@@ -28,4 +28,4 @@ from __future__ import (absolute_import, division,
 from ..kernel import _shared_cextension
 
 with _shared_cextension():
-    from . import _curvefitting
+    import _curvefitting

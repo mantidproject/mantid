@@ -30,5 +30,5 @@ from ..kernel import _shared_cextension
 import mantid.api
 
 with _shared_cextension():
-    from . import _dataobjects
-    from ._dataobjects import *
+    import _dataobjects
+    from _dataobjects import *

@@ -95,10 +95,6 @@ endfunction()
 ###########################################################################
 # mantid package
 ###########################################################################
-include ( PythonPackageTargetFunctions )
-
-add_python_package ( PythonInterface )
-set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 # All targets can see these includes
 include_directories ( core/inc )
@@ -107,7 +103,11 @@ include_directories ( core/inc )
 include_directories ( inc )
 add_subdirectory ( mantid )
 
-add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
+include ( PythonPackageTargetFunctions )
+
+add_python_package ( mantid )
+set_property ( TARGET mantid PROPERTY FOLDER "MantidFramework/Python" )
+add_dependencies ( mantid PythonInterfaceCore PythonKernelModule
   PythonGeometryModule PythonAPIModule PythonDataObjectsModule
   PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule )
 

@@ -27,8 +27,8 @@ CustomInstallLib = patch_setuptools_command('install_lib')
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name='PythonInterface', # probaly the wrong name if someone wants to include it
-    version='3.13.20190320.1118',
+    name='mantid',
+    version='3.13.20190321.1407',
     packages=find_packages(exclude=['*.test']),
     package_data={'': ['*.ui']},
     cmdclass={'build_py': CustomBuildPy, 'install': CustomInstall, 'install-lib': CustomInstallLib }

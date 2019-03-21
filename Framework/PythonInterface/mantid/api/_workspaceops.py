@@ -14,7 +14,7 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 from ..kernel.funcinspect import lhs_info, customise_func
-from . import _api
+import _api
 
 import inspect as _inspect
 from six import get_function_code, Iterator, iteritems

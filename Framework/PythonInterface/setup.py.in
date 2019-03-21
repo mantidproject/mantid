@@ -9,7 +9,7 @@ from setuptools import find_packages, setup
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name='PythonInterface', # probaly the wrong name if someone wants to include it
+    name='mantid',
     version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
     packages=find_packages(exclude=['*.test']),
     package_data={'': ['*.ui']},

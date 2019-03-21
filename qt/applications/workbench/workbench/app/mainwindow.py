@@ -18,13 +18,17 @@ import importlib
 import os
 import sys
 from functools import partial
+import sys
+sys.path.append("c:\\users\\qbr77747\\apps\\miniconda3\\lib\\site-packages")
+import pydevd
+pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
-# -----------------------------------------------------------------------------exception_handler.py
+# -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
 

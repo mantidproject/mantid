@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 from ..kernel._aliases import lazy_instance_access
-from ._geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,
+from _geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,
                         SymmetryElementFactoryImpl, PointGroupFactoryImpl)
 
 ###############################################################################

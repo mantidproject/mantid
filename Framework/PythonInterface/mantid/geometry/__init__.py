@@ -20,7 +20,7 @@ from __future__ import (absolute_import, division,
 from ..kernel import _shared_cextension
 
 with _shared_cextension():
-    from ._geometry import *
+    from _geometry import *
 
 ###############################################################################
 # Make aliases accessible in this namespace

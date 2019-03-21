@@ -44,7 +44,7 @@ if ( ENABLE_WORKBENCH )
     mantidqt_resources
     mantidqt_commonqt5
     mantidqt_instrumentviewqt5
-    PythonInterface
+    mantid
   )
 
   if ( ENABLE_MANTIDPLOT )
