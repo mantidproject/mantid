@@ -808,7 +808,7 @@ void ProjectRecovery::repairCheckpointDirectory() {
   for (auto c : vectorToDelete) {
     // Remove c recursively
     const std::string sanityCheckPath = getRecoveryFolderCheck();
-    const auto searchResult = c.find(sanityCheckPath);
+    const auto searchResult = c.find(Poco::Path(sanityCheckPath).toString());
     if (searchResult != std::string::npos) {
       Poco::File(c).remove(true);
     }
