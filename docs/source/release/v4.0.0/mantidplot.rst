@@ -49,6 +49,6 @@ Bugfixes
 - A bug has been fixed in Indirect I(Q,t) interface when analyzing ``IN16B`` reduced data.
 - Stop MantidPlot from attempting to contour plot/colorfill plot when a workspace has a TextAxis.
 - The general fitting interfaces do not display fit functions that are not supposed to be used with those interfaces.
-- Project Recovery in some cases would be unable to run algorithms in the correct order due to Operating System time precision, this is has been fixed by adding the execCount to the comment part of the scripts being built for recovery.
+- Project Recovery in some cases would be unable to run algorithms in the correct order due to Operating System time precision, this has been fixed by adding the execCount to the comment part of the scripts being built for recovery.
 
 :ref:`Release 4.0.0 <v4.0.0>`
