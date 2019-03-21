@@ -539,8 +539,7 @@ void EventList::minusHelper(std::vector<T1> &events,
   // Make the end vector big enough in one go (avoids repeated re-allocations).
   events.reserve(events.size() + more_events.size());
   /* In the event of subtracting in place, calling the end() vector would make
-   * it point
-   * at the wrong place
+   * it point at the wrong place
    * Using it caused a segault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
@@ -2562,9 +2561,9 @@ void EventList::convertTofHelper(std::vector<T> &events,
  */
 void EventList::convertTof(const double factor, const double offset) {
   // fix the histogram parameter
-  MantidVec &x = dataX();
-  for (double &iter : x)
-    iter = iter * factor + offset;
+  auto &x = mutableX();
+  x *= factor;
+  x += offset;
 
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))
     this->reverse();
@@ -2864,9 +2863,9 @@ template <class T>
 void EventList::getWeightsHelper(const std::vector<T> &events,
                                  std::vector<double> &weights) {
   weights.clear();
-  for (const auto &event : events) {
-    weights.push_back(event.weight());
-  }
+  weights.reserve(events.size());
+  std::transform(events.cbegin(), events.cend(), std::back_inserter(weights),
+                 [](const auto &event) { return event.weight(); });
 }
 
 /** Fill a vector with the list of Weights
@@ -2911,9 +2910,10 @@ template <class T>
 void EventList::getWeightErrorsHelper(const std::vector<T> &events,
                                       std::vector<double> &weightErrors) {
   weightErrors.clear();
-  for (const auto &event : events) {
-    weightErrors.push_back(event.error());
-  }
+  weightErrors.reserve(events.size());
+  std::transform(events.cbegin(), events.cend(),
+                 std::back_inserter(weightErrors),
+                 [](const auto &event) { return event.error(); });
 }
 
 /** Fill a vector with the list of Weight Errors
@@ -2959,9 +2959,9 @@ void EventList::getPulseTimesHelper(
     const std::vector<T> &events,
     std::vector<Mantid::Types::Core::DateAndTime> &times) {
   times.clear();
-  for (const auto &event : events) {
-    times.push_back(event.pulseTime());
-  }
+  times.reserve(events.size());
+  std::transform(events.cbegin(), events.cend(), std::back_inserter(times),
+                 [](const auto &event) { return event.pulseTime(); });
 }
 
 /** Get the pulse times of each event in this EventList.
@@ -3646,7 +3646,6 @@ void EventList::divideHistogramHelper(std::vector<T> &events,
   // --- Division case ---
   if (value == 0) {
     value = std::numeric_limits<float>::quiet_NaN(); // Avoid divide by zero
-    error = 0;
     valError_over_value_squared = 0;
   } else
     valError_over_value_squared = error * error / (value * value);
@@ -3677,7 +3676,6 @@ void EventList::divideHistogramHelper(std::vector<T> &events,
       // --- Division case ---
       if (value == 0) {
         value = std::numeric_limits<float>::quiet_NaN(); // Avoid divide by zero
-        error = 0;
         valError_over_value_squared = 0;
       } else
         valError_over_value_squared = error * error / (value * value);
@@ -4184,11 +4182,8 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
         fulltime = itev->m_pulsetime.totalNanoseconds() +
                    static_cast<int64_t>(itev->m_tof * 1000);
       if (fulltime < stop) {
-        // b1) Copy the event into another
-        const T eventCopy(*itev);
-        EventList *myOutput = outputs[index];
-        // Add the copy to the output
-        myOutput->addEventQuickly(eventCopy);
+        // b1) Add a copy to the output
+        outputs[index]->addEventQuickly(*itev);
         ++itev;
       } else {
         break;
@@ -4562,11 +4557,7 @@ void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter,
     while (itev != itev_end) {
 
       if (itev->m_pulsetime < stop) {
-        // Duplicate event
-        const T eventCopy(*itev);
-        EventList *myOutput = outputs[index];
-        // Add the copy to the output
-        myOutput->addEventQuickly(eventCopy);
+        outputs[index]->addEventQuickly(*itev);
         ++itev;
       } else {
         // Out of interval
@@ -4716,11 +4707,7 @@ void EventList::splitByPulseTimeWithMatrixHelper(
     while (itev != itev_end) {
 
       if (itev->m_pulsetime < stop) {
-        // Duplicate event
-        const T eventCopy(*itev);
-        EventList *myOutput = outputs[index];
-        // Add the copy to the output
-        myOutput->addEventQuickly(eventCopy);
+        outputs[index]->addEventQuickly(*itev);
         ++itev;
       } else {
         // Out of interval
