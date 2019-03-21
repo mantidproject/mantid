@@ -83,16 +83,15 @@ void LoadMLZ::exec() {
 
   initWorkSpace(dataFirstEntry);
 
-  runLoadInstrument(); // just to get IDF contents
+  // load the instrument from the IDF
+  runLoadInstrument();
   initInstrumentSpecific();
 
   loadDataIntoTheWorkSpace(dataFirstEntry);
-  loadRunDetails(dataFirstEntry);
+  loadRunDetails(dataFirstEntry);    // must run after runLoadInstrument
   loadExperimentDetails(dataFirstEntry);
   maskDetectors(dataFirstEntry);
 
-  // load the instrument from the IDF if it exists
-  runLoadInstrument();
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
@@ -334,6 +333,18 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
 
   runDetails.addProperty("EPP", m_monitorElasticPeakPosition);
   runDetails.addProperty("TOF1", m_t1, "microseconds", true);
+
+  // set instrument parameter Efixed, catch error, but don't stop
+  try {
+        IAlgorithm_sptr setPar = createChildAlgorithm("SetInstrumentParameter");
+        setPar->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+        setPar->setProperty("ParameterName", "Efixed");
+        setPar->setProperty("ParameterType", "Number");
+        setPar->setProperty("Value", std::to_string(ei));
+        setPar->execute();
+  } catch (...) {
+    g_log.warning("Cannot set the instrument parameter Efixed.");
+  }
 }
 
 /**
@@ -408,7 +419,7 @@ void LoadMLZ::runLoadInstrument() {
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (...) {
-    g_log.information("Cannot load the instrument definition.");
+    g_log.warning("Cannot load the instrument definition.");
   }
 }
 
