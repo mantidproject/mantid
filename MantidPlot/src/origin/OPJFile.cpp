@@ -159,48 +159,48 @@ vector<string> OPJFile::findDataByIndex(int index) const {
         str.emplace_back("T_" + spread.name);
         return str;
       }
-  for (const auto &i : MATRIX)
-    if (i.index == index) {
-      str.push_back(i.name);
-      str.emplace_back("M_" + i.name);
+  for (const auto &mat : MATRIX)
+    if (mat.index == index) {
+      str.push_back(mat.name);
+      str.emplace_back("M_" + mat.name);
       return str;
     }
-  for (const auto &i : EXCEL)
-    for (unsigned int j = 0; j < i.sheet.size(); j++)
-      for (unsigned int k = 0; k < i.sheet[j].column.size(); k++)
-        if (i.sheet[j].column[k].index == index) {
-          str.push_back(i.sheet[j].column[k].name);
-          str.emplace_back("E_" + i.name);
+  for (const auto &document : EXCEL)
+    for (unsigned int j = 0; j < document.sheet.size(); j++)
+      for (unsigned int k = 0; k < document.sheet[j].column.size(); k++)
+        if (document.sheet[j].column[k].index == index) {
+          str.push_back(document.sheet[j].column[k].name);
+          str.emplace_back("E_" + document.name);
           return str;
         }
-  for (const auto &i : FUNCTION)
-    if (i.index == index) {
-      str.push_back(i.name);
-      str.emplace_back("F_" + i.name);
+  for (const auto &func : FUNCTION)
+    if (func.index == index) {
+      str.push_back(func.name);
+      str.emplace_back("F_" + func.name);
       return str;
     }
   return str;
 }
 
 string OPJFile::findObjectByIndex(int index) {
-  for (auto &i : SPREADSHEET)
-    if (i.objectID == index) {
-      return i.name;
+  for (auto &spread : SPREADSHEET)
+    if (spread.objectID == index) {
+      return spread.name;
     }
 
-  for (auto &i : MATRIX)
-    if (i.objectID == index) {
-      return i.name;
+  for (auto &mat : MATRIX)
+    if (mat.objectID == index) {
+      return mat.name;
     }
 
-  for (auto &i : EXCEL)
-    if (i.objectID == index) {
-      return i.name;
+  for (auto &document : EXCEL)
+    if (document.objectID == index) {
+      return document.name;
     }
 
-  for (auto &i : GRAPH)
-    if (i.objectID == index) {
-      return i.name;
+  for (auto &g : GRAPH)
+    if (g.objectID == index) {
+      return g.name;
     }
 
   return "";
