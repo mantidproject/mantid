@@ -70,8 +70,13 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         # Cast as a set to remove duplicates
         unique_lines = list(set(all_lines))
-        # Sort according to time
-        unique_lines.sort(key=lambda time: (time[1]))
+
+        def sorting_order_workspace_history(x):
+            time, _, exec_count = x[1].split()
+            return time, int(exec_count)
+
+        # Sort according to time and execCount
+        unique_lines.sort(key=sorting_order_workspace_history)
 
         destination = self.getPropertyValue(_destination_file)
 
