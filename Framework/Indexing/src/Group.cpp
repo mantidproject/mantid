@@ -28,9 +28,9 @@ IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
   const auto &sourceDefs = source.spectrumDefinitions();
   for (const auto &groupIndices : grouping) {
     specDefs.emplace_back(SpectrumDefinition{});
-    for (const auto &i : groupIndices) {
+    for (const auto groupIndex : groupIndices) {
       auto &newSpecDef = specDefs.back();
-      for (const auto &specDef : (*sourceDefs)[i]) {
+      for (const auto &specDef : (*sourceDefs)[groupIndex]) {
         newSpecDef.add(specDef.first, specDef.second);
       }
     }
