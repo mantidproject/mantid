@@ -33,7 +33,6 @@
 #include "MantidMDAlgorithms/SetMDFrame.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <iostream>
 #include <nexus/NeXusException.hpp>
 #include <vector>
 
@@ -295,7 +294,7 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
-    std::cout << " start: " << start[0] << " size: " << size[0] << '\n';
+    g_log.information() << " start: " << start[0] << " size: " << size[0] << '\n';
   }
   m_file->closeData();
 }
