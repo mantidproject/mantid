@@ -249,7 +249,8 @@ double Material::linearAbsorpCoef(const double lambda) const {
   return absorbXSection(NeutronAtom::ReferenceLambda) * 100. * numberDensity() *
          lambda / NeutronAtom::ReferenceLambda;
 }
-// concrete instantiations
+/// concrete instatiation for std::vector<double>::const_iterator
+/// relates Material
 template MANTID_KERNEL_DLL std::vector<double>
 Material::linearAbsorpCoef<std::vector<double>::const_iterator>(
     std::vector<double>::const_iterator lambdaBegin,
