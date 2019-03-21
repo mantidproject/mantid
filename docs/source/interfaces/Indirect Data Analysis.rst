@@ -126,13 +126,13 @@ and the reflection is 002.
 
 2. Click **Browse** and select the files ``osi104371_graphite002_red``,
    ``osi104372_graphite002_red``, ``osi104373_graphite002_red``, ``osi104374_graphite002_red``
-   and ``osi104375_graphite002_red``. Load these files and they will be plotted in the mini plot
+   and ``osi104375_graphite002_red``. Load these files and they will be plotted in the mini-plot
    automatically.
 
 3. The workspace and spectrum displayed in the mini-plot can be change using the combobox and
    spinbox seen directly above the mini-plot.
 
-4. You may opt to change the x range of the miniplots by changing the **Integration Range**, or
+4. You may opt to change the x range of the mini-plot by changing the **Integration Range**, or
    by sliding the blue lines seen on the mini-plot using the cursor. For the purpose of this
    demonstration, use the default x range.
 
@@ -147,6 +147,9 @@ and the reflection is 002.
 
 8. In the **Output** section, select the ``_eq`` workspace and then choose a workspace index.
    Click **Plot Spectrum** to plot the spectrum from the selected workspace.
+
+9. Choose a default save directory and then click **Save Result** to save the output workspaces.
+   The workspace ending in ``_eq`` will be used in the MSD Fit Example Workflow.
 
 
 MSD Fit
@@ -230,6 +233,38 @@ Save Result
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+
+MSD Fit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The MSD Fit tab operates on ``_eq``. The files used in this workflow are produced on the Elwin
+tab as seen in the Elwin Example Workflow.
+
+1. Click **Browse** and select the file ``osi104371-104375_graphite002_red_elwin_eq``. Load this
+   file and it will be automatically plotted in the upper mini-plot.
+
+2. The spectrum displayed in the upper mini-plot can be changed using the **Plot Spectrum** spinbox
+   seen underneath the mini-plots
+
+3. Change the upper end of the Q range of the upper mini-plot by changing the **EndX** to be around
+   0.8. Alternatively, drag the **EndX** blue line seen on the mini-plot using the cursor.
+
+4. Choose the **Fit Type** to be Gaussian. The parameters for this function can be seen if you
+   expand the row labelled **f0-MsdGauss**. Choose appropriate starting values for these parameters.
+   It is possible to constrain one of the parameters by right clicking a parameter and selected
+   **Constrain**.
+
+5. Click **Run** and wait for the interface to finish processing. This should generate a
+   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
+   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+6. Alternatively you can click **Fit Single Spectrum** to perform a fit only for the spectrum
+   currently displayed in the upper mini-plot. Do not click this for the purposes of this
+   demonstration.
+
+7. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
+   Msd parameter which can be found within the ``_Results`` group workspace.
 
 
 I(Q, t)
