@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSignal as Signal
-
+import sys
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common import message_box
 
@@ -48,12 +48,16 @@ class GroupingTableView(QtGui.QWidget):
         self.group_range_label.setText('Group Asymmetry Range from:')
         self.group_range_min = QtGui.QLineEdit()
         self.group_range_min.setEnabled(False)
+        positive_float_validator = QtGui.QDoubleValidator(0.0, sys.float_info.max, 5)
+        self.group_range_min.setValidator(positive_float_validator)
+
         self.group_range_use_first_good_data = QtGui.QCheckBox()
         self.group_range_use_first_good_data.setText(u"\u03BCs (From data file)")
 
         self.group_range_use_first_good_data.setChecked(True)
         self.group_range_max = QtGui.QLineEdit()
         self.group_range_max.setEnabled(False)
+        self.group_range_max.setValidator(positive_float_validator)
 
         self.group_range_use_last_data = QtGui.QCheckBox()
         self.group_range_use_last_data.setText(u"\u03BCs (From data file)")
@@ -153,6 +157,8 @@ class GroupingTableView(QtGui.QWidget):
                 group_name_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 0, group_name_widget)
                 self.grouping_table.item(row_position, 0).setToolTip(entry)
+                item.setFlags(QtCore.Qt.ItemIsEnabled)
+                item.setFlags(QtCore.Qt.ItemIsSelectable)
             if group_table_columns[i] == group_table_columns[1]:
                 # column 1 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
@@ -181,6 +187,11 @@ class GroupingTableView(QtGui.QWidget):
         last_row = self.grouping_table.rowCount() - 1
         if last_row >= 0:
             self.grouping_table.removeRow(last_row)
+
+    def enter_group_name(self):
+        new_group_name, ok = QtGui.QInputDialog.getText(self, 'Group Name', 'Enter name of new group:')
+        if ok:
+            return new_group_name
 
     # ------------------------------------------------------------------------------------------------------------------
     # Context menu on right-click in the table
@@ -354,12 +365,12 @@ class GroupingTableView(QtGui.QWidget):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 item = self.grouping_table.item(row, col)
-                if group_table_columns[col] != 'number_of_detectors':
+                if group_table_columns[col] == 'detector_ids':
                     item.setFlags(QtCore.Qt.ItemIsSelectable |
                                   QtCore.Qt.ItemIsEditable |
                                   QtCore.Qt.ItemIsEnabled)
                 else:
-                    # number of detectors should remain un-editable
+                    # Group name and number of detectors should remain un-editable
                     item.setFlags(QtCore.Qt.ItemIsSelectable)
 
     def get_group_range(self):

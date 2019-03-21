@@ -277,7 +277,9 @@ void FilterEvents::exec() {
   std::vector<Kernel::TimeSeriesProperty<int> *> int_tsp_vector;
   std::vector<Kernel::TimeSeriesProperty<double> *> dbl_tsp_vector;
   std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
-  copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector);
+  std::vector<Kernel::TimeSeriesProperty<string> *> string_tsp_vector;
+  copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector,
+                    string_tsp_vector);
 
   // Optionall import corrections
   m_progress = 0.20;
@@ -293,6 +295,7 @@ void FilterEvents::exec() {
   else
     progressamount = 0.7;
 
+  // add a new 'split' tsp to output workspace
   std::vector<Kernel::TimeSeriesProperty<int> *> split_tsp_vector;
   if (m_useSplittersWorkspace) {
     filterEventsBySplitters(progressamount);
@@ -301,12 +304,12 @@ void FilterEvents::exec() {
     filterEventsByVectorSplitters(progressamount);
     generateSplitterTSP(split_tsp_vector);
   }
-
   // assign split_tsp_vector to all the output workspaces!
   mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
   // split times series property: new way to split events
-  splitTimeSeriesLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector);
+  splitTimeSeriesLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector,
+                      string_tsp_vector);
 
   // Optional to group detector
   groupOutputWorkspace();
@@ -574,11 +577,13 @@ void FilterEvents::groupOutputWorkspace() {
  * @param int_tsp_name_vector :: output
  * @param dbl_tsp_name_vector :: output
  * @param bool_tsp_name_vector :: output
+ * @param string_tsp_vector :: output
  */
 void FilterEvents::copyNoneSplitLogs(
     std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
     std::vector<TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-    std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector) {
+    std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
+    std::vector<Kernel::TimeSeriesProperty<string> *> &string_tsp_vector) {
   // get the user input information
   bool exclude_listed_logs = getProperty("ExcludeSpecifiedLogs");
   std::vector<std::string> tsp_logs = getProperty("TimeSeriesPropertyLogs");
@@ -603,9 +608,11 @@ void FilterEvents::copyNoneSplitLogs(
         dynamic_cast<TimeSeriesProperty<int> *>(prop_i);
     TimeSeriesProperty<bool> *bool_prop =
         dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
+    TimeSeriesProperty<string> *string_prop =
+        dynamic_cast<TimeSeriesProperty<string> *>(prop_i);
 
     // check for time series properties
-    if (dbl_prop || int_prop || bool_prop) {
+    if (dbl_prop || int_prop || bool_prop || string_prop) {
       // check whether the log is there
       set_iter = tsp_logs_set.find(name_i);
       if (exclude_listed_logs && set_iter != tsp_logs_set.end()) {
@@ -632,6 +639,9 @@ void FilterEvents::copyNoneSplitLogs(
         // is integer time series property
         bool_tsp_name_vector.push_back(bool_prop);
         continue;
+      } else if (string_prop) {
+        // is string time series property
+        string_tsp_vector.push_back(string_prop);
       }
 
     } else {
@@ -660,14 +670,16 @@ void FilterEvents::copyNoneSplitLogs(
 //----------------------------------------------------------------------------------------------
 /** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
- * @param int_tsp_vector
- * @param dbl_tsp_vector
- * @param bool_tsp_vector
+ * @param int_tsp_vector :: vector of itneger tps
+ * @param dbl_tsp_vector :: vector of double tsp
+ * @param bool_tsp_vector :: vector of boolean tsp
+ * @param string_tsp_vector :: vector of string tsp
  */
 void FilterEvents::splitTimeSeriesLogs(
     const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
     const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
-    const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector) {
+    const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector,
+    const std::vector<TimeSeriesProperty<string> *> &string_tsp_vector) {
   // get split times by converting vector of int64 to Time
   std::vector<Types::Core::DateAndTime> split_datetime_vec;
 
@@ -711,6 +723,11 @@ void FilterEvents::splitTimeSeriesLogs(
   // deal with bool time series property
   for (const auto &bool_tsp : bool_tsp_vector) {
     splitTimeSeriesProperty(bool_tsp, split_datetime_vec, max_target_index);
+  }
+
+  // deal with string time series property
+  for (const auto &string_tsp : string_tsp_vector) {
+    splitTimeSeriesProperty(string_tsp, split_datetime_vec, max_target_index);
   }
 
   // integrate proton charge

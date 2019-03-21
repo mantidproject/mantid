@@ -192,6 +192,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.axes.axhline(color='k')
         self.axes.set_xlabel(r'$|Q|$ ($\AA^{-1}$)')
         self.axes.set_ylabel('Energy Transfer (meV)')
+        self.canvas.draw()
         self.mainframe_grid.addWidget(self.canvas)
         self.figure_grid.addWidget(self.canvas)
         self.figure_controls = NavigationToolbar2QT(self.canvas, self.figure_frame)

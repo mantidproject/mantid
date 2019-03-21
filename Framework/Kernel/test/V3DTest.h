@@ -213,15 +213,6 @@ public:
     TS_ASSERT_EQUALS(d[1], 2.0);
     TS_ASSERT_EQUALS(d[2], 3.0);
   }
-  void testOperatorBracketNonConstThrows() {
-    TS_ASSERT_THROWS(a[-1], std::runtime_error &);
-    TS_ASSERT_THROWS(a[3], std::runtime_error &);
-  }
-  void testOperatorBracketConstThrows() {
-    const Mantid::Kernel::V3D d(1.0, 2.0, 3.0);
-    TS_ASSERT_THROWS(d[-1], std::runtime_error &);
-    TS_ASSERT_THROWS(d[3], std::runtime_error &);
-  }
   void testNorm() {
     a(1.0, -5.0, 8.0);
     TS_ASSERT_EQUALS(a.norm(), sqrt(90.0));
@@ -594,7 +585,7 @@ public:
     m_rotx[2][2] = cos(theta);
     m_rotx[2][1] = sin(theta);
 
-    m_sampleSize = 100000000;
+    m_sampleSize = 1000000000;
   }
 
   void testRotate() {

@@ -175,11 +175,10 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             self.assertTrue(calculated_transmission)
             self.assertTrue(unfitted_transmisison)
 
-    def test_that_when_show_transmission_is_true_transmission_runs_are_output(self):
+    def test_that_transmission_runs_are_output(self):
         # Arrange
         state = SANSCreateAdjustmentWorkspacesTest._get_state()
         state.adjustment.wide_angle_correction = True
-        state.adjustment.show_transmission = True
         serialized_state = state.property_manager
         sample_data = SANSCreateAdjustmentWorkspacesTest._get_sample_data()
         sample_monitor_data = SANSCreateAdjustmentWorkspacesTest._get_sample_monitor_data(3.)
@@ -200,7 +199,7 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             # We expect a wavelength and pixel adjustment workspace since we set the flag to true and provided a
             # sample data set
             self.assertTrue(wavelength_and_pixel_adjustment)
-            # We expect transmission workspaces since show_transmission was set to true
+            # We expect transmission workspaces
             self.assertTrue(calculated_transmission)
             self.assertTrue(unfitted_transmisison)
         except:  # noqa

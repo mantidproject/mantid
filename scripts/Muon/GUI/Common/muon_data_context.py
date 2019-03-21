@@ -33,7 +33,7 @@ from Muon.GUI.Common.observer_pattern import Observable
 
 def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
-    if instrument == "MUSR":
+    if instrument == "MUSR" or instrument == 'CHRONUS':
         parameter_name += " - " + main_field_direction
     try:
         if isinstance(workspace, WorkspaceGroup):
@@ -105,15 +105,17 @@ class MuonDataContext(object):
         self._pairs = OrderedDict()
 
         self._loaded_data = load_data
-        self._gui_variables = {}
+        self._gui_variables = {'SummedPeriods': [1], 'SubtractedPeriods': []}
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
         self._current_runs = []
+        self._main_field_direction = ''
 
         self._instrument = ConfigService.getInstrument().name() if ConfigService.getInstrument().name()\
             in allowed_instruments else 'EMU'
 
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
+        self.message_notifier = MuonDataContext.MessageNotifier(self)
         self.gui_variables_notifier = MuonDataContext.GuiVariablesNotifier(self)
 
     def is_data_loaded(self):
@@ -134,6 +136,8 @@ class MuonDataContext(object):
     def instrument(self, value):
         ConfigService['default.instrument'] = value
         self._instrument = value
+        self.main_field_direction = ''
+        self.set_groups_and_pairs_to_default()
         self.instrumentNotifier.notify_subscribers(self._instrument)
 
     @property
@@ -180,6 +184,8 @@ class MuonDataContext(object):
 
     @current_runs.setter
     def current_runs(self, value):
+        if not self.check_run_list_are_all_same_field(value):
+            self.message_notifier.notify_subscribers(self.create_multiple_field_directions_error_message(value))
         self._current_runs = value
 
     @property
@@ -217,17 +223,18 @@ class MuonDataContext(object):
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
-        if self._loaded_data.num_items() > 0:
-            self._current_data = self._loaded_data.get_latest_data()
+        if len(self.current_runs) > 0:
+            self._current_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
+            self.main_field_direction = self.current_data['MainFieldDirection']
             if not self.groups:
                 self.set_groups_and_pairs_to_default()
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
     def loaded_data(self, run):
-        loaded_dict = self._loaded_data.get_data(run=run)
+        loaded_dict = self._loaded_data.get_data(run=run, instrument=self.instrument)
         if loaded_dict:
-            return self._loaded_data.get_data(run=run)['workspace']
+            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']
         else:
             return None
 
@@ -266,7 +273,14 @@ class MuonDataContext(object):
 
     @property
     def main_field_direction(self):
-        return self.current_data["MainFieldDirection"]
+        return self._main_field_direction
+
+    @main_field_direction.setter
+    def main_field_direction(self, value):
+            if value and value != self._main_field_direction and self._main_field_direction:
+                self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
+                                                         ' data sets, click default to reset grouping if required')
+            self._main_field_direction = value
 
     @property
     def dead_time_table(self):
@@ -420,7 +434,40 @@ class MuonDataContext(object):
                (self.gui_variables['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
 
+    def check_run_list_are_all_same_field(self, run_list):
+        if not run_list:
+            return True
+
+        first_field = self._loaded_data.get_main_field_direction(run=run_list[0], instrument=self.instrument)
+        return all(first_field==self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
+                   for run in run_list)
+
+    def create_multiple_field_directions_error_message(self, run_list):
+        transverse = []
+        longitudinal = []
+        for run in run_list:
+            field_direction = self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
+            if field_direction.lower() == 'transverse':
+                transverse += run
+            elif field_direction.lower() == 'longitudinal':
+                longitudinal += run
+            else:
+                return 'Unrecognised field direction {} for run {}'.format(field_direction, run)
+
+        message = 'MainFieldDirection changes within current run set:\n'
+        message += 'transverse field runs {}\n'.format(run_list_to_string(transverse))
+        message += 'longitudinal field runs {}\n'.format(run_list_to_string(longitudinal))
+        return message
+
     class InstrumentNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)
+
+    class MessageNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

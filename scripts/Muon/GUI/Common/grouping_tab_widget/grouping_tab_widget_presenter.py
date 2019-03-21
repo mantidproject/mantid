@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
@@ -32,7 +31,6 @@ class GroupingTabPresenter(object):
         self._view.set_description_text(self.text_for_description())
         self._view.on_add_pair_requested(self.add_pair_from_grouping_table)
         self._view.on_clear_grouping_button_clicked(self.on_clear_requested)
-        self._view.on_update_button_clicked(self.handle_update_all_clicked)
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
@@ -50,7 +48,10 @@ class GroupingTabPresenter(object):
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
+        self.message_observer = GroupingTabPresenter.MessageObserver(self)
         self.gui_variables_observer = GroupingTabPresenter.GuiVariablesChangedObserver(self)
+        self.enable_observer = GroupingTabPresenter.EnableObserver(self)
+        self.disable_observer = GroupingTabPresenter.DisableObserver(self)
 
     def show(self):
         self._view.show()
@@ -191,10 +192,10 @@ class GroupingTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def group_table_changed(self):
-        pass
+        self.handle_update_all_clicked()
 
     def pair_table_changed(self):
-        pass
+        self.handle_update_all_clicked()
 
     class LoadObserver(Observer):
 
@@ -239,6 +240,31 @@ class GroupingTabPresenter(object):
 
         def notify_subscribers(self, *args, **kwargs):
             Observable.notify_subscribers(self, *args, **kwargs)
+
+    class MessageObserver(Observer):
+
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer._view.display_warning_box(arg)
+
+    class EnableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.enable_editing()
+
+    class DisableObserver(Observer):
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.disable_editing()
 
     class DisableEditingNotifier(Observable):
 

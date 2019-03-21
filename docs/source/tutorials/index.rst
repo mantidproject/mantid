@@ -27,6 +27,7 @@ capabilities of Mantid, by developing your own scripts.
    :maxdepth: 3
 
    mantid_basic_course/index
+   introduction_to_python/index
 
 **Sections:**
 

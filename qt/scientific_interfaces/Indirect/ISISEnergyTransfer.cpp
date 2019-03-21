@@ -9,6 +9,7 @@
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include <QFileInfo>
 
@@ -19,41 +20,57 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 
-std::string createRangeString(std::size_t from, std::size_t to) {
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+std::string createRangeString(std::size_t const &from, std::size_t const &to) {
   return std::to_string(from) + "-" + std::to_string(to);
 }
 
-std::string createGroupString(std::size_t start, std::size_t size) {
+std::string createGroupString(std::size_t const &start,
+                              std::size_t const &size) {
   return createRangeString(start, start + size - 1);
 }
 
-std::string createGroupingString(std::size_t groupSize,
-                                 std::size_t numberOfGroups) {
-  auto groupingString = createRangeString(0, groupSize - 1);
-  for (auto i = groupSize; i < groupSize * numberOfGroups; i += groupSize)
+std::string createGroupingString(std::size_t const &groupSize,
+                                 std::size_t const &numberOfGroups,
+                                 std::size_t const &spectraMin) {
+  auto groupingString =
+      createRangeString(spectraMin, spectraMin + groupSize - 1);
+  for (auto i = spectraMin + groupSize;
+       i < spectraMin + groupSize * numberOfGroups; i += groupSize)
     groupingString += "," + createGroupString(i, groupSize);
   return groupingString;
 }
 
-std::string createDetectorGroupingString(std::size_t groupSize,
-                                         std::size_t numberOfGroups,
-                                         std::size_t numberOfDetectors) {
-  const auto groupingString = createGroupingString(groupSize, numberOfGroups);
+std::string createDetectorGroupingString(std::size_t const &groupSize,
+                                         std::size_t const &numberOfGroups,
+                                         std::size_t const &numberOfDetectors,
+                                         std::size_t const &spectraMin) {
+  const auto groupingString =
+      createGroupingString(groupSize, numberOfGroups, spectraMin);
   const auto remainder = numberOfDetectors % numberOfGroups;
   if (remainder == 0)
     return groupingString;
   return groupingString + "," +
-         createRangeString(numberOfDetectors - remainder,
-                           numberOfDetectors - 1);
+         createRangeString(spectraMin + numberOfDetectors - remainder,
+                           spectraMin + numberOfDetectors - 1);
 }
 
-std::string createDetectorGroupingString(std::size_t numberOfDetectors,
-                                         std::size_t numberOfGroups) {
+std::string createDetectorGroupingString(std::size_t const &numberOfDetectors,
+                                         std::size_t const &numberOfGroups,
+                                         std::size_t const &spectraMin) {
   const auto groupSize = numberOfDetectors / numberOfGroups;
   if (groupSize == 0)
-    return createRangeString(0, numberOfDetectors - 1);
+    return createRangeString(spectraMin, spectraMin + numberOfDetectors - 1);
   return createDetectorGroupingString(groupSize, numberOfGroups,
-                                      numberOfDetectors);
+                                      numberOfDetectors, spectraMin);
 }
 
 std::vector<std::size_t>
@@ -67,6 +84,14 @@ getCustomGroupingNumbers(std::string const &customString) {
       customGroupingNumbers.emplace_back(std::stoull(string));
   return customGroupingNumbers;
 }
+
+void ungroupWorkspace(std::string const &workspaceName) {
+  auto ungroup = AlgorithmManager::Instance().create("UnGroupWorkspace");
+  ungroup->initialize();
+  ungroup->setProperty("InputWorkspace", workspaceName);
+  ungroup->execute();
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -259,11 +284,11 @@ bool ISISEnergyTransfer::validate() {
 
 bool ISISEnergyTransfer::numberInCorrectRange(
     std::size_t const &spectraNumber) const {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
-  auto spectraMin =
-      static_cast<std::size_t>(instDetails["spectra-min"].toInt());
-  auto spectraMax =
-      static_cast<std::size_t>(instDetails["spectra-max"].toInt());
+  auto const instrumentDetails = getInstrumentDetails();
+  auto const spectraMin =
+      static_cast<std::size_t>(instrumentDetails["spectra-min"].toInt());
+  auto const spectraMax =
+      static_cast<std::size_t>(instrumentDetails["spectra-max"].toInt());
   return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
 }
 
@@ -292,20 +317,16 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
 }
 
 void ISISEnergyTransfer::run() {
-  IAlgorithm_sptr reductionAlg =
-      AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+  auto reductionAlg =
+      AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
   BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
-  QString instName = getInstrumentConfiguration()->getInstrumentName();
+  QString instName = getInstrumentName();
 
   reductionAlg->setProperty("Instrument", instName.toStdString());
-  reductionAlg->setProperty(
-      "Analyser",
-      getInstrumentConfiguration()->getAnalyserName().toStdString());
-  reductionAlg->setProperty(
-      "Reflection",
-      getInstrumentConfiguration()->getReflectionName().toStdString());
+  reductionAlg->setProperty("Analyser", getAnalyserName().toStdString());
+  reductionAlg->setProperty("Reflection", getReflectionName().toStdString());
 
   // Override the efixed for QENS spectrometers only
   QStringList qens;
@@ -397,32 +418,27 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  if (error)
-    return;
+  auto const outputName("IndirectEnergyTransfer_Workspaces");
 
-  WorkspaceGroup_sptr energyTransferOutputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          "IndirectEnergyTransfer_Workspaces");
-  if (energyTransferOutputGroup->size() == 0)
-    return;
+  if (!error && doesExistInADS(outputName)) {
+    if (auto const outputGroup = getADSWorkspaceGroup(outputName)) {
+      m_outputWorkspaces = outputGroup->getNames();
+      m_pythonExportWsName = m_outputWorkspaces[0];
 
-  // Set workspace for Python export as the first result workspace
-  m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
-  m_outputWorkspaces = energyTransferOutputGroup->getNames();
-  // Ungroup the output workspace
-  energyTransferOutputGroup->removeAll();
-  AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
+      ungroupWorkspace(outputGroup->getName());
 
-  // Enable plotting and saving
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.cbPlotType->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.ckSaveAclimax->setEnabled(true);
-  m_uiForm.ckSaveASCII->setEnabled(true);
-  m_uiForm.ckSaveDaveGrp->setEnabled(true);
-  m_uiForm.ckSaveNexus->setEnabled(true);
-  m_uiForm.ckSaveNXSPE->setEnabled(true);
-  m_uiForm.ckSaveSPE->setEnabled(true);
+      // Enable plotting and saving
+      m_uiForm.pbPlot->setEnabled(true);
+      m_uiForm.cbPlotType->setEnabled(true);
+      m_uiForm.pbSave->setEnabled(true);
+      m_uiForm.ckSaveAclimax->setEnabled(true);
+      m_uiForm.ckSaveASCII->setEnabled(true);
+      m_uiForm.ckSaveDaveGrp->setEnabled(true);
+      m_uiForm.ckSaveNexus->setEnabled(true);
+      m_uiForm.ckSaveNXSPE->setEnabled(true);
+      m_uiForm.ckSaveSPE->setEnabled(true);
+    }
+  }
 }
 
 int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
@@ -463,7 +479,8 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   QMap<QString, QString> instDetails = getInstrumentDetails();
 
   // Set the search instrument for runs
-  m_uiForm.dsRunFiles->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.dsRunFiles->setInstrumentOverride(
+      getInstrumentDetail(instDetails, "instrument"));
 
   QStringList qens;
   qens << "IRIS"
@@ -512,8 +529,8 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   if (!instDetails["rebin-default"].isEmpty()) {
     m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
     m_uiForm.ckDoNotRebin->setChecked(false);
-    QStringList rbp =
-        instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
+    auto const rbp = getInstrumentDetail(instDetails, "rebin-default")
+                         .split(",", QString::SkipEmptyParts);
     if (rbp.size() == 3) {
       m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
       m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -599,16 +616,16 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 
 std::string ISISEnergyTransfer::getDetectorGroupingString() const {
   const unsigned int nGroups = m_uiForm.spNumberGroups->value();
-  const unsigned int nSpectra =
-      1 + m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
+  const unsigned int spectraMin = m_uiForm.spSpectraMin->value();
+  const unsigned int nSpectra = 1 + m_uiForm.spSpectraMax->value() - spectraMin;
   return createDetectorGroupingString(static_cast<std::size_t>(nSpectra),
-                                      static_cast<std::size_t>(nGroups));
+                                      static_cast<std::size_t>(nGroups),
+                                      static_cast<std::size_t>(spectraMin));
 }
 
 /**
  * Converts the checkbox selection to a comma delimited list of save formats for
- *the
- * ISISIndirectEnergyTransfer algorithm.
+ * the ISISIndirectEnergyTransferWrapper algorithm.
  *
  * @return A vector of save formats
  */
@@ -667,24 +684,18 @@ void ISISEnergyTransfer::plotRaw() {
   auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   std::string name = rawFileInfo.baseName().toStdString();
+  auto const instName =
+      getInstrumentConfiguration()->getInstrumentName().toStdString();
 
   IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
   loadAlg->initialize();
   loadAlg->setProperty("Filename", rawFile.toStdString());
   loadAlg->setProperty("OutputWorkspace", name);
-  loadAlg->setProperty("LoadLogFiles", false);
-  if (extension.compare(".nxs") == 0) {
-    int64_t detectorMin =
-        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
-    int64_t detectorMax =
-        static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
-    loadAlg->setProperty("SpectrumMin", detectorMin);
-    loadAlg->setProperty("SpectrumMax", detectorMax);
-  } else {
+  if (instName != "TOSCA") {
+    loadAlg->setProperty("LoadLogFiles", false);
     loadAlg->setProperty("SpectrumMin", detectorMin);
     loadAlg->setProperty("SpectrumMax", detectorMax);
   }
-
   loadAlg->execute();
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {

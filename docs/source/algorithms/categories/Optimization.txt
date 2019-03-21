@@ -1,0 +1,1 @@
+Support for fitting splines, peaks and other models to data. Including  peak finding, as stripping peaks from data.

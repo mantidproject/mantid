@@ -1440,13 +1440,6 @@ QGroupBox::title {
                           </property>
                          </widget>
                         </item>
-                        <item row="2" column="0">
-                         <widget class="QCheckBox" name="show_transmission_view">
-                          <property name="text">
-                           <string>Show Transmission</string>
-                          </property>
-                         </widget>
-                        </item>
                        </layout>
                       </widget>
                      </item>
@@ -2325,7 +2318,6 @@ QGroupBox::title {
   <tabstop>fit_sample_wavelength_combo_box</tabstop>
   <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
   <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
-  <tabstop>show_transmission_view</tabstop>
   <tabstop>fit_can_use_fit_check_box</tabstop>
   <tabstop>fit_can_fit_type_combo_box</tabstop>
   <tabstop>fit_can_polynomial_order_spin_box</tabstop>

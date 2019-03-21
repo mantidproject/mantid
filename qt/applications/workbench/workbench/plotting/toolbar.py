@@ -106,6 +106,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             painter.drawPixmap(0, 0, pixmap)
             painter.end()
 
+    def contextMenuEvent(self, event):
+        pass
+
 
 class ToolbarStateChecker(object):
     """

@@ -129,6 +129,8 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
 
     if 'GroupRangeMax' in context.gui_variables:
         params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
+    else:
+        params['AsymmetryTimeMax'] = max(context.loaded_data(run)['OutputWorkspace'][0].workspace.dataX(0))
 
     if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
         summed_periods = context.gui_variables["SummedPeriods"]

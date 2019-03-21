@@ -20,12 +20,14 @@ import matplotlib.dates as mdates
 import matplotlib.image as mimage
 import numpy
 from skimage.transform import resize
+from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
-    get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, get_md_data2d_bin_centers, get_normalization, \
-    get_sample_log, get_spectrum, get_uneven_data, get_wksp_index_dist_and_label
+    get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
+    get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
+    get_wksp_index_dist_and_label, check_resample_to_regular_grid
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
@@ -167,7 +169,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     dimension
     """
     x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs,
-                                              with_dy=True, with_dx=True)
+                                              with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
@@ -526,19 +528,18 @@ def imshow(axes, workspace, *args, **kwargs):
     else:
         (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        if uneven_bins:
-            raise Exception('Variable number of bins is not supported by imshow.')
+        if check_resample_to_regular_grid(workspace):
+            (x, y, z) = get_matrix_2d_ragged(workspace, distribution, histogram2D=True)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
 
-    diffs = numpy.diff(x, axis=1)
-    x_spacing_equal = numpy.alltrue(diffs == diffs[0])
-    diffs = numpy.diff(y, axis=0)
-    y_spacing_equal = numpy.alltrue(diffs == diffs[0])
-    if not x_spacing_equal or not y_spacing_equal:
-        raise Exception('Unevenly spaced bins are not supported by imshow')
-    if 'extent' not in kwargs:
-        kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+    if x.ndim == 2 and y.ndim == 2:
+        if 'extent' not in kwargs:
+            kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+    else:
+        if 'extent' not in kwargs:
+            kwargs['extent'] = [x[0],x[-1],y[0],y[-1]]
+
     return _imshow(axes, z, *args, **kwargs)
 
 

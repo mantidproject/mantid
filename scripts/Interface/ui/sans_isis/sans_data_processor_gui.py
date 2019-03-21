@@ -1055,14 +1055,6 @@ class SANSDataProcessorGui(QMainWindow,
             self._on_compatibility_unchecked()
 
     @property
-    def show_transmission(self):
-        return self.show_transmission_view.isChecked()
-
-    @show_transmission.setter
-    def show_transmission(self, value):
-        self.show_transmission_view.setChecked(value)
-
-    @property
     def instrument(self):
         return get_instrument_from_gui_selection(self.instrument_type.text())
 
@@ -1989,8 +1981,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.fit_can_wavelength_combo_box.setChecked(False)
         self.fit_can_wavelength_min_line_edit.setText("")
         self.fit_can_wavelength_max_line_edit.setText("")
-
-        self.show_transmission_view.setChecked(True)
 
         self.pixel_adjustment_det_1_line_edit.setText("")
         self.pixel_adjustment_det_2_line_edit.setText("")

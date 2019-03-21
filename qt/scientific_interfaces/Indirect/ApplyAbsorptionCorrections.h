@@ -21,8 +21,6 @@ public:
   ~ApplyAbsorptionCorrections();
 
 private slots:
-  /// Handles the geometry being changed
-  void handleGeometryChange(int index);
   /// Handles a new sample being loaded
   void newSample(const QString &dataName);
   /// Handles a new container being loaded

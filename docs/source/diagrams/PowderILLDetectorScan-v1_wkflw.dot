@@ -1,0 +1,57 @@
+digraph PowderILLDetectorScan {
+  $global_style
+
+  subgraph values {
+    $value_style
+  }
+
+  subgraph decision {
+    $decision_style
+    MergeType
+    NormaliseTo
+    OutputWorkspaceTypes
+  }
+
+  subgraph params {
+  	$param_style
+    Run
+    UseCalibratedData
+    HeightRange
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+    LoadILLDiffraction
+    MergeRuns
+    NormaliseToMonitor
+    SumOverlappingTubes2DTubes [label="SumOverlappingTubes"]
+    SumOverlappingTubes2D [label="SumOverlappingTubes"]
+    SumOverlappingTubes1D [label="SumOverlappingTubes"]
+    GroupWorkspaces
+  }
+
+  subgraph processes {
+    $process_style
+  }
+
+  Run -> LoadILLDiffraction
+  UseCalibratedData -> LoadILLDiffraction
+  LoadILLDiffraction -> MergeType
+  MergeType -> MergeRuns [label="Merge"]
+  MergeRuns -> NormaliseTo
+  MergeType -> NormaliseTo [label="Skip Merge"]
+  NormaliseTo -> NormaliseToMonitor [label="Monitor"]
+  NormaliseTo -> OutputWorkspaceTypes [label="None"]
+  NormaliseToMonitor -> OutputWorkspaceTypes
+  OutputWorkspaceTypes -> SumOverlappingTubes2DTubes [label="2DTubes"]
+  HeightRange -> SumOverlappingTubes2DTubes
+  HeightRange -> SumOverlappingTubes2D
+  HeightRange -> SumOverlappingTubes1D
+  OutputWorkspaceTypes -> SumOverlappingTubes2D [label="2D"]
+  OutputWorkspaceTypes -> SumOverlappingTubes1D [label="1D"]
+  SumOverlappingTubes2DTubes -> GroupWorkspaces
+  SumOverlappingTubes2D -> GroupWorkspaces
+  SumOverlappingTubes1D -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
+}

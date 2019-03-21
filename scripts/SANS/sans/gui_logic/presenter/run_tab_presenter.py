@@ -319,8 +319,7 @@ class RunTabPresenter(object):
                     " has been specified.".format(user_file_path))
         except RuntimeError as path_error:
             # This exception block runs if user file does not exist
-            self._view.on_user_file_load_failure()
-            self.display_errors(path_error, error_msg + " when finding file.")
+            self._on_user_file_load_failure(path_error, error_msg + " when finding file.")
         else:
             try:
                 self._table_model.user_file = user_file_path
@@ -332,8 +331,7 @@ class RunTabPresenter(object):
                 user_file_items = user_file_reader.read_user_file()
             except (RuntimeError, ValueError) as e:
                 # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
-                self._view.on_user_file_load_failure()
-                self.display_errors(e, error_msg + " when reading file.", use_error_name=True)
+                self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             else:
                 try:
                     # 4. Populate the model
@@ -352,14 +350,19 @@ class RunTabPresenter(object):
 
                 except RuntimeError as instrument_e:
                     # This exception block runs if the user file does not contain an parsable instrument
-                    self._view.on_user_file_load_failure()
-                    self.display_errors(instrument_e, error_msg + " when reading instrument.")
+                    self._on_user_file_load_failure(instrument_e, error_msg + " when reading instrument.")
                 except Exception as other_error:
                     # If we don't catch all exceptions, SANS can fail to open if last loaded
                     # user file contains an error that would not otherwise be caught
                     traceback.print_exc()
-                    self._view.on_user_file_load_failure()
-                    self.display_errors(other_error, "Unknown error in loading user file.", use_error_name=True)
+                    self._on_user_file_load_failure(other_error, "Unknown error in loading user file.",
+                                                    use_error_name=True)
+
+    def _on_user_file_load_failure(self, e, message, use_error_name=False):
+        self._setup_instrument_specific_settings(SANSInstrument.NoInstrument)
+        self._view.instrument = SANSInstrument.NoInstrument
+        self._view.on_user_file_load_failure()
+        self.display_errors(e, message, use_error_name)
 
     def on_batch_file_load(self):
         """
@@ -931,7 +934,6 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_mn_shift")
-        self._set_on_view("show_transmission")
 
         self._set_on_view_transmission_fit()
 
@@ -1120,7 +1122,6 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_mn_shift", state_model)
-        self._set_on_state_model("show_transmission", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 

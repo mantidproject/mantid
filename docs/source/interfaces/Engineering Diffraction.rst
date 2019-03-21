@@ -348,7 +348,7 @@ To use the Fitting tab, user is required to follow these steps:
    files *User may click Load button to load the focused file to the
    canvas*
 2. List of expected peaks which can be either by browsing a (*CSV*) file,
-   manually selecting peaks from the canvas using peak picker tool after
+   manually selecting peaks from the canvas using peak picker tool and the "Add Peak to List" button after
    loading the focused file or by entering the peaks list within the text-field
 3. Next click on the *Fit* button if you would like to fit single focused
    file or you can click *Fit All* button which will enable user to

@@ -77,9 +77,11 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Muon Analysis version 2")
 
-        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
-        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab.home_tab_widget.groupingObserver)
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.groupingObserver)
 
         self.context.instrumentNotifier.add_subscriber(
             self.home_tab.home_tab_widget.instrumentObserver)
@@ -90,15 +92,37 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         self.context.instrumentNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(self.home_tab.home_tab_widget.loadObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.loadObserver)
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
-        self.context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+        self.context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
+        self.context.gui_variables_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
 
-        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.enable_observer)
 
-        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.disable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.load_widget.load_widget.enable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.load_widget.load_widget.disable_observer)
+
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.enable_observer)
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.disable_observer)
+
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.enable_observer)
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.disable_observer)
 
     def setup_tabs(self):
         """

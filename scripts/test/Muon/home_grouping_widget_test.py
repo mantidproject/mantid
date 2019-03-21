@@ -10,6 +10,7 @@ from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import Home
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common import mock_widget
 import unittest
 from PyQt4 import QtGui
@@ -31,7 +32,8 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
         ConfigService['default.instrument'] = 'MUSR'
-        self.context = MuonDataContext()
+        self.loaded_data = MuonLoadData()
+        self.context = MuonDataContext(self.loaded_data)
         self.context.gui_variables['RebinType'] = 'None'
         self.view = HomeGroupingWidgetView(self.obj)
         self.model = HomeGroupingWidgetModel(self.context)
@@ -43,12 +45,12 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
         self.context._loaded_data.remove_data(run=run)
-        self.context._loaded_data.add_data(run=run, workspace=ws, filename=filename)
+        self.context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.context.current_runs = [[22725]]
+
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.add_pair(pair=test_pair)
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
         self.presenter.update_group_pair_list()
 
     def tearDown(self):

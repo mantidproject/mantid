@@ -204,11 +204,14 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       fit->execute();
 
       std::string status = fit->getProperty("OutputStatus");
-      if (!fit->isExecuted() || status != success) {
+      if (!fit->isExecuted()) {
         std::ostringstream error;
         error << "Fit failed for spectrum at workspace index " << wsIndex;
         error << ": " << status;
         throw std::runtime_error(error.str());
+      } else if (status != success) {
+        g_log.warning("Fit failed for spectrum at workspace index " +
+                      std::to_string(wsIndex) + ": " + status);
       }
 
       API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
@@ -398,7 +401,7 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   const auto instrument = ws->getInstrument();
   auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
 
-  if (instrument->getName() == "MUSR") {
+  if (instrument->getName() == "MUSR" || instrument->getName() == "CHRONUS") {
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {
@@ -418,9 +421,9 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
     const std::string name = grouping->groupNames[iGroup];
-    if (name == "fwd") {
+    if (name == "fwd" || name == "left") {
       fwdRange = grouping->groups[iGroup];
-    } else if (name == "bwd" || name == "bkwd") {
+    } else if (name == "bwd" || name == "bkwd" || name == "right") {
       bwdRange = grouping->groups[iGroup];
     }
   }

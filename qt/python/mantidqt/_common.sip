@@ -91,6 +91,17 @@ public:
   void setSource(const QString &source);
 };
 
+%If (Qt_5_0_0 -)
+class AlgorithmProgressWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+%End
+
+public:
+    AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+};
+%End
+
 class ScriptEditor : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ScriptEditor.h"
@@ -259,6 +270,7 @@ class WorkspaceTreeWidget : QWidget {
 public:
   WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
                       QWidget *parent /TransferThis/ = nullptr);
+  std::vector<std::string> getSelectedWorkspaceNames() const;
 };
 
 // Implementation to override context menu
@@ -286,7 +298,7 @@ class AlgorithmHistoryWindow : public QDialog {
 #include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 %End
 public:
-	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName);
+	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName) throw(std::invalid_argument);
 };
 
 // ---------------------------------

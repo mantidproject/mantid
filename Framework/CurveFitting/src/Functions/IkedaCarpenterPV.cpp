@@ -286,7 +286,7 @@ void IkedaCarpenterPV::constFunction(double *out, const double *xValues,
     std::complex<double> zs =
         std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
     std::complex<double> zu = (1 - k) * zs;
-    std::complex<double> zv = (1 - k) * zs;
+    std::complex<double> zv = (1 + k) * zs;
     std::complex<double> zr =
         std::complex<double>(-beta * diff, 0.5 * beta * gamma);
 
@@ -370,7 +370,7 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
     std::complex<double> zs =
         std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
     std::complex<double> zu = (1 - k) * zs;
-    std::complex<double> zv = (1 - k) * zs;
+    std::complex<double> zv = (1 + k) * zs;
     std::complex<double> zr =
         std::complex<double>(-beta * diff, 0.5 * beta * gamma);
 
@@ -407,10 +407,6 @@ double IkedaCarpenterPV::intensity() const {
   API::PeakFunctionIntegrator integrator;
   API::IntegrationResult result =
       integrator.integrate(*this, interval.first, interval.second);
-
-  if (!result.success) {
-    return 0.0;
-  }
 
   return result.result;
 }

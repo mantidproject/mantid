@@ -20,6 +20,8 @@ from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateWorkspace,
                               GroupWorkspaces)
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
+import matplotlib as mpl
+mpl.use('Agg')  # noqa
 from workbench.plugins.workspacewidget import WorkspaceWidget
 
 

@@ -252,7 +252,7 @@ class DirectToolsTest(unittest.TestCase):
         self.assertEquals(axes.get_yscale(), 'log')
 
     def test_plotconstE_and_plotconstQ_plot_equal_value_at_crossing(self):
-        Q = 2.5
+        Q = 2.512
         figure, axes, cuts = directtools.plotconstQ(self._sqw, Q, 0.01)
         lineDataQ = axes.get_lines()[0].get_data()
         E = 2.2

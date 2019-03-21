@@ -17,7 +17,7 @@ import matplotlib.pyplot
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
-from mantid.api import AnalysisDataService, MatrixWorkspace, ITableWorkspace
+from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
@@ -112,7 +112,13 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            SampleLogs(ws=ws, parent=self)
+            try:
+                SampleLogs(ws=ws, parent=self)
+            except Exception as exception:
+                logger.warning("Could not open sample logs for workspace '{}'."
+                               "".format(ws.name()))
+                logger.debug("{}: {}".format(type(exception).__name__,
+                                             exception))
 
     def _do_show_instrument(self, names):
         """
@@ -121,8 +127,17 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            presenter = InstrumentViewPresenter(ws, parent=self)
-            presenter.show_view()
+            if ws.getInstrument().getName():
+                try:
+                    presenter = InstrumentViewPresenter(ws, parent=self)
+                    presenter.show_view()
+                except Exception as exception:
+                    logger.warning("Could not show instrument for workspace "
+                                   "'{}':\n{}.\n".format(ws.name(), exception))
+            else:
+                logger.warning("Could not show instrument for workspace '{}':"
+                               "\nNo instrument available.\n"
+                               "".format(ws.name()))
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
@@ -145,13 +160,13 @@ class WorkspaceWidget(PluginWidget):
 
     def _do_show_algorithm_history(self, names):
         for name in names:
-            if any(isinstance(self._ads.retrieve(name), ws_type)
-                   for ws_type in [MatrixWorkspace, ITableWorkspace]):
-                AlgorithmHistoryWindow(self, name).show()
-            else:
-                logger.warning("Could not open history of '{}'. "
-                               "Not a MatrixWorkspace or ITableWorkspace"
-                               "".format(name))
+            if not isinstance(self._ads.retrieve(name), WorkspaceGroup):
+                try:
+                    AlgorithmHistoryWindow(self, name).show()
+                except Exception as exception:
+                    logger.warning("Could not open history of '{}'. "
+                                   "".format(name))
+                    logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])

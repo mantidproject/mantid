@@ -29,6 +29,7 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.SANSCentreFinder = mock.MagicMock()
         self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel,
                                              self.SANSCentreFinder)
+        self.presenter.connect_signals = mock.Mock()
 
     def test_that_on_run_clicked_calls_find_beam_centre(self):
         self.presenter.set_view(self.view)

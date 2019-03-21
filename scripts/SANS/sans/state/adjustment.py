@@ -29,12 +29,10 @@ class StateAdjustment(StateBase):
     normalize_to_monitor = TypedParameter(StateNormalizeToMonitor, validator_sub_state)
     wavelength_and_pixel_adjustment = TypedParameter(StateWavelengthAndPixelAdjustment, validator_sub_state)
     wide_angle_correction = BoolParameter()
-    show_transmission = BoolParameter()
 
     def __init__(self):
         super(StateAdjustment, self).__init__()
         self.wide_angle_correction = False
-        self.show_transmission = False
 
     def validate(self):
         is_invalid = {}

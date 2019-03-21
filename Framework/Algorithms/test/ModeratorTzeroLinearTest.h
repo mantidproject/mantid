@@ -7,12 +7,14 @@
 #ifndef MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 #define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -99,6 +101,49 @@ public:
                            // exceptions and not return them
     TS_ASSERT_THROWS(alg.execute(), Exception::InstrumentDefinitionError);
     AnalysisDataService::Instance().remove("testWS");
+  }
+
+  void testExecManualOverride() {
+    // Workspace with indirect instrument
+    MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
+    AnalysisDataService::Instance().add("testWS", testWS);
+    const bool add_deltaE_mode = true;
+    addToInstrument(testWS, add_deltaE_mode);
+
+    // Pass input parameters to the algorithm. Algorithm will execute
+    // even though the instrument lacks parameter Gradient and Intercept
+    alg.initialize();
+    alg.setProperty("InputWorkspace", testWS);
+    alg.setProperty("Gradient", 24.0);
+    alg.setProperty("Intercept", 42.0);
+    alg.setProperty("OutputWorkspace", "outWS1");
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Add parameters to the instrument. Parameter values (11.0 and -5.0)
+    // are different than the manual values (24.0 and 42.0)
+    const bool add_t0_formula = true;
+    addToInstrument(testWS, add_deltaE_mode, add_t0_formula);
+    alg.setProperty("OutputWorkspace", "outWS2");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Instrument parameters are not used because the manual values override
+    // Thus, TOFs in outWS2 should be the same as outWS1.
+    // Note: instruments will be different
+    auto checkAlg =
+        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    checkAlg->initialize();
+    checkAlg->setChild(true);
+    checkAlg->setProperty("Workspace1", "outWS1");
+    checkAlg->setProperty("Workspace2", "outWS2");
+    checkAlg->setProperty("CheckInstrument", false);
+    checkAlg->setProperty("Tolerance", 1.0e-9);
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS1");
+    AnalysisDataService::Instance().remove("outWS2");
   }
 
   /*

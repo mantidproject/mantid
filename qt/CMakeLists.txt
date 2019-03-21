@@ -1,4 +1,6 @@
-find_package ( QScintillaQt4 REQUIRED )
+if ( ENABLE_MANTIDPLOT )
+  find_package ( QScintillaQt4 REQUIRED )
+endif()
 
 # Utilities for defining targets
 include ( QtTargetFunctions )

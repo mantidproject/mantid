@@ -49,10 +49,11 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
 }
 
 size_t TableWorkspace::getMemorySize() const {
-  size_t data_size = 0;
-  for (const auto &column : m_columns) {
-    data_size += column->sizeOfData();
-  }
+  size_t data_size = std::accumulate(m_columns.cbegin(), m_columns.cend(),
+                                     static_cast<size_t>(0),
+                                     [](size_t sum, const auto &column) {
+                                       return sum = column->sizeOfData();
+                                     });
   data_size += m_LogManager->getMemorySize();
   return data_size;
 }
@@ -121,13 +122,13 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
 /// Gets the shared pointer to a column.
 API::Column_const_sptr
 TableWorkspace::getColumn(const std::string &name) const {
-  for (const auto &column : m_columns) {
-    if (column->name() == name) {
-      return column;
-    }
+  const auto found = std::find_if(
+      m_columns.cbegin(), m_columns.cend(),
+      [&name](const auto &column) { return column->name() == name; });
+  if (found == m_columns.cend()) {
+    throw std::runtime_error("Column " + name + " does not exist.");
   }
-  std::string str = "Column " + name + " does not exist.\n";
-  throw std::runtime_error(str);
+  return *found;
 }
 
 /// Gets the shared pointer to a column.
@@ -193,8 +194,9 @@ void TableWorkspace::removeRow(size_t index) {
 std::vector<std::string> TableWorkspace::getColumnNames() const {
   std::vector<std::string> nameList;
   nameList.reserve(m_columns.size());
-  for (const auto &column : m_columns)
-    nameList.push_back(column->name());
+  std::transform(m_columns.cbegin(), m_columns.cend(),
+                 std::back_inserter(nameList),
+                 [](const auto &column) { return column->name(); });
   return nameList;
 }
 

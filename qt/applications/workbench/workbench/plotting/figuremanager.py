@@ -23,6 +23,7 @@ import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
@@ -82,11 +83,27 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         all_axes = self.canvas.figure.axes
         if not all_axes:
             return
-        empty_axes = True
+
+        # Here we wish to delete any curves linked to the workspace being
+        # deleted and if a figure is now empty, close it. We must avoid closing
+        # any figures that were created via the script window that are not
+        # managed via a workspace.
+        # See https://github.com/mantidproject/mantid/issues/25135.
+        empty_axes = []
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                empty_axes = empty_axes & ax.remove_workspace_artists(workspace)
-        if empty_axes:
+                ax.remove_workspace_artists(workspace)
+            # We check for axes type below as a pseudo check for an axes being
+            # a colorbar. Creating a colorfill plot creates 2 axes: one linked
+            # to a workspace, the other a colorbar. Deleting the workspace
+            # deletes the colorfill, but the plot remains open due to the
+            # non-empty colorbar. This solution seems to work for the majority
+            # of cases but could lead to unmanaged figures only containing an
+            # Axes object being closed.
+            if type(ax) is not Axes:
+                empty_axes.append(MantidAxes.is_empty(ax))
+
+        if all(empty_axes):
             self.window.emit_close()
         else:
             self.canvas.draw_idle()
@@ -203,6 +220,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self._fig_interation = FigureInteraction(self)
         self._ads_observer = FigureManagerADSObserver(self)
 
+        # Plotted workspace names/spectra in form '{workspace}: spec {spec_num}'
+        self.workspace_labels = []
+
         self.window.raise_()
 
     def full_screen_toggle(self):
@@ -239,9 +259,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
         if figure_type(self.canvas.figure) != FigureType.Line:
-            action = self.toolbar._actions['toggle_fit']
-            action.setEnabled(False)
-            action.setVisible(False)
+            self._set_fit_enabled(False)
+
+        self._update_workspace_labels()
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -320,10 +340,31 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         """
         Gcf.figure_visibility_changed(self.num)
 
+    def get_curve_labels(self):
+        """Get curve labels from Matplotlib figure"""
+        return [line.get_label() for line in self.canvas.figure.axes[0].lines]
+
+    def _update_workspace_labels(self):
+        """Check for new curves and update the workspace labels"""
+        curve_labels = self.get_curve_labels()
+        num_new_curves = len(curve_labels) - len(self.workspace_labels)
+        self.workspace_labels += curve_labels[-num_new_curves:]
+        self._update_fit_browser_workspace_labels()
+        can_fit = self.fit_browser.can_fit_spectra(self.workspace_labels)
+        self._set_fit_enabled(can_fit)
+
+    def _update_fit_browser_workspace_labels(self):
+        self.fit_browser.workspace_labels = self.workspace_labels
+
+    def _set_fit_enabled(self, on):
+        action = self.toolbar._actions['toggle_fit']
+        action.setEnabled(on)
+        action.setVisible(on)
 
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
+
 
 def new_figure_manager(num, *args, **kwargs):
     """

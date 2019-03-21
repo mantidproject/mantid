@@ -36,12 +36,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     """
 
     closing = Signal()
+    pattern_fittable_curve = re.compile('(.+?): spec (\d+)')
 
     def __init__(self, canvas, toolbar_state_checker, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
         self.init()
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
+        self.workspace_labels = []
         # The toolbar state checker to be passed to the peak editing tool
         self.toolbar_state_checker = toolbar_state_checker
         # The peak editing tool
@@ -63,6 +65,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
 
+    @classmethod
+    def can_fit_spectra(cls, labels):
+        """
+        Determine if the spectra referred to by the plot labels can be used in this fit browser.
+        :param labels: A list of curve labels which can identify spectra in a workspace.
+        :return: True or False
+        """
+        return any(map(lambda s: re.match(cls.pattern_fittable_curve, s), labels))
+
     def closeEvent(self, event):
         """
         Emit self.closing signal used by figure manager to put the menu buttons in correct states
@@ -75,15 +86,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Override the base class method. Initialise the peak editing tool.
         """
         allowed_spectra = {}
-        pattern = re.compile('(.+?): spec (\d+)')
-        for label in [lin.get_label() for lin in self.get_lines()]:
-            a_match = re.match(pattern, label)
-            name, spec = a_match.group(1), int(a_match.group(2))
-            spec_list = allowed_spectra.get(name, [])
-            spec_list.append(spec)
-            allowed_spectra[name] = spec_list
-        for name, spec_list in allowed_spectra.items():
-            self.addAllowedSpectra(name, spec_list)
+        for label in self.workspace_labels:
+            a_match = re.match(self.pattern_fittable_curve, label)
+            if a_match:
+                name, spec = a_match.group(1), int(a_match.group(2))
+                spec_list = allowed_spectra.get(name, [])
+                spec_list.append(spec)
+                allowed_spectra[name] = spec_list
+        if len(allowed_spectra) > 0:
+            for name, spec_list in allowed_spectra.items():
+                self.addAllowedSpectra(name, spec_list)
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker,
                                        current_peak_type=self.defaultPeakType())
         self.tool.fit_start_x_moved.connect(self.setStartX)
@@ -258,7 +270,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             new_line.update_from(old_line)
 
         # Now update the legend to make sure it changes to the old properties
-        self.get_axes().legend()
+        self.get_axes().legend().draggable()
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):

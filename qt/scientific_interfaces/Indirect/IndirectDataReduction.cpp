@@ -100,10 +100,6 @@ void IndirectDataReduction::exportTabPython() {
 void IndirectDataReduction::initLayout() {
   m_uiForm.setupUi(this);
 
-  // Do not allow running until setup  and instrument loading are done
-  emitUpdateRunButton(false, "disable", "Loading UI...",
-                      "Initialising user interface components...");
-
   // Create the tabs
   addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
@@ -122,10 +118,6 @@ void IndirectDataReduction::initLayout() {
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
-
-  // Reset the Run button state when the tab is changed
-  connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this,
-          SLOT(emitUpdateRunButton()));
 
   // Handle instrument configuration changes
   connect(m_uiForm.iicInstrumentConfiguration,
@@ -528,17 +520,4 @@ void IndirectDataReduction::openDirectoryDialog() {
  */
 void IndirectDataReduction::showMessageBox(const QString &message) {
   showInformationBox(message);
-}
-
-/**
- * Slot to allow setting the state of the Run button.
- *
- * @param enabled If the button is clickable
- * @param message Message shown on the button
- * @param tooltip Tooltip shown when hovering over button
- */
-void IndirectDataReduction::emitUpdateRunButton(
-    bool enabled, std::string const &enableOutputButtons, QString message,
-    QString tooltip) {
-  emit updateRunButton(enabled, enableOutputButtons, message, tooltip);
 }

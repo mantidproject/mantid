@@ -8,10 +8,11 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
-from mantid.kernel import Direction
+from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
     CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
-    LoadDiffCal, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RemoveLogs, RenameWorkspace, SaveNexusProcessed
+    LoadDiffCal, Load, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RebinToWorkspace, RemoveLogs, \
+    RenameWorkspace, SaveNexusProcessed
 import os
 import numpy as np
 
@@ -19,15 +20,17 @@ EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
 CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
 CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
+# AlignAndFocusPowder only uses the ranges
+PROPS_IN_PD_CHARACTER = ["DMin", "DMax", "TMin", "TMax", "CropWavelengthMin", "CropWavelengthMax"]
 PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    GRP_WKSP, CAL_WKSP, "OffsetsWorkspace",
                    MASK_WKSP, "MaskBinTable",
-                   "Params", "ResampleX", "Dspacing", "DMin", "DMax",
-                   "TMin", "TMax", "PreserveEvents",
+                   "Params", "ResampleX", "Dspacing",
+                   "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
                    "CompressStartTime", "UnwrapRef", "LowResRef",
-                   "CropWavelengthMin", "CropWavelengthMax",
                    "LowResSpectrumOffset", "ReductionProperties"]
+PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
 PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
 
@@ -53,10 +56,32 @@ def determineChunking(filename, chunkSize):
         strategy.append({})
 
     # delete chunks workspace
-    chunks = str(chunks)
+    chunks = str(chunks)  # release the handle to the workspace object
     DeleteWorkspace(Workspace='chunks')
 
     return strategy
+
+
+def uniqueDescription(name, wksp):
+    wksp = str(wksp)
+    if name == 'AbsorptionWorkspace':
+        sample = mtd[wksp].sample()
+        materialname = sample.getMaterial().name()
+        shapeXML = sample.getShape().getShapeXML()
+        density = str(sample.getMaterial().numberDensity)
+        wavelength = mtd[wksp].readX(0)
+        wavelength = '{} to {} with {} bins'.format(wavelength[0], wavelength[-1], mtd[wksp].readY(0).size)
+        value = ';'.join((materialname, density, shapeXML, wavelength))
+    elif name == CAL_WKSP:
+        value = str(np.sum(mtd[wksp].column('difc')))  # less false collisions than the workspace name
+    elif name == GRP_WKSP:
+        value = ','.join(mtd[wksp].extractY().astype(int).astype(str).ravel())
+    elif name == MASK_WKSP:
+        value = ','.join([str(item) for item in mtd[wksp].getMaskedDetectors()])
+    else:
+        raise RuntimeError('Do not know how to create unique description for Property "{}"'.format(name))
+
+    return '{}={}'.format(name, value)
 
 
 class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
@@ -157,7 +182,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 GRP_WKSP:  self.__grpWksp,
                 MASK_WKSP: self.__mskWksp}
 
-        for name in PROPS_FOR_ALIGN:
+        for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             prop = self.getProperty(name)
             name_list = ['PreserveEvents', 'CompressTolerance',
                          'CompressWallClockTolerance', 'CompressStartTime']
@@ -171,31 +196,54 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                     args[name] = prop.value
         return args
 
+    def __isCharacterizationsNeeded(self):
+        '''Determine if the characterization file is needed by checking if
+        all the properties it would set are already specified'''
+        if not self.charac:
+            return False
+
+        for name in PROPS_IN_PD_CHARACTER:
+            if self.getProperty(name).isDefault:
+                return True
+
+        return False
+
+    def __needToLoadCal(self):
+        if (not self.getProperty(CAL_FILE).isDefault) or (not self.getProperty(GROUP_FILE).isDefault):
+            return not bool(self.__calWksp and self.__grpWksp and self.__mskWksp)
+        return False
+
     def __determineCharacterizations(self, filename, wkspname):
-        useCharac = bool(self.charac is not None)
-        loadFile = not mtd.doesExist(wkspname)
-        useCal = (not self.getProperty('CalFileName').isDefault) or (not self.getProperty('CalFileName').isDefault)
+        useCharTable = self.__isCharacterizationsNeeded()
+        needToLoadCal = self.__needToLoadCal()
+
+        # something needs to use the workspace and it needs to not already be in memory
+        loadFile = (useCharTable or needToLoadCal) and (not mtd.doesExist(wkspname))
 
         # input workspace is only needed to find a row in the characterizations table
         tempname = None
         if loadFile:
-            if useCharac or useCal:
+            if useCharTable or needToLoadCal:
                 tempname = '__%s_temp' % wkspname
                 # set the loader for this file
-                # MetaDataOnly=True is only supported by LoadEventNexus
-                loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
-                loader.execute()
+                try:
+                    # MetaDataOnly=True is only supported by LoadEventNexus
+                    loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
+                    loader.execute()
 
-                # get the underlying loader name if we used the generic one
-                if self.__loaderName == 'Load':
-                    self.__loaderName = loader.getPropertyValue('LoaderName')
+                    # get the underlying loader name if we used the generic one
+                    if self.__loaderName == 'Load':
+                        self.__loaderName = loader.getPropertyValue('LoaderName')
+                except RuntimeError:
+                    # give up and load the whole file - this can be expensive
+                    Load(OutputWorkspace=tempname, Filename=filename)
         else:
             tempname = wkspname  # assume it is already loaded
 
         # some bit of data has been loaded so use it to get the characterizations
         self.__setupCalibration(tempname)
 
-        # put together argument list
+        # put together argument list for determining characterizations
         args = dict(ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
         for name in PROPS_FOR_PD_CHARACTER:
             prop = self.getProperty(name)
@@ -203,12 +251,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 args[name] = prop.value
         if tempname is not None:
             args['InputWorkspace'] = tempname
-        if useCharac:
+        if useCharTable:
             args['Characterizations'] = self.charac
 
-        PDDetermineCharacterizations(**args)
+        if useCharTable:
+            PDDetermineCharacterizations(**args)
 
-        if loadFile and (useCharac or useCal):
+        if loadFile and (useCharTable or needToLoadCal):
             DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname, additional_props=None):
@@ -223,31 +272,34 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
         alignandfocusargs = []
+
         # calculate general properties
-        for name in PROPS_FOR_ALIGN:
+        for name in PROPS_FOR_ALIGN + PROPS_IN_PD_CHARACTER:
             # skip these because this has been reworked to only worry about information in workspaces
             if name in (CAL_FILE, GROUP_FILE, CAL_WKSP, GRP_WKSP, MASK_WKSP):
                 continue
             prop = self.getProperty(name)
             if name == 'PreserveEvents' or not prop.isDefault:
                 value = prop.valueAsStr  # default representation for everything
-                if name == 'AbsorptionWorkspace':  # TODO need better unique identifier for absorption workspace
-                    value = str(mtd[self.__grpWksp].extractY().sum())
                 alignandfocusargs.append('%s=%s' % (name, value))
-        # special calculations for group and mask - calibration hasn't been customized yet
+
+        # special calculations for workspaces
+        if self.absorption:
+            alignandfocusargs.append(uniqueDescription('AbsorptionWorkspace', self.absorption))
         if self.__calWksp:
-            value = str(np.sum(mtd[self.__calWksp].column('difc')))  # less false collisions than the workspace name
-            alignandfocusargs.append('%s=%s' % (CAL_WKSP, value))
+            alignandfocusargs.append(uniqueDescription(CAL_WKSP, self.__calWksp))
         if self.__grpWksp:
-            value = ','.join(mtd[self.__grpWksp].extractY().astype(int).astype(str).ravel())
-            alignandfocusargs.append('%s=%s' % (GRP_WKSP, value))
+            alignandfocusargs.append(uniqueDescription(GRP_WKSP, self.__grpWksp))
         if self.__mskWksp:
-            value = ','.join([str(item) for item in mtd[self.__mskWksp].getMaskedDetectors()])
-            alignandfocusargs.append('%s=%s' % (MASK_WKSP, value))
+            alignandfocusargs.append(uniqueDescription(MASK_WKSP, self.__mskWksp))
 
         alignandfocusargs += additional_props or []
+        reductionPropertiesName = self.getProperty('ReductionProperties').valueAsStr
+        if not PropertyManagerDataService.doesExist(reductionPropertiesName):
+            reductionPropertiesName = ''  # do not specify non-existant manager
+
         return CreateCacheFilename(Prefix=prefix,
-                                   PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
+                                   PropertyManager=reductionPropertiesName,
                                    Properties=propman_properties,
                                    OtherProperties=alignandfocusargs,
                                    CacheDir=cachedir).OutputFilename
@@ -258,14 +310,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         newprop = 'files_to_sum={}'.format(filenames_str)
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
-    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):
-        chunks = determineChunking(filename, self.chunkSize)
-        numSteps = 6  # for better progress reporting - 6 steps per chunk
-        if createUnfocused:
-            numSteps = 7  # one more for accumulating the unfocused workspace
-        self.log().information('Processing \'{}\' in {:d} chunks'.format(filename, len(chunks)))
-        prog_per_chunk_step = self.prog_per_file * 1./(numSteps*float(len(chunks)))
-
+    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902
         # create a unique name for the workspace
         wkspname = '__' + self.__wkspNameFromFile(filename)
         wkspname += '_f%d' % self._filenames.index(filename)  # add file number to be unique
@@ -275,6 +320,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # check for a cachefilename
         cachefile = self.__getCacheName(self.__wkspNameFromFile(filename))
+        self.log().information('looking for cachefile "{}"'.format(cachefile))
         if (not createUnfocused) and self.useCaching and os.path.exists(cachefile):
             try:
                 if self.__loadCacheFile(cachefile, wkspname):
@@ -282,6 +328,15 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             except RuntimeError as e:
                 # log as a warning and carry on as though the cache file didn't exist
                 self.log().warning('Failed to load cache file "{}": {}'.format(cachefile, e))
+        else:
+            self.log().information('not using cache')
+
+        chunks = determineChunking(filename, self.chunkSize)
+        numSteps = 6  # for better progress reporting - 6 steps per chunk
+        if createUnfocused:
+            numSteps = 7  # one more for accumulating the unfocused workspace
+        self.log().information('Processing \'{}\' in {:d} chunks'.format(filename, len(chunks)))
+        prog_per_chunk_step = self.prog_per_file * 1./(numSteps*float(len(chunks)))
 
         unfocusname_chunk = ''
         canSkipLoadingLogs = False
@@ -342,8 +397,16 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if self.absorption is not None and len(str(self.absorption)) > 0:
                 ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
                              Target='Wavelength', EMode='Elastic')
-                Divide(LHSWorkspace=chunkname, RHSWorkspace=self.absorption, OutputWorkspace=chunkname,
+                # rebin the absorption correction to match the binning of the inputs if in histogram mode
+                # EventWorkspace will compare the wavelength of each individual event
+                absWksp = self.absorption
+                if mtd[chunkname].id() != 'EventWorkspace':
+                    absWksp = '__absWkspRebinned'
+                    RebinToWorkspace(WorkspaceToRebin=self.absorption, WorkspaceToMatch=chunkname, OutputWorkspace=absWksp)
+                Divide(LHSWorkspace=chunkname, RHSWorkspace=absWksp, OutputWorkspace=chunkname,
                        startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                if absWksp != self.absorption:  # clean up
+                    DeleteWorkspace(Workspace=absWksp)
                 ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
                              Target='TOF', EMode='Elastic')
             prog_start += prog_per_chunk_step
@@ -364,6 +427,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         # write out the cachefile for the main reduced data independent of whether
         # the unfocussed workspace was requested
         if self.useCaching and not os.path.exists(cachefile):
+            self.log().information('Saving data to cachefile "{}"'.format(cachefile))
             SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
 
         return wkspname, unfocusname
@@ -549,7 +613,11 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if not prop.isDefault:
                 editinstrargs[name] = prop.value
         if editinstrargs:
-            EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+            try:
+                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+            except RuntimeError as e:
+                # treat this as a non-fatal error
+                self.log().warning('Failed to update instrument geometry in cache file: {}'.format(e))
 
         return True
 

@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
+# pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import *
@@ -25,6 +25,11 @@ def _ws_or_none(s):
 
 def _elems_or_none(l):
     return l if len(l) != 0 else None
+
+
+def add_missing_elements(from_list, to_list):
+    to_list.extend([element for element in from_list if element not in to_list])
+    return sorted(to_list)
 
 
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
@@ -73,7 +78,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
-                             doc='Workspace contining calibration data')
+                             doc='Workspace containing calibration data')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
@@ -94,7 +99,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(name='RebinString', defaultValue='',
                              doc='Rebin string parameters.')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
@@ -133,7 +138,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
-                                             identify_bad_detectors,
+                                             get_detectors_to_mask,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
                                              scale_monitor,
@@ -146,12 +151,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._setup()
         load_prog = Progress(self, start=0.0, end=0.10, nreports=2)
         load_prog.report('loading files')
-        self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                               self._ipf_filename,
-                                                               self._spectra_range[0],
-                                                               self._spectra_range[1],
-                                                               self._sum_files,
-                                                               self._load_logs)
+        self._workspace_names, self._chopped_data, masked_detectors = load_files(self._data_files,
+                                                                                 self._ipf_filename,
+                                                                                 self._spectra_range[0],
+                                                                                 self._spectra_range[1],
+                                                                                 self._sum_files,
+                                                                                 self._load_logs, None, self._sum_files)
         load_prog.report('files loaded')
 
         process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
@@ -169,7 +174,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
                                                              self._rebin_string)
 
-            masked_detectors = identify_bad_detectors(workspaces[0])
+            if not self._sum_files:
+                masked_detectors = get_detectors_to_mask(workspaces)
+            else:
+                summed_file_masked_detectors = get_detectors_to_mask(workspaces)
+                masked_detectors = add_missing_elements(summed_file_masked_detectors, masked_detectors)
 
             # Process workspaces
             for ws_name in workspaces:

@@ -80,8 +80,11 @@ class EditorIO(object):
             # pretend the user clicked No on the dialog
             return True
 
-    def write(self):
-        filename = self.editor.fileName()
+    def write(self, save_as=None):
+        if save_as is not None:
+            filename = save_as
+        else:
+            filename = self.editor.fileName()
         if not filename:
             filename = self.ask_for_filename()
             if not filename:
@@ -138,6 +141,11 @@ class PythonFileInterpreter(QWidget):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
+        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
+        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
+        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
+
     def closeEvent(self, event):
         self.deleteLater()
         if self.find_replace_dialog:
@@ -155,11 +163,6 @@ class PythonFileInterpreter(QWidget):
         if self.find_replace_dialog is not None:
             self.find_replace_dialog.hide()
 
-        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
-        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
-        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
-        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
-
     @property
     def filename(self):
         return self.editor.fileName()
@@ -175,8 +178,8 @@ class PythonFileInterpreter(QWidget):
     def abort(self):
         self._presenter.req_abort()
 
-    def execute_async(self):
-        self._presenter.req_execute_async()
+    def execute_async(self, ignore_selection=False):
+        self._presenter.req_execute_async(ignore_selection)
 
     def execute_async_blocking(self):
         self._presenter.req_execute_async_blocking()
@@ -187,6 +190,14 @@ class PythonFileInterpreter(QWidget):
             return io.save_if_required(prompt_for_confirmation, force_save)
         else:
             return True
+
+    def save_as(self):
+        io = EditorIO(self.editor)
+        new_filename = io.ask_for_filename()
+        if new_filename:
+            return io.write(save_as=new_filename), new_filename
+        else:
+            return False, None
 
     def set_editor_readonly(self, ro):
         self.editor.setReadOnly(ro)
@@ -336,16 +347,16 @@ class PythonFileInterpreterPresenter(QObject):
             self.model.abort()
             self.view.set_status_message(ABORTED_STATUS_MSG)
 
-    def req_execute_async(self):
-        self._req_execute_impl(blocking=False)
+    def req_execute_async(self, ignore_selection):
+        self._req_execute_impl(blocking=False, ignore_selection=ignore_selection)
 
     def req_execute_async_blocking(self):
         self._req_execute_impl(blocking=True)
 
-    def _req_execute_impl(self, blocking):
+    def _req_execute_impl(self, blocking, ignore_selection=False):
         if self.is_executing:
             return
-        code_str, self._code_start_offset = self._get_code_for_execution()
+        code_str, self._code_start_offset = self._get_code_for_execution(ignore_selection)
         if not code_str:
             return
         self.is_executing = True
@@ -353,12 +364,13 @@ class PythonFileInterpreterPresenter(QObject):
         self.view.set_status_message(RUNNING_STATUS_MSG)
         return self.model.execute_async(code_str, self.view.filename, blocking)
 
-    def _get_code_for_execution(self):
+    def _get_code_for_execution(self, ignore_selection):
         editor = self.view.editor
-        if editor.hasSelectedText():
+        if not ignore_selection and editor.hasSelectedText():
             code_str = editor.selectedText()
             line_from, _, _, _ = editor.getSelection()
         else:
+            # run everything in the file
             code_str = editor.text()
             line_from = 0
         return code_str, line_from

@@ -130,7 +130,7 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
   connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
-          SLOT(updateAvailableFitTypes()));
+          SIGNAL(updateAvailableFitTypes()));
 
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this,
           SLOT(plotSelectedSpectra()));

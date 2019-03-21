@@ -201,6 +201,11 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
       m_view(wsptr->getHistory().createView()) {
+
+  if (m_algHist.empty()) {
+    throw std::invalid_argument("No history found on the given workspace");
+  }
+
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(500);
   setMinimumWidth(750);

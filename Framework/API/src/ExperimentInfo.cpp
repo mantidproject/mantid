@@ -675,6 +675,9 @@ void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
   m_run = std::move(run);
 }
 
+/// Return the cow ptr of the run
+Kernel::cow_ptr<Run> ExperimentInfo::sharedRun() { return m_run; }
+
 /**
  * Get an experimental log either by log name or by type, e.g.
  *   - temperature_log
@@ -1430,6 +1433,14 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
     } else {
       // Really create the instrument
       instr = parser.parseXML(nullptr);
+      // Parse the instrument tree (internally create ComponentInfo and
+      // DetectorInfo). This is an optimization that avoids duplicate parsing
+      // of the instrument tree when loading multiple workspaces with the same
+      // instrument. As a consequence less time is spent and less memory is
+      // used. Note that this is only possible since the tree in `instrument`
+      // will not be modified once we add it to the IDS.
+      instr->parseTreeAndCacheBeamline();
+
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }

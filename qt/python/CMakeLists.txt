@@ -4,7 +4,9 @@
 include ( PythonPackageTargetFunctions )
 
 # Legacy wrappers for MantidPlot
-add_subdirectory ( mantidqtpython )
+if ( ENABLE_MANTIDPLOT )
+  add_subdirectory ( mantidqtpython )
+endif()
 
 ###########################################################################
 # mantidqt
@@ -40,10 +42,13 @@ if ( ENABLE_WORKBENCH )
   # Setup dependency chain
   add_dependencies ( mantidqt
     mantidqt_resources
-    mantidqt_commonqt4
     mantidqt_commonqt5
     mantidqt_instrumentviewqt5
   )
+
+  if ( ENABLE_MANTIDPLOT )
+    add_dependencies ( mantidqt mantidqt_commonqt4 )
+  endif()
 
   if ( MSVC )
     # Debug builds need libraries that are linked with MSVC debug runtime
@@ -85,7 +90,6 @@ endif ()
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/utils/test/test_writetosignal.py
 
-    mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
     mantidqt/widgets/codeeditor/test/test_codeeditor.py
     mantidqt/widgets/codeeditor/test/test_errorformatter.py
     mantidqt/widgets/codeeditor/test/test_execution.py
@@ -121,6 +125,9 @@ endif ()
 
   # ctest target for widgets that only get tested in qt5, because they are only used in the workbench
   set ( PYTHON_WIDGET_QT5_ONLY_TESTS
+    mantidqt/widgets/algorithmselector/test/observer_test.py
+    mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
+
     mantidqt/widgets/codeeditor/test/test_interpreter_view.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py

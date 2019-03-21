@@ -969,10 +969,10 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   }
 
   try {
-    m_calibFinishedOK = false;
-    doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
     m_calibFinishedOK = true;
+    doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
   } catch (std::runtime_error &rexc) {
+    m_calibFinishedOK = false;
     g_log.error()
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
@@ -1068,9 +1068,12 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
   if (cs.m_inputDirCalib.empty()) {
-    m_view->userWarning("No calibration directory selected",
-                        "Please select a calibration directory in Settings. "
-                        "This will be used to cache Vanadium calibration data");
+    g_log.warning("No calibration directory selected. Please select a "
+                  "calibration directory in Settings. This will be used to "
+                  "cache Vanadium calibration data");
+    // This should be a userWarning once the threading problem has been dealt
+    // with
+    m_calibFinishedOK = false;
     return;
   }
 

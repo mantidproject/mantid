@@ -47,6 +47,7 @@ class MultiPythonFileInterpreter(QWidget):
 
         # attributes
         self.default_content = default_content
+        self.default_font = font
         self.prev_session_tabs = None
         self.whitespace_visible = False
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -59,7 +60,7 @@ class MultiPythonFileInterpreter(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # add a single editor by default
-        self.append_new_editor(font=font)
+        self.append_new_editor()
 
         # setting defaults
         self.confirm_on_save = True
@@ -87,7 +88,8 @@ class MultiPythonFileInterpreter(QWidget):
     def append_new_editor(self, font=None, content=None, filename=None):
         """
         Appends a new editor the tabbed widget
-        :param font: A reference to the font to be used by the editor
+        :param font: A reference to the font to be used by the editor. If None is given
+        then self.default_font is used
         :param content: An optional string containing content to be placed
         into the editor on opening. If None then self.default_content is used
         :param filename: An optional string containing the filename of the editor
@@ -96,6 +98,8 @@ class MultiPythonFileInterpreter(QWidget):
         """
         if content is None:
             content = self.default_content
+        if font is None:
+            font = self.default_font
 
         interpreter = PythonFileInterpreter(font, content, filename=filename,
                                             parent=self)
@@ -129,15 +133,16 @@ class MultiPythonFileInterpreter(QWidget):
         :return: True if all tabs are closed, False if cancelled
         """
         for idx in reversed(range(self.editor_count)):
-            if not self.close_tab(idx):
+            if not self.close_tab(idx, allow_zero_tabs=True):
                 return False
 
         return True
 
-    def close_tab(self, idx):
+    def close_tab(self, idx, allow_zero_tabs=False):
         """
         Close the tab at the given index.
         :param idx: The tab index
+        :param allow_zero_tabs: If True then closing the last tab does not add a new empty tab.
         :return: True if tab is to be closed, False if cancelled
         """
         if idx >= self.editor_count:
@@ -153,8 +158,7 @@ class MultiPythonFileInterpreter(QWidget):
         else:
             return False
 
-        # we never want an empty widget
-        if self.editor_count == 0:
+        if (not allow_zero_tabs) and self.editor_count == 0:
             self.append_new_editor()
 
         return True
@@ -167,9 +171,19 @@ class MultiPythonFileInterpreter(QWidget):
         return self._tabs.widget(idx)
 
     def execute_current_async(self):
-        """Execute content of the current file. If a selection is active
-        then only this portion of code is executed, this is completed asynchronously"""
+        """
+        Execute content of the current file. If a selection is active
+        then only this portion of code is executed, this is completed asynchronously
+        """
         self.current_editor().execute_async()
+
+    def execute_async(self):
+        """
+        Execute ALL the content in the current file.
+        Selection is ignored.
+        This is completed asynchronously.
+        """
+        self.current_editor().execute_async(ignore_selection=True)
 
     @Slot()
     def execute_current_async_blocking(self):
@@ -238,6 +252,12 @@ class MultiPythonFileInterpreter(QWidget):
     def save_current_file(self):
         """Save the current file"""
         self.current_editor().save(force_save=True)
+
+    def save_current_file_as(self):
+        saved, filename = self.current_editor().save_as()
+        if saved:
+            self.current_editor().close()
+            self.open_file_in_new_tab(filename)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()

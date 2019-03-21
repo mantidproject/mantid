@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -297,6 +297,21 @@ void IntegrateEllipsoids::init() {
                   "If this options is enabled, then the the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
+
+  declareProperty("SatelliteRegionRadius", .1, mustBePositive,
+                  "Only events at most this distance from a peak will be "
+                  "considered when integrating");
+
+  declareProperty("SatellitePeakSize", .08, mustBePositive,
+                  "Half-length of major axis for satellite peak ellipsoid");
+
+  declareProperty("SatelliteBackgroundInnerSize", .08, mustBePositive,
+                  "Half-length of major axis for inner ellipsoidal surface of "
+                  "satellite background region");
+
+  declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
+                  "Half-length of major axis for outer ellipsoidal surface of "
+                  "satellite background region");
 }
 
 //---------------------------------------------------------------------
@@ -325,13 +340,17 @@ void IntegrateEllipsoids::exec() {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
-  double radius = getProperty("RegionRadius");
+  double radius_m = getProperty("RegionRadius");
+  double radius_s = getProperty("SatelliteRegionRadius");
   int numSigmas = getProperty("NumSigmas");
   double cutoffIsigI = getProperty("CutoffIsigI");
   bool specify_size = getProperty("SpecifySize");
   double peak_radius = getProperty("PeakSize");
+  double sate_peak_radius = getProperty("SatellitePeakSize");
   double back_inner_radius = getProperty("BackgroundInnerSize");
+  double sate_back_inner_radius = getProperty("SatelliteBackgroundInnerSize");
   double back_outer_radius = getProperty("BackgroundOuterSize");
+  double sate_back_outer_radius = getProperty("SatelliteBackgroundOuterSize");
   bool hkl_integ = getProperty("IntegrateInHKL");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
   bool adaptiveQBackground = getProperty("AdaptiveQBackground");
@@ -356,9 +375,8 @@ void IntegrateEllipsoids::exec() {
 
   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
       getProperty("OutputWorkspace");
-  if (peak_ws != in_peak_ws) {
+  if (peak_ws != in_peak_ws)
     peak_ws = in_peak_ws->clone();
-  }
 
   // get UBinv and the list of
   // peak Q's for the integrator
@@ -368,30 +386,55 @@ void IntegrateEllipsoids::exec() {
   std::vector<V3D> peak_q_list;
   std::vector<std::pair<double, V3D>> qList;
   std::vector<V3D> hkl_vectors;
+  std::vector<V3D> mnp_vectors;
+  int ModDim = 0;
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
-    V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
-    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
-                                                       // just check for (0,0,0)
+    V3D hkl(peaks[i].getIntHKL());
+    V3D mnp(peaks[i].getIntMNP());
+
+    if (mnp[0] != 0 && ModDim == 0)
+      ModDim = 1;
+    if (mnp[1] != 0 && ModDim == 1)
+      ModDim = 2;
+    if (mnp[2] != 0 && ModDim == 2)
+      ModDim = 3;
+
+    if (Geometry::IndexingUtils::ValidIndex(
+            hkl, 1.0)) // use tolerance == 1 to
+                       // just check for (0,0,0,0,0,0)
     {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
       qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
-      V3D miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
-                     static_cast<double>(boost::math::iround<double>(hkl[1])),
-                     static_cast<double>(boost::math::iround<double>(hkl[2])));
-      hkl_vectors.push_back(miller_ind);
+      hkl_vectors.push_back(hkl);
+      mnp_vectors.push_back(mnp);
       indexed_count++;
     }
   }
 
-  if (indexed_count < 3) {
+  if (indexed_count < 3)
     throw std::runtime_error(
         "At least three linearly independent indexed peaks are needed.");
-  }
+
   // Get UB using indexed peaks and
   // lab-Q vectors
   Matrix<double> UB(3, 3, false);
-  Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, peak_q_list);
+  Matrix<double> modUB(3, 3, false);
+  Matrix<double> modHKL(3, 3, false);
+  Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
+                                         ModDim, peak_q_list);
+
+  int maxOrder = 0;
+  bool CT = false;
+  if (peak_ws->sample().hasOrientedLattice()) {
+    OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
+    lattice.setUB(UB);
+    lattice.setModUB(modUB);
+    modHKL = lattice.getModHKL();
+    maxOrder = lattice.getMaxOrder();
+    CT = lattice.getCrossTerm();
+  }
+
   Matrix<double> UBinv(UB);
   UBinv.Invert();
   UBinv *= (1.0 / (2.0 * M_PI));
@@ -400,7 +443,7 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> BackgroundInnerRadiusVector(n_peaks, back_inner_radius);
   std::vector<double> BackgroundOuterRadiusVector(n_peaks, back_outer_radius);
   if (specify_size) {
-    if (back_outer_radius > radius)
+    if (back_outer_radius > radius_m)
       throw std::runtime_error(
           "BackgroundOuterSize must be less than or equal to the RegionRadius");
 
@@ -414,7 +457,8 @@ void IntegrateEllipsoids::exec() {
   }
 
   // make the integrator
-  Integrate3DEvents integrator(qList, UBinv, radius,
+  Integrate3DEvents integrator(qList, hkl_vectors, mnp_vectors, UBinv, modHKL,
+                               radius_m, radius_s, maxOrder, CT,
                                useOnePercentBackgroundCorrection);
 
   // get the events and add
@@ -437,22 +481,27 @@ void IntegrateEllipsoids::exec() {
   double inti;
   double sigi;
   std::vector<double> principalaxis1, principalaxis2, principalaxis3;
+  std::vector<double> sateprincipalaxis1, sateprincipalaxis2,
+      sateprincipalaxis3;
   V3D peak_q;
   for (size_t i = 0; i < n_peaks; i++) {
-    V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
-    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
+    V3D hkl(peaks[i].getIntHKL());
+    V3D mnp(peaks[i].getIntMNP());
+
+    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) ||
+        Geometry::IndexingUtils::ValidIndex(mnp, 1.0)) {
       peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
       // modulus of Q
       double lenQpeak = 0.0;
       if (adaptiveQMultiplier != 0.0) {
-        for (size_t d = 0; d < 3; d++) {
-          lenQpeak += peak_q[d] * peak_q[d];
-        }
-        lenQpeak = std::sqrt(lenQpeak);
+        lenQpeak = peak_q.norm();
       }
-      const double adaptiveRadius =
-          adaptiveQMultiplier * lenQpeak + peak_radius;
+
+      double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
+      if (mnp != V3D(0, 0, 0))
+        adaptiveRadius = adaptiveQMultiplier * lenQpeak + sate_peak_radius;
+
       if (adaptiveRadius <= 0.0) {
         g_log.error() << "Error: Radius for integration sphere of peak " << i
                       << " is negative =  " << adaptiveRadius << '\n';
@@ -463,16 +512,26 @@ void IntegrateEllipsoids::exec() {
         BackgroundOuterRadiusVector[i] = 0.0;
         continue;
       }
-      const double adaptiveBack_inner_radius =
-          adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
-      const double adaptiveBack_outer_radius =
-          adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+
+      double adaptiveBack_inner_radius =
+          adaptiveQBackgroundMultiplier * lenQpeak + sate_back_inner_radius;
+      if (mnp == V3D(0, 0, 0))
+        adaptiveBack_inner_radius =
+            adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+
+      double adaptiveBack_outer_radius =
+          adaptiveQBackgroundMultiplier * lenQpeak + sate_back_outer_radius;
+      if (mnp == V3D(0, 0, 0))
+        adaptiveBack_outer_radius =
+            adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+
       PeakRadiusVector[i] = adaptiveRadius;
       BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
       BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
+
       Mantid::Geometry::PeakShape_const_sptr shape =
-          integrator.ellipseIntegrateEvents(
-              E1Vec, peak_q, specify_size, adaptiveRadius,
+          integrator.ellipseIntegrateModEvents(
+              E1Vec, peak_q, hkl, mnp, specify_size, adaptiveRadius,
               adaptiveBack_inner_radius, adaptiveBack_outer_radius, axes_radii,
               inti, sigi);
       peaks[i].setIntensity(inti);
@@ -480,9 +539,15 @@ void IntegrateEllipsoids::exec() {
       peaks[i].setPeakShape(shape);
       if (axes_radii.size() == 3) {
         if (inti / sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()) {
-          principalaxis1.push_back(axes_radii[0]);
-          principalaxis2.push_back(axes_radii[1]);
-          principalaxis3.push_back(axes_radii[2]);
+          if (mnp == V3D(0, 0, 0)) {
+            principalaxis1.push_back(axes_radii[0]);
+            principalaxis2.push_back(axes_radii[1]);
+            principalaxis3.push_back(axes_radii[2]);
+          } else {
+            sateprincipalaxis1.push_back(axes_radii[0]);
+            sateprincipalaxis2.push_back(axes_radii[1]);
+            sateprincipalaxis3.push_back(axes_radii[2]);
+          }
         }
       }
     } else {
@@ -509,6 +574,28 @@ void IntegrateEllipsoids::exec() {
                    << stats3.standard_deviation << " minimum " << stats3.minimum
                    << " maximum " << stats3.maximum << " median "
                    << stats3.median << "\n";
+
+    if (sateprincipalaxis1.size() > 1) {
+      Statistics satestats1 = getStatistics(sateprincipalaxis1);
+      g_log.notice() << "sateprincipalaxis1: "
+                     << " mean " << satestats1.mean << " standard_deviation "
+                     << satestats1.standard_deviation << " minimum "
+                     << satestats1.minimum << " maximum " << satestats1.maximum
+                     << " median " << satestats1.median << "\n";
+      Statistics satestats2 = getStatistics(sateprincipalaxis2);
+      g_log.notice() << "sateprincipalaxis2: "
+                     << " mean " << satestats2.mean << " standard_deviation "
+                     << satestats2.standard_deviation << " minimum "
+                     << satestats2.minimum << " maximum " << satestats2.maximum
+                     << " median " << satestats2.median << "\n";
+      Statistics satestats3 = getStatistics(sateprincipalaxis3);
+      g_log.notice() << "sateprincipalaxis3: "
+                     << " mean " << satestats3.mean << " standard_deviation "
+                     << satestats3.standard_deviation << " minimum "
+                     << satestats3.minimum << " maximum " << satestats3.maximum
+                     << " median " << satestats3.median << "\n";
+    }
+
     size_t histogramNumber = 3;
     Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, principalaxis1.size(),
@@ -527,6 +614,9 @@ void IntegrateEllipsoids::exec() {
       principalaxis1.clear();
       principalaxis2.clear();
       principalaxis3.clear();
+      sateprincipalaxis1.clear();
+      sateprincipalaxis2.clear();
+      sateprincipalaxis3.clear();
       specify_size = true;
       peak_radius = std::max(std::max(stats1.mean, stats2.mean), stats3.mean) +
                     numSigmas * std::max(std::max(stats1.standard_deviation,
@@ -534,23 +624,31 @@ void IntegrateEllipsoids::exec() {
                                          stats3.standard_deviation);
       back_inner_radius = peak_radius;
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
-                                                    // will make the background
+      // will make the background
       // shell volume equal to the peak region volume.
       V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
-        V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
-        if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
+        V3D hkl(peaks[i].getIntHKL());
+        V3D mnp(peaks[i].getIntMNP());
+        if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) ||
+            Geometry::IndexingUtils::ValidIndex(mnp, 1.0)) {
           peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
-          integrator.ellipseIntegrateEvents(
-              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-              back_outer_radius, axes_radii, inti, sigi);
+          integrator.ellipseIntegrateModEvents(
+              E1Vec, peak_q, hkl, mnp, specify_size, peak_radius,
+              back_inner_radius, back_outer_radius, axes_radii, inti, sigi);
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
           if (axes_radii.size() == 3) {
-            principalaxis1.push_back(axes_radii[0]);
-            principalaxis2.push_back(axes_radii[1]);
-            principalaxis3.push_back(axes_radii[2]);
+            if (mnp == V3D(0, 0, 0)) {
+              principalaxis1.push_back(axes_radii[0]);
+              principalaxis2.push_back(axes_radii[1]);
+              principalaxis3.push_back(axes_radii[2]);
+            } else {
+              sateprincipalaxis1.push_back(axes_radii[0]);
+              sateprincipalaxis2.push_back(axes_radii[1]);
+              sateprincipalaxis3.push_back(axes_radii[2]);
+            }
           }
         } else {
           peaks[i].setIntensity(0.0);
@@ -590,8 +688,8 @@ void IntegrateEllipsoids::exec() {
 }
 
 /**
- * @brief IntegrateEllipsoids::initTargetWSDescr Initialize the output
- *        information for the MD conversion framework.
+ * @brief IntegrateEllipsoids::initTargetWSDescr Initialize the
+ * output information for the MD conversion framework.
  *
  * @param wksp The workspace to get information from.
  */
@@ -629,6 +727,7 @@ void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
  *
  * @param inst: instrument
  */
+
 void IntegrateEllipsoids::calculateE1(
     const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {

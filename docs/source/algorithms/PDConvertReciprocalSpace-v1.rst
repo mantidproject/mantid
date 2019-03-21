@@ -75,7 +75,7 @@ Usage
     from mantid import plots
 
     # Grab the reciprocal data for argon
-    url = "https://raw.githubusercontent.com/marshallmcdonnell/pystog/master/data/test_data/argon.reciprocal_space.dat"
+    url = "https://raw.githubusercontent.com/marshallmcdonnell/pystog/master/tests/test_data/argon.reciprocal_space.dat"
     filename = wget.download(url)
     q, sq, fq_, fk_, dcs_ = np.loadtxt(filename, skiprows=2, unpack=True)
 
