@@ -19,7 +19,7 @@ class BrowseFileWidgetModel(object):
         self._filenames = []
 
         self._loaded_data_store = loaded_data_store
-        self._context = context
+        self._data_context = context.data_context
 
     @property
     def loaded_filenames(self):

@@ -79,13 +79,13 @@ class LoadWidgetPresenter(object):
     def handle_file_widget_data_changed(self):
         self.load_run_widget.update_view_from_model(self._model.runs)
         self.load_file_widget.update_view_from_model(self._model.filenames)
-        self._model._context.update_current_data()
+        self._model._data_context.update_current_data()
         self.loadNotifier.notify_subscribers()
 
     def handle_run_widget_data_changed(self):
         self.load_run_widget.update_view_from_model(self._model.runs)
         self.load_file_widget.update_view_from_model(self._model.filenames)
-        self._model._context.update_current_data()
+        self._model._data_context.update_current_data()
         self.loadNotifier.notify_subscribers()
 
     def disable_loading(self):
@@ -109,7 +109,7 @@ class LoadWidgetPresenter(object):
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
         self.load_run_widget.set_current_instrument(
-            self._model._context.instrument)
+            self._model._data_context.instrument)
         self.loadNotifier.notify_subscribers()
 
     @property
@@ -123,7 +123,7 @@ class LoadWidgetPresenter(object):
 
     def update_new_instrument(self, instrument):
         self.set_current_instrument(instrument)
-        self._model._context.current_runs = []
+        self._model._data_context.current_runs = []
         self.handle_run_widget_data_changed()
 
     class LoadNotifier(Observable):

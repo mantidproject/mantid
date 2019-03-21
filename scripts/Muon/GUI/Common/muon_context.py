@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.Gui.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_data_context import MuonDataContext
 
 
 class MuonContext(object):

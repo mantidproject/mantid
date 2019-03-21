@@ -29,10 +29,10 @@ class HomeTabWidget(object):
 
         # keep a handle to the presenters of sub-widgets
         self.instrument_widget = InstrumentWidgetPresenter(self.inst_view,
-                                                           InstrumentWidgetModel(muon_data=context))
-        self.group_widget = HomeGroupingWidgetPresenter(self.grp_view, HomeGroupingWidgetModel(muon_data=context))
+                                                           InstrumentWidgetModel(context=context))
+        self.group_widget = HomeGroupingWidgetPresenter(self.grp_view, HomeGroupingWidgetModel(context=context))
         self.run_info_widget = HomeRunInfoWidgetPresenter(self.run_info_view,
-                                                          HomeRunInfoWidgetModel(muon_data=context))
+                                                          HomeRunInfoWidgetModel(context=context))
 
         self.home_tab_view = HomeTabView(parent=parent,
                                          widget_list=[self.inst_view,

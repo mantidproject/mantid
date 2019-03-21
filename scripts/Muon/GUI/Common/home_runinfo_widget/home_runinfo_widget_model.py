@@ -6,15 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_context import MuonContext
 
 millions_counts_conversion = 1./1e6
 
 
 class HomeRunInfoWidgetModel(object):
 
-    def __init__(self, muon_data=MuonDataContext()):
-        self._data = muon_data
+    def __init__(self, context=MuonContext()):
+        self._data = context.data_context
 
     def get_run_number(self):
         return str(self._data.run)

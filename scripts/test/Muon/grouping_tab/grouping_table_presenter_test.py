@@ -35,7 +35,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.gui_variable_observer = Observer()
 
         self.data.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
-        self.model = GroupingTabModel(data=self.data)
+        self.model = GroupingTabModel(context=self.data)
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 

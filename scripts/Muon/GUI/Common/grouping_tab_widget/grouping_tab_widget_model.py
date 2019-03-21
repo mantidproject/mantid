@@ -4,8 +4,8 @@ from collections import OrderedDict
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_data_context import MuonDataContext, construct_empty_group, construct_empty_pair
-
+from Muon.GUI.Common.muon_data_context import construct_empty_group, construct_empty_pair
+from Muon.GUI.Common.muon_context import MuonContext
 
 class GroupingTabModel(object):
     """
@@ -15,8 +15,8 @@ class GroupingTabModel(object):
     pairs and groups should be of type MuonGroup and MuonPair respectively.
     """
 
-    def __init__(self, data=MuonDataContext()):
-        self._data = data
+    def __init__(self, context=MuonContext()):
+        self._data = context.data_context
 
     def get_group_workspace(self, group_name, run):
         """

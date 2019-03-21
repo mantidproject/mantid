@@ -85,7 +85,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [[1234]])
         self.assertEqual(self.presenter.workspaces, [[1, 2, 3]])
 
-        self.assertEqual(self.model._context.current_runs, [[1234]])
+        self.assertEqual(self.model._data_context.current_runs, [[1234]])
 
     @run_test_with_and_without_threading
     def test_load_current_run_correctly_displays_run_if_load_successful(self):

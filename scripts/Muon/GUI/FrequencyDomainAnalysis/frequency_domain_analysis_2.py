@@ -21,8 +21,8 @@ from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 
-from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
+from Muon.GUI.FrequencyDomainAnalysis2.Transform.transform_widget import TransformWidget
+from Muon.GUI.FrequencyDomainAnalysis2.frequency_context import FrequencyContext
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
 

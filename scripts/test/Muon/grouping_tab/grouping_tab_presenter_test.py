@@ -29,7 +29,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
 
         self.context = MuonDataContext()
-        self.model = GroupingTabModel(data=self.context)
+        self.model = GroupingTabModel(context=self.context)
 
         self.grouping_table_view = GroupingTableView(parent=self.obj)
         self.grouping_table_widget = GroupingTablePresenter(self.grouping_table_view, self.model)
