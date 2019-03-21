@@ -205,7 +205,7 @@ class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Run a elastic reduction for powder sample in the newer DAS"""
 
     def __init__(self):
-        super(PowderSampleTest, self).__init__()
+        super(PowderSampleNewDASTest, self).__init__()
         self.config = None
         self.prepset('BASISPowderDiffraction')
 
