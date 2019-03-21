@@ -342,7 +342,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Mantid.EventsWorkspace
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
-        _t_corr = ModeratorTzeroLinear(w,  # delayed emission from moderator
+        _t_corr = ModeratorTzeroLinear(w,
                                        Gradient=self._tzero['gradient'],
                                        Intercept=self._tzero['intercept'])
         # Correct old DAS shift of fast neutrons. See GitHub issue 23855
@@ -487,8 +487,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_w = SumSpectra(_t_w, OutputWorkspace=w.name())
         return _t_w
 
-    @staticmethod
-    def _convert_to_angle(w):
+    def _convert_to_angle(self, w):
         """
         Output the integrated intensity for each elastic detector versus
         detector angle with the neutron beam.
@@ -589,7 +588,6 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                       OutputWorkspace=name)
         kwargs.update(particular[self._das_version])
         return LoadEventNexus(**kwargs)
-
-
+ 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISPowderDiffraction)
