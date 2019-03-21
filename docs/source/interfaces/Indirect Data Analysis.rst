@@ -55,8 +55,8 @@ of input files.
   :width: 450
   :widget: tabElwin
 
-Options
-~~~~~~~
+Elwin Options
+~~~~~~~~~~~~~
 
 Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
@@ -112,7 +112,43 @@ Plot Spectrum
 
 Save Result
   Saves the result in the default save directory.
-  
+
+Elwin Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~
+The Elwin tab operates on ``_red`` and ``_sqw`` files. The files used in this workflow can
+be produced using the run numbers 104371-104375 on the
+:doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS Energy
+Transfer tab. The instrument used to produce these files is OSIRIS, the analyser is graphite
+and the reflection is 002.
+
+1. Untick the **Load History** checkbox next to the file selector if you want to load your data
+   without history.
+
+2. Click **Browse** and select the files ``osi104371_graphite002_red``,
+   ``osi104372_graphite002_red``, ``osi104373_graphite002_red``, ``osi104374_graphite002_red``
+   and ``osi104375_graphite002_red``. Load these files and they will be plotted in the mini plot
+   automatically.
+
+3. The workspace and spectrum displayed in the mini-plot can be change using the combobox and
+   spinbox seen directly above the mini-plot.
+
+4. You may opt to change the x range of the miniplots by changing the **Integration Range**, or
+   by sliding the blue lines seen on the mini-plot using the cursor. For the purpose of this
+   demonstration, use the default x range.
+
+5. Tick **Normalise to Lowest Temp**. This option will produce an extra workspace with end suffix
+   ``_elt``. However, for this to work the input workspaces must have a temperature. See the
+   description above for more information.
+
+6. Click **Plot Current Preview** if you want a larger plot of the mini-plot.
+
+7. Click **Run** and wait for the interface to finish processing. This should generate four
+   workspaces ending in ``_eq``, ``_eq2``, ``_elf`` and ``_elt``.
+
+8. In the **Output** section, select the ``_eq`` workspace and then choose a workspace index.
+   Click **Plot Spectrum** to plot the spectrum from the selected workspace.
+
+
 MSD Fit
 -------
 
@@ -145,8 +181,8 @@ equal to zero.
   :width: 450
   :widget: tabMSD
 
-Options
-~~~~~~~
+MSD Fit Options
+~~~~~~~~~~~~~~~
 
 Sample
   A file with extension *_eq.nxs* that has been created using the Elwin tab with an :math:`x` axis of
@@ -206,8 +242,8 @@ in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
   :width: 450
   :widget: tabIqt
 
-Options
-~~~~~~~
+I(Q, t) Options
+~~~~~~~~~~~~~~~
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
@@ -283,8 +319,8 @@ The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>
   :width: 450
   :widget: tabIqtFit
 
-Options
-~~~~~~~
+I(Q, t) Fit Options
+~~~~~~~~~~~~~~~~~~~
 
 Sample
   Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
@@ -377,8 +413,8 @@ The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, 
   :width: 450
   :widget: tabConvFit
 
-Options
-~~~~~~~
+Conv Fit Options
+~~~~~~~~~~~~~~~~
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
@@ -474,8 +510,8 @@ The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`
   :widget: tabJumpFit
 
 
-Options
-~~~~~~~
+F(Q) Fit Options
+~~~~~~~~~~~~~~~~
 
 Sample
   A sample workspace created with either ConvFit or Quasi.
