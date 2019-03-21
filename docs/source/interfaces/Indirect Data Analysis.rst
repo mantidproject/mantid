@@ -153,9 +153,6 @@ and the reflection is 002.
 9. Choose a default save directory and then click **Save Result** to save the output workspaces.
    The workspace ending in _eq will be used in the :ref:`msdfit-example-workflow`.
 
-9. Choose a default save directory and then click **Save Result** to save the output workspaces.
-   The workspace ending in ``_eq`` will be used in the MSD Fit Example Workflow.
-
 
 MSD Fit
 -------
