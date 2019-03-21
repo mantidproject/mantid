@@ -579,6 +579,32 @@ Edit Result
 Save Result
   Saves the workspaces from the *_Results* group workspace in the default save directory.
 
+ConvFit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The ConvFit tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
+``_res`` for the resolution file. The sample file used in this workflow can be produced using the run
+number 26176 on the :doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS
+Energy Transfer tab. The resolution file is created in the ISIS Calibration tab using the run number
+26173. The instrument used to produce these files is IRIS, the analyser is graphite
+and the reflection is 002.
+
+1. Click **Browse** for the sample and select the file ``iris26176_graphite002_red``. Then click **Browse**
+   for the resolution and select the file ``iris26173_graphite002_res``.
+
+2. Choose the **Fit Type** to be Teixeira Water. Tick the **Delta Function** checkbox. Set the background
+   to be a **Flat Background**.
+
+3. Tick **Plot Guess** to get a prediction of what your fit will look like.
+
+4. Click **Run** and wait for the interface to finish processing. This should generate a
+   ``_Parameters`` table workspace and two group workspaces with end suffixes ``_Results`` and
+   ``_Workspaces``. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+5. Choose a default save directory and then click **Save Result** to save the ``_result`` workspaces 
+   found inside of the group workspace ending with ``_Results``.
+
 Theory
 ~~~~~~
 
