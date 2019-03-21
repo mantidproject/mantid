@@ -8,7 +8,6 @@
 #include "MantidCatalog/Exception.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {
