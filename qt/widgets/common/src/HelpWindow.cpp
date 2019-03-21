@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
 #include <QUrl>
@@ -80,8 +81,11 @@ void HelpWindow::showAlgorithm(QWidget *parent, const QString &name,
     connectParent(gui, parent);
     gui->showAlgorithm(name, version);
   } else {
-    g_log.error() << "Failed to launch help for algorithm "
-                  << name.toStdString() << " v" << version << "\n";
+    // Open online help
+    QString baseUrl = "https://docs.mantidproject.org/algorithms/";
+    QString url = baseUrl + name + "-v" + QString::number(version) + ".html";
+    MantidDesktopServices::openUrl(QUrl(url));
+    g_log.notice("Opening online help page:\n" + url.toStdString());
   }
 }
 
@@ -126,8 +130,11 @@ void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
     connectParent(gui, parent);
     gui->showCustomInterface(name, section);
   } else {
-    g_log.error() << "Failed to launch help for custom interface "
-                  << name.toStdString() << "\n";
+    // Open online help
+    QString baseUrl = "https://docs.mantidproject.org/interfaces/";
+    QString url = baseUrl + name + ".html";
+    MantidDesktopServices::openUrl(QUrl(url));
+    g_log.notice("Opening online help page:\n" + url.toStdString());
   }
 }
 
