@@ -707,7 +707,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
 
-    def _process(self):  # noqa: C901
+    def _process(self):
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
         """
@@ -720,15 +720,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
             rowIndexes = []
             for idx in rows:
                 rowIndexes.append(idx.row())
-            if not len(rowIndexes):
-                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',
-                                                   "This will process all rows in the table. Continue?",
-                                                   QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-                if reply == QtGui.QMessageBox.No:
-                    logger.notice("Cancelled!")
-                    willProcess = False
-                else:
-                    rowIndexes = range(self.tableMain.rowCount())
+            rowIndexes, willProcess = self._row_check(rowIndexes, willProcess)
             if willProcess:
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
@@ -794,74 +786,10 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
 
-                        # Check secondary and tertiary theta_in columns, if they're
-                        # blank and their corresponding run columns are set, fill them.
-                        for run_col in [5, 10]:
-                            tht_col = run_col + 1
-                            run_val = str(self.tableMain.item(row, run_col).text())
-                            tht_val = str(self.tableMain.item(row, tht_col).text())
-                            if run_val and not tht_val:
-                                Load(Filename=run_val, OutputWorkspace="_run")
-                                loadedRun = mtd["_run"]
-                                tht_val = getLogValue(loadedRun, "Theta")
-                                if tht_val:
-                                    self.tableMain.item(row, tht_col).setText(str(tht_val))
+                        self._check_theta_columns(row)
 
-                        # Populate runlist
-                        first_wq = None
-                        for i in range(0, len(runno)):
-                            theta, qmin, qmax, _wlam, wqBinnedAndScaled, _wqUnBinnedAndUnScaled = \
-                                self._do_run(runno[i], row, i)
-                            if not first_wq:
-                                first_wq = wqBinnedAndScaled  # Cache the first Q workspace
-                            theta = round(theta, 3)
-                            qmin = round(qmin, 3)
-                            qmax = round(qmax, 3)
-                            wksp.append(wqBinnedAndScaled.name())
-                            if self.tableMain.item(row, i * 5 + 1).text() == '':
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(theta))
-                                self.tableMain.setItem(row, i * 5 + 1, item)
-                            if self.tableMain.item(row, i * 5 + 3).text() == '':
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(qmin))
-                                self.tableMain.setItem(row, i * 5 + 3, item)
-                                overlapLow.append(qmin)
-                            if self.tableMain.item(row, i * 5 + 4).text() == '':
-                                item = QtGui.QTableWidgetItem()
-                                item.setText(str(qmax))
-                                self.tableMain.setItem(row, i * 5 + 4, item)
-                                overlapHigh.append(qmax)
-                            if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
-                                wksp[i] = first_wq.name()
-                            if self.__checked_row_stiched(row):
-                                if len(runno) == 1:
-                                    logger.notice("Nothing to combine for processing row : " + str(row))
-                                else:
-                                    w1 = getWorkspace(wksp[0])
-                                    w2 = getWorkspace(wksp[-1])
-                                    if len(runno) == 2:
-                                        outputwksp = runno[0] + '_' + runno[1][3:]
-                                    else:
-                                        outputwksp = runno[0] + '_' + runno[-1][3:]
-                                    # get Qmax
-                                    if self.tableMain.item(row, i * 5 + 4).text() == '':
-                                        overlapHigh = 0.3 * max(w1.readX(0))
-
-                                    Qmin = min(w1.readX(0))
-                                    Qmax = max(w2.readX(0))
-                                    if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
-                                        Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
-                                    if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
-                                        Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
-                                    if Qmax > _overallQMax:
-                                        _overallQMax = Qmax
-                                    if Qmin < _overallQMin:
-                                        _overallQMin = Qmin
-
-                                    combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
-                                                     _overallQMin, _overallQMax, -dqq, 1, keep=True,
-                                                     scale_right=self.__scale_right)
+                        overlapHigh = self._populate_runlist(_overallQMax, _overallQMin, dqq, overlapHigh, overlapLow,
+                                                             row, runno, wksp)
 
                         # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
@@ -876,6 +804,95 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
         except:
             self.statusMain.clearMessage()
             raise
+
+    def _check_theta_columns(self, row):
+        # Check secondary and tertiary theta_in columns, if they're
+        # blank and their corresponding run columns are set, fill them.
+        for run_col in [5, 10]:
+            tht_col = run_col + 1
+            run_val = str(self.tableMain.item(row, run_col).text())
+            tht_val = str(self.tableMain.item(row, tht_col).text())
+            if run_val and not tht_val:
+                Load(Filename=run_val, OutputWorkspace="_run")
+                loadedRun = mtd["_run"]
+                tht_val = getLogValue(loadedRun, "Theta")
+                if tht_val:
+                    self.tableMain.item(row, tht_col).setText(str(tht_val))
+
+    def _row_check(self, rowIndexes, willProcess):
+        if not len(rowIndexes):
+            reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',
+                                               "This will process all rows in the table. Continue?",
+                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.No:
+                logger.notice("Cancelled!")
+                willProcess = False
+            else:
+                rowIndexes = range(self.tableMain.rowCount())
+        return rowIndexes, willProcess
+
+    def _populate_runlist(self, _overallQMax, _overallQMin, dqq, overlapHigh, overlapLow, row, runno, wksp):
+        # Populate runlist
+        first_wq = None
+        for i in range(0, len(runno)):
+            theta, qmin, qmax, _wlam, wqBinnedAndScaled, _wqUnBinnedAndUnScaled = \
+                self._do_run(runno[i], row, i)
+            if not first_wq:
+                first_wq = wqBinnedAndScaled  # Cache the first Q workspace
+            theta = round(theta, 3)
+            qmin = round(qmin, 3)
+            qmax = round(qmax, 3)
+            wksp.append(wqBinnedAndScaled.name())
+            if self.tableMain.item(row, i * 5 + 1).text() == '':
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(theta))
+                self.tableMain.setItem(row, i * 5 + 1, item)
+            if self.tableMain.item(row, i * 5 + 3).text() == '':
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(qmin))
+                self.tableMain.setItem(row, i * 5 + 3, item)
+                overlapLow.append(qmin)
+            if self.tableMain.item(row, i * 5 + 4).text() == '':
+                item = QtGui.QTableWidgetItem()
+                item.setText(str(qmax))
+                self.tableMain.setItem(row, i * 5 + 4, item)
+                overlapHigh.append(qmax)
+            if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
+                wksp[i] = first_wq.name()
+            overlapHigh = self._check_stiched_row(_overallQMax, _overallQMin, dqq, i, overlapHigh,
+                                                  overlapLow, row, runno, wksp)
+        return overlapHigh
+
+    def _check_stiched_row(self, _overallQMax, _overallQMin, dqq, i, overlapHigh, overlapLow, row, runno, wksp):
+        if self.__checked_row_stiched(row):
+            if len(runno) == 1:
+                logger.notice("Nothing to combine for processing row : " + str(row))
+            else:
+                w1 = getWorkspace(wksp[0])
+                w2 = getWorkspace(wksp[-1])
+                if len(runno) == 2:
+                    outputwksp = runno[0] + '_' + runno[1][3:]
+                else:
+                    outputwksp = runno[0] + '_' + runno[-1][3:]
+                # get Qmax
+                if self.tableMain.item(row, i * 5 + 4).text() == '':
+                    overlapHigh = 0.3 * max(w1.readX(0))
+
+                Qmin = min(w1.readX(0))
+                Qmax = max(w2.readX(0))
+                if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
+                    Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
+                if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
+                    Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
+                if Qmax > _overallQMax:
+                    _overallQMax = Qmax
+                if Qmin < _overallQMin:
+                    _overallQMin = Qmin
+
+                combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
+                                 _overallQMin, _overallQMax, -dqq, 1, keep=True,
+                                 scale_right=self.__scale_right)
+        return overlapHigh
 
     def _plot(self, plotbutton):
         """
