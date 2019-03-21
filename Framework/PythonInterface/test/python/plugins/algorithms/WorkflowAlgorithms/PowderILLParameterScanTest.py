@@ -75,8 +75,8 @@ class PowderILLParameterScanTest(unittest.TestCase):
     def test_normalise_time(self):
         red = PowderILLParameterScan(Run=self._runs,NormaliseTo='Time')
         self.assertTrue(red)
-        self.assertAlmostEquals(red.readY(0)[1400],9532/300,4)
-        self.assertAlmostEquals(red.readY(1)[2100],9789/300,2)
+        self.assertAlmostEquals(red.readY(0)[1400],9532/300.,4)
+        self.assertAlmostEquals(red.readY(1)[2100],9789/300.,2)
 
     def test_normalise_roi(self):
         red = PowderILLParameterScan(Run=self._runs,NormaliseTo='ROI',ROI='0,100')
@@ -93,6 +93,11 @@ class PowderILLParameterScanTest(unittest.TestCase):
         red = PowderILLParameterScan(Run=self._runs,ScanAxisBinWidth=12,SortObservableAxis=True)
         self.assertEquals(red.getNumberHistograms(), 1)
         self.assertAlmostEqual(red.getAxis(1).extractValues()[0], 248.372, 5)
+
+    def test_normalise_time_single(self):
+        red = PowderILLParameterScan(Run='967087',NormaliseTo='Time')
+        self.assertTrue(red)
+        self.assertAlmostEquals(red.readY(0)[1400],9532/300.,4)
 
 if __name__ == '__main__':
     unittest.main()
