@@ -1990,7 +1990,7 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * For certain simple shapes, the point is generated directly inside the
  * shape. In the general case, the method simply generates a
  * point within the bounding box and tests if this is a valid point within
- * the object: if so the point is return otherwise a new point is selected.
+ * the object: if so the point is returned otherwise a new point is selected.
  * @param rng  A reference to a PseudoRandomNumberGenerator where
  * nextValue should return a flat random number between 0.0 & 1.0
  * @param maxAttempts The maximum number of attempts at generating a point
@@ -2020,6 +2020,8 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
     case detail::ShapeInfo::GeometryShape::CYLINDER:
       point = RandomPoint::inCylinder(m_handler->shapeInfo(), rng);
       break;
+    case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+      point = RandomPoint::inHollowCylinder(m_handler->shapeInfo(), rng);
     case detail::ShapeInfo::GeometryShape::SPHERE:
       point = RandomPoint::inSphere(m_handler->shapeInfo(), rng);
       break;
@@ -2102,7 +2104,6 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
   // Method - check if point in object, if not search directions along
   // principle axes using interceptSurface
   //
-  Kernel::V3D testPt;
   if (isValid(point))
     return 1;
   for (const auto &dir :

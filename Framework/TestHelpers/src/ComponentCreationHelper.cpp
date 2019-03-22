@@ -84,6 +84,39 @@ void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
   instrument->add(source);
   instrument->markAsSource(source);
 }
+//----------------------------------------------------------------------------------------------
+
+/**
+ * Return the XML for a hollow cylinder
+ */
+std::string hollowCylinderXML(double innerRadius, double outerRadius,
+                              double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
+  std::ostringstream xml;
+  xml << "<hollow-cylinder id=\"" << id << "\">"
+      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
+      << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
+      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
+      << axis.Z() << "\"/>"
+      << "<inner-radius val=\"" << innerRadius << "\" />"
+      << "<outer-radius val=\"" << outerRadius << "\" />"
+      << "<height val=\"" << height << "\" />"
+      << "</hollow-cylinder>";
+  return xml.str();
+}
+
+/**
+ * Create a hollow cylinder object
+ */
+boost::shared_ptr<CSGObject>
+createHollowCylinder(double innerRadius, double outerRadius, double height,
+                     const V3D &baseCentre, const V3D &axis,
+                     const std::string &id) {
+  return ShapeFactory().createShape(hollowCylinderXML(
+      innerRadius, outerRadius, height, baseCentre, axis, id));
+}
 
 void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
   // Define a sample as a simple sphere

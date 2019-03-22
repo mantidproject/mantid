@@ -34,6 +34,10 @@ inCylinder(const detail::ShapeInfo &shapeInfo,
            Kernel::PseudoRandomNumberGenerator &rng);
 
 MANTID_GEOMETRY_DLL Kernel::V3D
+inHollowCylinder(const detail::ShapeInfo &shapeInfo,
+                 Kernel::PseudoRandomNumberGenerator &rng);
+
+MANTID_GEOMETRY_DLL Kernel::V3D
 inSphere(const detail::ShapeInfo &shapeInfo,
          Kernel::PseudoRandomNumberGenerator &rng);
 

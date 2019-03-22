@@ -64,6 +64,40 @@ Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
 }
 
 /**
+ * Return a random point in a hollow cylinder
+ * @param shapeInfo hollow cylinder's shape info
+ * @param rng a random number generator
+ * @return a point
+ */
+Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo,
+                             Kernel::PseudoRandomNumberGenerator &rng) {
+  using boost::math::pow;
+  const auto geometry = shapeInfo.hollowCylinderGeometry();
+  const double r1{rng.nextValue()};
+  const double r2{rng.nextValue()};
+  const double r3{rng.nextValue()};
+  const double polar{2. * M_PI * r1};
+  // We need a random number between the inner radius and outer radius, but also
+  // need the square root for a uniform distribution of points
+  const double c1 = std::pow(geometry.innerRadius, 2);
+  const double c2 = std::pow(geometry.outerRadius, 2);
+  const double r{std::sqrt(c1 + (c2 - c1) * r2)};
+  const double z{geometry.height * r3};
+  const Kernel::V3D alongAxis{geometry.axis * z};
+  const Kernel::V3D &basis1{geometry.axis};
+  Mantid::Kernel::V3D basis2{1., 0., 0.};
+  if (basis1.X() != 0. && basis1.Z() != 0) {
+    const auto inverseXZSumSq = 1. / (pow<2>(basis1.X()) + pow<2>(basis1.Z()));
+    basis2.setX(std::sqrt(1. - pow<2>(basis1.X()) * inverseXZSumSq));
+    basis2.setZ(basis1.X() * std::sqrt(inverseXZSumSq));
+  }
+  const Kernel::V3D basis3{basis1.cross_prod(basis2)};
+  const Kernel::V3D localPoint{
+      ((basis2 * std::cos(polar) + basis3 * std::sin(polar)) * r) + alongAxis};
+  return geometry.centreOfBottomBase + localPoint;
+}
+
+/**
  * Return a random point in sphere.
  * @param shapeInfo sphere's shape info
  * @param rng a random number generator

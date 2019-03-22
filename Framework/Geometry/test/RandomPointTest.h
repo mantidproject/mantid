@@ -79,6 +79,41 @@ public:
     TS_ASSERT_DELTA(point.Z(), axisLength, tolerance);
   }
 
+  void test_inHollowCylinder() {
+    using namespace ::testing;
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randR{0.55};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+    constexpr double innerRadius{0.3};
+    constexpr double outerRadius{0.4};
+    constexpr double height{0.5};
+    const V3D axis{0., 0., 1.};
+    const V3D bottomCentre{
+        -1.,
+        2.,
+        -3.,
+    };
+    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
+        innerRadius, outerRadius, height, bottomCentre, axis, "hol-cyl");
+    V3D point = inHollowCylinder(hollowCylinder->shapeInfo(), rng);
+    // Global->cylinder local coordinates
+    point -= bottomCentre;
+    constexpr double tolerance{1e-10};
+    const double c1 = std::pow(innerRadius, 2);
+    const double c2 = std::pow(outerRadius, 2);
+    const double radialLength{std::sqrt(c1 + (c2 - c1) * randR)};
+    const double axisLength{height * randZ};
+    const double polarAngle{2. * M_PI * randT};
+    TS_ASSERT_DELTA(point.X(), radialLength * std::cos(polarAngle), tolerance);
+    TS_ASSERT_DELTA(point.Y(), radialLength * std::sin(polarAngle), tolerance);
+    TS_ASSERT_DELTA(point.Z(), axisLength, tolerance);
+  }
+
   void test_inSphere() {
     using namespace ::testing;
     MockRNG rng;

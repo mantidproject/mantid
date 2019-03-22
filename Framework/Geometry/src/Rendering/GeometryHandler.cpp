@@ -103,12 +103,23 @@ void GeometryHandler::setGeometryCache(size_t nPts, size_t nFaces,
   }
 }
 
-void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &mytype,
+void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &myType,
                                     std::vector<Kernel::V3D> &vectors,
-                                    double &myradius, double &myheight) const {
-  mytype = detail::ShapeInfo::GeometryShape::NOSHAPE;
+                                    double &myRadius, double &myHeight) const {
+  myType = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_shapeInfo)
-    m_shapeInfo->getObjectGeometry(mytype, vectors, myradius, myheight);
+    m_shapeInfo->getObjectGeometry(myType, vectors, myRadius, myHeight);
+}
+
+void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &myType,
+                                    std::vector<Kernel::V3D> &vectors,
+                                    double &myInnerRadius,
+                                    double &myOuterRadius,
+                                    double &myHeight) const {
+  myType = detail::ShapeInfo::GeometryShape::NOSHAPE;
+  if (m_shapeInfo)
+    m_shapeInfo->getObjectGeometry(myType, vectors, myInnerRadius,
+                                   myOuterRadius, myHeight);
 }
 
 void GeometryHandler::setShapeInfo(detail::ShapeInfo &&shapeInfo) {
