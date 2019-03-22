@@ -249,12 +249,24 @@ double Material::linearAbsorpCoef(const double lambda) const {
   return absorbXSection(NeutronAtom::ReferenceLambda) * 100. * numberDensity() *
          lambda / NeutronAtom::ReferenceLambda;
 }
-/// concrete instatiation for std::vector<double>::const_iterator
-/// relates Material
-template MANTID_KERNEL_DLL std::vector<double>
+
+// This must match the values that come from the scalar version
 Material::linearAbsorpCoef<std::vector<double>::const_iterator>(
     std::vector<double>::const_iterator lambdaBegin,
-    std::vector<double>::const_iterator lambdaEnd) const;
+    std::vector<double>::const_iterator lambdaEnd) const {
+  const double linearCoefByWL =
+      absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
+      numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
+
+  std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
+
+  std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
+                 [linearCoefByWL](const double lambda) {
+                   return linearCoefByWL * lambda;
+                 });
+
+  return linearCoef;
+}
 
 /// According to Sears eqn 12
 double Material::cohScatterLength(const double lambda) const {

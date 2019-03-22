@@ -119,21 +119,9 @@ public:
    * this should match the implementation of the scalar version
    */
   template <typename InputIterator>
-  std::vector<double> linearAbsorpCoef(InputIterator lambdaBegin,
-                                       InputIterator lambdaEnd) const {
-    const double linearCoefByWL =
-        absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
-        numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
-
-    std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
-
-    std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
-                   [linearCoefByWL](const double lambda) {
-                     return linearCoefByWL * lambda;
-                   });
-
-    return linearCoef;
-  }
+  std::vector<double>
+  linearAbsorpCoef(std::vector<double>::const_iterator lambdaBegin,
+                   std::vector<double>::const_iterator lambdaEnd) const;
 
   /// Get the coherent scattering length for a given wavelength in fm
   double
