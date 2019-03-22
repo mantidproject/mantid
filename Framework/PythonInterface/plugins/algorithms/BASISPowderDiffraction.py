@@ -85,7 +85,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     _mask_file = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/'\
                  'BASIS_Mask_default_diff.xml'
     # Consider only events with these wavelengths
-    _wavelength_bands = {'311': [3.07, 3.6], '111': [6.1, 6.6]}
+    _wavelength_bands = {'311': [3.07, 3.60], '111': [6.05, 6.60]}
     _diff_bank_numbers = list(range(5, 14))
     _tzero = dict(gradient=11.967, intercept=-5.0)
 
@@ -95,7 +95,6 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self._wavelength_dl = 0.0025  # in Angstroms
         self._qbins = None
         self._short_inst = "BSS"
-        self._run_list = None
         self._temps = None
         self._bkg = None  # Events workspace for brackground runs
         self._bkg_scale = None
@@ -121,19 +120,17 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         return ['BASISReduction', 'BASISCrystalDiffraction']
 
     @staticmethod
-    def _run_lists(runs):
+    def _run_list(runs):
         """
         Obtain all run numbers from input string `runs`
 
         Parameters
         ----------
         runs: str
-            Run numbers to be reduced. Symbol `;` separates the runs into
-            substrings. Each substring represents a set of runs to be
-            reduced together.
+            Run numbers to be reduced
         Returns
         -------
-
+            list
         """
         rl = list()
         rn = runs.replace(' ', '')  # remove spaces
@@ -287,7 +284,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         -------
         Mantid.EventsWorkspace
         """
-        rl = self._run_lists(runs)
+        rl = self._run_list(runs)
         #
         # Load files together
         #
@@ -379,7 +376,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         # Load monitors files together
         #
-        rl = self._run_lists(self.getProperty(target_to_runs[target]).value)
+        rl = self._run_list(self.getProperty(target_to_runs[target]).value)
         _t_all_w = None
         for run in rl:
             file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
@@ -543,7 +540,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     def _find_das_version(self):
         boundary_run = 90000  # from VDAS.v1900_2018 to VDAS.v2019_2100
         runs = self.getProperty('RunNumbers').value
-        first_run = int(self._run_lists(runs)[0])
+        first_run = int(self._run_list(runs)[0])
         if first_run < boundary_run:
             self._das_version = VDAS.v1900_2018
         else:
@@ -555,13 +552,13 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Select the wavelength band examining the logs of the first sample
         """
         runs = self.getProperty('RunNumbers').value
-        run = self._run_lists(runs)[0]
+        run = self._run_list(runs)[0]
         _t_w = self._load_single_run(run, '_t_w')
         wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest').value)
-        wavs = self._wavelength_bands
-        midpoint = (wavs['111'][0] + wavs['311'][0]) / 2.0
-        reflection = '111' if wavelength > midpoint else '311'
-        self._wavelength_band = self._wavelength_bands[reflection]
+        for reflection, band in self._wavelength_bands.items():
+            if band[0] <= wavelength <= band[1]:
+                self._wavelength_band = band
+                break
 
     def _load_single_run(self, run, name):
         """
@@ -583,8 +580,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         banks = ','.join(['bank{}'.format(i) for i in self._diff_bank_numbers])
         particular = {VDAS.v1900_2018: dict(NXentryName='entry-diff'),
                       VDAS.v2019_2100: dict(BankName=banks)}
-        file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
-        kwargs = dict(Filename=file_name, SingleBankPixelsOnly=False,
+        identifier = "{0}_{1}".format(self._short_inst, str(run))
+        kwargs = dict(Filename=identifier, SingleBankPixelsOnly=False,
                       OutputWorkspace=name)
         kwargs.update(particular[self._das_version])
         return LoadEventNexus(**kwargs)
