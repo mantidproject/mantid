@@ -34,6 +34,7 @@ set ( TEST_PY_FILES
    MaxEntModel_test.py
    MaxEntPresenter_test.py
    muon_data_context_test.py
+   muon_gui_context_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    transformWidget_test.py

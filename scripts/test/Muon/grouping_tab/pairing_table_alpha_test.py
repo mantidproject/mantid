@@ -8,7 +8,7 @@ else:
 
 from PyQt4 import QtGui
 
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 
@@ -32,7 +32,7 @@ class AlphaTest(unittest.TestCase):
 
         self.data = MuonDataContext()
 
-        self.model = PairingTableModel(data=self.data)
+        self.model = GroupingTabModel(context=self.data)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
