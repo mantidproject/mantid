@@ -126,9 +126,9 @@ and the reflection is 002.
 1. Untick the **Load History** checkbox next to the file selector if you want to load your data
    without history.
 
-2. Click **Browse** and select the files ``osi104371_graphite002_red``,
-   ``osi104372_graphite002_red``, ``osi104373_graphite002_red``, ``osi104374_graphite002_red``
-   and ``osi104375_graphite002_red``. Load these files and they will be plotted in the mini-plot
+2. Click **Browse** and select the files ``osiris104371_graphite002_red``,
+   ``osiris104372_graphite002_red``, ``osiris104373_graphite002_red``, ``osiris104374_graphite002_red``
+   and ``osiris104375_graphite002_red``. Load these files and they will be plotted in the mini-plot
    automatically.
 
 3. The workspace and spectrum displayed in the mini-plot can be changed using the combobox and
