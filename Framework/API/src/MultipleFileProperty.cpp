@@ -287,7 +287,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     for (; plusToken != end; ++plusToken)
       plusTokenStrings.push_back(plusToken->str());
 
-    for (auto & plusTokenString : plusTokenStrings) {
+    for (auto &plusTokenString : plusTokenStrings) {
       try {
         m_parser.parse(plusTokenString);
       } catch (const std::range_error &re) {
@@ -320,7 +320,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         if (temp.empty())
           temp.push_back(f[0]);
         else {
-          for (auto & parsedFile : f[0])
+          for (auto &parsedFile : f[0])
             temp[0].push_back(parsedFile);
         }
       } else {

@@ -152,8 +152,8 @@ int OPJFile::compareFunctionnames(const char *sname) const {
 
 vector<string> OPJFile::findDataByIndex(int index) const {
   vector<string> str;
-  for (const auto & spread : SPREADSHEET)
-    for (const auto & i : spread.column)
+  for (const auto &spread : SPREADSHEET)
+    for (const auto &i : spread.column)
       if (i.index == index) {
         str.push_back(i.name);
         str.emplace_back("T_" + spread.name);
@@ -165,8 +165,8 @@ vector<string> OPJFile::findDataByIndex(int index) const {
       str.emplace_back("M_" + i.name);
       return str;
     }
-  for (const auto & i : EXCEL)
-    for (const auto & j : i.sheet)
+  for (const auto &i : EXCEL)
+    for (const auto &j : i.sheet)
       for (const auto &k : j.column)
         if (k.index == index) {
           str.push_back(k.name);
@@ -212,7 +212,7 @@ void OPJFile::convertSpreadToExcel(int spread) {
                         SPREADSHEET[spread].maxRows,
                         SPREADSHEET[spread].bHidden,
                         SPREADSHEET[spread].bLoose));
-  for (auto & i : SPREADSHEET[spread].column) {
+  for (auto &i : SPREADSHEET[spread].column) {
     string name = i.name;
     int pos = static_cast<int>(name.find_last_of("@"));
     string col = name;
