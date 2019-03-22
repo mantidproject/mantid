@@ -22,6 +22,8 @@ Logging
    # Have been replaced by
    ConfigService.SetLogLevel(int)
 
+- Increased the log level from information to notice when creating an instrument geometry.
+
 Nexus Geometry Loading
 ----------------------
 - :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXoff_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXoff_geometry.html>`_ and `NXcylindrical_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXcylindrical_geometry.html>`_ will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations. :ref:`LoadInstrument <algm-LoadInstrument>` also supports the nexus geometry format in the same was as LoadEmptyInstrument.
@@ -136,8 +138,7 @@ Bugfixes
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` now save and load an empty sample name correctly. Note, that files saved before this change will still load with an empty sample name replaced by a space as before.
 - Fixed a bug in :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` where a sign in zv was different from `FullProf NPROF=13 <http://www.ccp14.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` now save and load spectrum numbers even when histograms have no detectors.
-- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` now save and load spectrum numbers even when histograms have no detectors.
-
+- :ref:`SavePlot1D <algm-SavePlot1D>` has been updated to follow changes to the plotly api.
 
 Python
 ------

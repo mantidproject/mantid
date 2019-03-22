@@ -36,12 +36,12 @@ template <typename T> struct ToCpp {
 template <> struct ToCpp<int> {
   int operator()(const Json::Value &value) { return value.asInt(); }
 };
+/// Specialization of ToCpp for long long
+template <> struct ToCpp<long long> {
+  long operator()(const Json::Value &value) { return value.asInt64(); }
+};
 /// Specialization of ToCpp for long
 template <> struct ToCpp<long> {
-  long operator()(const Json::Value &value) { return value.asInt(); }
-};
-/// Specialization of ToCpp for int
-template <> struct ToCpp<Json::Int64> {
   Json::Int64 operator()(const Json::Value &value) { return value.asInt64(); }
 };
 /// Specialization of ToCpp for unsigned int
@@ -114,8 +114,10 @@ namespace pwvjdetail {
 template <typename ValueType> struct JsonType { using Type = ValueType; };
 template <> struct JsonType<int> { using Type = Json::Int; };
 template <> struct JsonType<long> { using Type = Json::Int64; };
+template <> struct JsonType<long long> { using Type = Json::Int64; };
 template <> struct JsonType<unsigned int> { using Type = Json::UInt; };
 template <> struct JsonType<unsigned long> { using Type = Json::UInt64; };
+template <> struct JsonType<unsigned long long> { using Type = Json::UInt64; };
 } // namespace pwvjdetail
 
 /**

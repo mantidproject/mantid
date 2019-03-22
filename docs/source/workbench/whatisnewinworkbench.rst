@@ -4,7 +4,7 @@
 What is new in workbench?
 =========================
 
-.. image:: ../images/Workbench/Workbench.png
+.. image:: ../images/Workbench/WorkbenchOverview.png
     :width: 500
     :align: right
 

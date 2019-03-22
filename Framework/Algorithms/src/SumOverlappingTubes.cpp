@@ -111,6 +111,7 @@ void SumOverlappingTubes::exec() {
 
   MatrixWorkspace_sptr outputWS = create<Workspace2D>(m_numHistograms, x);
   outputWS->setDistribution(false);
+  outputWS->setSharedRun(m_workspaceList.front()->sharedRun());
 
   const auto newAxis = new NumericAxis(m_heightAxis);
   newAxis->setUnit("Label");

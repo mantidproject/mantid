@@ -189,7 +189,7 @@ Plot
   Plots the selected parameter stored in the result workspace.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
@@ -344,7 +344,7 @@ Edit Result
   algorithm. See below for more detail.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
@@ -447,7 +447,7 @@ Edit Result
   algorithm. See below for more detail.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 Theory
 ~~~~~~
@@ -527,7 +527,7 @@ Plot
   Plots the selected parameter stored in the result workspace.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
   
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 

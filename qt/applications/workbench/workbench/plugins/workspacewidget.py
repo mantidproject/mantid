@@ -166,8 +166,7 @@ class WorkspaceWidget(PluginWidget):
                 except Exception as exception:
                     logger.warning("Could not open history of '{}'. "
                                    "".format(name))
-                    logger.debug("{}: {}".format(type(exception).__name__,
-                                                 exception))
+                    logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
         self._do_show_data([name])

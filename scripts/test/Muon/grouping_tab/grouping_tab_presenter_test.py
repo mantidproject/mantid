@@ -1,8 +1,8 @@
-import unittest
-import sys
-import six
 from PyQt4 import QtGui
+import six
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
 
@@ -15,11 +15,6 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import Groupin
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 
 class GroupingTabPresenterTest(unittest.TestCase):

@@ -20,26 +20,27 @@
 namespace Mantid {
 namespace Geometry {
 /** @class UnitCell UnitCell.h Geometry/Crystal/UnitCell.h
-  Class to implement unit cell of crystals.
-  It is based on code by Laurent Chapon. It does not contain information about
-  lattice orientation.
-  See documentation about UB matrix in the Mantid repository.\n
-  For documentation purposes, units for lengths are assumed to be \f$ \mbox{ \AA
-  } \f$, and for reciprocal lattice lengths
-  \f$ \mbox{ \AA }^{-1} \f$,  but can be anything, as long as used consistently.
-  Note that the convention used for
-  reciprocal lattice follows the one in International Tables for
-  Crystallography, meaning that for an orthogonal lattice
-  \f$ a^{*} = 1/a \f$ , not   \f$ a^{*} = 2 \pi /a \f$
+ Class to implement unit cell of crystals.
+ It is based on code by Laurent Chapon. It does not contain information about
+ lattice orientation.
+ See documentation about UB matrix in the Mantid repository.\n
+ For documentation purposes, units for lengths are assumed to be \f$ \mbox{ \AA
+ } \f$, and for reciprocal lattice lengths
+ \f$ \mbox{ \AA }^{-1} \f$,  but can be anything, as long as used consistently.
+ Note that the convention used for
+ reciprocal lattice follows the one in International Tables for
+ Crystallography, meaning that for an orthogonal lattice
+ \f$ a^{*} = 1/a \f$ , not   \f$ a^{*} = 2 \pi /a \f$
 
-  References:
-    - International Tables for Crystallography (2006). Vol. B, ch. 1.1, pp. 2-9
-    - W. R. Busing and H. A. Levy, Angle calculations for 3- and 4-circle X-ray
-  and neutron diffractometers - Acta Cryst. (1967). 22, 457-464
+ References:
+ - International Tables for Crystallography (2006). Vol. B, ch. 1.1, pp. 2-9
+ - W. R. Busing and H. A. Levy, Angle calculations for 3- and 4-circle X-ray
+ and neutron diffractometers - Acta Cryst. (1967). 22, 457-464
 
 
-  @author Andrei Savici, SNS, ORNL
-  @date 2011-03-23
+ @author Andrei Savici, SNS, ORNL
+
+ @date 2011-03-23
  */
 class MANTID_GEOMETRY_DLL UnitCell {
 public:
@@ -85,6 +86,40 @@ public:
   double betastar() const;
   double gammastar() const;
   // Set lattice
+  void setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
+                 double _dk2, double _dl2, double _dh3, double _dk3,
+                 double _dl3);
+  void setModHKL(const Kernel::DblMatrix &newModHKL);
+  void setErrorModHKL(const Kernel::DblMatrix &newErrorModHKL);
+  void setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
+                      double _dh2err, double _dk2err, double _dl2err,
+                      double _dh3err, double _dk3err, double _dl3err);
+  void setModVec1(double _dh1, double _dk1, double _dl1);
+  void setModVec2(double _dh2, double _dk2, double _dl2);
+  void setModVec3(double _dh3, double _dk3, double _dl3);
+  void setModVec1(const Kernel::V3D &newModVec);
+  void setModVec2(const Kernel::V3D &newModVec);
+  void setModVec3(const Kernel::V3D &newModVec);
+  void setModerr(int i, double _dherr, double _dkerr, double _dlerr);
+  void setModerr1(double _dh1err, double _dk1err, double _dl1err);
+  void setModerr2(double _dh2err, double _dk2err, double _dl2err);
+  void setModerr3(double _dh3err, double _dk3err, double _dl3err);
+  void setMaxOrder(int MaxO);
+  void setCrossTerm(bool CT);
+
+  const Kernel::V3D getModVec(int j) const;
+  const Kernel::V3D getVecErr(int j) const;
+  const Kernel::DblMatrix &getModHKL() const;
+  double getdh(int j) const;
+  double getdk(int j) const;
+  double getdl(int j) const;
+
+  double getdherr(int j) const;
+  double getdkerr(int j) const;
+  double getdlerr(int j) const;
+  int getMaxOrder() const;
+  bool getCrossTerm() const;
+
   void set(double _a, double _b, double _c, double _alpha, double _beta,
            double _gamma, const int angleunit = angDegrees);
   void seta(double _a);
@@ -138,29 +173,37 @@ protected:
   std::vector<double> errorda;
   /** Metric tensor
    \f[ \left( \begin{array}{ccc}
-    aa & ab\cos(\gamma) & ac\cos(\beta) \\
-    ab\cos(\gamma) & bb & bc\cos(\alpha) \\
-    ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right) \f]
+   aa & ab\cos(\gamma) & ac\cos(\beta) \\
+   ab\cos(\gamma) & bb & bc\cos(\alpha) \\
+   ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right) \f]
    */
   Kernel::DblMatrix G;
   /** Reciprocal lattice tensor
    *\f[ \left( \begin{array}{ccc}
-    a^*a^* & a^*b^*\cos(\gamma^*) & a^*c^*\cos(\beta^*) \\
-    a^*b^*\cos(\gamma^*) & b^*b^* & b^*c^*\cos(\alpha^*) \\
-    a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right) \f]
+   a^*a^* & a^*b^*\cos(\gamma^*) & a^*c^*\cos(\beta^*) \\
+   a^*b^*\cos(\gamma^*) & b^*b^* & b^*c^*\cos(\alpha^*) \\
+   a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right) \f]
    */
   Kernel::DblMatrix Gstar;
   /** B matrix for a right-handed coordinate system, in Busing-Levy convention
    \f[ \left( \begin{array}{ccc}
-    a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
-    0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
-    0 & 0 & 1/c \end{array} \right) \f]
+   a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
+   0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
+   0 & 0 & 1/c \end{array} \right) \f]
    */
   Kernel::DblMatrix B;
 
   /** Inverse of the B matrix.
    */
   Kernel::DblMatrix Binv;
+
+  Kernel::DblMatrix ModHKL;
+
+  Kernel::DblMatrix errorModHKL;
+
+  int MaxOrder;
+
+  bool CrossTerm;
 
   // Private functions
 

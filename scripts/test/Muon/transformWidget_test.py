@@ -4,23 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
-
-from  Muon.GUI.Common import mock_widget
-from  Muon.GUI.Common.utilities import load_utils
-from  Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
-from  Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
-from  Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
-from  Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
-
-
-# need to update this
 import unittest
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+
+from mantid.py3compat import mock
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
+from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+
 
 class TransformTest(unittest.TestCase):
     def setUp(self):
