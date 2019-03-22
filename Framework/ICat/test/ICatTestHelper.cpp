@@ -5,8 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ICatTestHelper.h"
+#include "MantidKernel/Logger.h"
 
-#include <iostream>
+namespace {
+  Mantid::Kernel::Logger logger("ICatTest");
+}
 
 namespace ICatTestHelper {
 /// Skip all unit tests if ICat server is down
@@ -14,7 +17,7 @@ bool skipTests() {
   Mantid::Kernel::ConfigService::Instance().setString("default.facility",
                                                       "ISIS");
   if (!login()) {
-    std::cerr << "ICat server seems to be down. Skipping tests\n";
+    logger.error() << "ICat server seems to be down. Skipping tests\n";
     return true;
   } else {
     logout();
