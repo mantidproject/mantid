@@ -9,15 +9,10 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-import sys
 import unittest
 
+from mantid.py3compat import mock
 from workbench.projectrecovery.recoverygui.projectrecoverypresenter import ProjectRecoveryPresenter
-
-if sys.version_info.major >= 3:
-    from unittest import mock
-else:
-    import mock
 
 
 PATCH_PROJECT_RECOVERY_VIEW = 'workbench.projectrecovery.recoverygui.projectrecoverypresenter.ProjectRecoveryWidgetView'
