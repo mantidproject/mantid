@@ -726,7 +726,7 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (char instruction : instructions) {
+  for (const char instruction : instructions) {
     if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted followed by separator
@@ -757,7 +757,7 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (char instruction : instructions) {
+  for (const char instruction : instructions) {
     if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator

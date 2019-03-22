@@ -83,10 +83,8 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
   // PARALLEL_FOR_NO_WSP_CHECK does not work with range-based for so NOLINT this
   // block
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t index = 0;
-       index <
-       static_cast<int64_t>(indices.size()); // NOLINT (modernize-for-loop)
-       ++index) {
+  for (int64_t index = 0; index < static_cast<int64_t>(indices.size());
+       ++index) { // NOLINT (modernize-for-loop)
     if (!spectrumInfo.isMonitor(indices[index]) &&
         !spectrumInfo.isMasked(indices[index])) {
       const auto &spectrum = workspace->histogram(indices[index]);
