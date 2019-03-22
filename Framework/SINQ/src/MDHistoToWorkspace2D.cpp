@@ -20,9 +20,9 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
 
 #include <cmath>
-#include <iostream>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDHistoToWorkspace2D)
@@ -34,6 +34,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Points;
+
+namespace{
+Logger logger("MDHistoToWorkspace2D");
+}
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -54,11 +58,11 @@ void MDHistoToWorkspace2D::exec() {
 
   m_rank = inWS->getNumDims();
   size_t nSpectra = calculateNSpectra(inWS);
-  std::cout << "nSpectra = " << nSpectra << '\n';
+  logger.debug() << "nSpectra = " << nSpectra << '\n';
 
   boost::shared_ptr<const IMDDimension> lastDim =
       inWS->getDimension(m_rank - 1);
-  std::cout << "spectraLength = " << lastDim->getNBins() << '\n';
+  logger.debug() << "spectraLength = " << lastDim->getNBins() << '\n';
 
   Mantid::DataObjects::Workspace2D_sptr outWS;
   outWS = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
