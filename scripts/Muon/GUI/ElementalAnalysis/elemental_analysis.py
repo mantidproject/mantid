@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-from PyQt4 import QtGui
+from qtpy import QtGui, QtWidgets
 from copy import deepcopy
 
 from six import iteritems
@@ -41,7 +41,7 @@ def gen_name(element, name):
     return element + " " + name
 
 
-class ElementalAnalysisGui(QtGui.QMainWindow):
+class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
@@ -83,7 +83,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.peaks.electron.on_checkbox_unchecked(self.electrons_unchecked)
 
         # set up
-        self.widget_list = QtGui.QVBoxLayout()
+        self.widget_list = QtWidgets.QVBoxLayout()
         self.widget_list.addWidget(self.peaks.view)
         self.widget_list.addWidget(self.detectors.view)
         self.widget_list.addWidget(self.load_widget.view)
@@ -92,11 +92,11 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.plot_window = None
 
         # layout
-        self.box = QtGui.QHBoxLayout()
+        self.box = QtWidgets.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
         self.box.addLayout(self.widget_list)
 
-        self.setCentralWidget(QtGui.QWidget(self))
+        self.setCentralWidget(QtWidgets.QWidget(self))
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
 
@@ -284,15 +284,17 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     # sets data file for periodic table
     def select_data_file(self):
-        filename = QtGui.QFileDialog.getOpenFileName()
+        filename = QtWidgets.QFileDialog.getOpenFileName()
         if isinstance(filename, tuple):
             filename = filename[0]
         filename = str(filename)
         if filename:
             self.ptable.set_peak_datafile(filename)
-        self._clear_lines_after_data_file_selected()
+        # these are commneted out as they are a bug
+        # see issue 25326
+        #self._clear_lines_after_data_file_selected()
         self._generate_element_widgets()
-        self._generate_element_data()
+        #self._generate_element_data()
 
     # general checked data
     def checked_data(self, element, selection, state):
