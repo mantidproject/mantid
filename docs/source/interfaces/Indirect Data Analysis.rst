@@ -131,7 +131,7 @@ and the reflection is 002.
    and ``osi104375_graphite002_red``. Load these files and they will be plotted in the mini-plot
    automatically.
 
-3. The workspace and spectrum displayed in the mini-plot can be change using the combobox and
+3. The workspace and spectrum displayed in the mini-plot can be changed using the combobox and
    spinbox seen directly above the mini-plot.
 
 4. You may opt to change the x range of the mini-plot by changing the **Integration Range**, or
@@ -254,7 +254,7 @@ tab as seen in the :ref:`elwin-example-workflow`.
 
 4. Choose the **Fit Type** to be Gaussian. The parameters for this function can be seen if you
    expand the row labelled **f0-MsdGauss**. Choose appropriate starting values for these parameters.
-   It is possible to constrain one of the parameters by right clicking a parameter and selected
+   It is possible to constrain one of the parameters by right clicking a parameter and selecting
    **Constrain**.
 
 5. Click **Run** and wait for the interface to finish processing. This should generate a
@@ -263,7 +263,7 @@ tab as seen in the :ref:`elwin-example-workflow`.
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-6. Alternatively you can click **Fit Single Spectrum** to perform a fit only for the spectrum
+6. Alternatively, you can click **Fit Single Spectrum** to perform a fit only for the spectrum
    currently displayed in the upper mini-plot. Do not click this for the purposes of this
    demonstration.
 
@@ -339,9 +339,10 @@ and the reflection is 002.
    for the resolution and select the file ``iris26173_graphite002_res``.
 
 2. Change the **SampleBinning** variable to be 5. A description of this option can be found in the section
-   called 'A note on Binning'
+   called 'A note on Binning'.
 
-3. Untick **Calculate Errors** if you do not want to calculate the errors for the output _iqt workspace.
+3. Untick **Calculate Errors** if you do not want to calculate the errors for the output workspace which
+   ends with the suffix _iqt.
 
 4. Click **Run** and wait for the interface to finish processing. This should generate a workspace ending
    with a suffix _iqt.
@@ -481,7 +482,7 @@ I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 
 6. In the **Output** section, you can choose which parameter you want to plot.
 
-7. Click `Fit Single Spectrum` to produce a fit result for the first spectrum.
+7. Click **Fit Single Spectrum** to produce a fit result for the first spectrum.
 
 8. In the **Output** section, click **Edit Result** and then select the _Result workspace containing 
    multiple fits (1), and in the second combobox select the _Result workspace containing the single fit
@@ -611,15 +612,15 @@ and the reflection is 002.
    to the PeakCentre of the Lorentzian, right click on the Centre parameter and go to Tie->Custom Tie and then
    enter f0.PeakCentre.
 
-3. Tick **Plot Guess** to get a prediction of what your fit will look like.
+4. Tick **Plot Guess** to get a prediction of what your fit will look like.
 
-4. Click **Run** and wait for the interface to finish processing. This should generate a
+5. Click **Run** and wait for the interface to finish processing. This should generate a
    _Parameters table workspace and two group workspaces with end suffixes _Results and
    _Workspaces. The mini-plots should also update, with the upper plot displaying the
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-5. Choose a default save directory and then click **Save Result** to save the _result workspaces 
+6. Choose a default save directory and then click **Save Result** to save the _result workspaces 
    found inside of the group workspace ending with _Results. The saved workspace will be used in
    the :ref:`fqfit-example-workflow`.
 
