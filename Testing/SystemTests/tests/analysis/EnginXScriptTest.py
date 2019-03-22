@@ -10,12 +10,11 @@ import os
 import platform
 import shutil
 import systemtesting
+
 import mantid.simpleapi as simple
+
 from mantid import config
 from Engineering.EnginX import main
-
-import matplotlib
-matplotlib.use('agg')
 
 DIRS = config['datasearch.directories'].split(';')
 ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))),
