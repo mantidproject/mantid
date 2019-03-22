@@ -143,12 +143,26 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
 
+    @staticmethod
+    def get_spec_num_from_wksp_index(workspace, wksp_index):
+        return workspace.getSpectrum(wksp_index).getSpectrumNo()
+
+    def _get_spec_number(self, workspace, kwargs):
+        keys = kwargs.keys()
+        if 'specNum' in keys and kwargs['specNum'] is not None:
+            return kwargs['specNum']
+        elif 'wkspIndex' in keys and kwargs['wkspIndex'] is not None:
+            return self.get_spec_num_from_wksp_index(workspace,
+                                                     kwargs['wkspIndex'])
+        else:
+            return None
+
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
                                spec_num=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
-        :param workspace: The name of the workspace. If empty then no tracking takes place
+        :param workspace: A Workspace object. If empty then no tracking takes place
         :param artists: A single artist or iterable of artists containing the data for the workspace
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
@@ -171,7 +185,7 @@ class MantidAxes(Axes):
         """
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
-        :param workspace: The name of the workspace
+        :param workspace: A Workpspace object
         :return: True if the axes is empty, false if artists remain or this workspace is not associated here
         """
         try:
@@ -301,17 +315,10 @@ class MantidAxes(Axes):
                 self.autoscale()
                 return artists
 
-            try:
-                spec_num = kwargs['specNum']
-            except KeyError:
-                try:
-                    spec_num = args[0].getSpectrum(
-                        kwargs['wkspIndex']).getSpectrumNo()
-                except KeyError:
-                    spec_num = None
-
+            workspace = args[0]
+            spec_num = self._get_spec_number(workspace, kwargs)
             return self.track_workspace_artist(
-                args[0], plotfunctions.plot(self, *args, **kwargs),
+                workspace, plotfunctions.plot(self, *args, **kwargs),
                 _data_update, spec_num)
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -390,7 +397,9 @@ class MantidAxes(Axes):
                 self.autoscale()
                 return container_new
 
-            return self.track_workspace_artist(args[0], plotfunctions.errorbar(self, *args, **kwargs),
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.errorbar(self, *args, **kwargs),
                                                _data_update)
         else:
             return Axes.errorbar(self, *args, **kwargs)
@@ -487,8 +496,9 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions.imshow,
                                               artists, workspace, **kwargs)
-
-            return self.track_workspace_artist(args[0], plotfunctions.imshow(self, *args, **kwargs),
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.imshow(self, *args, **kwargs),
                                                _update_data)
         else:
             return Axes.imshow(self, *args, **kwargs)
@@ -508,8 +518,10 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions_func,
                                               artists, workspace, **kwargs)
+            workspace = args[0]
             # We return the last mesh so the return type is a single artist like the standard Axes
-            artists = self.track_workspace_artist(args[0], plotfunctions_func(self, *args, **kwargs),
+            artists = self.track_workspace_artist(workspace,
+                                                  plotfunctions_func(self, *args, **kwargs),
                                                   _update_data)
             try:
                 return artists[-1]
@@ -571,7 +583,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.contour(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.contour(self, *args, **kwargs))
         else:
             return Axes.contour(self, *args, **kwargs)
 
@@ -597,7 +611,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.contourf(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.contourf(self, *args, **kwargs))
         else:
             return Axes.contourf(self, *args, **kwargs)
 
@@ -623,7 +639,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.tripcolor(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.tripcolor(self, *args, **kwargs))
         else:
             return Axes.tripcolor(self, *args, **kwargs)
 
@@ -649,7 +667,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.tricontour(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.tricontour(self, *args, **kwargs))
         else:
             return Axes.tricontour(self, *args, **kwargs)
 
@@ -675,7 +695,9 @@ class MantidAxes(Axes):
         """
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
-            return self.track_workspace_artist(args[0], plotfunctions.tricontourf(self, *args, **kwargs))
+            workspace = args[0]
+            return self.track_workspace_artist(workspace,
+                                               plotfunctions.tricontourf(self, *args, **kwargs))
         else:
             return Axes.tricontourf(self, *args, **kwargs)
 

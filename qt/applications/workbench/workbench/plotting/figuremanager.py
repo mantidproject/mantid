@@ -200,7 +200,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar))
+        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar),
+                                              fig_manager=self)
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
@@ -219,9 +220,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # Register canvas observers
         self._fig_interation = FigureInteraction(self)
         self._ads_observer = FigureManagerADSObserver(self)
-
-        # Plotted workspace names/spectra in form '{workspace}: spec {spec_num}'
-        self.workspace_labels = []
 
         self.window.raise_()
 

@@ -9,10 +9,9 @@
 #
 from __future__ import (print_function, absolute_import, unicode_literals)
 
-import re
-
 from qtpy.QtCore import Qt, Signal, Slot
 
+from mantid import logger
 from mantid.api import AlgorithmManager
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
@@ -36,11 +35,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     """
 
     closing = Signal()
-    pattern_fittable_curve = re.compile('(.+?): spec (\d+)')
 
-    def __init__(self, canvas, toolbar_state_checker, parent=None):
+    def __init__(self, canvas, toolbar_state_checker, fig_manager, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
         self.init()
+        self.fig_manager = fig_manager
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
         # The toolbar state checker to be passed to the peak editing tool
@@ -64,14 +63,29 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
 
-    @classmethod
-    def can_fit_spectra(cls, labels):
+    def _add_spectra(self, spectra):
         """
-        Determine if the spectra referred to by the plot labels can be used in this fit browser.
-        :param labels: A list of curve labels which can identify spectra in a workspace.
-        :return: True or False
+        Add spectra to the fit browser
+        :param spectra: Dictionary with workspace names as keys and
+                        lists of spectrum numbers as values.
         """
-        return any(map(lambda s: re.match(cls.pattern_fittable_curve, s), labels))
+        for name, spec_list in spectra.items():
+            self.addAllowedSpectra(name, spec_list)
+
+    def _get_allowed_spectra(self):
+        """
+        Get the workspaces and spectra that can be fitted from the
+        tracked workspaces.
+        """
+        allowed_spectra = {}
+        for ax in self.canvas.figure.get_axes():
+            try:
+                for ws_name, artists in ax.tracked_workspaces.items():
+                    spectrum_list = [artist.spec_num for artist in artists]
+                    allowed_spectra[ws_name] = spectrum_list
+            except AttributeError:  # scripted plots have no tracked_workspaces
+                pass
+        return allowed_spectra
 
     def closeEvent(self, event):
         """
@@ -84,14 +98,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Override the base class method. Initialise the peak editing tool.
         """
-        allowed_spectra = {}
-        for ax in self.canvas.figure.get_axes():
-            for ws_name, artists in ax.tracked_workspaces.items():
-                spec_list = [artist.spec_num for artist in artists]
-                allowed_spectra[ws_name] = spec_list
-        if len(allowed_spectra) > 0:
-            for name, spec_list in allowed_spectra.items():
-                self.addAllowedSpectra(name, spec_list)
+        allowed_spectra = self._get_allowed_spectra()
+        if allowed_spectra:
+            self._add_spectra(allowed_spectra)
+        else:
+            self.fig_manager.toolbar.toggle_fit_button_checked()
+            logger.warning("Cannot open fitting tool: No valid workspaces to "
+                           "fit to.")
+            return
+
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker,
                                        current_peak_type=self.defaultPeakType())
         self.tool.fit_start_x_moved.connect(self.setStartX)
