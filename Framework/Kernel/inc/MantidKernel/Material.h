@@ -118,7 +118,6 @@ public:
    * cm^-1
    * this should match the implementation of the scalar version
    */
-  template <typename InputIterator>
   std::vector<double>
   linearAbsorpCoef(std::vector<double>::const_iterator lambdaBegin,
                    std::vector<double>::const_iterator lambdaEnd) const;

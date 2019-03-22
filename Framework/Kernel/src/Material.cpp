@@ -251,7 +251,7 @@ double Material::linearAbsorpCoef(const double lambda) const {
 }
 
 // This must match the values that come from the scalar version
-Material::linearAbsorpCoef<std::vector<double>::const_iterator>(
+std::vector<double> Material::linearAbsorpCoef(
     std::vector<double>::const_iterator lambdaBegin,
     std::vector<double>::const_iterator lambdaEnd) const {
   const double linearCoefByWL =
