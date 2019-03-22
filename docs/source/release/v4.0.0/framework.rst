@@ -134,6 +134,7 @@ Bugfixes
 - Fixed a bug in :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` where a sign in zv was different from `FullProf NPROF=13 <http://www.ccp14.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` now save and load spectrum numbers even when histograms have no detectors.
 - :ref:`SavePlot1D <algm-SavePlot1D>` has been updated to follow changes to the plotly api.
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` allows now international execution.
 
 Python
 ------
