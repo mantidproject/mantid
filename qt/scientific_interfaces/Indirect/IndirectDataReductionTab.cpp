@@ -102,18 +102,33 @@ QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
   return m_idrUI->getInstrumentDetails();
 }
 
-QString
-IndirectDataReductionTab::getInstrumentDetail(QString const &key) const {
-  return getInstrumentDetail(getInstrumentDetails(), key);
+QString IndirectDataReductionTab::getInstrumentDetail(
+    QString const &key, bool const &validateDetail) const {
+  return getInstrumentDetail(getInstrumentDetails(), key, validateDetail);
 }
 
 QString IndirectDataReductionTab::getInstrumentDetail(
-    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
-  auto const value = instrumentDetails[key];
-  if (!value.isEmpty())
-    return value;
-  throw std::runtime_error("No " + key.toStdString() + " found for the " +
-                           getInstrumentName().toStdString() + " instrument.");
+    QMap<QString, QString> const &instrumentDetails, QString const &key,
+    bool const &validateDetail) const {
+  auto const instrumentDetail = instrumentDetails[key];
+  if (validateDetail)
+    validateInstrumentDetail(key, instrumentDetail);
+  return instrumentDetail;
+}
+
+void IndirectDataReductionTab::validateInstrumentDetail(
+    QString const &key, QString const &value) const {
+  auto const instrumentName = getInstrumentName().toStdString();
+
+  if (instrumentName.empty())
+    throw std::invalid_argument(
+        "No instrument had been found. Please check that a valid "
+        "facility and instrument has been set.");
+  else if (value.isEmpty())
+    throw std::invalid_argument(
+        "No " + key.toStdString() + " found for the " + instrumentName +
+        " instrument. Please check that a valid facility and "
+        "instrument has been set.");
 }
 
 /**

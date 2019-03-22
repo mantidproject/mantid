@@ -216,7 +216,7 @@ QString ISISCalibration::backgroundRangeString() const {
          m_properties["CalBackMax"]->valueText();
 }
 
-QString ISISCalibration::instrumentDetectorRangeString() const {
+QString ISISCalibration::instrumentDetectorRangeString() {
   return getInstrumentDetail("spectra-min") + "," +
          getInstrumentDetail("spectra-max");
 }
@@ -708,7 +708,7 @@ void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
 }
 
 IAlgorithm_sptr
-ISISCalibration::calibrationAlgorithm(const QString &inputFiles) const {
+ISISCalibration::calibrationAlgorithm(const QString &inputFiles) {
   auto calibrationAlg =
       AlgorithmManager::Instance().create("IndirectCalibration");
   calibrationAlg->initialize();

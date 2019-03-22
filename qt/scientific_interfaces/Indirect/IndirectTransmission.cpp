@@ -108,10 +108,10 @@ void IndirectTransmission::transAlgDone(bool error) {
 
 void IndirectTransmission::instrumentSet() {
   auto const instrument = getInstrumentDetail("instrument");
-
-  // Set the search instrument for runs
-  m_uiForm.dsSampleInput->setInstrumentOverride(instrument);
-  m_uiForm.dsCanInput->setInstrumentOverride(instrument);
+  if (!instrument.isEmpty()) {
+    m_uiForm.dsSampleInput->setInstrumentOverride(instrument);
+    m_uiForm.dsCanInput->setInstrumentOverride(instrument);
+  }
 }
 
 /**

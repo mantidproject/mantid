@@ -472,36 +472,49 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
     removeGroupingOption(option);
 }
 
+void ISISEnergyTransfer::setInstrumentDefault() {
+  auto const instrumentDetails = getInstrumentDetails();
+  try {
+    setInstrumentDefault(instrumentDetails);
+  } catch (std::exception const &ex) {
+    showMessageBox(ex.what());
+  }
+}
+
 /**
  * Called when the instrument has changed, used to update default values.
  */
-void ISISEnergyTransfer::setInstrumentDefault() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+void ISISEnergyTransfer::setInstrumentDefault(
+    QMap<QString, QString> const &instDetails) {
+  auto const instrumentName = getInstrumentDetail(instDetails, "instrument");
+  auto const specMin = getInstrumentDetail(instDetails, "spectra-min").toInt();
+  auto const specMax = getInstrumentDetail(instDetails, "spectra-max").toInt();
+  auto const eFixed = getInstrumentDetail(instDetails, "Efixed", false);
+  auto const rebinDefault =
+      getInstrumentDetail(instDetails, "rebin-default", false);
 
   // Set the search instrument for runs
-  m_uiForm.dsRunFiles->setInstrumentOverride(
-      getInstrumentDetail(instDetails, "instrument"));
+  m_uiForm.dsRunFiles->setInstrumentOverride(instrumentName);
 
   QStringList qens;
   qens << "IRIS"
        << "OSIRIS";
-  m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
+  m_uiForm.spEfixed->setEnabled(qens.contains(instrumentName));
 
   QStringList allowDefaultGroupingInstruments;
   allowDefaultGroupingInstruments << "TOSCA";
   includeExtraGroupingOption(
-      allowDefaultGroupingInstruments.contains(instDetails["instrument"]),
-      "Default");
+      allowDefaultGroupingInstruments.contains(instrumentName), "Default");
 
-  if (instDetails["spectra-min"].isEmpty() ||
-      instDetails["spectra-max"].isEmpty()) {
-    emit showMessageBox("Could not gather necessary data from parameter file.");
-    return;
-  }
+  // if (instDetails["spectra-min"].isEmpty() ||
+  //    instDetails["spectra-max"].isEmpty()) {
+  //  emit showMessageBox("Could not gather necessary data from parameter
+  //  file."); return;
+  //}
 
   // Set spectra min/max for spinners in UI
-  const int specMin = instDetails["spectra-min"].toInt();
-  const int specMax = instDetails["spectra-max"].toInt();
+  // const int specMin = instDetails["spectra-min"].toInt();
+  // const int specMax = instDetails["spectra-max"].toInt();
   // Spectra spinners
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
@@ -520,17 +533,13 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMax->setValue(1);
 
-  if (!instDetails["Efixed"].isEmpty())
-    m_uiForm.spEfixed->setValue(instDetails["Efixed"].toDouble());
-  else
-    m_uiForm.spEfixed->setValue(0.0);
+  m_uiForm.spEfixed->setValue(!eFixed.isEmpty() ? eFixed.toDouble() : 0.0);
 
   // Default rebinning parameters can be set in instrument parameter file
-  if (!instDetails["rebin-default"].isEmpty()) {
-    m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
+  if (!rebinDefault.isEmpty()) {
+    m_uiForm.leRebinString->setText(rebinDefault);
     m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = getInstrumentDetail(instDetails, "rebin-default")
-                         .split(",", QString::SkipEmptyParts);
+    auto const rbp = rebinDefault.split(",", QString::SkipEmptyParts);
     if (rbp.size() == 3) {
       m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
       m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());

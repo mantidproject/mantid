@@ -65,6 +65,8 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  void setInstrumentDefault(QMap<QString, QString> const &instDetails);
+
   Ui::ISISEnergyTransfer m_uiForm;
 
   std::pair<std::string, std::string> createMapFile(
