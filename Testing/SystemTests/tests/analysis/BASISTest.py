@@ -222,6 +222,7 @@ class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
             # run with new DAS
             BASISPowderDiffraction(RunNumbers='90177',
                                    OutputWorkspace='powder',
+                                   MaskFile='BASIS_Mask_default_diff.xml',
                                    VanadiumRuns='90176')
         finally:
             self.preptear()
