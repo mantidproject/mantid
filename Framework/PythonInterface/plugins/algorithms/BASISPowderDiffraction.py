@@ -588,6 +588,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                       OutputWorkspace=name)
         kwargs.update(particular[self._das_version])
         return LoadEventNexus(**kwargs)
+
  
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISPowderDiffraction)
