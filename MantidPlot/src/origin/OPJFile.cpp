@@ -152,31 +152,31 @@ int OPJFile::compareFunctionnames(const char *sname) const {
 
 vector<string> OPJFile::findDataByIndex(int index) const {
   vector<string> str;
-  for (unsigned int spread = 0; spread < SPREADSHEET.size(); spread++)
-    for (unsigned int i = 0; i < SPREADSHEET[spread].column.size(); i++)
-      if (SPREADSHEET[spread].column[i].index == index) {
-        str.push_back(SPREADSHEET[spread].column[i].name);
-        str.emplace_back("T_" + SPREADSHEET[spread].name);
+  for (const auto & spread : SPREADSHEET)
+    for (const auto & i : spread.column)
+      if (i.index == index) {
+        str.push_back(i.name);
+        str.emplace_back("T_" + spread.name);
         return str;
       }
-  for (unsigned int i = 0; i < MATRIX.size(); i++)
-    if (MATRIX[i].index == index) {
-      str.push_back(MATRIX[i].name);
-      str.emplace_back("M_" + MATRIX[i].name);
+  for (const auto &i : MATRIX)
+    if (i.index == index) {
+      str.push_back(i.name);
+      str.emplace_back("M_" + i.name);
       return str;
     }
-  for (unsigned int i = 0; i < EXCEL.size(); i++)
-    for (unsigned int j = 0; j < EXCEL[i].sheet.size(); j++)
-      for (unsigned int k = 0; k < EXCEL[i].sheet[j].column.size(); k++)
-        if (EXCEL[i].sheet[j].column[k].index == index) {
-          str.push_back(EXCEL[i].sheet[j].column[k].name);
-          str.emplace_back("E_" + EXCEL[i].name);
+  for (const auto & i : EXCEL)
+    for (const auto & j : i.sheet)
+      for (const auto &k : j.column)
+        if (k.index == index) {
+          str.push_back(k.name);
+          str.emplace_back("E_" + i.name);
           return str;
         }
-  for (unsigned int i = 0; i < FUNCTION.size(); i++)
-    if (FUNCTION[i].index == index) {
-      str.push_back(FUNCTION[i].name);
-      str.emplace_back("F_" + FUNCTION[i].name);
+  for (const auto &i : FUNCTION)
+    if (i.index == index) {
+      str.push_back(i.name);
+      str.emplace_back("F_" + i.name);
       return str;
     }
   return str;
@@ -212,8 +212,8 @@ void OPJFile::convertSpreadToExcel(int spread) {
                         SPREADSHEET[spread].maxRows,
                         SPREADSHEET[spread].bHidden,
                         SPREADSHEET[spread].bLoose));
-  for (unsigned int i = 0; i < SPREADSHEET[spread].column.size(); ++i) {
-    string name = SPREADSHEET[spread].column[i].name;
+  for (auto & i : SPREADSHEET[spread].column) {
+    string name = i.name;
     int pos = static_cast<int>(name.find_last_of("@"));
     string col = name;
     unsigned int index = 0;
@@ -224,8 +224,8 @@ void OPJFile::convertSpreadToExcel(int spread) {
 
     if (EXCEL.back().sheet.size() <= index)
       EXCEL.back().sheet.resize(index + 1);
-    SPREADSHEET[spread].column[i].name = col;
-    EXCEL.back().sheet[index].column.push_back(SPREADSHEET[spread].column[i]);
+    i.name = col;
+    EXCEL.back().sheet[index].column.push_back(i);
   }
   SPREADSHEET.erase(SPREADSHEET.begin() + spread);
 }
