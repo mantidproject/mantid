@@ -33,9 +33,9 @@
 
 #include "boost/make_shared.hpp"
 
-using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::DOMWriter;
+using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
@@ -1467,10 +1467,11 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     Element *pElemHeight = getShapeElement(pElem, "height");
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    shapeInfo.setHollowCylinder(parsePosition(pElemCentre), normVec,
-                          std::stod(pElemInnerRadius->getAttribute("val")),
-                          std::stod(pElemOuterRadius->getAttribute("val")),
-                          std::stod(pElemHeight->getAttribute("val")));
+    shapeInfo.setHollowCylinder(
+        parsePosition(pElemCentre), normVec,
+        std::stod(pElemInnerRadius->getAttribute("val")),
+        std::stod(pElemOuterRadius->getAttribute("val")),
+        std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
