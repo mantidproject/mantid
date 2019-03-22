@@ -14,7 +14,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <iostream>
 #include <ostream>
 #include <stdexcept>
 
@@ -255,7 +254,7 @@ ObjCompAssembly::getComponentByName(const std::string &cname,
                                     int nlevels) const {
   int nchildren = this->nelements();
   if (nlevels > 1)
-    std::cout << "only implemented for children\n";
+    g_log.debug() << "only implemented for children\n";
   for (int i = 0; i < nchildren; ++i) {
     boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
     if (comp->getName() == cname)
@@ -460,10 +459,10 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
     II[2][0] = Ixz;
     II[2][1] = Iyz;
     II[2][2] = Izz;
-    std::cerr << "Inertia matrix: " << II << II.determinant() << '\n';
+    g_log.debug()<< "Inertia matrix: " << II << II.determinant() << '\n';
     II.Diagonalise(Vec, D);
-    std::cerr << "Vectors: " << Vec << '\n';
-    std::cerr << "Moments: " << D << '\n';
+    g_log.debug() << "Vectors: " << Vec << '\n';
+    g_log.debug() << "Moments: " << D << '\n';
     vx = V3D(Vec[0][0], Vec[1][0], Vec[2][0]);
     vy = V3D(Vec[0][1], Vec[1][1], Vec[2][1]);
     vz = V3D(Vec[0][2], Vec[1][2], Vec[2][2]);

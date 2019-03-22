@@ -8,7 +8,6 @@
 #include <complex>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <list>
 #include <map>
 #include <sstream>
@@ -22,6 +21,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Logger.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -45,6 +45,9 @@ GNU_DIAG_ON("cast-qual")
 namespace Mantid {
 
 namespace Geometry {
+namespace {
+  Kernel::Logger logger("Surface");
+}
 
 Surface::Surface()
     : Name(-1)
@@ -64,7 +67,7 @@ void Surface::print() const
   Simple print out function for surface header
 */
 {
-  std::cout << "Surf == " << Name << '\n';
+  logger.debug() << "Surf == " << Name << '\n';
 }
 
 void Surface::writeHeader(std::ostream &OX) const

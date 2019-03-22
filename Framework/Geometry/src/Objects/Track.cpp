@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace Mantid {
 namespace Geometry {

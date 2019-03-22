@@ -8,7 +8,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <set>
@@ -19,11 +18,15 @@
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Math/MapSupport.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {
 
 namespace Geometry {
+namespace {
+  Kernel::Logger logger("Algebra");
+}
 
 std::ostream &operator<<(std::ostream &OX, const Algebra &A)
 /**
@@ -161,7 +164,7 @@ std::string Algebra::writeMCNPX() const
           SurfMap.cbegin(), SurfMap.cend(),
           MapSupport::valEqual<int, std::string>(std::string(1, Out[i])));
       if (vc == SurfMap.end()) {
-        std::cout << "SurfMap size == " << SurfMap.size() << '\n';
+        logger.error() << "SurfMap size == " << SurfMap.size() << '\n';
         for_each(SurfMap.begin(), SurfMap.end(),
                  MapSupport::mapWrite<int, std::string>());
         throw Kernel::Exception::NotFoundError("Algebra::writeMCNPX",
@@ -285,7 +288,7 @@ int Algebra::setFunction(const std::string &A)
   try {
     F.setString(Ln);
   } catch (...) {
-    std::cerr << "Algebra String Error" << A << '\n';
+    logger.error() << "Algebra String Error" << A << '\n';
     return 1;
   }
   return 0;

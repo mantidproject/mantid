@@ -18,7 +18,11 @@
 */
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/Logger.h"
 
+namespace {
+  Mantid::Kernel::Logger logger("MapSupport");
+}
 namespace MapSupport {
 /**
   \class PFirst
@@ -142,7 +146,7 @@ public:
 };
 
 /**
-  \class mapWrite
+  \class mapWritezz
   \brief Functor quick write out of a map
   \author S. Ansell
   \date 2/9/05
@@ -155,7 +159,7 @@ template <typename PartA, typename PartB> class mapWrite {
 public:
   /// Write both the key and object
   void operator()(const std::pair<PartA, PartB> &A) const {
-    std::cout << A.first << " " << A.second << '\n';
+    logger.debug() << A.first << " " << A.second << '\n';
   }
 };
 
