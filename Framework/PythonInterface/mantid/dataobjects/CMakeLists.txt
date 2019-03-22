@@ -93,8 +93,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-# This tells the installer where to put the .pyd's
-mtd_install_targets( TARGETS PythonDataObjectsModule INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR} )
+mtd_install_targets( TARGETS PythonDataObjectsModule INSTALL_DIRS ${BIN_DIR}/mantid/dataobjects ${WORKBENCH_BIN_DIR}/mantid/dataobjects )
 
 # Pure Python files
 mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/dataobjects ${WORKBENCH_BIN_DIR}/mantid/dataobjects)

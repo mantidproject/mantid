@@ -76,9 +76,7 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-# This tells the installer where to put the .pyd's
-mtd_install_targets( TARGETS PythonCurveFittingModule INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR} )
-message("Gon install this _plugins in ${BIN_DIR}/mantid/_plugins huuh dooi ${WORKBENCH_BIN_DIR}/mantid/_plugins")
+mtd_install_targets( TARGETS PythonCurveFittingModule INSTALL_DIRS ${BIN_DIR}/mantid/_plugins ${WORKBENCH_BIN_DIR}/mantid/_plugins )
 
 # Pure Python files
 mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/_plugins ${WORKBENCH_BIN_DIR}/mantid/_plugins)
