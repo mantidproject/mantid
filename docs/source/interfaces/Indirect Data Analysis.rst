@@ -257,17 +257,19 @@ tab as seen in the :ref:`elwin-example-workflow`.
    It is possible to constrain one of the parameters by right clicking a parameter and selecting
    **Constrain**.
 
-5. Click **Run** and wait for the interface to finish processing. This should generate a
+5. Tick **Plot Guess** to get a prediction of what your fit will look like.
+
+6. Click **Run** and wait for the interface to finish processing. This should generate a
    _Parameters table workspace and two group workspaces with end suffixes _Results and
    _Workspaces. The mini-plots should also update, with the upper plot displaying the
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-6. Alternatively, you can click **Fit Single Spectrum** to perform a fit only for the spectrum
+7. Alternatively, you can click **Fit Single Spectrum** to perform a fit only for the spectrum
    currently displayed in the upper mini-plot. Do not click this for the purposes of this
    demonstration.
 
-7. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
+8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
    Msd parameter which can be found within the _Results group workspace.
 
 Go to the :ref:`iqt-example-workflow`.
@@ -338,8 +340,11 @@ and the reflection is 002.
 1. Click **Browse** for the sample and select the file ``iris26176_graphite002_red``. Then click **Browse**
    for the resolution and select the file ``iris26173_graphite002_res``.
 
-2. Change the **SampleBinning** variable to be 5. A description of this option can be found in the section
-   called 'A note on Binning'.
+2. Change the **SampleBinning** variable to be 5. Changing this will calculate values for the **EWidth**,
+   **SampleBins** and **ResolutionBins** variables automatically by using the
+   :ref:`TransformToIqt <algm-TransformToIqt>` algorithm where the **BinReductionFactor** is given by the
+   **SampleBinning** value. The **SampleBinning** value must be low enough for the **ResolutionBins** to be
+   at least 5. A description of this option can be found in the :ref:`a-note-on-binning` section.
 
 3. Untick **Calculate Errors** if you do not want to calculate the errors for the output workspace which
    ends with the suffix _iqt.
@@ -352,6 +357,8 @@ and the reflection is 002.
 
 6. Choose a default save directory and then click **Save Result** to save the _iqt workspace.
    This workspace will be used in the :ref:`iqtfit-example-workflow`.
+
+.. _a-note-on-binning:
 
 A note on Binning
 ~~~~~~~~~~~~~~~~~
@@ -468,8 +475,7 @@ I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
 2. Change the **EndX** variable to be around 0.2 in order to change the time range. Alternatively, drag
    the **EndX** blue line seen on the upper mini-plot using the cursor.
 
-3. Choose the number of **Exponentials** to be 1. Tick **Stretched Exponential**. Select a
-   **Flat Background**.
+3. Choose the number of **Exponentials** to be 1. Select a **Flat Background**.
 
 4. Change the **Fit Spectra** to go from 0 to 7. This will ensure that only the spectra within the input
    workspace with workspace indices between 0 and 7 are fitted.
@@ -710,8 +716,8 @@ Save Result
 
 F(Q) Fit Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The F(Q) Fit tab operates on ``_result`` files which can be produced on the MSD Fit, Iqt Fit or ConvFit
-tabs.  The sample file used in this workflow are produced on the Conv Fit tab as seen in the
+The F(Q) Fit tab operates on ``_result`` files which can be produced on the ConvFit tab.  The
+sample file used in this workflow is produced on the Conv Fit tab as seen in the
 :ref:`convfit-example-workflow`.
 
 1. Click **Browse** and select the file ``irs26176_graphite002_conv_Delta1LFitF_s0_to_9_Result``.
