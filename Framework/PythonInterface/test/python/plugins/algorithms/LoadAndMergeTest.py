@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import LoadAndMerge, config, mtd
-
+import locale
 
 class LoadAndMergeTest(unittest.TestCase):
 
@@ -18,6 +18,7 @@ class LoadAndMergeTest(unittest.TestCase):
         config['default.instrument'] = 'IN16B'
         config.appendDataSearchSubDir('ILL/IN16B/')
         config.appendDataSearchSubDir('ILL/D20/')
+        config.appendDataSearchSubDir('ILL/D17/')
 
     def test_single_run_load(self):
         out1 = LoadAndMerge(Filename='170257')
@@ -76,6 +77,19 @@ class LoadAndMergeTest(unittest.TestCase):
         self.assertEquals(out6.getName(), 'out6')
         self.assertTrue(isinstance(out6, MatrixWorkspace))
         mtd.clear()
+
+    def test_loader_option_locale(self):
+        loc = locale.getlocale()
+        locale.setlocale(locale.LC_ALL, 'fr_FR.utf8')
+        outLocale = LoadAndMerge(Filename='317370',
+                            LoaderName='LoadILLReflectometry',
+                            LoaderVersion=1,
+                            LoaderOptions={'BeamCentre': 100.235})
+        self.assertTrue(outLocale)
+        self.assertEquals(outLocale.getName(), 'outLocale')
+        self.assertTrue(isinstance(outLocale, MatrixWorkspace))
+        mtd.clear()
+        locale.setlocale(locale.LC_ALL, loc)
 
     def test_output_hidden(self):
         LoadAndMerge(Filename='170257+170258,170300+170302',LoaderName='LoadILLIndirect',
