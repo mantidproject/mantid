@@ -15,9 +15,11 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 # Load the C++ library
+from ..utils import import_mantid
+
 from ..kernel import _shared_cextension
 with _shared_cextension():
-    from _api import *
+    _api = import_mantid('._api', 'mantid.api')
 
 ###############################################################################
 # Make aliases accessible in this namespace

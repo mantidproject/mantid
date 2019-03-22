@@ -18,9 +18,10 @@ from __future__ import (absolute_import, division,
 # Load the C++ library
 ###############################################################################
 from ..kernel import _shared_cextension
+from ..utils import import_mantid
 
 with _shared_cextension():
-    from _geometry import *
+    _geometry = import_mantid('.__geometry', 'mantid._geometry')
 
 ###############################################################################
 # Make aliases accessible in this namespace

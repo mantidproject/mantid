@@ -50,8 +50,9 @@ from . import mpisetup
 ###############################################################################
 # Load the C++ library
 ###############################################################################
+from ..utils import import_mantid
 with _shared_cextension():
-    from _kernel import *
+    _kernel = import_mantid('._kernel', 'mantid.kernel')
 
 ###############################################################################
 # Make modules available in this namespace

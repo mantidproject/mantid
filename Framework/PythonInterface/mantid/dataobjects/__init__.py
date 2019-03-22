@@ -27,8 +27,7 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 # Load library dependencies
 from ..kernel import _shared_cextension
-import mantid.api
+from ..utils import import_mantid
 
 with _shared_cextension():
-    import _dataobjects
-    from _dataobjects import *
+    _dataobjects = import_mantid('._dataobjects', 'mantid.dataobjects')
