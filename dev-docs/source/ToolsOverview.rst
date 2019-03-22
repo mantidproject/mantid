@@ -218,3 +218,39 @@ Use
 	- ``--page_handle`` the page handle to use [default page name]
 	- ``--add_heading`` add a heading to the page (uses the page name)
 
+Clang-tidy
+----------
+
+Mantid has built clang-tidy support into cmake. This allows a user to detect and fix code which does not follow best practices,
+such as unused parameters or not using range-based for loops.
+
+cmake-gui
+~~~~~~~~~
+
+Open up the gui and search for *clang-tidy* parameters. There are several relevant options:
+
+- ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support.
+- ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. The full list can be seen `here <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
+  This defaults to all ``modernize-`` checks.
+- ``APPLY_CLANG_TIDY_FIX`` will automatically change the code whenever a check has returned a result. The behaviour of ``ENABLE_CLANG_TIDY`` without this checked is to highlight issues only.
+
+Configure the build to check that your selected options are reflected in ``CMAKE_CXX_CLANG_TIDY``, and then generate.
+When you next build, clang-tidy will perform the selected checks on the code included in the target.
+
+*Note: There is a known issue that clang-tidy is only being applied to certain directories within* ``Framework`` *and* ``Mantidplot``.
+
+Options
+~~~~~~~
+
+Some clang-tidy checks have optional arguments. For example, ``modernize-loop-convert``, which changes loops to range-based,
+assigns a riskiness to each loop and can accept a ``MinConfidence`` argument to determine which risk levels to address.
+
+Adding the optional arguments is clunky and will rarely be required, so it has not been directly added to Mantid's cmake setup.
+To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS``::
+
+    ;-config={CheckOptions: [ {key: check-to-choose-option.option-name, value: option-value} ]}
+
+For example, to convert all loops classified as *risky* or above, we would append::
+
+    ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+
