@@ -121,6 +121,31 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         return ['BASISReduction', 'BASISCrystalDiffraction']
 
     @staticmethod
+    def _run_lists(runs):
+        """
+        Obtain all run numbers from input string `runs`
+
+        Parameters
+        ----------
+        runs: str
+            Run numbers to be reduced. Symbol `;` separates the runs into
+            substrings. Each substring represents a set of runs to be
+            reduced together.
+        Returns
+        -------
+
+        """
+        rl = list()
+        rn = runs.replace(' ', '')  # remove spaces
+        for x in rn.split(','):
+            if '-' in x:
+                b, e = [int(y) for y in x.split('-')]
+                rl.extend([str(z) for z in range(b, e+1)])
+            else:
+                rl.append(x)
+        return rl
+
+    @staticmethod
     def add_previous_pulse(w):
         """
         Duplicate the events but shift them by one pulse, then add to
@@ -244,31 +269,6 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                                    suffix='_angle')
             _t_sample = self._convert_to_q(_t_sample)
             self._output_workspace(_t_sample, 'OutputWorkspace')
-
-    @staticmethod
-    def _run_lists(runs):
-        """
-        Obtain all run numbers from input string `runs`
-
-        Parameters
-        ----------
-        runs: str
-            Run numbers to be reduced. Symbol `;` separates the runs into
-            substrings. Each substring represents a set of runs to be
-            reduced together.
-        Returns
-        -------
-
-        """
-        rl = list()
-        rn = runs.replace(' ', '')  # remove spaces
-        for x in rn.split(','):
-            if '-' in x:
-                b, e = [int(y) for y in x.split('-')]
-                rl.extend([str(z) for z in range(b, e+1)])
-            else:
-                rl.append(x)
-        return rl
 
     def _load_runs(self, runs, w_name):
         """
