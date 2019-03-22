@@ -3,4 +3,4 @@
 INSTALLDIR=$(cd "$(dirname "$0")"; pwd)
 PLUGIN_DIR=$INSTALLDIR/../PlugIns
 cd $INSTALLDIR
-QT_PLUGIN_PATH=$PLUGIN_DIR ./workbench-script $* || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR --qtdir=$PLUGIN_DIR
+QT_PLUGIN_PATH=$PLUGIN_DIR ./workbench-script $* || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR --qtdir=$PLUGIN_DIR --application=workbench

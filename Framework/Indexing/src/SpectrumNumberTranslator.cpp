@@ -196,9 +196,11 @@ void SpectrumNumberTranslator::setupSpectrumNumberToIndexMap() const {
 std::vector<SpectrumNumber> SpectrumNumberTranslator::spectrumNumbers(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   std::vector<SpectrumNumber> spectrumNumbers;
-  for (const auto index : globalIndices)
-    spectrumNumbers.push_back(
-        m_globalSpectrumNumbers[static_cast<size_t>(index)]);
+  spectrumNumbers.reserve(globalIndices.size());
+  std::transform(globalIndices.cbegin(), globalIndices.cend(),
+                 std::back_inserter(spectrumNumbers), [this](const auto index) {
+                   return m_globalSpectrumNumbers[static_cast<size_t>(index)];
+                 });
   return spectrumNumbers;
 }
 

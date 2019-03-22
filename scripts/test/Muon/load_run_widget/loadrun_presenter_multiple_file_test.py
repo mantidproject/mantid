@@ -4,24 +4,18 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+from PyQt4 import QtGui
 import six
+import unittest
 
+
+from mantid.py3compat import mock
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
-
 from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-
-import unittest
-from PyQt4 import QtGui
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):

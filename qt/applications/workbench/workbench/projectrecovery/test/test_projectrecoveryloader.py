@@ -17,13 +17,11 @@ import unittest
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
+from mantid.py3compat import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery
 
 if sys.version_info.major >= 3:
-    from unittest import mock
     unicode = str
-else:
-    import mock
 
 
 class ProjectRecoveryLoaderTest(unittest.TestCase):

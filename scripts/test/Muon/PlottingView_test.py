@@ -11,18 +11,12 @@ os.environ["QT_API"] = "pyqt"  # noqa E402
 
 from matplotlib.figure import Figure
 
-from mantid import WorkspaceFactory
-from mantid import plots
+from mantid import WorkspaceFactory, plots
+from mantid.py3compat import mock
+from Muon.GUI.Common import mock_widget
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
-
-from Muon.GUI.Common import mock_widget
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 def get_subPlot(name):

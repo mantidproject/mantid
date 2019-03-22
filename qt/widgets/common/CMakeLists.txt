@@ -56,6 +56,7 @@ set ( QT5_SRC_FILES
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
   src/TextPropertyWidget.cpp
+  src/TSVSerialiser.cpp
   src/UserFunctionDialog.cpp
   src/UserSubWindow.cpp
   src/VatesViewerInterface.cpp
