@@ -248,12 +248,44 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
         self.detector_range = [1, 140]
-        self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
+        self.data_files = ['TSC15352.raw', 'TSC15353.raw', 'TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
         self.sum_files = True
 
     def get_reference_files(self):
         return ['II.TOSCAMultiFileSummedReduction.nxs']
+
+
+class TOSCAMultiFileSummedReductionWithDifferentMaskedDetectors(ISISIndirectInelasticReduction):
+    """
+    This test was created in response to the bug in issue #25072
+    """
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC22841.raw', 'TSC22842.raw', 'TSC22843.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+        self.sum_files = True
+
+    def get_reference_files(self):
+        return ['II.TOSCAMultiFileSummedReduction2.nxs']
+
+
+class TOSCAMultiFileReductionWithDifferentMaskedDetectors(ISISIndirectInelasticReduction):
+    """
+    This test was created in response to the bug in issue #25061
+    """
+    def __init__(self):
+        ISISIndirectInelasticReduction.__init__(self)
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC22797.raw', 'TSC22798.raw', 'TSC22799.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+        self.sum_files = False
+
+    def get_reference_files(self):
+        return ['II.TOSCAMultiFileReduction22797.nxs', 'II.TOSCAMultiFileReduction22798.nxs', 'II.TOSCAMultiFileReduction22799.nxs']
 
 #------------------------- OSIRIS tests ---------------------------------------
 
