@@ -19,7 +19,7 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
                      PYTHON_INSTALL_FILES )
 
 # Add a named target with the outputs as dependencies
-add_custom_target ( PythonPlotsModule ALL DEPENDS ${PYTHON_INSTALL_FILES} )
+add_custom_target ( PythonPlotsModestImageModule ALL DEPENDS ${PYTHON_INSTALL_FILES} )
 
 ###########################################################################
 # Installation settings
