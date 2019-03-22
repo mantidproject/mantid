@@ -728,7 +728,7 @@ sample file used in this workflow is produced on the Conv Fit tab as seen in the
 
 3. Change the **Fit Parameter** back to **Width**.
 
-4. Choose the **Fit Type** to be ChudleyElliot.
+4. Choose the **Fit Type** to be TeixeiraWater.
 
 5. Click **Run** and wait for the interface to finish processing. This should generate a
    _Parameters table workspace and two group workspaces with end suffixes _Results and
