@@ -1955,9 +1955,9 @@ void AxesDialog::updateGrid() {
   bool antiAlias = m_chkAntialiseGrid->isChecked();
   switch (m_cmbApplyGridFormat->currentIndex()) {
   case 0: {
-    for (auto &gridItr : m_Grid_list) {
-      if (gridItr->modified()) {
-        gridItr->apply(m_graph->plotWidget()->grid(), antiAlias);
+    for (auto &grid : m_Grid_list) {
+      if (grid->modified()) {
+        grid->apply(m_graph->plotWidget()->grid(), antiAlias);
         m_graph->replot();
         m_graph->notifyChanges();
       }
@@ -1969,13 +1969,13 @@ void AxesDialog::updateGrid() {
     if (!plot) {
       return;
     }
-    for (auto &gridItr : m_Grid_list) {
+    for (auto &grid : m_Grid_list) {
       QList<Graph *> layers = plot->layersList();
       foreach (Graph *g, layers) {
         if (g->isPiePlot()) {
           continue;
         }
-        gridItr->apply(g->plotWidget()->grid(), antiAlias);
+        grid->apply(g->plotWidget()->grid(), antiAlias);
         g->replot();
       }
     }
@@ -1994,8 +1994,8 @@ void AxesDialog::updateGrid() {
           if (g->isPiePlot()) {
             continue;
           }
-          for (auto &gridItr : m_Grid_list) {
-            gridItr->apply(g->plotWidget()->grid(), antiAlias, true);
+          for (auto &grid : m_Grid_list) {
+            grid->apply(g->plotWidget()->grid(), antiAlias, true);
             g->replot();
           }
         }
@@ -2012,15 +2012,15 @@ void AxesDialog::updateGrid() {
  */
 bool AxesDialog::pressToGraph() {
   // Check if all tabs and axes are valid first
-  for (auto &axisItr : m_Axis_list) {
-    if (!(axisItr->valid())) {
+  for (auto &axis : m_Axis_list) {
+    if (!(axis->valid())) {
       g_log.warning("Axis options are invalid!");
       return false;
     }
   }
 
-  for (auto &scaleItr : m_Scale_list) {
-    if (!(scaleItr->valid())) {
+  for (auto &scale : m_Scale_list) {
+    if (!(scale->valid())) {
       g_log.warning("Scale options are invalid!");
       return false;
     }
@@ -2028,12 +2028,12 @@ bool AxesDialog::pressToGraph() {
 
   updateGrid();
 
-  for (auto &axisItr : m_Axis_list) {
-    axisItr->apply();
+  for (auto &axis : m_Axis_list) {
+    axis->apply();
   }
 
-  for (auto &scaleItr : m_Scale_list) {
-    scaleItr->apply();
+  for (auto &scale : m_Scale_list) {
+    scale->apply();
   }
 
   if (m_generalModified) {
