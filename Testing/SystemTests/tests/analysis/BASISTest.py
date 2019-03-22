@@ -185,6 +185,7 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
             # run with old DAS
             BASISPowderDiffraction(RunNumbers='74799',
                                    OutputWorkspace='powder',
+                                   MaskFile='BASIS_Mask_default_diff.xml',
                                    BackgroundRuns='75527',
                                    VanadiumRuns='64642')
         finally:
