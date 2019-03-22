@@ -8,20 +8,20 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal as Signal
+from qtpy import QtWidgets, QtCore, QtGui
+from qtpy.QtCore import Signal
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 from Muon.GUI.Common.message_box import warning
 
 
-class InstrumentWidgetView(QtGui.QWidget):
+class InstrumentWidgetView(QtWidgets.QWidget):
     dataChanged = Signal()
 
     def __init__(self, parent=None):
         super(InstrumentWidgetView, self).__init__(parent)
 
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
 
         self._button_height = 40
         self._cached_instrument = ["None", "None"]
@@ -64,7 +64,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.setup_dead_time_row()
         self.setup_rebin_row()
 
-        self.group = QtGui.QGroupBox("Instrument")
+        self.group = QtWidgets.QGroupBox("Instrument")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
@@ -78,12 +78,12 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.group.setLayout(self.layout)
 
-        self.group2 = QtGui.QGroupBox("Rebin")
+        self.group2 = QtWidgets.QGroupBox("Rebin")
         self.group2.setFlat(False)
 
         self.group2.setLayout(self.horizontal_layout_5)
 
-        self.widget_layout = QtGui.QVBoxLayout(self)
+        self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
         self.widget_layout.addWidget(self.group2)
         self.setLayout(self.widget_layout)
@@ -91,11 +91,11 @@ class InstrumentWidgetView(QtGui.QWidget):
     def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
         if multiple_files:
-            chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
+            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
                                                               file_filter)
             return [str(chosen_file) for chosen_file in chosen_files]
         else:
-            chosen_file = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
+            chosen_file = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", default_directory,
                                                             file_filter)
             return [str(chosen_file)]
 
@@ -119,23 +119,23 @@ class InstrumentWidgetView(QtGui.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _fixed_aspect_ratio_size_policy(self, widget):
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         size_policy.setHeightForWidth(widget.sizePolicy().hasHeightForWidth())
         return size_policy
 
     def setup_instrument_row(self):
-        self.instrument_selector = QtGui.QComboBox(self)
+        self.instrument_selector = QtWidgets.QComboBox(self)
         self.instrument_selector.setSizePolicy(self._fixed_aspect_ratio_size_policy(self.instrument_selector))
         self.instrument_selector.setObjectName("instrumentSelector")
         self.instrument_selector.addItems(["None"] + allowed_instruments)
 
-        self.instrument_label = QtGui.QLabel(self)
+        self.instrument_label = QtWidgets.QLabel(self)
         self.instrument_label.setObjectName("instrumentLabel")
         self.instrument_label.setText("Instrument : ")
 
-        self.horizontal_layout = QtGui.QHBoxLayout()
+        self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.instrument_label)
         self.horizontal_layout.addWidget(self.instrument_selector)
@@ -167,11 +167,11 @@ class InstrumentWidgetView(QtGui.QWidget):
         return self._cached_instrument[-1]
 
     def instrument_changed_warning(self):
-        msg = QtGui.QMessageBox(self)
-        msg.setIcon(QtGui.QMessageBox.Warning)
+        msg = QtWidgets.QMessageBox(self)
+        msg.setIcon(QtWidgets.QMessageBox.Warning)
         msg.setText("Changing instrument will reset the interface, continue?")
         msg.setWindowTitle("Changing Instrument")
-        msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
         retval = msg.exec_()
         if retval == 1024:
             # The "OK" code
@@ -184,29 +184,29 @@ class InstrumentWidgetView(QtGui.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_time_zero_row(self):
-        self.timezero_label = QtGui.QLabel(self)
+        self.timezero_label = QtWidgets.QLabel(self)
         self.timezero_label.setObjectName("timeZeroLabel")
         self.timezero_label.setText("Time Zero : ")
 
-        self.timezero_edit = QtGui.QLineEdit(self)
+        self.timezero_edit = QtWidgets.QLineEdit(self)
         timezero_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.timezero_edit)
         self.timezero_edit.setValidator(timezero_validator)
         self.timezero_edit.setObjectName("timeZeroEdit")
         self.timezero_edit.setText("")
 
-        self.timezero_unit_label = QtGui.QLabel(self)
+        self.timezero_unit_label = QtWidgets.QLabel(self)
         self.timezero_unit_label.setObjectName("timeZeroUnitLabel")
         self.timezero_unit_label.setText(u"\u03BCs (From data file ")
 
-        self.timezero_checkbox = QtGui.QCheckBox(self)
+        self.timezero_checkbox = QtWidgets.QCheckBox(self)
         self.timezero_checkbox.setObjectName("timeZeroCheckbox")
         self.timezero_checkbox.setChecked(True)
 
-        self.timezero_label_2 = QtGui.QLabel(self)
+        self.timezero_label_2 = QtWidgets.QLabel(self)
         self.timezero_label_2.setObjectName("timeZeroLabel")
         self.timezero_label_2.setText(" )")
 
-        self.horizontal_layout_2 = QtGui.QHBoxLayout()
+        self.horizontal_layout_2 = QtWidgets.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.timezero_unit_label)
@@ -248,29 +248,30 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def setup_first_good_data_row(self):
 
-        self.firstgooddata_label = QtGui.QLabel(self)
+        self.firstgooddata_label = QtWidgets.QLabel(self)
         self.firstgooddata_label.setObjectName("firstgooddataLabel")
         self.firstgooddata_label.setText("First Good Data : ")
 
-        self.firstgooddata_edit = QtGui.QLineEdit(self)
+        self.firstgooddata_edit = QtWidgets.QLineEdit(self)
+
         firstgooddata_validator = QtGui.QRegExpValidator(QtCore.QRegExp(valid_float_regex), self.timezero_edit)
-        self.timezero_edit.setValidator(firstgooddata_validator)
+        self.firstgooddata_edit.setValidator(firstgooddata_validator)
         self.firstgooddata_edit.setObjectName("firstgooddataEdit")
         self.firstgooddata_edit.setText("")
 
-        self.firstgooddata_unit_label = QtGui.QLabel(self)
+        self.firstgooddata_unit_label = QtWidgets.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
         self.firstgooddata_unit_label.setText(u" \u03BCs (From data file ")
 
-        self.firstgooddata_checkbox = QtGui.QCheckBox(self)
+        self.firstgooddata_checkbox = QtWidgets.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")
         self.firstgooddata_checkbox.setChecked(True)
 
-        self.firstgooddata_label_2 = QtGui.QLabel(self)
+        self.firstgooddata_label_2 = QtWidgets.QLabel(self)
         self.firstgooddata_label_2.setObjectName("timeZeroLabel")
         self.firstgooddata_label_2.setText(" )")
 
-        self.horizontal_layout_3 = QtGui.QHBoxLayout()
+        self.horizontal_layout_3 = QtWidgets.QHBoxLayout()
         self.horizontal_layout_3.setObjectName("horizontalLayout3")
         self.horizontal_layout_3.addSpacing(10)
         self.horizontal_layout_3.addWidget(self.firstgooddata_unit_label)
@@ -311,44 +312,44 @@ class InstrumentWidgetView(QtGui.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_dead_time_row(self):
-        self.deadtime_label = QtGui.QLabel(self)
+        self.deadtime_label = QtWidgets.QLabel(self)
         self.deadtime_label.setObjectName("deadTimeLabel")
         self.deadtime_label.setText("Dead Time : ")
 
-        self.deadtime_selector = QtGui.QComboBox(self)
+        self.deadtime_selector = QtWidgets.QComboBox(self)
         self.deadtime_selector.setObjectName("deadTimeSelector")
         self.deadtime_selector.addItems(["None", "From data file", "From table workspace", "From other file"])
 
-        self.deadtime_label_2 = QtGui.QLabel(self)
+        self.deadtime_label_2 = QtWidgets.QLabel(self)
         self.deadtime_label_2.setObjectName("deadTimeFileLabel")
         self.deadtime_label_2.setText("Dead Time Workspace : ")
 
-        self.deadtime_label_3 = QtGui.QLabel(self)
+        self.deadtime_label_3 = QtWidgets.QLabel(self)
         self.deadtime_label_3.setObjectName("deadTimeInfoLabel")
         self.deadtime_label_3.setText("")
 
-        self.deadtime_file_selector = QtGui.QComboBox(self)
+        self.deadtime_file_selector = QtWidgets.QComboBox(self)
         self.deadtime_file_selector.setObjectName("deadTimeCombo")
         self.deadtime_file_selector.addItem("None")
         self.deadtime_file_selector.setToolTip("Select a table which is loaded into the ADS.")
 
-        self.deadtime_browse_button = QtGui.QPushButton(self)
+        self.deadtime_browse_button = QtWidgets.QPushButton(self)
         self.deadtime_browse_button.setObjectName("deadTimeBrowseButton")
         self.deadtime_browse_button.setText("Browse")
         self.deadtime_browse_button.setToolTip("Browse for a .nxs file to load dead times from. If valid, the "
                                                "dead times will be saved as a table, and automatically selected "
                                                "as the dead time for the current data.")
 
-        self.horizontal_layout_4 = QtGui.QHBoxLayout()
+        self.horizontal_layout_4 = QtWidgets.QHBoxLayout()
         self.horizontal_layout_4.setObjectName("horizontalLayout3")
         self.horizontal_layout_4.addSpacing(10)
         self.horizontal_layout_4.addWidget(self.deadtime_label_3)
 
-        self.dead_time_file_layout = QtGui.QHBoxLayout()
+        self.dead_time_file_layout = QtWidgets.QHBoxLayout()
         self.dead_time_file_layout.addWidget(self.deadtime_browse_button)
         self.dead_time_file_layout.addStretch(0)
 
-        self.dead_time_other_file_label = QtGui.QLabel(self)
+        self.dead_time_other_file_label = QtWidgets.QLabel(self)
         self.dead_time_other_file_label.setText("From other file : ")
 
         self.layout.addWidget(self.deadtime_label, 3, 0)
@@ -460,25 +461,25 @@ class InstrumentWidgetView(QtGui.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_rebin_row(self):
-        self.rebin_label = QtGui.QLabel(self)
+        self.rebin_label = QtWidgets.QLabel(self)
         self.rebin_label.setObjectName("rebinLabel")
         self.rebin_label.setText("Rebin : ")
 
-        self.rebin_selector = QtGui.QComboBox(self)
+        self.rebin_selector = QtWidgets.QComboBox(self)
         self.rebin_selector.setObjectName("rebinSelector")
         self.rebin_selector.addItems(["None", "Fixed", "Variable"])
 
-        self.rebin_steps_label = QtGui.QLabel(self)
+        self.rebin_steps_label = QtWidgets.QLabel(self)
         self.rebin_steps_label.setText("Steps : ")
 
-        self.rebin_steps_edit = QtGui.QLineEdit(self)
+        self.rebin_steps_edit = QtWidgets.QLineEdit(self)
         int_validator = QtGui.QDoubleValidator()
         self.rebin_steps_edit.setValidator(int_validator)
         self.rebin_steps_edit.setToolTip('Value to scale current bin width by.')
 
-        self.rebin_variable_label = QtGui.QLabel(self)
+        self.rebin_variable_label = QtWidgets.QLabel(self)
         self.rebin_variable_label.setText("Bin Boundaries : ")
-        self.rebin_variable_edit = QtGui.QLineEdit(self)
+        self.rebin_variable_edit = QtWidgets.QLineEdit(self)
         self.rebin_variable_edit.setToolTip('A comma separated list of first bin boundary, width, last bin boundary.\n'
                                             'Optionally this can be followed by a comma and more widths and last boundary pairs.\n'
                                             'Optionally this can also be a single number, which is the bin width.\n'
@@ -489,7 +490,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         variable_validator = QtGui.QRegExpValidator(QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
-        self.horizontal_layout_5 = QtGui.QHBoxLayout()
+        self.horizontal_layout_5 = QtWidgets.QHBoxLayout()
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
         self.horizontal_layout_5.addSpacing(10)
 

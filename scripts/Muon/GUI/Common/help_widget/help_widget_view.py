@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
+from qtpy import QtGui, QtWidgets
 import Muon.GUI.Common.message_box as message_box
 from qtpy import PYQT4
 
@@ -22,7 +22,7 @@ if PYQT4:
         pass
 
 
-class HelpWidgetView(QtGui.QWidget):
+class HelpWidgetView(QtWidgets.QWidget):
 
     @staticmethod
     def warning_popup(message):
@@ -37,19 +37,19 @@ class HelpWidgetView(QtGui.QWidget):
         self.setObjectName("HelpWidget")
         self.resize(500, 100)
 
-        self.help_label = QtGui.QLabel(self)
+        self.help_label = QtWidgets.QLabel(self)
         self.help_label.setObjectName("helpLabel")
         self.help_label.setText("Help : ")
 
-        self.help_button = QtGui.QToolButton(self)
+        self.help_button = QtWidgets.QToolButton(self)
         self.help_button.setObjectName("helpButton")
         self.help_button.setText("?")
 
-        self.manage_user_dir_button = QtGui.QPushButton(self)
+        self.manage_user_dir_button = QtWidgets.QPushButton(self)
         self.manage_user_dir_button.setObjectName("manageUserDirectoriesButton")
         self.manage_user_dir_button.setText("Manage User Directories")
 
-        self.horizontal_layout = QtGui.QHBoxLayout()
+        self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.help_label)
         self.horizontal_layout.addWidget(self.help_button)
