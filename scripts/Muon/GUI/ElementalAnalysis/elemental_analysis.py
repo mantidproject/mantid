@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-from qtpy import QtGui, QtWidgets
+from qtpy import QtWidgets
 from copy import deepcopy
 
 from six import iteritems

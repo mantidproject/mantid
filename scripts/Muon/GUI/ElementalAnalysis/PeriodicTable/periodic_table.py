@@ -280,7 +280,7 @@ class _ElementButton(QtWidgets.QPushButton):
         self.setCheckable(0)
 
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                          QtWidgets.QSizePolicy.Expanding))
+                                                 QtWidgets.QSizePolicy.Expanding))
 
         self.selected = False
         self.current = False
