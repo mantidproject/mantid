@@ -5,13 +5,16 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ProgressText.h"
-
+#include "MantidKernel/Logger.h"
 #include <atomic>
 #include <iomanip>
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {
+
+namespace {
+  Logger logger("ProgressText");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -36,7 +39,7 @@ ProgressText::ProgressText(double start, double end, int nsteps, bool newLines)
  */
 ProgressText::~ProgressText() {
   if (!m_newLines)
-    std::cout << '\n';
+    logger.debug() << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -56,21 +59,21 @@ void ProgressText::doReport(const std::string &msg) {
 
   // Return at the start of the line if not doing new lines
   if (!m_newLines)
-    std::cout << "\r";
+    logger.debug() << "\r";
 
   // Put a line of up to 40 *; spaces otherwise.
   for (int i = 0; i < 40; i++)
-    std::cout << ((i * 2.5 < pct) ? "*" : " ");
-  std::cout << " " << std::setw(3) << pct << " % " << msg << "  ";
+    logger.debug() << ((i * 2.5 < pct) ? "*" : " ");
+  logger.debug() << " " << std::setw(3) << pct << " % " << msg << "  ";
 
   if (!m_newLines) {
     // Overwrite the rest of the last message
     for (size_t i = msg.size(); i < m_lastMsgLength; i++)
-      std::cout << " ";
+      logger.debug() << " ";
     // Update the console
-    std::cout.flush();
+    logger.debug().flush();
   } else
-    std::cout << '\n';
+    logger.debug() << '\n';
 
   m_lastMsgLength = msg.size();
 

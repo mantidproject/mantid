@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/max.hpp>
@@ -16,11 +17,13 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {
 namespace Kernel {
+namespace {
+  Logger logger("Statistics");
+}
 
 using std::string;
 using std::vector;
@@ -299,7 +302,7 @@ Rfactor getRFactor(const std::vector<double> &obsI,
       sumdenom += tempden;
 
       if (tempnom != tempnom || tempden != tempden) {
-        std::cout << "***** Error! ****** Data indexed " << i << " is NaN. "
+        logger.error() << "***** Error! ****** Data indexed " << i << " is NaN. "
                   << "i = " << i << ": cal = " << calI[i] << ", obs = " << obs_i
                   << ", weight = " << weight << ". \n";
       }
@@ -311,7 +314,7 @@ Rfactor getRFactor(const std::vector<double> &obsI,
   rfactor.Rwp = std::sqrt(sumnom / sumdenom);
 
   if (rfactor.Rwp != rfactor.Rwp)
-    std::cout << "Rwp is NaN.  Denominator = " << sumnom
+    logger.debug() << "Rwp is NaN.  Denominator = " << sumnom
               << "; Nominator = " << sumdenom << ". \n";
 
   return rfactor;
