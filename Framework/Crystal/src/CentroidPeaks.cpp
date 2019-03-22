@@ -106,11 +106,11 @@ void CentroidPeaks::integrate() {
     int col = peak.getCol();
     int row = peak.getRow();
     int pixelID = peak.getDetectorID();
-    auto detid_iterator = wi_to_detid_map.find(pixelID);
-    if (detid_iterator == wi_to_detid_map.end()) {
+    auto detidIterator = wi_to_detid_map.find(pixelID);
+    if (detidIterator == wi_to_detid_map.end()) {
       continue;
     }
-    size_t workspaceIndex = detid_iterator->second;
+    size_t workspaceIndex = detidIterator->second;
     double TOFPeakd = peak.getTOF();
     const auto &X = inWS->x(workspaceIndex);
     int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
@@ -159,8 +159,8 @@ void CentroidPeaks::integrate() {
     // Set wavelength to change tof for peak object
     if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
-      detid_iterator = wi_to_detid_map.find(findPixelID(bankName, col, row));
-      workspaceIndex = (detid_iterator->second);
+      detidIterator = wi_to_detid_map.find(findPixelID(bankName, col, row));
+      workspaceIndex = (detidIterator->second);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
       timeflight.push_back(inWS->x(workspaceIndex)[chan]);
