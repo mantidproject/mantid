@@ -224,10 +224,20 @@ Clang-tidy
 Mantid has built clang-tidy support into cmake. This allows a user to detect and fix code which does not follow best practices,
 such as unused parameters or not using range-based for loops.
 
-cmake-gui
-~~~~~~~~~
+Installing
+~~~~~~~~~~
 
-Open up the gui and search for *clang-tidy* parameters. There are several relevant options:
+Mantid does not come packaged with clang-tidy. You can install clang-tidy `here <http://releases.llvm.org/download.html>`_.
+
+Alternatively, for **Ubuntu** users, run ``sudo apt-get install clang-tidy`` in the command line.
+
+Setup
+~~~~~
+
+In the cmake gui, find the ``CLANG_TIDY_EXE`` parameter. If you are a non-Linux developer, you may have to manually point to your clang-tidy install.
+Configure, and check the cmake log for the message `clang-tidy found`. If the `clang-tidy not found` warning was posted instead then it has not worked.
+
+Once you have clang-tidy, there are several relevant parameters you will want to change:
 
 - ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support.
 - ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. The full list can be seen `here <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
