@@ -91,6 +91,13 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
 
+    def toggle_fit_button_checked(self):
+        fit_action = self._actions['toggle_fit']
+        if fit_action.isChecked():
+            fit_action.setChecked(False)
+        else:
+            fit_action.setChecked(True)
+
     def trigger_fit_toggle_action(self):
         self._actions['toggle_fit'].trigger()
 
