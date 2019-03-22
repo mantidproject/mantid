@@ -22,7 +22,6 @@ set ( PY_FILES
 #                      PYTHON_PKGROOT_INSTALL_FILES )
 # Generate the version module
 set ( VERSION_PY pyversion )
-# set ( BUILDDIR_FILE mantidbuild )
 # Build version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py )
 message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py")

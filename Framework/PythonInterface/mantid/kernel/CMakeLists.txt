@@ -197,7 +197,8 @@ endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################
-mtd_install_targets( TARGETS PythonKernelModule INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel )
+# This tells the installer where to put the .pyd's
+mtd_install_targets( TARGETS PythonKernelModule INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR} )
 
 # Pure Python files
 mtd_install_files( FILES ${PY_FILES} INSTALL_DIRS ${BIN_DIR}/mantid/kernel ${WORKBENCH_BIN_DIR}/mantid/kernel)

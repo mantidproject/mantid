@@ -105,6 +105,7 @@ add_subdirectory ( mantid )
 
 include ( PythonPackageTargetFunctions )
 
+# Adds `mantid` as a target in the `MantidFramework/Python` folder
 add_python_package ( mantid )
 set_property ( TARGET mantid PROPERTY FOLDER "MantidFramework/Python" )
 add_dependencies ( mantid PythonInterfaceCore PythonKernelModule
