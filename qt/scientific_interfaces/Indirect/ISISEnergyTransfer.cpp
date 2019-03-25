@@ -284,12 +284,15 @@ bool ISISEnergyTransfer::validate() {
 
 bool ISISEnergyTransfer::numberInCorrectRange(
     std::size_t const &spectraNumber) const {
-  auto const instrumentDetails = getInstrumentDetails();
-  auto const spectraMin =
-      static_cast<std::size_t>(instrumentDetails["spectra-min"].toInt());
-  auto const spectraMax =
-      static_cast<std::size_t>(instrumentDetails["spectra-max"].toInt());
-  return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+  if (hasInstrumentDetail("spectra-min") &&
+      hasInstrumentDetail("spectra-max")) {
+    auto const spectraMin =
+        static_cast<std::size_t>(getInstrumentDetail("spectra-min").toInt());
+    auto const spectraMax =
+        static_cast<std::size_t>(getInstrumentDetail("spectra-max").toInt());
+    return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+  }
+  return false;
 }
 
 QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
@@ -489,9 +492,6 @@ void ISISEnergyTransfer::setInstrumentDefault(
   auto const instrumentName = getInstrumentDetail(instDetails, "instrument");
   auto const specMin = getInstrumentDetail(instDetails, "spectra-min").toInt();
   auto const specMax = getInstrumentDetail(instDetails, "spectra-max").toInt();
-  auto const eFixed = getInstrumentDetail(instDetails, "Efixed", false);
-  auto const rebinDefault =
-      getInstrumentDetail(instDetails, "rebin-default", false);
 
   // Set the search instrument for runs
   m_uiForm.dsRunFiles->setInstrumentOverride(instrumentName);
@@ -506,15 +506,6 @@ void ISISEnergyTransfer::setInstrumentDefault(
   includeExtraGroupingOption(
       allowDefaultGroupingInstruments.contains(instrumentName), "Default");
 
-  // if (instDetails["spectra-min"].isEmpty() ||
-  //    instDetails["spectra-max"].isEmpty()) {
-  //  emit showMessageBox("Could not gather necessary data from parameter
-  //  file."); return;
-  //}
-
-  // Set spectra min/max for spinners in UI
-  // const int specMin = instDetails["spectra-min"].toInt();
-  // const int specMax = instDetails["spectra-max"].toInt();
   // Spectra spinners
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
@@ -533,10 +524,14 @@ void ISISEnergyTransfer::setInstrumentDefault(
   m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMax->setValue(1);
 
-  m_uiForm.spEfixed->setValue(!eFixed.isEmpty() ? eFixed.toDouble() : 0.0);
+  m_uiForm.spEfixed->setValue(
+      hasInstrumentDetail(instDetails, "Efixed")
+          ? getInstrumentDetail(instDetails, "Efixed").toDouble()
+          : 0.0);
 
   // Default rebinning parameters can be set in instrument parameter file
-  if (!rebinDefault.isEmpty()) {
+  if (hasInstrumentDetail(instDetails, "rebin-default")) {
+    auto const rebinDefault = getInstrumentDetail(instDetails, "rebin-default");
     m_uiForm.leRebinString->setText(rebinDefault);
     m_uiForm.ckDoNotRebin->setChecked(false);
     auto const rbp = rebinDefault.split(",", QString::SkipEmptyParts);
@@ -556,24 +551,22 @@ void ISISEnergyTransfer::setInstrumentDefault(
     m_uiForm.leRebinString->setText("");
   }
 
-  if (!instDetails["cm-1-convert-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
-    m_uiForm.ckCm1Units->setChecked(defaultOptions);
-  }
+  setInstrumentCheckBoxProperty(m_uiForm.ckCm1Units, instDetails,
+                                "cm-1-convert-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckSaveNexus, instDetails,
+                                "save-nexus-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckSaveASCII, instDetails,
+                                "save-ascii-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckFold, instDetails,
+                                "fold-frames-choice");
+}
 
-  if (!instDetails["save-nexus-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["save-nexus-choice"] == "true";
-    m_uiForm.ckSaveNexus->setChecked(defaultOptions);
-  }
-
-  if (!instDetails["save-ascii-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["save-ascii-choice"] == "true";
-    m_uiForm.ckSaveASCII->setChecked(defaultOptions);
-  }
-
-  if (!instDetails["fold-frames-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["fold-frames-choice"] == "true";
-    m_uiForm.ckFold->setChecked(defaultOptions);
+void ISISEnergyTransfer::setInstrumentCheckBoxProperty(
+    QCheckBox *checkbox, QMap<QString, QString> const &instDetails,
+    QString const &instrumentProperty) {
+  if (hasInstrumentDetail(instDetails, instrumentProperty)) {
+    auto const value = getInstrumentDetail(instDetails, instrumentProperty);
+    checkbox->setChecked(value == "true");
   }
 }
 

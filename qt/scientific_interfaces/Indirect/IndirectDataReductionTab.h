@@ -82,12 +82,13 @@ protected:
                            std::string reflection = "");
 
   QMap<QString, QString> getInstrumentDetails() const;
-  QString getInstrumentDetail(QString const &key,
-                              bool const &validateDetail = true) const;
+  QString getInstrumentDetail(QString const &key) const;
   QString getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
-                              QString const &key,
-                              bool const &validateDetail = true) const;
-  void validateInstrumentDetail(QString const &key, QString const &value) const;
+                              QString const &key) const;
+  void validateInstrumentDetail(QString const &key) const;
+  bool hasInstrumentDetail(QString const &key) const;
+  bool hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                           QString const &key) const;
   MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
   QString getInstrumentName() const;
   QString getAnalyserName() const;

@@ -102,33 +102,37 @@ QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
   return m_idrUI->getInstrumentDetails();
 }
 
-QString IndirectDataReductionTab::getInstrumentDetail(
-    QString const &key, bool const &validateDetail) const {
-  return getInstrumentDetail(getInstrumentDetails(), key, validateDetail);
+QString
+IndirectDataReductionTab::getInstrumentDetail(QString const &key) const {
+  return getInstrumentDetail(getInstrumentDetails(), key);
 }
 
 QString IndirectDataReductionTab::getInstrumentDetail(
-    QMap<QString, QString> const &instrumentDetails, QString const &key,
-    bool const &validateDetail) const {
-  auto const instrumentDetail = instrumentDetails[key];
-  if (validateDetail)
-    validateInstrumentDetail(key, instrumentDetail);
-  return instrumentDetail;
+    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
+  validateInstrumentDetail(key);
+  return instrumentDetails[key];
 }
 
 void IndirectDataReductionTab::validateInstrumentDetail(
-    QString const &key, QString const &value) const {
+    QString const &key) const {
   auto const instrumentName = getInstrumentName().toStdString();
 
   if (instrumentName.empty())
-    throw std::invalid_argument(
-        "No instrument had been found. Please check that a valid "
-        "facility and instrument has been set.");
-  else if (value.isEmpty())
-    throw std::invalid_argument(
-        "No " + key.toStdString() + " found for the " + instrumentName +
-        " instrument. Please check that a valid facility and "
-        "instrument has been set.");
+    throw std::runtime_error(
+        "Please select a valid facility and/or instrument.");
+  else if (!hasInstrumentDetail(key))
+    throw std::runtime_error("Could not find " + key.toStdString() +
+                             " for the " + instrumentName +
+                             " instrument. Please select a valid instrument.");
+}
+
+bool IndirectDataReductionTab::hasInstrumentDetail(QString const &key) const {
+  return hasInstrumentDetail(getInstrumentDetails(), key);
+}
+
+bool IndirectDataReductionTab::hasInstrumentDetail(
+    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
+  return instrumentDetails.contains(key) && !instrumentDetails[key].isEmpty();
 }
 
 /**
