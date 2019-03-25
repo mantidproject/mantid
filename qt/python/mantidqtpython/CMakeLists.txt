@@ -1,4 +1,3 @@
-#
 # Python bindings for legacy mantidqtpython library This is a Qt4-only module
 # and serves to support MantidPlot alone.
 include(SipQtTargetFunctions)
@@ -128,8 +127,5 @@ if(MSVC)
     COMMENT "Copying debug PyQt4 to bin")
 endif()
 
-#
 # Installation settings
-#
-
 install(TARGETS mantidqtpython DESTINATION ${BIN_DIR})

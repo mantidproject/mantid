@@ -1,6 +1,6 @@
 # This file manages building/installation of the mantidqt and mantidqtpython
 # Python wrappers.
-#
+
 include(PythonPackageTargetFunctions)
 
 # Legacy wrappers for MantidPlot
@@ -8,10 +8,7 @@ if(ENABLE_MANTIDPLOT)
   add_subdirectory(mantidqtpython)
 endif()
 
-#
 # mantidqt
-#
-
 if(ENABLE_WORKBENCH)
   # The default value is just an empty string - this prevents a Python syntax
   # error when not on Windows Configure utils.qt.plugins file for build. It is
@@ -60,9 +57,8 @@ if(ENABLE_WORKBENCH)
       COMMENT "Copying debug PyQt5 to bin/Debug")
   endif()
 
-  #
+ 
   # Testing
-  #
 
   # ctest targets
   set(

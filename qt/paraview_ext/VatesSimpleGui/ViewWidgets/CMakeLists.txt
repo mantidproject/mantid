@@ -155,7 +155,7 @@ if(SQUISH_FOUND)
     )
   set(TEST_SUITES
       test/suite_MDEventWorkspace
-	  test/suite_MDHistoWorkspace)
+      test/suite_MDHistoWorkspace)
 
   squish_add_test_suite(${TEST_SUITES})
 
