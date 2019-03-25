@@ -43,8 +43,8 @@
 #include <utility>
 #include <vector>
 
-using Poco::XML::Document;
 using Poco::XML::DOMParser;
+using Poco::XML::Document;
 using Poco::XML::Element;
 
 namespace Mantid {

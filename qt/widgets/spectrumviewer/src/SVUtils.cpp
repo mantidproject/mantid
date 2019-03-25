@@ -7,11 +7,11 @@
 #include <cmath>
 #include <sstream>
 
-#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 namespace {
-  Mantid::Kernel::Logger logger("SVUtils");
+Mantid::Kernel::Logger logger("SVUtils");
 }
 namespace MantidQt {
 namespace SpectrumView {

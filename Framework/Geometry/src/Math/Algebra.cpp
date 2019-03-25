@@ -25,7 +25,7 @@ namespace Mantid {
 
 namespace Geometry {
 namespace {
-  Kernel::Logger logger("Algebra");
+Kernel::Logger logger("Algebra");
 }
 
 std::ostream &operator<<(std::ostream &OX, const Algebra &A)

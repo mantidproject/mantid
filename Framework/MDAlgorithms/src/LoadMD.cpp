@@ -294,7 +294,8 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
-    g_log.information() << " start: " << start[0] << " size: " << size[0] << '\n';
+    g_log.information() << " start: " << start[0] << " size: " << size[0]
+                        << '\n';
   }
   m_file->closeData();
 }

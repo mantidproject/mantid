@@ -226,7 +226,8 @@ void RefinePowderInstrumentParameters::exec() {
 /** Fit instrument parameters.  It is a straight forward fitting to
  */
 void RefinePowderInstrumentParameters::fitInstrumentParameters() {
-  g_log.debug() << "=========== Method [FitInstrumentParameters] ===============\n";
+  g_log.debug()
+      << "=========== Method [FitInstrumentParameters] ===============\n";
 
   // 1. Initialize the fitting function
   m_Function = boost::make_shared<ThermalNeutronDtoTOFFunction>();
@@ -264,7 +265,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   double homchi2 =
       calculateD2TOFFunction(m_Function, domain, values, rawY, rawE);
   g_log.debug() << "Fit Starting Value:  Chi^2 (GSL) = " << gslchi2
-       << ",  Chi2^2 (Home) = " << homchi2 << '\n';
+                << ",  Chi2^2 (Home) = " << homchi2 << '\n';
 
   // 3. Fix parameters that are not listed in parameter-to-fit.  Unfix the rest
   size_t numparams = funparamnames.size();
@@ -295,7 +296,8 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   for (size_t i = 0; i < m_dataWS->x(0).size(); ++i)
     outss << m_dataWS->x(0)[i] << "\t\t" << m_dataWS->y(0)[i] << "\t\t"
           << m_dataWS->e(0)[i] << '\n';
-  g_log.debug() << "Input Peak Position Workspace To Fit: \n" << outss.str() << '\n';
+  g_log.debug() << "Input Peak Position Workspace To Fit: \n"
+                << outss.str() << '\n';
 
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
@@ -319,7 +321,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
   g_log.debug() << "Fit Result (GSL):  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << '\n';
+                << "; Fit Status = " << fitstatus << '\n';
 
   API::IFunction_sptr fitfunc = fitalg->getProperty("Function");
 
@@ -446,7 +448,7 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
   g_log.debug() << "Function calculation [L.M]:  Chi^2 = " << chi2
-       << "; Fit Status = " << fitstatus << '\n';
+                << "; Fit Status = " << fitstatus << '\n';
 
   return chi2;
 }
@@ -545,7 +547,7 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
   // Calcualte the function's initial statistic
   m_BestGSLChi2 = calculateFunctionStatistic(m_Function, m_dataWS, 0);
   g_log.debug() << "Function with starting values has Chi2 = " << m_BestGSLChi2
-       << " (GSL L.M) \n";
+                << " (GSL L.M) \n";
 
   const auto &X = m_dataWS->x(0);
   const auto &rawY = m_dataWS->y(0);
@@ -597,7 +599,8 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
         func4fit.get(), parname, lowerb, upperb);
     func4fit->addConstraint(std::move(newconstraint));
   }
-  g_log.debug() << "Function for fitting in MC: " << func4fit->asString() << '\n';
+  g_log.debug() << "Function for fitting in MC: " << func4fit->asString()
+                << '\n';
 
   // 4. Do MC loops
   double curchi2 =

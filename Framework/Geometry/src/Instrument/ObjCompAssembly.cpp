@@ -459,7 +459,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
     II[2][0] = Ixz;
     II[2][1] = Iyz;
     II[2][2] = Izz;
-    g_log.debug()<< "Inertia matrix: " << II << II.determinant() << '\n';
+    g_log.debug() << "Inertia matrix: " << II << II.determinant() << '\n';
     II.Diagonalise(Vec, D);
     g_log.debug() << "Vectors: " << Vec << '\n';
     g_log.debug() << "Moments: " << D << '\n';

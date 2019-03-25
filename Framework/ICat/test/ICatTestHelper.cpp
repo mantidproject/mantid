@@ -8,7 +8,7 @@
 #include "MantidKernel/Logger.h"
 
 namespace {
-  Mantid::Kernel::Logger logger("ICatTest");
+Mantid::Kernel::Logger logger("ICatTest");
 }
 
 namespace ICatTestHelper {

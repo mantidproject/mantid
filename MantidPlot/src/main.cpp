@@ -168,7 +168,8 @@ int main(int argc, char **argv) {
     QString str(argv[1]);
     if (str == "-v" || str == "--version") {
       logger.information() << Mantid::Kernel::MantidVersion::version() << " ("
-                << Mantid::Kernel::MantidVersion::releaseDate() << ")\n";
+                           << Mantid::Kernel::MantidVersion::releaseDate()
+                           << ")\n";
       exit(0);
     } else if (str == "-r" ||
                str == "--revision") // Print abbreviated git SHA-1

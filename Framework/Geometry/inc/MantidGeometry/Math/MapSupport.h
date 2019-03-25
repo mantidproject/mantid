@@ -21,7 +21,7 @@
 #include "MantidKernel/Logger.h"
 
 namespace {
-  Mantid::Kernel::Logger logger("MapSupport");
+Mantid::Kernel::Logger logger("MapSupport");
 }
 namespace MapSupport {
 /**

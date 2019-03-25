@@ -278,7 +278,8 @@ private:
       }
       events.addDetectorID(Mantid::detid_t(i));
     }
-    logger.information() << "Number of events: " << numbins * numSpectra << std::endl;
+    logger.information() << "Number of events: " << numbins * numSpectra
+                         << std::endl;
 
     return eventWS;
   }

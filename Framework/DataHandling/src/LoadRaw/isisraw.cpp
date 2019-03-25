@@ -478,10 +478,11 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
 
     if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
       // this will/would be used for memory allocation
-      logger.error() << "Error in u_len value read from file, it would be " << u_len
-                << "; where it is calculated as "
-                   "u_len = ad_data - ad_user - 2, where ad_data: "
-                << add.ad_data << ", ad_user: " << add.ad_user << '\n';
+      logger.error() << "Error in u_len value read from file, it would be "
+                     << u_len
+                     << "; where it is calculated as "
+                        "u_len = ad_data - ad_user - 2, where ad_data: "
+                     << add.ad_data << ", ad_user: " << add.ad_user << '\n';
       return 0;
     }
   }
@@ -503,7 +504,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
         int zero = fseek(file, 4 * ddes[i].nwords, SEEK_CUR);
         if (0 != zero)
           logger.error() << "Failed to seek position in file for index: " << i
-                    << "\n";
+                         << "\n";
       }
     }
   } else if (dhdr.d_comp == 0) {
@@ -562,7 +563,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     int zero = fgetpos(file, &keep_pos);
     if (!zero) {
       logger.error() << "Error when getting file position: " << strerror(errno)
-                << '\n';
+                     << '\n';
       return -1;
     }
 
@@ -570,7 +571,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     zero = fsetpos(file, &add_pos);
     if (!zero) {
       logger.error() << "Error when setting file position: " << strerror(errno)
-                << '\n';
+                     << '\n';
       return -1;
     }
 
@@ -579,7 +580,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     zero = fsetpos(file, &dhdr_pos);
     if (!zero) {
       logger.error() << "Error when setting file position to header: "
-                << strerror(errno) << '\n';
+                     << strerror(errno) << '\n';
       return -1;
     }
 
@@ -587,8 +588,8 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     ioRAW(file, &ddes, ndes, from_file);
     zero = fsetpos(file, &keep_pos);
     if (!zero) {
-      logger.error() << "Error when restoring file position: " << strerror(errno)
-                << '\n';
+      logger.error() << "Error when restoring file position: "
+                     << strerror(errno) << '\n';
       return -1;
     }
   }

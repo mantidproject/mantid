@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Kernel {
 
 namespace {
-  Logger logger("ProgressText");
+Logger logger("ProgressText");
 }
 
 //----------------------------------------------------------------------------------------------

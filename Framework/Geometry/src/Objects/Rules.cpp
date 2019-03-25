@@ -22,17 +22,17 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 
 namespace Geometry {
 
 namespace {
-  Kernel::Logger logger("Rules");
+Kernel::Logger logger("Rules");
 }
 
 int Rule::addToKey(std::vector<int> &AV, const int passN)

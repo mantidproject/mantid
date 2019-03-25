@@ -18,10 +18,10 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Logger.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -46,7 +46,7 @@ namespace Mantid {
 
 namespace Geometry {
 namespace {
-  Kernel::Logger logger("Surface");
+Kernel::Logger logger("Surface");
 }
 
 Surface::Surface()

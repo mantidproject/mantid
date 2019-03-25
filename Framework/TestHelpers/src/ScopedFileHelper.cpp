@@ -12,7 +12,7 @@
 #include "MantidKernel/Logger.h"
 
 namespace {
-  Mantid::Kernel::Logger logger("scoperFileHelper");
+Mantid::Kernel::Logger logger("scoperFileHelper");
 }
 
 namespace ScopedFileHelper {
@@ -89,7 +89,7 @@ ScopedFile::~ScopedFile() {
       // destructors shouldn't throw exceptions so we have to resort to printing
       // an error
       logger.error() << "~ScopedFile() - Error deleting file '" << m_filename
-                << "'\n";
+                     << "'\n";
     }
   }
 }

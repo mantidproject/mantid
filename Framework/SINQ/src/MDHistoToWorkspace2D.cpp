@@ -35,7 +35,7 @@ using namespace Mantid;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Points;
 
-namespace{
+namespace {
 Logger logger("MDHistoToWorkspace2D");
 }
 

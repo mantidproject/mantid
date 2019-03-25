@@ -22,7 +22,7 @@
 namespace Mantid {
 namespace Kernel {
 namespace {
-  Logger logger("Statistics");
+Logger logger("Statistics");
 }
 
 using std::string;
@@ -302,9 +302,11 @@ Rfactor getRFactor(const std::vector<double> &obsI,
       sumdenom += tempden;
 
       if (tempnom != tempnom || tempden != tempden) {
-        logger.error() << "***** Error! ****** Data indexed " << i << " is NaN. "
-                  << "i = " << i << ": cal = " << calI[i] << ", obs = " << obs_i
-                  << ", weight = " << weight << ". \n";
+        logger.error() << "***** Error! ****** Data indexed " << i
+                       << " is NaN. "
+                       << "i = " << i << ": cal = " << calI[i]
+                       << ", obs = " << obs_i << ", weight = " << weight
+                       << ". \n";
       }
     }
   }
@@ -315,7 +317,7 @@ Rfactor getRFactor(const std::vector<double> &obsI,
 
   if (rfactor.Rwp != rfactor.Rwp)
     logger.debug() << "Rwp is NaN.  Denominator = " << sumnom
-              << "; Nominator = " << sumdenom << ". \n";
+                   << "; Nominator = " << sumdenom << ". \n";
 
   return rfactor;
 }

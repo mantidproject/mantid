@@ -92,8 +92,8 @@ void InputHistoryImpl::printAll() {
     const QList<PropertyData> &prop_list = alg.value();
     for (QList<PropertyData>::const_iterator prop = prop_list.begin();
          prop != prop_list.end(); ++prop)
-      logger.information() << prop->name.toStdString() << ": " << prop->value.toStdString()
-                << '\n';
+      logger.information() << prop->name.toStdString() << ": "
+                           << prop->value.toStdString() << '\n';
   }
 }
 

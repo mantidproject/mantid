@@ -18,6 +18,7 @@
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -27,7 +28,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/Logger.h"
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/error_of_mean.hpp>
@@ -47,7 +47,7 @@ namespace Mantid {
 namespace Geometry {
 
 namespace {
-  Kernel::Logger logger("CSGObject");
+Kernel::Logger logger("CSGObject");
 }
 /**
  *  Default constuctor

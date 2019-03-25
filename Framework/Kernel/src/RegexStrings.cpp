@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RegexStrings.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include <algorithm>
 #include <vector>
@@ -16,7 +16,7 @@ namespace Kernel {
 namespace Strings {
 
 namespace {
-  Logger logger("Regex");
+Logger logger("Regex");
 }
 
 /**
