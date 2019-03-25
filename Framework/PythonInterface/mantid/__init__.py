@@ -96,14 +96,14 @@ _warnings.filterwarnings("ignore",category=DeprecationWarning,
 # Load all non-plugin subpackages that contain a C-extension. The boost.python
 # registry will be missing entries if all are not loaded.
 ###############################################################################
-from . import kernel as _kernel
-from . import api as _api
-from . import geometry as _geometry
-from . import dataobjects as _dataobjects
+from mantid import kernel as _kernel
+from mantid import api as _api
+from mantid import geometry as _geometry
+from mantid import dataobjects as _dataobjects
 
 # Make the aliases from each module accessible in a the mantid namespace
-from .kernel._aliases import *
-from .api._aliases import *
+from mantid.kernel._aliases import *
+from mantid.api._aliases import *
 
 # Make the version string accessible in the standard way
 from .kernel import version_str as _version_str

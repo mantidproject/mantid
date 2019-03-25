@@ -11,30 +11,35 @@ api
 Defines Python objects that wrap the C++ API namespace.
 
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+from __future__ import absolute_import
 
+###############################################################################
 # Load the C++ library
-from ..utils import import_mantid
+###############################################################################
+from mantid.utils import _shared_cextension, import_mantid
 
-from ..kernel import _shared_cextension
+# insert all the classes from _api in the mantid.api namespace
 with _shared_cextension():
-    _api = import_mantid('._api', 'mantid.api')
+    _api = import_mantid('._api', 'mantid.api', globals())
+
+###############################################################################
+# Add importAll member to ADS.
+#
+# Must be imported AFTER all the api members
+# have been added to the mantid.api namespace above!
+###############################################################################
+from mantid.api import _adsimports
 
 ###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
-from ._aliases import *
-
-###############################################################################
-# Add importAll member to ADS
-###############################################################################
-from . import _adsimports
+from mantid.api._aliases import *
 
 ###############################################################################
 # Attach additional operators to workspaces
 ###############################################################################
-from . import _workspaceops
+from mantid.api import _workspaceops
+
 _workspaceops.attach_binary_operators_to_workspace()
 _workspaceops.attach_unary_operators_to_workspace()
 _workspaceops.attach_tableworkspaceiterator()

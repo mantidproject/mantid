@@ -18,10 +18,8 @@ import sys
 
 from six import Iterator, get_function_code, iteritems
 
-from mantid.utils import import_mantid
-from ..kernel.funcinspect import customise_func, lhs_info
-
-_api = import_mantid('._api', 'mantid.api')
+from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
+from mantid.kernel.funcinspect import customise_func, lhs_info
 
 
 # ------------------------------------------------------------------------------
@@ -43,7 +41,7 @@ def attach_binary_operators_to_workspace():
                                         inplace, reverse)
 
         op_wrapper.__name__ = attr
-        setattr(_api.Workspace, attr, op_wrapper)
+        setattr(Workspace, attr, op_wrapper)
 
     # Binary operations that workspaces are aware of
     operations = {
@@ -105,17 +103,17 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         output_name = _workspace_op_prefix + str(len(_workspace_op_tmps))
 
     # Do the operation
-    resultws = _api.performBinaryOp(self, rhs, op, output_name, inplace, reverse)
+    resultws = performBinaryOp(self, rhs, op, output_name, inplace, reverse)
 
     # Do we need to clean up
     if clear_tmps:
-        ads = _api.AnalysisDataServiceImpl.Instance()
+        ads = AnalysisDataServiceImpl.Instance()
         for name in _workspace_op_tmps:
             if name in ads and output_name != name:
                 del ads[name]
         _workspace_op_tmps = []
     else:
-        if type(resultws) == _api.WorkspaceGroup:
+        if type(resultws) == WorkspaceGroup:
             # Ensure the members are removed aswell
             members = resultws.getNames()
             for member in members:
@@ -144,7 +142,7 @@ def attach_unary_operators_to_workspace():
             return _do_unary_operation(algorithm, self, result_info)
 
         op_wrapper.__name__ = attr
-        setattr(_api.Workspace, attr, op_wrapper)
+        setattr(Workspace, attr, op_wrapper)
 
     # Binary operations that workspaces are aware of
     operations = {
@@ -181,7 +179,7 @@ def _do_unary_operation(op, self, lhs_vars):
         _workspace_op_tmps.append(output_name)
 
     # Do the operation
-    ads = _api.AnalysisDataServiceImpl.Instance()
+    ads = AnalysisDataServiceImpl.Instance()
 
     # gets the child status correct for PythonAlgorithms
     alg = simpleapi._create_algorithm_object(op)
@@ -220,7 +218,7 @@ def attach_tableworkspaceiterator():
 
         return ITableWorkspaceIter(self)
 
-    setattr(_api.ITableWorkspace, "__iter__", __iter_method)
+    setattr(ITableWorkspace, "__iter__", __iter_method)
 
 
 # ------------------------------------------------------------------------------
@@ -255,8 +253,9 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
                    tuple(signature), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
+        from mantid import api
         for typename in workspace_types:
-            cls = getattr(_api, typename)
+            cls = getattr(api, typename)
             setattr(cls, name, _method_impl)
     else:
-        setattr(_api.Workspace, name, _method_impl)
+        setattr(Workspace, name, _method_impl)
