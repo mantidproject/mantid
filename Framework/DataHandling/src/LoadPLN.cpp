@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {

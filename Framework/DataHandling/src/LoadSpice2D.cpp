@@ -38,14 +38,13 @@
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {
