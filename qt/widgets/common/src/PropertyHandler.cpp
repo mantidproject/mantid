@@ -198,8 +198,8 @@ private:
  */
 void PropertyHandler::initAttributes() {
   std::vector<std::string> attNames = function()->getAttributeNames();
-  for (auto & m_attribute : m_attributes) {
-    m_item->property()->removeSubProperty(m_attribute);
+  for (auto &attribute : m_attributes) {
+    m_item->property()->removeSubProperty(attribute);
   }
   m_attributes.clear();
   m_vectorMembers.clear();
@@ -215,8 +215,8 @@ void PropertyHandler::initAttributes() {
 }
 
 void PropertyHandler::initParameters() {
-  for (auto & m_parameter : m_parameters) {
-    m_item->property()->removeSubProperty(m_parameter);
+  for (auto &parameter : m_parameters) {
+    m_item->property()->removeSubProperty(parameter);
   }
   m_parameters.clear();
   for (size_t i = 0; i < function()->nParams(); i++) {

@@ -51,20 +51,20 @@ void QtDataProcessorOptionsDialog::saveOptions() {
 
   // Iterate through all our bound widgets, pushing their value into the options
   // map
-  for (auto & m_binding : m_bindings) {
-    QString widgetName = m_binding.second;
+  for (auto &binding : m_bindings) {
+    QString widgetName = binding.second;
     if (widgetName.isEmpty())
       continue;
 
     QCheckBox *checkbox = findChild<QCheckBox *>(widgetName);
     if (checkbox) {
-      options[m_binding.first] = checkbox->isChecked();
+      options[binding.first] = checkbox->isChecked();
       continue;
     }
 
     QSpinBox *spinbox = findChild<QSpinBox *>(widgetName);
     if (spinbox) {
-      options[m_binding.first] = spinbox->value();
+      options[binding.first] = spinbox->value();
       continue;
     }
   }

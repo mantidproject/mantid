@@ -125,8 +125,8 @@ void PeriodicTableWidget::ColourTransitionMetals(
 void PeriodicTableWidget::ColourUnknownProperties(
     const QVector<QPushButton *> &UnknownProperties) {
   QString buttonColourStr = "background-color: rgb(255, 0, 0, 255)";
-  for (auto UnknownPropertie : UnknownProperties) {
-    ColourButton(UnknownPropertie, buttonColourStr);
+  for (auto unknownProperty : UnknownProperties) {
+    ColourButton(unknownProperty, buttonColourStr);
     update();
   }
 }
@@ -211,8 +211,8 @@ QString PeriodicTableWidget::getValue() { return getAllCheckedElementsStr(); }
 
 void PeriodicTableWidget::disableButtons(
     QVector<QPushButton *> buttonsToDisable) {
-  for (auto & i : buttonsToDisable) {
-    i->setDisabled(true);
+  for (auto &button : buttonsToDisable) {
+    button->setDisabled(true);
   }
 }
 

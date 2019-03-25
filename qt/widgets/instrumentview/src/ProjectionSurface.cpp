@@ -146,9 +146,9 @@ ProjectionSurface::~ProjectionSurface() {
   if (m_pickImage) {
     delete m_pickImage;
   }
-  for (auto & m_peakShape : m_peakShapes) {
-    if (m_peakShape)
-      delete m_peakShape;
+  for (auto &peakShape : m_peakShapes) {
+    if (peakShape)
+      delete peakShape;
   }
   m_peakShapes.clear();
 }
@@ -592,9 +592,9 @@ void ProjectionSurface::drawPeakComparisonLine(QPainter &painter) const {
  */
 void ProjectionSurface::drawPeakMarkers(QPainter &painter) const {
   auto windowRect = getSurfaceBounds();
-  for (auto & m_peakShape : m_peakShapes) {
-    m_peakShape->setWindow(windowRect, painter.viewport());
-    m_peakShape->draw(painter);
+  for (auto &peakShape : m_peakShapes) {
+    peakShape->setWindow(windowRect, painter.viewport());
+    peakShape->draw(painter);
   }
 }
 
@@ -698,8 +698,8 @@ void ProjectionSurface::loadShapesFromTableWorkspace(
  */
 QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
   QList<PeakMarker2D *> out;
-  for (auto & m_peakShape : m_peakShapes) {
-    out += m_peakShape->getMarkersWithID(detID);
+  for (auto &peakShape : m_peakShapes) {
+    out += peakShape->getMarkersWithID(detID);
   }
   return out;
 }
@@ -739,8 +739,8 @@ void ProjectionSurface::deletePeaksWorkspace(
  */
 void ProjectionSurface::clearPeakOverlays() {
   if (!m_peakShapes.isEmpty()) {
-    for (auto & m_peakShape : m_peakShapes) {
-      delete m_peakShape;
+    for (auto &peakShape : m_peakShapes) {
+      delete peakShape;
     }
     m_peakShapes.clear();
     m_peakShapesStyle = 0;
@@ -781,8 +781,8 @@ void ProjectionSurface::setPeakLabelPrecision(int n) {
     return;
   }
   m_peakLabelPrecision = n;
-  for (auto & m_peakShape : m_peakShapes) {
-    m_peakShape->setPrecision(n);
+  for (auto &peakShape : m_peakShapes) {
+    peakShape->setPrecision(n);
   }
 }
 
@@ -791,8 +791,8 @@ void ProjectionSurface::setPeakLabelPrecision(int n) {
  */
 void ProjectionSurface::setShowPeakRowsFlag(bool on) {
   m_showPeakRows = on;
-  for (auto & m_peakShape : m_peakShapes) {
-    m_peakShape->setShowRowsFlag(on);
+  for (auto &peakShape : m_peakShapes) {
+    peakShape->setShowRowsFlag(on);
   }
 }
 
@@ -801,8 +801,8 @@ void ProjectionSurface::setShowPeakRowsFlag(bool on) {
  */
 void ProjectionSurface::setShowPeakLabelsFlag(bool on) {
   m_showPeakLabels = on;
-  for (auto & m_peakShape : m_peakShapes) {
-    m_peakShape->setShowLabelsFlag(on);
+  for (auto &peakShape : m_peakShapes) {
+    peakShape->setShowLabelsFlag(on);
   }
 }
 
@@ -811,8 +811,8 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on) {
  */
 void ProjectionSurface::setShowPeakRelativeIntensityFlag(bool on) {
   m_showPeakRelativeIntensity = on;
-  for (auto & m_peakShape : m_peakShapes) {
-    m_peakShape->setShowRelativeIntensityFlag(on);
+  for (auto &peakShape : m_peakShapes) {
+    peakShape->setShowRelativeIntensityFlag(on);
   }
 }
 

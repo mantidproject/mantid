@@ -156,9 +156,9 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() {
     table->addColumn("double", "Start X");
     table->addColumn("double", "End X");
 
-    for (auto & m_section : m_sections) {
+    for (auto &section : m_sections) {
       TableRow newRow = table->appendRow();
-      newRow << m_section.first << m_section.second;
+      newRow << section.first << section.second;
     }
 
     return table;

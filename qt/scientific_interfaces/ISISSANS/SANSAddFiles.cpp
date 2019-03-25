@@ -563,9 +563,9 @@ QString SANSAddFiles::createPythonStringList(QString inputString) {
   inputString.replace(" ", "");
   auto inputStringList = inputString.split(delimiter);
 
-  for (auto & it : inputStringList) {
+  for (auto &inputString : inputStringList) {
 
-    formattedString += quotationMark + it + quotationMark + delimiter;
+    formattedString += quotationMark + inputString + quotationMark + delimiter;
   }
 
   formattedString.remove(formattedString.length() - delimiter.length(),

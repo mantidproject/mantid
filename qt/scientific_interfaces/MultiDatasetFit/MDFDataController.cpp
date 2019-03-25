@@ -74,8 +74,8 @@ void DataController::addWorkspace() {
       if (!matrixWorkspaces.empty()) {
         for (auto & matrixWorkspace : matrixWorkspaces) {
           auto name = QString::fromStdString((*matrixWorkspace).getName());
-          for (std::_Vector_iterator<std::_Vector_val<std::_Simple_types<int> > >::value_type & indice : indices) {
-            addWorkspaceSpectrum(name, indice, *matrixWorkspace);
+          for (auto &index : indices) {
+            addWorkspaceSpectrum(name, index, *matrixWorkspace);
           }
         }
         emit spectraAdded(

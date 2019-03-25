@@ -200,20 +200,20 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
   // If the user typed in the wsField ...
   if (m_wsIndexChoice.getList().size() > 0) {
 
-    for (const auto & m_wsName : m_wsNames) {
+    for (const auto &wsName : m_wsNames) {
       std::set<int> intSet = m_wsIndexChoice.getIntSet();
-      plots.insert(m_wsName, intSet);
+      plots.insert(wsName, intSet);
     }
   }
   // Else if the user typed in the spectraField ...
   else if (m_spectraNumChoice.getList().size() > 0) {
-    for (const auto & m_wsName : m_wsNames) {
+    for (const auto &wsName : m_wsNames) {
       // Convert the spectra choices of the user into workspace indices for us
       // to use.
       Mantid::API::MatrixWorkspace_const_sptr ws =
           boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
-                  m_wsName.toStdString()));
+                  wsName.toStdString()));
       if (nullptr == ws)
         continue;
 
@@ -230,7 +230,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
         convertedSet.insert(convertedInt);
       }
 
-      plots.insert(m_wsName, convertedSet);
+      plots.insert(wsName, convertedSet);
     }
   }
 
@@ -1300,7 +1300,7 @@ IntervalList IntervalList::intersect(const IntervalList &a,
   const std::set<int> aInts = a.getIntSet();
   const std::set<int> bInts = b.getIntSet();
 
-  for (std::_Tree_const_iterator<std::_Tree_val<std::_Tree_simple_types<int> > >::value_type aInt : aInts) {
+  for (const auto &aInt : aInts) {
     const bool inIntervalListB = bInts.find(aInt) != bInts.end();
     if (inIntervalListB)
       output.addInterval(aInt);

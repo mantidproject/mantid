@@ -178,8 +178,8 @@ void AlgorithmPropertiesWidget::initLayout() {
 
   // This also deletes the PropertyWidget, which does not actually
   // contain the sub-widgets because they are shared in the grid layout
-  for (auto & m_propWidget : m_propWidgets)
-    m_propWidget->deleteLater();
+  for (auto &propWidget : m_propWidgets)
+    propWidget->deleteLater();
   QCoreApplication::processEvents();
   m_propWidgets.clear();
 

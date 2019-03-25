@@ -761,8 +761,8 @@ void AlgorithmDialog::executeAlgorithmAsync() {
 
   try {
     // Add any custom AlgorithmObservers to the algorithm
-    for (auto & m_observer : m_observers) {
-      m_observer->observeAll(algToExec);
+    for (auto &observer : m_observers) {
+      observer->observeAll(algToExec);
     }
 
     // Only need to observe finish events if we are staying open

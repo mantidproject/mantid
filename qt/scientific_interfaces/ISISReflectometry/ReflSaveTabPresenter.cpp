@@ -188,8 +188,8 @@ void ReflSaveTabPresenter::populateParametersList() {
                                .retrieveWS<MatrixWorkspace>(wsName)
                                ->run()
                                .getProperties();
-  for (auto propertie : properties) {
-    logs.push_back(propertie->name());
+  for (auto property : properties) {
+    logs.push_back(property->name());
   }
   m_view->setParametersList(logs);
 }

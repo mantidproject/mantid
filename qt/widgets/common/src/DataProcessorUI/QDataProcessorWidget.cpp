@@ -440,7 +440,7 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (std::_Tree_const_iterator<std::_Tree_val<std::_Tree_simple_types<int> > >::value_type group : groups) {
+  for (const auto &group : groups) {
     selectionModel->select(ui.viewTable->model()->index(group, 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
@@ -458,8 +458,8 @@ void QDataProcessorWidget::setInstrumentList(const QString &instruments,
   ui.comboProcessInstrument->clear();
 
   QStringList instrList = instruments.split(",");
-  for (auto & it : instrList) {
-    ui.comboProcessInstrument->addItem(it.trimmed());
+  for (auto &instrument : instrList) {
+    ui.comboProcessInstrument->addItem(instrument.trimmed());
   }
 
   int index =

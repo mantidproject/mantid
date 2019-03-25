@@ -295,9 +295,9 @@ void CatalogHelper::showPublishDialog() {
 const std::string CatalogHelper::propertyDocumentation(
     const std::vector<Mantid::Kernel::Property *> &properties,
     const std::string &name) {
-  for (auto propertie : properties) {
-    if (propertie->name() == name) {
-      return propertie->documentation();
+  for (auto property : properties) {
+    if (property->name() == name) {
+      return property->documentation();
     }
   }
   return "";

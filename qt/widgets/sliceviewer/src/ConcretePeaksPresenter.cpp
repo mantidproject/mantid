@@ -205,8 +205,8 @@ void ConcretePeaksPresenter::setVisiblePeaks(
     const std::vector<size_t> &indexes) {
   std::vector<bool> visible(this->m_peaksWS->getNumberPeaks(),
                             false); // assume all invisible
-  for (unsigned long long indexe : indexes) {
-    visible[indexe] =
+  for (const auto index : indexes) {
+    visible[index] =
         true; // make the visible indexes visible. Masking type operation.
   }
   m_viewablePeaks = visible;

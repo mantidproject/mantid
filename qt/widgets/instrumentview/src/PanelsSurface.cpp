@@ -245,8 +245,8 @@ void PanelsSurface::init() {
   spreadBanks();
 
   RectF surfaceRect;
-  for (auto & m_flatBank : m_flatBanks) {
-    RectF rect(m_flatBank->polygon.boundingRect());
+  for (auto &flatBank : m_flatBanks) {
+    RectF rect(flatBank->polygon.boundingRect());
     surfaceRect.unite(rect);
   }
 
@@ -318,7 +318,8 @@ void PanelsSurface::addFlatBankOfDetectors(
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
 #pragma omp parallel for ordered
-  for (unsigned long long detector : detectors) {
+  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
+    auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
 #pragma omp ordered
@@ -354,9 +355,9 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   }
 
   info->polygon = QPolygonF(verts);
-  for (unsigned long long column : columns) {
+  for (auto column : columns) {
     const auto &row = componentInfo.children(column);
-    for (unsigned long long j : row) {
+    for (auto j : row) {
       addDetector(j, ref, index, info->rotation);
     }
   }
@@ -456,11 +457,11 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
-  for (unsigned long long tube : tubes) {
+  for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
-    for (unsigned long long j : children) {
-      addDetector(j, pos0, index, info->rotation);
+    for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
+      addDetector(children[j], pos0, index, info->rotation);
     }
 
     auto &udet0 = m_unwrappedDetectors[children.front()];
@@ -715,9 +716,9 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
  * Remove all found flat banks
  */
 void PanelsSurface::clearBanks() {
-  for (auto & m_flatBank : m_flatBanks) {
-    if (m_flatBank)
-      delete m_flatBank;
+  for (auto &flatBank : m_flatBanks) {
+    if (flatBank)
+      delete flatBank;
   }
   m_flatBanks.clear();
 }

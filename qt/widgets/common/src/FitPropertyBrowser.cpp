@@ -1907,13 +1907,13 @@ QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
                                             QtProperty *prop) const {
   QList<QtBrowserItem *> children = parent->children();
   QtBrowserItem *res = nullptr;
-  for (auto & i : children) {
-    if (i->property() == prop) {
-      return i;
+  for (auto &child : children) {
+    if (child->property() == prop) {
+      return child;
     }
-    QList<QtBrowserItem *> grand_children = i->children();
+    QList<QtBrowserItem *> grand_children = child->children();
     if (grand_children.size() > 0)
-      res = findItem(i, prop);
+      res = findItem(child, prop);
     if (res)
       return res;
   }
@@ -3226,40 +3226,42 @@ void FitPropertyBrowser::minimizerChanged() {
   auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(
       this->minimizer());
   auto &properties = minzer->getProperties();
-  for (auto propertie : properties) {
-    QString propName = QString::fromStdString((*propertie).name());
+  for (auto property : properties) {
+    QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;
     if (auto prp =
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(propertie)) {
+            dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
       prop = m_boolManager->addProperty(propName);
       bool val = *prp;
       m_boolManager->setValue(prop, val);
     } else if (auto prp =
                    dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(
-                       propertie)) {
+                       property)) {
       prop = this->addDoubleProperty(propName);
       double val = *prp;
       m_doubleManager->setValue(prop, val);
     } else if (auto prp =
                    dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(
-                       propertie)) {
+                       property)) {
       prop = m_intManager->addProperty(propName);
       int val = *prp;
       m_intManager->setValue(prop, val);
     } else if (auto prp =
                    dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(
-                       propertie)) {
+                       property)) {
       prop = m_intManager->addProperty(propName);
       size_t val = *prp;
       m_intManager->setValue(prop, static_cast<int>(val));
     } else if (auto prp = dynamic_cast<
-                   Mantid::Kernel::PropertyWithValue<std::string> *>(propertie)) {
+                   Mantid::Kernel::PropertyWithValue<std::string> *>(
+                   property)) {
       prop = m_stringManager->addProperty(propName);
       QString val = QString::fromStdString(prp->value());
       m_stringManager->setValue(prop, val);
-    } else if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(propertie)) {
+    } else if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(property)) {
       prop = m_stringManager->addProperty(propName);
-      m_stringManager->setValue(prop, QString::fromStdString((*propertie).value()));
+      m_stringManager->setValue(prop,
+                                QString::fromStdString((*property).value()));
     } else {
       QMessageBox::warning(this, "MantidPlot - Error",
                            "Type of minimizer's property " + propName +
@@ -3270,7 +3272,7 @@ void FitPropertyBrowser::minimizerChanged() {
     if (!prop)
       continue;
     // set the tooltip from property doc string
-    QString toolTip = QString::fromStdString((*propertie).documentation());
+    QString toolTip = QString::fromStdString((*property).documentation());
     if (!toolTip.isEmpty()) {
       prop->setToolTip(toolTip);
     }

@@ -266,8 +266,8 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
-  for (auto propertie : properties) {
-    logs.push_back(propertie->name());
+  for (auto property : properties) {
+    logs.push_back(property->name());
   }
   m_view->setAvailableLogs(logs);
 

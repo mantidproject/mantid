@@ -195,8 +195,8 @@ void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
     const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
   std::size_t counter = 0;
-  for (const auto & i : fittingData)
-    addInputDataToSimultaneousFit(fitAlgorithm, i, counter);
+  for (const auto &data : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, data, counter);
 }
 
 void addInputDataToSimultaneousFit(
@@ -205,9 +205,8 @@ void addInputDataToSimultaneousFit(
     const std::pair<double, double> &range,
     const std::vector<double> &exclude) {
   std::size_t counter = 0;
-  for (const auto & i : fittingData)
-    addInputDataToSimultaneousFit(fitAlgorithm, i, range, exclude,
-                                  counter);
+  for (const auto &data : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, data, range, exclude, counter);
 }
 
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {

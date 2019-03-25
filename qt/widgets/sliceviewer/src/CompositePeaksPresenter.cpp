@@ -38,8 +38,8 @@ void CompositePeaksPresenter::update() {
     m_default->update();
     return;
   }
-  for (auto & m_subject : m_subjects) {
-    m_subject->update();
+  for (auto &subject : m_subjects) {
+    subject->update();
   }
 }
 
@@ -53,8 +53,8 @@ void CompositePeaksPresenter::updateWithSlicePoint(
     m_default->updateWithSlicePoint(point);
     return;
   }
-  for (auto & m_subject : m_subjects) {
-    m_subject->updateWithSlicePoint(point);
+  for (auto &subject : m_subjects) {
+    subject->updateWithSlicePoint(point);
   }
 }
 
@@ -66,8 +66,8 @@ bool CompositePeaksPresenter::changeShownDim(size_t dimX, size_t dimY) {
     return m_default->changeShownDim(dimX, dimY);
   }
   bool result = true;
-  for (auto & m_subject : m_subjects) {
-    result &= m_subject->changeShownDim(dimX, dimY);
+  for (auto &subject : m_subjects) {
+    result &= subject->changeShownDim(dimX, dimY);
   }
   return result;
 }
@@ -77,8 +77,8 @@ void CompositePeaksPresenter::setNonOrthogonal(bool nonOrthogonalEnabled) {
     m_default->setNonOrthogonal(nonOrthogonalEnabled);
   }
 
-  for (auto &i : m_subjects) {
-    i->setNonOrthogonal(nonOrthogonalEnabled);
+  for (auto &subject : m_subjects) {
+    subject->setNonOrthogonal(nonOrthogonalEnabled);
   }
 }
 /**
@@ -91,8 +91,8 @@ bool CompositePeaksPresenter::isLabelOfFreeAxis(
     return m_default->isLabelOfFreeAxis(label);
   }
   bool result = true;
-  for (const auto & m_subject : m_subjects) {
-    result &= m_subject->isLabelOfFreeAxis(label);
+  for (const auto &subject : m_subjects) {
+    result &= subject->isLabelOfFreeAxis(label);
   }
   return result;
 }
@@ -173,8 +173,8 @@ Return a collection of all referenced workspaces on demand.
 */
 SetPeaksWorkspaces CompositePeaksPresenter::presentedWorkspaces() const {
   SetPeaksWorkspaces allWorkspaces;
-  for (const auto & m_subject : m_subjects) {
-    auto workspacesToAppend = m_subject->presentedWorkspaces();
+  for (const auto &subject : m_subjects) {
+    auto workspacesToAppend = subject->presentedWorkspaces();
     allWorkspaces.insert(workspacesToAppend.begin(), workspacesToAppend.end());
   }
   return allWorkspaces;
@@ -385,8 +385,8 @@ void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
   if (useDefault()) {
     return m_default->setPeakSizeOnProjection(fraction);
   }
-  for (auto & m_subject : m_subjects) {
-    m_subject->setPeakSizeOnProjection(fraction);
+  for (auto &subject : m_subjects) {
+    subject->setPeakSizeOnProjection(fraction);
   }
 }
 
@@ -398,8 +398,8 @@ void CompositePeaksPresenter::peakEditMode(EditMode mode) {
   if (useDefault()) {
     return m_default->peakEditMode(mode);
   }
-  for (auto & m_subject : m_subjects) {
-    m_subject->peakEditMode(mode);
+  for (auto &subject : m_subjects) {
+    subject->peakEditMode(mode);
   }
 }
 
@@ -411,8 +411,8 @@ void CompositePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
   if (useDefault()) {
     return m_default->setPeakSizeIntoProjection(fraction);
   }
-  for (auto & m_subject : m_subjects) {
-    m_subject->setPeakSizeIntoProjection(fraction);
+  for (auto &subject : m_subjects) {
+    subject->setPeakSizeIntoProjection(fraction);
   }
 }
 
@@ -425,8 +425,8 @@ double CompositePeaksPresenter::getPeakSizeOnProjection() const {
     return m_default->getPeakSizeOnProjection();
   }
   double result = 0;
-  for (const auto & m_subject : m_subjects) {
-    double temp = m_subject->getPeakSizeOnProjection();
+  for (const auto &subject : m_subjects) {
+    double temp = subject->getPeakSizeOnProjection();
     if (temp > 0) {
       result = temp;
       break;
@@ -444,8 +444,8 @@ double CompositePeaksPresenter::getPeakSizeIntoProjection() const {
     return m_default->getPeakSizeIntoProjection();
   }
   double result = 0;
-  for (const auto & m_subject : m_subjects) {
-    double temp = m_subject->getPeakSizeIntoProjection();
+  for (const auto &subject : m_subjects) {
+    double temp = subject->getPeakSizeIntoProjection();
     if (temp > 0) {
       result = temp;
       break;
@@ -698,8 +698,8 @@ bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
   }
   // Forward the request onwards
   bool result = false;
-  for (auto & m_subject : m_subjects) {
-    result |= m_subject->deletePeaksIn(box);
+  for (auto &subject : m_subjects) {
+    result |= subject->deletePeaksIn(box);
   }
   return result;
 }
@@ -711,8 +711,8 @@ bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX,
   }
   // Forward the request onwards
   bool result = false;
-  for (auto & m_subject : m_subjects) {
-    result |= m_subject->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+  for (auto &subject : m_subjects) {
+    result |= subject->addPeakAt(plotCoordsPointX, plotCoordsPointY);
   }
   return result;
 }

@@ -618,9 +618,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     auto f = FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
-    for (const auto & categorie : categories) {
-      if ((categorie == "Muon") || (categorie == "General") ||
-          (categorie == "Background"))
+    for (const auto &category : categories) {
+      if ((category == "Muon") || (category == "General") ||
+          (category == "Background"))
         muon = true;
     }
     if (muon) {
