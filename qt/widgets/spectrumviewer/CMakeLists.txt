@@ -48,9 +48,7 @@ set(MOC_FILES
 set(UI_FILES
 	inc/MantidQtWidgets/SpectrumViewer/SpectrumView.ui)
 
-#
 # Main Library Target
-#
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSpectrumViewer
                    QT_VERSION 4
                    SRC ${SRC_FILES}

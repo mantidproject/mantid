@@ -56,7 +56,7 @@ set(QT5_SRC_FILES
     src/SelectFunctionDialog.cpp
     src/SelectWorkspacesDialog.cpp
     src/TextPropertyWidget.cpp
-	src/TSVSerialiser.cpp
+    src/TSVSerialiser.cpp
     src/UserFunctionDialog.cpp
     src/UserSubWindow.cpp
     src/VatesViewerInterface.cpp
@@ -107,8 +107,7 @@ set(QT5_SRC_FILES
     src/QtPropertyBrowser/StringEditorFactory.cpp
     src/QtPropertyBrowser/WorkspaceEditorFactory.cpp)
 
-set(
-  QT5_MOC_FILES
+set(QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -404,8 +403,7 @@ set(SRC_FILES
     src/QtPropertyBrowser/StringEditorFactory.cpp
     src/QtPropertyBrowser/WorkspaceEditorFactory.cpp)
 
-set(
-  MOC_FILES
+set(MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -514,8 +512,7 @@ set(
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set(
-  INC_FILES
+set(INC_FILES
   ${MOC_FILES}
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
@@ -707,9 +704,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
 
-#
 # Target
-#
 if(ENABLE_WORKBENCH)
   # Additional components for this module
   find_package(Qt5
@@ -799,9 +794,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsCommon
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 
-#
 # Testing
-#
 set(TEST_FILES
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
@@ -893,12 +886,10 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsCommonTest
                  PARENT_DEPENDENCIES
                    GUITests)
 
-#
 # Windows: Generate a qt.conf file so that the dev build finds the qt plugins in
 # third party. Done in two steps to get it into the build directory that is
 # selected at build time. This file is NOT packaged. See installers/WinInstaller
 # for the package version.
-#
 if(WIN32 AND ENABLE_MANTIDPLOT)
   set(QT_CONF qt.conf)
   configure_file(qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY)

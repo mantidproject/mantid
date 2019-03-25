@@ -57,9 +57,7 @@ set(UI_FILES
     inc/MantidQtWidgets/LegacyQwt/MWView.ui
     inc/MantidQtWidgets/LegacyQwt/PreviewPlot.ui)
 
-#
 # Target
-#
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsLegacyQwt
                    QT_VERSION 4
                    SRC ${SRC_FILES}
@@ -86,9 +84,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsLegacyQwt
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 
-#
 # Testing
-#
 set(TEST_FILES
     test/ContourPreviewPlotTest.h
     test/MantidColorMapTest.h

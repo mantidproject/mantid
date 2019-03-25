@@ -7,9 +7,7 @@ else(${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3)
   set(extra_options "")
 endif(${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3)
 
-#
 # Now add the packages one-by-one, building up the dependencies as we go
-#
 add_subdirectory(General)
 add_subdirectory(MultiDatasetFit)
 add_subdirectory(Muon)
@@ -19,9 +17,7 @@ add_subdirectory(Indirect)
 add_subdirectory(EnggDiffraction)
 add_subdirectory(DynamicPDF)
 
-#
 # Testing - These should be split out by library
-#
 set(TEST_FILES
     test/ALCBaselineModellingModelTest.h
     test/ALCBaselineModellingPresenterTest.h

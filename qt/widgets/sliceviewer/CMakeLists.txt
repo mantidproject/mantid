@@ -108,9 +108,7 @@ set(UI_FILES
     inc/MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.ui
     inc/MantidQtWidgets/SliceViewer/XYLimitsDialog.ui)
 
-#
 # Main Library Target
-#
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSliceViewer
                    QT_VERSION 4
                    SRC ${SRC_FILES}
@@ -142,10 +140,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSliceViewer
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 
-#
 # Testing
-#
-
 set(TEST_FILES
     test/CompositePeaksPresenterTest.h
     test/CoordinateTransformTest.h

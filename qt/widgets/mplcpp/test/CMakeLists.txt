@@ -1,6 +1,4 @@
-#
 # Unit tests for MplCpp library
-#
 set(TEST_FILES
     ArtistTest.h
     AxesTest.h

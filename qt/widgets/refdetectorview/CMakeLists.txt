@@ -25,9 +25,7 @@ set(MOC_FILES
 set(UI_FILES
 	inc/MantidQtWidgets/RefDetectorView/RefImageView.ui)
 
-#
 # Main Library Target
-#
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsRefDetectorView
                    QT_VERSION 4
                    SRC ${SRC_FILES}
@@ -54,9 +52,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsRefDetectorView
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 
-#
 # DEMO/GUI TESTING APPLICATIONS
-#
 mtd_add_qt_executable(TARGET_NAME RefDetectorViewDemo
                       QT_VERSION 4
                       SRC src/RefDetectorViewDemo.cpp

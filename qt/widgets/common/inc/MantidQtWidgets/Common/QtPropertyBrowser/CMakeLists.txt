@@ -35,26 +35,36 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # qt4_wrap_cpp because the latter produces files with a cxx suffix when
 # QtPropertyBrowser requires cpp
 
-qt4_generate_moc(src/qtpropertybrowser.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp)
-qt4_generate_moc(src/qtpropertymanager.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp)
-qt4_generate_moc(src/qteditorfactory.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp)
-qt4_generate_moc(src/qtvariantproperty.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp)
-qt4_generate_moc(src/qttreepropertybrowser.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp)
-qt4_generate_moc(src/qtbuttonpropertybrowser.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp)
-qt4_generate_moc(src/qtgroupboxpropertybrowser.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp)
-qt4_generate_moc(src/qtpropertymanager.cpp
-                 ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
-qt4_generate_moc(src/qteditorfactory.cpp
-                 ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
-qt4_generate_moc(src/qttreepropertybrowser.cpp
-                 ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
+qt4_generate_moc(
+  src/qtpropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp)
+qt4_generate_moc(
+  src/qtpropertymanager.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertymanager.cpp)
+qt4_generate_moc(
+  src/qteditorfactory.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qteditorfactory.cpp)
+qt4_generate_moc(
+  src/qtvariantproperty.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtvariantproperty.cpp)
+qt4_generate_moc(
+  src/qttreepropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qttreepropertybrowser.cpp)
+qt4_generate_moc(
+  src/qtbuttonpropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtbuttonpropertybrowser.cpp)
+qt4_generate_moc(
+  src/qtgroupboxpropertybrowser.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtgroupboxpropertybrowser.cpp)
+qt4_generate_moc(
+  src/qtpropertymanager.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qtpropertymanager.moc)
+qt4_generate_moc(
+  src/qteditorfactory.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qteditorfactory.moc)
+qt4_generate_moc(
+  src/qttreepropertybrowser.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/qttreepropertybrowser.moc)
 
 set(QTPROPERTYBROWSER_HEADERS_ONLY_MOC
     ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowser.cpp
@@ -73,8 +83,9 @@ set_source_files_properties(${QTPROPERTYBROWSER_HEADERS_ONLY_MOC}
                             HEADER_FILE_ONLY
                             true)
 
-qt4_generate_moc(src/qtpropertybrowserutils_p.h
-                 ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp)
+qt4_generate_moc(
+  src/qtpropertybrowserutils_p.h
+  ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp)
 
 set(QTPROPERTYBROWSER_HEADERS_MOC
     ${CMAKE_CURRENT_BINARY_DIR}/moc_qtpropertybrowserutils_p.cpp)
@@ -95,13 +106,13 @@ set(QTPROPERTYBROWSER_MOC
     ${EXTRA_MOCS})
 
 qt4_add_resources(
-	QTPROPERTYBROWSER_RESOURCES
-	src/qtpropertybrowser.qrc)
+  QTPROPERTYBROWSER_RESOURCES
+  src/qtpropertybrowser.qrc)
 
 set(SRCS
-    ${QTPROPERTYBROWSER_MOC}
-    ${QTPROPERTYBROWSER_SRCS}
-    ${QTPROPERTYBROWSER_RESOURCES})
+  ${QTPROPERTYBROWSER_MOC}
+  ${QTPROPERTYBROWSER_SRCS}
+  ${QTPROPERTYBROWSER_RESOURCES})
 
 add_library(${PROJECT_NAME} SHARED ${SRCS})
 
@@ -135,8 +146,5 @@ elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
   add_definitions(-Wno-unused-but-set-variable)
 endif()
 
-#
 # Installation settings
-#
-
 install(TARGETS ${PROJECT_NAME} DESTINATION ${LIB_DIR})

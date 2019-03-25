@@ -206,9 +206,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 
-#
 # Testing
-#
 set(TEST_FILES
 	test/InstrumentWidgetDecoderTest.h
     test/InstrumentWidgetEncoderTest.h)
