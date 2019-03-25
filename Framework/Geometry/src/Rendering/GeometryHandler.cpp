@@ -113,13 +113,11 @@ void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
 
 void GeometryHandler::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                                     std::vector<Kernel::V3D> &vectors,
-                                    double &innerRadius,
-                                    double &radius,
+                                    double &innerRadius, double &radius,
                                     double &height) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_shapeInfo)
-    m_shapeInfo->getObjectGeometry(type, vectors, innerRadius,
-                                   radius, height);
+    m_shapeInfo->getObjectGeometry(type, vectors, innerRadius, radius, height);
 }
 
 void GeometryHandler::setShapeInfo(detail::ShapeInfo &&shapeInfo) {
