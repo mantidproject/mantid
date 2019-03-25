@@ -382,7 +382,7 @@ bool AlgorithmDialog::setPropertyValues(const QStringList &skipList) {
   // But only if the individual validation passed
   if (allValid) {
     std::map<std::string, std::string> errs = m_algorithm->validateInputs();
-    for (auto & err : errs) {
+    for (auto &err : errs) {
       // only count as an error if the named property exists
       if (m_algorithm->existsProperty(err.first)) {
         const QString pName = QString::fromStdString(err.first);

@@ -162,7 +162,7 @@ void FitOptionsBrowser::createCommonProperties() {
     QStringList minimizers;
 
     // Store them in the m_minimizer enum property
-    for (auto & minimizerOption : minimizerOptions) {
+    for (auto &minimizerOption : minimizerOptions) {
       minimizers << QString::fromStdString(minimizerOption);
     }
     m_enumManager->setEnumNames(m_minimizer, minimizers);
@@ -184,7 +184,7 @@ void FitOptionsBrowser::createCommonProperties() {
         Mantid::API::CostFunctionFactory::Instance().getKeys();
     QStringList costFunctions;
     // Store them in the m_minimizer enum property
-    for (auto & costOption : costOptions) {
+    for (auto &costOption : costOptions) {
       costFunctions << QString::fromStdString(costOption);
     }
     m_enumManager->setEnumNames(m_costFunction, costFunctions);

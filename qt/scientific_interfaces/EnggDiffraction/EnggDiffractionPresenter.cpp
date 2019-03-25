@@ -597,7 +597,7 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
 
 void EnggDiffractionPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
-  for (const auto & msg : msgs) {
+  for (const auto &msg : msgs) {
     g_log.information() << msg << '\n';
   }
 }
@@ -682,7 +682,7 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (char & i : filename) {
+        for (char &i : filename) {
           char *str = &i;
           if (std::isdigit(*str)) {
             run_number += i;
@@ -736,7 +736,7 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (char & i : filename) {
+        for (char &i : filename) {
           char *str = &i;
           if (std::isdigit(*str)) {
             run_number += i;

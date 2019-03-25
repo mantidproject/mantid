@@ -38,7 +38,7 @@ CatalogHelper::getInstrumentList(const std::vector<std::string> &sessionIDs) {
     return catalogAlgorithm->getProperty("InstrumentList");
   } else {
     // Use catalogs for the specified sessions.
-    for (const auto & sessionID : sessionIDs) {
+    for (const auto &sessionID : sessionIDs) {
       catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
@@ -63,7 +63,7 @@ const std::vector<std::string> CatalogHelper::getInvestigationTypeList(
     executeAsynchronously(catalogAlgorithm);
     return catalogAlgorithm->getProperty("InvestigationTypes");
   } else {
-    for (const auto & sessionID : sessionIDs) {
+    for (const auto &sessionID : sessionIDs) {
       catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
@@ -97,7 +97,7 @@ void CatalogHelper::executeSearch(
   if (session.size() == sessionIDs.size()) {
     executeAsynchronously(catalogAlgorithm);
   } else {
-    for (const auto & sessionID : sessionIDs) {
+    for (const auto &sessionID : sessionIDs) {
       catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
@@ -126,7 +126,7 @@ int64_t CatalogHelper::getNumberOfSearchResults(
     executeAsynchronously(catalogAlgorithm);
     return catalogAlgorithm->getProperty("NumberOfSearchResults");
   } else {
-    for (const auto & sessionID : sessionIDs) {
+    for (const auto &sessionID : sessionIDs) {
       catalogAlgorithm->setProperty("Session", sessionID);
       executeAsynchronously(catalogAlgorithm);
     }
@@ -175,7 +175,7 @@ const std::vector<std::string> CatalogHelper::downloadDataFiles(
 
   // For each pair in userSelectedFiles we want to add them to their related
   // vector to pass to the algorithm.
-  for (const auto & userSelectedFile : userSelectedFiles) {
+  for (const auto &userSelectedFile : userSelectedFiles) {
     fileIDs.push_back(userSelectedFile.first);
     fileNames.push_back(userSelectedFile.second);
   }
@@ -210,12 +210,12 @@ const std::map<std::string, std::string> CatalogHelper::validateProperties(
   std::map<std::string, std::string> errors;
 
   // Validate all input elements in the map.
-  for (const auto & inputField : inputFields) {
+  for (const auto &inputField : inputFields) {
     try {
       catalogAlgorithm->setProperty(inputField.first, inputField.second);
     } catch (std::invalid_argument &) {
-      std::string documentation =
-          propertyDocumentation(catalogAlgorithm->getProperties(), inputField.first);
+      std::string documentation = propertyDocumentation(
+          catalogAlgorithm->getProperties(), inputField.first);
 
       // Add the input name + "_err" (to indicate the error marker in the GUI,
       // rather than the input field) as the key, and the related error as the
@@ -343,7 +343,7 @@ void CatalogHelper::setSearchProperties(
   // isn't empty (e.g. a value was input by the user)
   // then we will set the algorithm property with the key and value of that
   // specific value.
-  for (const auto & userInputField : userInputFields) {
+  for (const auto &userInputField : userInputFields) {
     std::string value = userInputField.second;
     // If the user has input any search terms.
     if (!value.empty()) {

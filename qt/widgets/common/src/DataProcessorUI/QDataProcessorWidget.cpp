@@ -387,7 +387,7 @@ void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
-  for (const auto & option : options)
+  for (const auto &option : options)
     settings.setValue(option.first, option.second);
   settings.endGroup();
 }
@@ -400,7 +400,7 @@ void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto & key : keys)
+  for (auto &key : keys)
     options[key] = settings.value(key);
   settings.endGroup();
 }
@@ -510,7 +510,7 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
-    for (auto & selectedRow : selectedRows) {
+    for (auto &selectedRow : selectedRows) {
       if (selectedRow.parent().isValid()) {
         int children = selectedRow.row();
         int parent = selectedRow.parent().row();
@@ -530,7 +530,7 @@ std::set<int> QDataProcessorWidget::getSelectedParents() const {
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
-    for (auto & selectedRow : selectedRows) {
+    for (auto &selectedRow : selectedRows) {
       if (!selectedRow.parent().isValid()) {
         parents.insert(selectedRow.row());
       }
@@ -650,7 +650,7 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
 
   for (auto it = runs.constBegin(); it != runs.constEnd(); ++it) {
     QStringList map = (*it).split(",");
-    for (auto & jt : map) {
+    for (auto &jt : map) {
       QStringList pair = jt.split(":");
 
       // The entry can be of the for "key:value" or of the form "key:" if

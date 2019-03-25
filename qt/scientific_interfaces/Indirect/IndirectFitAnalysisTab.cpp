@@ -52,7 +52,7 @@ void updateParameters(
 void updateAttributes(
     IFunction_sptr function, std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-  for (const auto & attributeName : attributeNames) {
+  for (const auto &attributeName : attributeNames) {
     auto const value = attributes.find(attributeName);
     if (value != attributes.end())
       function->setAttribute(attributeName, value->second);

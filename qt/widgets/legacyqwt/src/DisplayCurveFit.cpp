@@ -217,7 +217,7 @@ DisplayCurveFit::nameToType(const QString &name) const {
 DisplayCurveFit::curveTypes
 DisplayCurveFit::namesToTypes(const QStringList &curveNames) const {
   DisplayCurveFit::curveTypes typesFound;
-  for (const auto & curveName : curveNames) {
+  for (const auto &curveName : curveNames) {
     typesFound.push_back(this->nameToType(curveName));
   }
   return typesFound;

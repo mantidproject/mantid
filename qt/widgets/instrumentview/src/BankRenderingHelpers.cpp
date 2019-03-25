@@ -501,8 +501,7 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
       offsetHexahedronPosition(hex, -basePos);
       offsetHexahedronPosition(hex, compInfo.position(y));
 
-      glColor3ub((GLubyte)color[y].red(),
-                 (GLubyte)color[y].green(),
+      glColor3ub((GLubyte)color[y].red(), (GLubyte)color[y].green(),
                  (GLubyte)color[y].blue());
       glVertex3f(static_cast<GLfloat>(hex[0].X()),
                  static_cast<GLfloat>(hex[0].Y()), 0);

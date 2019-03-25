@@ -38,7 +38,7 @@ void QtDataProcessorOptionsDialog::initBindings() {
   // Check all the widgets for the "reflOptionName" property.
   // If it exists, bind the named option to that widget.
   QList<QWidget *> widgets = findChildren<QWidget *>();
-  for (auto & widget : widgets) {
+  for (auto &widget : widgets) {
     QVariant binding = widget->property("reflOptionName");
     if (binding.isValid())
       m_bindings[binding.toString()] = widget->objectName();
@@ -78,7 +78,7 @@ void QtDataProcessorOptionsDialog::loadOptions() {
   std::map<QString, QVariant> options = m_presenter->options();
 
   // Set the values from the options
-  for (auto & option : options) {
+  for (auto &option : options) {
     QString widgetName = m_bindings[option.first];
     if (widgetName.isEmpty())
       continue;

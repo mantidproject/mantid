@@ -181,7 +181,7 @@ void ALCInterface::exportResults() {
 
   // Check if any of the above is not empty
   bool nothingToExport = true;
-  for (auto & result : results) {
+  for (auto &result : results) {
 
     if (result.second) {
       nothingToExport = false;
@@ -196,7 +196,7 @@ void ALCInterface::exportResults() {
     AnalysisDataService::Instance().addOrReplace(
         groupName, boost::make_shared<WorkspaceGroup>());
 
-    for (auto & result : results) {
+    for (auto &result : results) {
       if (result.second) {
         std::string wsName = groupName + "_" + result.first;
         AnalysisDataService::Instance().addOrReplace(wsName, result.second);

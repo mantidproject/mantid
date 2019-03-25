@@ -261,7 +261,7 @@ std::pair<QStringList, QStringList> MuonAnalysisResultTableTab::getFitLabels() {
   std::map<std::string, Workspace_sptr> items =
       AnalysisDataService::Instance().topLevelItems();
 
-  for (auto & item : items) {
+  for (auto &item : items) {
     if (item.second->id() != "WorkspaceGroup")
       continue;
 
@@ -316,11 +316,11 @@ MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
 
   QStringList workspaces;
 
-  for (auto & wsName : wsNames) {
+  for (auto &wsName : wsNames) {
     auto wsGroup = ads.retrieveWS<WorkspaceGroup>(wsName);
     if (sequential) {
       std::vector<std::string> tmpNames = wsGroup->getNames();
-      for (auto & tmpName : tmpNames) {
+      for (auto &tmpName : tmpNames) {
         if (!isFittedWs(tmpName))
           continue; // Doesn't pass basic checks
 
@@ -346,16 +346,18 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces() {
 
   auto allWorkspaces = AnalysisDataService::Instance().getObjectNames();
 
-  for (auto & allWorkspace : allWorkspaces) {
+  for (auto &allWorkspace : allWorkspaces) {
     if (!isFittedWs(allWorkspace))
       continue; // Doesn't pass basic checks
 
     // Ignore sequential fit results
-    if (boost::starts_with(allWorkspace, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
+    if (boost::starts_with(allWorkspace,
+                           MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
 
     // Ignore simultaneous fit results
-    if (boost::starts_with(allWorkspace, MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
+    if (boost::starts_with(allWorkspace,
+                           MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
       continue;
     }
 

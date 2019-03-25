@@ -182,7 +182,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString &) {
           mws->run().getLogData();
       if (gws) {
         std::vector<std::string> wsNames = gws->getNames();
-        for (auto & wsName : wsNames) {
+        for (auto &wsName : wsNames) {
           Mantid::API::AnalysisDataService::Instance().remove(wsName);
         }
       } else {

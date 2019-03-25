@@ -48,7 +48,7 @@ SelectFunctionDialog::SelectFunctionDialog(
   // Store in a map. Key = category. Value = vector of fit functions belonging
   // to that category.
   std::map<std::string, std::vector<std::string>> categories;
-  for (const auto & registeredFunction : registeredFunctions) {
+  for (const auto &registeredFunction : registeredFunctions) {
     auto f = factory.createFunction(registeredFunction);
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {

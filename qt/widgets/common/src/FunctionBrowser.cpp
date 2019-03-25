@@ -631,7 +631,7 @@ void FunctionBrowser::addAttributeAndParameterProperties(
 
   // add attribute properties
   auto attributeNames = fun->getAttributeNames();
-  for (auto & attributeName : attributeNames) {
+  for (auto &attributeName : attributeNames) {
     QString attName = QString::fromStdString(attributeName);
     addAttributeProperty(prop, attName, fun->getAttribute(attributeName));
   }
@@ -883,7 +883,7 @@ QString FunctionBrowser::getIndex(QtProperty *prop) const {
     auto props = prop->subProperties();
     if (props.isEmpty())
       return "";
-    for (auto & prop : props) {
+    for (auto &prop : props) {
       if (isIndex(prop)) {
         return m_indexManager->value(prop);
       }

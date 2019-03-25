@@ -236,7 +236,7 @@ void RotationSurface::findUVBounds() {
   m_u_max = -DBL_MAX;
   m_v_min = DBL_MAX;
   m_v_max = -DBL_MAX;
-  for (const auto & udet : m_unwrappedDetectors) {
+  for (const auto &udet : m_unwrappedDetectors) {
     if (udet.empty() ||
         !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;

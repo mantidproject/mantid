@@ -72,7 +72,7 @@ void DataController::addWorkspace() {
       }
 
       if (!matrixWorkspaces.empty()) {
-        for (auto & matrixWorkspace : matrixWorkspaces) {
+        for (auto &matrixWorkspace : matrixWorkspaces) {
           auto name = QString::fromStdString((*matrixWorkspace).getName());
           for (auto &index : indices) {
             addWorkspaceSpectrum(name, index, *matrixWorkspace);
@@ -135,7 +135,7 @@ void DataController::removeSelectedSpectra() {
   if (ranges.isEmpty())
     return;
   QList<int> rows;
-  for (auto & range : ranges) {
+  for (auto &range : ranges) {
     for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
       rows.push_back(row);
     }

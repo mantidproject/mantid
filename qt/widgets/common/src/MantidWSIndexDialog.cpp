@@ -794,7 +794,7 @@ void MantidWSIndexWidget::generateSpectraNumIntervals() {
         ws->getSpectrumToWorkspaceIndexMap();
 
     IntervalList spectraIntervalList;
-    for (const auto & pair : spec2index) {
+    for (const auto &pair : spec2index) {
       spectraIntervalList.addInterval(static_cast<int>(pair.first));
     }
 
@@ -1098,7 +1098,7 @@ int IntervalList::totalIntervalLength() const {
 
   int total = 0;
 
-  for (const auto & i : m_list) {
+  for (const auto &i : m_list) {
     total += (i.length());
   }
 
@@ -1241,7 +1241,7 @@ void IntervalList::clear() { m_list = QList<Interval>(); }
 std::set<int> IntervalList::getIntSet() const {
   std::set<int> intSet;
 
-  for (const auto & i : m_list) {
+  for (const auto &i : m_list) {
     std::set<int> intervalSet = i.getIntSet();
     intSet.insert(intervalSet.begin(), intervalSet.end());
   }
@@ -1250,7 +1250,7 @@ std::set<int> IntervalList::getIntSet() const {
 }
 
 bool IntervalList::contains(const Interval &other) const {
-  for (const auto & i : m_list) {
+  for (const auto &i : m_list) {
     if (i.contains(other))
       return true;
   }
@@ -1259,7 +1259,7 @@ bool IntervalList::contains(const Interval &other) const {
 }
 
 bool IntervalList::contains(const IntervalList &other) const {
-  for (const auto & i : other.m_list) {
+  for (const auto &i : other.m_list) {
     if (!IntervalList::contains(i))
       return false;
   }

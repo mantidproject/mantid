@@ -1751,7 +1751,7 @@ void FitPropertyBrowser::populateWorkspaceNames() {
 
   QStringList tmp;
   auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  for (auto & it : sv) {
+  for (auto &it : sv) {
     auto const &name = QString::fromStdString(it);
     if (allAreAllowed || m_allowedSpectra.contains(name)) {
       tmp << name;
@@ -2222,7 +2222,7 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie,
   hasTie = false;
   hasBounds = false;
   QList<QtProperty *> subs = parProp->subProperties();
-  for (auto & sub : subs) {
+  for (auto &sub : subs) {
     if (sub->propertyName() == "Tie") {
       hasTie = true;
     }
@@ -2240,7 +2240,7 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie,
  */
 QtProperty *FitPropertyBrowser::getTieProperty(QtProperty *parProp) const {
   QList<QtProperty *> subs = parProp->subProperties();
-  for (auto & sub : subs) {
+  for (auto &sub : subs) {
     if (sub->propertyName() == "Tie") {
       return sub;
     }
@@ -3050,7 +3050,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
     QString errName;
     auto names = tws->getColumnNames();
     QStringList columns;
-    for (const auto & name : names) {
+    for (const auto &name : names) {
       columns << QString::fromStdString(name);
       auto col = tws->getColumn(name);
       if (xName.isEmpty() && col->getPlotType() == 1 /*X*/) {

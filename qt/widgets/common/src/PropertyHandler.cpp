@@ -203,10 +203,9 @@ void PropertyHandler::initAttributes() {
   }
   m_attributes.clear();
   m_vectorMembers.clear();
-  for (const auto & attName : attNames) {
+  for (const auto &attName : attNames) {
     QString aName = QString::fromStdString(attName);
-    Mantid::API::IFunction::Attribute att =
-        function()->getAttribute(attName);
+    Mantid::API::IFunction::Attribute att = function()->getAttribute(attName);
     CreateAttributeProperty tmp(m_browser, this, aName);
     QtProperty *prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);

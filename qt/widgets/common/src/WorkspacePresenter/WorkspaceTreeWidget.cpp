@@ -1394,7 +1394,7 @@ void WorkspaceTreeWidget::saveToProgram() {
       (Mantid::Kernel::ConfigService::Instance().getKeys(
           ("workspace.sendto." + programKeysAndDetails.find("name")->second)));
 
-  for (const auto & programKey : programKeys) {
+  for (const auto &programKey : programKeys) {
     // Assign a key to its value using the map
     programKeysAndDetails[programKey] =
         (Mantid::Kernel::ConfigService::Instance().getString(

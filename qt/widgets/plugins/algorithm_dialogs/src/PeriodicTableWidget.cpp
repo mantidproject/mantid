@@ -132,7 +132,7 @@ void PeriodicTableWidget::ColourUnknownProperties(
 }
 
 void PeriodicTableWidget::enableButtonByName(QString elementStr) {
-  for (auto & AllElementButton : AllElementButtons) {
+  for (auto &AllElementButton : AllElementButtons) {
     for (auto btn_i = AllElementButton.begin(); btn_i != AllElementButton.end();
          btn_i++) {
       if (compareButtonNameToStr((*btn_i), elementStr)) {
@@ -176,7 +176,7 @@ PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements) {
    * then retrieve the text on the button i.e the
    * element and add it to the string (space delimiter).
    */
-  for (auto & element : elements) {
+  for (auto &element : elements) {
     if (element->isChecked()) {
       selectedElements += element->text() + ",";
     }

@@ -108,7 +108,7 @@ void MDFFunctionPlotData::updateFunction(const Mantid::API::IFunction &fun) {
   }
   // Copy the attributes
   auto attributes = fun.getAttributeNames();
-  for (auto & attribute : attributes) {
+  for (auto &attribute : attributes) {
     auto value = fun.getAttribute(attribute);
     m_function->setAttribute(attribute, value);
   }

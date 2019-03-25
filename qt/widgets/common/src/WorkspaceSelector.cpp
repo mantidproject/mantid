@@ -153,7 +153,7 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
     m_algorithm->initialize();
     std::vector<Mantid::Kernel::Property *> props =
         m_algorithm->getProperties();
-    for (auto & prop : props) {
+    for (auto &prop : props) {
       if (prop->direction() == Mantid::Kernel::Direction::Input) {
         // try to cast property to WorkspaceProperty
         Mantid::API::WorkspaceProperty<> *wsProp =
@@ -315,7 +315,7 @@ void WorkspaceSelector::refresh() {
   }
 
   QStringList namesToAdd;
-  for (auto & item : items) {
+  for (auto &item : items) {
     QString name = QString::fromStdString(item);
     if (checkEligibility(name, ads.retrieve(item))) {
       namesToAdd << name;

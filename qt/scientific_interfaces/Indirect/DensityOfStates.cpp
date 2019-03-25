@@ -128,7 +128,7 @@ void DensityOfStates::run() {
 
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
-    for (auto & item : items)
+    for (auto &item : items)
       selectedIons.push_back(item->text().toStdString());
     dosAlgo->setProperty("Ions", selectedIons);
   } else if (specType == "IR") {

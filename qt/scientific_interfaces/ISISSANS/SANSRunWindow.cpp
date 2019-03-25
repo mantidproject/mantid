@@ -3015,7 +3015,7 @@ void SANSRunWindow::handleDefSaveClick() {
 
   const QStringList algs(getSaveAlgs());
   QString saveCommand;
-  for (const auto & alg : algs) {
+  for (const auto &alg : algs) {
     QString ext = SaveWorkspaces::getSaveAlgExt(alg);
     QString fname = fileBase.endsWith(ext) ? fileBase : fileBase + ext;
     if (alg == "SaveRKH")
@@ -3255,7 +3255,7 @@ void SANSRunWindow::handleInstrumentChange() {
   QWidget *front_center_widgets[] = {
       m_uiForm.front_beam_x, m_uiForm.front_beam_y, m_uiForm.front_radio};
   bool loq_selected = (instClass == "LOQ()");
-  for (auto & front_center_widget : front_center_widgets)
+  for (auto &front_center_widget : front_center_widgets)
     front_center_widget->setEnabled(true);
   // Set the label of the radio buttons according to the
   // beamline usage:
@@ -3482,8 +3482,9 @@ void SANSRunWindow::checkList() {
   // split up the comma separated list ignoring spaces
   Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try {
-    for (const auto & i : in) { // try a lexical cast, we don't need its result only
-                          // if there was an error
+    for (const auto &i :
+         in) { // try a lexical cast, we don't need its result only
+               // if there was an error
       boost::lexical_cast<double>(i);
     }
     // there were no errors
@@ -3965,7 +3966,7 @@ void SANSRunWindow::transSelectorChanged(int currindex) {
   QWidget *wid[] = {m_uiForm.trans_can_label, m_uiForm.transFitOnOff_can,
                     m_uiForm.transFit_ck_can, m_uiForm.trans_min_can,
                     m_uiForm.trans_max_can,   m_uiForm.trans_opt_can};
-  for (auto & i : wid)
+  for (auto &i : wid)
     i->setVisible(visible);
 }
 

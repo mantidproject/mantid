@@ -686,7 +686,7 @@ void CompositePeaksPresenter::notifyWorkspaceChanged(
   auto presentedWorkspaces = m_subjects[pos]->presentedWorkspaces();
   // We usually only have a single workspace, but just incase there are more.
   if (m_owner) {
-    for (const auto & presentedWorkspace : presentedWorkspaces) {
+    for (const auto &presentedWorkspace : presentedWorkspaces) {
       m_owner->updatePeaksWorkspace(wsName, presentedWorkspace);
     }
   }

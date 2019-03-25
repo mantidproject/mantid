@@ -769,8 +769,7 @@ void MultiDatasetFit::setLogNames() {
           ws->run().getLogData();
       QStringList logNames;
       for (auto log : logs) {
-        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(
-                log)) {
+        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log)) {
           logNames << QString::fromStdString(log->name());
         }
       }

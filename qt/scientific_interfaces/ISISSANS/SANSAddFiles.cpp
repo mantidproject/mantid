@@ -199,7 +199,8 @@ void SANSAddFiles::add2Runs2Add() {
       "unusedName", m_SANSForm->new2Add_edit->text().toStdString());
   const std::vector<std::string> &nam = commaSep;
 
-  for (const auto & i : nam) { // each comma separated item could be a range of run numbers
+  for (const auto &i :
+       nam) { // each comma separated item could be a range of run numbers
               // specified with a ':' or '-'
     QStringList ranges;
     std::vector<int> runNumRanges;

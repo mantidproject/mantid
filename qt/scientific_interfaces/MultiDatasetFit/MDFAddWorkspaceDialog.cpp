@@ -76,7 +76,7 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const {
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
   QStringList workspaceNames;
   auto wsNames = ADS.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted);
-  for (auto & wsName : wsNames) {
+  for (auto &wsName : wsNames) {
     if (ADS.retrieveWS<Mantid::API::MatrixWorkspace>(wsName)) {
       workspaceNames << QString::fromStdString(wsName);
       continue;

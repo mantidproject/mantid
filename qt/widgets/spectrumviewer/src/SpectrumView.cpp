@@ -294,7 +294,7 @@ void SpectrumView::changeSpectrumDisplay(int tab) {
 void SpectrumView::respondToTabCloseReqest(int tab) {
   if (m_spectrumDisplay.size() > 1) {
     auto displayToRemove = m_spectrumDisplay[tab];
-    for (auto & disp : m_spectrumDisplay) {
+    for (auto &disp : m_spectrumDisplay) {
       if (disp.get() != displayToRemove.get()) {
         (*disp).removeOther(displayToRemove);
       }

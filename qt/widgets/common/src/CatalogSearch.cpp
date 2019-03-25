@@ -702,7 +702,7 @@ void CatalogSearch::searchClicked() {
  */
 void CatalogSearch::showErrorLabels(
     std::map<std::string, std::string> &errors) {
-  for (auto & error : errors) {
+  for (auto &error : errors) {
     QLabel *label = m_icatUiForm.searchFrame->findChild<QLabel *>(
         QString::fromStdString(error.first));
 
@@ -1262,7 +1262,7 @@ void CatalogSearch::loadDataFiles() {
   loadAlgorithm->initialize();
 
   // For all the files downloaded (or in archive) we want to load them.
-  for (auto & filePath : filePaths) {
+  for (auto &filePath : filePaths) {
     if (filePath.empty())
       return;
     // Set the filename (path) of the algorithm to load from.

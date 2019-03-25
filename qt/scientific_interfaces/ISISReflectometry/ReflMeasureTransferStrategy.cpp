@@ -67,7 +67,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
   // runs.
   TransferResults results(runs, errors);
   MapGroupedMeasurement mapOfMeasurements;
-  for (auto & searchResult : searchResults) {
+  for (auto &searchResult : searchResults) {
     const auto location = searchResult.second.location;
     const auto fuzzyName = searchResult.first;
 
@@ -100,7 +100,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
 
   int nextGroupId = 0;
 
-  for (auto & mapOfMeasurement : mapOfMeasurements) {
+  for (auto &mapOfMeasurement : mapOfMeasurements) {
 
     std::string groupName;
 

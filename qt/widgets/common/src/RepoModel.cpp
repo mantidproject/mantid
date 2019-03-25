@@ -870,7 +870,7 @@ void RepoModel::setupModelData(RepoItem *root) {
   QString last_directory = "";
 
   // FOREACH entry in LISTFILES
-  for (const auto & number : list) {
+  for (const auto &number : list) {
     // folder or file inside the repository
     QString lineData = QString::fromStdString(number);
 

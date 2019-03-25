@@ -1119,7 +1119,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
       mapCmptToNameVector;
 
   auto paramNames = comp->getParameterNamesByComponent();
-  for (auto & itParamName : paramNames) {
+  for (auto &itParamName : paramNames) {
     // build the data structure I need Map comp id -> vector of names
     std::string paramName = itParamName.first;
     Mantid::Geometry::ComponentID paramCompId = itParamName.second;

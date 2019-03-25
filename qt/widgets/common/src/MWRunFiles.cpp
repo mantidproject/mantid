@@ -579,7 +579,7 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
       QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
       QStringList newRunNumbers;
 
-      for (auto & runNumber : runNumbers)
+      for (auto &runNumber : runNumbers)
         newRunNumbers << m_defaultInstrumentName + runNumber.simplified();
 
       searchText = newRunNumbers.join(",");
@@ -688,7 +688,7 @@ QString MWRunFiles::createFileFilter() {
     } else if (isForRunFiles()) {
       std::vector<std::string> exts =
           ConfigService::Instance().getFacility().extensions();
-      for (auto & ext : exts) {
+      for (auto &ext : exts) {
         fileExts.append(QString::fromStdString(ext));
       }
     } else {

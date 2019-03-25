@@ -204,7 +204,7 @@ void Elwin::run() {
   // Load input files
   std::string inputWorkspacesString;
 
-  for (auto & inputFilename : inputFilenames) {
+  for (auto &inputFilename : inputFilenames) {
     QFileInfo inputFileInfo(inputFilename);
     std::string workspaceName = inputFileInfo.baseName().toStdString();
 
