@@ -35,7 +35,6 @@
 #include <QSplashScreen>
 #include <QThread>
 #include <QTimer>
-#include <iostream>
 
 #include "ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
@@ -153,6 +152,10 @@ only one class per file, with the exception of
 the indentation depth for him/herself.
 */
 
+namespace {
+Mantid::Kernel::Logger logger("Main");
+}
+
 int main(int argc, char **argv) {
   // Force the qtpy package to use the PyQt4 bindings. QtPy < v1.4 does not
   // check whether a particular binding is imported and selects PyQt5 by default
@@ -164,14 +167,14 @@ int main(int argc, char **argv) {
   if (argc == 2) {
     QString str(argv[1]);
     if (str == "-v" || str == "--version") {
-      std::cout << Mantid::Kernel::MantidVersion::version() << " ("
+      logger.information() << Mantid::Kernel::MantidVersion::version() << " ("
                 << Mantid::Kernel::MantidVersion::releaseDate() << ")\n";
       exit(0);
     } else if (str == "-r" ||
                str == "--revision") // Print abbreviated git SHA-1
     {
       QString revision(Mantid::Kernel::MantidVersion::revision());
-      std::cout << revision.toStdString() << '\n';
+      logger.information() << revision.toStdString() << '\n';
       exit(0);
     } else if (str == "-a" || str == "--about") {
       MantidApplication app(argc, argv); // Needed to avoid an error
@@ -193,7 +196,7 @@ int main(int argc, char **argv) {
            "and then exit MantidPlot\n\n";
       s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py "
            "or ASCII file\n\n";
-      std::cout << s;
+      logger.information() << s;
 
       exit(0);
     }
@@ -208,7 +211,7 @@ int main(int argc, char **argv) {
     // Splash
     QPixmap pixmap;
     if (!pixmap.load(":/MantidSplashScreen.png"))
-      std::cerr << "Couldn't load splashscreen\n";
+      logger.error() << "Couldn't load splashscreen\n";
     QSplashScreen splash(pixmap);
     const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
     const QString versionInfo(Mantid::Kernel::MantidVersion::version());
