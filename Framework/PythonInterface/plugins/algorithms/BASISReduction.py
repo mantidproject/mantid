@@ -16,7 +16,7 @@ from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
                         FileAction, AnalysisDataService, ExperimentInfo)
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
-                           Direction, PropertyCriterion)
+                           Direction, PropertyCriterion, logger)
 from mantid import config
 from os.path import join as pjoin
 
@@ -63,6 +63,7 @@ class BASISReduction(PythonAlgorithm):
     _extension = None
     _doIndiv = None
 
+    _flux_normalization_types = ['Monitor', 'Proton Charge', 'Duration']
     _groupDetOpt = None
     _overrideMask = None
     _dMask = None
@@ -78,8 +79,11 @@ class BASISReduction(PythonAlgorithm):
         self._normalizeToFirst = False
         self._as_json = None
 
-        # properties related to monitor
-        self._MonNorm = None
+        # properties related to flux normalization
+        self._flux_normalization_type = None  # default to no flux normalizat.
+        self._MonNorm = False  # flux normalization by monitor
+        self._proton_charge = None
+        self._duration = None
 
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
@@ -119,8 +123,6 @@ class BASISReduction(PythonAlgorithm):
 
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
         self.declareProperty('DoIndividual', False, 'Do each run individually')
-        self.declareProperty('MonitorNorm', True,
-                             'Normalization with wavelength-dependent monitor counts')
         self.declareProperty('ExcludeTimeSegment', '',
                              'Exclude a contigous time segment; ' +
                              'Examples: "71546:0-60" filter run 71546 from ' +
@@ -130,10 +132,32 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty('GroupDetectors', 'None',
                              StringListValidator(grouping_type),
                              'Switch for grouping detectors')
+        #
+        #  Normalization selector
+        #
+        title_flux_normalization = 'Flux Normalization'
+        self.declareProperty('DoFluxNormalization', True,
+                             direction=Direction.Input,
+                             doc='Do we normalize data by incoming flux?')
+        self.setPropertyGroup('DoFluxNormalization', title_flux_normalization)
+        if_flux_normalization = EnabledWhenProperty('DoFluxNormalization',
+                                                PropertyCriterion.IsDefault)
+        default_flux_normalization = self._flux_normalization_types[0]
+        self.declareProperty('FluxNormalizationType',
+                             default_flux_normalization,
+                             StringListValidator(
+                                 self._flux_normalization_types),
+                             'Flux Normalization Type')
+        self.setPropertySettings('FluxNormalizationType',
+                                 if_flux_normalization)
+        self.setPropertyGroup('FluxNormalizationType',
+                              title_flux_normalization)
+
         self.declareProperty('NormalizeToFirst', False, 'Normalize spectra ' +
                              'to intensity of spectrum with lowest Q?')
-
+        #
         # Properties affected by the reflection selected
+        #
         titleReflection = 'Reflection Selector'
         available_reflections = sorted(REFLECTIONS_DICT.keys())
         default_reflection = REFLECTIONS_DICT['silicon_111']
@@ -160,7 +184,8 @@ class BASISReduction(PythonAlgorithm):
 
         # Properties setting the division by vanadium
         titleDivideByVanadium = 'Normalization by Vanadium'
-        self.declareProperty('DivideByVanadium', False, direction=Direction.Input,
+        self.declareProperty('DivideByVanadium', False,
+                             direction=Direction.Input,
                              doc='Do we normalize by the vanadium intensity?')
         self.setPropertyGroup('DivideByVanadium', titleDivideByVanadium)
         ifDivideByVanadium = EnabledWhenProperty('DivideByVanadium',
@@ -204,8 +229,23 @@ class BASISReduction(PythonAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
+
         config['default.facility'] = 'SNS'
         config['default.instrument'] = self._long_inst
+
+        #
+        # Collect Flux Normalization
+        #
+        if self.getProperty('DoFluxNormalization').value is True:
+            self._flux_normalization_type =\
+                self.getProperty('FluxNormalizationType').value
+            if self._flux_normalization_type == 'Monitor':
+                self._MonNorm = True
+        logger.error('DoFluxNormalization = ' + str(self.getProperty('DoFluxNormalization').value))
+        logger.error('FluxNormalizationType = ' + str(self._flux_normalization_type))
+        logger.error('self._MonNorm = ' + str(self._MonNorm))
+
+
         self._reflection =\
             REFLECTIONS_DICT[self.getProperty('ReflectionType').value]
         self._doIndiv = self.getProperty('DoIndividual').value
@@ -214,7 +254,6 @@ class BASISReduction(PythonAlgorithm):
         self._qBins = self.getProperty('MomentumTransferBins').value
         self._qBins[0] -= self._qBins[1]/2.0  # leftmost bin boundary
         self._qBins[2] += self._qBins[1]/2.0  # rightmost bin boundary
-        self._MonNorm = self.getProperty('MonitorNorm').value
         self._maskFile = self.getProperty('MaskFile').value
         maskfile = self.getProperty('MaskFile').value
         self._maskFile = maskfile if maskfile else\
@@ -420,6 +459,9 @@ class BASISReduction(PythonAlgorithm):
         @param mon_ws:  name of aggregate workspace for the monitors
         @param extra_ext: string to be added to the temporary workspaces
         """
+        self._proton_charge = 0.0
+        self._duration = 0.0
+
         for run in run_set:
             ws_name = self._make_run_name(run)
             if extra_ext is not None:
@@ -432,21 +474,27 @@ class BASISReduction(PythonAlgorithm):
                                 BankName=self._reflection['banks'])
             if str(run)+':' in self.getProperty('ExcludeTimeSegment').value:
                 self._filterEvents(str(run), ws_name)
-
-            if self._MonNorm:
-                sapi.LoadNexusMonitors(Filename=run_file,
-                                       OutputWorkspace=mon_ws_name)
-
             if sam_ws != ws_name:
                 sapi.Plus(LHSWorkspace=sam_ws,
                           RHSWorkspace=ws_name,
                           OutputWorkspace=sam_ws)
                 sapi.DeleteWorkspace(ws_name)
-            if mon_ws != mon_ws_name and self._MonNorm:
-                sapi.Plus(LHSWorkspace=mon_ws,
-                          RHSWorkspace=mon_ws_name,
-                          OutputWorkspace=mon_ws)
-                sapi.DeleteWorkspace(mon_ws_name)
+            #
+            # Add flux
+            #
+            if self._MonNorm:
+                sapi.LoadNexusMonitors(Filename=run_file,
+                                       OutputWorkspace=mon_ws_name)
+                if mon_ws != mon_ws_name:
+                    sapi.Plus(LHSWorkspace=mon_ws,
+                              RHSWorkspace=mon_ws_name,
+                              OutputWorkspace=mon_ws)
+                    sapi.DeleteWorkspace(mon_ws_name)
+            elif self._flux_normalization_type == 'Proton Charge':
+                self._proton_charge += mtd[ws_name].getRun().getProtonCharge()
+            elif self._flux_normalization_type == 'Duration':
+                self._duration += mtd[ws_name].getRun().\
+                    getProperty('duration').value
 
     def _calibrate_data(self, sam_ws, mon_ws):
         sapi.MaskDetectors(Workspace=sam_ws,
@@ -459,7 +507,9 @@ class BASISReduction(PythonAlgorithm):
                           OutputWorkspace=sam_ws,
                           Target='Wavelength',
                           EMode='Indirect')
-
+        #
+        # Divide by the flux
+        #
         if self._MonNorm:
             sapi.LoadParameterFile(Workspace=mon_ws, Filename=rpf)
             sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
@@ -484,6 +534,18 @@ class BASISReduction(PythonAlgorithm):
             sapi.Divide(LHSWorkspace=sam_ws,
                         RHSWorkspace=mon_ws,
                         OutputWorkspace=sam_ws)
+        elif self._flux_normalization_type == 'Proton Charge':
+            # Factor 0.049005 yields normalization similar to monitor normaliz.
+            sapi.Scale(InputWorkspace=sam_ws,
+                       Factor=0.049005 / self._proton_charge,
+                       Operation='Multiply',
+                       OutputWorkspace=sam_ws)
+        elif self._flux_normalization_type == 'Duration':
+            # Factor 0.07727 normalization similar to monitor normalization
+            sapi.Scale(InputWorkspace=sam_ws,
+                       Factor=0.7727 / self._duration,
+                       Operation='Multiply',
+                       OutputWorkspace=sam_ws)
 
     def _sum_and_calibrate(self, run_set, extra_extension=''):
         """
@@ -648,10 +710,11 @@ class BASISReduction(PythonAlgorithm):
             # Force serialization of the following properties even if having
             # their default values
             forced = {name: jsonify(self.getProperty(name).value)
-                      for name in ('DoIndividual', 'MonitorNorm',
-                                   'NormalizeToFirst', 'ReflectionType',
-                                   'EnergyBins', 'MomentumTransferBins',
-                                   'MaskFile', 'DivideByVanadium')}
+                      for name in ('DoIndividual', 'DoFluxNormalization',
+                                   'FluxNormalizationType', 'NormalizeToFirst',
+                                   'ReflectionType', 'EnergyBins',
+                                   'MomentumTransferBins', 'MaskFile',
+                                   'DivideByVanadium')}
             self._as_json['properties'].update(forced)
         r = mtd[ws_name].mutableRun()
         r.addProperty('asString', json.dumps(self._as_json), True)
