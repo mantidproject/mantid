@@ -580,10 +580,10 @@ void DataComparison::diffSelected() {
   QList<int> selectedRows;
 
   // Generate a list of selected row numbers
-  for (auto it = selectedItems.begin(); it != selectedItems.end(); ++it) {
-    int row = (*it)->row();
+  for (auto & selectedItem : selectedItems) {
+    int row = selectedItem->row();
     if (!selectedRows.contains(row))
-      selectedRows << (*it)->row();
+      selectedRows << selectedItem->row();
   }
 
   // Check there is the correct number of selected items

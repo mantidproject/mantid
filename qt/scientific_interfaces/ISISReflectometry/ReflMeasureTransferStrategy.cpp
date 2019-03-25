@@ -67,9 +67,9 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
   // runs.
   TransferResults results(runs, errors);
   MapGroupedMeasurement mapOfMeasurements;
-  for (auto it = searchResults.begin(); it != searchResults.end(); ++it) {
-    const auto location = it->second.location;
-    const auto fuzzyName = it->first;
+  for (auto & searchResult : searchResults) {
+    const auto location = searchResult.second.location;
+    const auto fuzzyName = searchResult.first;
 
     const auto definedPath = m_catInfo->transformArchivePath(location);
 
@@ -89,7 +89,7 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
         mapOfMeasurements[metaData.id()].push_back(metaData);
       }
     } else {
-      it->second.issues = metaData.whyUnuseable();
+      searchResult.second.issues = metaData.whyUnuseable();
       // run was unsuccessful so add it to 'errors'
       results.addErrorRow(metaData.run(), metaData.whyUnuseable());
     }
@@ -100,15 +100,14 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
 
   int nextGroupId = 0;
 
-  for (auto group = mapOfMeasurements.begin(); group != mapOfMeasurements.end();
-       ++group) {
+  for (auto & mapOfMeasurement : mapOfMeasurements) {
 
     std::string groupName;
 
     // Map keyed by subId to index of exisiting subid written.
     std::map<std::string, size_t> subIdMap;
-    for (size_t i = 0; i < group->second.size(); ++i) {
-      const MeasurementItem &measurementItem = group->second[i];
+    for (size_t i = 0; i < mapOfMeasurement.second.size(); ++i) {
+      const MeasurementItem &measurementItem = mapOfMeasurement.second[i];
 
       if (i == 0) {
         std::string title = measurementItem.title();

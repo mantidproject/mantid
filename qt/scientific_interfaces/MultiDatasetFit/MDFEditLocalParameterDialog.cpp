@@ -237,8 +237,8 @@ void EditLocalParameterDialog::showContextMenu() {
 
   bool hasSelection = false;
 
-  for (auto index = selection.begin(); index != selection.end(); ++index) {
-    if (index->column() == valueColumn)
+  for (auto & index : selection) {
+    if (index.column() == valueColumn)
       hasSelection = true;
   }
 

@@ -665,9 +665,9 @@ void groupWorkspaces(const std::string &groupName,
 
   if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
-      if (!group->contains(*it)) {
-        group->add(*it);
+    for (const auto & inputWorkspace : inputWorkspaces) {
+      if (!group->contains(inputWorkspace)) {
+        group->add(inputWorkspace);
       }
     }
   } else {

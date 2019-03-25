@@ -78,11 +78,11 @@ void IndirectDataAnalysis::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Set up all tabs
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->setupTab();
-    connect(tab->second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
+  for (auto & m_tab : m_tabs) {
+    m_tab.second->setupTab();
+    connect(m_tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
             SIGNAL(runAsPythonScript(const QString &, bool)));
-    connect(tab->second, SIGNAL(showMessageBox(const QString &)), this,
+    connect(m_tab.second, SIGNAL(showMessageBox(const QString &)), this,
             SLOT(showMessageBox(const QString &)));
   }
 

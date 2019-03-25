@@ -156,8 +156,8 @@ subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
   subworkspaces.reserve(1 + 2 * widthSpectra.size());
 
   int start = 0;
-  for (auto i = 0u; i < widthSpectra.size(); ++i) {
-    const auto spectrum = static_cast<int>(widthSpectra[i]);
+  for (unsigned long long i : widthSpectra) {
+    const auto spectrum = static_cast<int>(i);
     if (spectrum > start) {
       auto const outputName = "__extracted_" + std::to_string(start) + "_to_" +
                               std::to_string(spectrum);

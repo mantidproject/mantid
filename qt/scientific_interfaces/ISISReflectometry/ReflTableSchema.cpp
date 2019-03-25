@@ -26,8 +26,8 @@ ColumnIndexNameMap makeColumnIndexMap() {
 ColumnNameIndexMap makeColumnNameMap() {
   auto indexMap = makeColumnIndexMap();
   ColumnNameIndexMap columnMap;
-  for (auto it = indexMap.begin(); it != indexMap.end(); ++it) {
-    columnMap.emplace(it->second, it->first);
+  for (auto & it : indexMap) {
+    columnMap.emplace(it.second, it.first);
   }
   return columnMap;
 }

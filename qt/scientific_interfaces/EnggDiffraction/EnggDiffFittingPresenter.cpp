@@ -343,8 +343,8 @@ void EnggDiffFittingPresenter::processShutDown() {
 
 void EnggDiffFittingPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
-  for (size_t i = 0; i < msgs.size(); i++) {
-    g_log.information() << msgs[i] << '\n';
+  for (const auto & msg : msgs) {
+    g_log.information() << msg << '\n';
   }
 }
 

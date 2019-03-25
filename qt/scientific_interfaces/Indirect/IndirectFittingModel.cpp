@@ -195,8 +195,8 @@ void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
     const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
   std::size_t counter = 0;
-  for (auto i = 0u; i < fittingData.size(); ++i)
-    addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], counter);
+  for (const auto & i : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, i, counter);
 }
 
 void addInputDataToSimultaneousFit(
@@ -205,8 +205,8 @@ void addInputDataToSimultaneousFit(
     const std::pair<double, double> &range,
     const std::vector<double> &exclude) {
   std::size_t counter = 0;
-  for (auto i = 0u; i < fittingData.size(); ++i)
-    addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], range, exclude,
+  for (const auto & i : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, i, range, exclude,
                                   counter);
 }
 

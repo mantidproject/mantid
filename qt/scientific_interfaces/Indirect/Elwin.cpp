@@ -204,13 +204,13 @@ void Elwin::run() {
   // Load input files
   std::string inputWorkspacesString;
 
-  for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
-    QFileInfo inputFileInfo(*it);
+  for (auto & inputFilename : inputFilenames) {
+    QFileInfo inputFileInfo(inputFilename);
     std::string workspaceName = inputFileInfo.baseName().toStdString();
 
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadNexus");
     loadAlg->initialize();
-    loadAlg->setProperty("Filename", (*it).toStdString());
+    loadAlg->setProperty("Filename", inputFilename.toStdString());
     loadAlg->setProperty("OutputWorkspace", workspaceName);
 
     m_batchAlgoRunner->addAlgorithm(loadAlg);
@@ -431,8 +431,7 @@ void Elwin::newInputFiles() {
 
   // Populate the combo box with the filenames
   QStringList filenames = m_uiForm.dsInputFiles->getFilenames();
-  for (auto it = filenames.begin(); it != filenames.end(); ++it) {
-    QString rawFilename = *it;
+  for (auto rawFilename : filenames) {
     QFileInfo inputFileInfo(rawFilename);
     QString sampleName = inputFileInfo.baseName();
 
