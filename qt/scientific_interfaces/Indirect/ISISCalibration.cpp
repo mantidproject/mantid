@@ -217,12 +217,8 @@ QString ISISCalibration::backgroundRangeString() const {
 }
 
 QString ISISCalibration::instrumentDetectorRangeString() {
-  try {
-    return getInstrumentDetail("spectra-min") + "," +
-           getInstrumentDetail("spectra-max");
-  } catch (std::exception const &ex) {
-    showMessageBox(ex.what());
-  }
+  return getInstrumentDetail("spectra-min") + "," +
+         getInstrumentDetail("spectra-max");
 }
 
 QString ISISCalibration::outputWorkspaceName() const {
@@ -302,7 +298,13 @@ void ISISCalibration::run() {
   const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
   m_outputCalibrationName = outputWorkspaceNameStem + "_calib";
-  m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
+
+  try {
+    m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    return;
+  }
 
   // Initially take the calibration workspace as the result
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
