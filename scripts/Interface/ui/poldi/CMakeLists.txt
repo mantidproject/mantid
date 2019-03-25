@@ -2,4 +2,4 @@
 set(UI_FILES
 	poldi_window.ui)
 
-uitopy(UI_FILES CompileUIPoldi)
+UiToPy(UI_FILES CompileUIPoldi)

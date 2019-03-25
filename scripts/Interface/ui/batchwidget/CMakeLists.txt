@@ -2,4 +2,4 @@
 set(UI_FILES
 	batch_widget_window.ui)
 
-uitopy(UI_FILES CompileUIBatchWidgetInterface)
+UiToPy(UI_FILES CompileUIBatchWidgetInterface)

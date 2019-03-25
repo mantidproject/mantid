@@ -1,8 +1,7 @@
-#
 # Write out a files containing - the data search directories - the default save
 # directory These will be read by the MantidConfig class to configure the
 # properties file
-#
+
 # Data search directories
 set(DATA_DIRS "")
 # Input data

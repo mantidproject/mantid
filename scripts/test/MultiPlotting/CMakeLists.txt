@@ -1,6 +1,4 @@
-#
 # Tests for Muon GUIs
-#
 
 set(TEST_PY_FILES
     AxisChangerTwoPresenter_test.py

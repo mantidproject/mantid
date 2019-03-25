@@ -1,7 +1,4 @@
-
-#
 # Tests for ISIS Powder
-#
 
 set(TEST_PY_FILES
     ISISPowderAbsorptionTest.py

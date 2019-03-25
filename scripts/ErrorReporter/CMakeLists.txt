@@ -4,4 +4,4 @@ include(UiToPy)
 set(UI_FILES
 	errorreport.ui)
 
-uitopy(UI_FILES CompileUIErrorReporter)
+UiToPy(UI_FILES CompileUIErrorReporter)

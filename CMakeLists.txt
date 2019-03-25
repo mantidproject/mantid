@@ -1,6 +1,4 @@
-#
 # CMake version check. Require CMake 3.5, required by ParaView 5.1.0
-#
 cmake_minimum_required(VERSION 3.5)
 
 # Define the project name.
@@ -36,9 +34,7 @@ set(ENABLE_WORKBENCH ON CACHE BOOL "Enable Qt5-based gui & components")
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
-#
 # Quick exit if we only want data targets
-#
 if(DATA_TARGETS_ONLY)
   include(SetupDataTargets)
   # System test config files
@@ -46,9 +42,7 @@ if(DATA_TARGETS_ONLY)
   return()
 endif()
 
-#
 # Packaging configuration
-#
 set(CPACK_PACKAGE_SUFFIX "unstable"
     CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY
@@ -58,19 +52,14 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY
 # Set package name here
 set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 
-#
 # Bootstrap any dependencies
-#
 include(Bootstrap)
 
-#
 # Configure Eigen early
-#
 include(Eigen)
 
-#
 # Set ParaView information since later items depend on it
-#
+
 # VATES flag. Requires ParaView
 set(MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 if(ENABLE_MANTIDPLOT AND MAKE_VATES)
@@ -88,21 +77,15 @@ if(ENABLE_MANTIDPLOT)
   include(ParaViewSetup)
 endif()
 
-#
 # Set expected variables for OS X
-#
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include(DarwinSetup)
 endif()
 
-#
 # Cross-platform setup
-#
 include(CommonSetup)
 
-#
 # Find OpenGL
-#
 find_package(OpenGL REQUIRED)
 # FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
 if(NOT OPENGL_FOUND)
@@ -119,9 +102,7 @@ if(COVERALLS)
   coveralls_turn_on_coverage()
 endif()
 
-#
 # Qt/Qwt/PyQt/sip
-#
 if(ENABLE_MANTIDPLOT)
   set(QT_USE_IMPORTED_TARGETS ON)
   find_package(Qt4
@@ -159,14 +140,11 @@ if(ENABLE_WORKBENCH)
   separate_arguments(PYQT5_SIP_FLAGS)
 endif()
 
-#
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
-#
 find_package(GSL REQUIRED)
 
-#
 # Now add in all the components
-#
+
 # Flag that this is a full build, i.e not framework only
 set(FULL_PACKAGE_BUILD 1)
 # Set the path to the built docs directory here so that it can be used in the
@@ -298,9 +276,7 @@ if(COVERALLS)
 				  "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 endif()
 
-#
 # Installation settings
-#
 
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
 install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
@@ -329,9 +305,7 @@ if(ENABLE_CONDA)
   include(conda)
 endif(ENABLE_CONDA)
 
-#
 # CPack settings
-#
 
 # Keep this in a defaulted-to-off option
 set(ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")

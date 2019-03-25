@@ -1,6 +1,4 @@
-#
 # Tests for SANSState
-#
 
 set(TEST_PY_FILES
     user_file_parser_test.py

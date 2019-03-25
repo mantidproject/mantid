@@ -1,6 +1,4 @@
-#
 # Tests for SANSState
-#
 
 set(TEST_PY_FILES
     adjustment_test.py

@@ -1,6 +1,4 @@
-#
 # Tests for SANS
-#
 
 set(TEST_PY_FILES
     gui_state_director_test.py

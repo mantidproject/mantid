@@ -4,4 +4,4 @@ set(UI_FILES
 	refl_options_window.ui
 	refl_window.ui)
 
-uitopy(UI_FILES CompileUIReflectometer)
+UiToPy(UI_FILES CompileUIReflectometer)
