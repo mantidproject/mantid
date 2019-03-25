@@ -14,7 +14,8 @@ set(SOURCE_FILES
     src/ModeControlWidget.cpp
     src/RotationPointDialog.cpp)
 
-set(MOC_FILES inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
+set(MOC_FILES 
+    inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h
     inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h)
 
 set(RES_FILES icons/QtWidgetsIcons.qrc)
@@ -23,8 +24,7 @@ set(UI_FILES inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.ui
     inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.ui)
 
 mtd_add_qt_library(
-  TARGET_NAME
-  VatesSimpleGuiQtWidgets
+  TARGET_NAME VatesSimpleGuiQtWidgets
   QT_VERSION 4
   SRC ${SOURCE_FILES}
   MOC ${MOC_FILES}
