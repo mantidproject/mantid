@@ -25,37 +25,30 @@ set(UI_FILES inc/MantidVatesSimpleGuiQtWidgets/ModeControlWidget.ui
 mtd_add_qt_library(
   TARGET_NAME
   VatesSimpleGuiQtWidgets
-  QT_VERSION
-  4
-  SRC
-  ${SOURCE_FILES}
-  MOC
-  ${MOC_FILES}
-  NOMOC
-  ${INCLUDE_FILES}
-  UI
-  ${UI_FILES}
-  RES
-  ${RES_FILES}
-  DEFS
-  IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
+  QT_VERSION 4
+  SRC ${SOURCE_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INCLUDE_FILES}
+  UI ${UI_FILES}
+  RES ${RES_FILES}
+  DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
   INCLUDE_DIRS
-  inc
+    inc
   LINK_LIBS
-  ${TCMALLOC_LIBRARIES_LINKTIME}
-  ${POCO_LIBRARIES}
-  ${MANTID_SUBPROJECT_LIBS}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${POCO_LIBRARIES}
+    ${MANTID_SUBPROJECT_LIBS}
   QT4_LINK_LIBS
-  Qwt5
+    Qwt5
   MTD_QT_LINK_LIBS
-  MantidQtWidgetsCommon
+    MantidQtWidgetsCommon
   INSTALL_DIR_BASE
-  ${PLUGINS_DIR}
+    ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
-  @loader_path/../../Contents/Libraries
-  @loader_path/../../Contents/MacOS
+    @loader_path/../../Contents/Libraries
+    @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH
-  "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}"
+    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}"
   )
 
 # Set the name of the generated library
