@@ -227,9 +227,12 @@ such as unused parameters or not using range-based for loops.
 Installing
 ~~~~~~~~~~
 
-Mantid does not come packaged with clang-tidy. You can install clang-tidy `here <http://releases.llvm.org/download.html>`_.
+Mantid does not come packaged with clang-tidy, each developer must download it themselves:
 
-Alternatively, for **Ubuntu** users, run ``sudo apt-get install clang-tidy`` in the command line.
+- **Ubuntu**: Run ``sudo apt-get install clang-tidy`` in the command line.
+- **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
+
+For other operating systems, check out the clang-tidy `downloads <http://releases.llvm.org/download.html>`_.
 
 Setup
 ~~~~~
