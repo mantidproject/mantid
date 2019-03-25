@@ -16,7 +16,7 @@ from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
                         FileAction, AnalysisDataService, ExperimentInfo)
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
-                           Direction, PropertyCriterion, logger)
+                           Direction, PropertyCriterion)
 from mantid import config
 from os.path import join as pjoin
 
@@ -141,7 +141,7 @@ class BASISReduction(PythonAlgorithm):
                              doc='Do we normalize data by incoming flux?')
         self.setPropertyGroup('DoFluxNormalization', title_flux_normalization)
         if_flux_normalization = EnabledWhenProperty('DoFluxNormalization',
-                                                PropertyCriterion.IsDefault)
+                                                    PropertyCriterion.IsDefault)
         default_flux_normalization = self._flux_normalization_types[0]
         self.declareProperty('FluxNormalizationType',
                              default_flux_normalization,
@@ -229,10 +229,8 @@ class BASISReduction(PythonAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-
         config['default.facility'] = 'SNS'
         config['default.instrument'] = self._long_inst
-
         #
         # Collect Flux Normalization
         #
@@ -241,10 +239,6 @@ class BASISReduction(PythonAlgorithm):
                 self.getProperty('FluxNormalizationType').value
             if self._flux_normalization_type == 'Monitor':
                 self._MonNorm = True
-        logger.error('DoFluxNormalization = ' + str(self.getProperty('DoFluxNormalization').value))
-        logger.error('FluxNormalizationType = ' + str(self._flux_normalization_type))
-        logger.error('self._MonNorm = ' + str(self._MonNorm))
-
 
         self._reflection =\
             REFLECTIONS_DICT[self.getProperty('ReflectionType').value]
