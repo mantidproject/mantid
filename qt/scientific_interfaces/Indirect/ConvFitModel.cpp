@@ -179,6 +179,9 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
     auto const instrument = workspace->getInstrument();
     if (instrument && instrument->hasParameter("resolution"))
       return instrument->getNumberParameter("resolution")[0];
+    else if (instrument && instrument->hasParameter("EFixed"))
+      return instrument->getNumberParameter("EFixed")[0] * 0.01;
+
     return boost::none;
   } catch (Mantid::Kernel::Exception::NotFoundError const &) {
     return boost::none;
