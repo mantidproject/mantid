@@ -15,6 +15,8 @@
 
 #include <qwt_plot.h>
 
+#include <algorithm>
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
@@ -48,6 +50,58 @@ std::vector<std::string> getOutputWorkspaceSuffices() {
 
 int getNumberOfSpectra(std::string const &name) {
   return static_cast<int>(getADSMatrixWorkspace(name)->getNumberHistograms());
+}
+
+std::string extractLastOf(const std::string &str,
+                          const std::string &delimiter) {
+  const auto cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(cutIndex + 1, str.size() - cutIndex);
+  return str;
+}
+
+template <typename Iterator, typename Predicate>
+std::vector<std::string> copyIf(Iterator const fromIterator,
+                                Iterator const toIterator,
+                                Predicate const &predicate) {
+  std::vector<std::string> newVector;
+  std::copy_if(fromIterator, toIterator, std::back_inserter(newVector),
+               predicate);
+  return newVector;
+}
+
+template <typename Iterator, typename Predicate>
+std::vector<std::string> transform(Iterator const fromIterator,
+                                   Iterator const toIterator,
+                                   Predicate const &predicate) {
+  std::vector<std::string> newVector;
+  newVector.reserve(toIterator - fromIterator);
+  std::transform(fromIterator, toIterator, std::back_inserter(newVector),
+                 predicate);
+  return newVector;
+}
+
+std::vector<std::string> getInputSuffixes(QStringList files) {
+  auto const allSuffixes =
+      transform(files.begin(), files.end(), [&](QString const &file) {
+        QFileInfo const fileInfo(file);
+        return extractLastOf(fileInfo.baseName().toStdString(), "_");
+      });
+
+  auto const suffixes = copyIf(allSuffixes.begin(), allSuffixes.end(),
+                               [&](std::string const &suffix) {
+                                 return suffix == "red" || suffix == "sqw";
+                               });
+  return suffixes;
+}
+
+IAlgorithm_sptr loadAlgorithm(std::string const &filepath,
+                              std::string const &outputName) {
+  auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", filepath);
+  loadAlg->setProperty("OutputWorkspace", outputName);
+  return loadAlg;
 }
 
 } // namespace
@@ -132,12 +186,15 @@ void Elwin::setup() {
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this,
           SLOT(newInputFiles()));
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this,
+          SLOT(updateIntegrationRange()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this,
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
+
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -206,14 +263,9 @@ void Elwin::run() {
 
   for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
     QFileInfo inputFileInfo(*it);
-    std::string workspaceName = inputFileInfo.baseName().toStdString();
-
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadNexus");
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", (*it).toStdString());
-    loadAlg->setProperty("OutputWorkspace", workspaceName);
-
-    m_batchAlgoRunner->addAlgorithm(loadAlg);
+    auto const workspaceName = inputFileInfo.baseName().toStdString();
+    m_batchAlgoRunner->addAlgorithm(
+        loadAlgorithm((*it).toStdString(), workspaceName));
     inputWorkspacesString += workspaceName + ",";
   }
 
@@ -291,10 +343,20 @@ void Elwin::unGroupInput(bool error) {
 
     updatePlotSpectrumOptions();
 
+    if (m_blnManager->value(m_properties["Normalise"]))
+      checkForELTWorkspace();
+
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
+}
+
+void Elwin::checkForELTWorkspace() {
+  auto const workspaceName = getOutputBasename().toStdString() + "_elt";
+  if (!doesExistInADS(workspaceName))
+    showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
+                   "was not produced - temperatures were not found.");
 }
 
 void Elwin::updatePlotSpectrumOptions() {
@@ -359,6 +421,11 @@ bool Elwin::validate() {
     uiv.checkValidRange("Range Two", rangeTwo);
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
+
+  auto const suffixes = getInputSuffixes(m_uiForm.dsInputFiles->getFilenames());
+  if (std::adjacent_find(suffixes.begin(), suffixes.end(),
+                         std::not_equal_to<>()) != suffixes.end())
+    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
 
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
@@ -484,9 +551,13 @@ void Elwin::plotInput() {
   IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
                                            m_uiForm.ppPlot, "IntegrationStart",
                                            "IntegrationEnd");
+
+  setDefaultSampleLog(inputWorkspace());
+}
+
+void Elwin::updateIntegrationRange() {
   setDefaultResolution(inputWorkspace(),
                        m_uiForm.ppPlot->getCurveRange("Sample"));
-  setDefaultSampleLog(inputWorkspace());
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {

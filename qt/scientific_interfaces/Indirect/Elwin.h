@@ -33,6 +33,7 @@ private slots:
   void runClicked();
   void saveClicked();
   void plotClicked();
+  void updateIntegrationRange();
 
 private:
   void run() override;
@@ -43,6 +44,8 @@ private:
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
+
+  void checkForELTWorkspace();
 
   QString getOutputBasename();
 
