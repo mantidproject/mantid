@@ -10,8 +10,8 @@ import os
 import numpy as np
 from collections import namedtuple
 from contextlib import contextmanager
-from enum import Enum
 
+from mantid.py3compat.enum import Enum
 from mantid import config as mantid_config
 from mantid.api import (AnalysisDataService, DataProcessorAlgorithm,
                         AlgorithmFactory, FileProperty, FileAction,
