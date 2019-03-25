@@ -27,6 +27,7 @@ Data Analysis Interface
 Improvements
 ############
 - Improved the output options of MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit so that Chi_squared can now be plotted.
+- Improved the I(Q, t) tab by adding more validation checks for the input data.
 
 Bug Fixes
 #########
