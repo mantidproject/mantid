@@ -10,6 +10,8 @@
 #include "IndirectDataAnalysisTab.h"
 #include "ui_Iqt.h"
 
+#include "../General/UserInputValidator.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -23,9 +25,6 @@ private:
   void run() override;
   void setup() override;
   bool validate() override;
-  bool validWorkspaceProperty(std::string const &sampleName,
-                              std::string const &resolutionName,
-                              std::string const &parameter) const;
   void loadSettings(const QSettings &settings) override;
   void setBrowserWorkspace() override{};
 
