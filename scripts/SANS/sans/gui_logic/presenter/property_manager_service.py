@@ -21,7 +21,6 @@ class PropertyManagerService(object):
     sans_property_manager_prefix = "SANS_PROPERTY_MANAGER_THIS_NEEDS_TO_BE_UNIQUE_"
 
     def __init__(self):
-        super(PropertyManagerService, self).__init__()
 
     def add_states_to_pmds(self, states):
         # 1. Remove all property managers which belong to the sans property manager type
