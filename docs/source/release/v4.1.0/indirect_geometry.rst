@@ -31,6 +31,7 @@ Improvements
 Bug Fixes
 #########
 - Fixed an error caused by loading a Sample into ConvFit which does not have a resolution parameter for the analyser.
+- Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 
 
 Data Reduction Interface
