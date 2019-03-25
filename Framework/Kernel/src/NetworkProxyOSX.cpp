@@ -221,7 +221,9 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfo httpProxy;
   CFDictionaryRef dict = SCDynamicStoreCopyProxies(nullptr);
   if (!dict) {
-    logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL");
+    logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL. No "
+                 "proxy information retrieved");
+    return httpProxy;
   }
 
   // Query the proxy pac first.
