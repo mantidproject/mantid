@@ -258,7 +258,7 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
 
 class TOSCAMultiFileSummedReductionWithDifferentMaskedDetectors(ISISIndirectInelasticReduction):
     """
-    This test was created in response to the bug in issue #25072
+    This test was created in response to the bug in issue #25072.
     """
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
@@ -274,7 +274,7 @@ class TOSCAMultiFileSummedReductionWithDifferentMaskedDetectors(ISISIndirectInel
 
 class TOSCAMultiFileReductionWithDifferentMaskedDetectors(ISISIndirectInelasticReduction):
     """
-    This test was created in response to the bug in issue #25061
+    This test was created in response to the bug in issue #25061.
     """
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
