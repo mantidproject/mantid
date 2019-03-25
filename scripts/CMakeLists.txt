@@ -5,8 +5,8 @@ add_subdirectory(ErrorReporter)
 
 # Chain all required interface custom targets into CompilePyUI
 add_custom_target(CompilePyUI 
-				  DEPENDS CompileUIUI
-						  CompileUIErrorReporter)
+		  DEPENDS CompileUIUI
+		  CompileUIErrorReporter)
 
 # Put them into the 'CompileUI' folder or group in VS and the like, for
 # convenience
