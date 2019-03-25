@@ -12,6 +12,8 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
+#include "../General/UserInputValidator.h"
+
 #include <qwt_plot.h>
 
 #include <tuple>

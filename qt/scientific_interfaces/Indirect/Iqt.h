@@ -10,8 +10,6 @@
 #include "IndirectDataAnalysisTab.h"
 #include "ui_Iqt.h"
 
-#include "../General/UserInputValidator.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
