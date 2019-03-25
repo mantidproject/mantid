@@ -76,6 +76,11 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
 }
 
+bool IndirectFitPropertyBrowser::isFullFunctionBrowserActive() const
+{
+  return m_functionWidget->currentIndex() == 1;
+}
+
 void IndirectFitPropertyBrowser::init() {
   initFunctionBrowser();
   initFitOptionsBrowser();

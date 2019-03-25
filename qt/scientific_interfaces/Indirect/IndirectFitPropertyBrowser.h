@@ -100,6 +100,7 @@ signals:
 private:
   void initFunctionBrowser();
   void initFitOptionsBrowser();
+  bool isFullFunctionBrowserActive() const;
 
   QVBoxLayout *m_mainLayout;
   MantidWidgets::FunctionBrowser *m_functionBrowser;

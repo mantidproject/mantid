@@ -19,6 +19,7 @@ set ( QT5_SRC_FILES
   src/FitPropertyBrowser.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
+  src/FunctionTreeView.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
   # todo: move this to the instrument view library when the slice
@@ -106,6 +107,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
@@ -317,6 +319,7 @@ set ( SRC_FILES
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FunctionBrowser.cpp
+  src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IndirectInstrumentConfig.cpp
   src/InputController.cpp
@@ -428,6 +431,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
