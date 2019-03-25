@@ -28,9 +28,7 @@ if(ENABLE_WORKBENCH AND NOT PYRCC5_CMD)
   endif()
 endif()
 
-#
 # Qt-based targets
-#
 add_subdirectory(widgets)
 add_subdirectory(python)
 add_subdirectory(scientific_interfaces)
