@@ -80,7 +80,7 @@ Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo,
   // We need a random number between the inner radius and outer radius, but also
   // need the square root for a uniform distribution of points
   const double c1 = std::pow(geometry.innerRadius, 2);
-  const double c2 = std::pow(geometry.outerRadius, 2);
+  const double c2 = std::pow(geometry.radius, 2);
   const double r{std::sqrt(c1 + (c2 - c1) * r2)};
   const double z{geometry.height * r3};
   const Kernel::V3D alongAxis{geometry.axis * z};

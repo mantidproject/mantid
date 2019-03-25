@@ -70,16 +70,16 @@ public:
     const Kernel::V3D &centreOfBottomBase;
     const Kernel::V3D &axis;
     double innerRadius;
-    double outerRadius;
+    double radius;
     double height;
   };
 
 private:
   std::vector<Kernel::V3D> m_points;
-  double m_radius;      ///< Radius for the sphere, cone and cylinder
+  double m_radius;      ///< Radius for the sphere, cone and cylinder;
+                        ///< Also inner radius for hollow cylinder;
   double m_height;      ///< height for cone, cylinder and hollow cylinder;
   double m_innerRadius; ///< Inner radius for hollow cylinder
-  double m_outerRadius; ///< Outer radius for hollow cylinder
   GeometryShape m_shape;
 
 public:
@@ -88,7 +88,6 @@ public:
   const std::vector<Kernel::V3D> &points() const;
   double radius() const;
   double innerRadius() const;
-  double outerRadius() const;
   double height() const;
   GeometryShape shape() const;
 
