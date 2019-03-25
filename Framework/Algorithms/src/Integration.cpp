@@ -268,7 +268,7 @@ void Integration::exec() {
         sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
         if (distmin > 0)
           Fmin = F[distmin - 1];
-        Fmax = F[distmax];
+        Fmax = F[distmax < F.size() ? distmax : F.size() - 1];
       }
       if (!is_distrib) {
         // Sum the Y, and sum the E in quadrature
