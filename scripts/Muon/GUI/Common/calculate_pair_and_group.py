@@ -39,7 +39,7 @@ def estimate_group_asymmetry_data(context, group_name, run, rebin):
 
 def _run_pre_processing(context, run, rebin):
     params = _get_pre_processing_params(context, run, rebin)
-    params["InputWorkspace"] = context.loaded_workspace_as_group(run)
+    params["InputWorkspace"] = context.data_context.loaded_workspace_as_group(run)
     processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data
 
@@ -48,44 +48,44 @@ def _get_pre_processing_params(context, run, rebin):
     pre_process_params = {}
 
     try:
-        if context.gui_variables['FirstGoodDataFromFile']:
-            time_min = context.get_loaded_data_for_run(run)["FirstGoodData"]
+        if context.gui_context['FirstGoodDataFromFile']:
+            time_min = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            time_min = context.gui_variables['FirstGoodData']
+            time_min = context.gui_context['FirstGoodData']
         pre_process_params["TimeMin"] = time_min
     except KeyError:
         pass
 
     try:
-        if context.gui_variables['TimeZeroFromFile']:
+        if context.gui_context['TimeZeroFromFile']:
             time_offset = 0.0
         else:
-            time_offset = context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_variables['TimeZero']
+            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context['TimeZero']
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
 
     if rebin:
         try:
-            if context.gui_variables['RebinType'] == 'Variable' and context.gui_variables["RebinVariable"]:
-                pre_process_params["RebinArgs"] = context.gui_variables["RebinVariable"]
+            if context.gui_context['RebinType'] == 'Variable' and context.gui_context["RebinVariable"]:
+                pre_process_params["RebinArgs"] = context.gui_context["RebinVariable"]
         except KeyError:
             pass
 
         try:
-            if context.gui_variables['RebinType'] == 'Fixed' and context.gui_variables["RebinFixed"]:
-                x_data = context._loaded_data.get_data(run=run, instrument=context.instrument
+            if context.gui_context['RebinType'] == 'Fixed' and context.gui_context["RebinFixed"]:
+                x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.instrument
                                                        )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
                 original_step = x_data[1] - x_data[0]
-                pre_process_params["RebinArgs"] = float(context.gui_variables["RebinFixed"]) * original_step
+                pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step
         except KeyError:
             pass
 
     try:
-        if context.gui_variables['DeadTimeSource'] == 'FromFile':
-            dead_time_table = context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
-        elif context.gui_variables['DeadTimeSource'] == 'FromADS':
-            dead_time_table = context.gui_variables['DeadTimeTable']
+        if context.gui_context['DeadTimeSource'] == 'FromFile':
+            dead_time_table = context.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+        elif context.gui_context['DeadTimeSource'] == 'FromADS':
+            dead_time_table = context.gui_context['DeadTimeTable']
         else:
             dead_time_table = None
 
@@ -99,19 +99,19 @@ def _get_pre_processing_params(context, run, rebin):
 
 def _get_MuonGroupingCounts_parameters(context, group_name, run):
     params = {}
-    if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
-        summed_periods = context.gui_variables["SummedPeriods"]
+    if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
+        summed_periods = context.gui_context["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     else:
         params["SummedPeriods"] = "1"
 
-    if context.is_multi_period() and 'SubtractedPeriods' in context.gui_variables:
-        subtracted_periods = context.gui_variables["SubtractedPeriods"]
+    if context.data_context.is_multi_period() and 'SubtractedPeriods' in context.gui_context:
+        subtracted_periods = context.gui_context["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     else:
         params["SubtractedPeriods"] = ""
 
-    group = context._groups.get(group_name, None)
+    group = context.group_pair_context[group_name]
     if group:
         params["GroupName"] = group_name
         params["Grouping"] = ",".join([str(i) for i in group.detectors])

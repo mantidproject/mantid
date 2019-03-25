@@ -33,6 +33,7 @@ set ( TEST_PY_FILES
    LoadWidgetView_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
+   muon_context_test.py
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py

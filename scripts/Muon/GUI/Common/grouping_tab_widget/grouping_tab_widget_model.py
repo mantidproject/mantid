@@ -16,7 +16,10 @@ class GroupingTabModel(object):
     """
 
     def __init__(self, context=MuonContext()):
+        self._context = context
         self._data = context.data_context
+        self._groups_and_pairs = context.group_pair_context
+        self._gui_variables = context.gui_context
 
     def get_group_workspace(self, group_name, run):
         """
@@ -32,23 +35,23 @@ class GroupingTabModel(object):
 
     @property
     def groups(self):
-        return list(self._data.groups.values())
+        return self._groups_and_pairs.groups
 
     @property
     def pairs(self):
-        return list(self._data.pairs.values())
+        return self._groups_and_pairs.pairs.values()
 
     @property
     def group_names(self):
-        return list(self._data.group_names)
+        return self._groups_and_pairs.group_names
 
     @property
     def pair_names(self):
-        return list(self._data.pair_names)
+        return self._groups_and_pairs.pair_names
 
     @property
     def group_and_pair_names(self):
-        return list(self._data.group_names) + list(self._data.pair_names)
+        return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names
 
     def show_all_groups_and_pairs(self):
         self._data.show_all_groups()
@@ -66,11 +69,11 @@ class GroupingTabModel(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._data.add_group(group)
+        self._groups_and_pairs.add_group(group)
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
-        self._data.add_pair(pair)
+        self._groups_and_pairs.add_pair(pair)
 
     def remove_groups_by_name(self, name_list):
         for name in name_list:

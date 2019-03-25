@@ -83,6 +83,28 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_1.show.assert_called_once_with(str([12345]))
         pair.show.assert_called_once_with(str([12345]))
 
+    def test_group_names_returns_ordered_list_of_names(self):
+        group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
+        group_2 = MuonGroup('group_2', [1, 3, 4, 7, 9])
+        group_3 = MuonGroup('group_3', [1, 3, 4, 7, 9])
+
+        self.context.add_group(group_1)
+        self.context.add_group(group_2)
+        self.context.add_group(group_3)
+
+        self.assertEquals(self.context.group_names, ['group_1', 'group_2', 'group_3'])
+
+    def test_pair_names_returns_ordered_list_of_names(self):
+        pair_1 = MuonPair('pair_1')
+        pair_2 = MuonPair('pair_2')
+        pair_3 = MuonPair('pair_3')
+
+        self.context.add_pair(pair_1)
+        self.context.add_pair(pair_2)
+        self.context.add_pair(pair_3)
+
+        self.assertEquals(self.context.pair_names, ['pair_1', 'pair_2', 'pair_3'])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -89,6 +89,14 @@ class MuonGroupPairContext(object):
     def pairs(self):
         return self._pairs
 
+    @property
+    def group_names(self):
+        return [group.name for group in self._groups]
+
+    @property
+    def pair_names(self):
+        return [pair.name for pair in self._pairs]
+
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
         if self._check_name_unique(group.name):
@@ -99,12 +107,14 @@ class MuonGroupPairContext(object):
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
         if self._check_name_unique(pair.name):
-            self._groups.append(pair)
+            self._pairs.append(pair)
         else:
             raise ValueError('Groups and pairs must have unique names')
 
     def show(self, name, run):
         self[name].show(str(run))
+
+
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:

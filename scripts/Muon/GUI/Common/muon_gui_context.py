@@ -15,16 +15,13 @@ class GuiVariablesNotifier(Observable):
     def notify_subscribers(self, *args, **kwargs):
         Observable.notify_subscribers(self, *args, **kwargs)
 
-class MuonGuiContext(object):
+class MuonGuiContext(dict):
     def __init__(self):
-        self._variables = {}
+        super(MuonGuiContext, self).__init__()
         self.notifier = GuiVariablesNotifier(self)
 
-    def __getitem__(self, key):
-        return self._variables[key]
-
     def __setitem__(self, key, value):
-        self._variables.update({key: value})
+        super(MuonGuiContext, self).__setitem__(key, value)
         self.notifier.notify_subscribers(**{key: value})
 
     def add_subscriber(self, observer):
