@@ -9,6 +9,11 @@
 #define MANTID_ALGORITHMS_REMOVESPECTRA_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidIndexing/IndexInfo.h"
+
+using namespace Mantid::API;
+using namespace Mantid::Indexing;
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,14 +29,28 @@ class DLLExport RemoveSpectra : public API::Algorithm {
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"RemoveSpectra"};
+    return {"ExtractSpectra"};
   }
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "Utility\\Workspaces"; }
+  const std::string category() const override {
+    return "Transforms\\Splitting";
+  }
 
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
+  std::vector<int32_t>
+  discoverSpectraWithNoDetectorOrisMasked(MatrixWorkspace_const_sptr &inputWS);
+  template <class T>
+  bool evaluateSpectrumForMaskOrDetectors(MatrixWorkspace_const_sptr &inputWS,
+                                          T spectrum, int index);
+  MatrixWorkspace_sptr
+  copySpectraFromInputToOutput(MatrixWorkspace_const_sptr &inputWS,
+                               std::vector<int32_t> &specList);
+  template <class T>
+  bool evaluateIfSpectrumIsInList(std::vector<int32_t> &specList, T spectrum);
+  void removeDuplicates(std::vector<int32_t> &specList);
 };
 } // namespace Algorithms
 } // namespace Mantid
