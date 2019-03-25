@@ -31,8 +31,6 @@ class TransformToIqtTest(unittest.TestCase):
         self._param_table.addColumn('float', 'Resolution')
         self._param_table.addColumn('int', 'ResolutionBins')
 
-        self._param_table.addRow([1725, 10.0, 172, -0.5, 0.5, 0.00581395, 0.01845, 6])
-
 
     def test_with_can_reduction(self):
         """
@@ -46,6 +44,7 @@ class TransformToIqtTest(unittest.TestCase):
                                      ResolutionWorkspace=can,
                                      BinReductionFactor=10)
 
+        self._param_table.addRow([1725, 10.0, 172, -0.5, 0.5, 0.00581395, 0.01845, 6])
         self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
 
 
@@ -61,6 +60,7 @@ class TransformToIqtTest(unittest.TestCase):
                                      ResolutionWorkspace=resolution,
                                      BinReductionFactor=10)
 
+        self._param_table.addRow([1725, 10.0, 172, -0.5, 0.5, 0.00581395, 0.01845, 6])
         self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
 
 
@@ -76,10 +76,8 @@ class TransformToIqtTest(unittest.TestCase):
                                      ResolutionWorkspace=resolution,
                                      BinReductionFactor=10)
 
-        expected_param_table = Load('TransformToIqt_ParamTable_Expected')
-        expected_iqt = Load('TransformToIqt_Iqt_Expected')
-        self.assertTrue(CompareWorkspaces(params, expected_param_table, 1e-8)[0])
-        self.assertTrue(CompareWorkspaces(iqt, expected_iqt, 1e-8)[0])
+        self._param_table.addRow([1724, 10.0, 172, -0.5, 0.5, 0.00581395, 0.0175, 6])
+        self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
 
 
 if __name__ == '__main__':
