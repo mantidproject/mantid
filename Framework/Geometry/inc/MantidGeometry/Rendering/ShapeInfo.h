@@ -77,7 +77,7 @@ public:
 private:
   std::vector<Kernel::V3D> m_points;
   double m_radius;      ///< Radius for the sphere, cone and cylinder;
-                        ///< Also inner radius for hollow cylinder;
+                        ///< Also outer radius for hollow cylinder;
   double m_height;      ///< height for cone, cylinder and hollow cylinder;
   double m_innerRadius; ///< Inner radius for hollow cylinder
   GeometryShape m_shape;
