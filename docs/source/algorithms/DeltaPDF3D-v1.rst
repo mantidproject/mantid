@@ -49,12 +49,13 @@ slow) if the workspace is too large.
 KAREN
 =====
 
-The KAREN (K-space Algorithmic REconstructioN) method is a more
-advanced approach that applies a filter over the data removing any
-points that are outliers in a moving window, with width set by the
+The KAREN (K-space Algorithmic REconstructioN) method [#f3]_, is a
+more advanced approach that applies a filter over the data removing
+any points that are outliers in a moving window, with width set by the
 property `KARENWidth`. Outliers are defined as values more than 3
-sigma away from the median. Sigma is estimated using 1.4826*MAD.
-Outliers are replaced with a value of median+2.2*MAD of window.
+sigma away from the median. Sigma is estimated using 1.4826*MAD
+(median absolute deviation). Outliers are replaced with a value of
+median+2.2*MAD of window.
 
 Window function
 ---------------
@@ -77,6 +78,8 @@ References
 
 .. [#f2] Kobas, M and Weber, T and Steurer, W, *Structural disorder in the decagonal Al-Co-Ni. I. Patterson analysis of diffuse x-ray scattering data.* Phys. Rev. B (2005), **71**, 22, 224205
    `doi: 10.1103/PhysRevB.71.224205 <https://doi.org/10.1103/PhysRevB.71.224205>`_
+
+.. [#f3] Weng, J *et al.* *K-space Algorithmic REconstructioN (KAREN): A robust statistical methodology to separate Bragg and diffuse scattering.* J. Appl. Crystallogr. In-preparation.
 
 
 Usage -  Punch-and-Fill
