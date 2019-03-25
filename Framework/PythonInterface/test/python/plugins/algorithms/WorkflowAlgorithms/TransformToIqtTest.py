@@ -64,5 +64,23 @@ class TransformToIqtTest(unittest.TestCase):
         self.assertTrue(CompareWorkspaces(params, self._param_table, 1e-8)[0])
 
 
+    def test_TransformToIqt_using_workspaces_with_equal_numbers_of_histograms_but_different_x_lengths(self):
+        """
+        Tests running TransformToIqt using a sample and resolution with the same number of histograms but different
+        x lengths.
+        """
+        sample = Load('iris26184_multi_graphite002_red')
+        resolution = Load('irs26176_graphite002_red')
+
+        params, iqt = TransformToIqt(SampleWorkspace=sample,
+                                     ResolutionWorkspace=resolution,
+                                     BinReductionFactor=10)
+
+        expected_param_table = Load('TransformToIqt_ParamTable_Expected')
+        expected_iqt = Load('TransformToIqt_Iqt_Expected')
+        self.assertTrue(CompareWorkspaces(params, expected_param_table, 1e-8)[0])
+        self.assertTrue(CompareWorkspaces(iqt, expected_iqt, 1e-8)[0])
+
+
 if __name__ == '__main__':
     unittest.main()
