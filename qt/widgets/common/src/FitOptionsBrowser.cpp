@@ -162,9 +162,8 @@ void FitOptionsBrowser::createCommonProperties() {
     QStringList minimizers;
 
     // Store them in the m_minimizer enum property
-    for (auto it = minimizerOptions.begin(); it != minimizerOptions.end();
-         ++it) {
-      minimizers << QString::fromStdString(*it);
+    for (auto & minimizerOption : minimizerOptions) {
+      minimizers << QString::fromStdString(minimizerOption);
     }
     m_enumManager->setEnumNames(m_minimizer, minimizers);
     int i =
@@ -185,8 +184,8 @@ void FitOptionsBrowser::createCommonProperties() {
         Mantid::API::CostFunctionFactory::Instance().getKeys();
     QStringList costFunctions;
     // Store them in the m_minimizer enum property
-    for (auto it = costOptions.begin(); it != costOptions.end(); ++it) {
-      costFunctions << QString::fromStdString(*it);
+    for (auto & costOption : costOptions) {
+      costFunctions << QString::fromStdString(costOption);
     }
     m_enumManager->setEnumNames(m_costFunction, costFunctions);
     m_browser->addProperty(m_costFunction);
@@ -381,10 +380,9 @@ void FitOptionsBrowser::updateMinimizer() {
 
   // Create and add properties to the minimizer group
   auto minimizerProperties = minimizer->getProperties();
-  for (auto property = minimizerProperties.begin();
-       property != minimizerProperties.end(); ++property) {
-    auto prop = createPropertyProperty(*property);
-    if (!*property)
+  for (auto & minimizerPropertie : minimizerProperties) {
+    auto prop = createPropertyProperty(minimizerPropertie);
+    if (!minimizerPropertie)
       continue;
     m_minimizerGroup->addSubProperty(prop);
   }

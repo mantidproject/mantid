@@ -182,16 +182,15 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString &) {
           mws->run().getLogData();
       if (gws) {
         std::vector<std::string> wsNames = gws->getNames();
-        for (std::vector<std::string>::iterator it = wsNames.begin();
-             it != wsNames.end(); ++it) {
-          Mantid::API::AnalysisDataService::Instance().remove(*it);
+        for (auto & wsName : wsNames) {
+          Mantid::API::AnalysisDataService::Instance().remove(wsName);
         }
       } else {
         Mantid::API::AnalysisDataService::Instance().remove(
             "PlotAsymmetryByLogValueDialog_tmp");
       }
-      for (size_t i = 0; i < props.size(); i++) {
-        m_uiForm.logBox->addItem(QString::fromStdString(props[i]->name()));
+      for (auto prop : props) {
+        m_uiForm.logBox->addItem(QString::fromStdString(prop->name()));
       }
       // Display the appropriate value
       QString displayed("");

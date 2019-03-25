@@ -55,8 +55,7 @@ DiagResults::DiagResults(QWidget *parent)
   addRow("Test", "Number of failed spectra");
   // make one row for each set of results
   int row = 0;
-  for (int i = 0; i < NUMTESTS; i++) {
-    QString col1 = TESTS[i];
+  for (auto col1 : TESTS) {
     QString col2 = "N/A";
     row = addRow(col1, col2);
   }

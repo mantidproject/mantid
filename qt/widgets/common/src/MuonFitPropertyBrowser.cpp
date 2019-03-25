@@ -610,8 +610,7 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
   m_registeredFunctions.clear();
   m_registeredPeaks.clear();
   m_registeredBackgrounds.clear();
-  for (size_t i = 0; i < names.size(); i++) {
-    std::string fnName = names[i];
+  for (auto fnName : names) {
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG")
       continue;
@@ -619,9 +618,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     auto f = FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
-    for (size_t j = 0; j < categories.size(); ++j) {
-      if ((categories[j] == "Muon") || (categories[j] == "General") ||
-          (categories[j] == "Background"))
+    for (const auto & categorie : categories) {
+      if ((categorie == "Muon") || (categorie == "General") ||
+          (categorie == "Background"))
         muon = true;
     }
     if (muon) {

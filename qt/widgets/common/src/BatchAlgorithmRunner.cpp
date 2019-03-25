@@ -128,9 +128,8 @@ bool BatchAlgorithmRunner::executeAlgo(ConfiguredAlgorithm algorithm) {
     m_currentAlgorithm = algorithm.first;
 
     // Assign the properties to be set at runtime
-    for (auto it = algorithm.second.begin(); it != algorithm.second.end();
-         ++it) {
-      m_currentAlgorithm->setProperty(it->first, it->second);
+    for (auto & it : algorithm.second) {
+      m_currentAlgorithm->setProperty(it.first, it.second);
     }
 
     g_log.information() << "Starting next algorithm in queue: "

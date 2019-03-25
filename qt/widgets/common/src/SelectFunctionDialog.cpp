@@ -48,12 +48,12 @@ SelectFunctionDialog::SelectFunctionDialog(
   // Store in a map. Key = category. Value = vector of fit functions belonging
   // to that category.
   std::map<std::string, std::vector<std::string>> categories;
-  for (size_t i = 0; i < registeredFunctions.size(); ++i) {
-    auto f = factory.createFunction(registeredFunctions[i]);
+  for (const auto & registeredFunction : registeredFunctions) {
+    auto f = factory.createFunction(registeredFunction);
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
       categories[tempCategories[boost::lexical_cast<int>(j)]].push_back(
-          registeredFunctions[i]);
+          registeredFunction);
     }
   }
 

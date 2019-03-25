@@ -245,8 +245,8 @@ void PanelsSurface::init() {
   spreadBanks();
 
   RectF surfaceRect;
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    RectF rect(m_flatBanks[i]->polygon.boundingRect());
+  for (auto & m_flatBank : m_flatBanks) {
+    RectF rect(m_flatBank->polygon.boundingRect());
     surfaceRect.unite(rect);
   }
 
@@ -318,8 +318,7 @@ void PanelsSurface::addFlatBankOfDetectors(
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
 #pragma omp parallel for ordered
-  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
-    auto detector = detectors[i];
+  for (unsigned long long detector : detectors) {
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
 #pragma omp ordered
@@ -355,10 +354,10 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   }
 
   info->polygon = QPolygonF(verts);
-  for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
-    const auto &row = componentInfo.children(columns[i]);
-    for (int j = 0; j < static_cast<int>(row.size()); ++j) {
-      addDetector(row[j], ref, index, info->rotation);
+  for (unsigned long long column : columns) {
+    const auto &row = componentInfo.children(column);
+    for (unsigned long long j : row) {
+      addDetector(j, ref, index, info->rotation);
     }
   }
 }
@@ -457,11 +456,11 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
-  for (int i = 0; i < static_cast<int>(tubes.size()); ++i) {
-    const auto &children = componentInfo.children(tubes[i]);
+  for (unsigned long long tube : tubes) {
+    const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
-    for (int j = 0; j < static_cast<int>(children.size()); ++j) {
-      addDetector(children[j], pos0, index, info->rotation);
+    for (unsigned long long j : children) {
+      addDetector(j, pos0, index, info->rotation);
     }
 
     auto &udet0 = m_unwrappedDetectors[children.front()];
@@ -716,9 +715,9 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
  * Remove all found flat banks
  */
 void PanelsSurface::clearBanks() {
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    if (m_flatBanks[i])
-      delete m_flatBanks[i];
+  for (auto & m_flatBank : m_flatBanks) {
+    if (m_flatBank)
+      delete m_flatBank;
   }
   m_flatBanks.clear();
 }

@@ -496,8 +496,8 @@ void AlgorithmHistoryWindow::copytoClipboard() {
 }
 
 void AlgorithmHistoryWindow::doUnroll(const std::vector<int> &unrollIndicies) {
-  for (auto it = unrollIndicies.begin(); it != unrollIndicies.end(); ++it) {
-    m_view->unroll(*it);
+  for (std::_Vector_const_iterator<std::_Vector_val<std::_Simple_types<int> > >::value_type unrollIndicie : unrollIndicies) {
+    m_view->unroll(unrollIndicie);
   }
 }
 
@@ -749,15 +749,14 @@ void AlgHistoryTreeWidget::populateNestedHistory(
     parentWidget->setCheckState(1, Qt::Unchecked);
   }
 
-  for (auto algHistIter = entries.begin(); algHistIter != entries.end();
-       ++algHistIter) {
-    int nAlgVersion = (*algHistIter)->version();
-    algName = concatVersionwithName((*algHistIter)->name(), nAlgVersion);
+  for (const auto & entrie : entries) {
+    int nAlgVersion = entrie->version();
+    algName = concatVersionwithName(entrie->name(), nAlgVersion);
 
     AlgHistoryItem *item =
-        new AlgHistoryItem(QStringList(algName), *algHistIter, parentWidget);
+        new AlgHistoryItem(QStringList(algName), entrie, parentWidget);
     parentWidget->addChild(item);
-    populateNestedHistory(item, *algHistIter);
+    populateNestedHistory(item, entrie);
   }
 }
 

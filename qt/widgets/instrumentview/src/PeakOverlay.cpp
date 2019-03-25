@@ -298,8 +298,7 @@ void PeakOverlay::draw(QPainter &painter) const {
     bool overlap = false;
     // if current label overlaps with another
     // combine them substituting differing numbers with letter 'h','k', or 'l'
-    for (int i = 0; i < m_labels.size(); ++i) {
-      PeakHKL &hkl = m_labels[i];
+    for (auto & hkl : m_labels) {
       overlap = hkl.add(marker, rect);
       if (overlap)
         break;
@@ -312,8 +311,7 @@ void PeakOverlay::draw(QPainter &painter) const {
   }
 
   painter.setPen(color);
-  for (int i = 0; i < m_labels.size(); ++i) {
-    PeakHKL &hkl = m_labels[i];
+  for (auto & hkl : m_labels) {
     hkl.draw(painter, m_precision);
   }
 }

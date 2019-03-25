@@ -178,8 +178,8 @@ void AlgorithmPropertiesWidget::initLayout() {
 
   // This also deletes the PropertyWidget, which does not actually
   // contain the sub-widgets because they are shared in the grid layout
-  for (auto it = m_propWidgets.begin(); it != m_propWidgets.end(); it++)
-    (*it)->deleteLater();
+  for (auto & m_propWidget : m_propWidgets)
+    m_propWidget->deleteLater();
   QCoreApplication::processEvents();
   m_propWidgets.clear();
 
@@ -196,9 +196,7 @@ void AlgorithmPropertiesWidget::initLayout() {
     // Each property is on its own row
     int row = 0;
 
-    for (std::vector<Property *>::const_iterator pIter = prop_list.begin();
-         pIter != prop_list.end(); ++pIter) {
-      Property *prop = *pIter;
+    for (auto prop : prop_list) {
       QString propName = QString::fromStdString(prop->name());
 
       // Are we entering a new group?

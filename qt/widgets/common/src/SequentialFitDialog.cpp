@@ -193,12 +193,12 @@ bool SequentialFitDialog::validateLogs(const QString wsName) {
   if (ws) {
     const std::vector<Mantid::Kernel::Property *> logs = ws->run().getLogData();
     QStringList logNames;
-    for (int i = 0; i < static_cast<int>(logs.size()); ++i) {
+    for (auto log : logs) {
       Mantid::Kernel::TimeSeriesProperty<double> *p =
-          dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(logs[i]);
+          dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log);
       if (!p)
         continue;
-      logNames << QString::fromStdString(logs[i]->name());
+      logNames << QString::fromStdString(log->name());
     }
     int n = ui.cbLogValue->count();
     // if the ws has no logs - do not include it

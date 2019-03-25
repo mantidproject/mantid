@@ -276,8 +276,8 @@ std::set<int> TwoLevelTreeManager::expandSelection() {
   if (items.empty())
     return groupIds;
 
-  for (auto group = items.begin(); group != items.end(); ++group)
-    groupIds.insert(group->first);
+  for (auto & item : items)
+    groupIds.insert(item.first);
 
   return groupIds;
 }
@@ -369,9 +369,9 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
     // Iterate over rows and lines simultaneously, stopping when we reach the
     // end of either
     auto lineIt = lines.begin();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-      const int groupId = it->first;
-      auto rows = it->second;
+    for (const auto & selectedRow : selectedRows) {
+      const int groupId = selectedRow.first;
+      auto rows = selectedRow.second;
       auto rowIt = rows.begin();
       for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
         auto values = (*lineIt).split("\t");

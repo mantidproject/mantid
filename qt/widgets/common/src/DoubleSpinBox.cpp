@@ -91,11 +91,10 @@ void DoubleSpinBox::interpretText(bool notify) {
         emit valueChanged(d_value);
     } else {
       // Check for any registered test strings that map to a given value
-      for (auto it = m_specialTextMappings.begin();
-           it != m_specialTextMappings.end(); ++it) {
-        if (it->first == text()) {
+      for (auto & m_specialTextMapping : m_specialTextMappings) {
+        if (m_specialTextMapping.first == text()) {
           // Found a matching string, try to set the value
-          if (setValue(it->second)) {
+          if (setValue(m_specialTextMapping.second)) {
             lineEdit()->setText(text());
             if (notify)
               emit valueChanged(d_value);

@@ -120,8 +120,8 @@ void SortTableWorkspaceDialog::workspaceChanged(const QString &wsName) {
     m_columnNames.clear();
     // get and cache the column names from the workspace
     auto columnNames = ws->getColumnNames();
-    for (auto name = columnNames.begin(); name != columnNames.end(); ++name) {
-      m_columnNames << QString::fromStdString(*name);
+    for (auto & columnName : columnNames) {
+      m_columnNames << QString::fromStdString(columnName);
     }
     m_form.cbColumnName->addItems(m_columnNames);
     // the GUI already has the controls to set the first column
