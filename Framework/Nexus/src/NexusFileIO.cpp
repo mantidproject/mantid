@@ -1271,8 +1271,7 @@ int getNexusEntryTypes(const std::string &fileName,
   for (auto &entry : entryList) {
     NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
-    while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
-           NX_OK) {
+    while ((NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) == NX_OK) {
       std::string nxc(nxclass), nxn(nxname);
       // if a data field
       if (nxc == "SDS")
