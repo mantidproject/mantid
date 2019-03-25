@@ -283,8 +283,9 @@ if ( CMAKE_VERSION VERSION_GREATER "3.5" )
     endif()
   else()
     set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
-    message(AUTHOR_WARNING "Using cmake version 3.5 or below. Clang-tidy is not supported!")
+    message(AUTHOR_WARNING "ENABLE_CLANG_TIDY is off. Clang-tidy will not run!")
   endif()
+  message(AUTHOR_WARNING "Using cmake version 3.5 or below. Clang-tidy is not supported!")
 endif()
 
 ###########################################################################
