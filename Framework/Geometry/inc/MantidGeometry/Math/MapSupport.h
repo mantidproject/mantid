@@ -146,7 +146,7 @@ public:
 };
 
 /**
-  \class mapWritezz
+  \class mapWrite
   \brief Functor quick write out of a map
   \author S. Ansell
   \date 2/9/05
