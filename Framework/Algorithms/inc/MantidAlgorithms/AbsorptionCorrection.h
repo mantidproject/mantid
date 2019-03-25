@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 
@@ -134,7 +135,7 @@ private:
   int64_t m_num_lambda; ///< The number of points in wavelength, the rest is
   /// interpolated linearly
   int64_t m_xStep; ///< The step in bin number between adjacent points
-  int64_t m_emode; ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
+  Kernel::DeltaEMode::Type m_emode;
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
   /// if provided
 

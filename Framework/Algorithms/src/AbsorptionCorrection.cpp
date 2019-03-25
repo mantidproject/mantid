@@ -18,10 +18,12 @@
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -32,8 +34,10 @@ using namespace API;
 using namespace Geometry;
 using HistogramData::interpolateLinearInplace;
 using namespace Kernel;
+using Kernel::DeltaEMode;
 using namespace Mantid::PhysicalConstants;
 using namespace Mantid::DataObjects;
+using PhysicalConstants::E_mev_toNeutronWavenumberSq;
 
 namespace {
 // the maximum number of elements to combine at once in the pairwise summation
@@ -45,12 +49,9 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
   return start + half;
 }
 
+// wavelength = 2 pi / k
 double energyToWavelength(const double energyFixed) {
-  Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
-  double factor, power;
-  energy->quickConversion(*UnitFactory::Instance().create("Wavelength"), factor,
-                          power);
-  return factor * std::pow(energyFixed, power);
+  return 2. * M_PI * std::sqrt(E_mev_toNeutronWavenumberSq / energyFixed);
 }
 
 } // namespace
@@ -59,7 +60,8 @@ AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_linearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
-      m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
+      m_emode(Kernel::DeltaEMode::Undefined), m_lambdaFixed(0.), EXPONENTIAL() {
+}
 
 void AbsorptionCorrection::init() {
 
@@ -184,7 +186,7 @@ void AbsorptionCorrection::exec() {
 
     // If an indirect instrument, see if there's an efixed in the parameter map
     double lambdaFixed = m_lambdaFixed;
-    if (m_emode == 2) {
+    if (m_emode == DeltaEMode::Indirect) {
       try {
         Parameter_sptr par = pmap.get(&det, "Efixed");
         if (par) {
@@ -207,12 +209,12 @@ void AbsorptionCorrection::exec() {
 
     // Loop through the bins in the current spectrum every m_xStep
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      if (m_emode == 0) { // Elastic
+      if (m_emode == DeltaEMode::Elastic) {
         Y[j] = this->doIntegration(-linearCoefAbs[j], L2s, 0, L2s.size());
-      } else if (m_emode == 1) { // Direct
+      } else if (m_emode == DeltaEMode::Direct) {
         Y[j] = this->doIntegration(linearCoefAbsFixed, -linearCoefAbs[j], L2s,
                                    0, L2s.size());
-      } else if (m_emode == 2) { // Indirect
+      } else if (m_emode == DeltaEMode::Indirect) {
         Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
                                    0, L2s.size());
       }
@@ -296,13 +298,20 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   // Get the energy mode
   const std::string emodeStr = getProperty("EMode");
   // Convert back to an integer representation
-  m_emode = 0;
   if (emodeStr == "Direct")
-    m_emode = 1;
+    m_emode = DeltaEMode::Direct;
   else if (emodeStr == "Indirect")
-    m_emode = 2;
+    m_emode = DeltaEMode::Indirect;
+  else if (emodeStr == "Elastic")
+    m_emode = DeltaEMode::Elastic;
+  else {
+    std::stringstream msg;
+    msg << "Unknown EMode \"" << emodeStr << "\"";
+    throw std::runtime_error(msg.str());
+  }
+
   // If inelastic, get the fixed energy and convert it to a wavelength
-  if (m_emode) {
+  if (m_emode != DeltaEMode::Elastic) {
     const double efixed = getProperty("Efixed");
     m_lambdaFixed = energyToWavelength(efixed);
   }
