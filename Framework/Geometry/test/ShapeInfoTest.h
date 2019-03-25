@@ -171,8 +171,8 @@ public:
     double tinnerRadius;
     double touterRadius;
 
-    shapeInfo.getObjectGeometry(testShape, testPoint, tinnerRadius, touterRadius,
-                                testHeight);
+    shapeInfo.getObjectGeometry(testShape, testPoint, tinnerRadius,
+                                touterRadius, testHeight);
     TS_ASSERT_EQUALS(tinnerRadius, innerRadius);
     TS_ASSERT_EQUALS(touterRadius, outerRadius);
     TS_ASSERT_EQUALS(testHeight, height);
