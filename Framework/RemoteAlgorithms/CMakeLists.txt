@@ -116,10 +116,7 @@ target_link_libraries(RemoteAlgorithms
 # Add the unit tests directory
 add_subdirectory(test) # Note: No tests yet for many remote algorithms...
 
-#
 # Installation settings
-#
-
 mtd_install_targets(TARGETS
                     RemoteAlgorithms
                     INSTALL_DIRS

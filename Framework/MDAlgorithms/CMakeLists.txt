@@ -1,8 +1,5 @@
 # GLOBs should be replaced with explicit listings
 set(SRC_FILES
-    # Old TMP convertToMD code prepared for deprecation:
-    # src/CreateMDFitWorkspace.cpp
-    # end TMP
     src/AccumulateMD.cpp
     src/AndMD.cpp
     src/BaseConvertToDiffractionMDWorkspace.cpp
@@ -269,9 +266,7 @@ set(
 
 # Test files. Other source files required.
 set(TEST_FILES
-    #
     # these tests are as they test verify different parts of the CPR algorithms
-    # CreateMDFitWorkspaceTest.h
     AccumulateMDTest.h
     AndMDTest.h
     BooleanBinaryOperationMDTest.h
@@ -442,10 +437,7 @@ target_link_libraries(MDAlgorithms
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
-
 mtd_install_targets(TARGETS
                     MDAlgorithms
                     INSTALL_DIRS

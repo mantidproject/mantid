@@ -139,9 +139,7 @@ target_link_libraries(LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES})
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 mtd_install_targets(TARGETS
                     LiveData

@@ -132,10 +132,7 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
-
 mtd_install_targets(TARGETS
                     Parallel
                     INSTALL_DIRS

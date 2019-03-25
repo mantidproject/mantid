@@ -65,10 +65,7 @@ target_link_libraries(RemoteJobManagers
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
-
 mtd_install_targets(TARGETS
                     RemoteJobManagers
                     INSTALL_DIRS

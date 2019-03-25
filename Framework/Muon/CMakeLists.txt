@@ -77,9 +77,9 @@ if(COVERALLS)
   endforeach(loop_var)
 endif()
 
-# Add a precompiled header where they are supported enable_precompiled_headers (
-# inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES ) Add the target for this
-# directory
+# Add a precompiled header where they are supported 
+# enable_precompiled_headers (inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
+# Add the target for this directory
 add_library(Muon ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties(Muon
@@ -110,9 +110,7 @@ target_link_libraries(Muon
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 mtd_install_targets(TARGETS
                     Muon

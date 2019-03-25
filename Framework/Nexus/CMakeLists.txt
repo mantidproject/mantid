@@ -48,8 +48,5 @@ target_link_libraries(Nexus
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
-
 mtd_install_targets(TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
