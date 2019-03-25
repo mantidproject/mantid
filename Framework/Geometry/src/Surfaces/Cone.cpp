@@ -300,7 +300,7 @@ int Cone::onSurface(const Kernel::V3D &R) const {
   rptAngle *= rptAngle / cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
 
-  return (fabs(eqn - cangle) > Tolerance) ? 0 : 1;
+  return (std::abs(eqn - cangle) > Tolerance) ? 0 : 1;
 }
 
 void Cone::write(std::ostream &OX) const

@@ -415,31 +415,33 @@ CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
 * to get a correct normal test.
 
 * @param point :: Point to check
-* @returns 1 if the point is on the surface
+* @returns true if the point is on the surface
 */
 bool CSGObject::isOnSide(const Kernel::V3D &point) const {
-  std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
+  std::vector<Kernel::V3D> Snorms; // Normals from the contact surface.
+  Snorms.reserve(m_SurList.size());
 
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+  for (auto vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
     if ((*vc)->onSurface(point)) {
-      Snorms.push_back((*vc)->surfaceNormal(point));
+      Snorms.emplace_back((*vc)->surfaceNormal(point));
       // can check direct normal here since one success
-      // means that we can return 1 and finish
+      // means that we can return true and finish
       if (!checkSurfaceValid(point, Snorms.back()))
         return true;
     }
   }
-  std::list<Kernel::V3D>::const_iterator xs, ys;
   Kernel::V3D NormPair;
-  for (xs = Snorms.begin(); xs != Snorms.end(); ++xs)
-    for (ys = xs, ++ys; ys != Snorms.end(); ++ys) {
+  for (auto xs = Snorms.begin(); xs != Snorms.end(); ++xs)
+    for (auto ys = std::next(xs); ys != Snorms.end(); ++ys) {
       NormPair = (*ys) + (*xs);
-      NormPair.normalize();
-      if (!checkSurfaceValid(point, NormPair))
-        return true;
+      try {
+        NormPair.normalize();
+        if (!checkSurfaceValid(point, NormPair))
+          return true;
+      } catch(std::runtime_error &) {
+      }
     }
-  // Ok everthing failed return 0;
+  // Ok everthing failed
   return false;
 }
 

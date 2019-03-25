@@ -210,8 +210,8 @@ int Plane::side(const Kernel::V3D &A) const
   @retval 0 :: A is on the plane itself (within tolerence)
 */
 {
-  double Dp = NormV.scalar_prod(A) - Dist;
-  if (Tolerance < fabs(Dp))
+  const double Dp = NormV.scalar_prod(A) - Dist;
+  if (Tolerance < std::abs(Dp))
     return (Dp > 0) ? 1 : -1;
   return 0;
 }
