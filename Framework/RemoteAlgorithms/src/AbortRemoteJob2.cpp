@@ -27,7 +27,6 @@ void AbortRemoteJob2::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
-  auto nullValidator = boost::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
