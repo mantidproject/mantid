@@ -95,7 +95,7 @@ set(TEST_FILES
 
 set(TEST_PY_FILES
     EQSANSQ2DTest.py
-	SANSBeamFluxCorrectionTest.py)
+    SANSBeamFluxCorrectionTest.py)
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
@@ -144,10 +144,7 @@ target_link_libraries(WorkflowAlgorithms
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
-
 mtd_install_targets(TARGETS
                     WorkflowAlgorithms
                     INSTALL_DIRS

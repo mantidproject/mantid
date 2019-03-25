@@ -1,6 +1,4 @@
-#
 # Sphinx documentation
-#
 
 # We generate a target per build type, i.e docs-html
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -124,15 +122,11 @@ set_target_properties(${TARGET_PREFIX}-linkcheck
                                  EXCLUDE_FROM_ALL
                                  1)
 
-#
 # Tests (It would be nice to have this is a test sub directory but the
 #        configure of the runsphinx file doesn't like being in two directories.
 #        Ninja complains about multiple targets creating runsphinx.py.in)
-#
 
-#
 # Overall doctest target that executes in MantidPlot
-#
 set(BUILDER doctest)
 configure_file(runsphinx.py.in runsphinx_doctest.py @ONLY)
 add_custom_target(${TARGET_PREFIX}-test
@@ -151,9 +145,8 @@ set_target_properties(${TARGET_PREFIX}-test
                                  EXCLUDE_FROM_ALL
                                  1)
 
-#
 # Installation settings
-#
+
 # Allow control over whether the documentation is packaged
 set(
   PACKAGE_DOCS False

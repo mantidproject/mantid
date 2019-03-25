@@ -1,6 +1,5 @@
-#
 # Developer documentation
-#
+
 # targets
 set(BUILDER html)
 set(OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BUILDER})

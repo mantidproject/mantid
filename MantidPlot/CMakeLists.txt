@@ -2,9 +2,7 @@
 # explicitly listed - we not only have to add the sources and headers, but also
 # the files that need to be made known to Qt and sip.
 
-#
 # Add the source files
-#
 
 set(QTIPLOT_SRCS
     src/ApplicationWindow.cpp
@@ -208,10 +206,7 @@ set(MANTID_SRCS
     src/Mantid/UserFitFunctionDialog.cpp
     src/Mantid/InstrumentWidget/InstrumentWindow.cpp)
 
-#
 # Add the headers (so they show up in Visual Studio solutions)
-#
-
 set(QTIPLOT_HDRS
     src/ApplicationWindow.h
     src/ArrowMarker.h
@@ -408,16 +403,10 @@ set(MANTID_HDRS
     src/Mantid/UserFitFunctionDialog.h
     src/Mantid/InstrumentWidget/InstrumentWindow.h)
 
-#
 # Add Qt to the include path
-#
-
 include(UseQt4)
 
-#
 # Do the sip generation.
-#
-
 include_directories(${PYTHON_INCLUDE_PATH})
 
 # We need to manually add all the headers that are in qti.sip so that the
@@ -446,9 +435,7 @@ set(QTI_SIP_HDRS
 
 set(SRC_UNITY_IGNORE_FILES)
 
-#
 # Sip generated files
-#
 set(SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip)
 set(SIP_SRC_AUTO sip_qtipart0.cpp)
 
@@ -471,10 +458,7 @@ include_directories(SYSTEM ${SIP_INCLUDE_DIR})
 # Needed for sip generated files to find includes in src
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-#
 # Specify the files that we need to pass to Qt macros
-#
-
 set(QTIPLOT_MOC_FILES
     src/ApplicationWindow.h
     src/AssociationsDialog.h
@@ -669,20 +653,14 @@ qt4_wrap_ui(UI_HDRS ${UI_FILES})
 # The generated ui headers will go here:
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-#
 # Internal icon links
-#
-
 qt4_add_resources(RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc)
 qt4_add_resources(RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc)
 qt4_add_resources(RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc)
 qt4_add_resources(RES_FILES
                   ${PROJECT_SOURCE_DIR}/scripts/ErrorReporter/errorreporter.qrc)
 
-#
 # Add the dependencies
-#
-
 if(MAKE_VATES)
   include(${PARAVIEW_USE_FILE})
 endif()
@@ -697,10 +675,7 @@ include_directories(SYSTEM ${QWTPLOT3D_INCLUDE_DIR})
 
 find_package(QScintillaQt4 REQUIRED)
 
-#
 # Now create the target and add its dependencies and flags
-#
-
 add_definitions(-DSCRIPTING_MUPARSER)
 add_definitions(-DSCRIPTING_PYTHON)
 add_definitions(-DQSCINTILLA_DLL) # Will only have an effect on Windows (as is
@@ -709,9 +684,7 @@ if(MSVC)
   add_definitions(-DQ_COMPILER_INITIALIZER_LISTS)
 endif()
 
-#
 # Application icon files
-#
 if(WIN32)
   set(MANTID_RC_FILE icons/MantidPlotDesktop.rc)
   if(CONSOLE)
@@ -729,10 +702,7 @@ if(APPLE)
                               Resources)
 endif()
 
-#
 # Config reset scripts
-#
-
 if(WIN32)
   set(CONFIG_RESET_SCRIPT mantid_reset_settings.bat)
 else()
@@ -744,9 +714,7 @@ copy_files_to_dir("${CONFIG_RESET_SCRIPT}"
                   ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                   CONFIG_RESET_SCRIPT_FILE)
 
-#
 # Required Python config files
-#
 
 # Top-level python scripts
 set(PY_FILES mantidplot.py mantidplotrc.py mantid_qt_settings_editor.py)
@@ -784,10 +752,7 @@ copy_files_to_dir(
   ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget
   IPYTHON_INSTALL_FILES)
 
-#
 # MantidPlot executable
-#
-
 add_executable(MantidPlot
                ${WIN_CONSOLE}
                MACOSX_BUNDLE
@@ -877,9 +842,8 @@ endif()
 
 set_target_properties(MantidPlot PROPERTIES FOLDER "Qt4")
 
-#
 # Custom Info.plist file for OS X
-#
+
 if( APPLE )
   # Setting the CFBundleIdentifer attribute on OS X 10.6 (SL) and before
   # causes problems with trying to install the package on the same
@@ -907,9 +871,7 @@ if( APPLE )
                                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
 endif()
 
-#
 # Entry point flag for Windows to ensure we always link to standard main
-#
 if(WIN32)
   set_target_properties(MantidPlot
                         PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
@@ -918,9 +880,7 @@ if(WIN32)
   endif(CONSOLE)
 endif(WIN32)
 
-#
 # MantidPlot Python Unit Tests
-#
 
 # List of .py files than must be run WITHIN MantidPlot.
 set(MANTIDPLOT_TEST_PY_FILES
@@ -985,10 +945,7 @@ endforeach()
 
 add_dependencies(GUITests MantidPlot)
 
-#
 # Installation settings
-#
-
 install(TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR} BUNDLE DESTINATION .)
 
 # Ship required files. Explicit so some can be disabled easily if necessary
