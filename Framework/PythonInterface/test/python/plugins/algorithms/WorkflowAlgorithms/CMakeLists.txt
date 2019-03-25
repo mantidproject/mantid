@@ -1,6 +1,4 @@
-#
 # Tests for PythonWorkflowAlgorithms
-#
 
 set(TEST_PY_FILES
     AddSampleLogMultipleTest.py

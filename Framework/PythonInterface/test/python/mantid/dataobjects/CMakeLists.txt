@@ -1,6 +1,5 @@
-#
 # mantid.dataobjects tests
-#
+
 set(TEST_PY_FILES
     EventListTest.py
 	Workspace2DPickleTest.py)

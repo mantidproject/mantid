@@ -1,6 +1,4 @@
-#
 # _geometry Python module
-#
 
 set(MODULE_TEMPLATE src/geometry.cpp.in)
 
@@ -46,24 +44,21 @@ set(EXPORT_FILES
     src/Exports/ComponentInfoItem.cpp
     src/Exports/ComponentInfoPythonIterator.cpp)
 
-#
 # Generate a source file from the export definitions and provided template
-#
+
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
-#
 # Helper code
-#
+
 set(SRC_FILES)
 
 set(INC_FILES)
 
 set(PY_FILES __init__.py _aliases.py)
 
-#
 # Copy over the pure Python files for the module
-#
+
 # Set the destination directory
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/geometry)
 
@@ -77,9 +72,7 @@ copy_files_to_dir("${PY_FILES}"
                   ${OUTPUT_DIR}
                   PYTHON_INSTALL_FILES)
 
-#
 # Create the target for this directory
-#
 
 add_library(PythonGeometryModule
             ${EXPORT_FILES}
@@ -115,9 +108,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/")
 endif()
 
-#
 # Installation settings
-#
 mtd_install_targets(TARGETS
                     PythonGeometryModule
                     INSTALL_DIRS

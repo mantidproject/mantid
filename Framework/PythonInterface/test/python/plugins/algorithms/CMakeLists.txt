@@ -1,6 +1,4 @@
-#
 # Tests for PythonAlgorithms
-#
 
 add_subdirectory(WorkflowAlgorithms)
 

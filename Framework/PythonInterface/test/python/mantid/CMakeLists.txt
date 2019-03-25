@@ -1,6 +1,4 @@
-#
 # Tests for the Python exports of the mantid module
-#
 add_subdirectory(kernel)
 add_subdirectory(geometry)
 add_subdirectory(api)

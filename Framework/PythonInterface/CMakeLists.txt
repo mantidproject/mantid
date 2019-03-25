@@ -1,10 +1,7 @@
-#
 # Python API
-#
 
-#
 # Set local dependencies
-#
+
 # boost python
 set(old_boost ${Boost_LIBRARIES})
 set(Boost_LIBRARIES) # Empty out the variable after previous use
@@ -36,7 +33,6 @@ set(PYTHON_DEPS ${MPI_CXX_LIBRARIES})
 # First, common Python code
 add_subdirectory(core)
 
-#
 # A function for generating the exports
 #  - MODULE_TEMPLATE: The file containing the @EXPORT_FUNCTIONS@ and 
 #    @EXPORT_DECLARE@ flags to replace
@@ -77,9 +73,7 @@ function(CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE)
   configure_file(${MODULE_TEMPLATE} ${OUTPUT_FILE})
 endfunction()
 
-#
 # A function for setting the correct properties on the individual targets
-#
 function(SET_PYTHON_PROPERTIES TARGET TARGET_NAME)
   # No library prefixes
   set_target_properties(${TARGET} PROPERTIES PREFIX "")
@@ -108,9 +102,8 @@ function(SET_PYTHON_PROPERTIES TARGET TARGET_NAME)
   set_property(TARGET ${TARGET} PROPERTY FOLDER "MantidFramework/Python")
 endfunction()
 
-#
 # mantid package
-#
+
 # All targets can see these includes
 include_directories(core/inc)
 # TODO: Move all common code to the core library to remove the need for linking
@@ -118,20 +111,14 @@ include_directories(core/inc)
 include_directories(inc)
 add_subdirectory(mantid)
 
-#
 # Python algorithms
-#
 clean_orphaned_pyc_files(${CMAKE_CURRENT_SOURCE_DIR}/plugins)
 
-#
 # tests
-#
 set(PYTHONINTERFACE_PLUGINS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/plugins)
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 # Python algorithms
 install(DIRECTORY plugins/

@@ -1,6 +1,5 @@
-#
 # mantid.api tests
-#
+
 set(TEST_PY_FILES
     ADSValidatorTest.py
     AlgorithmTest.py

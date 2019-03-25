@@ -1,6 +1,4 @@
-#
 # _dataobjects Python module
-#
 
 set(MODULE_TEMPLATE src/dataobjects.cpp.in)
 
@@ -30,18 +28,15 @@ set(EXPORT_FILES
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
-#
 # Helper code
-#
 set(SRC_FILES)
 
 set(INC_FILES)
 
 set(PY_FILES __init__.py)
 
-#
 # Copy over the pure Python files for the module
-#
+
 # Set the destination directory
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/dataobjects)
 
@@ -55,9 +50,7 @@ copy_files_to_dir("${PY_FILES}"
                   ${OUTPUT_DIR}
                   PYTHON_INSTALL_FILES)
 
-#
 # Create the target for this directory
-#
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/DataObjects/inc)
 
@@ -104,9 +97,8 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
       "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/;\$ORIGIN/../api/"
     )
 endif()
-#
+
 # Installation settings
-#
 mtd_install_targets(TARGETS
                     PythonDataObjectsModule
                     INSTALL_DIRS

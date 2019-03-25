@@ -1,14 +1,11 @@
-#
 # PythonInterface sub modules
-#
 
 # Set the root directory for the package
 set(PYTHON_PKG_ROOT
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid)
 
-#
 # Root module
-#
+
 # The destination directory, used by sub modules
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT})
 
@@ -39,9 +36,8 @@ add_custom_target(PythonModule
                   SOURCES ${PY_FILES})
 set_property(TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python")
 
-#
 # Sub modules
-#
+
 add_subdirectory(kernel)
 add_dependencies(PythonKernelModule PythonModule) # Ensure the module files are
                                                   # in place
@@ -64,16 +60,13 @@ add_custom_target(PythonInterface
                           PythonPy3CompatModule)
 set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
 
-#
 # Bundle Python DLL (where appropriate)
-#
+
 # Defines the target the will cause the Python bundle to be copied
 set(PYBUNDLE_POST_TARGET PythonModule)
 include(${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake)
 
-#
 # Installation settings
-#
 
 # Pure Python files
 mtd_install_files(FILES

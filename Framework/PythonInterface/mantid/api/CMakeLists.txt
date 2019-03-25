@@ -1,6 +1,4 @@
-#
 # _api Python module
-#
 
 set(MODULE_TEMPLATE src/api.cpp.in)
 
@@ -88,9 +86,7 @@ set(EXPORT_FILES
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
-#
 # Helper code
-#
 set(SRC_FILES
     src/Algorithms/AlgorithmObserverAdapter.cpp
     src/Algorithms/RunPythonScript.cpp
@@ -128,9 +124,8 @@ set(PY_FILES
 	_aliases.py
 	_workspaceops.py)
 
-#
 # Copy over the pure Python files for the module
-#
+
 # Set the destination directory
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/api)
 
@@ -144,9 +139,7 @@ copy_files_to_dir("${PY_FILES}"
                   ${OUTPUT_DIR}
                   PYTHON_INSTALL_FILES)
 
-#
 # Create the target for this directory
-#
 
 add_library(PythonAPIModule
             ${EXPORT_FILES}
@@ -186,9 +179,8 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
       INSTALL_RPATH
       "\$ORIGIN/../../../${LIB_DIR};\$ORIGIN/../kernel/;\$ORIGIN/../geometry/")
 endif()
-#
+
 # Installation settings
-#
 mtd_install_targets(TARGETS
                     PythonAPIModule
                     INSTALL_DIRS

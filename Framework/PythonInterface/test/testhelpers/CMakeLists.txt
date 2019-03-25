@@ -1,6 +1,4 @@
-#
 # testhelpers Python module
-#
 
 set(PY_FILES
     __init__.py
@@ -18,9 +16,7 @@ copy_files_to_dir("${PY_FILES}"
                   ${OUTPUT_DIR}
                   PYTHON_INSTALL_FILES)
 
-#
 # Create the targets for this directory
-#
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/CurveFitting/inc
                     ${FRAMEWORK_DIR}/DataHandling/inc

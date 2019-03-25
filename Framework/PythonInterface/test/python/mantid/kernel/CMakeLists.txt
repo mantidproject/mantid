@@ -1,6 +1,5 @@
-#
 # mantid.kernel tests
-#
+
 set(TEST_PY_FILES
     ArrayPropertyTest.py
     ArrayBoundedValidatorTest.py

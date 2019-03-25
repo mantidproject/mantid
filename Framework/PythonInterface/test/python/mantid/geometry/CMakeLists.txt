@@ -1,6 +1,5 @@
-#
 # mantid.geometry tests
-#
+
 set(TEST_PY_FILES
     BoundingBoxTest.py
     CSGObjectTest.py

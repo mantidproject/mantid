@@ -1,6 +1,5 @@
-#
 # mantid._plugin tests
-#
+
 set(TEST_PY_FILES
     ProductFunctionTest.py)
 

@@ -5,9 +5,8 @@ set(PY_FILES
     plotfunctions3D.py
     utility.py)
 
-#
 # Copy over the pure Python files for the module
-#
+
 # Set the destination directory
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/plots)
 
@@ -24,9 +23,8 @@ copy_files_to_dir("${PY_FILES}"
 # Add a named target with the outputs as dependencies
 add_custom_target(PythonPlotsModule ALL DEPENDS ${PYTHON_INSTALL_FILES})
 
-#
 # Installation settings
-#
+
 # Pure Python files
 mtd_install_files(FILES
                   ${PY_FILES}

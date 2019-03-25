@@ -1,6 +1,5 @@
-#
 # C++ unit tests
-#
+
 set(TEST_FILES
     IFunction1DAdapterTest.h
     IPeakFunctionAdapterTest.h

@@ -1,10 +1,9 @@
-#
 # Core Python/C++ code used by all layers accessing the Python C API. It
 # contains functionality such as classes for GIL management, conversion of
 # Python errors to exceptions etc.
-#
+
 # It should not link to any other Mantid libraries.
-#
+
 set(SRC_FILES
     src/Converters/NDArrayTypeIndex.cpp
     src/Converters/WrapWithNDArray.cpp

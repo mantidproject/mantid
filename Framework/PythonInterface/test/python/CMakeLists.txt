@@ -1,7 +1,6 @@
-#
 # This directory (and subdirectories) contains Python tests for each subpackage
 # and the PythonAlgorithms
-#
+
 if(PYUNITTEST_FOUND)
 
   # Defines a macro to check that each file contains a call to unittest.main()

@@ -1,6 +1,4 @@
-#
 # Tests for Fit functions
-#
 
 set(TEST_PY_FILES
     DSFinterp1DFitTest.py

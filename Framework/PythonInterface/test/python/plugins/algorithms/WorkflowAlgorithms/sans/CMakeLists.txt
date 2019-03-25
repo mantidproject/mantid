@@ -1,6 +1,4 @@
-#
 # Tests for ISIS SANS
-#
 
 set(TEST_PY_FILES
     SANSCalculateTransmissionTest.py

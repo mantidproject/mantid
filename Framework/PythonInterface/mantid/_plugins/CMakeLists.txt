@@ -1,6 +1,4 @@
-#
 # __curvefitting Python module
-#
 
 set(MODULE_TEMPLATE src/curvefitting.cpp.in)
 
@@ -13,18 +11,15 @@ set(EXPORT_FILES src/Exports/ProductFunction.cpp)
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/curvefitting.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
-#
 # Helper code
-#
 set(SRC_FILES)
 
 set(INC_FILES)
 
 set(PY_FILES __init__.py)
 
-#
 # Copy over the pure Python files for the module
-#
+
 # Set the destination directory
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/_plugins)
 
@@ -38,9 +33,8 @@ copy_files_to_dir("${PY_FILES}"
                   ${OUTPUT_DIR}
                   PYTHON_INSTALL_FILES)
 
-#
 # Create the target for this directory
-#
+
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 
@@ -86,9 +80,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     )
 endif()
 
-#
 # Installation settings
-#
 mtd_install_targets(TARGETS
                     PythonCurveFittingModule
                     INSTALL_DIRS

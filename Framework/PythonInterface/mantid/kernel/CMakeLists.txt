@@ -1,6 +1,4 @@
-#
 # _kernel Python module
-#
 
 set(MODULE_TEMPLATE src/kernel.cpp.in)
 
@@ -67,9 +65,8 @@ set(EXPORT_FILES
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
-#
 # Helper code
-#
+
 set(SRC_FILES
     src/Converters/CloneToNumpy.cpp
     src/Converters/DateAndTime.cpp
@@ -118,9 +115,7 @@ set(INC_FILES
 
 set(PY_FILES __init__.py _aliases.py environment.py funcinspect.py plugins.py)
 
-#
 # Add rule to copy over the pure Python files for the module
-#
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel)
 
 if(CMAKE_GENERATOR STREQUAL Xcode)
@@ -133,9 +128,7 @@ copy_files_to_dir("${PY_FILES}"
                   ${OUTPUT_DIR}
                   PYTHON_INSTALL_FILES)
 
-#
 # Generate the packagesetup module for the build & install package
-#
 set(PACKAGESETUP_PY packagesetup)
 set(NEXUSLIB ${NEXUS_C_LIBRARIES})
 if(WIN32) # .lib -> .dll
@@ -181,9 +174,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py)
 
-#
 # Create the target for this directory
-#
 add_library(PythonKernelModule
             ${EXPORT_FILES}
             ${MODULE_DEFINITION}
@@ -213,9 +204,8 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../../../${LIB_DIR}")
 endif()
 
-#
 # Installation settings
-#
+
 mtd_install_targets(TARGETS
                     PythonKernelModule
                     INSTALL_DIRS
