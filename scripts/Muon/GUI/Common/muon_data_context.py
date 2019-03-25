@@ -106,7 +106,7 @@ class MuonDataContext(object):
 
         self._loaded_data = load_data
         self._gui_variables = {'SummedPeriods': [1], 'SubtractedPeriods': []}
-        self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
+        self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
 
         self._current_runs = []
         self._main_field_direction = ''
@@ -125,10 +125,6 @@ class MuonDataContext(object):
         return len(self.current_data["OutputWorkspace"]) > 1
 
     @property
-    def current_data(self):
-        return self._current_data["workspace"]
-
-    @property
     def instrument(self):
         return self._instrument
 
@@ -136,35 +132,17 @@ class MuonDataContext(object):
     def instrument(self, value):
         ConfigService['default.instrument'] = value
         self._instrument = value
-        self.main_field_direction = ''
+        self._main_field_direction = ''
         self.set_groups_and_pairs_to_default()
         self.instrumentNotifier.notify_subscribers(self._instrument)
 
     @property
-    def current_run(self):
-        return self._current_data["run"]
-
-    @property
-    def run(self):
-        try:
-            # refer to the output of the loading widget (e.g. for co-adding)
-            runs = run_list_to_string(self.current_run)
-        except Exception:
-            # extract from sample logs
-            run_log = self.get_sample_log("run_number")
-            if run_log:
-                runs = run_log.value
-            else:
-                runs = 0
-        return runs
-
-    @property
     def group_names(self):
-        return self._groups.keys()
+        return list(self._groups.keys())
 
     @property
     def pair_names(self):
-        return self._pairs.keys()
+        return list(self._pairs.keys())
 
     @property
     def groups(self):
@@ -206,7 +184,7 @@ class MuonDataContext(object):
     @property
     def first_good_data(self):
         if self.gui_variables['FirstGoodDataFromFile']:
-            return self.loaded_data(self.current_runs[-1])["FirstGoodData"]
+            return self.get_loaded_data_for_run(self.current_runs[-1])["FirstGoodData"]
         else:
             return self.gui_variables['FirstGoodData']
 
@@ -225,22 +203,36 @@ class MuonDataContext(object):
         # Update the current data; resetting the groups and pairs to their default values
         if len(self.current_runs) > 0:
             self._current_data = self._loaded_data.get_data(run=self.current_runs[0], instrument=self.instrument)
-            self.main_field_direction = self.current_data['MainFieldDirection']
+
+            if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] != self._main_field_direction\
+                    and self._main_field_direction:
+                self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
+                                                         ' data sets, click default to reset grouping if required')
+            self._main_field_direction = self.current_data['MainFieldDirection']
+
             if not self.groups:
                 self.set_groups_and_pairs_to_default()
         else:
-            self._current_data = {"workspace": load_utils.empty_loaded_data()}
+            self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}
 
-    def loaded_data(self, run):
+    @property
+    def current_data(self):
+        return self._current_data["workspace"]
+
+    @property
+    def current_workspace(self):
+        return self.current_data["OutputWorkspace"][0].workspace
+
+    @property
+    def current_run(self):
+        return self._current_data["run"]
+
+    def get_loaded_data_for_run(self, run):
         loaded_dict = self._loaded_data.get_data(run=run, instrument=self.instrument)
         if loaded_dict:
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']
         else:
             return None
-
-    @property
-    def loaded_workspace(self):
-        return self.current_data["OutputWorkspace"][0].workspace
 
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
@@ -262,7 +254,7 @@ class MuonDataContext(object):
     @property
     def num_detectors(self):
         try:
-            n_det = self.loaded_workspace.detectorInfo().size()
+            n_det = self.current_workspace.detectorInfo().size()
         except AttributeError:
             # default to 1
             n_det = 1
@@ -275,27 +267,20 @@ class MuonDataContext(object):
     def main_field_direction(self):
         return self._main_field_direction
 
-    @main_field_direction.setter
-    def main_field_direction(self, value):
-            if value and value != self._main_field_direction and self._main_field_direction:
-                self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
-                                                         ' data sets, click default to reset grouping if required')
-            self._main_field_direction = value
-
     @property
     def dead_time_table(self):
         return self.current_data["DeadTimeTable"]
 
-    def get_sample_logs(self):
+    def __get_sample_logs(self):
         logs = None
         try:
-            logs = self.loaded_workspace.getSampleDetails()
+            logs = self.current_workspace.getRun()
         except Exception:
             print("Cannot find sample logs")
         return logs
 
     def get_sample_log(self, log_name):
-        logs = self.get_sample_logs()
+        logs = self.__get_sample_logs()
         try:
             log = logs.getLogData(log_name)
         except Exception:
@@ -406,7 +391,7 @@ class MuonDataContext(object):
             calculate_group_data(self, group_name)
 
     def set_groups_and_pairs_to_default(self):
-        groups, pairs = get_default_grouping(self.loaded_workspace, self.instrument, self.main_field_direction)
+        groups, pairs = get_default_grouping(self.current_workspace, self.instrument, self.main_field_direction)
 
         self.clear_groups()
         for group in groups:

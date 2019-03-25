@@ -109,7 +109,7 @@ class FrequencyContext(object):
 
     def get_detectors_excluded_from_default_grouping_tables(self):
         groups, _ = get_default_grouping(
-            self.context.loaded_workspace, self.context.instrument, self.context.main_field_direction)
+            self.context.current_workspace, self.context.instrument, self.context.main_field_direction)
         detectors_in_group = []
         for group in groups:
             detectors_in_group += group.detectors

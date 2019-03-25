@@ -49,7 +49,7 @@ def _get_pre_processing_params(context, run, rebin):
 
     try:
         if context.gui_variables['FirstGoodDataFromFile']:
-            time_min = context.loaded_data(run)["FirstGoodData"]
+            time_min = context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
             time_min = context.gui_variables['FirstGoodData']
         pre_process_params["TimeMin"] = time_min
@@ -60,7 +60,7 @@ def _get_pre_processing_params(context, run, rebin):
         if context.gui_variables['TimeZeroFromFile']:
             time_offset = 0.0
         else:
-            time_offset = context.loaded_data(run)["TimeZero"] - context.gui_variables['TimeZero']
+            time_offset = context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_variables['TimeZero']
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
@@ -83,7 +83,7 @@ def _get_pre_processing_params(context, run, rebin):
 
     try:
         if context.gui_variables['DeadTimeSource'] == 'FromFile':
-            dead_time_table = context.loaded_data(run)["DataDeadTimeTable"]
+            dead_time_table = context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
         elif context.gui_variables['DeadTimeSource'] == 'FromADS':
             dead_time_table = context.gui_variables['DeadTimeTable']
         else:
@@ -125,12 +125,12 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     if 'GroupRangeMin' in context.gui_variables:
         params['AsymmetryTimeMin'] = context.gui_variables['GroupRangeMin']
     else:
-        params['AsymmetryTimeMin'] = context.loaded_data(run)["FirstGoodData"]
+        params['AsymmetryTimeMin'] = context.get_loaded_data_for_run(run)["FirstGoodData"]
 
     if 'GroupRangeMax' in context.gui_variables:
         params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
     else:
-        params['AsymmetryTimeMax'] = max(context.loaded_data(run)['OutputWorkspace'][0].workspace.dataX(0))
+        params['AsymmetryTimeMax'] = max(context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
 
     if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
         summed_periods = context.gui_variables["SummedPeriods"]

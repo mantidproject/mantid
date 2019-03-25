@@ -72,3 +72,9 @@ class MuonGroup(object):
                 raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:
             raise ValueError("detectors must be a list of ints.")
+
+    def show(self, run):
+        run not in self._workspace or self._workspace[run].show()
+        run not in self._asymmetry_estimate or self._asymmetry_estimate[run].show()
+        run not in self._workspace_rebin or self._workspace_rebin[run].show()
+        run not in self._asymmetry_estimate_rebin or self._asymmetry_estimate_rebin[run].show()

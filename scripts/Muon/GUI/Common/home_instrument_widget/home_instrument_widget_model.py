@@ -103,7 +103,7 @@ class InstrumentWidgetModel(object):
         if col[0] != "spectrum" or col[1] != "dead-time":
             raise ValueError("Columns have incorrect names")
         rows = table.rowCount()
-        if rows != self._data.loaded_workspace.getNumberHistograms():
+        if rows != self._data.current_workspace.getNumberHistograms():
             raise ValueError("Number of histograms do not match number of rows in dead time table")
         return True
 

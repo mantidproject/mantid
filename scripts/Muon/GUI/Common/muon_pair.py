@@ -74,3 +74,7 @@ class MuonPair(object):
             self._alpha = float(new_alpha)
         else:
             raise AttributeError("Alpha must be > 0.0.")
+
+    def show(self, run):
+        run not in self._workspace or self._workspace[run].show()
+        run not in self.workspace_rebin or self.workspace_rebin[run].show()

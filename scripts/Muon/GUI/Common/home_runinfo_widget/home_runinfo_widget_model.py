@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 millions_counts_conversion = 1./1e6
 
@@ -17,10 +18,10 @@ class HomeRunInfoWidgetModel(object):
         self._data = context.data_context
 
     def get_run_number(self):
-        return str(self._data.run)
+        return str(self._data.current_run[0]) if self._data.current_run else ''
 
     def get_instrument_name(self):
-        inst = self._data.loaded_workspace.getInstrument()
+        inst = self._data.current_workspace.getInstrument()
         return inst.getName()
 
     def get_log_value(self, log_name):
@@ -31,7 +32,7 @@ class HomeRunInfoWidgetModel(object):
             return "Log not found"
 
     def get_total_counts(self):
-        workspace = self._data.loaded_workspace
+        workspace = self._data.current_workspace
         total = 0
         for i in range(workspace.getNumberHistograms()):
             total += sum(workspace.dataY(i))
@@ -63,7 +64,7 @@ class HomeRunInfoWidgetModel(object):
         # TimeSeriesProperty.cpp line 934
         temps = self._data.get_sample_log("Temp_Sample")
         try:
-            temps = self._data.loaded_workspace.getRun().getProperty("Temp_Sample")
+            temps = self._data.current_workspace.getRun().getProperty("Temp_Sample")
         except Exception:
             return "Log not found"
         if temps:
@@ -72,5 +73,5 @@ class HomeRunInfoWidgetModel(object):
             return "Log not found"
 
     def get_workspace_comment(self):
-        ws = self._data.loaded_workspace
+        ws = self._data.current_workspace
         return ws.getComment()
