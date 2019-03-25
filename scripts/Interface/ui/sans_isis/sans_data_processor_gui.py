@@ -417,6 +417,11 @@ class SANSDataProcessorGui(QMainWindow,
              "Options"]
             , self.cell(""), self)
 
+        # Default QTreeView size is too small
+        font = self.data_processor_table.font()
+        font.setPointSize(13)
+        self.data_processor_table.setFont(font)
+
         self.data_processor_table.setRootIsDecorated(False)
 
         row_entry = [''] * 16
