@@ -221,20 +221,34 @@ Use
 Clang-tidy
 ----------
 
-Mantid has built clang-tidy support into cmake. This allows a user to detect and fix code which does not follow best practices,
-such as unused parameters or not using range-based for loops.
+Clang-tidy is a set of tools which allows a developer to detect and fix code which does not follow current best practices,
+such as unused parameters or not using range-based for loops. Primarily this is used for modernising C++ code.
+
+The full list of clang-tidy checks can be seen `here <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
 
 Installing
 ~~~~~~~~~~
 
-Mantid does not come packaged with clang-tidy, each developer must download it themselves:
+Mantid does not come packaged with clang-tidy; each developer must download it themselves. Windows users can utilise clang-tidy support for Visual Studio.
+For other operating systems, Mantid provides clang-tidy functionality through cmake.
 
 - **Ubuntu**: Run ``sudo apt-get install clang-tidy`` in the command line.
 - **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
 
-For other operating systems, check out the clang-tidy `downloads <http://releases.llvm.org/download.html>`_.
+For non-Ubuntu systems, download the latest clang-tidy `pre-compile binaries <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
 
-Setup
+Visual Studio
+~~~~~~~~~~~~~
+
+Once you have installed the clang-tidy extension, Visual Studio will have additional options under ``Tools -> Options -> Clang Power Tools``.
+Here you can set clang-tidy after to run after building and select which checks to run. The default settings *should* not require alteration for clang-tidy to work.
+
+To run clang-tidy, right click on a target and highlight ``Clang Power Tools``. You will have a number of options. ``Tidy`` will highlight code which fails one of the checks, whereas
+``Tidy fix`` will automatically change your code.
+
+*Note: clang-tidy does not work on* **ALL BUILD** *so it is necessary to select a subtarget.*
+
+Cmake
 ~~~~~
 
 In the cmake gui, find the ``CLANG_TIDY_EXE`` parameter. If you are a non-Linux developer, you may have to manually point to your clang-tidy install.
@@ -243,8 +257,7 @@ Configure, and check the cmake log for the message `clang-tidy found`. If the `c
 Once you have clang-tidy, there are several relevant parameters you will want to change:
 
 - ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support.
-- ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. The full list can be seen `here <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
-  This defaults to all ``modernize-`` checks.
+- ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. This defaults to all ``modernize-`` checks.
 - ``APPLY_CLANG_TIDY_FIX`` will automatically change the code whenever a check has returned a result. The behaviour of ``ENABLE_CLANG_TIDY`` without this checked is to highlight issues only.
 
 Configure the build to check that your selected options are reflected in ``CMAKE_CXX_CLANG_TIDY``, and then generate.
