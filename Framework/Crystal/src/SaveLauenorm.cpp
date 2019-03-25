@@ -442,9 +442,6 @@ void SaveLauenorm::exec() {
     if (newFormat) {
       // mult nodal ovlp close h2 k2 l2 nidx lambda2 ipoint
       out << " 1 0 0 0 0 0 0 0 0.0 0 ";
-    }
-
-    if (newFormat) {
       // Dmin threshold squared for next harmonic
       out << std::setw(10) << std::fixed << std::setprecision(5)
           << dsp * dsp * 0.25 << "\n";

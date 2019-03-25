@@ -106,12 +106,11 @@ void TransformHKL::exec() {
         hkl_tran_string);
   }
   if (det < 0) {
-    std::ostringstream str_stream;
-    str_stream << hkl_tran;
-    std::string hkl_tran_string = str_stream.str();
+    std::ostringstream error_stream;
+    error_stream << hkl_tran;
     throw std::runtime_error(
         "ERROR: The determinant of the matrix is negative.\n" +
-        hkl_tran_string);
+        str_stream.str());
   }
   double tolerance = this->getProperty("Tolerance");
 
