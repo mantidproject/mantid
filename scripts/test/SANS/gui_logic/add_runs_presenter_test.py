@@ -5,10 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 
 from mantid.kernel import ConfigService
-from sans.common.enums import SANSInstrument
+from mantid.py3compat import mock
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
@@ -20,11 +19,6 @@ from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from fake_signal import FakeSignal
 from assert_called import assert_called
-
-if sys.version_info.major == 2:
-    import mock
-else:
-    from unittest import mock
 
 
 class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):

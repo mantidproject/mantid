@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
@@ -14,10 +15,6 @@ from ui.sans_isis.run_selector_widget import RunSelectorWidget
 from fake_signal import FakeSignal
 
 from assert_called import assert_called
-if sys.version_info.major == 2:
-    import mock
-else:
-    from unittest import mock
 
 
 class RunSelectorPresenterTest(unittest.TestCase):

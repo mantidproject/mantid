@@ -5,28 +5,6 @@ Indirect Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
-Algorithms
-----------
-
-New Algorithms
-##############
-
-- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
-- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
-- TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`.
-- Deprecated algorithm BASISReduction311 has been removed.
-- :ref:`LoadEMU <algm-LoadEMU>` loader for an ANSTO EMU backscattering event file.
-- :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the results of a fit found in one workspace with the
-  single fit data provided within a second workspace.
-
-Improvements
-############
-
-- :ref:`BASISReduction <algm-BASISReduction>` user interface contains slightly different naming convention for selection of reflection and works for old and new DAS.
-
-
-:ref:`Release 4.0.0 <v4.0.0>`
-
 All Indirect Interfaces
 -----------------------
 
@@ -251,3 +229,25 @@ Improvements
 Bugfixes
 ########
 - An unexpected error when using manual grouping has been fixed.
+  
+Algorithms
+----------
+
+New Algorithms
+##############
+
+- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
+- TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`.
+- Deprecated algorithm BASISReduction311 has been removed.
+- :ref:`LoadEMU <algm-LoadEMU>` loader for an ANSTO EMU backscattering event file.
+- :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>` will replace the results of a fit found in one workspace with the
+  single fit data provided within a second workspace.
+
+Improvements
+############
+
+- :ref:`BASISReduction <algm-BASISReduction>` user interface contains slightly different naming convention for selection of reflection and works for old and new DAS.
+
+
+:ref:`Release 4.0.0 <v4.0.0>`

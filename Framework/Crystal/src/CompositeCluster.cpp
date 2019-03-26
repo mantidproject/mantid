@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CompositeCluster.h"
 
+#include <numeric>
+
 namespace {
 /**
  * Helper comparitor for finding IClusters based on an input label.
@@ -82,11 +84,9 @@ size_t CompositeCluster::getOriginalLabel() const { return getLabel(); }
  * @return total size.
  */
 size_t CompositeCluster::size() const {
-  size_t size = 0;
-  for (const auto &ownedCluster : m_ownedClusters) {
-    size += ownedCluster->size();
-  }
-  return size;
+  return std::accumulate(
+      m_ownedClusters.cbegin(), m_ownedClusters.cend(), static_cast<size_t>(0),
+      [](auto sum, const auto &cluster) { return sum + cluster->size(); });
 }
 
 /// Add an index. This method does not apply to composite clusters.

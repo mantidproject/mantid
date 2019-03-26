@@ -11,7 +11,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import matplotlib
 matplotlib.use('AGG')
 
-import sys  # noqa
 import unittest  # noqa
 import matplotlib.pyplot as plt  # noqa
 import matplotlib.figure  # noqa
@@ -21,13 +20,7 @@ from mantidqt.project.plotsloader import PlotsLoader  # noqa
 import mantid.plots.plotfunctions  # noqa
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.dataobjects import Workspace2D  # noqa
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest import mock
-else:
-    # Python 2
-    import mock
+from mantid.py3compat import mock  # noqa
 
 
 def pass_func():

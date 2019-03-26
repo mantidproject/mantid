@@ -5,15 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from mantid.py3compat import mock
 
 from Muon.GUI.Common.load_widget.load_view import LoadView
-
 from Muon.GUI.Common import mock_widget
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class LoadViewTest(unittest.TestCase):

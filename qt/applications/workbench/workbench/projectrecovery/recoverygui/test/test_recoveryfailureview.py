@@ -9,16 +9,11 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-import sys
 from qtpy.QtWidgets import QTableWidgetItem
 
-from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFailureView
+from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
-
-if sys.version_info.major >= 3:
-    from unittest import mock
-else:
-    import mock
+from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFailureView
 
 
 class RecoveryFailureViewTest(GuiTest):

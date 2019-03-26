@@ -145,18 +145,19 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
 
       if (checkPeakExtents) {
         // Take account of radius spherical extents.
-        for (int i = 0; i < numberOfFaces; ++i) {
-          distance = normals[i].scalar_prod(
-              faces[i][0] -
+        for (int j = 0; j < numberOfFaces; ++j) {
+          distance = normals[j].scalar_prod(
+              faces[j][0] -
               peakCenter); // Distance between plane and peak center.
           if (m_peakRadius >= std::abs(distance)) // Sphere passes through one
                                                   // of the PLANES defined by
                                                   // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            V3D touchPoint = (normals[i] * distance) +
-                             peakCenter; // Vector equation of line give touch
-                                         // point on plane.
+            const V3D touchPoint =
+                (normals[j] * distance) +
+                peakCenter; // Vector equation of line give touch
+                            // point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.

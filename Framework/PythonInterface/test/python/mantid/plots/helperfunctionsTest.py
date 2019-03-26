@@ -12,10 +12,10 @@ import unittest
 
 import matplotlib
 import numpy as np
-from mock import Mock
 
 import mantid.api
 import mantid.plots.helperfunctions as funcs
+from mantid.py3compat.mock import Mock
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \

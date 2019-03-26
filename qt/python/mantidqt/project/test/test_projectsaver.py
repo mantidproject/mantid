@@ -10,19 +10,15 @@ import json
 import matplotlib.backend_bases
 import matplotlib.figure
 import os
-import sys
 import tempfile
 import unittest
 from shutil import rmtree
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
+from mantid.py3compat import mock
 from mantidqt.project import projectsaver
 
-if sys.version_info.major >= 3:
-    from unittest import mock
-else:
-    import mock
 
 project_file_ext = ".mtdproj"
 working_directory = tempfile.mkdtemp()

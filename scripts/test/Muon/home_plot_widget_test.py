@@ -4,20 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+from PyQt4 import QtGui
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
-import unittest
-from PyQt4 import QtGui
-
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
 
 
 class HomeTabPlotPresenterTest(unittest.TestCase):

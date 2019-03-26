@@ -4,16 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
-
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
-
 import unittest
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 
 class MaxEntModelTest(unittest.TestCase):

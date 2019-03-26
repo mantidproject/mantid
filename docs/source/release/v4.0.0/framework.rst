@@ -5,8 +5,6 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-The calculations for :py:obj:`mantid.kernel.Material` have been changed to match the equations in Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron News 3.3 (1992): 26-37
-
 Logging
 -------
 
@@ -49,9 +47,6 @@ ISIS / ICat
 - The path returned by ICat starting ``\\isis\inst$`` is now overridden by the fully-qualified path starting ``\\isis.cclrc.ac.uk\inst$`` on Windows machines. This makes accessing the archive more reliable over the VPN.
 - On Linux and Mac machines, it is overridden by a path starting ``/archive``.
 - On all machines, you can override this locally by setting ``icatDownload.mountPoint=<my_path>`` in your ``Mantid.user.properties`` file.
-
-Stability
----------
 
 
 Algorithms
@@ -139,6 +134,7 @@ Bugfixes
 - Fixed a bug in :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` where a sign in zv was different from `FullProf NPROF=13 <http://www.ccp14.ac.uk/ccp/web-mirrors/plotr/Tutorials&Documents/TOF_FullProf.pdf>`_.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` now save and load spectrum numbers even when histograms have no detectors.
 - :ref:`SavePlot1D <algm-SavePlot1D>` has been updated to follow changes to the plotly api.
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` allows now international execution.
 
 Python
 ------
@@ -151,9 +147,9 @@ New
 - The windows python bundle now includes numpy=1.15.4, scipy=1.1.0, matplotlib=2.2.3, pip=18.1
 - We have been making major performance improvements to geometry access in Mantid over the last few releases. We are now exposing these features via Python to give our users direct access to the same benefits as part of their scripts. The newly exposed objects are now available via workspaces and include:
 
- * :class:`mantid.geometry.ComponentInfo`
- * :class:`mantid.geometry.DetectorInfo`
- * :class:`mantid.api.SpectrumInfo`
+  - :class:`mantid.geometry.ComponentInfo`
+  - :class:`mantid.geometry.DetectorInfo`
+  - :class:`mantid.api.SpectrumInfo`
 
 - :class:`mantid.geometry.ComponentInfo` is exposed to allow the user to access geometric information about the components which are part of a beamline. Iterator support is also provided via python.
 - :class:`mantid.geometry.DetectorInfo` offers the user the ability to access geometric information about the detector(s) which are part of a beamline. ``DetectorInfo`` has also been given a python iterator.
@@ -173,6 +169,7 @@ Improvements
 ############
 
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition.
+- The calculations for :py:obj:`mantid.kernel.Material` have been changed to match the equations in Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron News 3.3 (1992): 26-37
 - :ref:`Functions <FitFunctionsInPython>` may now have their constraint penalties for fitting set in python using ``function.setConstraintPenaltyFactor("parameterName", double)``.
 - :py:obj:`mantid.kernel.Logger` now handles unicode in python2.
 - :py:meth:`mantid.api.ITableWorkspace.columnTypes` now returns human readable strings for non-primitive column types.
@@ -181,8 +178,6 @@ Improvements
 - :py:obj:`mantid.kernel.MaterialBuilder` now supports number densities in formula units per cubic Ångström.
 - IPython on Windows has been upgraded to v5.8.0. This is the last version that supports Python 2.
 
-Bugfixes
-########
 
 
 :ref:`Release 4.0.0 <v4.0.0>`

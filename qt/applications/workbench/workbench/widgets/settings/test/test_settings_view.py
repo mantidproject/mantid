@@ -7,9 +7,9 @@
 #  This file is part of the mantid workbench
 from __future__ import absolute_import, unicode_literals
 
-from mock import MagicMock
 from qtpy.QtWidgets import QApplication, QWidget
 
+from mantid.py3compat.mock import MagicMock
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from workbench.widgets.settings.presenter import SettingsPresenter
