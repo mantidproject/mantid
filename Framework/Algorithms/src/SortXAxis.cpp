@@ -189,8 +189,6 @@ void SortXAxis::copyXandDxToOutputWorkspace(
  * @param inputWorkspace the unsorted input workspaces
  * @param outputWorkspace the empty output workspace
  * @param specNum the spectrum number being copied into
- * @param isAProperHistogram whether or not it has been determined to be a valid
- * histogram earlier on.
  */
 void SortXAxis::copyYandEToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
