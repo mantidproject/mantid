@@ -57,6 +57,7 @@
 #include <exception>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <stdexcept>
 #include <utility>
 
@@ -464,8 +465,8 @@ void ConfigServiceImpl::configureLogging() {
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf.get());
   } catch (std::exception &e) {
-    g_log.warning() << "Trouble configuring the logging framework " << e.what()
-                    << '\n';
+    std::cerr << "Trouble configuring the logging framework " << e.what()
+              << '\n';
   }
 }
 

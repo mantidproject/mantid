@@ -3008,7 +3008,7 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else {
-    g_log.error() << "[DBx211] Cropped Workspace Range: "
+    g_log.information() << "[DBx211] Cropped Workspace Range: "
                   << m_dataWS->x(m_wsIndex)[0] << ", "
                   << m_dataWS->x(m_wsIndex).back() << '\n';
   }
