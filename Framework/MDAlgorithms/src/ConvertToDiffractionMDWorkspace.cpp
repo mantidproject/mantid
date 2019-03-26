@@ -26,7 +26,6 @@
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"

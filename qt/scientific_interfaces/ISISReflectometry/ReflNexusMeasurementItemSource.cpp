@@ -14,7 +14,6 @@
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <boost/regex.hpp>
-#include <iostream>
 #include <sstream>
 #include <string>
 

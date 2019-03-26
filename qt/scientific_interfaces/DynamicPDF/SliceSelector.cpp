@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <iomanip>
-#include <iostream>
 // includes for workspace handling
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"

@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {

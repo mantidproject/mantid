@@ -22,7 +22,6 @@
 
 #include "MantidKernel/Exception.h"
 #include <boost/regex.hpp>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {

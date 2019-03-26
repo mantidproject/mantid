@@ -4,10 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <iostream>
-
-#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
 
 #include <QLineEdit>
@@ -44,8 +42,8 @@ void EModeHandler::setEMode(const int mode) {
   if (mode >= 0 && mode <= 2)
     m_svUI->emode_combo_box->setCurrentIndex(mode);
   else
-    g_log.error() << "Mode number invalid: "
-                  << QString::number(mode).toStdString() << '\n';
+    g_log.error("Mode number invalid: " + QString::number(mode).toStdString() +
+                '\n');
 }
 
 /**
