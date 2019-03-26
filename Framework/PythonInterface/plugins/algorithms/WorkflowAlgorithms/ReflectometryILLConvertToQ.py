@@ -10,8 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution, ReflectometryMomentumTransfer)
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution, Multiply,
+                              ReflectometryMomentumTransfer)
 import ReflectometryILL_common as common
+import scipy.constants as constants
 
 
 class Prop:
@@ -179,8 +181,35 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         return qWS
 
     def _correctForChopperOpenings(self, ws, directWS):
-        """Corrects ws for different chopper opening angles."""
-        correctedWS = common.correctForChopperOpenings(ws, directWS, self._names, self._cleanup, self._subalgLogging)
+        """Correct reflectivity values if chopper openings between RB and DB differ."""
+
+        def opening(instrumentName, logs, Xs):
+            chopperGap = common.chopperPairDistance(logs, instrumentName)
+            chopperPeriod = 60. / common.chopperSpeed(logs, instrumentName)
+            openingAngle = common.chopperOpeningAngle(logs, instrumentName)
+            return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
+
+        instrumentName = common.instrumentName(ws)
+        Xbins = ws.readX(0)
+        Xs = (Xbins[:-1] + Xbins[1:]) / 2.
+        reflectedOpening = opening(instrumentName, ws.run(), Xs)
+        directOpening = opening(instrumentName, directWS.run(), Xs)
+        corFactorWSName = self._names.withSuffix('chopper_opening_correction_factors')
+        corFactorWS = CreateWorkspace(
+            OutputWorkspace=corFactorWSName,
+            DataX=Xbins,
+            DataY=directOpening / reflectedOpening,
+            UnitX=ws.getAxis(0).getUnit().unitID(),
+            ParentWorkspace=ws,
+            EnableLogging=self._subalgLogging)
+        correctedWSName = self._names.withSuffix('corrected_by_chopper_opening')
+        correctedWS = Multiply(
+            LHSWorkspace=ws,
+            RHSWorkspace=corFactorWS,
+            OutputWorkspace=correctedWSName,
+            EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(corFactorWS)
+        self._cleanup.cleanup(ws)
         return correctedWS
 
     def _finalize(self, ws):
