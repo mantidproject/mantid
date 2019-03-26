@@ -22,6 +22,7 @@ This module should be fully compatible with:
 
 from __future__ import (absolute_import, print_function, unicode_literals)
 
+import inspect
 import six
 from six import *  # noqa
 import sys
@@ -40,12 +41,18 @@ __all__ = dir(six)
 
 
 # -----------------------------------------------------------------------------
-# System functions
+# Library functions
 # -----------------------------------------------------------------------------
 if six.PY2 or sys.version_info[0:2] < (3, 2):
     setswitchinterval = sys.setcheckinterval
 else:
     setswitchinterval = sys.setswitchinterval
+
+if six.PY2 or sys.version_info[0:2] < (3, 5):
+    # getfullargspec deprecated up until python 3.5, so use getargspec
+    getfullargspec = inspect.getargspec
+else:
+    getfullargspec = inspect.getfullargspec
 
 
 # -----------------------------------------------------------------------------
