@@ -404,18 +404,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             useOnePercentBackgroundCorrection);
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
-        double radiusRatio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = radiusRatio * radiusRatio * radiusRatio;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * radiusRatio;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius sphere
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * interiorRatio;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       }

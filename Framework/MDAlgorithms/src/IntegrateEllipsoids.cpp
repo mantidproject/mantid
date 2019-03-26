@@ -400,10 +400,8 @@ void IntegrateEllipsoids::exec() {
     if (mnp[2] != 0 && ModDim == 2)
       ModDim = 3;
 
-    if (Geometry::IndexingUtils::ValidIndex(
-            hkl, 1.0)) // use tolerance == 1 to
-                       // just check for (0,0,0,0,0,0)
-    {
+    // use tolerance == 1 to just check for (0,0,0,0,0,0)
+    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
       qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
       hkl_vectors.push_back(hkl);
@@ -484,18 +482,14 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> sateprincipalaxis1, sateprincipalaxis2,
       sateprincipalaxis3;
   for (size_t i = 0; i < n_peaks; i++) {
-    V3D hkl(peaks[i].getIntHKL());
-    V3D mnp(peaks[i].getIntMNP());
+    const V3D hkl(peaks[i].getIntHKL());
+    const V3D mnp(peaks[i].getIntMNP());
 
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) ||
         Geometry::IndexingUtils::ValidIndex(mnp, 1.0)) {
-      V3D peak_q = peaks[i].getQLabFrame();
-      std::vector<double> axes_radii;
+      const V3D peak_q = peaks[i].getQLabFrame();
       // modulus of Q
-      double lenQpeak = 0.0;
-      if (adaptiveQMultiplier != 0.0) {
-        lenQpeak = peak_q.norm();
-      }
+      const double lenQpeak = adaptiveQMultiplier != 0.0 ? peak_q.norm() : 0.0;
 
       double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;
       if (mnp != V3D(0, 0, 0))
@@ -512,22 +506,24 @@ void IntegrateEllipsoids::exec() {
         continue;
       }
 
-      double adaptiveBack_inner_radius =
-          adaptiveQBackgroundMultiplier * lenQpeak + sate_back_inner_radius;
-      if (mnp == V3D(0, 0, 0))
+      double adaptiveBack_inner_radius;
+      double adaptiveBack_outer_radius;
+      if (mnp == V3D(0, 0, 0)) {
         adaptiveBack_inner_radius =
             adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
-
-      double adaptiveBack_outer_radius =
-          adaptiveQBackgroundMultiplier * lenQpeak + sate_back_outer_radius;
-      if (mnp == V3D(0, 0, 0))
         adaptiveBack_outer_radius =
             adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
-
+      } else {
+        adaptiveBack_inner_radius =
+            adaptiveQBackgroundMultiplier * lenQpeak + sate_back_inner_radius;
+        adaptiveBack_outer_radius =
+            adaptiveQBackgroundMultiplier * lenQpeak + sate_back_outer_radius;
+      }
       PeakRadiusVector[i] = adaptiveRadius;
       BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
       BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
 
+      std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateModEvents(
               E1Vec, peak_q, hkl, mnp, specify_size, adaptiveRadius,
