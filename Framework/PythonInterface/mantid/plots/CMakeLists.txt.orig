@@ -5,8 +5,14 @@ set(PY_FILES
     plotfunctions3D.py
     utility.py)
 
-add_subdirectory (modest_image)
+<<<<<<< HEAD
+||||||| merged common ancestors
+#############################################################################################
+=======
+add_subdirectory ( modest_image )
 
+#############################################################################################
+>>>>>>> master
 # Copy over the pure Python files for the module
 
 # Set the destination directory

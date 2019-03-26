@@ -236,12 +236,11 @@ bool NexusFileIO::writeNxStringArray(
     const std::vector<std::string> &attributes,
     const std::vector<std::string> &avalues) const {
   int dimensions[2];
-  size_t maxlen = 0;
+  const auto maxlen = std::max_element(
+      values.cbegin(), values.cend(),
+      [](const auto &lhs, const auto &rhs) { return lhs.size() < rhs.size(); });
   dimensions[0] = static_cast<int>(values.size());
-  for (const auto &value : values)
-    if (value.size() > maxlen)
-      maxlen = value.size();
-  dimensions[1] = static_cast<int>(maxlen);
+  dimensions[1] = static_cast<int>(maxlen->size());
   NXstatus status = NXmakedata(fileID, name.c_str(), NX_CHAR, 2, dimensions);
   if (status == NX_ERROR)
     return (false);
@@ -249,9 +248,9 @@ bool NexusFileIO::writeNxStringArray(
   for (size_t it = 0; it < attributes.size(); ++it)
     NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(),
               static_cast<int>(avalues[it].size() + 1), NX_CHAR);
-  auto strs = new char[values.size() * maxlen];
+  auto strs = new char[values.size() * maxlen->size()];
   for (size_t i = 0; i < values.size(); i++) {
-    strncpy(&strs[i * maxlen], values[i].c_str(), maxlen);
+    strncpy(&strs[i * maxlen->size()], values[i].c_str(), maxlen->size());
   }
   NXputdata(fileID, strs);
   NXclosedata(fileID);
@@ -474,12 +473,12 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputattr(fileID, "units", sLabel.c_str(), static_cast<int>(sLabel.size()),
               NX_CHAR);
 
-    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         sAxis->unit());
-    if (label) {
-      NXputattr(fileID, "caption", label->caption().c_str(),
-                static_cast<int>(label->caption().size()), NX_CHAR);
-      auto unitLbl = label->label();
+    if (unitLabel) {
+      NXputattr(fileID, "caption", unitLabel->caption().c_str(),
+                static_cast<int>(unitLabel->caption().size()), NX_CHAR);
+      auto unitLbl = unitLabel->label();
       NXputattr(fileID, "label", unitLbl.ascii().c_str(),
                 static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
     }
@@ -488,8 +487,7 @@ int NexusFileIO::writeNexusProcessedData2D(
   } else {
     std::string textAxis;
     for (size_t i = 0; i < sAxis->length(); i++) {
-      std::string label = sAxis->label(i);
-      textAxis += label + "\n";
+      textAxis += sAxis->label(i) + "\n";
     }
     dims_array[0] = static_cast<int>(textAxis.size());
     NXmakedata(fileID, "axis2", NX_CHAR, 1, dims_array);
@@ -497,12 +495,12 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputdata(fileID, textAxis.c_str());
     NXputattr(fileID, "units", "TextAxis", 8, NX_CHAR);
 
-    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
+    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         sAxis->unit());
-    if (label) {
-      NXputattr(fileID, "caption", label->caption().c_str(),
-                static_cast<int>(label->caption().size()), NX_CHAR);
-      auto unitLbl = label->label();
+    if (unitLabel) {
+      NXputattr(fileID, "caption", unitLabel->caption().c_str(),
+                static_cast<int>(unitLabel->caption().size()), NX_CHAR);
+      auto unitLbl = unitLabel->label();
       NXputattr(fileID, "label", unitLbl.ascii().c_str(),
                 static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
     }
@@ -971,11 +969,11 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   if (checkEntryAtLevelByAttribute("signal", entry))
     status = NXopendata(fileID, entry.c_str());
   else {
-    status = NXclosegroup(fileID);
+    NXclosegroup(fileID);
     return (2);
   }
   if (status == NX_ERROR) {
-    status = NXclosegroup(fileID);
+    NXclosegroup(fileID);
     return (2);
   }
   // read workspace data size
@@ -1032,12 +1030,9 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
-  for (const auto &info : infos) {
-    if (target == info.name)
-      return true;
-  }
-
-  return false;
+  return std::any_of(infos.cbegin(), infos.cend(), [&target](const auto &info) {
+    return info.name == target;
+  });
 }
 
 int NexusFileIO::getXValues(MantidVec &xValues, const int &spectra) const {
@@ -1082,7 +1077,7 @@ int NexusFileIO::getSpectra(MantidVec &values, MantidVec &errors,
   if (checkEntryAtLevelByAttribute("signal", entry))
     status = NXopendata(fileID, entry.c_str());
   else {
-    status = NXclosegroup(fileID);
+    NXclosegroup(fileID);
     return (2);
   }
   if (status == NX_ERROR) {
@@ -1129,12 +1124,9 @@ int NexusFileIO::findMantidWSEntries() const {
 bool NexusFileIO::checkEntryAtLevel(const std::string &item) const {
   // Search the currently open level for name "item"
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto &entrie : entries) {
-    if (entrie.first == item)
-      return true;
-  }
-
-  return (false);
+  return std::any_of(
+      entries.cbegin(), entries.cend(),
+      [&item](const auto &entry) { return entry.first == item; });
 }
 
 bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
@@ -1277,11 +1269,9 @@ int getNexusEntryTypes(const std::string &fileName,
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
   for (auto &entry : entryList) {
-    //
-    stat = NXopengroup(fileH, entry.c_str(), "NXentry");
+    NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
-    while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
-           NX_OK) {
+    while ((NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) == NX_OK) {
       std::string nxc(nxclass), nxn(nxname);
       // if a data field
       if (nxc == "SDS")
@@ -1301,12 +1291,12 @@ int getNexusEntryTypes(const std::string &fileName,
           entryName.push_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
-          stat = NXclosegroup(fileH);
+          NXclosegroup(fileH);
           break;
         }
     }
   }
-  stat = NXclose(&fileH);
+  NXclose(&fileH);
   delete[] nxname;
   delete[] nxclass;
   return (static_cast<int>(entryName.size()));
