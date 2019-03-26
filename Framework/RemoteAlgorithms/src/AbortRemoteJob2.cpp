@@ -10,7 +10,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/NullValidator.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {

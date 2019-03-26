@@ -9,7 +9,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 
