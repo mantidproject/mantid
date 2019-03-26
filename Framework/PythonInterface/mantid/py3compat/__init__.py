@@ -38,10 +38,6 @@ except ImportError:
 # -----------------------------------------------------------------------------
 __all__ = dir(six)
 
-VERSION_INFO = sys.version_info
-MAJOR_VER = VERSION_INFO[0]
-MINOR_VER = VERSION_INFO[1]
-
 
 # -----------------------------------------------------------------------------
 # System functions
