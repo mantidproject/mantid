@@ -48,6 +48,7 @@ from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_inf
 from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 
 # register matplotlib projection
+from . import plots  # noqa
 
 MODULE_NAME = 'simpleapi'
 

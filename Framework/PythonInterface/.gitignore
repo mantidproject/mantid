@@ -1,0 +1,5 @@
+setup.py
+mantid/pyversion.py
+mantid/buildconfig.py
+mantid/kernel/mpisetup.py
+mantid/kernel/packagesetup.py
