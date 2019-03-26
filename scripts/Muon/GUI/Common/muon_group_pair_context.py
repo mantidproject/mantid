@@ -114,6 +114,8 @@ class MuonGroupPairContext(object):
     def show(self, name, run):
         self[name].show(str(run))
 
+    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
+        self._groups, self._pairs = get_default_grouping(workspace, instrument, main_field_direction)
 
 
     def _check_name_unique(self, name):

@@ -20,6 +20,7 @@ from mantid.api import AnalysisDataService
 import unittest
 from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import FileFinder
+from mantid.dataobjects import Workspace2D
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -46,9 +47,23 @@ class MuonContextTest(unittest.TestCase):
                                   instrument='EMU')
         self.data_context.current_runs = [[self.run_number]]
         self.data_context.update_current_data()
+        self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0]._workspace,
+                                                                 'EMU', '')
 
-    def test_calculate_group_calculates_group_for_given_run_and_stores_appropriately(self):
-        self.context.calculate_group('fwd', run=[19489])
+    def test_reset_groups_and_pairs_to_default(self):
+        self.assertEquals(self.group_pair_context.group_names, ['fwd', 'bwd'])
+        self.assertEquals(self.group_pair_context.pair_names, ['long'])
+
+    def test_calculate_group_calculates_group_for_given_run(self):
+        counts_workspace, asymmetry_workspace = self.context.calculate_group('fwd', run=[19489])
+
+        self.assertEquals(type(counts_workspace), Workspace2D)
+        self.assertEquals(type(counts_workspace), Workspace2D)
+
+    def test_calculate_pair_calculates_pair_for_given_run(self):
+        pair_asymmetry = self.context.calculate_pair('long', run=[19489])
+
+        self.assertEquals(type(pair_asymmetry), Workspace2D)
 
 
 

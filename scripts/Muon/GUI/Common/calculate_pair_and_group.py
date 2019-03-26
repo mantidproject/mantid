@@ -122,29 +122,29 @@ def _get_MuonGroupingCounts_parameters(context, group_name, run):
 def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     params = {}
 
-    if 'GroupRangeMin' in context.gui_variables:
-        params['AsymmetryTimeMin'] = context.gui_variables['GroupRangeMin']
+    if 'GroupRangeMin' in context.gui_context:
+        params['AsymmetryTimeMin'] = context.gui_context['GroupRangeMin']
     else:
-        params['AsymmetryTimeMin'] = context.get_loaded_data_for_run(run)["FirstGoodData"]
+        params['AsymmetryTimeMin'] = context.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
 
-    if 'GroupRangeMax' in context.gui_variables:
-        params['AsymmetryTimeMax'] = context.gui_variables['GroupRangeMax']
+    if 'GroupRangeMax' in context.gui_context:
+        params['AsymmetryTimeMax'] = context.gui_context['GroupRangeMax']
     else:
-        params['AsymmetryTimeMax'] = max(context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
+        params['AsymmetryTimeMax'] = max(context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
 
-    if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
-        summed_periods = context.gui_variables["SummedPeriods"]
+    if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
+        summed_periods = context.gui_context["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     else:
         params["SummedPeriods"] = "1"
 
-    if context.is_multi_period() and 'SubtractedPeriods' in context.gui_variables:
-        subtracted_periods = context.gui_variables["SubtractedPeriods"]
+    if context.data_context.is_multi_period() and 'SubtractedPeriods' in context.gui_context:
+        subtracted_periods = context.gui_context["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     else:
         params["SubtractedPeriods"] = ""
 
-    group = context._groups.get(group_name, None)
+    group = context.group_pair_context[group_name]
     if group:
         params["GroupName"] = group_name
         params["Grouping"] = ",".join([str(i) for i in group.detectors])
@@ -154,25 +154,25 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
 
 def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
     params = {}
-    if context.is_multi_period() and 'SummedPeriods' in context.gui_variables:
-        summed_periods = context.gui_variables["SummedPeriods"]
+    if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
+        summed_periods = context.gui_context["SummedPeriods"]
         params["SummedPeriods"] = summed_periods
     else:
         params["SummedPeriods"] = "1"
 
-    if context.is_multi_period() and 'SubtractedPeriods' in context.gui_variables:
-        subtracted_periods = context.gui_variables["SubtractedPeriods"]
+    if context.data_context.is_multi_period() and 'SubtractedPeriods' in context.gui_context:
+        subtracted_periods = context.gui_context["SubtractedPeriods"]
         params["SubtractedPeriods"] = subtracted_periods
     else:
         params["SubtractedPeriods"] = ""
 
-    pair = context._pairs.get(pair_name, None)
+    pair = context.group_pair_context[pair_name]
 
     if pair:
         params["SpecifyGroupsManually"] = True
         params["PairName"] = str(pair_name)
-        detectors1 = ",".join([str(i) for i in context._groups[pair.forward_group].detectors])
-        detectors2 = ",".join([str(i) for i in context._groups[pair.backward_group].detectors])
+        detectors1 = ",".join([str(i) for i in context.group_pair_context[pair.forward_group].detectors])
+        detectors2 = ",".join([str(i) for i in context.group_pair_context[pair.backward_group].detectors])
         params["Group1"] = detectors1
         params["Group2"] = detectors2
         params["Alpha"] = str(pair.alpha)

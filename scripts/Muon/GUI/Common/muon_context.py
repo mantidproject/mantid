@@ -32,5 +32,7 @@ class MuonContext(object):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
         group_asymmetry = estimate_group_asymmetry_data(self, group_name, run, rebin)
 
-        self._group_pair_context[group_name].update_workspace(group_workspace, group_asymmetry)
+        return group_workspace, group_asymmetry
 
+    def calculate_pair(self, pair_name, run, rebin=False):
+        return calculate_pair_data(self, pair_name, run, rebin)

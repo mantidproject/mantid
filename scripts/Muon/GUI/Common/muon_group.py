@@ -78,3 +78,11 @@ class MuonGroup(object):
         run not in self._asymmetry_estimate or self._asymmetry_estimate[run].show()
         run not in self._workspace_rebin or self._workspace_rebin[run].show()
         run not in self._asymmetry_estimate_rebin or self._asymmetry_estimate_rebin[run].show()
+
+    def update_workspaces(self, run, counts_workspace, asymmetry_workspace, rebin):
+        if rebin:
+            self._workspace_rebin.update({run: MuonWorkspaceWrapper(counts_workspace)})
+            self._asymmetry_estimate_rebin.update({run: MuonWorkspaceWrapper(asymmetry_workspace)})
+        else:
+            self._workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
+            self._asymmetry_estimate.update({run: MuonWorkspaceWrapper(asymmetry_workspace)})
