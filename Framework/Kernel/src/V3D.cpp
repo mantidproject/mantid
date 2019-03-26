@@ -220,7 +220,7 @@ void V3D::rotate(const Kernel::Matrix<double> &A) noexcept {
 }
 
 /**
-  Determines if this,B,C are collinear
+  Determines if this,B,C are colinear
   @param Bv :: Vector to test
   @param Cv :: Vector to test
   @return false if no colinear and true if they are (within Tolerance)
@@ -541,6 +541,19 @@ double V3D::hklError() const {
   return fabs(m_pt[0] - std::round(m_pt[0])) +
          fabs(m_pt[1] - std::round(m_pt[1])) +
          fabs(m_pt[2] - std::round(m_pt[2]));
+}
+
+/** Normalizes a V3D.
+ * @param v a vector to normalize.
+ * @return a vector with norm 1 parallel to v
+ * @throw std::runtime_error if v is a null vector.
+ */
+V3D normalize(const V3D &v) {
+  const auto l = v.norm();
+  if (l == 0.) {
+    throw std::runtime_error("Unable to normalize a zero length vector.");
+  }
+  return v / l;
 }
 
 } // Namespace Kernel

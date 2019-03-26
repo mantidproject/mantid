@@ -37,10 +37,9 @@ Quat::Quat() : w(1), a(0), b(0), c(0) {}
  */
 Quat::Quat(const V3D &src, const V3D &des) {
 
-  V3D v = (src + des);
-  v.normalize();
+  const V3D v = Kernel::normalize(src + des);
 
-  V3D cross = v.cross_prod(des);
+  const V3D cross = v.cross_prod(des);
 
   if (cross.nullVector()) {
     w = 1.;

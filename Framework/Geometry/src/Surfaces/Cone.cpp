@@ -49,12 +49,6 @@ namespace Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
-// The number of slices to use to approximate a cylinder
-int Cone::g_nslices = 10;
-
-// The number of slices to use to approximate a cylinder
-int Cone::g_nstacks = 1;
-
 Cone::Cone()
     : Quadratic(), Centre(), Normal(1, 0, 0), alpha(0.0), cangle(1.0)
 /**
@@ -207,9 +201,9 @@ void Cone::setNorm(const Kernel::V3D &A)
  @param A :: New Normal direction
  */
 {
-  if (A.norm() > Tolerance) {
-    Normal = A;
-    Normal.normalize();
+  const double norm = A.norm();
+  if (norm > Tolerance) {
+    Normal = A / norm;
     setBaseEqn();
   }
 }

@@ -137,10 +137,10 @@ public:
   double solidAngle(const Kernel::V3D &observer,
                     const Kernel::V3D &scaleFactor) const override;
   // solid angle via triangulation
-  double triangleSolidAngle(const Kernel::V3D &observer) const;
+  double triangulatedSolidAngle(const Kernel::V3D &observer) const ;
   // Solid angle via triangulation with scaling factor for object size
-  double triangleSolidAngle(const Kernel::V3D &observer,
-                            const Kernel::V3D &scaleFactor) const;
+  double triangulatedSolidAngle(const Kernel::V3D &observer,
+                            const Kernel::V3D &scaleFactor) const ;
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
@@ -207,22 +207,6 @@ private:
   void calcBoundingBoxByGeometry();
 
   int searchForObject(Kernel::V3D &) const;
-  double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
-                               const Kernel::V3D &c,
-                               const Kernel::V3D &observer) const;
-  double CuboidSolidAngle(const Kernel::V3D observer,
-                          const std::vector<Kernel::V3D> vectors) const;
-  double SphereSolidAngle(const Kernel::V3D observer,
-                          const std::vector<Kernel::V3D> vectors,
-                          const double radius) const;
-  double CylinderSolidAngle(const Kernel::V3D &observer,
-                            const Mantid::Kernel::V3D &centre,
-                            const Mantid::Kernel::V3D &axis,
-                            const double radius, const double height) const;
-  double ConeSolidAngle(const Kernel::V3D &observer,
-                        const Mantid::Kernel::V3D &centre,
-                        const Mantid::Kernel::V3D &axis, const double radius,
-                        const double height) const;
 
   /// Returns the volume.
   double monteCarloVolume() const;

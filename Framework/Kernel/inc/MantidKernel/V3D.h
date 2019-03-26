@@ -359,6 +359,8 @@ private:
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const V3D &);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, V3D &);
 
+MANTID_KERNEL_DLL V3D normalize(const V3D &v);
+
 } // Namespace Kernel
 } // Namespace Mantid
 

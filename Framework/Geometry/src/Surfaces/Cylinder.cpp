@@ -36,12 +36,6 @@ namespace Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
-// The number of slices to use to approximate a cylinder
-int Cylinder::g_nslices = 10;
-
-// The number of slices to use to approximate a cylinder
-int Cylinder::g_nstacks = 1;
-
 Cylinder::Cylinder()
     : Quadratic(), Centre(), Normal(1, 0, 0), Nvec(0), Radius(0.0)
 /**
@@ -233,8 +227,7 @@ void Cylinder::setNorm(const Kernel::V3D &A)
  @param A :: Vector along the centre line
  */
 {
-  Normal = A;
-  Normal.normalize();
+  Normal = normalize(A);
   setBaseEqn();
   setNvec();
 }

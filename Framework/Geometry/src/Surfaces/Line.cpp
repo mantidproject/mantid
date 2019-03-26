@@ -28,13 +28,11 @@ Constructor
 {}
 
 Line::Line(const Kernel::V3D &O, const Kernel::V3D &D)
-    : Origin(O), Direct(D)
+    : Origin(O), Direct(normalize(D))
 /**
 Constructor
 */
-{
-  Direct.normalize();
-}
+{}
 
 Line *Line::clone() const
 /**
@@ -272,8 +270,7 @@ sets the line given the Origne and direction
   if (D.nullVector())
     return 0;
   Origin = O;
-  Direct = D;
-  Direct.normalize();
+  Direct = normalize(D);
   return 1;
 }
 
