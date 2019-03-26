@@ -456,7 +456,6 @@ class Abins(PythonAlgorithm):
         return cross_section
 
     def _create_total_workspace(self, partial_workspaces=None):
-
         """
         Sets workspace with total S.
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
@@ -493,7 +492,6 @@ class Abins(PythonAlgorithm):
 
     def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None,
                           nucleons_number=None):
-
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
@@ -533,7 +531,6 @@ class Abins(PythonAlgorithm):
         mtd[wrk].setYUnit("Arbitrary Units")
 
     def _check_advanced_parameter(self):
-
         """
         Checks if parameters from AbinsParameters.py are valid. If any parameter is invalid then RuntimeError is thrown
         with meaningful message.
@@ -696,7 +693,7 @@ class Abins(PythonAlgorithm):
         if found_filename_ext.lower() != expected_file_extension:
             comment = "{}Output from ab initio program {} is expected." \
                       " The expected extension of file is .{}. Found: {}.{}".format(
-                      msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
+                          msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
             return dict(Invalid=True, Comment=comment)
         else:
             return dict(Invalid=False, Comment="")
