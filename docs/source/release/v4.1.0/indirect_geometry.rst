@@ -24,6 +24,10 @@ Improvements
 Data Analysis Interface
 -----------------------
 
+Improvements
+############
+- Improved the output options of MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit so that Chi_squared can now be plotted.
+
 Bug Fixes
 #########
 - Fixed an error caused by loading a Sample into ConvFit which does not have a resolution parameter for the analyser.
