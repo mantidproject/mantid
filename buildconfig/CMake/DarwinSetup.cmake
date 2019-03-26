@@ -99,6 +99,7 @@ endif ()
 
 # directives similar to linux for conda framework-only build
 set ( BIN_DIR bin )
+set ( WORKBENCH_BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
 set ( PLUGINS_DIR plugins )

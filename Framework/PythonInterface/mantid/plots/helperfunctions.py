@@ -18,7 +18,7 @@ import mantid.kernel
 from mantid.api import MultipleExperimentInfos
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
 from mantid.plots.utility import MantidAxType
-
+from scipy.interpolate import interp1d
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
 # These functions are common between plotfunctions.py and plotfunctions3D.py
@@ -312,6 +312,38 @@ def common_x(arr):
     return numpy.all(arr == arr[0, :], axis=(1, 0))
 
 
+def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
+    num_hist = workspace.getNumberHistograms()
+    delta = numpy.finfo(numpy.float64).max
+    min_value = numpy.finfo(numpy.float64).max
+    max_value = numpy.finfo(numpy.float64).min
+    for i in range(num_hist):
+        xtmp = workspace.readX(i)
+        if workspace.isHistogramData():
+            #input x is edges
+            xtmp = mantid.plots.helperfunctions.points_from_boundaries(xtmp)
+        else:
+            #input x is centers
+            pass
+        min_value = min(min_value, xtmp.min())
+        max_value = max(max_value, xtmp.max())
+        diff = xtmp[1:] - xtmp[:-1]
+        delta = min(delta, diff.min())
+    num_edges = int(numpy.ceil((max_value - min_value)/delta)) + 1 
+    x_centers = numpy.linspace(min_value, max_value, num=num_edges)
+    y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
+    z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
+    for i in range(num_hist):
+        centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
+        f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=numpy.nan)
+        z[i] = f(x_centers)
+    if histogram2D:
+        x = mantid.plots.helperfunctions.boundaries_from_points(x_centers)
+    else:
+        x = x_centers
+    return x,y,z
+
+
 def get_matrix_2d_data(workspace, distribution, histogram2D=False):
     '''
     Get all data from a Matrix workspace that has the same number of bins
@@ -418,6 +450,18 @@ def get_data_uneven_flag(workspace, **kwargs):
     return aligned, kwargs
 
 
+def check_resample_to_regular_grid(ws):
+    if not ws.isCommonBins():
+        return True
+
+    x = ws.dataX(0)
+    difference = numpy.diff(x)
+    if not numpy.all(numpy.isclose(difference[:-1], difference[0])):
+        return True
+
+    return False
+
+
 # ====================================================
 # extract logs
 # ====================================================
@@ -472,11 +516,11 @@ def get_axes_labels(workspace):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
         for d in dims:
-            axis_title = d.name.replace('DeltaE', '$\Delta E$')
-            axis_unit = d.getUnits().replace('Angstrom^-1', '$\AA^{-1}$')
+            axis_title = d.name.replace('DeltaE', r'$\Delta E$')
+            axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
             axis_unit = axis_unit.replace('DeltaE', 'meV')
-            axis_unit = axis_unit.replace('Angstrom', '$\AA$')
-            axis_unit = axis_unit.replace('MomentumTransfer', '$\AA^{-1}$')
+            axis_unit = axis_unit.replace('Angstrom', r'$\AA$')
+            axis_unit = axis_unit.replace('MomentumTransfer', r'$\AA^{-1}$')
             axes.append('{0} ({1})'.format(axis_title, axis_unit))
     else:
         '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''

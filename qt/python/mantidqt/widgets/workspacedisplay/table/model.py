@@ -5,15 +5,30 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-#
-#
+#  This file is part of the mantidqt package.
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.kernel import V3D
 from mantid.simpleapi import DeleteTableRows, SortPeaksWorkspace, SortTableWorkspace, StatisticsOfTableWorkspace
+from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
+
+
+class TableWorkspaceColumnTypeMapping(object):
+    """
+    Enum can't be used here because the original C++ code maps the types to integers.
+    Comparing the integer to a Python enum does not work, as it does not simply compare
+    the integer values. So the types are just stored as integers here
+    """
+    NotSet = -1000
+    NoType = 0
+    X = 1
+    Y = 2
+    Z = 3
+    XERR = 4
+    YERR = 5
+    LABEL = 6
 
 
 class TableWorkspaceDisplayModel:
@@ -45,6 +60,25 @@ class TableWorkspaceDisplayModel:
         self.ws_num_cols = self.ws.columnCount()
         self.marked_columns = MarkedColumns()
         self._original_column_headers = self.get_column_headers()
+
+        # loads the types of the columns
+        for col in range(self.ws_num_cols):
+            plot_type = self.ws.getPlotType(col)
+            if plot_type == TableWorkspaceColumnTypeMapping.X:
+                self.marked_columns.add_x(col)
+            elif plot_type == TableWorkspaceColumnTypeMapping.Y:
+                self.marked_columns.add_y(col)
+            elif plot_type == TableWorkspaceColumnTypeMapping.YERR:
+                # mark YErrs only if there are any columns that have been marked as Y
+                # if there are none then do not mark anything as YErr
+                if len(self.marked_columns.as_y) > len(self.marked_columns.as_y_err):
+                    # Assume all the YErrs are associated with the first available (no other YErr has it) Y column.
+                    # There isn't a way to know the correct Y column, as that information is not stored
+                    # in the table workspace - the original table workspace does not associate Y errors
+                    # columns with specific Y columns
+                    err_for_column = self.marked_columns.as_y[len(self.marked_columns.as_y_err)]
+                    label = str(len(self.marked_columns.as_y_err))
+                    self.marked_columns.add_y_err(ErrorColumn(col, err_for_column, label))
 
     def _get_v3d_from_str(self, string):
         if '[' in string and ']' in string:

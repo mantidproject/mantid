@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as s_api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
-    PropertyMode, MatrixWorkspace, Progress
+    PropertyMode, MatrixWorkspace, Progress, WorkspaceGroup
 from mantid.kernel import Direction, logger
 
 
@@ -172,6 +172,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             issues['CanWorkspace'] = error_msg
 
         if self._use_corrections:
+            if not isinstance(self._corrections_workspace, WorkspaceGroup):
+                issues['CorrectionsWorkspace'] = "The corrections workspace should be a workspace group."
+
             if self._corrections_workspace.size() == 0:
                 issues['CorrectionsWorkspace'] = "No corrections found in the supplied corrections workspace group."
             else:
@@ -227,7 +230,11 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_corrections:
             if self._corrections_workspace.size() == 1:
-                self._factors = ['acc']
+                correction_name = self._corrections_workspace[0].getName()
+                if 'acc' in correction_name:
+                    self._factors = ['acc']
+                elif 'ass' in correction_name:
+                    self._factors = ['ass']
             if self._corrections_workspace.size() == 2:
                 self._factors = ['acc', 'ass']
                 self._corrections_approximation = self._two_factor_corrections_approximation

@@ -6,21 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import sys
-
-from  Muon.GUI.Common.utilities import load_utils
-from  Muon.GUI.Common import thread_model
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
-
 import unittest
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+
+from mantid.py3compat import mock
+from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.Common import thread_model
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
+
+
 def test(inputs):
     inputs["OutputPhaseTable"] = "test"
+
 
 class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):

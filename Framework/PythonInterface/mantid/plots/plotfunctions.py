@@ -20,12 +20,16 @@ import matplotlib.dates as mdates
 import matplotlib.image as mimage
 import numpy
 from skimage.transform import resize
+from scipy.interpolate import interp1d
 
 import mantid.api
 import mantid.kernel
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
-    get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, get_md_data2d_bin_centers, get_normalization, \
-    get_sample_log, get_spectrum, get_uneven_data, get_wksp_index_dist_and_label
+    get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
+    get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
+    get_wksp_index_dist_and_label, check_resample_to_regular_grid
+
+import mantid.plots.modest_image
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
@@ -167,7 +171,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     dimension
     """
     x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs,
-                                              with_dy=True, with_dx=True)
+                                              with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
@@ -399,110 +403,6 @@ def pcolormesh(axes, workspace, *args, **kwargs):
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
-def _skimage_version():
-    import skimage
-    from distutils.version import LooseVersion
-    return LooseVersion(skimage.__version__) >= LooseVersion('1.4.0')
-
-
-class ScalingAxesImage(mimage.AxesImage):
-    def __init__(self, ax,
-                 cmap=None,
-                 norm=None,
-                 interpolation=None,
-                 origin=None,
-                 extent=None,
-                 filternorm=1,
-                 filterrad=4.0,
-                 resample=False,
-                 **kwargs):
-        self.dx = None
-        self.dy = None
-        self.unsampled_data = None
-        super(ScalingAxesImage, self).__init__(
-            ax,
-            cmap=cmap,
-            norm=norm,
-            interpolation=interpolation,
-            origin=origin,
-            extent=extent,
-            filternorm=filternorm,
-            filterrad=filterrad,
-            resample=resample,
-            **kwargs)
-
-    def set_data(self, A):
-        dims = A.shape
-        max_dims = (3840, 2160)  # 4K resolution
-        if dims[0] > max_dims[0] or dims[1] > max_dims[1]:
-            new_dims = numpy.minimum(dims, max_dims)
-            if (_skimage_version()):
-                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
-            else:
-                self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan)
-        else:
-            self.unsampled_data = A
-        super(ScalingAxesImage, self).set_data(A)
-
-    def draw(self, renderer):
-        ax = self.axes
-        # might not be calculated before first call
-        we = ax.get_window_extent()
-        dx = round(we.x1 - we.x0)
-        dy = round(we.y1 - we.y0)
-        # decide if we should downsample
-        dims = self.unsampled_data.shape
-        if dx != self.dx or dy != self.dy:
-            if dims[0] > dx or dims[1] > dy:
-                new_dims = numpy.minimum(dims, [dx, dy])
-                if (_skimage_version()):
-                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan,
-                                          anti_aliasing=True)
-                else:
-                    sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan)
-                self.dx = dx
-                self.dy = dy
-                super(ScalingAxesImage, self).set_data(sampled_data)
-        return super(ScalingAxesImage,self).draw(renderer)
-
-
-def _imshow(axes, z, cmap=None, norm=None, aspect=None,
-            interpolation=None, alpha=None, vmin=None, vmax=None,
-            origin=None, extent=None, shape=None, filternorm=1,
-            filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
-    """
-    Copy of imshow in order to replace AxesImage artist with a custom artist.
-
-    Use :meth:`matplotlib.axes.Axes.imshow` documentation for individual arguments.
-    """
-    if norm is not None and not isinstance(norm, mcolors.Normalize):
-        raise ValueError(
-            "'norm' must be an instance of 'mcolors.Normalize'")
-    if aspect is None:
-        aspect = matplotlib.rcParams['image.aspect']
-    axes.set_aspect(aspect)
-    im = ScalingAxesImage(axes, cmap, norm, interpolation, origin, extent,
-                          filternorm=filternorm, filterrad=filterrad,
-                          resample=resample, **kwargs)
-    im.set_data(z)
-    im.set_alpha(alpha)
-    if im.get_clip_path() is None:
-        # image does not already have clipping set, clip to axes patch
-        im.set_clip_path(axes.patch)
-    if vmin is not None or vmax is not None:
-        im.set_clim(vmin, vmax)
-    else:
-        im.autoscale_None()
-    im.set_url(url)
-
-    # update ax.dataLim, and, if autoscaling, set viewLim
-    # to tightly fit the image, regardless of dataLim.
-    im.set_extent(im.get_extent())
-
-    axes.add_image(im)
-    return im
-
-
 def imshow(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.imshow`.
@@ -526,20 +426,16 @@ def imshow(axes, workspace, *args, **kwargs):
     else:
         (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        if uneven_bins:
-            raise Exception('Variable number of bins is not supported by imshow.')
+        if check_resample_to_regular_grid(workspace):
+            (x, y, z) = get_matrix_2d_ragged(workspace, distribution, histogram2D=True)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
-
-    diffs = numpy.diff(x, axis=1)
-    x_spacing_equal = numpy.alltrue(diffs == diffs[0])
-    diffs = numpy.diff(y, axis=0)
-    y_spacing_equal = numpy.alltrue(diffs == diffs[0])
-    if not x_spacing_equal or not y_spacing_equal:
-        raise Exception('Unevenly spaced bins are not supported by imshow')
     if 'extent' not in kwargs:
-        kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
-    return _imshow(axes, z, *args, **kwargs)
+        if x.ndim == 2 and y.ndim == 2:
+            kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
+        else:
+            kwargs['extent'] = [x[0], x[-1], y[0], y[-1]]
+    return mantid.plots.modest_image.imshow(axes, z, *args, **kwargs)
 
 
 def tripcolor(axes, workspace, *args, **kwargs):

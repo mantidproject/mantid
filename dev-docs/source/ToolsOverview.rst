@@ -4,6 +4,14 @@
 Tools Overview
 ==============
 
+.. toctree::
+   :hidden:
+
+   AlgorithmProfiler
+
+.. contents:: Contents
+   :local:
+
 Creating classes: class_maker.py
 --------------------------------
 
@@ -42,6 +50,11 @@ This python script is located in in /buildconfig/. It will delete a
 class from one subproject. CMakeList.txt is adjusted. For details, run:
 
 ``buildconfig/delete_class.py --help``
+
+Profiling an algorithm
+----------------------
+
+On Linux the build can be configured to generated algorithm profiling information. See :doc:`AlgorithmProfiler <AlgorithmProfiler>` for more details.
 
 Leak checking etc
 -----------------

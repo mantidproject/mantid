@@ -138,7 +138,7 @@ void PeaksTabWidget::updateTab(const std::vector<bool> &visiblePeaks,
 void PeaksTabWidget::addNewPeaksWorkspace(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
     std::vector<bool> visiblePeaks) {
-  m_ws.push_back(std::move(peaksWorkspace));
+  m_ws.push_back(peaksWorkspace);
   addNewTab(peaksWorkspace, peaksWorkspace->getName(), std::move(visiblePeaks));
 }
 } // namespace SimpleGui

@@ -196,11 +196,9 @@ void MultiProcessEventLoader::assembleFromShared(
   std::vector<std::thread> workers;
 
   std::vector<std::atomic<uint32_t>> cnts(m_segmentNames.size());
+  std::fill(cnts.begin(), cnts.end(), 0);
   std::vector<std::atomic<uint32_t>> processCounter(m_segmentNames.size());
-  for (auto &cnt : cnts)
-    cnt = 0;
-  for (auto &cnt : processCounter)
-    cnt = 0;
+  std::fill(processCounter.begin(), processCounter.end(), 0);
 
   const unsigned portion{std::max<unsigned>(m_numPixels / m_numThreads / 3, 1)};
 

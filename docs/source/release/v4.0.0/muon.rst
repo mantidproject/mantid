@@ -21,7 +21,7 @@ Interface
 
 New
 ###
-- Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table. There are two versions (Elemental Analysis and Elemental Analysis Old). The old interface is deprected and may not be included in future releases. The difference between the old and new versions of the interface is TODO.
+- `Elemental Analysis` has been added to Muon Interfaces: Includes a selectable Periodic Table and can plot elemental lines against the currently loaded data.
 - New Frequency Domain Analysis GUI added, the original one is now marked as old and is deprecated so may not be included in future releases. See the :ref:`documentation <Frequency_Domain_Analysis_2-ref>` for more details.
 
 Improvements
@@ -31,6 +31,8 @@ Improvements
 - Muon Analysis now includes number of event per frame and number of events per frame per detector in the run info box on the home tab.
 - Frequency Domain Analysis now lets the user select the phase table in MaxEnt mode.
 - CHRONUS now has a transverse and longitudanal default grouping table, the main field direction is read from the file to determine which to use.
+- Added x axis labels to Maxent and FFT plots in frequency domain analysis.
+- For FFT in frequency domain analysis. Set default apodization function to Lorenz and associated default decay constant to 4.4.
 - MaxEnt now produces better warning messages for invalid properties.
 
 Bugfixes
@@ -42,6 +44,8 @@ Bugfixes
 - The `load current run` button now works for CHRONUS in muon analysis.
 - ALC interface now removes all of the fitting regions for the baseline modelling when the data changes.
 - ALC interface now produces a warning if the custom grouping is not valid.
+- The new Frequency Domain Analysis interface now crops the raw data by first and last good times before the calculation of the PhaseQuad workspace. This does not affect the raw data in the ADS.
+- The new Frequency Domain Analysis now masks out any detectors not in any of the default grouping tables before calculating the phase table and PhaseQuad workspace.
 - Frequency Domain Analysis will ignore the fix phases option if phase table is not used.
 
 Algorithms
@@ -61,7 +65,9 @@ New
 
 Improvements
 ############
-- :ref:`MuonMaxent <algm-MuonMaxent>` has validation checks on its input.  
+- :ref:`MuonMaxent <algm-MuonMaxent>` has validation checks on its input.
+- :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>` now sends a warning to the log window if it fails to fit a spectrum instead of exiting the process of creating a phase table.
+- :ref:`PhaseQuad <algm-PhaseQuad>` now ignores spectra which do not have a valid phase table entry.
 
 Bugfixes
 ########

@@ -353,7 +353,7 @@
             </font>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Shift+ Left Click&lt;/span&gt; to select peak then click &lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Add Peak &lt;/span&gt;to add to list of peaks.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Left Click+Drag &lt;/span&gt;to zoom into an area within the peak display.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Right Click&lt;/span&gt; to return to original zoom size.&lt;/p&gt;&lt;p&gt;Selected peaks can be removed from the top of the interface&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Shift+ Left Click&lt;/span&gt; to select peak then click &lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Add Peak to List &lt;/span&gt;to add to list of peaks.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Left Click+Drag &lt;/span&gt;to zoom into an area within the peak display.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Right Click&lt;/span&gt; to return to original zoom size.&lt;/p&gt;&lt;p&gt;Selected peaks can be removed from the top of the interface&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">border: 0px;
@@ -411,7 +411,7 @@ background-color: rgb(179, 214, 255)</string>
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Add Peak</string>
+              <string>Add Peak to List</string>
              </property>
             </widget>
            </item>

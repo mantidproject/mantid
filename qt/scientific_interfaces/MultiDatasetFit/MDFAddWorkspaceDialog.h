@@ -30,6 +30,8 @@ private slots:
   void selectAllSpectra(int state);
 
 private:
+  QStringList availableWorkspaces() const;
+  void findCommonMaxIndex(const QString &wsName);
   /// Name of the selected workspace
   QString m_workspaceName;
   /// Selected workspace index

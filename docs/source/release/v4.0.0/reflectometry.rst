@@ -18,6 +18,7 @@ New
 - :ref:`algm-SaveReflectometryAscii` is a general algorithm which saves the first spectrum of a workspace in Ascii format particularly suited for reflectometry data.
 - Some computations from :ref:`algm-ReflectometryMomentumTransfer` were extracted to a new algorithm, :ref:`algm-ReflectometryBeamStatistics`.
 - :ref:`algm-GroupToXResolution` can be used to group the reflectivity data (as point data) to the :math:`Q_z` resolution.
+- Added algorithm :ref:`algm-ReflectometryBackgroundSubtraction` which calculates the background of a given workspace and removes it.
 - Added algorithm :ref:`algm-ReflectometryISISLoadAndProcess` which performs full preparation and processing for a single run or combined set of runs in an ISIS reflectometry reduction.
 
 Improvements
@@ -27,6 +28,7 @@ Improvements
 - Added flood corrections to :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>`. The correction data can be provided either via a flood workspace passed as a property or taken from the parameter file.
 - The four Ascii save algorithms :ref:`algm-SaveANSTOAscii`, :ref:`algm-SaveILLCosmosAscii`, :ref:`algm-SaveReflCustomAscii`, and :ref:`algm-SaveReflThreeColumnAscii` now correctly save x-error and can treat correctly point data and histograms. They are, however, deprecated in favour of :ref:`algm-SaveReflectometryAscii`. Please see :ref:`algm-SaveReflectometryAscii` for more documentation.
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+- :ref:`algm-ReflectometryReductionOneAuto` now crops the unbinned output workspace in Q to ``MomentumTransferMin`` and ``MomentumTransferMax``, if specified
 - :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto`, :ref:`algm-CreateTransmissionWorkspace`, and :ref:`algm-CreateTransmissionWorkspaceAuto` now use spectrum numbers for their processing instructions instead of workspace indices.
 - :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` now take a parameter to pass processing instructions to the transmission workspace algorithms and no longer accept strict spectrum checking.
 - Common naming of slit component name and size properties across algorithms.
