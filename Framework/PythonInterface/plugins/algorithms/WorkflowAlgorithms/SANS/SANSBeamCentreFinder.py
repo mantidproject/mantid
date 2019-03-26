@@ -210,7 +210,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                        sample_quartiles[MaskingQuadrant.Bottom]))
             if j == 0:
-                self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                self.logger.notice("Itr {0}: ( {1: .3f}, {2: .3f} )  SX={3:.5f}  SY={4:.5f}".
                                    format(j, self.scale_1 * centre1,
                                           self.scale_2 * centre2, residueLR[j], residueTB[j]))
                 if do_plotting:
@@ -226,7 +226,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
-                self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                self.logger.notice("Itr {0}: ( {1: .3f}, {2: .3f} )  SX={3:.5f}  SY={4:.5f}".
                                    format(j, self.scale_1 * centre1,
                                           self.scale_2 * centre2, residueLR[j], residueTB[j]))
 
