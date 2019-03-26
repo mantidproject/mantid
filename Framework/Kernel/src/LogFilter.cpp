@@ -59,11 +59,9 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     TimeInterval t1 = f1->nthInterval(f1->size() - 1);
     TimeInterval t2 = f2->nthInterval(f2->size() - 1);
 
-    // cppcheck-suppress mismatchingContainerExpression
     if (t1.begin() < t2.begin()) {
       f1->addValue(t2.begin(), true); // should be f1->lastValue, but it doesnt
                                       // matter for boolean AND
-      // cppcheck-suppress mismatchingContainerExpression
     } else if (t2.begin() < t1.begin()) {
       f2->addValue(t1.begin(), true);
     }
@@ -79,11 +77,9 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
     // of the filter that starts later to equalise their staring times. The new
     // interval will have
     // value opposite to the one it started with originally.
-    // cppcheck-suppress mismatchingContainerExpression
     if (t1.begin() > t2.begin()) {
       f1->addValue(t2.begin(), !f1->nthValue(i));
       t1 = f1->nthInterval(i);
-      // cppcheck-suppress mismatchingContainerExpression
     } else if (t2.begin() > t1.begin()) {
       f2->addValue(t1.begin(), !f2->nthValue(j));
       t2 = f2->nthInterval(j);
@@ -93,14 +89,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       TimeInterval t;
       t = t1.intersection(t2);
       if (t.isValid()) {
-        // cppcheck-suppress mismatchingContainerExpression
         f->addValue(t.begin(), (f1->nthValue(i) && f2->nthValue(j)));
       }
 
-      // cppcheck-suppress mismatchingContainerExpression
       if (t1.end() < t2.end()) {
         i++;
-        // cppcheck-suppress mismatchingContainerExpression
       } else if (t2.end() < t1.end()) {
         j++;
       } else {
