@@ -77,8 +77,8 @@ void LorentzianTest::functionDerivLocal(Jacobian *out, const double *xValues,
   const double w = fwhm() / 2.;
 
   for (size_t i = 0; i < nData; i++) {
-    double diff = xValues[i] - c;
-    double invDenominator = 1 / ((diff * diff + w * w));
+    const double diff = xValues[i] - c;
+    const double invDenominator = 1 / ((diff * diff + w * w));
     out->set(i, 0, w * w * invDenominator);
     out->set(i, 1, 2.0 * h * diff * w * w * invDenominator * invDenominator);
     out->set(i, 2,
