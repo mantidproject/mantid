@@ -29,8 +29,8 @@ namespace {
 const int NUMTESTS = 5;
 /// the list of tests that we display results for
 const QString TESTS[NUMTESTS] = {"Hard mask", "First detector vanadium test",
-                          "Second detector vanadium test", "Background test",
-                          "PSD Bleed test"};
+                                 "Second detector vanadium test",
+                                 "Background test", "PSD Bleed test"};
 
 int find_test(const std::string &test_name) {
   int found = -1;
