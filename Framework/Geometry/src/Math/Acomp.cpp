@@ -1450,10 +1450,10 @@ given a inner bracket expand that etc.
   // First:: Union take presidence over Intersection
   //      :: check brackets
   int blevel = 0; // bracket level
-  for (unsigned int i = 0; i < Ln.size(); i++) {
-    if (Ln[i] == '(')
+  for (char i : Ln) {
+    if (i == '(')
       blevel++;
-    if (Ln[i] == ')') {
+    if (i == ')') {
       if (!blevel) // error condition
       {
         deleteComp();
@@ -1461,7 +1461,7 @@ given a inner bracket expand that etc.
       }
       blevel--;
     }
-    if (Ln[i] == '+' && !blevel) // must be union
+    if (i == '+' && !blevel) // must be union
       Intersect = 0;
   }
   if (blevel != 0)
