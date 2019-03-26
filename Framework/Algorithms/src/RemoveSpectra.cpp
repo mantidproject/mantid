@@ -193,6 +193,10 @@ RemoveSpectra::copySpectraFromInputToOutput(MatrixWorkspace_const_sptr &inputWS,
           .setSpectrumNo(spectrumEvent->getSpectrumNo());
       ++outputWSindex;
     }
+
+    // Copy bin masking if it exists.
+    if (!getProperty("RemoveMaskedSpectra") && inputWS->hasMaskedBins(i))
+      outputWS->setMaskedBins(i, inputWS->maskedBins(i));
   }
 
   return outputWS;
