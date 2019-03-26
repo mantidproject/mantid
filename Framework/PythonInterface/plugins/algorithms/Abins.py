@@ -696,7 +696,7 @@ class Abins(PythonAlgorithm):
         if found_filename_ext.lower() != expected_file_extension:
             comment = "{}Output from ab initio program {} is expected." \
                       " The expected extension of file is .{}. Found: {}.{}".format(
-                msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
+                      msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
             return dict(Invalid=True, Comment=comment)
         else:
             return dict(Invalid=False, Comment="")
