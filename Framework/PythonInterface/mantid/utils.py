@@ -24,9 +24,10 @@ def import_mantid(modulename, package="", caller_globals=None):
     if modulename.startswith('.'):
         try:
             # import from PACKAGE.MODULE, this is used for mantid packages, where the .pyd files
-            # are places at e.g. mantid.kernel._kernel
+            # are placed at e.g. `from mantid.kernel import _kernel`
             lib = import_module(modulename, package)
         except ImportError as e1:
+            # import relative to current working directory, this is essentially doing `import _kernel`
             try:
                 lib = import_module(modulename.lstrip('.'))
             except ImportError as e2:

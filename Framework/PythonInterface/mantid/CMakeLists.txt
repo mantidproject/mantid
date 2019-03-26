@@ -18,16 +18,16 @@ set ( PY_FILES
   fitfunctions.py
 )
 
-# copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
-#                      PYTHON_PKGROOT_INSTALL_FILES )
 # Generate the version module
-set ( VERSION_PY pyversion )
 # Build version
+set ( VERSION_PY pyversion )
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py )
+
+# The build directory, used to set up the path for Mantid.properties for tests ran through CMake
+set ( CMAKE_BUILD_DIR mantidbuild )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_DIR}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_DIR}.py )
 message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py")
-# Copy py to build directory, taking care of multi-config (MSVC) builds
-# copy_files_to_dir ( ${VERSION_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-#                     PYTHON_PKGROOT_INSTALL_FILES )
+
 # Package version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py )
 

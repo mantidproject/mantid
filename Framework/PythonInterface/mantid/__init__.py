@@ -26,10 +26,11 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 import os
-import site
 import sys
 
+import site
 from .pyversion import check_python_version
+
 check_python_version()
 
 
@@ -51,10 +52,18 @@ def _bin_dirs():
     yield os.path.dirname(sys.executable)
     # The working directory
     yield sys.path[0]
+    # This path is for tests
+    build_type = os.environ.get('CMAKE_CONFIG_TYPE', '')
+    try:
+        from mantid.mantidbuild import BUILD_DIR
+        yield "{}/bin/{}".format(BUILD_DIR, build_type)
+    except ImportError:
+        #     The file with the build dir not found, default to empty string, so that we fail later
+        yield ''
 
 
-# Bail out early if a Mantid.properties files is not found in the
-# 1 of the expected places - it indicates a broken installation or build.
+# Bail out early if a Mantid.properties files is not found in
+# one of the expected places - it indicates a broken installation or build.
 _bindir = None
 for path in _bin_dirs():
     if os.path.exists(os.path.join(path, "Mantid.properties")):
@@ -78,18 +87,20 @@ site.addsitedir(_bindir)
 try:
     # Flag indicating whether mantidplot layer is loaded.
     import _qti
+
     __gui__ = True
 except ImportError:
     __gui__ = False
 
 # Set deprecation warnings back to default (they are ignored in 2.7)
 import warnings as _warnings
+
 # Default we see everything
-_warnings.filterwarnings("default",category=DeprecationWarning,
+_warnings.filterwarnings("default", category=DeprecationWarning,
                          module="mantid.*")
 # We can't do anything about numpy.oldnumeric being deprecated but
 # still used in other libraries, e.g scipy, so just ignore those
-_warnings.filterwarnings("ignore",category=DeprecationWarning,
+_warnings.filterwarnings("ignore", category=DeprecationWarning,
                          module="numpy.oldnumeric")
 
 ###############################################################################
@@ -107,4 +118,5 @@ from mantid.api._aliases import *
 
 # Make the version string accessible in the standard way
 from .kernel import version_str as _version_str
+
 __version__ = _version_str()
