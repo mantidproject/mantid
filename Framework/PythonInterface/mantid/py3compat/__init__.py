@@ -46,12 +46,10 @@ MINOR_VER = VERSION_INFO[1]
 # -----------------------------------------------------------------------------
 # System functions
 # -----------------------------------------------------------------------------
-if MAJOR_VER == 2:
-    setcheckinterval = sys.setcheckinterval
-elif MAJOR_VER == 3 and MINOR_VER < 2:
-    setcheckinterval = sys.setcheckinterval
+if six.PY2 or sys.version_info[0:2] < (3, 2):
+    setswitchinterval = sys.setcheckinterval
 else:
-    setcheckinterval = sys.setswitchinterval
+    setswitchinterval = sys.setswitchinterval
 
 
 # -----------------------------------------------------------------------------

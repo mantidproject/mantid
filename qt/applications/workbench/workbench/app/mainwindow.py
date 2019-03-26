@@ -21,7 +21,7 @@ from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-from mantid.py3compat import setcheckinterval
+from mantid.py3compat import setswitchinterval
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
@@ -672,7 +672,7 @@ def main():
     app = initialize()
     # the default sys check interval leads to long lags
     # when request scripts to be aborted
-    setcheckinterval(SYSCHECK_INTERVAL)
+    setswitchinterval(SYSCHECK_INTERVAL)
     exit_value = 0
     try:
         exit_value = start_workbench(app, options)
