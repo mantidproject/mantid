@@ -46,20 +46,33 @@ def _bin_dirs():
     Generate a list of possible paths that contain the Mantid.properties file
     """
     _moduledir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+
     # standard packaged install
     yield _moduledir
+
     # conda layout
     yield os.path.dirname(sys.executable)
-    # The working directory
+
+    # The correct path for when the working directory is the same as the
+    # build root directory. Used to run from PyCharm
     yield sys.path[0]
-    # This path is for tests
-    build_type = os.environ.get('CMAKE_CONFIG_TYPE', '')
+
     try:
-        from mantid.mantidbuild import BUILD_DIR
-        yield "{}/bin/{}".format(BUILD_DIR, build_type)
+        from mantid.buildconfig import BUILD_DIR
     except ImportError:
-        #     The file with the build dir not found, default to empty string, so that we fail later
-        yield ''
+        # The buildconfig file not found, the function returns to stop the execution of following yields
+        # this will make the _bindir empty check fail later
+        return
+
+    # The path for running a development build outside of the working directory
+    yield "{}/bin".format(BUILD_DIR)
+
+    # This path is for when tests are ran. The CMAKE_CONFIG_TYPE is declared from
+    # CTest's -C flag, and it will contain the build type (Debug, Release).
+    # If no config is declared (Linux), then it will be an empty string, and
+    # default to bin/, which is the correct path
+    build_type = os.environ.get('CMAKE_CONFIG_TYPE', '')
+    yield "{}/bin/{}".format(BUILD_DIR, build_type)
 
 
 # Bail out early if a Mantid.properties files is not found in
@@ -75,7 +88,7 @@ if _bindir is None:
         "Broken installation! Unable to find Mantid.properties file.\n"
         "Directories searched: {}".format(', '.join(_bin_dirs())))
 
-# Windows doesn"t have rpath settings so make sure the C-extensions can find the rest of the
+# Windows doesn't have rpath settings so make sure the C-extensions can find the rest of the
 # mantid dlls. We assume they will be next to the properties file.
 if sys.platform == "win32":
     os.environ["PATH"] = _bindir + ";" + os.environ.get("PATH", "")
