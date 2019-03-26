@@ -32,11 +32,10 @@ _mantidsite.set_NEXUSLIB_var()
 ###############################################################################
 # Load the C++ library
 ###############################################################################
-from mantid.utils import _shared_cextension, import_mantid
+from mantid.utils import import_mantid_cext
 
 # insert all the classes from _kernel in the mantid.kernel namespace
-with _shared_cextension():
-    _kernel = import_mantid('._kernel', 'mantid.kernel', globals())
+_kernel = import_mantid_cext('._kernel', 'mantid.kernel', globals())
 
 from mantid.kernel._aliases import *
 

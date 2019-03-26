@@ -16,11 +16,10 @@ from __future__ import absolute_import
 ###############################################################################
 # Load the C++ library
 ###############################################################################
-from mantid.utils import _shared_cextension, import_mantid
+from mantid.utils import import_mantid_cext
 
 # insert all the classes from _api in the mantid.api namespace
-with _shared_cextension():
-    _api = import_mantid('._api', 'mantid.api', globals())
+_api = import_mantid_cext('._api', 'mantid.api', globals())
 
 ###############################################################################
 # Add importAll member to ADS.

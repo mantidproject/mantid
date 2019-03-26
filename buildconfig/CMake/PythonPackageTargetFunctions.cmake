@@ -3,7 +3,7 @@
 # Function to create links to python packages in the source tree
 # If the EXECUTABLE option is provided then it additional build rules are
 # defined to ensure startup scripts are regenerated appropriately
-function ( add_python_package target_name )
+function ( add_python_package pkg_name )
   # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
   set ( _setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR} )
@@ -46,7 +46,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     endif()
   else()
     # if no egg-link name is specified, then use the target name
-    set ( _egg_link ${_egg_link_dir}/${target_name}.egg-link )
+    set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
   endif()
 
   message(STATUS "Adding egg link: ${_egg_link}")
@@ -54,13 +54,13 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
     if ( WIN32 )
       # add .exe in the executable name for Windows, otherwise it can't find it during the install step
-      set ( _executable_name ${target_name}.exe )
-      set ( _startup_script_full_name ${target_name}-script.pyw )
+      set ( _executable_name ${pkg_name}.exe )
+      set ( _startup_script_full_name ${pkg_name}-script.pyw )
       set ( _startup_script ${_egg_link_dir}/${_startup_script_full_name} )
     else ()
       set ( _startup_script_full_name )
       set ( _startup_script )
-      set ( _executable_name ${target_name} )
+      set ( _executable_name ${pkg_name} )
     endif ()
     set ( _startup_exe ${_egg_link_dir}/${_executable_name} )
   endif ()
@@ -75,7 +75,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${_setup_py}
   )
-  add_custom_target ( ${target_name} ALL
+  add_custom_target ( ${pkg_name} ALL
     DEPENDS ${_outputs}
   )
 
@@ -104,7 +104,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
             DESTINATION ${_package_install_destination}
             PATTERN "test" EXCLUDE )
 
-    if (APPLE AND "${target_name}" STREQUAL "mantidqt")
+    if (APPLE AND "${pkg_name}" STREQUAL "mantidqt")
       # Horrible hack to get mantidqt into the MantidPlot.app bundle too.
       # Remove this when MantidPlot is removed!!
       set ( _package_install_destination ${BIN_DIR} )
@@ -119,7 +119,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
         # On UNIX systems install the workbench executable directly.
         # The Windows case is handled with a custom startup script installed in WindowsNSIS
         if ( NOT WIN32 )
-            install(PROGRAMS ${_setup_py_build_root}/install/bin/${target_name}
+            install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
                 DESTINATION ${WORKBENCH_BIN_DIR}
                 RENAME workbench-script)
         endif()

@@ -24,7 +24,6 @@ from __future__ import absolute_import
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################
-from mantid.utils import _shared_cextension, import_mantid
+from mantid.utils import import_mantid_cext
 
-with _shared_cextension():
-    _dataobjects = import_mantid('._dataobjects', 'mantid.dataobjects', globals())
+_dataobjects = import_mantid_cext('._dataobjects', 'mantid.dataobjects', globals())

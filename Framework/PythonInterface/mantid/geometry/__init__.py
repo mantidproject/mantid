@@ -16,11 +16,9 @@ from __future__ import absolute_import
 ###############################################################################
 # Load the C++ library
 ###############################################################################
-from mantid.kernel import _shared_cextension
-from mantid.utils import import_mantid
+from mantid.utils import import_mantid_cext
 
-with _shared_cextension():
-    _geometry = import_mantid('._geometry', 'mantid.geometry', globals())
+_geometry = import_mantid_cext('._geometry', 'mantid.geometry', globals())
 
 ###############################################################################
 # Make aliases accessible in this namespace

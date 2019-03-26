@@ -1455,6 +1455,7 @@ _translate()
 
 # Load the Python plugins
 # The exported C++ plugins
+from . import _plugins  # noqa
 
 # Now the algorithms
 # There is a chicken and egg problem with what we want to achieve here.

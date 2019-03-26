@@ -25,7 +25,6 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################
-from mantid.utils import _shared_cextension, import_mantid
+from mantid.utils import import_mantid_cext
 
-with _shared_cextension():
-    _curvefitting = import_mantid('._curvefitting', 'mantid._plugins', globals())
+_curvefitting = import_mantid_cext('._curvefitting', 'mantid._plugins', globals())
