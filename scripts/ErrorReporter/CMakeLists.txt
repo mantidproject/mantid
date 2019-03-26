@@ -1,10 +1,7 @@
 include(UiToPy)
 
 # List of UIs to Auto convert
-set( UI_FILES
-  errorreport.ui
-)
+set(UI_FILES 
+    errorreport.ui)
 
-UiToPy( UI_FILES CompileUIErrorReporter)
-
-
+UiToPy(UI_FILES CompileUIErrorReporter)
