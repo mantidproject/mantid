@@ -24,9 +24,8 @@ set ( VERSION_PY pyversion )
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py )
 
 # The build directory, used to set up the path for Mantid.properties for tests ran through CMake
-set ( CMAKE_BUILD_DIR mantidbuild )
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_DIR}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_DIR}.py )
-message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py")
+set ( _cmake_build_dir mantidbuild )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${_cmake_build_dir}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${_cmake_build_dir}.py )
 
 # Package version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py )

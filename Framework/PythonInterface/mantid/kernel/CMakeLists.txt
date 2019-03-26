@@ -157,15 +157,8 @@ endif()
 
 # Build version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py )
-message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py")
 
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py )
-message("Configuring file at ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py")
-# Copy py to build directory, taking care of multi-config (MSVC) builds
-# copy_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-#                     PYTHON_INSTALL_FILES )
-# copy_files_to_dir ( ${MPISETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
-#                     PYTHON_INSTALL_FILES )
 
 # Package version
 if ( WIN32 OR (APPLE AND ENABLE_MANTIDPLOT) )

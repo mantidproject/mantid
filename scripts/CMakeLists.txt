@@ -67,7 +67,7 @@ add_custom_command ( OUTPUT ${_scripts_pth_dest}
   COMMENT "Generating scripts .pth file"
 )
 add_custom_target ( ScriptsDotPth ALL DEPENDS ${_scripts_pth_dest} )
-add_dependencies ( mantid ScriptsDotPth )
+add_dependencies ( PythonInterface ScriptsDotPth )
 
 # install copy
 set ( _scripts_pth_install "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.install" )

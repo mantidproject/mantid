@@ -106,11 +106,24 @@ add_subdirectory ( mantid )
 include ( PythonPackageTargetFunctions )
 
 # Adds `mantid` as a target in the `MantidFramework/Python` folder
-add_python_package ( mantid )
-set_property ( TARGET mantid PROPERTY FOLDER "MantidFramework/Python" )
-add_dependencies ( mantid PythonInterfaceCore PythonKernelModule
+add_python_package ( PythonInterface EGGLINKNAME mantid )
+set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
+add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
   PythonGeometryModule PythonAPIModule PythonDataObjectsModule
   PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule )
+
+# Clear any leftover bin/$(Configuration)/mantid/ folder, from when
+# PythonInterface was being copied over.
+# The last semicolon is there to have an iteration with an empty string
+# which makes the last check just bin/mantid for non-Windows builds
+set(_windows_configurations "Debug/;Release/;")
+foreach(_configuration IN LISTS _windows_configurations)
+set(_old_mantid_dir ${CMAKE_BINARY_DIR}/bin/${_configuration}mantid)
+  if(EXISTS ${_old_mantid_dir})
+    message("Removing old mantid PythonInterface directory: ${_old_mantid_dir}")
+    file(REMOVE_RECURSE ${_old_mantid_dir})
+  endif()
+endforeach(_configuration)
 
 ###########################################################################
 # Python algorithms

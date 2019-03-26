@@ -3,17 +3,12 @@
 # Function to create links to python packages in the source tree
 # If the EXECUTABLE option is provided then it additional build rules are
 # defined to ensure startup scripts are regenerated appropriately
-function ( add_python_package pkg_name )
+function ( add_python_package target_name )
   # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
-  message("Setup.py at ${_setup_py}")
   set ( _setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR} )
-  message("Setup.py build root at ${_setup_py_build_root}")
-  # if ( custom_install_directory )
-  #   set ( _setup_py_build_root ${custom_install_directory} )
-  # endif ()
+
   if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" )
-  message("Found setup.py.in at ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
     set ( SETUPTOOLS_BUILD_COMMANDS_DEF
 "def patch_setuptools_command(cmd_cls_name):
     import importlib
@@ -39,19 +34,33 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   endif ()
 
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
-  set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
-  message("Egg link supposed to be at ${_egg_link}")
+
+  list(LENGTH ARGN _additional_args_length)
+
+  # If a custom egg-link name is specified use that for the link
+  if ( _additional_args_length EQUAL 2)
+    list(GET ARGN 0 _additional_first_arg)
+    if( "${_additional_first_arg}" STREQUAL "EGGLINKNAME" )
+      list(GET ARGN 1 _egg_link_name)
+      set ( _egg_link ${_egg_link_dir}/${_egg_link_name}.egg-link )
+    endif()
+  else()
+    # if no egg-link name is specified, then use the target name
+    set ( _egg_link ${_egg_link_dir}/${target_name}.egg-link )
+  endif()
+
+  message(STATUS "Adding egg link: ${_egg_link}")
 
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
     if ( WIN32 )
       # add .exe in the executable name for Windows, otherwise it can't find it during the install step
-      set ( _executable_name ${pkg_name}.exe )
-      set ( _startup_script_full_name ${pkg_name}-script.pyw )
+      set ( _executable_name ${target_name}.exe )
+      set ( _startup_script_full_name ${target_name}-script.pyw )
       set ( _startup_script ${_egg_link_dir}/${_startup_script_full_name} )
     else ()
       set ( _startup_script_full_name )
       set ( _startup_script )
-      set ( _executable_name ${pkg_name} )
+      set ( _executable_name ${target_name} )
     endif ()
     set ( _startup_exe ${_egg_link_dir}/${_executable_name} )
   endif ()
@@ -66,7 +75,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${_setup_py}
   )
-  add_custom_target ( ${pkg_name} ALL
+  add_custom_target ( ${target_name} ALL
     DEPENDS ${_outputs}
   )
 
@@ -95,7 +104,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
             DESTINATION ${_package_install_destination}
             PATTERN "test" EXCLUDE )
 
-    if (APPLE AND "${pkg_name}" STREQUAL "mantidqt")
+    if (APPLE AND "${target_name}" STREQUAL "mantidqt")
       # Horrible hack to get mantidqt into the MantidPlot.app bundle too.
       # Remove this when MantidPlot is removed!!
       set ( _package_install_destination ${BIN_DIR} )
@@ -110,7 +119,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
         # On UNIX systems install the workbench executable directly.
         # The Windows case is handled with a custom startup script installed in WindowsNSIS
         if ( NOT WIN32 )
-            install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
+            install(PROGRAMS ${_setup_py_build_root}/install/bin/${target_name}
                 DESTINATION ${WORKBENCH_BIN_DIR}
                 RENAME workbench-script)
         endif()
