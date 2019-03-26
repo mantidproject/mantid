@@ -8,10 +8,6 @@ Indirect Inelastic Changes
 All Indirect Interfaces
 -----------------------
 
-New Features
-############
-- A *Settings* GUI is now available and can be opened using the button next to the help *?* button on the bottom left of the interfaces.
-
 Improvements
 ############
 
@@ -123,11 +119,6 @@ Bugfixes
 Data Corrections Interface
 --------------------------
 
-New Features
-############
-- The settings GUI allows you to turn off the restriction of input data based on their name.
-- The settings GUI allows you to turn on error bars for the output plots.
-
 Improvements
 ############
 
@@ -148,11 +139,6 @@ Bugfixes
 
 Data Reduction Interface
 ------------------------
-
-New Features
-############
-- The settings GUI allows you to turn off the restriction of input data based on their name.
-- The settings GUI allows you to turn on error bars for the output plots.
 
 Improvements
 ############
@@ -213,8 +199,6 @@ New Features
 ############
 
 - It is now possible to produce a contour plot from the output on the Stretch Tab.
-- The settings GUI allows you to turn off the restriction of input data based on their name.
-- The settings GUI allows you to turn on error bars for the output plots.
 
 Improvements
 ############
