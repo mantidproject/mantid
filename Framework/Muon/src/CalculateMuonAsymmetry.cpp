@@ -295,7 +295,6 @@ double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
   auto TFFunc =
       boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
 
-  auto fdas = TFFunc->asString();
   // getFunction(0) -> N
   auto flat = TFFunc->getFunction(0);
 
