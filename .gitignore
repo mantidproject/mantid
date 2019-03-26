@@ -177,7 +177,10 @@ Desktop.ini
 # Dynamically created files
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 Framework/PythonInterface/setup.py
+Framework/PythonInterface/mantid/pyversion.py
 Framework/PythonInterface/mantid/mantidbuild.py
+Framework/PythonInterface/mantid/kernel/mpisetup.py
+Framework/PythonInterface/mantid/kernel/packagesetup.py
 Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 qt/applications/workbench/setup.py
 qt/python/setup.py

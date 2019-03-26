@@ -136,9 +136,6 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
 endif()
 
-# copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
-#                      PYTHON_INSTALL_FILES )
-
 #############################################################################################
 # Generate the packagesetup module for the build & install package
 #############################################################################################
@@ -175,7 +172,7 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURREN
 add_library ( PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES}
               ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonKernelModule _kernel )
-# set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
+
 # Add the required dependencies
 target_link_libraries ( PythonKernelModule PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} PythonInterfaceCore
                         Types Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES}
