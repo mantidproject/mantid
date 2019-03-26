@@ -232,7 +232,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             OutputWorkspace=reflectivityWSName,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
-        reflectivityWS = common.correctForChopperOpenings(reflectivityWS, directWS, self._names, self._cleanup, self._subalgLogging)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
         return reflectivityWS
@@ -324,7 +323,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
         if dist != 0.:
             # With the sinus law
-            theta = foregroundWS.run().getProperty(common.SampleLogs.REDUCTION_TWO_THETA).value / 2.
+            #theta = foregroundWS.run().getProperty(common.SampleLogs.REDUCTION_TWO_THETA).value / 2.
             #eq1 = dist / numpy.math.sin(numpy.radians([theta]))
             #alpha = numpy.math.asin(foregroundWS.spectrumInfo().l2(0) / eq1)
             #gamma = 180 - numpy.degrees([alpha]) - theta
@@ -334,7 +333,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
             xvsy = numpy.math.sin(beta) * dist
             mz = numpy.math.cos(beta) * dist
-
             #xvsy = numpy.math.sin(theta) * detectorDistance
             #mz = numpy.math.cos(theta) * detectorDistance
             #print('BP {} LP {}'.format(beamPosIndex, linePosition))
@@ -356,7 +354,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 Z=mz,
                 RelativePosition=True
             )
-            #rotationAngle=foregroundWS.spectrumInfo().twoTheta(0) / 2.
+            theta=foregroundWS.spectrumInfo().twoTheta(0) / 2.
             RotateInstrumentComponent(
                 Workspace=foregroundWS,
                 ComponentName='detector',
