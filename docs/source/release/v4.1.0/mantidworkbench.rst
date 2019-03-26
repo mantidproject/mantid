@@ -7,6 +7,7 @@ MantidWorkbench Changes
 
 Improvements
 ############
+- The log level of help page notices has been reduced to declutter your message window.
 
 Bugfixes
 ########
