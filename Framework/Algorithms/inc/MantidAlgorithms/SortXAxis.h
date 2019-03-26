@@ -42,7 +42,7 @@ private:
   copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
                              const Mantid::API::MatrixWorkspace &inputWorkspace,
                              Mantid::API::MatrixWorkspace &outputWorkspace,
-                             unsigned int SpecNum, bool isAProperHistogram);
+                             unsigned int SpecNum);
 
   void copyXandDxToOutputWorkspace(
       std::vector<std::size_t> &workspaceIndecies,
@@ -52,9 +52,9 @@ private:
   void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
                              const Mantid::API::MatrixWorkspace &inputWorkspace,
                              Mantid::API::MatrixWorkspace &outputWorkspace,
-                             unsigned int specNum, bool isAProperHistogram);
+                             unsigned int specNum);
 
-  bool determineIfHistogramIsValid(
+  void determineIfHistogramIsValid(
       const Mantid::API::MatrixWorkspace &inputWorkspace);
 };
 

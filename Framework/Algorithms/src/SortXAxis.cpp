@@ -19,6 +19,15 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
+namespace {
+
+template <typename T, typename Predicate>
+void removeElementsIf(std::vector<T> &vector, Predicate const &predicate) {
+  vector.erase(std::remove_if(vector.begin(), vector.end(), predicate));
+}
+
+} // namespace
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -66,11 +75,8 @@ void SortXAxis::exec() {
   const bool ignoreHistogramValidation =
       getProperty("IgnoreHistogramValidation");
 
-  // Check if it is a valid histogram here
-  const bool isAProperHistogram =
-      (!ignoreHistogramValidation)
-          ? determineIfHistogramIsValid(*inputWorkspace)
-          : false;
+  if (!ignoreHistogramValidation)
+    determineIfHistogramIsValid(*inputWorkspace);
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
@@ -86,7 +92,7 @@ void SortXAxis::exec() {
                    specNum);
 
     copyToOutputWorkspace(workspaceIndicies, *inputWorkspace, *outputWorkspace,
-                          specNum, isAProperHistogram);
+                          specNum);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -189,18 +195,15 @@ void SortXAxis::copyXandDxToOutputWorkspace(
 void SortXAxis::copyYandEToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     const Mantid::API::MatrixWorkspace &inputWorkspace,
-    Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum,
-    bool isAProperHistogram) {
-  // If Histogram data find the biggest index value and remove it from
-  // workspaceIndicies
-  if (isAProperHistogram) {
-    auto lastIndexIt =
-        std::find(workspaceIndicies.begin(), workspaceIndicies.end(),
-                  inputWorkspace.y(specNum).size());
-    workspaceIndicies.erase(lastIndexIt);
-  }
-
+    Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
   auto &inSpaceY = inputWorkspace.y(specNum);
+  const auto ySize = inSpaceY.size();
+
+  // Remove workspace indices which are out of index range for y space
+  removeElementsIf(workspaceIndicies, [&ySize](const std::size_t &index) {
+    return index >= ySize;
+  });
+
   for (auto workspaceIndex = 0u;
        workspaceIndex < inputWorkspace.y(specNum).size(); workspaceIndex++) {
     outputWorkspace.mutableY(specNum)[workspaceIndex] =
@@ -218,12 +221,11 @@ void SortXAxis::copyYandEToOutputWorkspace(
 void SortXAxis::copyToOutputWorkspace(
     std::vector<std::size_t> &workspaceIndicies,
     const Mantid::API::MatrixWorkspace &inputWorkspace,
-    Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum,
-    bool isAProperHistogram) {
+    Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
   copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace,
                               outputWorkspace, specNum);
   copyYandEToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
-                             specNum, isAProperHistogram);
+                             specNum);
 }
 
 /**
@@ -257,10 +259,10 @@ bool isItSorted(Comparator const &compare,
  * @brief Determines whether it is a valid histogram or not.
  *
  * @param inputWorkspace the unsorted input workspace
- * @return true if it is a valid histogram else produce a runtime_error
- * @return false if it is not a histogram, and is thus point data
+ * @throws if the inputWorkspace data is unordered (i.e. not ascending or
+ * descending)
  */
-bool SortXAxis::determineIfHistogramIsValid(
+void SortXAxis::determineIfHistogramIsValid(
     const Mantid::API::MatrixWorkspace &inputWorkspace) {
   // Assuming all X and Ys are the same, if X is not the same size as y, assume
   // it is a histogram
@@ -274,9 +276,7 @@ bool SortXAxis::determineIfHistogramIsValid(
             "unordered x-axis.");
       }
     }
-    return true;
   }
-  return false;
 }
 
 } // namespace Algorithms
