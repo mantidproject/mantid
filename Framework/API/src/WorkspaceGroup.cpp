@@ -177,12 +177,8 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
  */
 Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  if (index >= this->size()) {
-    std::ostringstream os;
-    os << "WorkspaceGroup - index out of range. Requested=" << index
-       << ", current size=" << this->size();
-    throw std::out_of_range(os.str());
-  }
+  if (index >= this->size())
+    this->throwIndexOutOfRangeError(static_cast<int>(index));
   return m_workspaces[index];
 }
 
@@ -237,6 +233,18 @@ void WorkspaceGroup::print() const {
     g_log.debug() << "Workspace name in group vector =  "
                   << workspace->getName() << '\n';
   }
+}
+
+/*
+ * Throws an out of range error for an out of range index
+ * @param index The out of range index to be printed
+ * @throws out_of_range error
+ */
+void WorkspaceGroup::throwIndexOutOfRangeError(int index) const {
+  std::ostringstream os;
+  os << "WorkspaceGroup - index out of range. Requested=" << index
+     << ", current size=" << this->size();
+  throw std::out_of_range(os.str());
 }
 
 /**
