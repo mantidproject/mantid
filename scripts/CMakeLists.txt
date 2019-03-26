@@ -6,7 +6,7 @@ add_subdirectory(ErrorReporter)
 # Chain all required interface custom targets into CompilePyUI
 add_custom_target(CompilePyUI 
 		  DEPENDS CompileUIUI
-		  CompileUIErrorReporter)
+		          CompileUIErrorReporter)
 
 # Put them into the 'CompileUI' folder or group in VS and the like, for
 # convenience
@@ -20,9 +20,7 @@ add_subdirectory(ExternalInterfaces)
 # External projects
 include(PyStoG)
 
-# --------------------------------------------------------------------
 # .pth files
-# --------------------------------------------------------------------
 set(_pth_dirs .
     Calibration
     DiamondAttenuationCorrection
@@ -86,9 +84,7 @@ install(FILES ${_scripts_pth_install}
         DESTINATION ${WORKBENCH_BIN_DIR}
         RENAME mantid-scripts.pth)
 
-# --------------------------------------------------------------------
 # Testing
-# --------------------------------------------------------------------
 set(TEST_PY_FILES
     test/AbinsAtomsDataTest.py
     test/AbinsCalculateDWSingleCrystalTest.py
