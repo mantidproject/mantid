@@ -33,8 +33,8 @@
 
 using namespace Mantid;
 using namespace Geometry;
-using Mantid::Kernel::V3D;
 using detail::ShapeInfo;
+using Mantid::Kernel::V3D;
 
 class CSGObjectTest : public CxxTest::TestSuite {
 
@@ -786,6 +786,47 @@ public:
     TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
   }
 
+  void testGeneratePointInsideHollowCylinder() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randR{0.55};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+
+    constexpr double innerRadius{0.29};
+    constexpr double radius{0.3};
+    constexpr double height{0.5};
+    const V3D axis{0., 0., 1.};
+    const V3D bottomCentre{
+        -1.,
+        2.,
+        -3.,
+    };
+    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
+        innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = hollowCylinder->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    point -= bottomCentre;
+    constexpr double tolerance{1e-10};
+    const double polarAngle{2. * M_PI * randT};
+    const double c1 = std::pow(innerRadius, 2);
+    const double c2 = std::pow(radius, 2);
+    const double radialLength{std::sqrt(c1 + (c2 - c1) * randR)};
+    const double axisLength{height * randZ};
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
@@ -1029,6 +1070,28 @@ public:
     auto cuboid = shapeFactory.createShape(typeElement);
     const double cylinderVolume = height * M_PI * radius * radius;
     TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
+  }
+
+  void testExactVolumeHollowCylinder() {
+    using namespace Poco::XML;
+    constexpr double innerRadius = 0.98;
+    constexpr double radius = 0.99;
+    constexpr double height = 88;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testHollowCylinder");
+    AutoPtr<Element> shapeElement = createHollowCylinderTypeElement(
+        "hollow-cylinder-shape", height, innerRadius, radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "hollow-cylinder-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double hollowCylinderVolume =
+        M_PI * height * (radius * radius - innerRadius * innerRadius);
+    TS_ASSERT_DELTA(cuboid->volume(), hollowCylinderVolume, 1e-6)
   }
 
   void testMonteCarloVolume() {
@@ -1621,6 +1684,34 @@ private:
     shapeElement->appendChild(element);
     element = document->createElement("radius");
     element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("height");
+    element->setAttribute("val", std::to_string(height));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element> createHollowCylinderTypeElement(
+      const std::string &id, const double height, const double innerRadius,
+      const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("hollow-cylinder");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre-of-bottom-base");
+    element->setAttribute("x", std::to_string(-height / 2));
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("axis");
+    element->setAttribute("x", "1.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("outer-radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("inner-radius");
+    element->setAttribute("val", std::to_string(innerRadius));
     shapeElement->appendChild(element);
     element = document->createElement("height");
     element->setAttribute("val", std::to_string(height));
