@@ -11,7 +11,8 @@ Description
 -----------
 
 Calculates the 3D-ΔPDF [#f1]_ from a HKL MDHistoWorkspace. This
-algorithm utilizes the punch-and-fill method [#f2]_.
+algorithm can remove the Bragg peaks by either the punch-and-fill
+method [#f2]_ or the `KAREN`_ algorithm.
 
 This algorithm is still in development and features may be added,
 removed or changed. The scale of the resulting 3D-ΔPDF is, as yet, not
@@ -22,6 +23,20 @@ The input workspace must be a :ref:`MDHistoWorkspace
 <MDHistoWorkspace>` with dimensions '[H,0,0]', '[0,K,0]' and
 '[0,0,L]', The dimensions must be centered on zero.
 
+
+Peak removal
+------------
+
+Two method are available to remove the Bragg peaks.
+
+Punch-and-fill
+==============
+
+The punch-and-fill method is described in [#f2]_. Basically it will
+punch out a volume of reciprocal space of shape defined by the
+property `Shape` and `Size`. After punch-and-fill the removed Bragg
+peaks are filled back in by applying a Gaussian convolution.
+
 The convolution option requires `astropy
 <http://docs.astropy.org/en/stable/index.html>`_ to be installed as it
 uses `astropy.convolution
@@ -30,6 +45,30 @@ can be very slow for large workspaces, it will attempt to use
 astropy.convolution.convolve_fft (which is fast but only works for
 small workspace) but will use astropy.convolution.convolve (which is
 slow) if the workspace is too large.
+
+KAREN
+=====
+
+The KAREN (K-space Algorithmic REconstructioN) method [#f3]_, is a
+more advanced approach that applies a filter over the data removing
+any points that are outliers in a moving window, with width set by the
+property `KARENWidth`. Outliers are defined as values more than 3
+sigma away from the median. Sigma is estimated using 1.4826*MAD
+(median absolute deviation). Outliers are replaced with a value of
+median+2.2*MAD of window.
+
+Window function
+---------------
+
+A window function can be applied to the volume that will produce a
+smooth transition to zero and you approach the edge of the data.
+
+Currently implemented functions are Blackman (:func:`numpy.blackman`,
+default), Gaussian (:func:`scipy.signal.windows.gaussian`), Tukey
+(:func:`scipy.signal.windows.tukey`) and Kaiser (:func:`numpy.kaiser`)
+
+The `WindowParameter` allows you to define the Gaussian window sigma,
+the Tukey window alpha and the Kaiser window beta.
 
 References
 ----------
@@ -40,9 +79,12 @@ References
 .. [#f2] Kobas, M and Weber, T and Steurer, W, *Structural disorder in the decagonal Al-Co-Ni. I. Patterson analysis of diffuse x-ray scattering data.* Phys. Rev. B (2005), **71**, 22, 224205
    `doi: 10.1103/PhysRevB.71.224205 <https://doi.org/10.1103/PhysRevB.71.224205>`_
 
+.. [#f3] Weng, J *et al.* *K-space Algorithmic REconstructioN (KAREN): A robust statistical methodology to separate Bragg and diffuse scattering.* J. Appl. Crystallogr. In-preparation.
 
-Usage
------
+
+Usage -  Punch-and-Fill
+-----------------------
+
 .. testsetup:: *
 
    # Create a fake workspace to test
@@ -51,7 +93,7 @@ Usage
    # Add some Bragg peaks
    for h in range(-3,4):
       for k in range(-3,4):
-         FakeMDEventData(DeltaPDF3D_MDE, PeakParams='100,'+str(h)+','+str(k)+',0,0.1', RandomSeed='1337')
+         FakeMDEventData(DeltaPDF3D_MDE, PeakParams='100,'+str(h)+','+str(k)+',0,0.01', RandomSeed='1337')
    # Add addiontal peaks on [0.5,0.5,0.5] type positions
    # This would correspond to negative substitutional correlations
    for h in [-2.5,-1.5,-0.5,0.5,1.5,2.5]:
@@ -70,14 +112,14 @@ dominated by the Bragg peaks and will just be a 3D-PDF instead.
 .. testcode:: fft1
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft',
-              RemoveReflections=False,Convolution=False)
+              Method='None', WindowFunction='None')
    print("The value at [1,0,0] is {:.4f}".format(mtd['fft'].signalAt(1866)))
    print("The value at [0,1,0] is {:.4f}".format(mtd['fft'].signalAt(2226)))
 
 .. testoutput:: fft1
 
-   The value at [1,0,0] is 3456.5690
-   The value at [0,1,0] is 4903.7113
+   The value at [1,0,0] is 4057.7079
+   The value at [0,1,0] is 5565.6700
 
 The results 3D-ΔPDF workspace looks like
 
@@ -102,7 +144,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. testcode:: fft2
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft2',IntermediateWorkspace='int2',
-              RemoveReflections=True,Size=0.3,Convolution=False)
+              Method='Punch and fill',Size=0.3,Convolution=False, WindowFunction='None')
    print("The value at [1,0,0] is {:.4f}".format(mtd['fft2'].signalAt(1866)))
    print("The value at [0,1,0] is {:.4f}".format(mtd['fft2'].signalAt(2226)))
 
@@ -127,7 +169,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. testcode:: fft3
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
-              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
+              Method='Punch and fill',Size=0.3,CropSphere=True,SphereMax=3,Convolution=False, WindowFunction='None')
    print("The value at [1,0,0] is {:.4f}".format(mtd['fft3'].signalAt(1866)))
    print("The value at [0,1,0] is {:.4f}".format(mtd['fft3'].signalAt(2226)))
 
@@ -153,7 +195,7 @@ The fill value should be about the background level
 .. testcode:: fft3_2
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
-              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
+              Method='Punch and fill',Size=0.3,CropSphere=True,SphereMax=3,Convolution=False, WindowFunction='None')
    print("The value at [1,0,0] is {:.4f}".format(mtd['fft3'].signalAt(1866)))
    print("The value at [0,1,0] is {:.4f}".format(mtd['fft3'].signalAt(2226)))
 
@@ -178,7 +220,7 @@ The fill value should be about the background level
 .. code-block:: python
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4'
-              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=True)
+              Method='Punch and fill',Size=0.3,CropSphere=True,SphereMax=3,Convolution=True, WindowFunction='None')
    print("The value at [1,0,0] is {:.4f}".format(mtd['fft4'].signalAt(1866)))
    print("The value at [0,1,0] is {:.4f}".format(mtd['fft4'].signalAt(2226)))
 
@@ -198,29 +240,29 @@ The fill value should be about the background level
 .. |int4| image:: /images/DeltaPDF3D_int4.png
    :width: 100%
 
-**Applying convolution and deconvolution**
+Usage - KAREN
+-------------
 
-.. code-block:: python
+.. testcode:: karen
 
-   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft5',IntermediateWorkspace='int5'
-              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=True,Deconvolution=True)
-   print("The value at [1,0,0] is {:.4f}".format(mtd['fft5'].signalAt(1866)))
-   print("The value at [0,1,0] is {:.4f}".format(mtd['fft5'].signalAt(2226)))
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft',IntermediateWorkspace='int',KARENWidth=3)
+   print("The value at [1,0,0] is {:.4f}".format(mtd['fft'].signalAt(1866)))
+   print("The value at [0,1,0] is {:.4f}".format(mtd['fft'].signalAt(2226)))
 
-.. code-block:: none
+.. testoutput:: karen
 
-   The value at [1,0,0] is -95.0768
-   The value at [0,1,0] is 99.3535
+   The value at [1,0,0] is -18.4259
+   The value at [0,1,0] is 18.4204
 
-+--------------------------------------------------------------+--------------------------------------------------------------+
-| The deconvolution array, workspace signal is divided by this | Resulting 3D-ΔPDF                                            |
-+--------------------------------------------------------------+--------------------------------------------------------------+
-| |deconv|                                                     | |fft5|                                                       |
-+--------------------------------------------------------------+--------------------------------------------------------------+
++----------------------------------------------------------------+----------------------------------------------------------------+
+| Intermediate workspace after KAREN and window function applied | Resulting 3D-ΔPDF                                              |
++----------------------------------------------------------------+----------------------------------------------------------------+
+| |int5|                                                         | |fft5|                                                         |
++----------------------------------------------------------------+----------------------------------------------------------------+
 
-.. |fft5| image:: /images/DeltaPDF3D_fft5.png
+.. |fft5| image:: /images/DeltaPDF3D_karen_fft.png
    :width: 100%
-.. |deconv| image:: /images/DeltaPDF3D_deconv.png
+.. |int5| image:: /images/DeltaPDF3D_karen_int.png
    :width: 100%
 
 .. categories::

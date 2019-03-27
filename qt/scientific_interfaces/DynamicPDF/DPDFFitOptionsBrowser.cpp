@@ -12,8 +12,6 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 // 3rd party library headers
 #include "MantidKernel/Logger.h"
-// System headers
-//#include<iostream>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");

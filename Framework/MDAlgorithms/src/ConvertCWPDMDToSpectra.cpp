@@ -548,7 +548,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       // add signal
       if (xindex < 0) {
         // Out of left boundary
-        int32_t detid = mditer->getInnerDetectorID(iev);
+        int32_t innerDetid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
         g_log.debug() << "Event is out of user-specified range by "
                       << (outx - vecx.front()) << ", xindex = " << xindex
@@ -556,11 +556,11 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                       << " out of left boundeary [" << vecx.front() << ", "
                       << vecx.back() << "]. dep pos = " << detpos.X() << ", "
                       << detpos.Y() << ", " << detpos.Z() << ", Run = " << runid
-                      << ", DetectorID = " << detid << "\n";
+                      << ", DetectorID = " << innerDetid << "\n";
         continue;
       } else if (xindex >= static_cast<int>(vecy.size())) {
         // Out of right boundary
-        int32_t detid = mditer->getInnerDetectorID(iev);
+        int32_t innerDetid = mditer->getInnerDetectorID(iev);
         uint16_t runid = mditer->getInnerRunIndex(iev);
         g_log.debug() << "Event is out of user-specified range "
                       << "xindex = " << xindex << ", " << unitbit << " = "
@@ -569,7 +569,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                       << detpos.Y() << ", " << detpos.Z()
                       << "; sample pos = " << samplepos.X() << ", "
                       << samplepos.Y() << ", " << samplepos.Z()
-                      << ", Run = " << runid << ", DetectorID = " << detid
+                      << ", Run = " << runid << ", DetectorID = " << innerDetid
                       << "\n";
         continue;
       } else {

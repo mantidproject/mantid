@@ -164,7 +164,8 @@ double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("StartX" + getPropertySuffix(index));
 }
 
-template <typename Base> double IqtFit<Base>::getStartX(std::size_t) const {
+template <typename Base>
+double IqtFit<Base>::getStartX(std::size_t /*unused*/) const {
   return Base::getProperty("StartX");
 }
 
@@ -173,7 +174,8 @@ double IqtFit<QENSFitSimultaneous>::getEndX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("EndX" + getPropertySuffix(index));
 }
 
-template <typename Base> double IqtFit<Base>::getEndX(std::size_t) const {
+template <typename Base>
+double IqtFit<Base>::getEndX(std::size_t /*unused*/) const {
   return Base::getProperty("EndX");
 }
 

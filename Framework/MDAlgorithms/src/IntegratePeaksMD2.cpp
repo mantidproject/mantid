@@ -373,11 +373,11 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       if (Peak *shapeablePeak = dynamic_cast<Peak *>(&p)) {
 
-        PeakShape *sphere = new PeakShapeSpherical(
+        PeakShape *sphereShape = new PeakShapeSpherical(
             PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
             BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
             this->version());
-        shapeablePeak->setPeakShape(sphere);
+        shapeablePeak->setPeakShape(sphereShape);
       }
 
       // Perform the integration into whatever box is contained within.
@@ -404,18 +404,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             useOnePercentBackgroundCorrection);
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * ratio;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * radiusRatio;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius sphere
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * interiorRatio;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       }
@@ -466,18 +468,20 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // are 100% dependent; this is the same as integrating a shell.
         bgErrorSquared -= interiorErrorSquared;
         // Relative volume of peak vs the BackgroundOuterRadius cylinder
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * cylinderLength;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * cylinderLength;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius cylinder
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * cylinderLength;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * cylinderLength;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       } else {

@@ -555,7 +555,7 @@ template <typename VecType> size_t getSizeOf(const VecType &vec) {
 }
 
 // Special case of V3D
-size_t getSizeOf(const Kernel::V3D &) { return 3; }
+size_t getSizeOf(const Kernel::V3D & /*unused*/) { return 3; }
 } // namespace
 
 /**

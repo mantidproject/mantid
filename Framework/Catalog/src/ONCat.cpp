@@ -14,7 +14,6 @@
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 
 #include <boost/algorithm/string/join.hpp>

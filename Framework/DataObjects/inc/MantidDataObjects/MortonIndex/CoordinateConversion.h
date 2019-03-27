@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
-#include <iostream>
 
 namespace morton_index {
 /**

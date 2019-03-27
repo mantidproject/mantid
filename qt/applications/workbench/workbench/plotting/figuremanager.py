@@ -400,7 +400,7 @@ if __name__ == '__main__':
     fig1 = fig_mgr_1.canvas.figure
     ax = fig1.add_subplot(111)
     ax.set_title("Test title")
-    ax.set_xlabel("$\mu s$")
+    ax.set_xlabel(r"$\mu s$")
     ax.set_ylabel("Counts")
 
     ax.plot(x, cx)

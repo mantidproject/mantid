@@ -24,7 +24,9 @@ Kernel::UnitLabel QLab::getUnitLabel() const {
 
 const Kernel::MDUnit &QLab::getMDUnit() const { return *m_unit; }
 
-bool QLab::setMDUnit(const Mantid::Kernel::MDUnit &) { return false; }
+bool QLab::setMDUnit(const Mantid::Kernel::MDUnit & /*newUnit*/) {
+  return false;
+}
 
 bool QLab::canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const {
   /*

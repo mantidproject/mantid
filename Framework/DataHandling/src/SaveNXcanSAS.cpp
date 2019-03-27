@@ -499,8 +499,8 @@ public:
     setSpectrumAxisValues();
   }
 
-  Mantid::MantidVec::value_type *operator()(Mantid::API::MatrixWorkspace_sptr,
-                                            int index) {
+  Mantid::MantidVec::value_type *
+  operator()(Mantid::API::MatrixWorkspace_sptr /*unused*/, int index) {
     auto isPointData =
         m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
     double value = 0;

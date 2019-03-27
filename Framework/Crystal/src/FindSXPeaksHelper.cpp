@@ -252,7 +252,7 @@ AbsoluteBackgroundStrategy::AbsoluteBackgroundStrategy(const double background)
     : m_background(background) {}
 
 bool AbsoluteBackgroundStrategy::isBelowBackground(
-    const double intensity, const HistogramData::HistogramY &) const {
+    const double intensity, const HistogramData::HistogramY & /*y*/) const {
   return intensity < m_background;
 }
 
@@ -545,9 +545,9 @@ SimpleReduceStrategy::SimpleReduceStrategy(
     const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
-std::vector<SXPeak>
-SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
-                             Mantid::Kernel::ProgressBase &) const {
+std::vector<SXPeak> SimpleReduceStrategy::reduce(
+    const std::vector<SXPeak> &peaks,
+    Mantid::Kernel::ProgressBase & /*progress*/) const {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
