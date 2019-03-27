@@ -6,13 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import unittest
-from pdb import set_trace as tr
 import systemtesting
 from mantid import config
 from mantid.simpleapi import (BASISCrystalDiffraction, GroupWorkspaces,
                               ElasticWindowMultiple, MSDFit, BASISReduction,
-                              BASISPowderDiffraction)
+                              BASISPowderDiffraction, Load)
 
 
 class PreppingMixin(object):
@@ -29,7 +27,7 @@ class PreppingMixin(object):
         for (key, value) in self.config.items():
             config[key] = value  # config object does not have update method like python dict
 
-'''
+
 class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""ELWIN tab of the Indirect Inelastic Interface"""
 
@@ -110,7 +108,7 @@ class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'outMSD', 'BASIS_63652_63720_Gaussian_msd.nxs'
-'''
+
 
 class BASISReduction1Test(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Reduce in the old DAS using: (1)silicon 111 analyzers, (2) monitor
@@ -247,7 +245,7 @@ class BASISReduction4Test(systemtesting.MantidSystemTest, PreppingMixin):
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'BSS_90178_divided_sqw', 'BASIS_90178_divided_sqw.nxs'
 
-'''
+
 class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Reduction for a scan of runs probing different orientations of a
     crystal."""
@@ -330,7 +328,3 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'
-'''
-
-#if __name__ == "__main__":
-#    unittest.main()
