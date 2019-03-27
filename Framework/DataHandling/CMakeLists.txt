@@ -164,7 +164,7 @@
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-  src/SaveMask.cpp
+        src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -177,7 +177,7 @@
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
-  src/SaveReflectometryAscii.cpp
+        src/SaveReflectometryAscii.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSESANS.cpp
@@ -553,7 +553,7 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
-  SaveReflectometryAsciiTest.h
+        SaveReflectometryAsciiTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSESANSTest.h
@@ -600,7 +600,7 @@ endif ()
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 target_include_directories ( DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories ( DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+target_include_directories ( DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} )
 
 target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${JSONCPP_LIBRARIES} Catalog )
 

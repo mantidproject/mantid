@@ -161,6 +161,7 @@ if ( WIN32 )
   set ( WINSOCK ws2_32 )
 endif ()
 
+target_include_directories ( SINQ SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} )
 target_link_libraries ( SINQ LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
 # Add the unit tests directory

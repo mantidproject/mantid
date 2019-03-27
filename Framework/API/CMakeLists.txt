@@ -532,6 +532,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
+target_include_directories ( API SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} )
 target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} ${BCRYPT})
 
 # Add the unit tests directory

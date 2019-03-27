@@ -426,7 +426,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework")
 
-include_directories(inc)
+include_directories(inc SYSTEM ${Boost_INCLUDE_DIRS})
 target_link_libraries(MDAlgorithms
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}

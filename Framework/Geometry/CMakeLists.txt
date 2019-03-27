@@ -460,8 +460,7 @@ if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
 endif ()
 
-include_directories ( ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} )
-include_directories ( ${GSL_INCLUDE_DIR} )
+include_directories ( SYSTEM ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR})
 
 
 # Add a precompiled header where they are supported

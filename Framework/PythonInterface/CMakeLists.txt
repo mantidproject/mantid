@@ -10,8 +10,7 @@ set(Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
 # NumPy
 find_package(Numpy REQUIRED)
-include_directories(SYSTEM ${PYTHON_INCLUDE_PATH})
-include_directories(SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR})
+include_directories(SYSTEM ${PYTHON_INCLUDE_PATH} ${PYTHON_NUMPY_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 # Base of the subproject include dir
 set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface)
