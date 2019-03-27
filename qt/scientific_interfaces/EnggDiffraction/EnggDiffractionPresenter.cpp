@@ -980,9 +980,13 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                std::string(rexc.what())
         << '\n';
   } catch (std::invalid_argument &) {
+    m_calibFinishedOK = false;
     g_log.error()
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. \n";
+  } catch (Mantid::API::Algorithm::CancelException&) {
+    m_calibFinishedOK = false;
+    g_log.error() << "Execution terminated by user. \n";
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
