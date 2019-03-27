@@ -10,13 +10,16 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <iostream>
 
 namespace Mantid {
-
 namespace Geometry {
+namespace {
+Kernel::Logger logger("Line");
+}
+
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -282,7 +285,7 @@ void Line::print() const
 Print statement for debugging
 */
 {
-  std::cout << "Line == " << Origin << " :: " << Direct << '\n';
+  logger.debug() << "Line == " << Origin << " :: " << Direct << '\n';
 }
 
 } // namespace Geometry

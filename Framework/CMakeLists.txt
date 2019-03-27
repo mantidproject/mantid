@@ -135,19 +135,9 @@ if(MPI_BUILD)
   add_subdirectory(MPIAlgorithms)
 endif()
 
-# If a OpenCL-enabled build, add in the OpenCL-specific algorithms package
-set(
-  OPENCL_BUILD OFF
-  CACHE
-    BOOL
-    "Enable building the GPUAlgorithms package using OpenCL. Requires OpenCL.")
-if(OPENCL_BUILD)
-  add_subdirectory(GPUAlgorithms)
-endif()
-
-add_subdirectory(MDAlgorithms)
-add_subdirectory(Doxygen)
-add_subdirectory(ScriptRepository)
+add_subdirectory (MDAlgorithms)
+add_subdirectory (Doxygen)
+add_subdirectory (ScriptRepository)
 
 #
 # Add a custom target to build all of the Framework

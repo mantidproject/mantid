@@ -966,7 +966,7 @@ PeaksWorkspace::getSpecialCoordinateSystem() const {
 
 // prevent shared pointer from deleting this
 struct NullDeleter {
-  template <typename T> void operator()(T *) {}
+  template <typename T> void operator()(T * /*unused*/) {}
 };
 /**Get access to shared pointer containing workspace porperties */
 API::LogManager_sptr PeaksWorkspace::logs() {
@@ -980,8 +980,8 @@ API::LogManager_const_sptr PeaksWorkspace::getLogs() const {
   return API::LogManager_const_sptr(new API::LogManager(this->run()));
 }
 
-ITableWorkspace *
-PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
+ITableWorkspace *PeaksWorkspace::doCloneColumns(
+    const std::vector<std::string> & /*colNames*/) const {
   throw Kernel::Exception::NotImplementedError(
       "PeaksWorkspace cannot clone columns.");
 }

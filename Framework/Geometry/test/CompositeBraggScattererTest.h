@@ -15,7 +15,6 @@
 #include "MantidKernel/V3D.h"
 
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
-#include <iostream>
 #include <map>
 
 using namespace Mantid::Geometry;

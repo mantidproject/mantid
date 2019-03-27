@@ -15,7 +15,6 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include <iostream>
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1125

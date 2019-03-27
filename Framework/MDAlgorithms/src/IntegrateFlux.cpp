@@ -32,7 +32,7 @@ namespace {
 class NoEventWorkspaceDeleting {
 public:
   /// deleting operator. Does nothing
-  void operator()(const API::MatrixWorkspace *) {}
+  void operator()(const API::MatrixWorkspace * /*unused*/) {}
 };
 } // namespace
 

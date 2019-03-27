@@ -8,7 +8,6 @@
 #define MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPINGTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/GroupingLoader.h"

@@ -76,7 +76,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
 //----------------------------------------------------------------------------------------------
 
 void AffineMatrixParameterParser::setSuccessorParser(
-    Mantid::API::ImplicitFunctionParameterParser *) {
+    Mantid::API::ImplicitFunctionParameterParser * /*paramParser*/) {
   throw std::runtime_error(
       "Cannot set a successor parser on a AffineMatrixParameterParser");
 }
