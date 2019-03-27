@@ -67,15 +67,15 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb, ws_name=None, spec_num=None):
+    def __init__(self, artists, data_replace_cb, spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
+        :param spec_num: The spectrum number of the spectrum used to plot the artist
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
-        self.workspace_name = ws_name
         self.spec_num = spec_num
 
     def remove(self, axes):
@@ -177,7 +177,7 @@ class MantidAxes(Axes):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 name, spec_num))
+                                                 spec_num))
 
         return artists
 
@@ -185,7 +185,7 @@ class MantidAxes(Axes):
         """
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
-        :param workspace: A Workpspace object
+        :param workspace: A Workspace object
         :return: True if the axes is empty, false if artists remain or this workspace is not associated here
         """
         try:
@@ -398,9 +398,10 @@ class MantidAxes(Axes):
                 return container_new
 
             workspace = args[0]
+            spec_num = self._get_spec_number(workspace, kwargs)
             return self.track_workspace_artist(workspace,
                                                plotfunctions.errorbar(self, *args, **kwargs),
-                                               _data_update)
+                                               _data_update, spec_num=spec_num)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 

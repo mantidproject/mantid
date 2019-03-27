@@ -35,15 +35,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     """
 
     closing = Signal()
-    
-    def __init__(self, canvas, toolbar_state_checker, fig_manager, parent=None):
+
+    def __init__(self, canvas, toolbar_manager, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
         self.init()
-        self.fig_manager = fig_manager
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
-        # The toolbar state checker to be passed to the peak editing tool
-        self.toolbar_state_checker = toolbar_state_checker
+        # The toolbar state manager to be passed to the peak editing tool
+        self.toolbar_manager = toolbar_manager
         # The peak editing tool
         self.tool = None
         # Pyplot lines for the fit result curves
@@ -102,12 +101,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if allowed_spectra:
             self._add_spectra(allowed_spectra)
         else:
-            self.fig_manager.toolbar.toggle_fit_button_checked()
+            self.toolbar_manager.toggle_fit_button_checked()
             logger.warning("Cannot open fitting tool: No valid workspaces to "
                            "fit to.")
             return
 
-        self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker,
+        self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
                                        current_peak_type=self.defaultPeakType())
         self.tool.fit_start_x_moved.connect(self.setStartX)
         self.tool.fit_end_x_moved.connect(self.setEndX)
