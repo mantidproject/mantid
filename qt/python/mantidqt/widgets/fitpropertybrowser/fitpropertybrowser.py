@@ -36,7 +36,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     """
 
     closing = Signal()
-    pattern_fittable_curve = re.compile('(.+?): spec (\d+)')
+    pattern_fittable_curve = re.compile(r'(.+?): spec (\d+)')
 
     def __init__(self, canvas, toolbar_state_checker, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
