@@ -309,7 +309,11 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre,
   // facing away from the observer gives a negative solid angle and is excluded
   // For simplicity the triangulation points are constructed such that the cone
   // axis points up the +Z axis and then rotated into their final position
-  const V3D axis_direction = normalize(axis);
+  const double l = axis.norm();
+  if (l == 0.) {
+    throw std::runtime_error("Ill defined cylinder axis: " + axis.toString());
+  }
+  const V3D axis_direction = axis / l;
   // Required rotation
   constexpr V3D initial_axis(0., 0., 1.0);
   const Quat transform(initial_axis, axis_direction);
