@@ -184,10 +184,17 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             doc='A user-defined Bragg angle in degree{}'.format(listOrSingleNumber)
         )
         self.setPropertyGroup(PropAutoProcess.BRAGG_ANGLE, preProcessGen)
+        self.declareProperty(
+            FloatArrayProperty(
+                Prop.LINE_POSITION,
+                values=[Property.EMPTY_DBL]
+            ),
+            doc='A fractional workspace index corresponding to the beam centre between 0 and 255 {}'.
+                format(listOrSingleNumber)
+        )
         self.copyProperties(
             'ReflectometryILLPreprocess',
             [
-                Prop.LINE_POSITION,
                 Prop.SUBALG_LOGGING,
                 Prop.CLEANUP,
                 Prop.WATER_REFERENCE,
@@ -552,20 +559,19 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Execute the algorithm."""
         subalgLogging = self.getPropertyValue(Prop.SUBALG_LOGGING)
         cleanup = self.getPropertyValue(Prop.CLEANUP)
-
         rb = self.getProperty(PropAutoProcess.RB).value
-        db = self.getProperty(PropAutoProcess.DB).value
-
         workflowProgress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
-
-        linePosition = self.getProperty(Prop.LINE_POSITION).value
+        db = self.getProperty(PropAutoProcess.DB).value
         slitNorm = self.getProperty(Prop.SLIT_NORM).value
-
         toStitch = []
 
         for angle in range(len(rb)):
 
             twoTheta = self.twoTheta(rb[angle], angle)
+            if numpy.isclose(self.getValue(Prop.LINE_POSITION, angle), Property.EMPTY_DBL):
+                linePosition = Property.EMPTY_DBL
+            else:
+                linePosition = float(self.getValue(Prop.LINE_POSITION, angle))
 
             runDB = self.mtdName(db[angle])
             runRB = self.mtdName(rb[angle])
