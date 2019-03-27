@@ -71,3 +71,21 @@ class LoadRunWidgetModel(object):
     @property
     def loaded_runs(self):
         return self._loaded_data_store.get_parameter("run")
+
+    @property
+    def instrument(self):
+        return self._data_context.instrument
+
+    @property
+    def current_runs(self):
+        return self._data_context.current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._data_context.current_runs = value
+
+    def get_latest_loaded_run(self):
+        return self._loaded_data_store.get_latest_data()['run']
+
+    def get_data(self, run):
+        return self._loaded_data_store.get_data(run=run, instrument=self._data_context.instrument)

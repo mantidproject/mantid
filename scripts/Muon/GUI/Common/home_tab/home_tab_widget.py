@@ -38,7 +38,7 @@ class HomeTabWidget(object):
                                          widget_list=[self.inst_view,
                                                       self.grp_view,
                                                       self.run_info_view])
-        self.home_tab_model = HomeTabModel(muon_data=context)
+        self.home_tab_model = HomeTabModel(context=context)
         self.home_tab_widget = HomeTabPresenter(self.home_tab_view, self.home_tab_model,
                                                 subwidgets=[self.instrument_widget,
                                                             self.group_widget,

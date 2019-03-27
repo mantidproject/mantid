@@ -89,6 +89,12 @@ class MuonGroupPairContext(object):
     def pairs(self):
         return self._pairs
 
+    def clear_groups(self):
+        self._groups = []
+
+    def clear_pairs(self):
+        self._pairs = []
+
     @property
     def group_names(self):
         return [group.name for group in self._groups]
@@ -104,6 +110,18 @@ class MuonGroupPairContext(object):
         else:
             raise ValueError('Groups and pairs must have unique names')
 
+    def remove_group(self, group_name):
+        for group in self._groups:
+            if group.name == group_name:
+                self._groups.remove(group)
+                break
+
+    def remove_pair(self, pair_name):
+        for pair in self._pairs:
+            if pair.name == pair_name:
+                self._pairs.remove(pair)
+                break
+
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
         if self._check_name_unique(pair.name):
@@ -116,7 +134,6 @@ class MuonGroupPairContext(object):
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
         self._groups, self._pairs = get_default_grouping(workspace, instrument, main_field_direction)
-
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:

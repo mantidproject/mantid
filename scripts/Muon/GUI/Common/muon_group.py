@@ -73,16 +73,21 @@ class MuonGroup(object):
         else:
             raise ValueError("detectors must be a list of ints.")
 
-    def show(self, run):
-        run not in self._workspace or self._workspace[run].show()
-        run not in self._asymmetry_estimate or self._asymmetry_estimate[run].show()
-        run not in self._workspace_rebin or self._workspace_rebin[run].show()
-        run not in self._asymmetry_estimate_rebin or self._asymmetry_estimate_rebin[run].show()
+    def show_raw(self, run, name, asym_name):
+        str(run) not in self._workspace or self._workspace[str(run)].show(name)
+        str(run) not in self._asymmetry_estimate or self._asymmetry_estimate[str(run)].show(asym_name)
+
+    def show_rebin(self, run, name, asym_name):
+        str(run) not in self._workspace_rebin or self._workspace_rebin[str(run)].show(name)
+        str(run) not in self._asymmetry_estimate_rebin or self._asymmetry_estimate_rebin[str(run)].show(asym_name)
 
     def update_workspaces(self, run, counts_workspace, asymmetry_workspace, rebin):
         if rebin:
-            self._workspace_rebin.update({run: MuonWorkspaceWrapper(counts_workspace)})
-            self._asymmetry_estimate_rebin.update({run: MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._workspace_rebin.update({str(run): MuonWorkspaceWrapper(counts_workspace)})
+            self._asymmetry_estimate_rebin.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
         else:
-            self._workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
-            self._asymmetry_estimate.update({run: MuonWorkspaceWrapper(asymmetry_workspace)})
+            self._workspace.update({str(run): MuonWorkspaceWrapper(counts_workspace)})
+            self._asymmetry_estimate.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+
+    def update_counts_workspace(self, counts_workspace, run):
+        self._workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})

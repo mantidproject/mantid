@@ -300,7 +300,7 @@ class MuonDataContext(object):
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
-        self._current_data = {"workspace": load_utils.empty_loaded_data()}
+        self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}
 
     def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """

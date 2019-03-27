@@ -27,10 +27,10 @@ class GroupingTabModel(object):
         it doesn't already exist (e.g. if group added to table but no update yet triggered).
         """
         try:
-            workspace = self._data.groups[group_name].workspace[str(run)].workspace
+            workspace = self._groups_and_pairs[group_name].workspace[str(run)].workspace
         except AttributeError:
-            self._data.show_group_data(group_name, show=False)
-            workspace = self._data.groups[group_name].workspace[str(run)].workspace
+            workspace = self._context.calculate_group(group_name, str(run), rebin=False)
+            self._groups_and_pairs[group_name].update_counts_workspace(workspace, str(run))
         return workspace
 
     @property
@@ -39,7 +39,7 @@ class GroupingTabModel(object):
 
     @property
     def pairs(self):
-        return self._groups_and_pairs.pairs.values()
+        return self._groups_and_pairs.pairs
 
     @property
     def group_names(self):
@@ -54,14 +54,14 @@ class GroupingTabModel(object):
         return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names
 
     def show_all_groups_and_pairs(self):
-        self._data.show_all_groups()
-        self._data.show_all_pairs()
+        self._context.show_all_groups()
+        self._context.show_all_pairs()
 
     def clear_groups(self):
-        self._data._groups = OrderedDict()
+        self._groups_and_pairs.clear_groups()
 
     def clear_pairs(self):
-        self._data._pairs = OrderedDict()
+        self._groups_and_pairs.clear_pairs()
 
     def clear(self):
         self.clear_groups()
@@ -77,17 +77,17 @@ class GroupingTabModel(object):
 
     def remove_groups_by_name(self, name_list):
         for name in name_list:
-            del self._data.groups[name]
+            self._groups_and_pairs.remove_group(name)
             self.remove_pairs_with_removed_name(name)
 
     def remove_pairs_with_removed_name(self, group_name):
-        for name, pair in self._data.pairs.items():
+        for pair in self._groups_and_pairs.pairs:
             if pair.forward_group == group_name or pair.backward_group == group_name:
-                del self._data.pairs[name]
+                self._groups_and_pairs.remove_pair(pair.name)
 
     def remove_pairs_by_name(self, name_list):
         for name in name_list:
-            del self._data.pairs[name]
+            self._groups_and_pairs.remove_pair(name)
 
     def construct_empty_group(self, _group_index):
         return construct_empty_group(self.group_names, _group_index)
@@ -106,10 +106,10 @@ class GroupingTabModel(object):
         return pair
 
     def reset_groups_and_pairs_to_default(self):
-        self._data.set_groups_and_pairs_to_default()
+        self._groups_and_pairs.reset_group_and_pairs_to_default()
 
     def update_pair_alpha(self, pair_name, new_alpha):
-        self._data.pairs[pair_name].alpha = new_alpha
+        self._groups_and_pairs[pair_name].alpha = new_alpha
 
     @property
     def num_detectors(self):

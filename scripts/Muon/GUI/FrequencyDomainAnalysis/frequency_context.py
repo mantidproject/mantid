@@ -39,7 +39,7 @@ class FrequencyContext(object):
 
     # get methods
     def getNPoints(self):
-        run_numbers = self.context.current_runs
+        run_numbers = self.context.data_context.current_runs
         ws = [wsName.get_raw_data_workspace_name(self.context, run_list_to_string(run_number)) for run_number in
               run_numbers]
         self.N_points = 1
@@ -57,7 +57,7 @@ class FrequencyContext(object):
         return self.runName
 
     def getInstrument(self):
-        return self.context.instrument
+        return self.context.data_context.instrument
 
     # check if data matches current
     def digit(self, x):
@@ -82,13 +82,13 @@ class FrequencyContext(object):
     # Get the groups/pairs for active WS
     # ignore raw files
     def getWorkspaceNames(self, use_raw):
-        pair_names = list(self.context.pair_names)
-        group_names = list(self.context.group_names)
-        run_numbers = self.context.current_runs
+        pair_names = list(self.context.group_pair_context.pair_names)
+        group_names = list(self.context.group_pair_context.group_names)
+        run_numbers = self.context.data_context.current_runs
         final_options = []
         for run in run_numbers:
             final_options += [wsName.get_raw_data_workspace_name(self.context, run_list_to_string(run), period=str(period + 1)) +
-                              " (PhaseQuad)" for period in range(self.context.num_periods(run))]
+                              " (PhaseQuad)" for period in range(self.context.data_context.num_periods(run))]
             for name in pair_names:
                 final_options.append(
                     wsName.get_pair_data_workspace_name(self.context,
@@ -102,17 +102,17 @@ class FrequencyContext(object):
 
     # Get the groups/pairs for active WS
     def getGroupedWorkspaceNames(self):
-        run_numbers = self.context.current_runs
+        run_numbers = self.context.data_context.current_runs
         runs = [wsName.get_raw_data_workspace_name(self.context, run_list_to_string(run_number), period=str(period + 1))
-                for run_number in run_numbers for period in range(self.context.num_periods(run_number))]
+                for run_number in run_numbers for period in range(self.context.data_context.num_periods(run_number))]
         return runs
 
     def get_detectors_excluded_from_default_grouping_tables(self):
         groups, _ = get_default_grouping(
-            self.context.current_workspace, self.context.instrument, self.context.main_field_direction)
+            self.context.data_context.current_workspace, self.context.data_context.instrument, self.context.data_context.main_field_direction)
         detectors_in_group = []
         for group in groups:
             detectors_in_group += group.detectors
         detectors_in_group = set(detectors_in_group)
 
-        return [det for det in range(1, self.context.num_detectors) if det not in detectors_in_group]
+        return [det for det in range(1, self.context.data_context.num_detectors) if det not in detectors_in_group]

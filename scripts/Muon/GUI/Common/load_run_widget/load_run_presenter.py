@@ -25,7 +25,7 @@ class LoadRunWidgetPresenter(object):
         self._use_threading = True
         self._multiple_file_mode = "Simultaneous"
 
-        self._instrument = self._model._data_context.instrument
+        self._instrument = self._model.instrument
         self._view.set_current_instrument(self._instrument)
 
         self.run_list = []
@@ -111,9 +111,7 @@ class LoadRunWidgetPresenter(object):
 
         self.run_list = run_utils.run_string_to_list(run_string)
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-                      for new_run in self.run_list if not self._model._loaded_data_store.get_data(run=[new_run],
-                                                                                                  instrument=
-                                                                                                  self._model._data_context.instrument)]
+                      for new_run in self.run_list if not self._model.get_data(run=[new_run])]
         if file_names:
             self.load_runs(file_names)
         else:
@@ -168,7 +166,7 @@ class LoadRunWidgetPresenter(object):
         """
         Updates list of runs by adding a run equal to 1 after to the highest run.
         """
-        run_list = load_utils.flatten_run_list(copy.copy(self._model._data_context.current_runs))
+        run_list = load_utils.flatten_run_list(copy.copy(self._model.current_runs))
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
@@ -181,7 +179,7 @@ class LoadRunWidgetPresenter(object):
         """
         Updates list of runs by adding a run equal to 1 before to the lowest run.
         """
-        run_list = load_utils.flatten_run_list(copy.copy(self._model._data_context.current_runs))
+        run_list = load_utils.flatten_run_list(copy.copy(self._model.current_runs))
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
@@ -232,17 +230,17 @@ class LoadRunWidgetPresenter(object):
 
     def on_loading_finished(self):
         if self.run_list and self.run_list[0] == 'Current':
-            self.run_list = [self._model._loaded_data_store.get_latest_data()['run']][0]
+            self.run_list = [self._model.get_latest_loaded_run()][0]
             self._model.current_run = self.run_list
 
-        run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
+        run_list = [[run] for run in self.run_list if self._model.get_data(run=[run])]
         self._model._data_context.current_runs = run_list
 
         if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
-            run_list_to_add = [run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
-            run_list = [[run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]]
+            run_list_to_add = [run for run in self.run_list if self._model.get_data(run=[run])]
+            run_list = [[run for run in self.run_list if self._model.get_data(run=[run])]]
             load_utils.combine_loaded_runs(self._model, run_list_to_add)
-            self._model._data_context.current_runs = run_list
+            self._model.current_runs = run_list
 
         self.update_view_from_model(run_list)
         self._view.notify_loading_finished()

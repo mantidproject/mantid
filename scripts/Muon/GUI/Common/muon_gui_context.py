@@ -26,3 +26,11 @@ class MuonGuiContext(dict):
 
     def add_subscriber(self, observer):
         self.notifier.add_subscriber(observer)
+
+    def period_string(self, run=None):
+        summed_periods = self["SummedPeriods"] if 'SummedPeriods' in self else [1]
+        subtracted_periods = self["SubtractedPeriods"] if 'SubtractedPeriods' in self else []
+        if subtracted_periods:
+            return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
+        else:
+            return '+'.join([str(period) for period in summed_periods])

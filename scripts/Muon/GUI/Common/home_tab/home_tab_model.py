@@ -12,8 +12,9 @@ from Muon.GUI.Common.muon_context import MuonContext
 
 class HomeTabModel(object):
 
-    def __init__(self, muon_data=MuonContext()):
-        self._data = muon_data.data_context
+    def __init__(self, context=MuonContext()):
+        self._data = context.data_context
+        self._context = context
 
     def is_data_loaded(self):
         return self._data.is_data_loaded()
@@ -23,8 +24,5 @@ class HomeTabModel(object):
 
     def show_all_data(self):
         self._data.show_raw_data()
-        self._data.show_all_groups()
-        self._data.show_all_pairs()
-
-    def update_current_data(self):
-        self._data.update_current_data()
+        self._context.show_all_groups()
+        self._context.show_all_pairs()

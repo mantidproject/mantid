@@ -109,7 +109,7 @@ class LoadWidgetPresenter(object):
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
         self.load_run_widget.set_current_instrument(
-            self._model._data_context.instrument)
+            self._model.instrument)
         self.loadNotifier.notify_subscribers()
 
     @property
@@ -117,13 +117,13 @@ class LoadWidgetPresenter(object):
         return self._view
 
     def set_current_instrument(self, instrument):
-        self._model._loaded_data_store.instrument = instrument
+        self._model.instrument = instrument
         self.load_file_widget.set_current_instrument(instrument)
         self.load_run_widget.set_current_instrument(instrument)
 
     def update_new_instrument(self, instrument):
         self.set_current_instrument(instrument)
-        self._model._data_context.current_runs = []
+        self._model.current_runs = []
         self.handle_run_widget_data_changed()
 
     class LoadNotifier(Observable):

@@ -74,7 +74,7 @@ def _get_pre_processing_params(context, run, rebin):
 
         try:
             if context.gui_context['RebinType'] == 'Fixed' and context.gui_context["RebinFixed"]:
-                x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.instrument
+                x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.data_context.instrument
                                                        )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
                 original_step = x_data[1] - x_data[0]
                 pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step

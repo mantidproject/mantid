@@ -87,7 +87,7 @@ class BrowseFileWidgetPresenter(object):
     def handle_loading(self, filenames):
         unloaded_file_names = []
         for filename in filenames:
-            if not self._model._loaded_data_store.get_data(filename=filename):
+            if not self._model.get_data(filename=filename):
                 unloaded_file_names.append(filename)
 
         if self._use_threading:
@@ -123,26 +123,25 @@ class BrowseFileWidgetPresenter(object):
         self.on_loading_finished()
 
     def on_loading_finished(self):
-        instrument_from_workspace = self._model._loaded_data_store.\
-            get_latest_data()['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
+        instrument_from_workspace = self._model.get_instrument_from_latest_run()
         if instrument_from_workspace != self._model._data_context.instrument:
-            self._model._data_context.instrument = instrument_from_workspace
+            self._model.instrument = instrument_from_workspace
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":
             file_list = [filename for filename in self.filenames if
-                         self._model._loaded_data_store.get_data(filename=filename, instrument=self._model._data_context.instrument)]
-            run_list_to_add = [self._model._loaded_data_store.get_data(filename=filename)['run'][0] for filename in file_list]
+                         self._model.get_data(filename=filename, instrument=self._model._data_context.instrument)]
+            run_list_to_add = [self._model.get_data(filename=filename)['run'][0] for filename in file_list]
             run_list = [
-                [self._model._loaded_data_store.get_data(filename=filename)['run'][0] for filename in file_list]]
+                [self._model.get_data(filename=filename)['run'][0] for filename in file_list]]
             load_utils.combine_loaded_runs(self._model, run_list_to_add)
 
         else:
             file_list = [filename for filename in self.filenames if
-                         self._model._loaded_data_store.get_data(filename=filename, instrument=self._model._data_context.instrument)]
-            run_list = [self._model._loaded_data_store.get_data(filename=filename)['run'] for filename in file_list]
+                         self._model._loaded_data_store.get_data(filename=filename, instrument=self._model.instrument)]
+            run_list = [self._model.get_data(filename=filename)['run'] for filename in file_list]
 
         self.set_file_edit(file_list)
-        self._model._data_context.current_runs = run_list
+        self._model.current_runs = run_list
 
         self._view.notify_loading_finished()
         self.enable_loading()

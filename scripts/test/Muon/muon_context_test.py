@@ -30,14 +30,17 @@ else:
 class MuonContextTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
-        cls.load_result, cls.run_number, cls.filename = load_workspace_from_filename(cls.filepath)
+        pass
 
     def setUp(self):
+        AnalysisDataService.clear()
+        self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
+        self.load_result, self.run_number, self.filename = load_workspace_from_filename(self.filepath)
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext()
+        self.gui_context.update({'RebinType': 'None'})
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context, muon_group_context=self.group_pair_context)
 
@@ -65,6 +68,54 @@ class MuonContextTest(unittest.TestCase):
 
         self.assertEquals(type(pair_asymmetry), Workspace2D)
 
+    def test_show_all_groups_calculates_and_shows_all_groups(self):
+        self.context.show_all_groups()
+
+        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Groups', 'EMU19489; Group; bwd; Asymmetry; #1',
+                                                                 'EMU19489; Group; bwd; Counts; #1', 'EMU19489; Group; fwd; Asymmetry; #1',
+                                                                 'EMU19489; Group; fwd; Counts; #1', 'Muon Data'])
+
+    def test_that_show_all_calculates_and_shows_all_groups_with_rebin(self):
+        self.gui_context['RebinType'] = 'Fixed'
+        self.gui_context['RebinFixed'] = 2
+
+        self.context.show_all_groups()
+
+        self.assertEquals(AnalysisDataService.getObjectNames(),
+                          ['EMU19489', 'EMU19489 Groups', 'EMU19489; Group; bwd; Asymmetry; #1', 'EMU19489; Group; bwd; Asymmetry; Rebin; #1',
+                           'EMU19489; Group; bwd; Counts; #1', 'EMU19489; Group; bwd; Counts; Rebin; #1',
+                           'EMU19489; Group; fwd; Asymmetry; #1', 'EMU19489; Group; fwd; Asymmetry; Rebin; #1',
+                           'EMU19489; Group; fwd; Counts; #1', 'EMU19489; Group; fwd; Counts; Rebin; #1', 'Muon Data'])
+
+    def test_show_all_pairs_calculates_and_shows_all_pairs(self):
+        self.context.show_all_pairs()
+
+        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Pairs', 'EMU19489; Pair Asym; long; #1', 'Muon Data'])
+
+    def test_that_show_all_calculates_and_shows_all_pairs_with_rebin(self):
+        self.gui_context['RebinType'] = 'Fixed'
+        self.gui_context['RebinFixed'] = 2
+
+        self.context.show_all_pairs()
+
+        self.assertEquals(AnalysisDataService.getObjectNames(),
+                          ['EMU19489', 'EMU19489 Pairs', 'EMU19489; Pair Asym; long; #1', 'EMU19489; Pair Asym; long; Rebin; #1', 'Muon Data'])
+
+    def test_update_current_data_sets_current_run_in_data_context(self):
+        self.context.update_current_data()
+
+        self.assertEquals(self.data_context.current_data, self.load_result)
+
+    def test_update_current_data_sets_groups_and_pairs(self):
+        self.context.update_current_data()
+
+        self.assertEquals(self.group_pair_context.pair_names, ['long'])
+        self.assertEquals(self.group_pair_context.group_names, ['fwd', 'bwd'])
+
+    def test_show_raw_data_puts_raw_data_into_the_ADS(self):
+        self.context.show_raw_data()
+
+        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Raw Data', 'EMU19489_raw_data', 'Muon Data'])
 
 
 if __name__ == '__main__':

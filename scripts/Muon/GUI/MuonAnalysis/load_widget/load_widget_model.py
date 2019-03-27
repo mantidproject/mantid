@@ -18,6 +18,7 @@ class LoadWidgetModel(object):
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         self._loaded_data_store = loaded_data_store
         self._data_context = context.data_context
+        self._context = context
 
     def add_muon_data(self, filename, workspace, run):
         self._loaded_data_store.add_data(run=run, filename=filename, workspace=workspace)
@@ -43,3 +44,22 @@ class LoadWidgetModel(object):
     @property
     def filenames(self):
         return self._data_context.current_filenames
+
+    @property
+    def instrument(self):
+        return self._data_context.instrument
+
+    @instrument.setter
+    def instrument(self, value):
+        self._data_context.instrument = value
+
+    @property
+    def current_runs(self):
+        return self._data_context.current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._data_context.current_runs = value
+
+    def update_current_data(self):
+        self._context.update_current_data()
