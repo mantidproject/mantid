@@ -86,8 +86,7 @@ def write_source(subproject, classname, filename, args):
     print("Writing source file to", filename)
     f = open(filename, 'w')
 
-    algorithm_top = """// Mantid Repository : https://github.com/mantidproject/mantid
-using Mantid::Kernel::Direction;
+    algorithm_top = """using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
@@ -139,7 +138,8 @@ void {algname}::exec() {{
         algorithm_source = ""
 
     # ------- Now the normal class text ------------------------------
-    s = """//
+    s = """// Mantid Repository : https://github.com/mantidproject/mantid
+//
 // Copyright &copy; {today} ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
