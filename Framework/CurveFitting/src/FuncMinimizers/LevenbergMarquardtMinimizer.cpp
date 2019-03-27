@@ -54,7 +54,7 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
 }
 
 void LevenbergMarquardtMinimizer::initialize(
-    API::ICostFunction_sptr costFunction, size_t) {
+    API::ICostFunction_sptr costFunction, size_t /*maxIterations*/) {
   // set-up GSL container to be used with GSL simplex algorithm
   auto leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
@@ -98,7 +98,7 @@ LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer() {
   }
 }
 
-bool LevenbergMarquardtMinimizer::iterate(size_t) {
+bool LevenbergMarquardtMinimizer::iterate(size_t /*iteration*/) {
   m_absError = getProperty("AbsError");
   m_relError = getProperty("RelError");
 

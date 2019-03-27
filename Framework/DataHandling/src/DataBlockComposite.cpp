@@ -219,7 +219,7 @@ int64_t DataBlockComposite::getMinSpectrumID() const {
   return min;
 }
 
-void DataBlockComposite::setMinSpectrumID(int64_t) {
+void DataBlockComposite::setMinSpectrumID(int64_t /*minSpecID*/) {
   // DO NOTHING
 }
 
@@ -234,7 +234,7 @@ int64_t DataBlockComposite::getMaxSpectrumID() const {
   return max;
 }
 
-void DataBlockComposite::setMaxSpectrumID(int64_t) {
+void DataBlockComposite::setMaxSpectrumID(int64_t /*minSpecID*/) {
   // DO NOTHING
 }
 

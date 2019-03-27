@@ -52,8 +52,7 @@ Non-member method to interpret an normalisation option.
 */
 Mantid::API::MDNormalization
 whichNormalisation(const std::string &strNormalisation) {
-  Mantid::API::MDNormalization requestedNormalisation =
-      Mantid::API::NoNormalization;
+  Mantid::API::MDNormalization requestedNormalisation;
   if (strNormalisation == noNormalisationOption()) {
     requestedNormalisation = Mantid::API::NoNormalization;
     ;

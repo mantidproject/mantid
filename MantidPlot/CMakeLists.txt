@@ -816,8 +816,11 @@ target_link_libraries ( MantidPlot LINK_PRIVATE
   ${OPENGL_gl_LIBRARY}
 )
 if (WIN32)
-  set_target_properties ( MantidPlot PROPERTIES COMPILE_DEFINITIONS "PSAPI_VERSION=1" )
+  set_target_properties ( MantidPlot PROPERTIES COMPILE_DEFINITIONS "PSAPI_VERSION=1"
+                                                CXX_CLANG_TIDY "" )
   target_link_libraries ( MantidPlot PRIVATE Psapi.lib )
+else()
+  set_target_properties ( MantidPlot PROPERTIES CXX_CLANG_TIDY "" )
 endif ()
 
 if(MAKE_VATES)

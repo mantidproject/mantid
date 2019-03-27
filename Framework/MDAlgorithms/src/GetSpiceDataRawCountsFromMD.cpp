@@ -164,12 +164,10 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(
   // Get monitor counts
   std::vector<double> vec2thetaMon;
   std::vector<double> vecMonitorCounts;
-  if (donormalize)
-    getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts,
-                 false);
-
   // Normalize if required
   if (donormalize) {
+    getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts,
+                 false);
     // check
     if (vecDetCounts.size() != vecMonitorCounts.size())
       throw std::runtime_error(
@@ -245,14 +243,11 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
   // Get monitor counts
   std::vector<double> vec2thetaMon;
   std::vector<double> vecMonitorCounts;
-  if (donormalize)
-    getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts,
-                 false);
-
   // FIXME - Consider refactoring in future
   // Normalize if required
   if (donormalize) {
-    // check
+    getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts,
+                 false);
     if (vecDetCounts.size() != vecMonitorCounts.size())
       throw std::runtime_error(
           "Number of detectors' counts' is different from that of "

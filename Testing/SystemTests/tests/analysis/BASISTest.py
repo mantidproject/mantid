@@ -255,7 +255,7 @@ class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
     def __init__(self):
         super(CrystalDiffractionTest, self).__init__()
         self.config = None
-        self.prepset('BASISCrystalDiffraction')
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',

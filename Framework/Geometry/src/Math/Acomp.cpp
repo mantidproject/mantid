@@ -13,11 +13,14 @@
 
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <iterator>
+#include <ostream>
 
 namespace Mantid {
 
+namespace {
+Kernel::Logger logger("Acomp");
+}
 namespace Geometry {
 
 using Kernel::Matrix;
@@ -386,7 +389,7 @@ must not contain a toplevel +
         try {
           AX.setString(Bexpress);
         } catch (...) {
-          std::cerr << "Error in string creation\n";
+          logger.error() << "Error in string creation\n";
         }
         Bexpress.erase(); // reset string
         addComp(AX);      // add components
@@ -451,7 +454,7 @@ Units are sorted after this function is returned.
         try {
           AX.setString(Express);
         } catch (...) {
-          std::cerr << "Error in string \n";
+          logger.error() << "Error in string \n";
           throw;
         }
         Express.erase(); // reset string
@@ -472,7 +475,7 @@ Units are sorted after this function is returned.
     try {
       AX.setString(Express);
     } catch (...) {
-      std::cerr << "Error in bracket ::\n";
+      logger.error() << "Error in bracket ::\n";
       throw;
     }
     addComp(AX); // add component
@@ -909,11 +912,11 @@ It is set on exit (to the EPI)
       }
     }
     if (DNFscore[ic] == 0) {
-      std::cerr << "PIForm:\n";
+      logger.error() << "PIForm:\n";
       copy(PIform.begin(), PIform.end(),
-           std::ostream_iterator<BnId>(std::cerr, "\n"));
-      std::cerr << "Error with DNF / EPI determination at " << ic << '\n';
-      std::cerr << " Items " << DNFobj[ic] << '\n';
+           std::ostream_iterator<BnId>(logger.error(), "\n"));
+      logger.error() << "Error with DNF / EPI determination at " << ic << '\n';
+      logger.error() << " Items " << DNFobj[ic] << '\n';
       return 0;
     }
   }
@@ -956,12 +959,12 @@ It is set on exit (to the EPI)
   /// DEBUG PRINT
   if (debug) {
     for (px = PIactive.begin(); px != PIactive.end(); ++px) {
-      std::cerr << PIform[*px] << ":";
+      logger.debug() << PIform[*px] << ":";
       for (ddx = DNFactive.begin(); ddx != DNFactive.end(); ++ddx)
-        std::cerr << ((Grid[*px][*ddx]) ? " 1" : " 0");
-      std::cerr << '\n';
+        logger.debug() << ((Grid[*px][*ddx]) ? " 1" : " 0");
+      logger.debug() << '\n';
     }
-    std::cerr << "END OF TABLE \n";
+    logger.debug() << "END OF TABLE \n";
   }
 
   // Ok -- now the hard work...
@@ -1450,10 +1453,10 @@ given a inner bracket expand that etc.
   // First:: Union take presidence over Intersection
   //      :: check brackets
   int blevel = 0; // bracket level
-  for (unsigned int i = 0; i < Ln.size(); i++) {
-    if (Ln[i] == '(')
+  for (char i : Ln) {
+    if (i == '(')
       blevel++;
-    if (Ln[i] == ')') {
+    if (i == ')') {
       if (!blevel) // error condition
       {
         deleteComp();
@@ -1461,7 +1464,7 @@ given a inner bracket expand that etc.
       }
       blevel--;
     }
-    if (Ln[i] == '+' && !blevel) // must be union
+    if (i == '+' && !blevel) // must be union
       Intersect = 0;
   }
   if (blevel != 0)
@@ -1630,10 +1633,10 @@ PI and Grid :
 {
   const std::pair<size_t, size_t> RX = Grid.size();
   for (size_t pc = 0; pc != PIform.size(); pc++) {
-    std::cerr << PIform[pc] << ":";
+    logger.debug() << PIform[pc] << ":";
     for (size_t ic = 0; ic != RX.second; ic++)
-      std::cerr << ((Grid[pc][ic]) ? " 1" : " 0");
-    std::cerr << '\n';
+      logger.debug() << ((Grid[pc][ic]) ? " 1" : " 0");
+    logger.debug() << '\n';
   }
 }
 

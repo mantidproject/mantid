@@ -16,6 +16,8 @@ IValidator_sptr NullValidator::clone() const {
 /** Always returns valid, that is ""
  *  @returns an empty string
  */
-std::string NullValidator::check(const boost::any &) const { return ""; }
+std::string NullValidator::check(const boost::any & /*unused*/) const {
+  return "";
+}
 } // namespace Kernel
 } // namespace Mantid
