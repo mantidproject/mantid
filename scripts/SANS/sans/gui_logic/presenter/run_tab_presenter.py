@@ -486,9 +486,11 @@ class RunTabPresenter(object):
         which occur.
         """
         states, errors = self.get_states(row_index=rows)
+        error_msg = ""
         for row, error in errors.items():
             self.on_processing_error(row, error)
-        return states
+            error_msg += "\n{}".format(error)
+        return states, error_msg
 
     def _plot_graph(self):
         """
@@ -527,7 +529,7 @@ class RunTabPresenter(object):
             self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
 
-            states = self._handle_get_states(rows)
+            states, error_msg = self._handle_get_states(rows)
             if not states:
                 raise Exception("No states found")
 
@@ -548,7 +550,8 @@ class RunTabPresenter(object):
         except Exception as e:
             self.on_processing_finished(None)
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box('Warning', 'Process halted', str(e))
+            warning_box_text = str(e) + "\n\n" + error_msg
+            self.display_warning_box('Warning', 'Process halted', warning_box_text)
 
     def on_process_all_clicked(self):
         """
