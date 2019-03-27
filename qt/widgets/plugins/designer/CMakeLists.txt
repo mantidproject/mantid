@@ -25,6 +25,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
     LIBRARY_NAME=MantidQtWidgetsPluginsDesigner
   INCLUDE_DIRS
     inc
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
