@@ -93,8 +93,8 @@ void PeriodicTableWidget::ColourMetalloids(
 void PeriodicTableWidget::ColourNobleGases(
     const QVector<QPushButton *> &nobleGases) {
   QString buttonColourStr = "background-color: rgb(255, 170, 0, 255)";
-  for (auto nobleGase : nobleGases) {
-    ColourButton(nobleGase, buttonColourStr);
+  for (auto nobleGas : nobleGases) {
+    ColourButton(nobleGas, buttonColourStr);
     update();
   }
 }

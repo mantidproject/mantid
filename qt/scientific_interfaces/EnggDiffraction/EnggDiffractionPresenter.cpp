@@ -682,10 +682,9 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (char &i : filename) {
-          char *str = &i;
-          if (std::isdigit(*str)) {
-            run_number += i;
+        for (const char &ch : filename) {
+          if (std::isdigit(ch)) {
+            run_number += ch;
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
@@ -736,10 +735,9 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (char &i : filename) {
-          char *str = &i;
-          if (std::isdigit(*str)) {
-            run_number += i;
+        for (const char &ch : filename) {
+          if (std::isdigit(ch)) {
+            run_number += ch;
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
@@ -1462,7 +1460,7 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
   std::vector<std::string> res;
   res.reserve(bankIDs.size());
   std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
-  for (unsigned long long bankID : bankIDs) {
+  for (auto bankID : bankIDs) {
     res.emplace_back(prefix + boost::lexical_cast<std::string>(bankID) +
                      ".nxs");
   }
