@@ -401,7 +401,7 @@ detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
 }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
-                                 std::vector<Kernel::V3D> &, double &,
+                                 std::vector<Kernel::V3D> &, double &, double &,
                                  double &) const {
 
   throw std::runtime_error("Not implemented");

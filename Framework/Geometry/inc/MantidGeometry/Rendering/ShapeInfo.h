@@ -92,10 +92,8 @@ public:
   GeometryShape shape() const;
 
   void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
-                         double &innerRadius, double &outerRadius,
+                         double &innerRadius, double &radius,
                          double &height) const;
-  void getObjectGeometry(GeometryShape &shape, std::vector<Kernel::V3D> &points,
-                         double &radius, double &height) const;
 
   CuboidGeometry cuboidGeometry() const;
   HexahedronGeometry hexahedronGeometry() const;

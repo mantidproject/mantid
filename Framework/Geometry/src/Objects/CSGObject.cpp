@@ -1014,12 +1014,12 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
   }
 
   // If the object is a simple shape use the special methods
-  double height(0.0), radius(0.0);
+  double height(0.0), radius(0.0), innerRadius(0.0);
   detail::ShapeInfo::GeometryShape type;
   std::vector<Mantid::Kernel::V3D> geometry_vectors;
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
-  this->GetObjectGeom(type, geometry_vectors, radius, height);
+  this->GetObjectGeom(type, geometry_vectors, innerRadius, radius, height);
   auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
   switch (type) {
@@ -1113,10 +1113,10 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
   // and Cone cases as well.
   //
   if (nTri == 0) {
-    double height = 0.0, radius(0.0);
+    double height = 0.0, radius(0.0), innerRadius;
     detail::ShapeInfo::GeometryShape type;
     std::vector<Kernel::V3D> vectors;
-    this->GetObjectGeom(type, vectors, radius, height);
+    this->GetObjectGeom(type, vectors, innerRadius, radius, height);
     switch (type) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
@@ -1506,8 +1506,9 @@ double CSGObject::volume() const {
   detail::ShapeInfo::GeometryShape type;
   double height;
   double radius;
+  double innerRadius;
   std::vector<Kernel::V3D> vectors;
-  this->GetObjectGeom(type, vectors, radius, height);
+  this->GetObjectGeom(type, vectors, innerRadius, radius, height);
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
@@ -1543,6 +1544,8 @@ double CSGObject::volume() const {
     return 4.0 / 3.0 * M_PI * radius * radius * radius;
   case detail::ShapeInfo::GeometryShape::CYLINDER:
     return M_PI * radius * radius * height;
+  case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+    return M_PI * height * (radius * radius - innerRadius * innerRadius);
   default:
     // Fall back to Monte Carlo method.
     return monteCarloVolume();
@@ -1774,9 +1777,10 @@ void CSGObject::calcBoundingBoxByGeometry() {
   std::vector<Kernel::V3D> vectors;
   double radius;
   double height;
+  double innerRadius;
 
   // Will only work for shapes with ShapeInfo
-  m_handler->GetObjectGeom(type, vectors, radius, height);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
   // Type of shape is given as a simple integer
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
@@ -2022,6 +2026,7 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
       break;
     case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
       point = RandomPoint::inHollowCylinder(m_handler->shapeInfo(), rng);
+      break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
       point = RandomPoint::inSphere(m_handler->shapeInfo(), rng);
       break;
@@ -2067,7 +2072,8 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
     std::vector<Kernel::V3D> shapeVectors;
     double radius;
     double height;
-    GetObjectGeom(shape, shapeVectors, radius, height);
+    double innerRadius;
+    GetObjectGeom(shape, shapeVectors, innerRadius, radius, height);
     switch (shape) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       point = RandomPoint::bounded<RandomPoint::inCuboid>(
@@ -2075,6 +2081,10 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
       point = RandomPoint::bounded<RandomPoint::inCylinder>(
+          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+      break;
+    case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+      point = RandomPoint::bounded<RandomPoint::inHollowCylinder>(
           m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
@@ -2253,11 +2263,12 @@ const detail::ShapeInfo &CSGObject::shapeInfo() const {
  */
 void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                               std::vector<Kernel::V3D> &vectors,
-                              double &myradius, double &myheight) const {
+                              double &innerRadius, double &radius,
+                              double &height) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
-  m_handler->GetObjectGeom(type, vectors, myradius, myheight);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
 }
 
 /** Getter for the shape xml

@@ -63,16 +63,16 @@ public:
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     ShapeInfo::GeometryShape objType;
-    double radius(-1.0), height(-1.0);
+    double radius(-1.0), height(-1.0), innerRadius(0.0);
     std::vector<V3D> pts;
     auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original.GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, innerRadius, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
     // The copy should be a primitive object with a GeometryHandler
-    copy.GetObjectGeom(objType, pts, radius, height);
+    copy.GetObjectGeom(objType, pts, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
     auto handlerCopy = copy.getGeometryHandler();
@@ -89,17 +89,17 @@ public:
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     ShapeInfo::GeometryShape objType;
-    double radius(-1.0), height(-1.0);
+    double radius(-1.0), height(-1.0), innerRadius(0.0);
     std::vector<V3D> pts;
     auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original.GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, innerRadius, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
-    lhs.GetObjectGeom(objType, pts, radius, height);
+    lhs.GetObjectGeom(objType, pts, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);

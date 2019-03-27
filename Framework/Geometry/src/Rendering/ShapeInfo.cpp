@@ -30,21 +30,12 @@ ShapeInfo::GeometryShape ShapeInfo::shape() const { return m_shape; }
 
 void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
                                   std::vector<Kernel::V3D> &points,
-                                  double &radius, double &height) const {
-  shape = m_shape;
-  points = m_points;
-  radius = m_radius;
-  height = m_height;
-}
-
-void ShapeInfo::getObjectGeometry(ShapeInfo::GeometryShape &shape,
-                                  std::vector<Kernel::V3D> &points,
-                                  double &innerRadius, double &outerRadius,
+                                  double &innerRadius, double &radius,
                                   double &height) const {
   shape = m_shape;
   points = m_points;
   innerRadius = m_innerRadius;
-  outerRadius = m_radius;
+  radius = m_radius;
   height = m_height;
 }
 

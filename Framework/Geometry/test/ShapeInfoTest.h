@@ -135,17 +135,20 @@ public:
     double radius = 10;
     shapeInfo.setSphere(center, radius);
 
-    ShapeInfo::GeometryShape tshape;
-    std::vector<V3D> tpoints;
-    double theight;
-    double tradius;
+    ShapeInfo::GeometryShape testShape;
+    std::vector<V3D> testPoints;
+    double testHeight;
+    double testRadius;
+    double testInnerRadius;
 
-    shapeInfo.getObjectGeometry(tshape, tpoints, tradius, theight);
-    TS_ASSERT_EQUALS(tradius, radius);
-    TS_ASSERT(theight == 0);
-    TS_ASSERT(tpoints.size() == 1);
-    TS_ASSERT_EQUALS(tpoints[0], center);
-    TS_ASSERT_EQUALS(tshape, ShapeInfo::GeometryShape::SPHERE);
+    shapeInfo.getObjectGeometry(testShape, testPoints, testInnerRadius,
+                                testRadius, testHeight);
+    TS_ASSERT_EQUALS(testRadius, radius);
+    TS_ASSERT_EQUALS(testHeight, 0);
+    TS_ASSERT_EQUALS(testInnerRadius, 0);
+    TS_ASSERT(testPoints.size() == 1);
+    TS_ASSERT_EQUALS(testPoints[0], center);
+    TS_ASSERT_EQUALS(testShape, ShapeInfo::GeometryShape::SPHERE);
   }
 
   void testGetObjectGeometryForCylinders() {
@@ -158,21 +161,21 @@ public:
     shapeInfo.setHollowCylinder(centreBottomBase, symmetryAxis, innerRadius,
                                 outerRadius, height);
 
-    ShapeInfo::GeometryShape tshape;
-    std::vector<V3D> tpoints;
-    double theight;
+    ShapeInfo::GeometryShape testShape;
+    std::vector<V3D> testPoints;
+    double testHeight;
     double tinnerRadius;
     double touterRadius;
 
-    shapeInfo.getObjectGeometry(tshape, tpoints, tinnerRadius, touterRadius,
-                                theight);
+    shapeInfo.getObjectGeometry(testShape, testPoints, tinnerRadius,
+                                touterRadius, testHeight);
     TS_ASSERT_EQUALS(tinnerRadius, innerRadius);
     TS_ASSERT_EQUALS(touterRadius, outerRadius);
-    TS_ASSERT_EQUALS(theight, height);
-    TS_ASSERT(tpoints.size() == 2);
-    TS_ASSERT_EQUALS(tpoints[0], centreBottomBase);
-    TS_ASSERT_EQUALS(tpoints[1], symmetryAxis);
-    TS_ASSERT_EQUALS(tshape, ShapeInfo::GeometryShape::HOLLOWCYLINDER);
+    TS_ASSERT_EQUALS(testHeight, height);
+    TS_ASSERT(testPoints.size() == 2);
+    TS_ASSERT_EQUALS(testPoints[0], centreBottomBase);
+    TS_ASSERT_EQUALS(testPoints[1], symmetryAxis);
+    TS_ASSERT_EQUALS(testShape, ShapeInfo::GeometryShape::HOLLOWCYLINDER);
   }
 
   void testCuboidGeometry() {
