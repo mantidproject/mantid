@@ -45,7 +45,7 @@ from mantid.simpleapi import (
     Stitch1DMany
 )
 import ReflectometryILL_common as common
-from ReflectometryILLPreprocess import BkgMethod, Prop
+from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
 from ReflectometryILLSumForeground import SumType
 import numpy
 
@@ -541,13 +541,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().notice('Using Bragg angle : {} degree'.format(twoT / 2.))
             return twoT
 
-    def finalize(self):
-        """Remove all intermediate workspace, if required."""
-        if self.getPropertyValue(Prop.CLEANUP) == common.WSCleanup.ON:
-            for workspace in mtd.getObjectNames():
-                if '__' in workspace:
-                    AnalysisDataService.remove(workspace)
-
     def isPolarized(self):
         """Return True, if a polarization file is given and False otherwise."""
         if self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value == "":
@@ -557,8 +550,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
-        subalgLogging = self.getPropertyValue(Prop.SUBALG_LOGGING)
-        cleanup = self.getPropertyValue(Prop.CLEANUP)
+        subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value
+        cleanup = self.getProperty(Prop.CLEANUP).value
+        autoCleanup = common.WSCleanup(cleanup, subalgLogging == SubalgLogging.ON)
+        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        names = common.WSNameSource(wsPrefix, cleanup)
+
         rb = self.getProperty(PropAutoProcess.RB).value
         workflowProgress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
         db = self.getProperty(PropAutoProcess.DB).value
@@ -586,17 +583,16 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             directBeamInput = self.angleOrMergeRuns(db[angle])
             reflectedBeamInput = self.angleOrMergeRuns(rb[angle])
 
+            directBeamName = 'direct-{}-angle-{}'.format(runDB, angle)
+            directForegroundName = 'direct-{}-angle-{}-foreground'.format(runDB, angle)
             # Direct beam already in ADS?
             workspaces = mtd.getObjectNames()
-            if '__direct-{}-angle-{}'.format(runDB, angle) not in workspaces:
-                self.log().notice('Direct beam __direct-{}-angle-{} not cached in AnalysisDataService.'.format(runDB,
-                                                                                                               angle))
-                # The cached value could be used, if the parameters of the angles correspond
-
+            if directBeamName not in workspaces:
+                self.log().notice('Direct beam {} not cached in AnalysisDataService.'.format(directBeamName))
                 # Direct beam pre-processing
                 ReflectometryILLPreprocess(
                     Run=directBeamInput,
-                    OutputWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
+                    OutputWorkspace=directBeamName,
                     ForegroundHalfWidth=halfWidthsDirect,
                     SlitNormalisation=slitNorm,
                     FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
@@ -609,20 +605,22 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     SubalgorithmLogging=subalgLogging,
                     Cleanup=cleanup,
                 )
+                autoCleanup.protect(directBeamName)
                 # Direct sum foreground
                 ReflectometryILLSumForeground(
-                    InputWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
-                    OutputWorkspace='__direct-{}-angle-{}-foreground'.format(runDB, angle),
+                    InputWorkspace=directBeamName,
+                    OutputWorkspace=directForegroundName,
                     SummationType=SumType.IN_LAMBDA,
                     WavelengthRange=wavelengthRange,
                     SubalgorithmLogging=subalgLogging,
                     Cleanup=cleanup,
                 )
+                autoCleanup.protect(directForegroundName)
                 # Direct beam polarization correction
                 if self.isPolarized():
                     ReflectometryILLPolarizationCor(
-                        InputWorkspaces='__direct-{}-angle-{}-foreground'.format(runDB, angle),
-                        OutputWorkspace='__direct-{}-angle-{}-polcor'.format(runDB, angle),
+                        InputWorkspaces=directForegroundName,
+                        OutputWorkspace='direct-{}-angle-{}-polcor'.format(runDB, angle),
                         EfficiencyFile=self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value,
                         SubalgorithmLogging=subalgLogging,
                         Cleanup=cleanup,
@@ -631,10 +629,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if not self.isPolarized():
                 ReflectometryILLPreprocess(
                     Run=reflectedBeamInput,
-                    OutputWorkspace='__reflected-{}'.format(runRB),
+                    OutputWorkspace='reflected-{}'.format(runRB),
                     TwoTheta=twoTheta,
                     LinePosition=linePosition,
-                    DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
+                    DirectLineWorkspace=directBeamName,
                     ForegroundHalfWidth=halfWidthsReflected,
                     SlitNormalisation=slitNorm,
                     FluxNormalisation=self.getProperty(Prop.FLUX_NORM_METHOD).value,
@@ -648,25 +646,27 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     Cleanup=cleanup,
                 )
                 # Reflected sum foreground
-                workspaceNamesForQConversion = '__reflected-{}-foreground'.format(runRB)
+                workspaceNamesForQConversion = 'reflected-{}-foreground'.format(runRB)
                 ReflectometryILLSumForeground(
-                    InputWorkspace='__reflected-{}'.format(runRB),
+                    InputWorkspace='reflected-{}'.format(runRB),
                     OutputWorkspace=workspaceNamesForQConversion,
                     SummationType=self.getValue(PropAutoProcess.SUM_TYPE, angle),
-                    DirectForegroundWorkspace='__direct-{}-angle-{}-foreground'.format(runDB, angle),
-                    DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
+                    DirectForegroundWorkspace=directForegroundName,
+                    DirectLineWorkspace=directBeamName,
                     WavelengthRange=wavelengthRange,
                     SubalgorithmLogging=subalgLogging,
                     Cleanup=cleanup,
                 )
+                autoCleanup.cleanupLater('reflected-{}'.format(runRB))
+                autoCleanup.cleanupLater('reflected-{}-foreground'.format(runRB))
             else:
                 for run in reflectedBeamInput:
                     ReflectometryILLPreprocess(
                         Run=run,
                         TwoTheta=twoTheta,
                         LinePosition=linePosition,
-                        OutputWorkspace='__{}'.format(run),
-                        DirectLineWorkspace='__direct-{}- angle-{}'.format(runDB, angle),
+                        OutputWorkspace='{}'.format(run),
+                        DirectLineWorkspace=directBeamName,
                         ForegroundHalfWidth=halfWidthsReflected,
                         SlitNormalisation=slitNorm,
                         LowAngleBkgOffset=int(self.getValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED, angle)),
@@ -680,47 +680,50 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     )
                     # Reflected sum foreground
                     ReflectometryILLSumForeground(
-                        InputWorkspace='__{}'.format(run),
-                        OutputWorkspace='__reflected-{}-foreground'.format(run),
+                        InputWorkspace='{}'.format(run),
+                        OutputWorkspace='reflected-{}-foreground'.format(run),
                         SummationType=self.getValue(PropAutoProcess.SUM_TYPE, angle),
-                        DirectForegroundWorkspace='__direct-{}-angle-{}-foreground'.format(runDB, angle),
-                        DirectLineWorkspace='__direct-{}-angle-{}'.format(runDB, angle),
+                        DirectForegroundWorkspace=directForegroundName,
+                        DirectLineWorkspace=directBeamName,
                         WavelengthRange=wavelengthRange,
                         SubalgorithmLogging=subalgLogging,
                         Cleanup=cleanup,
                     )
+                    autoCleanup.cleanupLater('{}'.format(run))
+                    autoCleanup.cleanupLater('reflected-{}-foreground'.format(run))
                 # Reflected polarization correction
-                inputWorkspaces = '__reflected-{}-foreground'.format(runRB)
+                inputWorkspaces = 'reflected-{}-foreground'.format(runRB)
                 if len(reflectedBeamInput) > 1:
                     for r in self._reflecteds:
                         inputWorkspaces = ',{}'.join(rb)
-                        inputWorkspaces += ',' + '__reflected-{}-foreground'.format(r)
+                        inputWorkspaces += ',' + 'reflected-{}-foreground'.format(r)
                 ReflectometryILLPolarizationCor(
                     InputWorkspaces=inputWorkspaces,
-                    OutputWorkspace='__reflected-polcor'.format(),
+                    OutputWorkspace='reflected-polcor'.format(),
                     EfficiencyFile=self.getProperty(PropAutoProcess.EFFICIENCY_FILE).value,
                     SubalgorithmLogging=subalgLogging,
                     Cleanup=cleanup,
                 )
-                polCorGroup = mtd['__reflected-polcor']
+                polCorGroup = mtd['reflected-polcor']
                 workspaceNamesForQConversion = polCorGroup.getNames()
             # Conversion to Q
-            outWS = '__Angle-{}'.format(angle)
+            outWS = 'Angle-{}'.format(angle)
             ReflectometryILLConvertToQ(
                 InputWorkspace=workspaceNamesForQConversion,
                 OutputWorkspace=outWS,
-                DirectForegroundWorkspace='__direct-{}-angle-{}-foreground'.format(runDB, angle),
+                DirectForegroundWorkspace=directForegroundName,
                 GroupingQFraction=float(self.getValue(PropAutoProcess.GROUPING_FRACTION, angle)),
                 SubalgorithmLogging=subalgLogging,
                 Cleanup=cleanup,
             )
             toStitch.append(outWS)
+            autoCleanup.cleanupLater(outWS)
             workflowProgress.report()
 
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        if len(rb) > 100:
+        if len(rb) > 1:
             ','.join(toStitch)
-            # need to defined reduction.two_theta for stitched angles, list
+            # Stitch could list sample log infos of reduction.two_theta , reduction.line_position, ...
             Stitch1DMany(
                 InputWorkspaces=toStitch,
                 OutputWorkspace='{}'.format(wsPrefix),
@@ -729,6 +732,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 UseManualScaleFactors=self.getProperty(PropAutoProcess.USE_MANUAL_SCALE_FACTORS).value,
                 ManualScaleFactors=self.getProperty(PropAutoProcess.MANUAL_SCALE_FACTORS).value,
             )
+            autoCleanup.cleanupLater(toStitch)
         else:
             RenameWorkspace(
                 InputWorkspace='{}'.format(toStitch[0]),
@@ -742,6 +746,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 Factor=scaleFactor,
             )
         self.setProperty(Prop.OUTPUT_WS, wsPrefix)
-        self.finalize()
+        autoCleanup.finalCleanup()
 
 AlgorithmFactory.subscribe(ReflectometryILLAutoProcess)

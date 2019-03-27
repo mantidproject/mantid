@@ -29,7 +29,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
+                                                 'outWS'])
         mtd.clear()
 
     def testSampleAngle(self):
@@ -43,7 +45,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
+                                                 'outWS'])
         mtd.clear()
 
     def testUndefinedAngleOption(self):
@@ -68,7 +72,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369317370-angle-0',
+                                                 'direct-317369317370-angle-0-foreground',
+                                                 'outWS'])
         mtd.clear()
 
     def testSingleAngleMergeTwoRuns(self):
@@ -81,7 +87,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
+                                                 'outWS'])
         mtd.clear()
 
     def testTwoAnglesMergeOneRun(self):
@@ -94,8 +102,11 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        print(mtd.getObjectNames())
-        self.assertEquals(mtd.getObjectNames(), ['outWS'])
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
+                                                 'direct-317370-angle-1',
+                                                 'direct-317370-angle-1-foreground',
+                                                 'outWS'])
         mtd.clear()
 
     def testMultipleAngles(self):
