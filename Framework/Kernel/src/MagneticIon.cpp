@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MagneticIon.h"
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <sstream>
