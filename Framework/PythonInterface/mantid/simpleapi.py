@@ -38,17 +38,17 @@ from six import iteritems
 
 import mantid
 # This is a simple API so give access to the aliases by default as well
-from mantid import __gui__, api as _api, kernel as _kernel
-from mantid.api._aliases import *
-from mantid.fitfunctions import *
+from mantid import __gui__, api as _api, kernel as _kernel, apiVersion
 from mantid.kernel import plugins as _plugin_helper
-from mantid.kernel._aliases import *
 from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_info as _lhs_info, \
     replace_signature as _replace_signature
 from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 
 # register matplotlib projection
 from . import plots  # noqa
+from mantid.kernel._aliases import *
+from mantid.api._aliases import *
+from mantid.fitfunctions import *
 
 MODULE_NAME = 'simpleapi'
 

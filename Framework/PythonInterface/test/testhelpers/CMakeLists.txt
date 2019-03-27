@@ -14,6 +14,9 @@ set ( PY_FILES
 # Copy python files to output directory
 set ( OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers )
 
+# Copy the files for the testhelpers to the build directory
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} PYTHON_INSTALL_FILES )
+
 #############################################################################################
 # Create the targets for this directory
 #############################################################################################
