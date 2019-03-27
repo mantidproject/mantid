@@ -165,7 +165,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              doc='A user-defined scattering angle 2 theta (unit degrees).')
         self.declareProperty(name=Prop.LINE_POSITION,
                              defaultValue=Property.EMPTY_DBL,
-                             doc='A workspace index corresponding to the beam centre between 0.0 and 255.0.')
+                             doc='A fractional workspace index corresponding to the beam centre between 0 and 255.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_LINE_WORKSPACE,
                                                      defaultValue='',
                                                      direction=Direction.Input,
@@ -408,7 +408,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 RangeLower=xmin,
                 RangeUpper=xmax,
                 StartWorkspaceIndex=self.getProperty(Prop.START_WS_INDEX).value,
-                EndWorkspaceIndex=self.getProperty(Prop.END_WS_INDEX).value
+                EndWorkspaceIndex=self.getProperty(Prop.END_WS_INDEX).value,
+                EnableLogging=self._subalgLogging
             )
             linePosition = peak.LineCentre
             self._cleanup.cleanup(peak.OutputWorkspace)
@@ -442,7 +443,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
-            'DetectorFacesSample': True
+            'DetectorFacesSample': True,
+            'EnableLogging': self._subalgLogging
         }
         if not self.getProperty(Prop.TWO_THETA).isDefault:
             # We should use user angle
@@ -468,13 +470,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         calibratedWS = SpecularReflectionPositionCorrect(
             InputWorkspace=ws,
             OutputWorkspace=calibratedWSName,
-            EnableLogging=self._subalgLogging,
             DetectorComponentName='detector',
             DirectLineWorkspace=directLineWS,
             DirectLinePosition=directLine,
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorCorrectionType='RotateAroundSample',
-            DetectorFacesSample=True
+            DetectorFacesSample=True,
+            EnableLogging=self._subalgLogging
         )
         self._cleanup.cleanup(ws)
         return calibratedWS
