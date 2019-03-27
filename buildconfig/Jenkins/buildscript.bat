@@ -94,6 +94,8 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 ::                   from bin and can cause random failures
 ::   - build/ExternalData/**: data files will change over time and removing
 ::                            the links helps keep it fresh
+::   - build/Testing/**: old ctest xml files will change over time and removing
+::                       the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set BUILD_DIR_REL=build
 set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
@@ -118,7 +120,7 @@ if "!CLEANBUILD!" == "yes" (
 
 if EXIST %BUILD_DIR% (
   git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
-  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData %BUILD_DIR%\Testing
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-prefix
@@ -210,7 +212,7 @@ mkdir %CONFIGDIR%\mantid
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
 
-call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+call ctest.exe -C %BUILD_CONFIG% -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
