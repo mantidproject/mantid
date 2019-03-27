@@ -151,7 +151,7 @@ class BASISReduction2Test(systemtesting.MantidSystemTest, PreppingMixin):
     chaarge normalization, (3) vanadium normalization"""
 
     def __init__(self):
-        super(BASISReduction1Test, self).__init__()
+        super(BASISReduction2Test, self).__init__()
         self.config = None
         self.prepset('BASISReduction')
 
