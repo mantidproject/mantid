@@ -1059,9 +1059,7 @@ target_link_libraries(Algorithms
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 mtd_install_targets(TARGETS
                     Algorithms
