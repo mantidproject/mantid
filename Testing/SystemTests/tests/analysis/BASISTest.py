@@ -121,7 +121,7 @@ class BASISReduction1Test(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_111.xml',
-                'BSS_79827_event.nxs'
+                'BSS_79827_event.nxs',
                 'BSS_64642_event.nxs',
                 'BASIS_79827_divided_sqw.nxs']
 
@@ -155,7 +155,7 @@ class BASISReduction2Test(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_311.xml',
-                'BSS_56748_event.nxs'
+                'BSS_56748_event.nxs',
                 'BSS_78379_event.nxs',
                 'BASIS_56748_divided_sqw.nxs']
 
@@ -189,7 +189,7 @@ class BASISReduction3Test(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_111.xml',
-                'BSS_90177.nxs.h5'
+                'BSS_90177.nxs.h5',
                 'BSS_90176.nxs.h5',
                 'BASIS_90177_divided_sqw.nxs']
 
@@ -223,7 +223,7 @@ class BASISReduction4Test(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_311.xml',
-                'BSS_90178.nxs.h5'
+                'BSS_90178.nxs.h5',
                 'BSS_90176.nxs.h5',
                 'BASIS_90178_divided_sqw.nxs']
 
