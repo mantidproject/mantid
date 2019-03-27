@@ -49,7 +49,7 @@ void ErrorCurve::setErrorBars(const std::vector<double> &errors) {
 
 /// Draw this curve
 void ErrorCurve::draw(QPainter *painter, const QwtScaleMap &xMap,
-                      const QwtScaleMap &yMap, const QRect &) const {
+                      const QwtScaleMap &yMap, const QRect & /*canvasRect*/) const {
   if (m_e.empty())
     return;
   painter->save();

@@ -46,16 +46,16 @@ public:
   bool isVisible() { return m_visible; }
 
 signals:
-  void minValueChanged(double);
-  void maxValueChanged(double);
-  void rangeChanged(double, double);
-  void selectionChanged(double, double);
-  void selectionChangedLazy(double, double);
+  void minValueChanged(double /*_t1*/);
+  void maxValueChanged(double /*_t1*/);
+  void rangeChanged(double /*_t1*/, double /*_t2*/);
+  void selectionChanged(double /*_t1*/, double /*_t2*/);
+  void selectionChangedLazy(double /*_t1*/, double /*_t2*/);
 
 public slots:
-  void setRange(double, double);
-  void setMinimum(double); ///< outside setting of value
-  void setMaximum(double); ///< outside setting of value
+  void setRange(double /*min*/, double /*max*/);
+  void setMinimum(double /*val*/); ///< outside setting of value
+  void setMaximum(double /*val*/); ///< outside setting of value
   void reapply();          ///< re-apply the range selector lines
   void detach();           ///< Detach range selector lines from the plot
   void setColour(QColor colour);
@@ -67,13 +67,13 @@ private:
   void setMin(double val);
   void setMax(double val);
   void setMaxMin(const double min, const double max);
-  void setMinLinePos(double);
-  void setMaxLinePos(double);
+  void setMinLinePos(double /*val*/);
+  void setMaxLinePos(double /*val*/);
   void verify();
-  bool inRange(double);
-  bool changingMin(double, double);
-  bool changingMax(double, double);
-  bool eventFilter(QObject *, QEvent *) override;
+  bool inRange(double /*x*/);
+  bool changingMin(double /*x*/, double /*xPlusdx*/);
+  bool changingMax(double /*x*/, double /*xPlusdx*/);
+  bool eventFilter(QObject * /*unused*/, QEvent * /*unused*/) override;
 
   // MEMBER ATTRIBUTES
   SelectType m_type; ///< type of selection widget is for
