@@ -92,7 +92,6 @@ using Mantid::API::WorkspaceProperty;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM({})
 """.format(classname)
-    algorithm_top = ""
     algorithm_source = """
 //----------------------------------------------------------------------------------------------
 
@@ -135,6 +134,7 @@ void {algname}::exec() {{
 """.format(algname=classname)
 
     if not args.alg:
+        algorithm_top = ""
         algorithm_source = ""
 
     # ------- Now the normal class text ------------------------------
