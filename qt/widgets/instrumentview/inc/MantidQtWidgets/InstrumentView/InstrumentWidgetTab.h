@@ -34,13 +34,13 @@ public:
   /// Use it for surface-specific initialization
   virtual void initSurface() {}
   /// Save tab's persistent settings to the provided QSettings instance
-  virtual void saveSettings(QSettings &) const {}
+  virtual void saveSettings(QSettings & /*unused*/) const {}
   /// Load (read and apply) tab's persistent settings from the provided
   /// QSettings instance
-  virtual void loadSettings(const QSettings &) {}
+  virtual void loadSettings(const QSettings & /*unused*/) {}
   /// Add tab-specific items to the context menu
   /// Return true if at least 1 item was added or false otherwise.
-  virtual bool addToDisplayContextMenu(QMenu &) const { return false; }
+  virtual bool addToDisplayContextMenu(QMenu & /*unused*/) const { return false; }
   /// Get the projection surface
   boost::shared_ptr<ProjectionSurface> getSurface() const;
   /// Load state for the widget tab from a project file

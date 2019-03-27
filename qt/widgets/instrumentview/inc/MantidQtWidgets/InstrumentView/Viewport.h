@@ -50,13 +50,13 @@ public:
   Viewport(int w,
            int h); ///< Constructor with Width (w) and Height(h) as inputs
                    /// Called by the display device when viewport is resized
-  void resize(int, int);
+  void resize(int /*w*/, int /*h*/);
   /// Get the viewport width and height.
   void getViewport(int &w, int &h) const;
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
-  void setProjection(double, double, double, double, double, double,
+  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/, double /*nearz*/, double /*farz*/,
                      ProjectionType type = Viewport::ORTHO);
   /// Set a projection.
   void setProjection(const Mantid::Kernel::V3D &minBounds,
@@ -107,15 +107,15 @@ public:
   /* Translation */
 
   /// Call when the mouse button is pressed to start translation
-  void initTranslateFrom(int, int);
+  void initTranslateFrom(int /*a*/, int /*b*/);
   /// Call when the mouse is moving during a translation
-  void generateTranslationTo(int, int);
+  void generateTranslationTo(int /*a*/, int /*b*/);
   /// Set translation programmatically
-  void setTranslation(double, double);
+  void setTranslation(double /*xval*/, double /*yval*/);
 
   // void getProjection(double&,double&,double&,double&,double&,double&);
-  void getInstantProjection(double &, double &, double &, double &, double &,
-                            double &) const;
+  void getInstantProjection(double & /*xmin*/, double & /*xmax*/, double & /*ymin*/, double & /*ymax*/, double & /*zmin*/,
+                            double & /*zmax*/) const;
 
   /// Apply the transformation to a vector
   void transform(Mantid::Kernel::V3D &pos) const;

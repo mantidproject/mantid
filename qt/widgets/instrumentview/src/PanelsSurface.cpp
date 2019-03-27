@@ -264,8 +264,8 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
-                            double &, double &) const {
+void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/,
+                            double & /*uscale*/, double & /*vscale*/) const {
   throw std::runtime_error(
       "Cannot project an arbitrary point to this surface.");
 }

@@ -285,14 +285,14 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
   painter.end();
 }
 
-void ProjectionSurface::resize(int, int) { updateView(); }
+void ProjectionSurface::resize(int /*unused*/, int /*unused*/) { updateView(); }
 
 /**
  * Draw the surface onto an image without OpenGL
  * @param image :: Image to draw on.
  * @param picking :: If true draw a picking image.
  */
-void ProjectionSurface::drawSimpleToImage(QImage *, bool) const {}
+void ProjectionSurface::drawSimpleToImage(QImage * /*unused*/, bool /*unused*/) const {}
 
 void ProjectionSurface::mousePressEvent(QMouseEvent *e) {
   getController()->mousePressEvent(e);
