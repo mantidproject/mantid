@@ -527,9 +527,7 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # This section deals with creating the MantidVersion implementation
-#
 
 # DON'T try to update the MantidVersion source file if we were not able to
 # determine it from git and the file already exists. This makes sure the version
@@ -541,20 +539,14 @@ if(NOT NOT_GIT_REPO
                  ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
 endif()
 
-#
 # This section deals with creating the PocoVersion implementation
-#
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h)
 
-#
 # This section deals with creating the ParaViewVersion implementation
-#
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp)
-#
 # This section deals with creating the GithubApiHelper implementation
-#
 
 if(WIN32)
   set(GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
@@ -566,9 +558,7 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h)
 
-#
 # Manipulate the Mantid.properties file to work wherever you build to
-#
 
 # This needs to be done as a 2-step process for it to work for VS builds First
 # the part that turns relative into absolute paths in the properties file
@@ -639,9 +629,7 @@ else()
        ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 endif()
 
-#
 # Installation settings
-#
 
 mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
