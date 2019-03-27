@@ -23,6 +23,6 @@ class HomeTabModel(object):
         return self._data.instrument
 
     def show_all_data(self):
-        self._data.show_raw_data()
+        self._context.show_raw_data()
         self._context.show_all_groups()
         self._context.show_all_pairs()

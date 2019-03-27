@@ -64,6 +64,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
+        self.gui_context['RebinType'] = 'None'
         self.group_pair_context = MuonGroupPairContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
