@@ -97,7 +97,7 @@ class AlgExecSummaryGrpBox : public QGroupBox {
   Q_OBJECT
 public:
   explicit AlgExecSummaryGrpBox(QWidget *w);
-  AlgExecSummaryGrpBox(QString, QWidget *w);
+  AlgExecSummaryGrpBox(QString /*title*/, QWidget *w);
   ~AlgExecSummaryGrpBox() override;
   void setData(const double execDuration,
                const Mantid::Types::Core::DateAndTime execDate);
@@ -118,7 +118,7 @@ class AlgEnvHistoryGrpBox : public QGroupBox {
   Q_OBJECT
 public:
   explicit AlgEnvHistoryGrpBox(QWidget *w);
-  AlgEnvHistoryGrpBox(QString, QWidget *w);
+  AlgEnvHistoryGrpBox(QString /*title*/, QWidget *w);
   ~AlgEnvHistoryGrpBox() override;
 
   QLineEdit *getosNameEdit() const { return m_osNameEdit; }
@@ -144,7 +144,7 @@ signals:
 
 public:
   AlgorithmHistoryWindow(QWidget *parent,
-                         const boost::shared_ptr<const Mantid::API::Workspace>);
+                         const boost::shared_ptr<const Mantid::API::Workspace> /*wsptr*/);
   AlgorithmHistoryWindow(QWidget *parent, const QString &workspaceName);
   ~AlgorithmHistoryWindow() override;
 

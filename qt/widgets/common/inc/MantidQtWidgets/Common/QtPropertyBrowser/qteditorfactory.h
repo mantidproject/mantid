@@ -701,8 +701,8 @@ class QtEnumEditorFactoryPrivate : public EditorFactoryPrivate<QComboBox> {
   Q_DECLARE_PUBLIC(QtEnumEditorFactory)
 public:
   void slotPropertyChanged(QtProperty *property, int value);
-  void slotEnumNamesChanged(QtProperty *property, const QStringList &);
-  void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &);
+  void slotEnumNamesChanged(QtProperty *property, const QStringList & /*enumNames*/);
+  void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> & /*enumIcons*/);
   void slotSetValue(int value);
 };
 

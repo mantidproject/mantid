@@ -39,11 +39,11 @@ public:
 
 signals:
   /// Signal emitted when the check box is toggled
-  void toggled(bool);
+  void toggled(bool /*_t1*/);
 
 public slots:
-  void on_menu_toggled(bool);
-  void on_button_toggled(bool);
+  void on_menu_toggled(bool /*val*/);
+  void on_button_toggled(bool /*val*/);
 
 private:
   QAction *m_menu;

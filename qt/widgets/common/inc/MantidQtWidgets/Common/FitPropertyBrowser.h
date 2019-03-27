@@ -150,7 +150,7 @@ public:
   /// Get the output name
   virtual std::string outputName() const;
   /// Set the output name
-  void setOutputName(const std::string &);
+  void setOutputName(const std::string & /*name*/);
   /// Get the minimizer
   std::string minimizer(bool withProperties = false) const;
   /// Get the ignore invalid data option
@@ -295,47 +295,47 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
-  virtual void executeFitMenu(const QString &);
-  void executeDisplayMenu(const QString &);
-  void executeSetupMenu(const QString &);
-  void executeSetupManageMenu(const QString &);
+  virtual void executeFitMenu(const QString & /*item*/);
+  void executeDisplayMenu(const QString & /*item*/);
+  void executeSetupMenu(const QString & /*item*/);
+  void executeSetupManageMenu(const QString & /*item*/);
 
 signals:
   void currentChanged() const;
   void functionRemoved();
-  void algorithmFinished(const QString &);
+  void algorithmFinished(const QString & /*_t1*/);
   void workspaceIndexChanged(int index);
   void updatePlotSpectrum(int index);
-  void workspaceNameChanged(const QString &);
+  void workspaceNameChanged(const QString & /*_t1*/);
 
-  void wsChangePPAssign(const QString &);
+  void wsChangePPAssign(const QString & /*_t1*/);
   void functionChanged();
 
-  void startXChanged(double);
-  void endXChanged(double);
-  void xRangeChanged(double, double);
-  void parameterChanged(const Mantid::API::IFunction *);
+  void startXChanged(double /*_t1*/);
+  void endXChanged(double /*_t1*/);
+  void xRangeChanged(double /*_t1*/, double /*_t2*/);
+  void parameterChanged(const Mantid::API::IFunction * /*_t1*/);
   void changedParameterOf(const QString &prefix);
   void functionCleared();
   void plotGuess();
   void plotCurrentGuess();
   void removeGuess();
   void removeCurrentGuess();
-  void changeWindowTitle(const QString &);
-  void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler *);
+  void changeWindowTitle(const QString & /*_t1*/);
+  void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler * /*_t1*/);
   void removeFitCurves();
 
-  void executeFit(QString, QHash<QString, QString>,
-                  Mantid::API::AlgorithmObserver *);
+  void executeFit(QString /*_t1*/, QHash<QString, QString> /*_t2*/,
+                  Mantid::API::AlgorithmObserver * /*_t3*/);
   void multifitFinished();
 
   /// signal which can optionally be caught for customization after a fit has
   /// been done
-  void fittingDone(const QString &);
+  void fittingDone(const QString & /*_t1*/);
   void functionFactoryUpdateReceived();
   void errorsEnabled(bool enabled);
   void fitUndone();
-  void functionLoaded(const QString &);
+  void functionLoaded(const QString & /*_t1*/);
   void fitResultsChanged(const QString &status);
 
 protected slots:
@@ -356,7 +356,7 @@ private slots:
   void stringChanged(QtProperty *prop);
   void filenameChanged(QtProperty *prop);
   void columnChanged(QtProperty *prop);
-  void currentItemChanged(QtBrowserItem *);
+  void currentItemChanged(QtBrowserItem * /*current*/);
   void vectorDoubleChanged(QtProperty *prop);
   void vectorSizeChanged(QtProperty *prop);
   void addTie();
@@ -394,7 +394,7 @@ private slots:
   void
   browserHelp(); ///< Open a web page with description of FitPropertyBrowser
 
-  void popupMenu(const QPoint &);
+  void popupMenu(const QPoint & /*unused*/);
   /* Context menu slots */
   void addFunction();
   void deleteFunction();
@@ -543,7 +543,7 @@ private:
   /// save function
   void saveFunction(const QString &fnName);
   /// Check if the workspace can be used in the fit
-  virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr) const;
+  virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr /*ws*/) const;
   /// Find QtBrowserItem for a property prop among the chidren of
   QtBrowserItem *findItem(QtBrowserItem *parent, QtProperty *prop) const;
 
@@ -569,7 +569,7 @@ private:
   QtProperty *getTieProperty(QtProperty *parProp) const;
 
   /// Callback for FunctionFactory update notifications
-  void handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr);
+  void handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr /*notice*/);
   /// Observes algorithm factory update notifications
   Poco::NObserver<FitPropertyBrowser,
                   Mantid::API::FunctionFactoryUpdateNotification>

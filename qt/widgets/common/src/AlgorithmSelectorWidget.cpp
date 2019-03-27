@@ -174,7 +174,7 @@ void AlgorithmSelectorWidget::setSelectedAlgorithm(QString &algName) {
  *
  */
 void AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate(
-    Mantid::API::AlgorithmFactoryUpdateNotification_ptr) {
+    Mantid::API::AlgorithmFactoryUpdateNotification_ptr /*unused*/) {
   emit algorithmFactoryUpdateReceived();
 }
 

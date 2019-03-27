@@ -35,7 +35,7 @@ public:
   void sendQPointSelection(bool lab_coords, double qx, double qy, double qz);
 
 signals:
-  void QPointSelection_signal(bool, double, double, double);
+  void QPointSelection_signal(bool /*_t1*/, double /*_t2*/, double /*_t3*/, double /*_t4*/);
 
 private:
   /// private constructor, since SelectionNotificationService is a singleton

@@ -26,7 +26,7 @@ public:
   LineEditWithClear(QWidget *parent = nullptr);
 
 protected:
-  void resizeEvent(QResizeEvent *) override;
+  void resizeEvent(QResizeEvent * /*unused*/) override;
 
 private slots:
   void updateCloseButton(const QString &text);

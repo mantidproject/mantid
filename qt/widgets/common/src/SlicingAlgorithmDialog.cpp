@@ -133,7 +133,7 @@ formattedAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr dim) {
  @return : empty string.
 */
 QString
-formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr) {
+formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr /*unused*/) {
   // Deliberately return an empty string here, because it's not obvious how the
   // basis vectors could be automatically formed.
   return QString("");
@@ -382,7 +382,7 @@ Event handler for the axis changed event.
 This event handler allows us to continually dynamically provide inputs depending
 upon the dimensionality.
 */
-void SlicingAlgorithmDialog::onAxisAlignedChanged(bool) {
+void SlicingAlgorithmDialog::onAxisAlignedChanged(bool /*unused*/) {
   buildDimensionInputs(this->doAutoFillDimensions());
 }
 
@@ -391,7 +391,7 @@ Event handler for changes so that recursion depth for the ouput workspace is
 either taken
 from the input workspace or from an external field.
 */
-void SlicingAlgorithmDialog::onMaxFromInput(bool) {
+void SlicingAlgorithmDialog::onMaxFromInput(bool /*unused*/) {
   const bool takeFromInputWorkspace = ui.ck_max_from_input->isChecked();
   ui.txt_resursion_depth->setEnabled(!takeFromInputWorkspace);
   ui.lbl_resursion_depth->setEnabled(!takeFromInputWorkspace);
@@ -404,7 +404,7 @@ void SlicingAlgorithmDialog::onRebuildDimensions() {
   buildDimensionInputs(true);
 }
 
-void SlicingAlgorithmDialog::onCalculateChanged(bool) {
+void SlicingAlgorithmDialog::onCalculateChanged(bool /*unused*/) {
   if (ui.ck_axis_aligned->isChecked())
     buildDimensionInputs(true);
 }

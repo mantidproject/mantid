@@ -86,7 +86,7 @@ void BatchAlgorithmRunner::executeBatchAsync() {
 /**
  * Implementation of sequential algorithm scheduler.
  */
-bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
+bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) {
   bool cancelFlag = false;
 
   for (auto it = m_algorithms.begin(); it != m_algorithms.end(); ++it) {

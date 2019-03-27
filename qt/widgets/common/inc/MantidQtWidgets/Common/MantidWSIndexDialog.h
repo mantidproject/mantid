@@ -73,15 +73,15 @@ public:
   /// Constructor - starting at start and ending at end.
   Interval(int start, int end);
   /// Constructor - attempts to parse given string to find start and end.
-  explicit Interval(QString);
+  explicit Interval(QString /*intervalString*/);
   /// Copy constructor
-  Interval(const Interval &);
+  Interval(const Interval & /*copy*/);
 
   /// Attempts to merge the given Interval with this Interval
-  bool merge(const Interval &);
+  bool merge(const Interval & /*other*/);
   /// Returns true if it is possible to merge the given Interval with this
   /// Interval, else false.
-  bool canMerge(const Interval &) const;
+  bool canMerge(const Interval & /*other*/) const;
   /// Returns the int marking the start of this Interval
   int start() const;
   /// Returns the int marking the end of this Interval
@@ -95,7 +95,7 @@ public:
   /// Returns true if this interval completely contains the interval passed
   /// to
   /// it, else false.
-  bool contains(const Interval &) const;
+  bool contains(const Interval & /*other*/) const;
 
   /// Returns a string which represents the start and end of this Interval
   std::string toStdString() const;
@@ -104,7 +104,7 @@ public:
 
 private:
   /// Initialise the Interval, given the specified start and end ints
-  void init(int, int);
+  void init(int /*start*/, int /*end*/);
 
   /// The start and end of the interval.
   int m_start, m_end;
@@ -115,11 +115,11 @@ public:
   /// Constructor - with empty list.
   IntervalList(void);
   /// Constructor - with a list created by parsing the input string
-  explicit IntervalList(QString);
+  explicit IntervalList(QString /*intervals*/);
   /// Constructor - with a list containing a single Interval
-  explicit IntervalList(Interval);
+  explicit IntervalList(Interval /*interval*/);
   /// Copy Constructor
-  IntervalList(const IntervalList &);
+  IntervalList(const IntervalList & /*copy*/);
 
   /// Returns a reference to the list of Intervals.
   const QList<Interval> &getList() const;
@@ -137,17 +137,17 @@ public:
   /// Add an interval starting and ending at single.
   void addInterval(int single);
   /// Add an interval
-  void addInterval(Interval);
+  void addInterval(Interval /*interval*/);
   /// Add an interval starting at start and ending at end.
   void addInterval(int start, int end);
   /// Attempts to parse the given string into a IntervalList to add.
-  void addIntervals(QString);
+  void addIntervals(QString /*intervals*/);
   /// Adds an IntervalList to this IntervalList.
-  void addIntervalList(const IntervalList &);
+  void addIntervalList(const IntervalList & /*intervals*/);
   /// Replaces the current list with the list belonging to given
   /// IntervalList
   /// object.
-  void setIntervalList(const IntervalList &);
+  void setIntervalList(const IntervalList & /*intervals*/);
   /// Clears the interval list
   void clear();
 
@@ -157,27 +157,27 @@ public:
   /// Returns true if this interval list completely contains the interval
   /// passed
   /// to it, else false.
-  bool contains(const Interval &) const;
+  bool contains(const Interval & /*other*/) const;
   /// Returns true if this interval list completely contains the interval
   /// list
   /// passed to it, else false.
-  bool contains(const IntervalList &) const;
+  bool contains(const IntervalList & /*other*/) const;
 
   /// Returns true if the QString can be parsed into an IntervalList, else
   /// false.
-  static bool isParsable(const QString &);
+  static bool isParsable(const QString & /*input*/);
   /// Returns true if the QString can be parsed into an IntervalList which
   /// can
   /// then be contained
   /// in the IntervalList given, else false.
-  static bool isParsable(const QString &, const IntervalList &);
+  static bool isParsable(const QString & /*input*/, const IntervalList & /*container*/);
 
   /// Returns an IntervalList which is the intersection of the given
   /// IntervalList and Interval
-  static IntervalList intersect(const IntervalList &, const Interval &);
+  static IntervalList intersect(const IntervalList & /*aList*/, const Interval & /*bInterval*/);
   /// Returns an IntervalList which is the intersection of the given
   /// IntervalLists
-  static IntervalList intersect(const IntervalList &, const IntervalList &);
+  static IntervalList intersect(const IntervalList & /*a*/, const IntervalList & /*b*/);
 
 private:
   /// A list of all the Intervals in this IntervalList
@@ -193,7 +193,7 @@ public:
   IntervalListValidator(QObject *parent, const IntervalList &intervals);
 
   /// Overriden method to validate a given QString, at a particular position
-  State validate(QString &, int &) const override;
+  State validate(QString & /*unused*/, int & /*unused*/) const override;
 
 private:
   /// The IntervalList against which to validate.
