@@ -125,12 +125,11 @@ Content ONCatEntity::getNestedContent(const Content &content,
   auto currentNode = content;
 
   // Use the path tokens to drill down through the JSON nodes.
-  for (auto pathToken = pathTokens.cbegin(); pathToken != pathTokens.cend();
-       ++pathToken) {
-    if (!currentNode.isMember(*pathToken)) {
+  for (const auto &pathToken : pathTokens) {
+    if (!currentNode.isMember(pathToken)) {
       throw ContentError("");
     }
-    currentNode = currentNode[*pathToken];
+    currentNode = currentNode[pathToken];
   }
 
   return currentNode;
