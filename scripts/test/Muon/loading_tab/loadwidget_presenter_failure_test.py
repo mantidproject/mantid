@@ -4,19 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from PyQt4 import QtGui
 import unittest
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-from PyQt4 import QtGui
-
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
-
+from mantid.py3compat import mock
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
@@ -29,6 +20,10 @@ from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
+
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 
 
 class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):

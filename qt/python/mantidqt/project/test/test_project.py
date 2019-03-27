@@ -9,7 +9,6 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
-import sys
 import tempfile
 import unittest
 
@@ -17,14 +16,8 @@ from qtpy.QtWidgets import QMessageBox
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
+from mantid.py3compat import mock
 from mantidqt.project.project import Project
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest import mock
-else:
-    # Python 2
-    import mock
 
 
 class FakeGlobalFigureManager(object):

@@ -74,9 +74,14 @@ IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent)
           Kernel::make_unique<Parallel::Communicator>(*parent.m_communicator)) {
   if (const auto parentSpectrumDefinitions = parent.spectrumDefinitions()) {
     m_spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>();
+    const auto &indexSet = parent.makeIndexSet(indices);
     auto &specDefs = m_spectrumDefinitions.access();
-    for (const auto i : parent.makeIndexSet(indices))
-      specDefs.push_back(parentSpectrumDefinitions->operator[](i));
+    specDefs.reserve(specDefs.size() + indexSet.size());
+    std::transform(indexSet.begin(), indexSet.end(),
+                   std::back_inserter(specDefs),
+                   [&parentSpectrumDefinitions](const auto index) {
+                     return (*parentSpectrumDefinitions)[index];
+                   });
   }
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(indices), *parent.m_spectrumNumberTranslator);

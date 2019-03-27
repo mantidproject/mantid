@@ -185,7 +185,7 @@ void UsageServiceImpl::sendFeatureUsageReport(const bool synchronous = false) {
   }
 }
 
-void UsageServiceImpl::timerCallback(Poco::Timer &) {
+void UsageServiceImpl::timerCallback(Poco::Timer & /*unused*/) {
   m_timerTicks++;
   if (m_timerTicks > m_timerTicksTarget) {
     // send startup report

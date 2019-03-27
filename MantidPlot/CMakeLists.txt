@@ -845,6 +845,7 @@ set_target_properties ( MantidPlot PROPERTIES FOLDER "Qt4" )
 # Custom Info.plist file for OS X
 ###########################################################################
 if( APPLE )
+  set ( MAC_BUNDLE_EXECUTABLE Mantid_osx_launcher )
   # Setting the CFBundleIdentifer attribute on OS X 10.6 (SL) and before
   # causes problems with trying to install the package on the same
   # machine as it was built. It tries to relocate the package to the build directory
@@ -860,7 +861,8 @@ if( APPLE )
   else()
     set ( MAC_BUNDLE_IDENTIFIER "" )
   endif()
-
+  set ( MAC_BUNDLE_ICON MantidPlot.icns )
+  set ( MAC_BUNDLE_NAME MantidPlot )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )

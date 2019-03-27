@@ -15,8 +15,6 @@
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <iostream>
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces::IDA;

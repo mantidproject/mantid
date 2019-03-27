@@ -58,19 +58,31 @@ else()
 endif()
 
 # Install MantidWorkbench for OSX
-if ( APPLE )
+if( APPLE )
+  set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
+  if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
+    set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
+  else()
+    set ( MAC_BUNDLE_IDENTIFIER "" )
+  endif()
+  set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
+  set ( MAC_BUNDLE_NAME MantidWorkbench )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+                   @ONLY )
 
-    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
-        ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
-        @ONLY )
-    install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidWorkbench.app/ )
-    install ( CODE "
-        set ( bundle \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app )
-        execute_process(COMMAND chmod +x ./make_package.rb WORKING_DIRECTORY \${bundle})
-        execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY \${bundle} RESULT_VARIABLE install_name_tool_result)
-        if(NOT install_name_tool_result EQUAL 0)
-          message(FATAL_ERROR \"Package script failed!!!\n\")
-        endif()
-    ")
+  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
+      ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
+      @ONLY )
+  install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidWorkbench.app/ )
+  install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION MantidWorkbench.app/Contents/ )
+  install ( CODE "
+      set ( bundle \${CMAKE_INSTALL_PREFIX}/MantidWorkbench.app )
+      execute_process(COMMAND chmod +x ./make_package.rb WORKING_DIRECTORY \${bundle})
+      execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY \${bundle} RESULT_VARIABLE install_name_tool_result)
+      if(NOT install_name_tool_result EQUAL 0)
+        message(FATAL_ERROR \"Package script failed!!!\n\")
+      endif()
+  ")
 
 endif()

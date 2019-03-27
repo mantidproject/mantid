@@ -243,6 +243,31 @@ double Material::absorbXSection(const double lambda) const {
   }
 }
 
+// NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
+// will cancel for mu to give units: cm^-1
+double Material::linearAbsorpCoef(const double lambda) const {
+  return absorbXSection(NeutronAtom::ReferenceLambda) * 100. * numberDensity() *
+         lambda / NeutronAtom::ReferenceLambda;
+}
+
+// This must match the values that come from the scalar version
+std::vector<double> Material::linearAbsorpCoef(
+    std::vector<double>::const_iterator lambdaBegin,
+    std::vector<double>::const_iterator lambdaEnd) const {
+  const double linearCoefByWL =
+      absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
+      numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
+
+  std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
+
+  std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
+                 [linearCoefByWL](const double lambda) {
+                   return linearCoefByWL * lambda;
+                 });
+
+  return linearCoef;
+}
+
 /// According to Sears eqn 12
 double Material::cohScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);

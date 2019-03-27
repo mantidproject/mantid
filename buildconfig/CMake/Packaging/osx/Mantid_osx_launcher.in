@@ -2,4 +2,4 @@
 
 INSTALLDIR=$(cd "$(dirname "$0")"; pwd)
 cd $INSTALLDIR
-./MantidPlot || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR --qtdir=$INSTALLDIR/../PlugIns
+./MantidPlot || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR --qtdir=$INSTALLDIR/../PlugIns --application=mantidplot

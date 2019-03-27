@@ -139,7 +139,6 @@ class ConfigServiceTest(unittest.TestCase):
                            'UpdateInstrumentDefinitions.URL', # shouldn't be changed by users
                            'docs.html.root', # shouldn't be changed by users
                            'errorreports.rooturl', # shouldn't be changed by users
-                           'openclKernelFiles.directory', # only available if OPENCL_BUILD is enabled
                            'usagereports.rooturl', # shouldn't be changed by users
                            'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
                            'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu

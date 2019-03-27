@@ -7,14 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class CentreFinderNewTest(unittest.TestCase):

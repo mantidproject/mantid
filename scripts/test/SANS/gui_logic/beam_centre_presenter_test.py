@@ -5,16 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class BeamCentrePresenterTest(unittest.TestCase):

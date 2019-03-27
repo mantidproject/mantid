@@ -203,8 +203,9 @@ void FunctionGenerator::setUpForFit() {
 }
 
 /// Declare a new parameter
-void FunctionGenerator::declareParameter(const std::string &, double,
-                                         const std::string &) {
+void FunctionGenerator::declareParameter(const std::string & /*name*/,
+                                         double /*initValue*/,
+                                         const std::string & /*description*/) {
   throw Kernel::Exception::NotImplementedError(
       "FunctionGenerator cannot not have its own parameters.");
 }

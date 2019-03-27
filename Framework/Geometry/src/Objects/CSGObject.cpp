@@ -18,6 +18,7 @@
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -36,7 +37,6 @@
 
 #include <array>
 #include <deque>
-#include <iostream>
 #include <random>
 #include <stack>
 
@@ -46,6 +46,9 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Geometry {
 
+namespace {
+Kernel::Logger logger("CSGObject");
+}
 /**
  *  Default constuctor
  */
@@ -522,8 +525,8 @@ int CSGObject::createSurfaceList(const int outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-      std::cerr << "Point == " << *vc << '\n';
-      std::cerr << (*vc)->getName() << '\n';
+      logger.debug() << "Point == " << *vc << '\n';
+      logger.debug() << (*vc)->getName() << '\n';
     }
   }
   return 1;
@@ -603,14 +606,14 @@ void CSGObject::print() const {
     }
   }
 
-  std::cout << "Name == " << ObjNum << '\n';
-  std::cout << "Rules == " << Rcount << '\n';
+  logger.debug() << "Name == " << ObjNum << '\n';
+  logger.debug() << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
-  std::cout << "Surface included == ";
+  logger.debug() << "Surface included == ";
   for (mc = Cells.begin(); mc < Cells.end(); ++mc) {
-    std::cout << (*mc) << " ";
+    logger.debug() << (*mc) << " ";
   }
-  std::cout << '\n';
+  logger.debug() << '\n';
 }
 
 /**
@@ -625,8 +628,8 @@ void CSGObject::makeComplement() {
  * Displays the rule tree
  */
 void CSGObject::printTree() const {
-  std::cout << "Name == " << ObjNum << '\n';
-  std::cout << TopRule->display() << '\n';
+  logger.debug() << "Name == " << ObjNum << '\n';
+  logger.debug() << TopRule->display() << '\n';
 }
 
 /**
