@@ -1327,7 +1327,6 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
       RepositoryEntry &entry = repo.at(fileToUpdate);
       entry.auto_update = option;
       updateLocalJson(fileToUpdate, entry);
-      // TODO: update local json without opening and closing file many times
     }
   } catch (const std::out_of_range &ex) {
     // fixme: readable exception
