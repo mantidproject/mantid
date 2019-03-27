@@ -31,7 +31,7 @@ from qtpy.QtWidgets import QApplication, QLabel
 from .figureinteraction import FigureInteraction
 from .figurewindow import FigureWindow
 from .qappthreadcall import QAppThreadCall
-from .toolbar import WorkbenchNavigationToolbar, ToolbarStateChecker
+from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 
 def _catch_exceptions(func):
@@ -200,8 +200,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateChecker(self.toolbar),
-                                              fig_manager=self)
+        self.fit_browser = FitPropertyBrowser(canvas,
+                                              ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)

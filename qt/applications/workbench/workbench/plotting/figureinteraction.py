@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QActionGroup, QMenu
 
 # local imports
 from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import ToolbarStateChecker
+from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
 AXES_SCALE_MENU_OPTS = OrderedDict([
@@ -57,7 +57,7 @@ class FigureInteraction(object):
                                              self.on_mouse_button_press))
 
         self.canvas = canvas
-        self.toolbar_checker = ToolbarStateChecker(self.canvas.toolbar)
+        self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
 
     @property
@@ -77,7 +77,7 @@ class FigureInteraction(object):
         # local variables to avoid constant self lookup
         canvas = self.canvas
         if (event.button == canvas.buttond[Qt.RightButton] and
-                self.toolbar_checker.is_tool_active() is False):
+                self.toolbar_manager.is_tool_active() is False):
             self._show_context_menu(event)
         elif event.dblclick and event.button == canvas.buttond[Qt.LeftButton]:
             self._show_axis_editor(event)
