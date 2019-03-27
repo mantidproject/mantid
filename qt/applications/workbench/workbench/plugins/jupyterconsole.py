@@ -10,6 +10,13 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
+import warnings
+warnings.filterwarnings(action='ignore',
+                        category=DeprecationWarning,
+                        module='ipykernel')
+warnings.filterwarnings(action='ignore',
+                        category=DeprecationWarning,
+                        module='.*jupyter.*')
 
 # third-party library imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole

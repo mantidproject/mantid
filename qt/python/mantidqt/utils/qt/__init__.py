@@ -15,6 +15,10 @@ from __future__ import absolute_import
 import os.path as osp
 from contextlib import contextmanager
 from importlib import import_module
+import warnings
+warnings.filterwarnings(action='ignore',
+                        category=DeprecationWarning,
+                        module='.*uic.*')
 
 # 3rd-party modules
 from qtpy import QT_VERSION
