@@ -78,7 +78,7 @@ public slots:
   void spectrumColorScale();
 
 signals:
-  void peakBackTofRangeUpdate(double, double, double, double, double, double);
+  void peakBackTofRangeUpdate(double /*_t1*/, double /*_t2*/, double /*_t3*/, double /*_t4*/, double /*_t5*/, double /*_t6*/);
 
 private:
   RefIVConnections() {}

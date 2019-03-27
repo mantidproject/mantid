@@ -43,15 +43,15 @@ public:
   void exitClearPeaksMode();
   void exitAddPeaksMode();
 signals:
-  void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
-  void peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor);
-  void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
-  void backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
-                              PeakViewColor);
-  void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
-  void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
-  void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool);
-  void zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int);
+  void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, QColor /*_t2*/);
+  void peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, PeakViewColor /*_t2*/);
+  void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, QColor /*_t2*/);
+  void backgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/,
+                              PeakViewColor /*_t2*/);
+  void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, bool /*_t2*/);
+  void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/);
+  void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, bool /*_t2*/);
+  void zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr /*_t1*/, int /*_t2*/);
 
 private:
   /// Populate the widget with model data.
@@ -88,12 +88,12 @@ private slots:
   void onBackgroundColorEllipsoidClicked();
   void onForegroundColorEllipsoidClicked();
 
-  void onShowBackgroundChanged(bool);
+  void onShowBackgroundChanged(bool /*show*/);
   void onRemoveWorkspaceClicked();
   void onToggleHideInPlot();
-  void onCurrentChanged(QModelIndex, QModelIndex);
-  void onClearPeaksToggled(bool);
-  void onAddPeaksToggled(bool);
+  void onCurrentChanged(QModelIndex /*index*/, QModelIndex /*unused*/);
+  void onClearPeaksToggled(bool /*on*/);
+  void onAddPeaksToggled(bool /*on*/);
 };
 
 } // namespace SliceViewer

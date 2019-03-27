@@ -43,15 +43,15 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER CompositePeaksPresenter
 public:
   // Overrriden methods from Peaks Presenter
   void update() override;
-  void updateWithSlicePoint(const PeakBoundingBox &) override;
+  void updateWithSlicePoint(const PeakBoundingBox & /*unused*/) override;
   bool changeShownDim(size_t dimX, size_t dimY) override;
   void setNonOrthogonal(bool nonOrthogonalEnabled) override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
-  virtual void setForegroundColor(const PeakViewColor) override {
+  virtual void setForegroundColor(const PeakViewColor /*unused*/) override {
     /*Do nothing*/
   }
-  virtual void setBackgroundColor(const PeakViewColor) override {
+  virtual void setBackgroundColor(const PeakViewColor /*unused*/) override {
     /*Do nothing*/
   }
   /// Get the foreground colour. This should never be used on the composite
@@ -66,9 +66,9 @@ public:
                        "composite presenter");
     return PeakViewColor();
   }
-  void showBackgroundRadius(const bool) override { /*Do nothing*/
+  void showBackgroundRadius(const bool /*shown*/) override { /*Do nothing*/
   }
-  void setShown(const bool) override { /*Do nothing*/
+  void setShown(const bool /*shown*/) override { /*Do nothing*/
   }
   PeakBoundingBox getBoundingBox(const int peakIndex) const override {
     return m_default->getBoundingBox(peakIndex);
@@ -76,12 +76,12 @@ public:
   bool getShowBackground() const override {
     return m_default->getShowBackground();
   }
-  void zoomToPeak(const int) override { /* Do nothing */
+  void zoomToPeak(const int /*peakIndex*/) override { /* Do nothing */
   }
   std::string getTransformName() const override;
   bool isHidden() const override { return m_default->isHidden(); }
   void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace>) override { /*Do nothing*/
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/) override { /*Do nothing*/
   }
   bool deletePeaksIn(PeakBoundingBox box) override;
   bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;
@@ -110,11 +110,11 @@ public:
   void peakEditMode(EditMode mode) override;
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     const PeakViewColor);
+                     const PeakViewColor /*color*/);
   /// Change the background representation for the peaks of this workspace
   void
   setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     const PeakViewColor);
+                     const PeakViewColor /*color*/);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;

@@ -117,7 +117,7 @@ std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
 }
 
 void PeakRepresentationCross::doDraw(
-    QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor &,
+    QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor & /*backgroundColor*/,
     std::shared_ptr<PeakPrimitives> drawingInformation,
     PeakRepresentationViewInformation viewInformation) {
   auto drawingInformationCross =
@@ -159,7 +159,7 @@ const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const {
   return m_origin;
 }
 
-void PeakRepresentationCross::showBackgroundRadius(const bool) {
+void PeakRepresentationCross::showBackgroundRadius(const bool /*show*/) {
   // Do nothing
 }
 } // namespace SliceViewer
