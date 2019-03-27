@@ -101,11 +101,7 @@ class MuonDataContext(object):
         member. The load widget may load multiple runs at once, these are stored in the _loaded_data member.
         Groups and Pairs associated to the current run are stored in _grousp and _pairs as ordered dictionaries.
         """
-        self._groups = OrderedDict()
-        self._pairs = OrderedDict()
-
         self._loaded_data = load_data
-        self._gui_variables = {'SummedPeriods': [1], 'SubtractedPeriods': []}
         self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}  # self.get_result(False)
 
         self._current_runs = []
@@ -116,7 +112,6 @@ class MuonDataContext(object):
 
         self.instrumentNotifier = MuonDataContext.InstrumentNotifier(self)
         self.message_notifier = MuonDataContext.MessageNotifier(self)
-        self.gui_variables_notifier = MuonDataContext.GuiVariablesNotifier(self)
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -133,28 +128,7 @@ class MuonDataContext(object):
         ConfigService['default.instrument'] = value
         self._instrument = value
         self._main_field_direction = ''
-        self.set_groups_and_pairs_to_default()
         self.instrumentNotifier.notify_subscribers(self._instrument)
-
-    @property
-    def group_names(self):
-        return list(self._groups.keys())
-
-    @property
-    def pair_names(self):
-        return list(self._pairs.keys())
-
-    @property
-    def groups(self):
-        return self._groups
-
-    @property
-    def pairs(self):
-        return self._pairs
-
-    @property
-    def gui_variables(self):
-        return self._gui_variables
 
     @property
     def current_runs(self):
@@ -180,24 +154,6 @@ class MuonDataContext(object):
         for run in self.current_runs:
             current_workspaces.append(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace'])
         return current_workspaces
-
-    @property
-    def first_good_data(self):
-        if self.gui_variables['FirstGoodDataFromFile']:
-            return self.get_loaded_data_for_run(self.current_runs[-1])["FirstGoodData"]
-        else:
-            return self.gui_variables['FirstGoodData']
-
-    def add_group(self, group):
-        assert isinstance(group, MuonGroup)
-        if self.check_group_contains_valid_detectors(group):
-            self._groups[group.name] = group
-        else:
-            raise ValueError('Invalid detectors in group {}'.format(group.name))
-
-    def add_pair(self, pair):
-        assert isinstance(pair, MuonPair)
-        self._pairs[pair.name] = pair
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
@@ -236,14 +192,6 @@ class MuonDataContext(object):
             return workspace_group
         else:
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
-
-    def period_string(self, run=None):
-        summed_periods = self.gui_variables["SummedPeriods"] if 'SummedPeriods' in self.gui_variables else [1]
-        subtracted_periods = self.gui_variables["SubtractedPeriods"] if 'SubtractedPeriods' in self.gui_variables else []
-        if subtracted_periods:
-            return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
-        else:
-            return '+'.join([str(period) for period in summed_periods])
 
     @property
     def num_detectors(self):
@@ -284,16 +232,7 @@ class MuonDataContext(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Clearing data
     # ------------------------------------------------------------------------------------------------------------------
-
-    def clear_groups(self):
-        self._groups = OrderedDict()
-
-    def clear_pairs(self):
-        self._pairs = OrderedDict()
-
     def clear(self):
-        self.clear_groups()
-        self.clear_pairs()
         self._current_data = {"workspace": load_utils.empty_loaded_data(), 'run': []}
 
     def _base_run_name(self, run=None):
@@ -308,110 +247,11 @@ class MuonDataContext(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Showing workspaces in the ADS
     # ------------------------------------------------------------------------------------------------------------------
-
-    def show_raw_data(self):
-        for run in self.current_runs:
-            run_string = run_list_to_string(run)
-            loaded_workspace = self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']
-            directory = get_base_data_directory(self, run_string) + get_raw_data_directory(self, run_string)
-
-            if len(loaded_workspace) > 1:
-                # Multi-period data
-                for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self, run_string, period=str(i + 1))
-                    single_ws.show(name)
-            else:
-                # Single period data
-                name = directory + get_raw_data_workspace_name(self, run_string)
-                loaded_workspace[0].show(name)
-
-    def show_all_groups(self):
-        for group_name in self._groups.keys():
-            self.show_group_data(group_name)
-
-        if self.do_rebin():
-            for group_name in self._groups.keys():
-                self.show_group_data(group_name, rebin=True)
-
-    def show_group_data(self, group_name, show=True, rebin=False):
-        for run in self.current_runs:
-            run_as_string = run_list_to_string(run)
-            group_workspace = calculate_group_data(self, group_name, run, rebin)
-            group_asymmetry = estimate_group_asymmetry_data(self, group_name, run, rebin)
-            directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
-
-            name = get_group_data_workspace_name(self, group_name, run_as_string, rebin)
-            asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin)
-
-            if not rebin:
-                self._groups[group_name]._workspace[str(run)] = MuonWorkspaceWrapper(group_workspace)
-                self._groups[group_name]._asymmetry_estimate[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
-                if show:
-                    self._groups[group_name].workspace[str(run)].show(directory + name)
-                    self._groups[group_name]._asymmetry_estimate[str(run)].show(directory + asym_name)
-            else:
-                self._groups[group_name]._workspace_rebin[str(run)] = MuonWorkspaceWrapper(group_workspace)
-                self._groups[group_name]._asymmetry_estimate_rebin[str(run)] = MuonWorkspaceWrapper(group_asymmetry)
-                if show:
-                    self._groups[group_name]._workspace_rebin[str(run)].show(directory + name)
-                    self._groups[group_name]._asymmetry_estimate_rebin[str(run)].show(directory + asym_name)
-
-    def show_all_pairs(self):
-        for pair_name in self._pairs.keys():
-            self.show_pair_data(pair_name)
-
-        if self.do_rebin():
-            for pair_name in self._pairs.keys():
-                self.show_pair_data(pair_name, rebin=True)
-
-    def show_pair_data(self, pair_name, show=True, rebin=False):
-        for run in self.current_runs:
-            run_as_string = run_list_to_string(run)
-            name = get_pair_data_workspace_name(self, pair_name, run_as_string, rebin)
-            directory = get_base_data_directory(self, run_as_string) + get_pair_data_directory(self, run_as_string)
-            pair_workspace = calculate_pair_data(self, pair_name, run, rebin)
-
-            if not rebin:
-                self._pairs[pair_name].workspace[str(run)] = MuonWorkspaceWrapper(pair_workspace)
-                if show:
-                    self._pairs[pair_name].workspace[str(run)].show(directory + name)
-            else:
-                self._pairs[pair_name].workspace_rebin[str(run)] = MuonWorkspaceWrapper(pair_workspace)
-                if show:
-                    self._pairs[pair_name].workspace_rebin[str(run)].show(directory + name)
-
-    def calculate_all_groups(self):
-        for group_name in self._groups.keys():
-            calculate_group_data(self, group_name)
-
-    def set_groups_and_pairs_to_default(self):
-        groups, pairs = get_default_grouping(self.current_workspace, self.instrument, self.main_field_direction)
-
-        self.clear_groups()
-        for group in groups:
-            self.add_group(group)
-
-        self.clear_pairs()
-        for pair in pairs:
-            self.add_pair(pair)
-
     def check_group_contains_valid_detectors(self, group):
         if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
             return False
         else:
             return True
-
-    def add_or_replace_gui_variables(self, **kwargs):
-        if all([key in self._gui_variables and self._gui_variables[key] == kwargs[key] for key in kwargs.keys()]) and kwargs:
-            return
-        self._gui_variables.update(kwargs)
-        self.gui_variables_notifier.notify_subscribers()
-
-    def do_rebin(self):
-        return (self.gui_variables['RebinType'] == 'Fixed' and
-                'RebinFixed' in self.gui_variables and self.gui_variables['RebinFixed']) or\
-               (self.gui_variables['RebinType'] == 'Variable' and
-                'RebinVariable' in self.gui_variables and self.gui_variables['RebinVariable'])
 
     def check_run_list_are_all_same_field(self, run_list):
         if not run_list:
@@ -447,14 +287,6 @@ class MuonDataContext(object):
             Observable.notify_subscribers(self, *args)
 
     class MessageNotifier(Observable):
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, *args, **kwargs):
-            Observable.notify_subscribers(self, *args)
-
-    class GuiVariablesNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

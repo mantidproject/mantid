@@ -16,16 +16,16 @@ class GuiVariablesNotifier(Observable):
         Observable.notify_subscribers(self, *args, **kwargs)
 
 class MuonGuiContext(dict):
-    def __init__(self):
-        super(MuonGuiContext, self).__init__()
-        self.notifier = GuiVariablesNotifier(self)
+    def __init__(self, *args, **kwargs):
+        super(MuonGuiContext, self).__init__(*args, **kwargs)
+        self.gui_variables_notifier = GuiVariablesNotifier(self)
 
-    def __setitem__(self, key, value):
-        super(MuonGuiContext, self).__setitem__(key, value)
-        self.notifier.notify_subscribers(**{key: value})
+    def update_and_send_signal(self, *args, **kwargs):
+        super(MuonGuiContext, self).update(*args, **kwargs)
+        self.gui_variables_notifier.notify_subscribers()
 
     def add_subscriber(self, observer):
-        self.notifier.add_subscriber(observer)
+        self.gui_variables_notifier.add_subscriber(observer)
 
     def period_string(self, run=None):
         summed_periods = self["SummedPeriods"] if 'SummedPeriods' in self else [1]

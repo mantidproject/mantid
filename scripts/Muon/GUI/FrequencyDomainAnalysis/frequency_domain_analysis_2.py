@@ -64,7 +64,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
-        self.gui_context['RebinType'] = 'None'
+
         self.group_pair_context = MuonGroupPairContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
@@ -91,61 +91,25 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Frequency Domain Analysis")
 
-        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.setup_load_observers()
 
-        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.groupingObserver)
+        self.setup_gui_variable_observers()
 
-        self.context.data_context.instrumentNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.instrumentObserver)
+        self.setup_alpha_recalculated_observers()
 
-        self.context.data_context.instrumentNotifier.add_subscriber(
-            self.load_widget.load_widget.instrumentObserver)
+        self.setup_grouping_changed_observers()
 
-        self.context.data_context.instrumentNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
+        self.setup_instrument_changed_notifier()
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.loadObserver)
+        self.setup_group_calculation_enable_notifer()
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.setup_group_calculation_disabler_notifer()
 
-        # self.load_widget.load_widget.loadNotifier.add_subscriber(
-        #     self.transform.LoadObserver)
-        #
-        # self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
-        #     self.transform.GroupPairObserver)
-        #
-        # self.context.data_context.instrumentNotifier.add_subscriber(
-        #     self.transform.instrumentObserver)
+        self.setup_on_load_enabler()
+
+        self.setup_on_load_disabler()
 
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
-        self.context.data_context.gui_variables_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
-            self.load_widget.load_widget.enable_observer)
-
-        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
-            self.load_widget.load_widget.disable_observer)
-
-        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
-        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
-
-        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.enable_observer)
-        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.disable_observer)
-
-        # self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-        #     self.transform.enable_observer)
-        # self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-        #     self.transform.disable_observer)
 
     def setup_tabs(self):
         """
@@ -156,6 +120,79 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
+
+    def setup_load_observers(self):
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.loadObserver)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+
+        # self.load_widget.load_widget.loadNotifier.add_subscriber(
+        #     self.transform.LoadObserver)
+
+    def setup_gui_variable_observers(self):
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+
+    def setup_alpha_recalculated_observers(self):
+        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+
+    def setup_grouping_changed_observers(self):
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.groupingObserver)
+
+        #
+        # self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+        #     self.transform.GroupPairObserver)
+
+    def setup_instrument_changed_notifier(self):
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.load_widget.load_widget.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
+        #
+        # self.context.data_context.instrumentNotifier.add_subscriber(
+        #     self.transform.instrumentObserver)
+
+    def setup_group_calculation_enable_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.enable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.load_widget.load_widget.enable_observer)
+
+    def setup_group_calculation_disabler_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.disable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.load_widget.load_widget.disable_observer)
+
+    def setup_on_load_enabler(self):
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.enable_observer)
+
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.enable_observer)
+
+        # self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+        #     self.transform.enable_observer)
+
+    def setup_on_load_disabler(self):
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.disable_observer)
+
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.disable_observer)
+
+        # self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+        #     self.transform.disable_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

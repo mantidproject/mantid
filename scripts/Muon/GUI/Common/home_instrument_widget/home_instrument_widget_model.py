@@ -24,7 +24,8 @@ class InstrumentWidgetModel(object):
 
     def __init__(self, context=MuonContext()):
         self._data = context.data_context
-        self._data.gui_variables['RebinType'] = 'None'
+        self._context = context
+        self._context.gui_context['RebinType'] = 'None'
 
     def clear_data(self):
         """When e.g. instrument changed"""
@@ -34,37 +35,37 @@ class InstrumentWidgetModel(object):
         return self._data.current_data["TimeZero"]
 
     def get_user_time_zero(self):
-        if "TimeZero" in self._data.gui_variables.keys():
-            time_zero = self._data.gui_variables["TimeZero"]
+        if "TimeZero" in self._context.gui_context.keys():
+            time_zero = self._context.gui_context["TimeZero"]
         else:
             # default to loaded value, keep a record of the data vaue
-            self._data.gui_variables["TimeZero"] = self._data.current_data["TimeZero"]
-            time_zero = self._data.gui_variables["TimeZero"]
+            self._context.gui_context["TimeZero"] = self._data.current_data["TimeZero"]
+            time_zero = self._context.gui_context["TimeZero"]
         return time_zero
 
     def set_time_zero_from_file(self, state):
-        self._data.add_or_replace_gui_variables(TimeZeroFromFile=state)
+        self._context.gui_context.update_and_send_signal(TimeZeroFromFile=state)
 
     def set_first_good_data_source(self, state):
-        self._data.add_or_replace_gui_variables(FirstGoodDataFromFile=state)
+        self._context.gui_context.update_and_send_signal(FirstGoodDataFromFile=state)
 
     def get_file_first_good_data(self):
         return self._data.current_data["FirstGoodData"]
 
     def get_user_first_good_data(self):
-        if "FirstGoodData" in self._data.gui_variables.keys():
-            first_good_data = self._data.gui_variables["FirstGoodData"]
+        if "FirstGoodData" in self._context.gui_context.keys():
+            first_good_data = self._context.gui_context["FirstGoodData"]
         else:
             # Default to loaded value
-            self._data.gui_variables["FirstGoodData"] = self._data.current_data["FirstGoodData"]
-            first_good_data = self._data.gui_variables["FirstGoodData"]
+            self._context.gui_context["FirstGoodData"] = self._data.current_data["FirstGoodData"]
+            first_good_data = self._context.gui_context["FirstGoodData"]
         return first_good_data
 
     def set_user_time_zero(self, time_zero):
-        self._data.add_or_replace_gui_variables(TimeZero=time_zero)
+        self._context.gui_context.update_and_send_signal(TimeZero=time_zero)
 
     def set_user_first_good_data(self, first_good_data):
-        self._data.add_or_replace_gui_variables(FirstGoodData=first_good_data)
+        self._context.gui_context.update_and_send_signal(FirstGoodData=first_good_data)
 
     def get_dead_time_table_from_data(self):
         return self._data.current_data["DataDeadTimeTable"]
@@ -73,19 +74,19 @@ class InstrumentWidgetModel(object):
         return self._data.dead_time_table
 
     def add_fixed_binning(self, fixed_bin_size):
-        self._data.add_or_replace_gui_variables(RebinFixed=str(fixed_bin_size))
+        self._context.gui_context.update_and_send_signal(RebinFixed=str(fixed_bin_size))
 
     def add_variable_binning(self, rebin_params):
-        self._data.add_or_replace_gui_variables(RebinVariable=str(rebin_params))
+        self._context.gui_context.update_and_send_signal(RebinVariable=str(rebin_params))
 
     def get_variable_binning(self):
-        if 'RebinVariable' in self._data.gui_variables:
-            return self._data.gui_variables['RebinVariable']
+        if 'RebinVariable' in self._context.gui_context:
+            return self._context.gui_context['RebinVariable']
         else:
             return ''
 
     def update_binning_type(self, rebin_type):
-        self._data.add_or_replace_gui_variables(RebinType=rebin_type)
+        self._context.gui_context.update_and_send_signal(RebinType=rebin_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time
@@ -108,15 +109,15 @@ class InstrumentWidgetModel(object):
         return True
 
     def set_dead_time_to_none(self):
-        self._data.add_or_replace_gui_variables(DeadTimeSource='None')
+        self._context.gui_context.update_and_send_signal(DeadTimeSource='None')
 
     def set_dead_time_from_data(self):
-        self._data.add_or_replace_gui_variables(DeadTimeSource='FromFile')
+        self._context.gui_context.update_and_send_signal(DeadTimeSource='FromFile')
 
     def set_user_dead_time_from_ADS(self, name):
-        self._data.gui_variables['DeadTimeSource'] = 'FromADS'
+        self._context.gui_context['DeadTimeSource'] = 'FromADS'
         dtc = api.AnalysisDataService.retrieve(str(name))
-        self._data.add_or_replace_gui_variables(DeadTimeTable=dtc)
+        self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 
     def validate_variable_rebin_string(self, variable_rebin_string):
         variable_rebin_list = variable_rebin_string.split(',')

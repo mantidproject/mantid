@@ -130,3 +130,10 @@ class MuonContext(object):
                 'RebinFixed' in self.gui_context and self.gui_context['RebinFixed']) or\
                (self.gui_context['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
+
+    @property
+    def first_good_data(self):
+        if self.gui_context['FirstGoodDataFromFile']:
+            return self.data_context.get_loaded_data_for_run(self.current_runs[-1])["FirstGoodData"]
+        else:
+            return self.gui_context['FirstGoodData']

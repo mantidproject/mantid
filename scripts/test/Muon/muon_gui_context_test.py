@@ -15,9 +15,6 @@ else:
     import mock
 
 class MuonGUIContextTest(unittest.TestCase):
-    def test_can_be_created(self):
-        self.assertTrue(MuonGuiContext())
-
     def test_can_set_variables(self):
         context = MuonGuiContext()
 
@@ -32,7 +29,7 @@ class MuonGUIContextTest(unittest.TestCase):
 
         context.add_subscriber(observer)
 
-        context['FirstGoodData'] = 12.0
+        context.update_and_send_signal(FirstGoodData=12.0)
 
         observer.update.assert_called_once_with(context.notifier, None, FirstGoodData=12.0)
 
