@@ -76,7 +76,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Override the base class method. Initialise the peak editing tool.
         """
         allowed_spectra = {}
-        pattern = re.compile('(.+?): spec (\d+)')
+        pattern = re.compile(r'(.+?): spec (\d+)')
         for label in self.workspace_labels:
             a_match = re.match(pattern, label)
             name, spec = a_match.group(1), int(a_match.group(2))
