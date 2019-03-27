@@ -90,7 +90,8 @@ FileEventDataListener::~FileEventDataListener() {
   delete m_chunkload;
 }
 
-bool FileEventDataListener::connect(const Poco::Net::SocketAddress &) {
+bool FileEventDataListener::connect(
+    const Poco::Net::SocketAddress & /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

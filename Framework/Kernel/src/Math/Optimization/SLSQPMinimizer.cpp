@@ -229,10 +229,12 @@ double d_sign(double *a, double *b) {
 }
 
 // --------------------- Forward declarations of helpers ---------------------
-int slsqpb_(int *, int *, int *, int *, double *, double *, double *, double *,
-            double *, double *, double *, double *, int *, int *, double *,
-            double *, double *, double *, double *, double *, double *,
-            double *, int *);
+int slsqpb_(int * /*m*/, int * /*meq*/, int * /*la*/, int * /*n*/,
+            double * /*x*/, double * /*xl*/, double * /*xu*/, double * /*f*/,
+            double * /*c__*/, double * /*g*/, double * /*a*/, double * /*acc*/,
+            int * /*iter*/, int * /*mode*/, double * /*r__*/, double * /*l*/,
+            double * /*x0*/, double * /*mu*/, double * /*s*/, double * /*u*/,
+            double * /*v*/, double * /*w*/, int * /*iw*/);
 int dcopy___(int *n, double *dx, int *incx, double *dy, int *incy);
 int daxpy_sl__(int *n, double *da, double *dx, int *incx, double *dy,
                int *incy);

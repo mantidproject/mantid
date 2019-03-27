@@ -449,7 +449,7 @@ Rule::Rule()
 */
 {}
 
-Rule::Rule(const Rule &)
+Rule::Rule(const Rule & /*unused*/)
     : Parent(nullptr)
 /**
   Constructor copies.
@@ -466,7 +466,7 @@ Rule::Rule(Rule *A)
 */
 {}
 
-Rule &Rule::operator=(const Rule &)
+Rule &Rule::operator=(const Rule & /*unused*/)
 /**
   Assignment operator=
   does not set parent as Rules

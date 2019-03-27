@@ -126,9 +126,9 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
 
 /** Some forbidden function
  */
-void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian *,
-                                                      const double *,
-                                                      const size_t) {
+void ThermalNeutronDtoTOFFunction::functionDerivLocal(
+    API::Jacobian * /*unused*/, const double * /*unused*/,
+    const size_t /*unused*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "functionDerivLocal is not implemented for "
       "ThermalNeutronDtoTOFFunction.");

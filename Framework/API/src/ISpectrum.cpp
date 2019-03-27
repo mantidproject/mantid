@@ -206,16 +206,16 @@ void ISpectrum::invalidateSpectrumDefinition() const {
 }
 
 /// Override in child classes for polymorphic copying of data.
-void ISpectrum::copyDataInto(DataObjects::EventList &) const {
+void ISpectrum::copyDataInto(DataObjects::EventList & /*unused*/) const {
   throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
 }
 /// Override in child classes for polymorphic copying of data.
-void ISpectrum::copyDataInto(DataObjects::Histogram1D &) const {
+void ISpectrum::copyDataInto(DataObjects::Histogram1D & /*unused*/) const {
   throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
 }
 
 /// Override in child classes for polymorphic copying of data.
-void ISpectrum::copyDataInto(SpectrumTester &) const {
+void ISpectrum::copyDataInto(SpectrumTester & /*unused*/) const {
   throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
 }
 

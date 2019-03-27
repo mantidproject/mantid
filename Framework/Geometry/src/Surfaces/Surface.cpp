@@ -56,7 +56,7 @@ Surface::Surface()
 */
 {}
 
-int Surface::side(const Kernel::V3D &) const
+int Surface::side(const Kernel::V3D & /*unused*/) const
 /// Surface side : throw AbsObjMethod
 {
   throw Kernel::Exception::AbsObjMethod("Surface::side");
