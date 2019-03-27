@@ -321,9 +321,6 @@ set(INC_FILES
     inc/MantidCurveFitting/SpecialFunctionSupport.h)
 
 set(TEST_FILES
-    # ChebyshevPolynomialBackgroundTest.h
-    # RefinePowderInstrumentParametersTest.h
-    # SCDPanelErrorsTest.h
     Algorithms/CalculateChiSquaredTest.h
     Algorithms/CalculateCostFunctionTest.h
     Algorithms/ConvertToYSpaceTest.h
@@ -514,9 +511,7 @@ target_link_libraries(CurveFitting
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 mtd_install_targets(TARGETS
                     CurveFitting
