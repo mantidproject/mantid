@@ -90,10 +90,10 @@ def write_source(subproject, classname, filename, args):
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM({})  
+DECLARE_ALGORITHM({})
 """.format(classname)
-
-    algorithm_source = """ 
+    algorithm_top = ""
+    algorithm_source = """
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
@@ -149,7 +149,7 @@ void {algname}::exec() {{
 
 namespace Mantid {{
 namespace {subproject} {{
-{algorithm_top} {algorithm_source}
+{algorithm_top}{algorithm_source}
 }} // namespace {subproject}
 }} // namespace Mantid
 """.format(
