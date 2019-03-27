@@ -44,7 +44,7 @@ public:
 
 private slots:
   /// Update the column name widgets
-  void fillColumnNames(const QString &);
+  void fillColumnNames(const QString & /*qWSName*/);
 
 private:
   /// Initialize the layout

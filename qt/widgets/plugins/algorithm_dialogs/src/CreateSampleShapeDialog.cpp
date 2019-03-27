@@ -628,7 +628,7 @@ void BinaryTreeWidget::traverseInPostOrder(
 
 #if QT_VERSION < 0x050000
 void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
-                                   const QModelIndex &) {
+                                   const QModelIndex & /*bottomRight*/) {
 #else
 void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
                                    const QModelIndex &, const QVector<int> &) {
@@ -653,8 +653,8 @@ ComboBoxDelegate::ComboBoxDelegate(QWidget *parent) : QItemDelegate(parent) {}
  * @param option :: unused argument
  */
 QWidget *ComboBoxDelegate::createEditor(QWidget *parent,
-                                        const QStyleOptionViewItem &,
-                                        const QModelIndex &) const {
+                                        const QStyleOptionViewItem & /*option*/,
+                                        const QModelIndex & /*index*/) const {
   QComboBox *editor = new QComboBox(parent);
   editor->addItem("intersection");
   editor->addItem("union");
@@ -700,6 +700,6 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
  */
 void ComboBoxDelegate::updateEditorGeometry(QWidget *editor,
                                             const QStyleOptionViewItem &option,
-                                            const QModelIndex &) const {
+                                            const QModelIndex & /*index*/) const {
   editor->setGeometry(option.rect);
 }
