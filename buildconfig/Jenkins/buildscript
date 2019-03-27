@@ -154,6 +154,8 @@ fi
 #                   from bin and can cause random failures
 #   - build/ExternalData/**: data files will change over time and removing
 #                            the links helps keep it fresh
+#   - build/Testing/**: old ctest xml files will change over time and removing
+#                       the links helps keep it fresh
 ###############################################################################
 BUILD_DIR_REL=build
 BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
@@ -167,7 +169,7 @@ if [[ "$CLEANBUILD" == true ]]; then
 fi
 if [ -d $BUILD_DIR ]; then
   git clean -fdx --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
-  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
+  rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData ${BUILD_DIR:?}/Testing
   find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
@@ -378,7 +380,7 @@ userprops_file=$userconfig_dir/Mantid.user.properties
 echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
-  ${X11_RUNNER} "${X11_RUNNER_ARGS}" $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+  ${X11_RUNNER} "${X11_RUNNER_ARGS}" $CTEST_EXE -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 fi
 
 ###############################################################################
