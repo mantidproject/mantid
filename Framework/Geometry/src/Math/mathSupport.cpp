@@ -7,13 +7,17 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
-#include <iostream>
 #include <iterator>
 #include <vector>
 
 #include "MantidGeometry/Math/mathSupport.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
+
+namespace {
+Kernel::Logger logger("mathSupport");
+}
 
 template <typename InputIter>
 int solveQuadratic(
@@ -86,7 +90,7 @@ int solveCubic(const CInputIter Coef, std::complex<double> &AnsA,
   }
   if (*(Coef + 3) == 0) {
     const int xi = solveQuadratic(Coef, SQ);
-    std::cerr << "Xi == " << xi << '\n';
+    logger.debug() << "Xi == " << xi << '\n';
     AnsA = SQ.first;
     AnsB = (xi == 1) ? SQ.first : SQ.second;
     AnsC = std::complex<double>(0.0, 0.0);

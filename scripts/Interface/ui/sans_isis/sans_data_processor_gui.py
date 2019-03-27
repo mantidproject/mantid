@@ -417,6 +417,11 @@ class SANSDataProcessorGui(QMainWindow,
              "Options"]
             , self.cell(""), self)
 
+        # Default QTreeView size is too small
+        font = self.data_processor_table.font()
+        font.setPointSize(13)
+        self.data_processor_table.setFont(font)
+
         self.data_processor_table.setRootIsDecorated(False)
 
         row_entry = [''] * 16
@@ -837,7 +842,7 @@ class SANSDataProcessorGui(QMainWindow,
         return str(self.mask_file_input_line_edit.text())
 
     def show_directory_manager(self):
-        manageuserdirectories.ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories(self).exec_()
 
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,

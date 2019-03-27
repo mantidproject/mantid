@@ -38,6 +38,19 @@ def get_name_and_version_from_item_label(item_label):
     return None
 
 
+class AlgorithmTreeWidget(QTreeWidget):
+
+    def __init__(self, parent=None):
+        super(AlgorithmTreeWidget, self).__init__(parent)
+        self.parent = parent
+
+    def mouseDoubleClickEvent(self, mouse_event):
+        if mouse_event.button() == Qt.LeftButton:
+            if not self.selectedItems()[0].child(0):
+                self.parent.execute_algorithm()
+            super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
+
+
 class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
@@ -98,7 +111,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Make a tree widget for displaying algorithms in their categories.
         :return: A QTreeWidget
         """
-        tree = QTreeWidget(self)
+        tree = AlgorithmTreeWidget(self)
         tree.setColumnCount(1)
         tree.setHeaderHidden(True)
         tree.itemSelectionChanged.connect(self._on_tree_selection_changed)
@@ -199,7 +212,11 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
-        layout.addWidget(AlgorithmProgressWidget())
+
+        algProgWidget = AlgorithmProgressWidget(self)
+        algProgWidget.setAttribute(Qt.WA_DeleteOnClose)
+
+        layout.addWidget(algProgWidget)
         # todo: Without the sizeHint() call the minimum size is not set correctly
         #       This needs some investigation as to why this is.
         layout.sizeHint()

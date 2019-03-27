@@ -5,14 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from Muon.GUI.Common.thread_model import ThreadModel
 from Muon.GUI.Common import mock_widget
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class testModelWithoutExecute:

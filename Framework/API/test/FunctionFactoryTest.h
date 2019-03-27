@@ -501,6 +501,16 @@ public:
     TS_ASSERT_EQUALS(
         names, FunctionFactory::Instance().getFunctionNames<IFunction1D>());
   }
+
+  void test_getFunctionNamesGUI() {
+    const auto &names = FunctionFactory::Instance().getFunctionNamesGUI();
+    TS_ASSERT(!names.empty());
+    auto i =
+        std::find_if(names.begin(), names.end(), [](const std::string &name) {
+          return name.find("CrystalField") != std::string::npos;
+        });
+    TS_ASSERT(i == names.end());
+  }
 };
 
 #endif /*FUNCTIONFACTORYTEST_H_*/

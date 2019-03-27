@@ -36,6 +36,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     """
 
     closing = Signal()
+    pattern_fittable_curve = re.compile('(.+?): spec (\d+)')
 
     def __init__(self, canvas, toolbar_state_checker, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
@@ -64,6 +65,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
 
+    @classmethod
+    def can_fit_spectra(cls, labels):
+        """
+        Determine if the spectra referred to by the plot labels can be used in this fit browser.
+        :param labels: A list of curve labels which can identify spectra in a workspace.
+        :return: True or False
+        """
+        return any(map(lambda s: re.match(cls.pattern_fittable_curve, s), labels))
+
     def closeEvent(self, event):
         """
         Emit self.closing signal used by figure manager to put the menu buttons in correct states
@@ -78,13 +88,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         allowed_spectra = {}
         pattern = re.compile(r'(.+?): spec (\d+)')
         for label in self.workspace_labels:
-            a_match = re.match(pattern, label)
-            name, spec = a_match.group(1), int(a_match.group(2))
-            spec_list = allowed_spectra.get(name, [])
-            spec_list.append(spec)
-            allowed_spectra[name] = spec_list
-        for name, spec_list in allowed_spectra.items():
-            self.addAllowedSpectra(name, spec_list)
+            a_match = re.match(self.pattern_fittable_curve, label)
+            if a_match:
+                name, spec = a_match.group(1), int(a_match.group(2))
+                spec_list = allowed_spectra.get(name, [])
+                spec_list.append(spec)
+                allowed_spectra[name] = spec_list
+        if len(allowed_spectra) > 0:
+            for name, spec_list in allowed_spectra.items():
+                self.addAllowedSpectra(name, spec_list)
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_state_checker,
                                        current_peak_type=self.defaultPeakType())
         self.tool.fit_start_x_moved.connect(self.setStartX)

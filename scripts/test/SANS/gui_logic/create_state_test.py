@@ -7,8 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import sys
 
+from mantid.py3compat import mock
 from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
 from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility, SaveType)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
@@ -16,10 +16,6 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.state.state import State
 from qtpy.QtCore import QCoreApplication
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 class GuiCommonTest(unittest.TestCase):
     def setUp(self):

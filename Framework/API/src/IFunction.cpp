@@ -400,9 +400,9 @@ void IFunction::removeConstraint(const std::string &parName) {
 void IFunction::setConstraintPenaltyFactor(const std::string &parName,
                                            const double &c) {
   size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getLocalIndex()) {
-      (**it).setPenaltyFactor(c);
+  for (auto &constraint : m_constraints) {
+    if (iPar == constraint->getLocalIndex()) {
+      constraint->setPenaltyFactor(c);
       return;
     }
   }

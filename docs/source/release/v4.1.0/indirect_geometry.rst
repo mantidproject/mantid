@@ -18,3 +18,13 @@ Improvements
 ############
 
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
+- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
+
+
+Data Reduction
+--------------
+
+Bug Fixes
+#########
+
+- Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.

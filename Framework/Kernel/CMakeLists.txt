@@ -81,7 +81,6 @@ set ( SRC_FILES
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
-	src/ProgressText.cpp
 	src/Property.cpp
 	src/PropertyHistory.cpp
 	src/PropertyManager.cpp
@@ -250,7 +249,6 @@ set ( INC_FILES
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/PocoVersion.h
 	inc/MantidKernel/ProgressBase.h
-	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
 	inc/MantidKernel/PropertyHelper.h
 	inc/MantidKernel/PropertyHistory.h
@@ -404,7 +402,6 @@ set ( TEST_FILES
 	NullValidatorTest.h
 	OptionalBoolTest.h
 	ProgressBaseTest.h
-	ProgressTextTest.h
 	PropertyHistoryTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyManagerPropertyTest.h

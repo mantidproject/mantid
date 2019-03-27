@@ -139,7 +139,6 @@ class ConfigServiceTest(unittest.TestCase):
                            'UpdateInstrumentDefinitions.URL', # shouldn't be changed by users
                            'docs.html.root', # shouldn't be changed by users
                            'errorreports.rooturl', # shouldn't be changed by users
-                           'openclKernelFiles.directory', # only available if OPENCL_BUILD is enabled
                            'usagereports.rooturl', # shouldn't be changed by users
                            'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
                            'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
@@ -160,7 +159,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'usersearch.directories',
 
                            ########## TODO should these be documented?
-                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance',
+                           'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',
                            'logging.channels.consoleChannel.class', 'logging.channels.consoleChannel.formatter', 'logging.formatters.f1.class', 'logging.formatters.f1.pattern', 'logging.formatters.f1.times', 'logging.loggers.root.channel.channel1', 'logging.loggers.root.channel.class',
                            'MantidOptions.ReusePlotInstances',
                            'mantidqt.python_interfaces', 'mantidqt.python_interfaces_directory',

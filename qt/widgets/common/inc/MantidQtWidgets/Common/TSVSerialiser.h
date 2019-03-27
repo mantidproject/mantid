@@ -15,14 +15,10 @@
 #include <string>
 #include <vector>
 
-#include "qstring.h"
 #include <QColor>
 #include <QPoint>
 #include <QRect>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#error "TSVSerialiser os only available in Qt 4 builds"
-#endif
+#include <QString>
 
 /** Parses the formatting used in MantidPlot project files
 

@@ -726,15 +726,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted followed by separator
       converted.append(convertToWorkspaceIndex(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted
@@ -757,15 +757,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator
       converted.append(convertToSpectrumNumber(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted

@@ -18,9 +18,9 @@
 namespace Mantid {
 namespace API {
 /**
- Observes Algorithm notifications: start,progress,finish,error.
- Hides Poco::Notification API from the user.
- */
+Observes Algorithm notifications: start,progress,finish,error.
+Hides Poco::Notification API from the user.
+*/
 class MANTID_API_DLL AlgorithmObserver {
 public:
   AlgorithmObserver();
@@ -35,6 +35,7 @@ public:
   void observeError(IAlgorithm_const_sptr alg);
 
   void stopObserving(IAlgorithm_const_sptr alg);
+  void stopObserving(const Mantid::API::IAlgorithm *alg);
   void stopObservingManager();
 
   virtual void progressHandle(const IAlgorithm *alg, double p,

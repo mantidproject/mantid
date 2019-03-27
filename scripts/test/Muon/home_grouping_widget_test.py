@@ -4,27 +4,21 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+from PyQt4 import QtGui
+import unittest
 
+from mantid import ConfigService
+from mantid.api import FileFinder
+from mantid.py3compat import mock
+from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
+from Muon.GUI.Common.observer_pattern import Observer
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common import mock_widget
-import unittest
-from PyQt4 import QtGui
-from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import FileFinder
-from mantid import ConfigService
-import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.muon_pair import MuonPair
-
-
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class HomeTabGroupingPresenterTest(unittest.TestCase):
@@ -51,8 +45,6 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.add_pair(pair=test_pair)
-        self.context.show_all_groups()
-        self.context.show_all_pairs()
         self.presenter.update_group_pair_list()
 
     def tearDown(self):

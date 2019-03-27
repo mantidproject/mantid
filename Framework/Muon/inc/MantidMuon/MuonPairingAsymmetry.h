@@ -29,8 +29,14 @@ public:
            "from Muon data.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess",   "MuonPreProcess", "AsymmetryCalc",
-            "AppendSpectra", "Plus",           "Minus"};
+    return {"MuonProcess",
+            "MuonPreProcess",
+            "AsymmetryCalc",
+            "AppendSpectra",
+            "Plus",
+            "Minus",
+            "MuonGroupingAsymmetry",
+            "MuonGroupingCounts"};
   }
 
 private:

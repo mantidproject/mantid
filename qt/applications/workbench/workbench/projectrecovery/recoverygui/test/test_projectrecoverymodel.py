@@ -11,20 +11,15 @@ from __future__ import (absolute_import, unicode_literals)
 
 import os
 import shutil
-import sys
 import time
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace
+from mantid.py3compat import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery, NO_OF_CHECKPOINTS_KEY
 from workbench.projectrecovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
-
-if sys.version_info.major >= 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class ProjectRecoveryModelTest(unittest.TestCase):

@@ -25,7 +25,6 @@
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
-#include <iostream>
 #include <limits>
 
 namespace Mantid {

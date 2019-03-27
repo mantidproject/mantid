@@ -21,6 +21,11 @@ using Mantid::Kernel::V3D;
 using MantidQt::MantidWidgets::detail::GridTextureFace;
 namespace {
 
+class RectangularDetectorShapeError : public std::runtime_error {
+public:
+  RectangularDetectorShapeError() : std::runtime_error("") {}
+};
+
 class Corners {
 public:
   Corners() {}
@@ -216,7 +221,13 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
   glBegin(GL_QUADS);
 
   // Set the bank normal to facilitate lighting effects
-  setBankNormal(corners.bottomRight(), corners.topLeft(), basePos);
+  try {
+    setBankNormal(corners.bottomRight() + bottomRightOffset,
+                  corners.topLeft() + topLeftOffset, basePos);
+  } catch (std::runtime_error &) {
+    glEnd();
+    throw RectangularDetectorShapeError();
+  }
 
   glTexCoord2f(0.0, 0.0);
   addVertex(corners.bottomLeft() - basePos + bottomLeftOffset);
@@ -236,8 +247,8 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
   if (glGetError() > 0)
     g_log.error() << "OpenGL error in rendering texture. \n";
 
-  glDisable(
-      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
+  // stop texture mapping
+  glDisable(GL_TEXTURE_2D);
 }
 
 std::tuple<double, double, double> findSteps(const std::vector<V3D> &points) {
@@ -450,10 +461,20 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
   auto ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
 
-  render2DTexture(c, bank.nX, bank.nY, V3D((xstep * -0.5), (ystep * -0.5), 0.0),
-                  V3D((xstep * 0.5), (ystep * -0.5), 0.0),
-                  V3D((xstep * 0.5), (ystep * 0.5), 0.0),
-                  V3D((xstep * -0.5), (ystep * 0.5), 0.0), c.bottomLeft());
+  try {
+    render2DTexture(c, bank.nX, bank.nY,
+                    V3D((xstep * -0.5), (ystep * -0.5), 0.0),
+                    V3D((xstep * 0.5), (ystep * -0.5), 0.0),
+                    V3D((xstep * 0.5), (ystep * 0.5), 0.0),
+                    V3D((xstep * -0.5), (ystep * 0.5), 0.0), c.bottomLeft());
+  } catch (RectangularDetectorShapeError &) {
+    g_log.warning() << "Cannot display rectangular detector bank "
+                    << compInfo.name(index) << '\n';
+    if (xstep == 0.0)
+      g_log.warning() << "Detector step in x direction is zero.\n";
+    if (ystep == 0.0)
+      g_log.warning() << "Detector step in y direction is zero.\n";
+  }
 }
 
 void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,

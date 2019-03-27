@@ -9,18 +9,13 @@
 #
 from __future__ import (absolute_import)
 
+from qtpy.QtCore import QCoreApplication, QObject
+import sys
 import unittest
 
-import sys
-from qtpy.QtCore import QCoreApplication, QObject
-
+from mantid.py3compat.mock import patch
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
-
-if sys.version_info.major == 2:
-    from mock import patch
-else:
-    from unittest.mock import patch
 
 
 class Receiver(QObject):

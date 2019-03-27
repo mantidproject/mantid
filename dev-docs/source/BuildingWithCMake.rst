@@ -73,13 +73,13 @@ From the CMake gui
 * Start it and click the "Browse Source" button to point to ``/path/to/Mantid``.
 * Click "Browse Build" and point to the directory you want to build into - it's recommended that you create a new directory for this (see above), though it can be the same as the source directory.
 * Click "Configure" down near the bottom of the window.
-* A new window will appear asking which 'Generator' you want to use.
+* A new window will appear asking which 'Generator' you want to use:
 
   * Linux/Mac developers should choose ``Ninja``
-  * Windows developers should choose ``Visual Studio 15 2017 Win64`` (the Win64 is very important)
+  * Windows developers should choose ``Visual Studio 15 2017`` and in the _Optional platform for generator\_ box select ``x64``. If you see errors related to HDF5 then you have most likely selected the wrong platform. 
 
 * Wait a while....
-* You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking "MAKE_VATES" if you want to build that.
+* You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking ``MAKE_VATES`` if you want to build that.
 * Click "Configure" again and wait....
 * Finally, click "Generate". This will create the build files, e.g. for a Visual Studio build there will be a ``Mantid.sln`` in the directory you selected as your build directory.
 

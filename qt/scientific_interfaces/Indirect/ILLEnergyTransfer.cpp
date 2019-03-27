@@ -182,8 +182,6 @@ bool ILLEnergyTransfer::validate() {
 }
 
 void ILLEnergyTransfer::run() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
-
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
   QString backgroundFilename =
       m_uiForm.rfBackgroundRun->getUserInput().toString();
@@ -269,9 +267,10 @@ void ILLEnergyTransfer::run() {
                               m_backCalibScaling);
   }
 
-  reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
+  reductionAlg->setProperty("Analyser",
+                            getInstrumentDetail("analyser").toStdString());
   reductionAlg->setProperty("Reflection",
-                            instDetails["reflection"].toStdString());
+                            getInstrumentDetail("reflection").toStdString());
 
   std::string target = m_uiForm.cbSpectrumTarget->currentText().toStdString();
   reductionAlg->setProperty("SpectrumAxis", target);
@@ -366,11 +365,11 @@ void ILLEnergyTransfer::save() {
  * Called when the instrument has changed, used to update default values.
  */
 void ILLEnergyTransfer::setInstrumentDefault() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+  auto const instrument = getInstrumentDetail("instrument");
 
   // Set instrument in run file widgets
-  m_uiForm.rfInput->setInstrumentOverride(instDetails["instrument"]);
-  m_uiForm.rfMapFile->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.rfInput->setInstrumentOverride(instrument);
+  m_uiForm.rfMapFile->setInstrumentOverride(instrument);
 }
 
 void ILLEnergyTransfer::setRunEnabled(bool enabled) {

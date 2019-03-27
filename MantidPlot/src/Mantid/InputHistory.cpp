@@ -5,15 +5,19 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InputHistory.h"
-#include <MantidAPI/Algorithm.h>
+#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Logger.h"
 
 #include <QSettings>
 #include <QStringList>
-#include <iostream>
 #include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+
+namespace {
+Logger logger("InputHistory");
+}
 
 /// Constructor
 InputHistoryImpl::InputHistoryImpl() {
@@ -84,12 +88,12 @@ void InputHistoryImpl::printAll() {
   QMapIterator<QString, QList<PropertyData>> alg(m_history);
   while (alg.hasNext()) {
     alg.next();
-    std::cerr << alg.key().toStdString() << '\n';
+    logger.information() << alg.key().toStdString() << '\n';
     const QList<PropertyData> &prop_list = alg.value();
     for (QList<PropertyData>::const_iterator prop = prop_list.begin();
          prop != prop_list.end(); ++prop)
-      std::cerr << prop->name.toStdString() << ": " << prop->value.toStdString()
-                << '\n';
+      logger.information() << prop->name.toStdString() << ": "
+                           << prop->value.toStdString() << '\n';
   }
 }
 

@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description='Pass in exit_code')
 parser.add_argument('--exitcode', dest='exit_code')
 parser.add_argument('--directory', dest='directory')
 parser.add_argument('--qtdir', dest='qtdir')
+parser.add_argument('--application', dest='application')
 
 command_line_args = parser.parse_args()
 
@@ -45,7 +46,7 @@ def main():
         return int(command_line_args.exit_code)
     app = QtWidgets.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
-    presenter = ErrorReporterPresenter(form, command_line_args.exit_code)
+    presenter = ErrorReporterPresenter(form, command_line_args.exit_code, command_line_args.application)
     presenter.show_view()
     app.exec_()
     return int(command_line_args.exit_code)

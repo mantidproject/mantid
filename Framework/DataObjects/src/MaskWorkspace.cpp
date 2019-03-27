@@ -85,9 +85,6 @@ void MaskWorkspace::clearMask() {
  * @return The total number of masked spectra.
  */
 size_t MaskWorkspace::getNumberMasked() const {
-  // Determine whether has instrument or not
-  Geometry::Instrument_const_sptr inst = getInstrument();
-
   size_t numMasked(0);
   const size_t numWksp(this->getNumberHistograms());
   for (size_t i = 0; i < numWksp; i++) {
@@ -114,9 +111,6 @@ size_t MaskWorkspace::getNumberMasked() const {
  */
 set<detid_t> MaskWorkspace::getMaskedDetectors() const {
   set<detid_t> detIDs;
-
-  Geometry::Instrument_const_sptr inst = this->getInstrument();
-
   /*
    * Note
    * This test originally just checked if there was an instument and ignored

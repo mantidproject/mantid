@@ -478,6 +478,7 @@ class MuonMaxent(PythonAlgorithm):
             YLength=MAXPAGE_n)
         outSpec.dataX(0)[:] = fchan
         outSpec.dataY(0)[:] = MAXPAGE_f
+        outSpec.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
         self.setProperty("OutputWorkspace", outSpec)
         # revised dead times
         if(not self.getProperty("OutputDeadTimeTable").isDefault):

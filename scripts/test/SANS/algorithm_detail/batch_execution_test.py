@@ -5,14 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import sys
-from sans.algorithm_detail.batch_execution import get_all_names_to_save, ReductionPackage
+
 from mantid.simpleapi import CreateSampleWorkspace
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
+from sans.algorithm_detail.batch_execution import get_all_names_to_save, ReductionPackage
 
 
 class GetAllNamesToSaveTest(unittest.TestCase):
