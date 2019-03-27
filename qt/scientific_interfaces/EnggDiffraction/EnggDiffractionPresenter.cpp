@@ -1592,21 +1592,26 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                           ") for run " + runNo + " into: "
                    << effectiveFilenames[idx] << '\n';
     try {
-      m_focusFinishedOK = false;
+      
       doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
                  dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
+      m_focusFinishedOK = false;
       g_log.error() << "The focusing calculations failed. One of the algorithms"
                        "did not execute correctly. See log messages for "
                        "further details. Error: " +
                            std::string(rexc.what())
                     << '\n';
     } catch (std::invalid_argument &ia) {
+      m_focusFinishedOK = false;
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
                        "See log messages for details. Error: "
                     << ia.what() << '\n';
+    }catch (Mantid::API::Algorithm::CancelException) {
+      m_focusFinishedOK = false;
+      g_log.error() << "Focus terminated by user.\n";
     }
   }
 
