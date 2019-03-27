@@ -36,7 +36,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     """
 
     closing = Signal()
-    pattern_fittable_curve = re.compile('(.+?): spec (\d+)')
+    pattern_fittable_curve = re.compile(r'(.+?): spec (\d+)')
 
     def __init__(self, canvas, toolbar_state_checker, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
@@ -86,7 +86,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Override the base class method. Initialise the peak editing tool.
         """
         allowed_spectra = {}
-        pattern = re.compile(r'(.+?): spec (\d+)')
         for label in self.workspace_labels:
             a_match = re.match(self.pattern_fittable_curve, label)
             if a_match:
