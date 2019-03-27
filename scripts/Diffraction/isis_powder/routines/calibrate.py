@@ -48,6 +48,7 @@ def create_van(instrument, run_details, absorb):
     solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws,RHSWorkspace=solid_angle)
+        mantid.DeleteWorkspace(solid_angle)
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
 
