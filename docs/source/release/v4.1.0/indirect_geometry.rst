@@ -18,3 +18,4 @@ Improvements
 ############
 
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
+- :ref:`BASISReduction <algm-BASISReduction>` permits now flux normalization by proton charge and run duration.
