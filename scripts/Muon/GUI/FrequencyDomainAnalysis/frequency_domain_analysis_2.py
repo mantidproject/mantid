@@ -128,8 +128,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
-        # self.load_widget.load_widget.loadNotifier.add_subscriber(
-        #     self.transform.LoadObserver)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.transform.LoadObserver)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -143,9 +143,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.home_tab.home_tab_widget.groupingObserver)
 
-        #
-        # self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
-        #     self.transform.GroupPairObserver)
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.transform.GroupPairObserver)
 
     def setup_instrument_changed_notifier(self):
         self.context.data_context.instrumentNotifier.add_subscriber(
@@ -156,9 +155,9 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
-        #
-        # self.context.data_context.instrumentNotifier.add_subscriber(
-        #     self.transform.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.transform.instrumentObserver)
 
     def setup_group_calculation_enable_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
@@ -181,8 +180,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.enable_observer)
 
-        # self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-        #     self.transform.enable_observer)
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.transform.enable_observer)
 
     def setup_on_load_disabler(self):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
@@ -191,8 +190,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.disable_observer)
 
-        # self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-        #     self.transform.disable_observer)
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.transform.disable_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

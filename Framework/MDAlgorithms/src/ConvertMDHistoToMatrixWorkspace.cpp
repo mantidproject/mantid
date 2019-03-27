@@ -30,7 +30,7 @@ namespace {
  * A shared pointer deleter that doesn't delete.
  */
 struct NullDeleter {
-  void operator()(void const *) const { // Do nothing
+  void operator()(void const * /*unused*/) const { // Do nothing
   }
 };
 

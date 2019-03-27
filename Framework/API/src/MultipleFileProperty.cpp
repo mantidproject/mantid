@@ -287,10 +287,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     for (; plusToken != end; ++plusToken)
       plusTokenStrings.push_back(plusToken->str());
 
-    for (auto plusTokenString = plusTokenStrings.begin();
-         plusTokenString != plusTokenStrings.end(); ++plusTokenString) {
+    for (auto &plusTokenString : plusTokenStrings) {
       try {
-        m_parser.parse(*plusTokenString);
+        m_parser.parse(plusTokenString);
       } catch (const std::range_error &re) {
         g_log.error(re.what());
         throw;
@@ -307,7 +306,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // existing) file within a token, but which has unexpected zero padding,
       // or some other anomaly.
       if (VectorHelper::flattenVector(f).empty())
-        f.push_back(std::vector<std::string>(1, *plusTokenString));
+        f.push_back(std::vector<std::string>(1, plusTokenString));
 
       if (plusTokenStrings.size() > 1) {
         // See [3] in header documentation.  Basically, for reasons of
@@ -321,9 +320,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         if (temp.empty())
           temp.push_back(f[0]);
         else {
-          for (auto parsedFile = f[0].begin(); parsedFile != f[0].end();
-               ++parsedFile)
-            temp[0].push_back(*parsedFile);
+          for (auto &parsedFile : f[0])
+            temp[0].push_back(parsedFile);
         }
       } else {
         temp.insert(temp.end(), f.begin(), f.end());

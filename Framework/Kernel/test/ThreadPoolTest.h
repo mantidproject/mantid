@@ -12,7 +12,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include <MantidKernel/FunctionTask.h>
-#include <MantidKernel/ProgressText.h>
+#include <MantidKernel/ProgressBase.h>
 #include <MantidKernel/ThreadPool.h>
 #include <MantidKernel/Timer.h>
 

@@ -62,7 +62,8 @@ bool PeakBackground::isBackground(Mantid::API::IMDIterator *iterator) const {
   return true;
 }
 
-void PeakBackground::configureIterator(Mantid::API::IMDIterator *const) const {}
+void PeakBackground::configureIterator(
+    Mantid::API::IMDIterator *const /*iterator*/) const {}
 
 } // namespace Crystal
 } // namespace Mantid

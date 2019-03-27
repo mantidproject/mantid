@@ -10,3 +10,11 @@ SANS Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 4.1.0 <v4.1.0>`
+
+ISIS SANS Interface
+-------------------
+
+Improvements
+############
+
+- Increased font size in run table.

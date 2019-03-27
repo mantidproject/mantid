@@ -272,8 +272,8 @@ void CreateMD::exec() {
   progress.report();
 
   // Clean up temporary workspaces
-  for (auto &to_merge_name : to_merge_names) {
-    AnalysisDataService::Instance().remove(to_merge_name);
+  for (const auto &name : to_merge_names) {
+    AnalysisDataService::Instance().remove(name);
   }
 
   this->setProperty("OutputWorkspace", output_workspace);

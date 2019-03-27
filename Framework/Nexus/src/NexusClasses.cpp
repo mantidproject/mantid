@@ -15,16 +15,16 @@ namespace NeXus {
 std::vector<std::string> NXAttributes::names() const {
   std::vector<std::string> out;
   out.reserve(m_values.size());
-  for (const auto &value : m_values)
-    out.push_back(value.first);
+  std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
+                 [](const auto &value) { return value.first; });
   return out;
 }
 
 std::vector<std::string> NXAttributes::values() const {
   std::vector<std::string> out;
   out.reserve(m_values.size());
-  for (const auto &value : m_values)
-    out.push_back(value.second);
+  std::transform(m_values.cbegin(), m_values.cend(), std::back_inserter(out),
+                 [](const auto &value) { return value.second; });
   return out;
 }
 

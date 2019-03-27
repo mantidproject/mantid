@@ -1,14 +1,8 @@
-import unittest
-import sys
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
-
 from PyQt4 import QtGui
+import unittest
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from mantid.py3compat import mock
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 

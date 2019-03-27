@@ -138,7 +138,7 @@ void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
 
 /** Perform a single iteration.
  */
-bool TrustRegionMinimizer::iterate(size_t) {
+bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
   int max_tr_decrease = 100;
   auto &w = m_workspace;
   auto &options = m_options;

@@ -1,8 +1,8 @@
-import unittest
-import sys
 from PyQt4 import QtGui
+import unittest
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from mantid.py3compat import mock
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 
@@ -11,16 +11,13 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
 
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 def pair_name():
     name = []
     for i in range(21):
         name.append("pair_" + str(i+1))
     return name
+
 
 class GroupSelectorTest(unittest.TestCase):
 

@@ -7,16 +7,11 @@
 #    This file is part of the mantid workbench.
 #
 #
-
 import os
+from qtpy.QtWidgets import QMainWindow
 import unittest
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-from qtpy.QtWidgets import QMainWindow
-
+from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from workbench.plugins.editor import MultiFileEditor
 
