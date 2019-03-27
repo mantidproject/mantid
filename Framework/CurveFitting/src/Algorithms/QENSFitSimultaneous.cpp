@@ -622,7 +622,7 @@ bool QENSFitSimultaneous::throwIfElasticQConversionFails() const {
   return false;
 }
 
-bool QENSFitSimultaneous::isFitParameter(const std::string &) const {
+bool QENSFitSimultaneous::isFitParameter(const std::string & /*unused*/) const {
   return true;
 }
 

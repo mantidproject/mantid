@@ -756,21 +756,21 @@ void GridDetector::testIntersectionWithChildren(
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie within this object component?
-bool GridDetector::isValid(const V3D &) const {
+bool GridDetector::isValid(const V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError(
       "GridDetector::isValid() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie on the surface of this object component?
-bool GridDetector::isOnSide(const V3D &) const {
+bool GridDetector::isOnSide(const V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError(
       "GridDetector::isOnSide() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Checks whether the track given will pass through this Component.
-int GridDetector::interceptSurface(Track &) const {
+int GridDetector::interceptSurface(Track & /*track*/) const {
   throw Kernel::Exception::NotImplementedError(
       "GridDetector::interceptSurface() is not implemented.");
 }
@@ -778,14 +778,14 @@ int GridDetector::interceptSurface(Track &) const {
 //-------------------------------------------------------------------------------------------------
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double GridDetector::solidAngle(const V3D &) const {
+double GridDetector::solidAngle(const V3D & /*observer*/) const {
   throw Kernel::Exception::NotImplementedError(
       "GridDetector::solidAngle() is not implemented.");
 }
 
 //-------------------------------------------------------------------------------------------------
 /// Try to find a point that lies within (or on) the object
-int GridDetector::getPointInObject(V3D &) const {
+int GridDetector::getPointInObject(V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError(
       "GridDetector::getPointInObject() is not implemented.");
 }

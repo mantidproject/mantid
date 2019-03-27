@@ -467,8 +467,10 @@ void Elwin::newPreviewFileSelected(int index) {
       int const numHist =
           static_cast<int>(workspace->getNumberHistograms()) - 1;
 
+      setInputWorkspace(workspace);
       m_uiForm.spPreviewSpec->setMaximum(numHist);
       m_uiForm.spPreviewSpec->setValue(0);
+      plotInput();
     } else
       g_log.error("Failed to load input workspace.");
   }

@@ -53,10 +53,16 @@ public:
   void loadFromProject(const std::string &) {}
   std::string saveToProject() const { return ""; }
 signals:
+  // Changed signals emitted for any change
   void scaleTypeChanged(int);
   void minValueChanged(double);
   void maxValueChanged(double);
   void nthPowerChanged(double);
+
+  // Edited signals only emitted when manual editing of that field
+  // occurs
+  void minValueEdited(double);
+  void maxValueEdited(double);
   ///@}
 
 private slots:

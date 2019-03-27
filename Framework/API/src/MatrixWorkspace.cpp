@@ -877,6 +877,12 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
   m_axes[axisIndex] = newAxis;
 }
 
+/**
+ * Return the number of Axis stored by this workspace
+ * @return int
+ */
+size_t MatrixWorkspace::numberOfAxis() const { return m_axes.size(); }
+
 /// Returns the units of the data in the workspace
 std::string MatrixWorkspace::YUnit() const { return m_YUnit; }
 
@@ -1695,7 +1701,8 @@ signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
 MDMasking for a Matrix Workspace has not been implemented.
 @param :
 */
-void MatrixWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction *) {
+void MatrixWorkspace::setMDMasking(
+    Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
   throw std::runtime_error(
       "MatrixWorkspace::setMDMasking has no implementation");
 }
@@ -2023,14 +2030,15 @@ void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
 /// Cache a lookup of grouped detIDs to member IDs. Always throws
 /// std::runtime_error since MatrixWorkspace supports detector grouping via
 /// spectra instead of the caching mechanism.
-void MatrixWorkspace::cacheDetectorGroupings(const det2group_map &) {
+void MatrixWorkspace::cacheDetectorGroupings(
+    const det2group_map & /*mapping*/) {
   throw std::runtime_error("Cannot cache detector groupings in a "
                            "MatrixWorkspace -- grouping must be defined via "
                            "spectra");
 }
 
 /// Throws an exception. This method is only for MDWorkspaces.
-size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
+size_t MatrixWorkspace::groupOfDetectorID(const detid_t /*detID*/) const {
   throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
                            "for MatrixWorkspace, only for MDWorkspaces");
 }

@@ -104,7 +104,6 @@ class LoadRunWidgetPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_run_changed_by_user(self):
-        self.disable_notifier.notify_subscribers()
         run_string = self._view.get_run_edit_text()
         if not run_string:
             return
@@ -141,7 +140,8 @@ class LoadRunWidgetPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_increment_run(self):
-        self.run_list = self.get_incremented_run_list()
+        incremented_run_list = self.get_incremented_run_list()
+        self.run_list = [max(incremented_run_list)] if incremented_run_list else []
         if not self.run_list:
             return
         new_run = max(self.run_list)
@@ -154,7 +154,8 @@ class LoadRunWidgetPresenter(object):
         self.load_runs([file_name])
 
     def handle_decrement_run(self):
-        self.run_list = self.get_decremented_run_list()
+        decremented_run_list = self.get_decremented_run_list()
+        self.run_list = [min(decremented_run_list)] if decremented_run_list else []
         if not self.run_list:
             return
         new_run = min(self.run_list)
@@ -217,35 +218,42 @@ class LoadRunWidgetPresenter(object):
         self._load_thread = self.create_load_thread()
         self._load_thread.threadWrapperSetUp(self.disable_loading,
                                              finished_callback,
-                                             self._view.warning_popup)
+                                             self.error_callback)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
-    def handle_load_thread_finished(self):
+    def error_callback(self, error_message):
+        self.enable_notifier.notify_subscribers()
+        self._view.warning_popup(error_message)
 
+    def handle_load_thread_finished(self):
         self._load_thread.deleteLater()
         self._load_thread = None
 
         self.on_loading_finished()
 
     def on_loading_finished(self):
-        if self.run_list and self.run_list[0] == 'Current':
-            self.run_list = [self._model._loaded_data_store.get_latest_data()['run']][0]
-            self._model.current_run = self.run_list
+        try:
+            if self.run_list and self.run_list[0] == 'Current':
+                self.run_list = [self._model._loaded_data_store.get_latest_data()['run']][0]
+                self._model.current_run = self.run_list
 
-        run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
-        self._model._context.current_runs = run_list
-
-        if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
-            run_list_to_add = [run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
-            run_list = [[run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]]
-            load_utils.combine_loaded_runs(self._model, run_list_to_add)
+            run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             self._model._context.current_runs = run_list
 
-        self.update_view_from_model(run_list)
-        self._view.notify_loading_finished()
-        self.enable_loading()
-        self.enable_notifier.notify_subscribers()
+            if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
+                run_list_to_add = [run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
+                run_list = [[run for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]]
+                load_utils.combine_loaded_runs(self._model, run_list_to_add)
+                self._model._context.current_runs = run_list
+
+            self.update_view_from_model(run_list)
+            self._view.notify_loading_finished()
+        except IndexError as error:
+            self._view.warning_popup(error)
+        finally:
+            self.enable_loading()
+            self.enable_notifier.notify_subscribers()
 
     class DisableEditingNotifier(Observable):
 

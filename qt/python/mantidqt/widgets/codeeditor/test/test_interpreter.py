@@ -11,15 +11,9 @@ from __future__ import (absolute_import, unicode_literals)
 
 import unittest
 
-import six
-
+from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-
-if six.PY2:
-    import mock
-else:
-    from unittest import mock
 
 
 class PythonFileInterpreterTest(GuiTest):

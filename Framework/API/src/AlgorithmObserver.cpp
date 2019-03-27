@@ -23,9 +23,9 @@ AlgorithmObserver::AlgorithmObserver()
       m_startingObserver(*this, &AlgorithmObserver::_startingHandle) {}
 
 /**   Constructs AlgorithmObserver and connects all its handlers to algorithm
-   alg.
-      @param alg :: Algorithm to be observed
-  */
+alg.
+  @param alg :: Algorithm to be observed
+*/
 AlgorithmObserver::AlgorithmObserver(IAlgorithm_const_sptr alg)
     : m_progressObserver(*this, &AlgorithmObserver::_progressHandle),
       m_startObserver(*this, &AlgorithmObserver::_startHandle),
@@ -39,7 +39,7 @@ AlgorithmObserver::AlgorithmObserver(IAlgorithm_const_sptr alg)
 AlgorithmObserver::~AlgorithmObserver() = default;
 
 /**   Connect to algorithm alg and observe all its notifications
-      @param alg :: Algorithm to be observed
+  @param alg :: Algorithm to be observed
 */
 void AlgorithmObserver::observeAll(IAlgorithm_const_sptr alg) {
   alg->addObserver(m_progressObserver);
@@ -49,7 +49,7 @@ void AlgorithmObserver::observeAll(IAlgorithm_const_sptr alg) {
 }
 
 /**   Connect to algorithm alg and observe its progress notification
-      @param alg :: Algorithm to be observed
+  @param alg :: Algorithm to be observed
 */
 void AlgorithmObserver::observeProgress(IAlgorithm_const_sptr alg) {
   alg->addObserver(m_progressObserver);
@@ -63,31 +63,35 @@ void AlgorithmObserver::observeStarting() {
 }
 
 /**   Connect to algorithm alg and observe its start notification
-      @param alg :: Algorithm to be observed
+  @param alg :: Algorithm to be observed
 */
 void AlgorithmObserver::observeStart(IAlgorithm_const_sptr alg) {
   alg->addObserver(m_startObserver);
 }
 
 /**   Connect to algorithm alg and observe its finish notification
-      @param alg :: Algorithm to be observed
+  @param alg :: Algorithm to be observed
 */
 void AlgorithmObserver::observeFinish(IAlgorithm_const_sptr alg) {
   alg->addObserver(m_finishObserver);
 }
 
 /**   Connect to algorithm alg and observe its error notification
-      @param alg :: Algorithm to be observed
+  @param alg :: Algorithm to be observed
 */
 void AlgorithmObserver::observeError(IAlgorithm_const_sptr alg) {
   alg->addObserver(m_errorObserver);
 }
 
 /**   Disconnect from algorithm alg. Should be called in the destructor of
-   inherited classes.
-      @param alg :: Algorithm to be disconnected
+inherited classes.
+  @param alg :: Algorithm to be disconnected
 */
 void AlgorithmObserver::stopObserving(IAlgorithm_const_sptr alg) {
+  this->stopObserving(alg.get());
+}
+
+void AlgorithmObserver::stopObserving(const IAlgorithm *alg) {
   alg->removeObserver(m_progressObserver);
   alg->removeObserver(m_startObserver);
   alg->removeObserver(m_finishObserver);
@@ -105,17 +109,17 @@ void AlgorithmObserver::stopObservingManager() {
 /// @cond Doxygen cannot handle the macro around the argument name
 
 /** Handler of the progress notifications. Must be overriden in inherited
-   classes.
-    The default handler is provided (doing nothing).
-    @param alg :: Pointer to the algorithm sending the notification. Note that
-   this can
-    point to a different object than the argument of a observeZZZ(...) method,
-   e.g.
-    an observer can be connected to an AlgorithmProxy instance and receive
-   notifications from
-    the corresponding Algorithm type object.
-    @param p :: Progress reported by the algorithm, 0 <= p <= 1
-    @param msg :: Optional message string sent by the algorithm
+classes.
+The default handler is provided (doing nothing).
+@param alg :: Pointer to the algorithm sending the notification. Note that
+this can
+point to a different object than the argument of a observeZZZ(...) method,
+e.g.
+an observer can be connected to an AlgorithmProxy instance and receive
+notifications from
+the corresponding Algorithm type object.
+@param p :: Progress reported by the algorithm, 0 <= p <= 1
+@param msg :: Optional message string sent by the algorithm
 */
 void AlgorithmObserver::progressHandle(const IAlgorithm *alg, double p,
                                        const std::string &msg) {
@@ -125,45 +129,45 @@ void AlgorithmObserver::progressHandle(const IAlgorithm *alg, double p,
 }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
-    The default handler is provided (doing nothing).
-    @param alg :: Shared Pointer to the algorithm sending the notification.
+The default handler is provided (doing nothing).
+@param alg :: Shared Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg) }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
-    The default handler is provided (doing nothing).
-    @param alg :: Pointer to the algorithm sending the notification. Note that
-   this can
-    point to a different object than the argument of a observeZZZ(...) method,
-   e.g.
-    an observer can be connected to an AlgorithmProxy instance and receive
-   notifications from
-    the corresponding Algorithm type object.
+The default handler is provided (doing nothing).
+@param alg :: Pointer to the algorithm sending the notification. Note that
+this can
+point to a different object than the argument of a observeZZZ(...) method,
+e.g.
+an observer can be connected to an AlgorithmProxy instance and receive
+notifications from
+the corresponding Algorithm type object.
 */
 void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
 /** Handler of the finish notifications. Must be overriden in inherited classes.
-     The default handler is provided (doing nothing).
-     @param alg :: Pointer to the algorithm sending the notification. Note that
-   this can
-     point to a different object than the argument of a observeZZZ(...) method,
-   e.g.
-     an observer can be connected to an AlgorithmProxy instance and receive
-   notifications from
-     the corresponding Algorithm type object.
- */
+ The default handler is provided (doing nothing).
+ @param alg :: Pointer to the algorithm sending the notification. Note that
+this can
+ point to a different object than the argument of a observeZZZ(...) method,
+e.g.
+ an observer can be connected to an AlgorithmProxy instance and receive
+notifications from
+ the corresponding Algorithm type object.
+*/
 void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
 /** Handler of the error notifications. Must be overriden in inherited classes.
-    The default handler is provided (doing nothing).
-    @param alg :: Pointer to the algorithm sending the notification. Note that
-   this can
-    point to a different object than the argument of a observeZZZ(...) method,
-   e.g.
-    an observer can be connected to an AlgorithmProxy instance and receive
-   notifications from
-    the corresponding Algorithm type object.
-    @param what :: The error message
+The default handler is provided (doing nothing).
+@param alg :: Pointer to the algorithm sending the notification. Note that
+this can
+point to a different object than the argument of a observeZZZ(...) method,
+e.g.
+an observer can be connected to an AlgorithmProxy instance and receive
+notifications from
+the corresponding Algorithm type object.
+@param what :: The error message
 */
 void AlgorithmObserver::errorHandle(const IAlgorithm *alg,
                                     const std::string &what) {
@@ -173,7 +177,7 @@ void AlgorithmObserver::errorHandle(const IAlgorithm *alg,
 /// @endcond
 
 /** Poco notification handler for Algorithm::ProgressNotification.
-    @param pNf :: An pointer to the notification.
+@param pNf :: An pointer to the notification.
 */
 void AlgorithmObserver::_progressHandle(
     const Poco::AutoPtr<Algorithm::ProgressNotification> &pNf) {
@@ -181,7 +185,7 @@ void AlgorithmObserver::_progressHandle(
 }
 
 /** Poco notification handler for Algorithm::StartedNotification.
-    @param pNf :: An pointer to the notification.
+@param pNf :: An pointer to the notification.
 */
 void AlgorithmObserver::_startHandle(
     const Poco::AutoPtr<Algorithm::StartedNotification> &pNf) {
@@ -189,7 +193,7 @@ void AlgorithmObserver::_startHandle(
 }
 
 /** Poco notification handler for Algorithm::FinishedNotification.
-    @param pNf :: An pointer to the notification.
+@param pNf :: An pointer to the notification.
 */
 void AlgorithmObserver::_finishHandle(
     const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
@@ -197,7 +201,7 @@ void AlgorithmObserver::_finishHandle(
 }
 
 /** Poco notification handler for Algorithm::ErrorNotification.
-    @param pNf :: An pointer to the notification.
+@param pNf :: An pointer to the notification.
 */
 void AlgorithmObserver::_errorHandle(
     const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
@@ -205,7 +209,7 @@ void AlgorithmObserver::_errorHandle(
 }
 
 /** Poco notification handler for API::AlgorithmStartingNotification.
-    @param pNf :: An pointer to the notification.
+@param pNf :: An pointer to the notification.
 */
 void AlgorithmObserver::_startingHandle(
     const Poco::AutoPtr<AlgorithmStartingNotification> &pNf) {

@@ -1,7 +1,7 @@
-import unittest
-import sys
 from PyQt4 import QtGui
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
@@ -11,10 +11,12 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
 
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
 
 
 class GroupSelectorTest(unittest.TestCase):
@@ -30,7 +32,10 @@ class GroupSelectorTest(unittest.TestCase):
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
+        self.add_three_groups_to_model()
+
         self.view.warning_popup = mock.Mock()
+        self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
 
     def tearDown(self):
         self.obj = None
@@ -67,40 +72,13 @@ class GroupSelectorTest(unittest.TestCase):
     #         together make the muon pair.
     # ------------------------------------------------------------------------------------------------------------------
 
-    def test_that_adding_pair_when_no_groups_exist_leaves_combo_boxes_empty(self):
-        self.presenter.handle_add_pair_button_clicked()
-
-        self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 0)
-        self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 0)
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "")
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "")
-
-    def test_that_adding_pair_then_adding_group_puts_group_in_combos(self):
-        self.presenter.handle_add_pair_button_clicked()
-        self.data.add_group(MuonGroup(group_name="my_group_0", detector_ids=[1]))
-        self.presenter.update_view_from_model()
-
-        self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 1)
-        self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 1)
-
-    def test_that_adding_pair_then_adding_group_sets_combo_to_added_group(self):
-        self.presenter.handle_add_pair_button_clicked()
-        self.data.add_group(MuonGroup(group_name="my_group_0", detector_ids=[1]))
-        self.presenter.update_view_from_model()
-
-        self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_0")
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_0")
-
     def test_that_adding_two_groups_and_then_pair_sets_combo_to_added_groups(self):
-        self.data.add_group(MuonGroup(group_name="my_group_0", detector_ids=[1]))
-        self.data.add_group(MuonGroup(group_name="my_group_1", detector_ids=[2]))
         self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), "my_group_0")
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), "my_group_1")
 
     def test_that_added_groups_appear_in_group_combo_boxes_in_new_pairs(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
@@ -158,7 +136,7 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertNotEqual(self.get_group_1_selector_from_pair(0).findText("my_group_0"), -1)
         self.assertNotEqual(self.get_group_2_selector_from_pair(0).findText("my_group_0"), -1)
 
-    def test_adding_new_group_does_not_change_pair_slection(self):
+    def test_adding_new_group_does_not_change_pair_selection(self):
         self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 

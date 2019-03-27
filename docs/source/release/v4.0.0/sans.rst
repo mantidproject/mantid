@@ -5,19 +5,6 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-Algorithms
-----------
-
-New
-###
-
-- :ref:`SANSILLReduction <algm-SANSILLReduction>` performs SANS data reduction for ILL instruments D11, D22, D33.
-- :ref:`SANSILLIntegration <algm-SANSILLIntegration>` performs integration of corrected SANS data to produce I(Q), I(Phi,Q) or I(Qx,Qy).
-
-Removed
-#######
-
-- Obsolete *SetupILLD33Reduction* algorithm was removed.
 
 ISIS SANS Interface
 -------------------
@@ -27,7 +14,7 @@ This release sees the "new" ISIS SANS interface becoming the primary interface, 
 Active development will only be carried out on the new interface and only major bugs will be fixed in the deprecated interface.
 This change does not affect the functionality of either of the interfaces.
 
-To signify this change, the "ISIS SANS" interface has been renamed "ISIS SANS (Deprecated)" and the "ISIS SANS v2 experimental" interface has been renamed "ISIS SANS".
+To signify this change, the "ISIS SANS" interface has been renamed "Old ISIS SANS (Deprecated)" and the "ISIS SANS v2 experimental" interface has been renamed "ISIS SANS".
 The old interface will be removed in a later release.
 
 .. figure:: ../../images/sans_isis_interface_4.0.png
@@ -101,5 +88,19 @@ Improvements
 
 - ORNL HFIR SANS instruments have new geometries. The monitors now have a shape associated to them. Detector will move to the right position based on log values.
 
+
+Algorithms
+----------
+
+New
+###
+
+- :ref:`SANSILLReduction <algm-SANSILLReduction>` performs SANS data reduction for ILL instruments D11, D22, D33.
+- :ref:`SANSILLIntegration <algm-SANSILLIntegration>` performs integration of corrected SANS data to produce I(Q), I(Phi,Q) or I(Qx,Qy).
+
+Removed
+#######
+
+- Obsolete *SetupILLD33Reduction* algorithm was removed.
 
 :ref:`Release 4.0.0 <v4.0.0>`

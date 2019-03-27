@@ -488,7 +488,7 @@ MantidVec &EventWorkspace::dataDx(const std::size_t index) {
 /// Deprecated, use mutableY() instead. Return the data Y vector at a given
 /// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
-MantidVec &EventWorkspace::dataY(const std::size_t) {
+MantidVec &EventWorkspace::dataY(const std::size_t /*index*/) {
   throw NotImplementedError("EventWorkspace::dataY cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
@@ -497,7 +497,7 @@ MantidVec &EventWorkspace::dataY(const std::size_t) {
 /// Deprecated, use mutableE() instead. Return the data E vector at a given
 /// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
-MantidVec &EventWorkspace::dataE(const std::size_t) {
+MantidVec &EventWorkspace::dataE(const std::size_t /*index*/) {
   throw NotImplementedError("EventWorkspace::dataE cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");

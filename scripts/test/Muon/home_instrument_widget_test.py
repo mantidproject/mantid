@@ -4,22 +4,18 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+from PyQt4 import QtGui
+import unittest
 
+from mantid.api import FileFinder
+from mantid.py3compat import mock
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
-import unittest
-from PyQt4 import QtGui
-from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import FileFinder
 
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
+from Muon.GUI.Common.observer_pattern import Observer
 
 
 class HomeTabInstrumentPresenterTest(unittest.TestCase):

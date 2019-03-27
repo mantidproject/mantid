@@ -77,6 +77,8 @@ private slots:
 
 private:
   Ui::IndirectSymmetrise m_uiForm;
+  double m_originalMax;
+  double m_originalMin;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

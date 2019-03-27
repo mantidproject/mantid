@@ -80,8 +80,11 @@ class EditorIO(object):
             # pretend the user clicked No on the dialog
             return True
 
-    def write(self):
-        filename = self.editor.fileName()
+    def write(self, save_as=None):
+        if save_as is not None:
+            filename = save_as
+        else:
+            filename = self.editor.fileName()
         if not filename:
             filename = self.ask_for_filename()
             if not filename:
@@ -138,6 +141,11 @@ class PythonFileInterpreter(QWidget):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
+        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
+        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
+        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
+
     def closeEvent(self, event):
         self.deleteLater()
         if self.find_replace_dialog:
@@ -154,11 +162,6 @@ class PythonFileInterpreter(QWidget):
     def hide_find_replace_dialog(self):
         if self.find_replace_dialog is not None:
             self.find_replace_dialog.hide()
-
-        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
-        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
-        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
-        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
 
     @property
     def filename(self):
@@ -187,6 +190,14 @@ class PythonFileInterpreter(QWidget):
             return io.save_if_required(prompt_for_confirmation, force_save)
         else:
             return True
+
+    def save_as(self):
+        io = EditorIO(self.editor)
+        new_filename = io.ask_for_filename()
+        if new_filename:
+            return io.write(save_as=new_filename), new_filename
+        else:
+            return False, None
 
     def set_editor_readonly(self, ro):
         self.editor.setReadOnly(ro)
@@ -342,7 +353,7 @@ class PythonFileInterpreterPresenter(QObject):
     def req_execute_async_blocking(self):
         self._req_execute_impl(blocking=True)
 
-    def _req_execute_impl(self, blocking, ignore_selection):
+    def _req_execute_impl(self, blocking, ignore_selection=False):
         if self.is_executing:
             return
         code_str, self._code_start_offset = self._get_code_for_execution(ignore_selection)

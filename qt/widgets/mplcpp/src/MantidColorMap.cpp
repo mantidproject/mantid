@@ -115,7 +115,10 @@ MantidColorMap::ScaleType MantidColorMap::getScaleType() const {
  * @brief Set the value of the exponent for the power scale
  * @param gamma The value of the exponent
  */
-void MantidColorMap::setNthPower(double gamma) { m_gamma = gamma; }
+void MantidColorMap::setNthPower(double gamma) {
+  m_gamma = gamma;
+  m_mappable.setNorm(PowerNorm(m_gamma, 0, 1));
+}
 
 /**
  * @brief Compute an RGB color value on the current scale type for the given

@@ -546,7 +546,12 @@ void QENSFitSequential::exec() {
 
   setProperty("OutputWorkspace", resultWs);
   setProperty("OutputParameterWorkspace", parameterWs);
-  setProperty("OutputWorkspaceGroup", groupWs);
+  // Copy the group to prevent the ADS having two entries for one workspace
+  auto outGroupWs = WorkspaceGroup_sptr(new WorkspaceGroup);
+  for (auto item : groupWs->getAllItems()) {
+    outGroupWs->addWorkspace(item);
+  }
+  setProperty("OutputWorkspaceGroup", outGroupWs);
 }
 
 std::map<std::string, std::string>
@@ -608,7 +613,7 @@ std::string QENSFitSequential::getOutputBaseName() const {
 
 bool QENSFitSequential::throwIfElasticQConversionFails() const { return false; }
 
-bool QENSFitSequential::isFitParameter(const std::string &) const {
+bool QENSFitSequential::isFitParameter(const std::string & /*unused*/) const {
   return true;
 }
 

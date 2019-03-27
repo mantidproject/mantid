@@ -4,13 +4,40 @@
 Mantid 4.0.0 Release Notes
 ==========================
 
+.. figure:: ../../images/Release4-0.png
+   :class: screenshot
+   :align: right
+   :scale: 35%
+
+   Overview of the MantidWorkbench
+
+
 .. contents:: Table of Contents
    :local:
 
-
 We are proud to announce version 4.0.0 of Mantid.
 
-Here is a load of stuff we have done.
+
+This major release sees the introduction of a brand new graphical user interface, ``MantidWorkbench``, which will eventually
+replace ``MantidPlot``. The ``MantidWorkbench`` has been built from the ground up to allow more automated testing in an
+effort to vastly improve on the stability of ``MantidPlot``. In addition it offers:
+
+- `matplotlib <https://matplotlib.org/>`_-based plotting: Matplotlib is the defacto-standard plotting package for the
+  scientific community and one of its core goals is to produce publication-quality plots
+
+- cleaner interface: ``MantidPlot`` had many toolbars, buttons and menus that would confuse new users.
+  ``MantidWorkbench`` aims to have a simpler interface and removes many legacy tools that were unused from ``MantidPlot``
+
+- support for high-dpi displays: Based on Qt5, allowing for improved handling of high-resolution screens such as retina
+  displays
+
+Please see :ref:`the full workbench release notes <workbench_v4_release_notes>` for more information along with the new
+:ref:`documentation <workbench>`.
+
+This is just one of the many improvements in this release, so please take a look at the release notes, which are filled
+with details of the important changes and improvements in many areas. The development team has put a great effort into
+making all of these improvements within Mantid and we would like to thank all of our beta testers for their time and
+effort helping us to make this another reliable version of Mantid.
 
 Citation
 --------
@@ -26,18 +53,31 @@ Changes
 -------
 
 .. toctree::
-   :titlesonly:
+   :hidden:
+   :glob:
 
-   Framework <framework>
-   User Interface & Usability <ui>
-   Diffraction <diffraction>
-   Muon Analysis <muon>
-   Reflectometry <reflectometry>
-   SANS <sans>
-   Direct Inelastic <direct_inelastic>
-   Indirect Inelastic <indirect_inelastic>
-   Error Reporter <error_reporter>
-   Kafka Live Streaming <kafka>
+   *
+
+- :doc:`Framework <framework>`
+- :doc:`General UI & Usability <ui>`
+
+  - :doc:`MantidPlot <mantidplot>`
+
+  - :doc:`MantidWorkbench <mantidworkbench>`
+- :doc:`Diffraction <diffraction>`
+- :doc:`Muon Analysis <muon>`
+- Low Q
+
+  - :doc:`Reflectometry <reflectometry>`
+
+  - :doc:`SANS <sans>`
+- Spectroscopy
+
+  - :doc:`Direct Geometry <direct_inelastic>`
+
+  - :doc:`Indirect Geometry <indirect_inelastic>`
+
+- :doc:`Kafka Live Streaming <kafka>`
 
 Full Change Listings
 --------------------

@@ -30,6 +30,14 @@ def contains_non_ascending_range(strings, delimiter):
     return False
 
 
+def find_minimum_non_zero_y(workspace):
+    y_minimum = min(filter(lambda x: x > 0, workspace.readY(0)))
+    for idx in range(1, workspace.getNumberHistograms()):
+        y_spec_min = min(filter(lambda x: x > 0, workspace.readY(idx)))
+        y_minimum = y_spec_min if y_spec_min < y_minimum else y_minimum
+    return y_minimum
+
+
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _workspace_names = None
     _cal_file = None
@@ -48,6 +56,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _ipf_filename = None
     _sum_files = None
     _vanadium_ws = None
+    _replace_zeros_name = '_replace_zeros'
 
     # ------------------------------------------------------------------------------
 
@@ -194,12 +203,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Load vanadium runs if given
         if self._vanadium_runs:
-            self._vanadium_ws, _ = load_files(self._vanadium_runs,
-                                              self._ipf_filename,
-                                              self._spectra_range[0],
-                                              self._spectra_range[1],
-                                              load_logs=self._load_logs,
-                                              load_opts=load_opts)
+            self._vanadium_ws, _, _ = load_files(self._vanadium_runs,
+                                                 self._ipf_filename,
+                                                 self._spectra_range[0],
+                                                 self._spectra_range[1],
+                                                 load_logs=self._load_logs,
+                                                 load_opts=load_opts)
 
             if len(self._workspace_names) > len(self._vanadium_runs):
                 raise RuntimeError("There cannot be more sample runs than vanadium runs.")
@@ -257,10 +266,19 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                          WorkspaceToMatch=ws_name,
                                          OutputWorkspace=van_ws_name)
 
+                    replacement_value = 0.1*find_minimum_non_zero_y(van_ws)
+                    logger.information('Replacing zeros in {0} with {1}.'.format(van_ws_name, replacement_value))
+                    ReplaceSpecialValues(InputWorkspace=van_ws_name,
+                                         SmallNumberThreshold=0.0000001,
+                                         SmallNumberValue=replacement_value,
+                                         OutputWorkspace=self._replace_zeros_name)
+
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=van_ws_name,
+                           RHSWorkspace=self._replace_zeros_name,
                            OutputWorkspace=ws_name,
                            AllowDifferentNumberSpectra=True)
+
+                    DeleteWorkspace(self._replace_zeros_name)
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):
@@ -380,13 +398,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         Applies the scale factor to the container if not 1.
         """
         if self._container_data_files is not None:
-            self._container_workspace, _ = load_files(self._container_data_files,
-                                                      self._ipf_filename,
-                                                      self._spectra_range[0],
-                                                      self._spectra_range[1],
-                                                      sum_files=True,
-                                                      load_logs=self._load_logs,
-                                                      load_opts=load_opts)
+            self._container_workspace, _, _ = load_files(self._container_data_files,
+                                                         self._ipf_filename,
+                                                         self._spectra_range[0],
+                                                         self._spectra_range[1],
+                                                         sum_files=True,
+                                                         load_logs=self._load_logs,
+                                                         load_opts=load_opts)
             self._container_workspace = self._container_workspace[0]
 
             # Scale container if factor is given

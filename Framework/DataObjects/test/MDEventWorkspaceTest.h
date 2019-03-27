@@ -21,7 +21,6 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "PropertyManagerHelper.h"

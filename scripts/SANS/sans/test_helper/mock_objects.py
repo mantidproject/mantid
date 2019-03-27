@@ -6,21 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import)
 
+from functools import (partial)
+
+from mantid.py3compat import mock
+from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
+from sans.test_helper.test_director import TestDirector
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
-from sans.test_helper.test_director import TestDirector
-from functools import (partial)
-
-import sys
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 def create_mock_settings_diagnostic_tab():
@@ -37,6 +33,8 @@ def create_mock_masking_table():
 
 def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
+    view.r_min_line_edit = mock.Mock()
+    view.r_max_line_edit = mock.Mock()
     return view
 
 

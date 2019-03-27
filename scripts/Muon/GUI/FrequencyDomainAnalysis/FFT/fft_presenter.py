@@ -132,6 +132,7 @@ class FFTPresenter(object):
             if self.load.version == 2:
                 phaseTable["InputWorkspace"] = self.clean(
                     self.view.getInputWS())
+                phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
 
             inputs["phaseTable"] = phaseTable
             self.view.RePhaseAdvanced(preInputs)

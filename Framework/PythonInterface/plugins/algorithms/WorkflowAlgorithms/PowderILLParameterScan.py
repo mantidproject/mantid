@@ -10,7 +10,7 @@ import numpy as np
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, \
     FloatArrayOrderedPairsValidator, VisibleWhenProperty, PropertyCriterion, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
-    FileAction, Progress, MatrixWorkspaceProperty, NumericAxis
+    FileAction, Progress, MatrixWorkspaceProperty, NumericAxis, WorkspaceGroup
 from mantid.simpleapi import *
 
 
@@ -125,10 +125,14 @@ class PowderILLParameterScan(PythonAlgorithm):
 
         self._progress.report('Normalising and merging')
         if self._normalise_option == 'Time':
-            for ws in mtd[temp_ws]:
-                # normalise to time here, before joining, since the duration is in sample logs
-                duration = ws.getRun().getLogData('duration').value
-                Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
+            if isinstance(mtd[temp_ws], WorkspaceGroup):
+                for ws in mtd[temp_ws]:
+                    # normalise to time here, before joining, since the duration is in sample logs
+                    duration = ws.getRun().getLogData('duration').value
+                    Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
+            else:
+                duration = mtd[temp_ws].getRun().getLogData('duration').value
+                Scale(InputWorkspace=temp_ws,OutputWorkspace=temp_ws,Factor=1./duration)
 
         try:
             ConjoinXRuns(InputWorkspaces=temp_ws, SampleLogAsXAxis=self._observable, OutputWorkspace=joined_ws)

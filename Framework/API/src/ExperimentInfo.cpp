@@ -78,25 +78,30 @@ public:
 };
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {
-  void startElement(const XMLString &, const XMLString &localName,
-                    const XMLString &, const Attributes &attrList) override {
+  void startElement(const XMLString & /*uri*/, const XMLString &localName,
+                    const XMLString & /*qname*/,
+                    const Attributes &attrList) override {
     if (localName == "instrument" || localName == "parameter-file") {
       throw DummyException(
           static_cast<std::string>(attrList.getValue("", "valid-from")),
           static_cast<std::string>(attrList.getValue("", "valid-to")));
     }
   }
-  void endElement(const XMLString &, const XMLString &,
-                  const XMLString &) override {}
+  void endElement(const XMLString & /*uri*/, const XMLString & /*localName*/,
+                  const XMLString & /*qname*/) override {}
   void startDocument() override {}
   void endDocument() override {}
-  void characters(const XMLChar[], int, int) override {}
-  void endPrefixMapping(const XMLString &) override {}
-  void ignorableWhitespace(const XMLChar[], int, int) override {}
-  void processingInstruction(const XMLString &, const XMLString &) override {}
-  void setDocumentLocator(const Locator *) override {}
-  void skippedEntity(const XMLString &) override {}
-  void startPrefixMapping(const XMLString &, const XMLString &) override {}
+  void characters(const XMLChar /*ch*/[], int /*start*/,
+                  int /*length*/) override {}
+  void endPrefixMapping(const XMLString & /*prefix*/) override {}
+  void ignorableWhitespace(const XMLChar /*ch*/[], int /*start*/,
+                           int /*length*/) override {}
+  void processingInstruction(const XMLString & /*target*/,
+                             const XMLString & /*data*/) override {}
+  void setDocumentLocator(const Locator * /*loc*/) override {}
+  void skippedEntity(const XMLString & /*name*/) override {}
+  void startPrefixMapping(const XMLString & /*prefix*/,
+                          const XMLString & /*uri*/) override {}
 };
 
 } // namespace
@@ -557,7 +562,8 @@ void ExperimentInfo::setDetectorGrouping(
  * implementation throws, since no grouping information for update is available
  * when grouping comes from a call to `cacheDetectorGroupings`. This method is
  * overridden in MatrixWorkspace. */
-void ExperimentInfo::updateCachedDetectorGrouping(const size_t) const {
+void ExperimentInfo::updateCachedDetectorGrouping(
+    const size_t /*unused*/) const {
   throw std::runtime_error("ExperimentInfo::updateCachedDetectorGrouping: "
                            "Cannot update -- grouping information not "
                            "available");
@@ -674,6 +680,9 @@ Run &ExperimentInfo::mutableRun() {
 void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
   m_run = std::move(run);
 }
+
+/// Return the cow ptr of the run
+Kernel::cow_ptr<Run> ExperimentInfo::sharedRun() { return m_run; }
 
 /**
  * Get an experimental log either by log name or by type, e.g.

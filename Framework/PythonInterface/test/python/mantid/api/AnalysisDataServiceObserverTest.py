@@ -9,17 +9,10 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import unittest
-import sys
 
 from mantid.api import AnalysisDataService as ADS, AnalysisDataServiceObserver
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace, GroupWorkspaces, UnGroupWorkspace, DeleteWorkspace
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest import mock
-else:
-    # Python 2
-    import mock
+from mantid.py3compat import mock
 
 
 class FakeADSObserver(AnalysisDataServiceObserver):
