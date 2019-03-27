@@ -164,7 +164,6 @@ set(SRC_UNITY_IGNORE_FILES
     src/IPowderDiffPeakFunction.cpp)
 
 set(INC_FILES
-    # inc/MantidAPI/BoxCtrlChangesInterface.h
     inc/MantidAPI/ADSValidator.h
     inc/MantidAPI/Algorithm.h
     inc/MantidAPI/Algorithm.tcc
@@ -377,7 +376,6 @@ endif()
 unset(PROFILE_ALGORITHM_LINUX CACHE)
 
 set(TEST_FILES
-    # IkedaCarpenterModeratorTest.h
     ADSValidatorTest.h
     AlgorithmFactoryTest.h
     AlgorithmFactoryObserverTest.h
@@ -549,8 +547,6 @@ target_link_libraries(API
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 mtd_install_targets(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

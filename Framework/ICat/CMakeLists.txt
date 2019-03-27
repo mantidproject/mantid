@@ -113,8 +113,6 @@ target_link_libraries(ICat
 # Add the unit tests directory
 add_subdirectory(test)
 
-#
 # Installation settings
-#
 
 install(TARGETS ICat ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR})
