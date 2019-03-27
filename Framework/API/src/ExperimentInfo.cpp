@@ -1038,9 +1038,8 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
   std::vector<std::string> pathNames;
   if (!matchingFiles.empty()) {
     pathNames.reserve(matchingFiles.size());
-    std::transform(matchingFiles.begin(), matchingFiles.end(),
-                   std::back_inserter(pathNames),
-                   [](const auto &element) { return element.second; });
+    for (auto &elem : matchingFiles)
+      pathNames.emplace_back(std::move(elem.second));
   } else {
     pathNames.emplace_back(std::move(mostRecentFile));
   }

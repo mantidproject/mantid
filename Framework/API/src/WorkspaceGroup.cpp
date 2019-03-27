@@ -165,9 +165,9 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
   std::vector<std::string> out;
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   out.reserve(m_workspaces.size());
-  std::transform(m_workspaces.cbegin(), m_workspaces.cend(),
-                 std::back_inserter(out),
-                 [](const auto &workspace) { return workspace->getName(); });
+  for (const auto &workspace : m_workspaces) {
+    out.emplace_back(workspace->getName());
+  }
   return out;
 }
 

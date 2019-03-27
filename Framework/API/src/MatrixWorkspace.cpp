@@ -1128,9 +1128,9 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  std::transform(maskedBins.cbegin(), maskedBins.cend(),
-                 std::back_inserter(maskedIds),
-                 [](const auto &element) { return element.first; });
+  for (const auto &mb : maskedBins) {
+    maskedIds.emplace_back(mb.first);
+  }
   return maskedIds;
 }
 

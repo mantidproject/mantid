@@ -105,9 +105,9 @@ void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
 std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
   sessions.reserve(m_activeCatalogs.size());
-  std::transform(m_activeCatalogs.cbegin(), m_activeCatalogs.cend(),
-                 std::back_inserter(sessions),
-                 [](const auto &catalog) { return catalog.first; });
+  for (const auto &activeCatalog : m_activeCatalogs) {
+    sessions.emplace_back(activeCatalog.first);
+  }
   return sessions;
 }
 

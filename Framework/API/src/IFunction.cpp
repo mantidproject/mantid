@@ -1352,8 +1352,9 @@ void IFunction::setAttributeValue(const std::string &attName,
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(m_attrs.size());
-  std::transform(m_attrs.cbegin(), m_attrs.cend(), std::back_inserter(names),
-                 [](const auto &element) { return element.first; });
+  for (const auto &attr : m_attrs) {
+    names.emplace_back(attr.first);
+  }
   return names;
 }
 
