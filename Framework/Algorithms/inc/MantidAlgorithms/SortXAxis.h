@@ -33,23 +33,23 @@ private:
   void exec() override;
   std::vector<std::size_t> createIndexes(const size_t);
 
-  void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies,
+  void sortIndicesByX(std::vector<std::size_t> &workspaceIndices,
                       std::string order,
                       const Mantid::API::MatrixWorkspace &inputWorkspace,
                       unsigned int specNum);
 
   void
-  copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
+  copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndices,
                              const Mantid::API::MatrixWorkspace &inputWorkspace,
                              Mantid::API::MatrixWorkspace &outputWorkspace,
                              unsigned int SpecNum);
 
   void copyXandDxToOutputWorkspace(
-      std::vector<std::size_t> &workspaceIndecies,
+      std::vector<std::size_t> &workspaceIndices,
       const Mantid::API::MatrixWorkspace &inputWorkspace,
       Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum);
 
-  void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
+  void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndices,
                              const Mantid::API::MatrixWorkspace &inputWorkspace,
                              Mantid::API::MatrixWorkspace &outputWorkspace,
                              unsigned int specNum);

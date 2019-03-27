@@ -23,7 +23,9 @@ namespace {
 
 template <typename T, typename Predicate>
 void removeElementsIf(std::vector<T> &vector, Predicate const &predicate) {
-  vector.erase(std::remove_if(vector.begin(), vector.end(), predicate));
+  const auto iter = std::remove_if(vector.begin(), vector.end(), predicate);
+  if (iter != vector.end())
+    vector.erase(iter);
 }
 
 } // namespace
@@ -55,8 +57,9 @@ void SortXAxis::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Sorted Output Workspace");
 
-  auto orderingValues = std::vector<std::string>({"Ascending", "Descending"});
-  auto orderingValidator =
+  const auto orderingValues =
+      std::vector<std::string>({"Ascending", "Descending"});
+  const auto orderingValidator =
       boost::make_shared<StringListValidator>(orderingValues);
   declareProperty("Ordering", orderingValues[0], orderingValidator,
                   "Ascending or descending sorting", Direction::Input);
@@ -86,12 +89,12 @@ void SortXAxis::exec() {
   for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms();
        specNum++) {
     PARALLEL_START_INTERUPT_REGION
-    auto workspaceIndicies = createIndexes(sizeOfX);
+    auto workspaceIndices = createIndexes(sizeOfX);
 
-    sortIndicesByX(workspaceIndicies, getProperty("Ordering"), *inputWorkspace,
+    sortIndicesByX(workspaceIndices, getProperty("Ordering"), *inputWorkspace,
                    specNum);
 
-    copyToOutputWorkspace(workspaceIndicies, *inputWorkspace, *outputWorkspace,
+    copyToOutputWorkspace(workspaceIndices, *inputWorkspace, *outputWorkspace,
                           specNum);
     PARALLEL_END_INTERUPT_REGION
   }
@@ -107,29 +110,29 @@ void SortXAxis::exec() {
  * @return std::vector<std::size_t>
  */
 std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
-  std::vector<std::size_t> workspaceIndicies;
-  workspaceIndicies.reserve(sizeOfX);
+  std::vector<std::size_t> workspaceIndices;
+  workspaceIndices.reserve(sizeOfX);
   for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
-    workspaceIndicies.emplace_back(workspaceIndex);
+    workspaceIndices.emplace_back(workspaceIndex);
   }
-  return workspaceIndicies;
+  return workspaceIndices;
 }
 
 /**
  * @brief A template for sorting the values given a comparator
  *
  * @tparam Comparator
- * @param workspaceIndicies the vector of indicies values
+ * @param workspaceIndices the vector of indicies values
  * @param inputWorkspace the original workspace
  * @param specNum the Spectrum number to be sorted
  * @param compare std::less<double> for Ascending order std::greater<double>
  * for descending order
  */
 template <typename Comparator>
-void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
+void sortByXValue(std::vector<std::size_t> &workspaceIndices,
                   const Mantid::API::MatrixWorkspace &inputWorkspace,
                   unsigned int specNum, Comparator const &compare) {
-  std::sort(workspaceIndicies.begin(), workspaceIndicies.end(),
+  std::sort(workspaceIndices.begin(), workspaceIndices.end(),
             [&](std::size_t lhs, std::size_t rhs) -> bool {
               return compare(inputWorkspace.x(specNum)[lhs],
                              inputWorkspace.x(specNum)[rhs]);
@@ -137,13 +140,13 @@ void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
 }
 
 void SortXAxis::sortIndicesByX(
-    std::vector<std::size_t> &workspaceIndicies, std::string order,
+    std::vector<std::size_t> &workspaceIndices, std::string order,
     const Mantid::API::MatrixWorkspace &inputWorkspace, unsigned int specNum) {
   if (order == "Ascending") {
-    sortByXValue(workspaceIndicies, inputWorkspace, specNum,
+    sortByXValue(workspaceIndices, inputWorkspace, specNum,
                  std::less<double>());
   } else if (order == "Descending") {
-    sortByXValue(workspaceIndicies, inputWorkspace, specNum,
+    sortByXValue(workspaceIndices, inputWorkspace, specNum,
                  std::greater<double>());
   }
 }
@@ -153,20 +156,20 @@ void SortXAxis::sortIndicesByX(
  * using clone because of how histograms are supported, for the X Axis and the
  * Dx Axis.
  *
- * @param workspaceIndicies the sorted vector of indecies
+ * @param workspaceIndices the sorted vector of indecies
  * @param inputWorkspace the unsorted initial workspace
  * @param outputWorkspace the emptry output workspace
  * @param specNum the Spectrum it is currently copying over
  */
 void SortXAxis::copyXandDxToOutputWorkspace(
-    std::vector<std::size_t> &workspaceIndicies,
+    std::vector<std::size_t> &workspaceIndices,
     const Mantid::API::MatrixWorkspace &inputWorkspace,
     Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
   // Move an ordered X to the output workspace
   for (auto workspaceIndex = 0u;
        workspaceIndex < inputWorkspace.x(specNum).size(); workspaceIndex++) {
     outputWorkspace.mutableX(specNum)[workspaceIndex] =
-        inputWorkspace.x(specNum)[workspaceIndicies[workspaceIndex]];
+        inputWorkspace.x(specNum)[workspaceIndices[workspaceIndex]];
   }
 
   // If Dx's are present, move Dx's to the output workspace
@@ -175,7 +178,7 @@ void SortXAxis::copyXandDxToOutputWorkspace(
     for (auto workspaceIndex = 0u;
          workspaceIndex < inputWorkspace.dx(specNum).size(); workspaceIndex++) {
       outputWorkspace.mutableDx(specNum)[workspaceIndex] =
-          inputWorkspace.dx(specNum)[workspaceIndicies[workspaceIndex]];
+          inputWorkspace.dx(specNum)[workspaceIndices[workspaceIndex]];
     }
   }
 }
@@ -185,44 +188,44 @@ void SortXAxis::copyXandDxToOutputWorkspace(
  * using clone because of how histograms are supported, for the Y Axis and the E
  * Axis.
  *
- * @param workspaceIndicies the sorted vector of indicies
+ * @param workspaceIndices the sorted vector of indicies
  * @param inputWorkspace the unsorted input workspaces
  * @param outputWorkspace the empty output workspace
  * @param specNum the spectrum number being copied into
  */
 void SortXAxis::copyYandEToOutputWorkspace(
-    std::vector<std::size_t> &workspaceIndicies,
+    std::vector<std::size_t> &workspaceIndices,
     const Mantid::API::MatrixWorkspace &inputWorkspace,
     Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
   auto &inSpaceY = inputWorkspace.y(specNum);
   const auto ySize = inSpaceY.size();
 
   // Remove workspace indices which are out of index range for y space
-  removeElementsIf(workspaceIndicies, [&ySize](const std::size_t &index) {
+  removeElementsIf(workspaceIndices, [&ySize](const std::size_t &index) {
     return index >= ySize;
   });
 
   for (auto workspaceIndex = 0u;
        workspaceIndex < inputWorkspace.y(specNum).size(); workspaceIndex++) {
     outputWorkspace.mutableY(specNum)[workspaceIndex] =
-        inSpaceY[workspaceIndicies[workspaceIndex]];
+        inSpaceY[workspaceIndices[workspaceIndex]];
   }
 
   auto &inSpaceE = inputWorkspace.e(specNum);
   for (auto workspaceIndex = 0u;
        workspaceIndex < inputWorkspace.e(specNum).size(); workspaceIndex++) {
     outputWorkspace.mutableE(specNum)[workspaceIndex] =
-        inSpaceE[workspaceIndicies[workspaceIndex]];
+        inSpaceE[workspaceIndices[workspaceIndex]];
   }
 }
 
 void SortXAxis::copyToOutputWorkspace(
-    std::vector<std::size_t> &workspaceIndicies,
+    std::vector<std::size_t> &workspaceIndices,
     const Mantid::API::MatrixWorkspace &inputWorkspace,
     Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
-  copyXandDxToOutputWorkspace(workspaceIndicies, inputWorkspace,
-                              outputWorkspace, specNum);
-  copyYandEToOutputWorkspace(workspaceIndicies, inputWorkspace, outputWorkspace,
+  copyXandDxToOutputWorkspace(workspaceIndices, inputWorkspace, outputWorkspace,
+                              specNum);
+  copyYandEToOutputWorkspace(workspaceIndices, inputWorkspace, outputWorkspace,
                              specNum);
 }
 
