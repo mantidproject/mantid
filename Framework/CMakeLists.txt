@@ -18,9 +18,7 @@ if(NOT COMMONSETUP_DONE)
   include(CommonSetup)
 endif()
 
-#
 # Look for dependencies - bail out if any necessary ones not found
-#
 
 check_include_files(stdint.h stdint)
 if(stdint)
@@ -31,18 +29,14 @@ if(boost_stdint)
   add_definitions(-DBOOST_CSTDINT_HPP)
 endif()
 
-#
 # Globally-linked libraries variable
-#
 
 # Might just as well link everything to Boost & Poco (found in CommonSetup)
 # Boost_LIBRARIES variable is redefined by MPISetup so capture the value here
 # and just add MPI stuff if required
 set(MANTIDLIBS ${Boost_LIBRARIES} ${POCO_LIBRARIES})
 
-#
 # MPI-enable build setup
-#
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -58,9 +52,7 @@ if(MPI_EXPERIMENTAL)
   include(BoostMPI)
 endif()
 
-#
 # Now add the packages one-by-one, building up the dependencies as we go
-#
 include(TargetFunctions)
 
 add_custom_target(FrameworkTests) # target for all framework tests
@@ -139,9 +131,7 @@ add_subdirectory (MDAlgorithms)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
 
-#
 # Add a custom target to build all of the Framework
-#
 
 set(FRAMEWORK_LIBS
     Kernel
@@ -170,12 +160,10 @@ set(FRAMEWORK_LIBS
 
 add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 
-#
 # Installation settings These need to be here so that a Framework only install
 # will pick them up
 #
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-#
 
 # Create instrument directory
 foreach(_bundle ${BUNDLES})
