@@ -30,15 +30,15 @@ def find_basedir(project, subproject):
 
 #======================================================================================
 def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
-    """ Read the LINES of a file. Find first "set ( cmake_tag",
+    """ Read the LINES of a file. Find first "set(cmake_tag",
     read all the lines to get all the files,
     add your new line,
     sort them,
     rewrite. Only touches first section found to avoid messing up any other set
     sections in the rest of the file
     """
-    search_for1 = "set ( " + cmake_tag
-    search_for2 = "set (" + cmake_tag
+    search_for1 = "set( " + cmake_tag
+    search_for2 = "set(" + cmake_tag
     # List of files in the thingie
     files = []
     lines_before = []
@@ -73,7 +73,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     # Add the new file to the list of files
     if len(add_this_line) > 0:
         files.append(add_this_line)
-    # Use a set to keep only unique linese
+    # Use a set to keep only unique lines
     files = set(files)
 
     # Remove an entry from the cmake list
@@ -89,10 +89,10 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     files.sort()
 
     lines = lines_before
-    lines.append("set ( " + cmake_tag)
+    lines.append("set(" + cmake_tag)
     for file in files:
         lines.append("\t" + file)
-    lines.append(")") # close the parentheses
+    lines[-1] += ")" # close the parentheses
     lines += lines_after
 
     return lines
