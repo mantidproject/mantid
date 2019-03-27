@@ -1,14 +1,8 @@
-import unittest
-import sys
-import six
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
-
 from PyQt4 import QtGui
+import six
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
@@ -18,6 +12,11 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
 
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
 
 class PairingTablePresenterTest(unittest.TestCase):
 
@@ -34,6 +33,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.presenter = PairingTablePresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
+        self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
 
     def tearDown(self):
         self.obj = None
@@ -229,20 +229,11 @@ class PairingTablePresenterTest(unittest.TestCase):
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), valid_name)
             self.assertIn(valid_name, self.model.pair_names)
 
-    def test_that_renaming_group_to_duplicate_fails_and_reverts_to_previous_value(self):
-        self.add_two_pairs_to_table()
-
-        self.view.pairing_table.setCurrentCell(0, 0)
-        self.view.pairing_table.item(0, 0).setText("my_pair_1")
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
-        self.assertIn("my_pair_0", self.model.pair_names)
-
     def test_that_warning_shown_if_duplicated_pair_name_used(self):
         self.add_two_pairs_to_table()
 
-        self.view.pairing_table.setCurrentCell(0, 0)
-        self.view.pairing_table.item(0, 0).setText("my_group_1")
+        self.view.enter_pair_name = mock.Mock(return_value="my_group_1")
+        self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 

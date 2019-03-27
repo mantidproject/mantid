@@ -13,10 +13,7 @@ Mocking Exercise Solution
     import view
 
     import unittest
-    if sys.version_info.major == 3:
-        from unittest import mock
-    else:
-        import mock
+    from mantid.py3compat import mock
 
     class presenterTest(unittest.TestCase):
         def setUp(self):

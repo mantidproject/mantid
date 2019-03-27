@@ -11,13 +11,11 @@ from __future__  import absolute_import
 
 # std imports
 from unittest import TestCase, main
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+
 
 # third party imports
 from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.py3compat import mock
 # register mantid projection
 import mantid.plots  # noqa
 import matplotlib

@@ -7,6 +7,7 @@
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
@@ -31,7 +32,7 @@ using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
 /**
- * Construct an object to store events that correspond to a peak an are
+ * Construct an object to store events that correspond to a peak and are
  * within the specified radius of the specified peak centers, and to
  * integrate the peaks.
  *
@@ -41,18 +42,63 @@ using Mantid::Kernel::V3D;
  *                       an event to be stored in the list associated with
  *                       that peak.
  * @param   useOnePercentBackgroundCorrection flag if one percent background
-                         correction should be used.
+ *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    std::vector<std::pair<double, V3D>> const &peak_q_list,
-    DblMatrix const &UBinv, double radius,
+    const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
+    Kernel::DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
-    : m_UBinv(UBinv), m_radius(radius),
+    : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
       m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hkl_key] = peak_q_list[it].second;
+  }
+}
+
+/**
+ * With modulation vectors, construct an object to store events that correspond
+ * to a peak and are within the specified radius of the specified peak centers,
+ * and to integrate the peaks.
+ *
+ * @overload
+ * @param   peak_q_list  List of Q-vectors for peak centers.
+ * @param   hkl_list     The list of h,k,l
+ * @param   mnp_list     The list of satellite m,n,p
+ * @param   UBinv        The matrix that maps Q-vectors to h,k,l
+ * @param   ModHKL       The Modulation vectors
+ * @param   radius_m     The maximum distance from a peak's Q-vector, for
+ *                       an event to be stored in the list associated with
+ *                       that peak.
+ * @param   radius_s     The maximum distance from a peak's Q-vector, for
+ *                       an event to be stored in the list associated with
+ *                       that satellite peak.
+ * @param   MaxO         The maximum order of satellite peaks.
+ * @param   CrossT       Switch for cross terms of satellites.
+ * @param   useOnePercentBackgroundCorrection flag if one percent background
+ *                       correction should be used.
+ */
+Integrate3DEvents::Integrate3DEvents(
+    const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
+    std::vector<Mantid::Kernel::V3D> const &hkl_list,
+    std::vector<Mantid::Kernel::V3D> const &mnp_list,
+    Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
+    double radius_m, double radius_s, int MaxO, const bool CrossT,
+    const bool useOnePercentBackgroundCorrection)
+    : m_UBinv(UBinv), m_ModHKL(ModHKL), m_radius(radius_m), s_radius(radius_s),
+      maxOrder(MaxO), crossterm(CrossT),
+      m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
+  for (size_t it = 0; it != peak_q_list.size(); ++it) {
+    int64_t hklmnp_key =
+        getHklMnpKey(boost::math::iround<double>(hkl_list[it][0]),
+                     boost::math::iround<double>(hkl_list[it][1]),
+                     boost::math::iround<double>(hkl_list[it][2]),
+                     boost::math::iround<double>(mnp_list[it][0]),
+                     boost::math::iround<double>(mnp_list[it][1]),
+                     boost::math::iround<double>(mnp_list[it][2]));
+    if (hklmnp_key != 0) // only save if hkl != (0,0,0)
+      m_peak_qs[hklmnp_key] = peak_q_list[it].second;
   }
 }
 
@@ -75,9 +121,12 @@ Integrate3DEvents::Integrate3DEvents(
  */
 void Integrate3DEvents::addEvents(
     std::vector<std::pair<double, V3D>> const &event_qs, bool hkl_integ) {
-  for (const auto &event_q : event_qs) {
-    addEvent(event_q, hkl_integ);
-  }
+  if (!maxOrder)
+    for (const auto &event_q : event_qs)
+      addEvent(event_q, hkl_integ);
+  else
+    for (const auto &event_q : event_qs)
+      addModEvent(event_q, hkl_integ);
 }
 
 std::pair<boost::shared_ptr<const Geometry::PeakShape>,
@@ -290,7 +339,9 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
 
 const std::vector<std::pair<double, V3D>> *
 Integrate3DEvents::getEvents(const V3D &peak_q) {
-  const auto hkl_key = getHklKey(peak_q);
+  auto hkl_key = getHklKey(peak_q);
+  if (maxOrder)
+    hkl_key = getHklMnpKey(peak_q);
 
   if (hkl_key == 0)
     return nullptr;
@@ -385,6 +436,7 @@ Integrate3DEvents::ellipseIntegrateEvents(
   sigi = 0.0; // is wrong with the peak.
 
   int64_t hkl_key = getHklKey(peak_q);
+
   if (hkl_key == 0) {
     return boost::make_shared<NoShape>();
   }
@@ -428,6 +480,64 @@ Integrate3DEvents::ellipseIntegrateEvents(
                                 axes_radii, inti, sigi);
 }
 
+Mantid::Geometry::PeakShape_const_sptr
+Integrate3DEvents::ellipseIntegrateModEvents(
+    std::vector<Kernel::V3D> E1Vec, V3D const &peak_q, V3D const &hkl,
+    V3D const &mnp, bool specify_size, double peak_radius,
+    double back_inner_radius, double back_outer_radius,
+    std::vector<double> &axes_radii, double &inti, double &sigi) {
+  inti = 0.0; // default values, in case something
+  sigi = 0.0; // is wrong with the peak.
+
+  int64_t hkl_key = getHklMnpKey(
+      boost::math::iround<double>(hkl[0]), boost::math::iround<double>(hkl[1]),
+      boost::math::iround<double>(hkl[2]), boost::math::iround<double>(mnp[0]),
+      boost::math::iround<double>(mnp[1]), boost::math::iround<double>(mnp[2]));
+
+  if (hkl_key == 0) {
+    return boost::make_shared<NoShape>();
+  }
+
+  auto pos = m_event_lists.find(hkl_key);
+  if (m_event_lists.end() == pos)
+    return boost::make_shared<NoShape>();
+  ;
+
+  std::vector<std::pair<double, V3D>> &some_events = pos->second;
+
+  if (some_events.size() < 3) // if there are not enough events to
+  {                           // find covariance matrix, return
+    return boost::make_shared<NoShape>();
+  }
+
+  DblMatrix cov_matrix(3, 3);
+  if (hkl_key % 1000 == 0)
+    makeCovarianceMatrix(some_events, cov_matrix, m_radius);
+  else
+    makeCovarianceMatrix(some_events, cov_matrix, s_radius);
+
+  std::vector<V3D> eigen_vectors;
+  getEigenVectors(cov_matrix, eigen_vectors);
+
+  std::vector<double> sigmas(3);
+  for (int i = 0; i < 3; i++)
+    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
+
+  bool invalid_peak =
+      std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
+        return std::isnan(sigma) || sigma <= 0;
+      });
+
+  if (invalid_peak)                       // if data collapses to a line or
+  {                                       // to a plane, the volume of the
+    return boost::make_shared<NoShape>(); // ellipsoids will be zero.
+  }
+
+  return ellipseIntegrateEvents(E1Vec, peak_q, some_events, eigen_vectors,
+                                sigmas, specify_size, peak_radius,
+                                back_inner_radius, back_outer_radius,
+                                axes_radii, inti, sigi);
+}
 /**
  * Calculate the number of events in an ellipsoid centered at 0,0,0 with
  * the three specified axes and the three specified sizes in the direction
@@ -471,7 +581,7 @@ double Integrate3DEvents::numInEllipsoid(
  * @param  sizesIn       List of three values a,b,c giving half the length
  *                     of the three inner axes of the ellisoid.
  * @param  useOnePercentBackgroundCorrection  flag if one percent background
-                       correction should be used.
+ correction should be used.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
 double Integrate3DEvents::numInEllipsoidBkg(
@@ -637,11 +747,32 @@ Integrate3DEvents::stdDev(std::vector<std::pair<double, V3D>> const &events,
  *  @param  k        The second Miller index
  *  @param  l        The third  Miller index
  */
+
 int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
   int64_t key(0);
 
   if (h != 0 || k != 0 || l != 0)
-    key = 1000000000000 * h + 1000000 * k + l;
+    key = 1000000000000 * h + 100000000 * k + 10000 * l;
+
+  return key;
+}
+/**
+ *  Form a map key as 10^12*h + 10^6*k + l from the integers h,k,l.
+ *
+ *  @param  h        The first Miller index
+ *  @param  k        The second Miller index
+ *  @param  l        The third  Miller index
+ *  @param  m        The first modulation index
+ *  @param  n        The second modulation index
+ *  @param  p        The third  modulation index
+ */
+
+int64_t Integrate3DEvents::getHklMnpKey(int h, int k, int l, int m, int n,
+                                        int p) {
+  int64_t key(0);
+
+  if (h != 0 || k != 0 || l != 0 || m != 0 || n != 0 || p != 0)
+    key = 1000000000000 * h + 100000000 * k + 10000 * l + 100 * m + 10 * n + p;
 
   return key;
 }
@@ -663,6 +794,97 @@ int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
  *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
  *  values.
  *
+ *  @param hkl  The q_vector to be mapped to h,k,l
+ */
+int64_t Integrate3DEvents::getHklMnpKey2(V3D const &hkl) {
+  V3D modvec1 = V3D(m_ModHKL[0][0], m_ModHKL[1][0], m_ModHKL[2][0]);
+  V3D modvec2 = V3D(m_ModHKL[0][1], m_ModHKL[1][1], m_ModHKL[2][1]);
+  V3D modvec3 = V3D(m_ModHKL[0][2], m_ModHKL[1][2], m_ModHKL[2][2]);
+  if (Geometry::IndexingUtils::ValidIndex(hkl, m_radius)) {
+    int h = boost::math::iround<double>(hkl[0]);
+    int k = boost::math::iround<double>(hkl[1]);
+    int l = boost::math::iround<double>(hkl[2]);
+
+    return getHklMnpKey(h, k, l, 0, 0, 0);
+  } else if (!crossterm) {
+    if (modvec1 != V3D(0, 0, 0))
+      for (int order = -maxOrder; order <= maxOrder; order++) {
+        if (order == 0)
+          continue; // exclude order 0
+        V3D hkl1(hkl);
+        hkl1[0] -= order * modvec1[0];
+        hkl1[1] -= order * modvec1[1];
+        hkl1[2] -= order * modvec1[2];
+        if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+          int h = boost::math::iround<double>(hkl1[0]);
+          int k = boost::math::iround<double>(hkl1[1]);
+          int l = boost::math::iround<double>(hkl1[2]);
+          return getHklMnpKey(h, k, l, order, 0, 0);
+        }
+      }
+    if (modvec2 != V3D(0, 0, 0))
+      for (int order = -maxOrder; order <= maxOrder; order++) {
+        if (order == 0)
+          continue; // exclude order 0
+        V3D hkl1(hkl);
+        hkl1[0] -= order * modvec2[0];
+        hkl1[1] -= order * modvec2[1];
+        hkl1[2] -= order * modvec2[2];
+        if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+          int h = boost::math::iround<double>(hkl1[0]);
+          int k = boost::math::iround<double>(hkl1[1]);
+          int l = boost::math::iround<double>(hkl1[2]);
+          return getHklMnpKey(h, k, l, 0, order, 0);
+        }
+      }
+    if (modvec3 != V3D(0, 0, 0))
+      for (int order = -maxOrder; order <= maxOrder; order++) {
+        if (order == 0)
+          continue; // exclude order 0
+        V3D hkl1(hkl);
+        hkl1[0] -= order * modvec3[0];
+        hkl1[1] -= order * modvec3[1];
+        hkl1[2] -= order * modvec3[2];
+        if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+          int h = boost::math::iround<double>(hkl1[0]);
+          int k = boost::math::iround<double>(hkl1[1]);
+          int l = boost::math::iround<double>(hkl1[2]);
+          return getHklMnpKey(h, k, l, 0, 0, order);
+        }
+      }
+  } else {
+    int maxOrder1 = maxOrder;
+    if (modvec1 == V3D(0, 0, 0))
+      maxOrder1 = 0;
+    int maxOrder2 = maxOrder;
+    if (modvec2 == V3D(0, 0, 0))
+      maxOrder2 = 0;
+    int maxOrder3 = maxOrder;
+    if (modvec3 == V3D(0, 0, 0))
+      maxOrder3 = 0;
+    for (int m = -maxOrder1; m <= maxOrder1; m++)
+      for (int n = -maxOrder2; n <= maxOrder2; n++)
+        for (int p = -maxOrder3; p <= maxOrder3; p++) {
+          if (m == 0 && n == 0 && p == 0)
+            continue; // exclude 0,0,0
+          V3D hkl1(hkl);
+          V3D mnp = V3D(m, n, p);
+          hkl1 -= m_ModHKL * mnp;
+          if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+            int h = boost::math::iround<double>(hkl1[0]);
+            int k = boost::math::iround<double>(hkl1[1]);
+            int l = boost::math::iround<double>(hkl1[2]);
+            return getHklMnpKey(h, k, l, m, n, p);
+          }
+        }
+  }
+  return 0;
+}
+/**
+ *  Form a map key for the specified q_vector.  The q_vector is mapped to
+ *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
+ *  values.
+ *
  *  @param q_vector  The q_vector to be mapped to h,k,l
  */
 int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
@@ -671,6 +893,101 @@ int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
   int k = boost::math::iround<double>(hkl[1]);
   int l = boost::math::iround<double>(hkl[2]);
   return getHklKey(h, k, l);
+}
+
+/**
+ *  Form a map key for the specified q_vector of satellite peaks.
+ *  The q_vector is mapped to h,k,l by UBinv
+ *  and the map key is then formed from those rounded h+-0.5,k+-0.5,l+-0.5 or
+ * h,k,l depending on the offset of satellite peak from main peak.
+ *
+ *  @param q_vector  The q_vector to be mapped to h,k,l
+ */
+int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
+  V3D hkl = m_UBinv * q_vector;
+
+  V3D modvec1 = V3D(m_ModHKL[0][0], m_ModHKL[1][0], m_ModHKL[2][0]);
+  V3D modvec2 = V3D(m_ModHKL[0][1], m_ModHKL[1][1], m_ModHKL[2][1]);
+  V3D modvec3 = V3D(m_ModHKL[0][2], m_ModHKL[1][2], m_ModHKL[2][2]);
+  if (Geometry::IndexingUtils::ValidIndex(hkl, m_radius)) {
+    int h = boost::math::iround<double>(hkl[0]);
+    int k = boost::math::iround<double>(hkl[1]);
+    int l = boost::math::iround<double>(hkl[2]);
+
+    return getHklMnpKey(h, k, l, 0, 0, 0);
+  } else if (!crossterm) {
+    if (modvec1 != V3D(0, 0, 0))
+      for (int order = -maxOrder; order <= maxOrder; order++) {
+        if (order == 0)
+          continue; // exclude order 0
+        V3D hkl1(hkl);
+        hkl1[0] -= order * modvec1[0];
+        hkl1[1] -= order * modvec1[1];
+        hkl1[2] -= order * modvec1[2];
+        if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+          int h = boost::math::iround<double>(hkl1[0]);
+          int k = boost::math::iround<double>(hkl1[1]);
+          int l = boost::math::iround<double>(hkl1[2]);
+          return getHklMnpKey(h, k, l, order, 0, 0);
+        }
+      }
+    if (modvec2 != V3D(0, 0, 0))
+      for (int order = -maxOrder; order <= maxOrder; order++) {
+        if (order == 0)
+          continue; // exclude order 0
+        V3D hkl1(hkl);
+        hkl1[0] -= order * modvec2[0];
+        hkl1[1] -= order * modvec2[1];
+        hkl1[2] -= order * modvec2[2];
+        if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+          int h = boost::math::iround<double>(hkl1[0]);
+          int k = boost::math::iround<double>(hkl1[1]);
+          int l = boost::math::iround<double>(hkl1[2]);
+          return getHklMnpKey(h, k, l, 0, order, 0);
+        }
+      }
+    if (modvec3 != V3D(0, 0, 0))
+      for (int order = -maxOrder; order <= maxOrder; order++) {
+        if (order == 0)
+          continue; // exclude order 0
+        V3D hkl1(hkl);
+        hkl1[0] -= order * modvec3[0];
+        hkl1[1] -= order * modvec3[1];
+        hkl1[2] -= order * modvec3[2];
+        if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+          int h = boost::math::iround<double>(hkl1[0]);
+          int k = boost::math::iround<double>(hkl1[1]);
+          int l = boost::math::iround<double>(hkl1[2]);
+          return getHklMnpKey(h, k, l, 0, 0, order);
+        }
+      }
+  } else {
+    int maxOrder1 = maxOrder;
+    if (modvec1 == V3D(0, 0, 0))
+      maxOrder1 = 0;
+    int maxOrder2 = maxOrder;
+    if (modvec2 == V3D(0, 0, 0))
+      maxOrder2 = 0;
+    int maxOrder3 = maxOrder;
+    if (modvec3 == V3D(0, 0, 0))
+      maxOrder3 = 0;
+    for (int m = -maxOrder1; m <= maxOrder1; m++)
+      for (int n = -maxOrder2; n <= maxOrder2; n++)
+        for (int p = -maxOrder3; p <= maxOrder3; p++) {
+          if (m == 0 && n == 0 && p == 0)
+            continue; // exclude 0,0,0
+          V3D hkl1(hkl);
+          V3D mnp = V3D(m, n, p);
+          hkl1 -= m_ModHKL * mnp;
+          if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius)) {
+            int h = boost::math::iround<double>(hkl1[0]);
+            int k = boost::math::iround<double>(hkl1[1]);
+            int l = boost::math::iround<double>(hkl1[2]);
+            return getHklMnpKey(h, k, l, m, n, p);
+          }
+        }
+  }
+  return 0;
 }
 
 /**
@@ -707,6 +1024,50 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q,
         event_Q.second = event_Q.second - peak_it->second;
       if (event_Q.second.norm() < m_radius) {
         m_event_lists[hkl_key].push_back(event_Q);
+      }
+    }
+  }
+}
+
+/**
+ * Add an event to the appropriate vector of events for the closest h,k,l,
+ * if it is within the required radius of the corresponding peak in the
+ * PeakQMap.
+ *
+ * NOTE: The event passed in may be modified by this method.  In particular,
+ * if it corresponds to one of the specified peak_qs, the corresponding peak q
+ * will be subtracted from the event and the event will be added to that
+ * peak's vector in the event_lists map.
+ *
+ * @param event_Q      The Q-vector for the event that may be added to the
+ *                     event_lists map, if it is close enough to some peak
+ * @param hkl_integ
+ */
+void Integrate3DEvents::addModEvent(std::pair<double, V3D> event_Q,
+                                    bool hkl_integ) {
+  int64_t hklmnp_key;
+
+  if (hkl_integ)
+    hklmnp_key = getHklMnpKey2(event_Q.second);
+  else
+    hklmnp_key = getHklMnpKey(event_Q.second);
+
+  if (hklmnp_key == 0) // don't keep events associated with 0,0,0
+    return;
+
+  auto peak_it = m_peak_qs.find(hklmnp_key);
+  if (peak_it != m_peak_qs.end()) {
+    if (!peak_it->second.nullVector()) {
+      if (hkl_integ)
+        event_Q.second = event_Q.second - m_UBinv * peak_it->second;
+      else
+        event_Q.second = event_Q.second - peak_it->second;
+
+      if (hklmnp_key % 10000 == 0) {
+        if (event_Q.second.norm() < m_radius)
+          m_event_lists[hklmnp_key].push_back(event_Q);
+      } else if (event_Q.second.norm() < s_radius) {
+        m_event_lists[hklmnp_key].push_back(event_Q);
       }
     }
   }
@@ -780,7 +1141,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     r1 = 3;
     r2 = 3;
     r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-                          // shell volume equal to the peak region volume.
+    // shell volume equal to the peak region volume.
 
     // if necessary restrict the background ellipsoid
     // to lie within the specified sphere, and adjust

@@ -1,7 +1,8 @@
-import unittest
-import sys
-import six
 from PyQt4 import QtGui
+import six
+import unittest
+
+from mantid.py3compat import mock
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
@@ -10,12 +11,14 @@ from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.observer_pattern import Observer
 
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 maximum_number_of_groups = 20
+
+def group_name():
+    name = []
+    for i in range(maximum_number_of_groups + 1):
+        name.append("group_" + str(i))
+    return name
 
 
 class GroupingTablePresenterTest(unittest.TestCase):
@@ -33,6 +36,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 
+        self.view.enter_group_name = mock.Mock(side_effect=group_name())
         self.view.warning_popup = mock.Mock()
         self.gui_variable_observer.update = mock.MagicMock()
 
@@ -141,7 +145,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         self.assertEqual(len(self.model.groups), 2)
         self.assertEqual(self.view.num_rows(), 2)
-        self.assertEqual(self.view.get_table_item_text(1, 0), "group_2")
+        self.assertEqual(self.view.get_table_item_text(1, 0), "group_1")
 
     def test_context_menu_add_grouping_with_rows_selected_does_not_add_group(self):
         self.presenter.handle_add_group_button_clicked()
@@ -220,38 +224,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), valid_name)
             self.assertIn(valid_name, self.model.group_names)
 
-    def test_that_renaming_group_to_duplicate_fails_and_reverts_to_previous_value(self):
-        self.add_three_groups_to_table()
-
-        self.view.grouping_table.setCurrentCell(0, 0)
-        self.view.grouping_table.item(0, 0).setText("my_group_1")
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_group_0")
-        self.assertIn("my_group_0", self.model.group_names)
-
     def test_that_warning_shown_if_duplicated_group_name_used(self):
         self.add_three_groups_to_table()
 
-        self.view.grouping_table.setCurrentCell(0, 0)
-        self.view.grouping_table.item(0, 0).setText("my_group_1")
+        self.view.enter_group_name = mock.Mock(return_value="my_group_1")
+        self.presenter.handle_add_group_button_clicked()
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
-
-    def test_that_default_group_name_is_group_1(self):
-        self.presenter.handle_add_group_button_clicked()
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "group_1")
-        self.assertIn("group_1", self.model.group_names)
-
-    def test_that_adding_new_group_creates_incremented_default_name(self):
-        self.presenter.handle_add_group_button_clicked()
-        self.presenter.handle_add_group_button_clicked()
-        self.presenter.handle_add_group_button_clicked()
-
-        self.assertEqual(str(self.view.get_table_item_text(0, 0)), "group_1")
-        self.assertEqual(str(self.view.get_table_item_text(1, 0)), "group_2")
-        self.assertEqual(str(self.view.get_table_item_text(2, 0)), "group_3")
-        six.assertCountEqual(self, self.model.group_names, ["group_1", "group_2", "group_3"])
 
     # ------------------------------------------------------------------------------------------------------------------
     # detector ID validation
@@ -281,7 +260,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.grouping_table.item(0, 1).setText("20-25,10,5,4,3,2,1")
 
         self.assertEqual(self.view.get_table_item_text(0, 1), "1-5,10,20-25")
-        self.assertEqual(self.model._data._groups["group_1"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
+        self.assertEqual(self.model._data._groups["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()

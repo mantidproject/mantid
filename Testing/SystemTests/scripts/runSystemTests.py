@@ -28,6 +28,9 @@ except AttributeError:
     # PyQt < v4.6
     pass
 
+# Prevents erros in systemtests that use matplotlib directly
+os.environ['MPLBACKEND'] = 'Agg'
+
 #########################################################################
 # Set up the command line options
 #########################################################################

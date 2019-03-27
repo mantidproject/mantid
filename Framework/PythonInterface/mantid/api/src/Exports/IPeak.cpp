@@ -67,6 +67,8 @@ void export_IPeak() {
            "cache values related to it.")
       .def("getRunNumber", &IPeak::getRunNumber, arg("self"),
            "Return the run number this peak was measured at")
+      .def("getIntMNP", &IPeak::getIntMNP, arg("self"),
+           "Return the modulated scructure for this peak")
       .def("getPeakNumber", &IPeak::getPeakNumber, arg("self"),
            "Return the peak number for this peak")
       .def("getBankName", &IPeak::getBankName, arg("self"),
@@ -74,6 +76,9 @@ void export_IPeak() {
       .def("setRunNumber", &IPeak::setRunNumber,
            (arg("self"), arg("run_number")),
            "Set the run number that measured this peak")
+      .def("setIntMNP", &IPeak::setIntMNP,
+           (arg("self"), arg("modulated_structure")),
+           "Set the modulated structure for this peak")
       .def("setPeakNumber", &IPeak::setPeakNumber,
            (arg("self"), arg("peak_number")),
            "Set the peak number for this peak")
@@ -87,6 +92,10 @@ void export_IPeak() {
       .def("getL", &IPeak::getL, arg("self"), "Get the L index of the peak")
       .def("getHKL", &IPeak::getHKL, arg("self"),
            "Get HKL as a :class:`~mantid.kernel.V3D` object")
+      .def("getIntHKL", &IPeak::getIntHKL, arg("self"),
+           "Get HKL as a :class:`~mantid.kernel.V3D` object")
+      .def("setIntHKL", &IPeak::setIntHKL, (arg("self"), arg("hkl")),
+           "Set the integer HKL for this peak")
       .def("getSamplePos", &IPeak::getSamplePos, arg("self"),
            "Get the cached samplePos as a :class:`~mantid.kernel.V3D` object")
       .def("setHKL", (void (IPeak::*)(double, double, double)) & IPeak::setHKL,

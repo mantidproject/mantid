@@ -42,7 +42,7 @@ void IObjComponent::setGeometryHandler(GeometryHandler *h) {
 /**
  * Copy constructor
  */
-IObjComponent::IObjComponent(const IObjComponent &) {
+IObjComponent::IObjComponent(const IObjComponent & /*unused*/) {
   // Copy constructor just creates new handle. Copies nothing.
   handle = std::make_unique<GeometryHandler>(this);
 }

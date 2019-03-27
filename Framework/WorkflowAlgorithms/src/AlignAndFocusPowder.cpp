@@ -307,6 +307,8 @@ void AlignAndFocusPowder::exec() {
   tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
   m_resampleX = getProperty("ResampleX");
+  const double compressEventsTolerance = getProperty("CompressTolerance");
+  const double wallClockTolerance = getProperty("CompressWallClockTolerance");
   // determine some bits about d-space and binning
   if (m_resampleX != 0) {
     m_params.clear(); // ignore the normal rebin parameters
@@ -412,10 +414,9 @@ void AlignAndFocusPowder::exec() {
   m_progress = make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
-    double tolerance = getProperty("CompressTolerance");
-    if (tolerance > 0.) {
-      double wallClockTolerance = getProperty("CompressWallClockTolerance");
-      g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+    if (compressEventsTolerance > 0.) {
+      g_log.information() << "running CompressEvents(Tolerance="
+                          << compressEventsTolerance;
       if (!isEmpty(wallClockTolerance))
         g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
       g_log.information() << ") started at "
@@ -424,7 +425,7 @@ void AlignAndFocusPowder::exec() {
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("Tolerance", tolerance);
+      compressAlg->setProperty("Tolerance", compressEventsTolerance);
       if (!isEmpty(wallClockTolerance)) {
         compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
         compressAlg->setPropertyValue("StartTime",
@@ -717,11 +718,10 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // compress again if appropriate
-  double tolerance = getProperty("CompressTolerance");
   m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-  if ((m_outputEW) && (tolerance > 0.)) {
-    double wallClockTolerance = getProperty("CompressWallClockTolerance");
-    g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+  if ((m_outputEW) && (compressEventsTolerance > 0.)) {
+    g_log.information() << "running CompressEvents(Tolerance="
+                        << compressEventsTolerance;
     if (!isEmpty(wallClockTolerance))
       g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
     g_log.information() << ") started at "
@@ -729,7 +729,7 @@ void AlignAndFocusPowder::exec() {
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("Tolerance", tolerance);
+    compressAlg->setProperty("Tolerance", compressEventsTolerance);
     if (!isEmpty(wallClockTolerance)) {
       compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
       compressAlg->setPropertyValue("StartTime",

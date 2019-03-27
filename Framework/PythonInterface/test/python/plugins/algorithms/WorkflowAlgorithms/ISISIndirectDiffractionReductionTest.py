@@ -24,6 +24,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
 
     def tearDown(self):
         config.setFacility(self._oldFacility)
+        AnalysisDataService.clear()
 
     def test_basic_reduction_completes(self):
         """
@@ -187,7 +188,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
-    def test_reduction_with_vandium_iris(self):
+    def test_reduction_with_vanadium_iris(self):
         """
         Test to ensure that reduction with normalisation by vanadium works
         """
@@ -206,6 +207,46 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
         self.assertEquals(round(red_ws.readY(0)[1], 7), 0.0215684)
         self.assertEquals(round(red_ws.readY(0)[-1], 7), 0.0022809)
+
+    def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_a_workspace_with_the_correct_name(self):
+        output_group = ISISIndirectDiffractionReduction(InputFiles=['OSI137793.RAW'],
+                                                        VanadiumFiles=['OSI137713.RAW'],
+                                                        Instrument='OSIRIS',
+                                                        Mode='diffspec',
+                                                        SpectraRange=[3, 962])
+
+        self.assertTrue(isinstance(output_group, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(len(output_group), 1)
+        self.assertEqual(output_group.getNames()[0], 'osiris137793_diffspec_red')
+
+    def test_that_a_reduction_with_a_vanadium_file_containing_zeros_for_osiris_diffspec_produces_the_correct_output_workspace(self):
+        output_group = ISISIndirectDiffractionReduction(InputFiles=['OSI137793.RAW'],
+                                                        VanadiumFiles=['OSI137713.RAW'],
+                                                        Instrument='OSIRIS',
+                                                        Mode='diffspec',
+                                                        SpectraRange=[3, 962])
+
+        workspace = output_group[0]
+
+        reference = LoadNexus(Filename='OSIRIS_Diffspec_Diffraction_with_Vanadium.nxs')
+        self.assertTrue(CompareWorkspaces(Workspace1=reference, Workspace2=workspace, Tolerance=0.001)[0])
+
+    def test_that_a_reduction_with_a_manual_grouping_for_osiris_diffspec_produces_the_correct_output_workspace(self):
+        CreateGroupingWorkspace(FixedGroupCount=2,
+                                InstrumentName='OSIRIS',
+                                ComponentName='bank',
+                                OutputWorkspace='__grouping')
+        output_group = ISISIndirectDiffractionReduction(InputFiles=['OSI137793.RAW'],
+                                                        Instrument='OSIRIS',
+                                                        Mode='diffspec',
+                                                        SpectraRange=[3, 962],
+                                                        GroupingPolicy='Workspace',
+                                                        GroupingWorkspace='__grouping')
+
+        workspace = output_group[0]
+
+        reference = LoadNexus(Filename='OSIRIS_Diffspec_Diffraction_with_Manual_Grouping.nxs')
+        self.assertTrue(CompareWorkspaces(Workspace1=reference, Workspace2=workspace, Tolerance=0.001)[0])
 
     # ------------------------------------------ Vesuvio ----------------------------------------------
 

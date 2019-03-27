@@ -13,7 +13,6 @@
 #include <cmath>
 #include <gsl/gsl_blas.h>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 

@@ -34,7 +34,7 @@ bool GeneralFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   return canInterpret;
 }
 
-QLab *QLabFrameFactory::createRaw(const MDFrameArgument &) const {
+QLab *QLabFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const {
   return new QLab;
 }
 
@@ -43,7 +43,8 @@ bool QLabFrameFactory::canInterpret(const MDFrameArgument &argument) const {
   return argument.frameString == QLab::QLabName;
 }
 
-QSample *QSampleFrameFactory::createRaw(const MDFrameArgument &) const {
+QSample *
+QSampleFrameFactory::createRaw(const MDFrameArgument & /*argument*/) const {
   return new QSample;
 }
 
@@ -88,7 +89,8 @@ UnknownFrameFactory::createRaw(const MDFrameArgument &argument) const {
 }
 
 /// Indicate an ability to intepret the string
-bool UnknownFrameFactory::canInterpret(const MDFrameArgument &) const {
+bool UnknownFrameFactory::canInterpret(
+    const MDFrameArgument & /*unitString*/) const {
   return true; // This can interpret everything
 }
 

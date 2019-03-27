@@ -54,7 +54,6 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -1263,7 +1262,7 @@ int FitPropertyBrowser::getPeakRadius() const {
 /// Get the registered function names
 void FitPropertyBrowser::populateFunctionNames() {
   const std::vector<std::string> names =
-      Mantid::API::FunctionFactory::Instance().getKeys();
+      Mantid::API::FunctionFactory::Instance().getFunctionNamesGUI();
   m_registeredFunctions.clear();
   m_registeredPeaks.clear();
   m_registeredBackgrounds.clear();

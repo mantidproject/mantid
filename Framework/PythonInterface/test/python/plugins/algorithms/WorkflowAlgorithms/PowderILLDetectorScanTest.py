@@ -43,6 +43,8 @@ class PowderILLDetectorScanTest(unittest.TestCase):
         self.assertAlmostEqual(xaxis[-1],148.721,3)
         spectrumaxis = item.getAxis(1).extractValues()
         self.assertEquals(spectrumaxis[0],0)
+        self.assertTrue(item.getRun())
+        self.assertTrue(item.getRun().hasProperty('run_number'))
 
 if __name__ == '__main__':
     unittest.main()

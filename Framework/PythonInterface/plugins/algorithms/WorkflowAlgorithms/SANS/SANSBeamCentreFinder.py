@@ -10,6 +10,8 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import numpy as np
+
 from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
@@ -42,6 +44,8 @@ else:
         from mantidqt.plotting.functions import plot
     except ImportError:
         WITHOUT_GUI = True
+
+do_plotting = not PYQT4 or IN_MANTIDPLOT
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -129,8 +133,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def PyExec(self):
         state = self._get_state()
         state_serialized = state.property_manager
-        logger = Logger("CentreFinder")
-        logger.notice("Starting centre finder routine...")
+        self.logger = Logger("CentreFinder")
+        self.logger.notice("Starting centre finder routine...")
         progress = self._get_progress()
         self.scale_1 = 1000
         self.scale_2 = 1000
@@ -196,7 +200,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            if not PYQT4 or IN_MANTIDPLOT:
+            if do_plotting:
                 output_workspaces = self._publish_to_ADS(sample_quartiles)
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
@@ -205,14 +209,15 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                                                        sample_quartiles[MaskingQuadrant.Right]))
             residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                        sample_quartiles[MaskingQuadrant.Bottom]))
-            if(j == 0):
-                logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
-                              format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
-                if not PYQT4:
-                    self._plot_quartiles_matplotlib(output_workspaces, state.data.sample_scatter)
-                elif IN_MANTIDPLOT:
-                    self._plot_quartiles(output_workspaces, state.data.sample_scatter)
-
+            if j == 0:
+                self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                                   format(j, self.scale_1 * centre1,
+                                          self.scale_2 * centre2, residueLR[j], residueTB[j]))
+                if do_plotting:
+                    break_loop = self._plot_workspaces(output_workspaces, state.data.sample_scatter)
+                    if break_loop:
+                        # If workspaces contain NaN values, stop the process.
+                        break
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR[j] > residueLR[j-1]:
@@ -221,25 +226,42 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
-                logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
-                              format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
+                self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                                   format(j, self.scale_1 * centre1,
+                                          self.scale_2 * centre2, residueLR[j], residueTB[j]))
 
-                if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or state.compatibility.use_compatibility_mode:
+                if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or \
+                        state.compatibility.use_compatibility_mode:
                     centre_1_hold = centre1
                     centre_2_hold = centre2
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center
-                    logger.notice("Converged - check if stuck in local minimum! ")
+                    self.logger.notice("Converged - check if stuck in local minimum! ")
                     break
 
             if j == max_iterations:
-                logger.notice("Out of iterations, new coordinates may not be the best")
+                self.logger.notice("Out of iterations, new coordinates may not be the best")
 
         self.setProperty("Centre1", centre_1_hold)
         self.setProperty("Centre2", centre_2_hold)
 
-        logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
+        self.logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
+
+    def _plot_workspaces(self, output_workspaces, sample_scatter):
+        try:
+            # Check for NaNs in workspaces
+            output_workspaces_matplotlib = self._validate_workspaces(output_workspaces)
+        except ValueError as e:
+            self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
+            return True
+        else:
+            if not PYQT4:
+                # matplotlib plotting can take a list of workspaces (not names)
+                self._plot_quartiles_matplotlib(output_workspaces_matplotlib, sample_scatter)
+            elif IN_MANTIDPLOT:
+                self._plot_quartiles(output_workspaces, sample_scatter)
+        return False
 
     def _rename_and_group_workspaces(self, index, output_workspaces):
         to_group = []
@@ -278,6 +300,21 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         if not WITHOUT_GUI:
             plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
                  plot_kwargs=plot_kwargs, window_title=title)
+
+    @staticmethod
+    def _validate_workspaces(workspaces):
+        """
+        This method checks if any of the workspaces to plot contain NaN values.
+        :param workspaces: A list of workspace names
+        :return: A list of workspaces (used in matplotlib plotting). Raises if NaN values present.
+        """
+        workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
+        for ws in workspaces:
+            if np.isnan(ws.readY(0)).any():
+                # All data can be NaN if bounds are too close together
+                # this makes the data unplottable
+                raise ValueError("Workspace contains NaN values.")
+        return workspaces
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value

@@ -7,7 +7,6 @@
 #include "MantidHistogramData/EstimatePolynomial.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/Points.h"
-#include <iostream>
 #include <limits>
 #include <sstream>
 #include <stdexcept>

@@ -678,15 +678,32 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         """
         if final_name is None:
             final_name = getBasename(filenames[0])
+
+        # only pass in the characterizations if the values haven't already been determined
+        characterizations = self._charTable
+        if self._info is not None:
+            characterizations = ''
+
+        # put together a list of the other arguments
+        otherArgs = self._focusPos.copy()
+        # use the workspaces if they already exists, or pass the filenames down
+        # this assumes that AlignAndFocusPowderFromFiles will give the workspaces the canonical names
+        cal, grp, msk = [self._instrument + name for name in ['_cal', '_group', '_mask']]
+        if mtd.doesExist(cal) and mtd.doesExist(grp) and mtd.doesExist(msk):
+            otherArgs['CalibrationWorkspace'] = cal
+            otherArgs['GroupingWorkspace'] = grp
+            otherArgs['MaskWorkspace'] = msk
+        else:
+            otherArgs['CalFileName'] = self.calib
+            otherArgs['GroupFilename'] = self.getProperty("GroupingFile").value
+
         api.AlignAndFocusPowderFromFiles(Filename=','.join(filenames),
                                          OutputWorkspace=final_name,
                                          AbsorptionWorkspace=absorptionWksp,
                                          MaxChunkSize=self._chunks,
                                          FilterBadPulses=self._filterBadPulses,
-                                         Characterizations=self._charTable,
+                                         Characterizations=characterizations,
                                          CacheDir=self.getProperty("CacheDir").value,
-                                         CalFileName=self.calib,
-                                         GroupFilename=self.getProperty("GroupingFile").value,
                                          Params=self._binning,
                                          ResampleX=self._resampleX,
                                          Dspacing=self._bin_in_dspace,
@@ -700,8 +717,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          CropWavelengthMax=self._wavelengthMax,
                                          FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
-                                         ReductionProperties="__snspowderreduction_inner",
-                                         **self._focusPos)
+                                         ReductionProperties="__snspowderreduction",
+                                         **otherArgs)
 
         #TODO make sure that this funny function is called
         #self.checkInfoMatch(info, tempinfo)
@@ -1175,6 +1192,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
             # get reference to container run
             can_run_ws_name = getBasename(can_run_number)
+            self.log().notice('Processing empty container {}'.format(can_run_ws_name))
             if self.does_workspace_exist(can_run_ws_name):
                 # container run exists to get reference from mantid
                 api.ConvertUnits(InputWorkspace=can_run_ws_name,
@@ -1290,19 +1308,28 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         else:
             # Explicitly load, reduce and correct vanadium runs
             van_run_ws_name = getBasename(van_run_number)
+            self.log().notice('Processing vanadium {}'.format(van_run_ws_name))
 
             # create the donor workspace for calculating the sample correction
             absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000)  # TODO should this be hard coded?
 
             # set material as Vanadium and correct for multiple scattering
-            api.SetSampleMaterial(InputWorkspace=absWksp,
-                                  ChemicalFormula="V",
-                                  SampleNumberDensity=0.0721)
+            api.SetSample(InputWorkspace=absWksp,
+                          Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
+                          Geometry={'Shape': 'Cylinder',
+                                    'Height':7.,  # cm - shouldn't be hard coded
+                                    'Radius':self._vanRadius,
+                                    'Center': [0., 0., 0.]})
 
-            # calculate the correction which is 1/normal carpenter correction
-            api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr')
+            # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
+            api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
+                                                   CylinderSampleRadius=self._vanRadius)
             api.DeleteWorkspace(Workspace=absWksp)   # no longer needed
             __V_corr_eff = 1. / ((1. / mtd['__V_corr_abs']) - mtd['__V_corr_ms'])
+            __V_corr_eff = str(__V_corr_eff)
+            # adding geometry to aid in creating a value for cache file calculation
+            api.CopySample(InputWorkspace=__V_corr_eff, OutputWorkspace=__V_corr_eff,
+                           CopyEnvironment=False)
             api.DeleteWorkspace(Workspace='__V_corr')  # don't need partials anymore
 
             if self.getProperty("Sum").value:
@@ -1324,6 +1351,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                     van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
                 van_bkgd_ws_name = getBasename(van_bkgd_run_number) + "_vanbg"
                 try:
+                    self.log().notice('Processing vanadium background {}'.format(van_bkgd_ws_name))
                     # load background runs and sum if necessary
                     if self.getProperty("Sum").value:
                         self._focusAndSum(van_bkgd_run_number_list, preserveEvents=True, final_name=van_bkgd_ws_name,

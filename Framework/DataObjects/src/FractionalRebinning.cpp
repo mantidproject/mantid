@@ -29,7 +29,7 @@ struct AreaInfo {
  * implementation uses the shoelace formula but requires the last element to
  * be the same as the first element. Also note that it returns 2x the area!
  */
-template <class T> double polyArea(const T &) { return 0.; }
+template <class T> double polyArea(const T & /*unused*/) { return 0.; }
 template <class T, class... Ts>
 double polyArea(const T &v1, const T &v2, Ts &&... vertices) {
   return v2.X() * v1.Y() - v2.Y() * v1.X() +
@@ -319,7 +319,6 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
   double area(0.);
   ConvexPolygon poly;
   areaInfos.reserve(nx * ny);
-  size_t vertBits = 0;
   size_t yj0, yj1;
   for (size_t xi = x_start; xi < x_end; ++xi) {
     const size_t xj = xi - x_start;
@@ -347,7 +346,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
         // Checks if this bin is not completely outside new quadrilateral
       } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) &&
                  yAxis[yi] <= std::max(nul.Y(), nur.Y())) {
-        vertBits = 0;
+        size_t vertBits = 0;
         if (nll.Y() >= yAxis[yi] && nll.Y() <= yAxis[yi + 1])
           vertBits |= LL_IN;
         if (nul.Y() >= yAxis[yi] && nul.Y() <= yAxis[yi + 1])

@@ -8,6 +8,8 @@
 #define MANTID_CRYSTAL_FIND_UB_USING_INDEXED_PEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -45,6 +47,9 @@ private:
 
   /// Run the algorithm
   void exec() override;
+  void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
+  int getModulationDimension(Kernel::V3D &mnp);
+  bool isPeakIndexed(DataObjects::Peak &peak);
 };
 
 } // namespace Crystal

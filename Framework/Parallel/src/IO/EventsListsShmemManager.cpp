@@ -28,7 +28,8 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
 }
 
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
-                                                 const std::string &elName, int)
+                                                 const std::string &elName,
+                                                 int /*unused*/)
     : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {}
 
 /// Appends ToF event to given pixel in given chunk of shared storage

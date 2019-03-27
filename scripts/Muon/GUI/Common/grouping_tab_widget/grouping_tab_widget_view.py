@@ -18,7 +18,6 @@ class GroupingTabView(QtGui.QWidget):
         self.default_grouping_button = None
         self.vertical_layout = None
         self.horizontal_layout_base = None
-        self.update_button = None
         self.horizontal_layout_description = None
         self.description_label = None
         self.description_edit = None
@@ -58,10 +57,6 @@ class GroupingTabView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.default_grouping_button)
 
         self.horizontal_layout_base = QtGui.QHBoxLayout()
-        self.update_button = QtGui.QPushButton(self)
-        self.update_button.setText("Update All")
-        self.update_button.setToolTip("Calculate group counts and pair asymmetries from the tables and store the data.")
-        self.horizontal_layout_base.addWidget(self.update_button)
 
         self.vertical_layout = QtGui.QVBoxLayout(self)
         self.vertical_layout.setObjectName("verticalLayout")
@@ -101,7 +96,6 @@ class GroupingTabView(QtGui.QWidget):
         self.save_grouping_button.setEnabled(enabled)
         self.clear_grouping_button.setEnabled(enabled)
         self.default_grouping_button.setEnabled(enabled)
-        self.update_button.setEnabled(enabled)
 
     def set_grouping_table(self, table):
         self._grouping_table = table
@@ -163,9 +157,6 @@ class GroupingTabView(QtGui.QWidget):
 
     def on_default_grouping_button_clicked(self, slot):
         self.default_grouping_button.clicked.connect(slot)
-
-    def on_update_button_clicked(self, slot):
-        self.update_button.clicked.connect(slot)
 
     def on_load_grouping_button_clicked(self, slot):
         self.load_grouping_button.clicked.connect(slot)

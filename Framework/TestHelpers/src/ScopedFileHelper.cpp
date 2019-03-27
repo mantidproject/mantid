@@ -9,7 +9,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ScopedFileHelper.h"
-#include <iostream>
+#include "MantidKernel/Logger.h"
+
+namespace {
+Mantid::Kernel::Logger logger("ScopedFileHelper");
+}
 
 namespace ScopedFileHelper {
 /**
@@ -84,8 +88,8 @@ ScopedFile::~ScopedFile() {
     if (remove(m_filename.c_str()) != 0) {
       // destructors shouldn't throw exceptions so we have to resort to printing
       // an error
-      std::cerr << "~ScopedFile() - Error deleting file '" << m_filename
-                << "'\n";
+      logger.error() << "~ScopedFile() - Error deleting file '" << m_filename
+                     << "'\n";
     }
   }
 }

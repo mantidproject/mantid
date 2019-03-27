@@ -141,6 +141,11 @@ class PythonFileInterpreter(QWidget):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
+        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
+        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
+        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
+        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
+
     def closeEvent(self, event):
         self.deleteLater()
         if self.find_replace_dialog:
@@ -157,11 +162,6 @@ class PythonFileInterpreter(QWidget):
     def hide_find_replace_dialog(self):
         if self.find_replace_dialog is not None:
             self.find_replace_dialog.hide()
-
-        # Connect the model signals to the view's signals so they can be accessed from outside the MVP
-        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
-        self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
-        self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
 
     @property
     def filename(self):
@@ -353,7 +353,7 @@ class PythonFileInterpreterPresenter(QObject):
     def req_execute_async_blocking(self):
         self._req_execute_impl(blocking=True)
 
-    def _req_execute_impl(self, blocking, ignore_selection):
+    def _req_execute_impl(self, blocking, ignore_selection=False):
         if self.is_executing:
             return
         code_str, self._code_start_offset = self._get_code_for_execution(ignore_selection)

@@ -34,7 +34,7 @@ def attr_imported(attr, content):
 
 
 def attr_called(attr, content):
-    return bool(re.search(r'(^|\s)+' + attr + '\(.*\)', content))
+    return bool(re.search(r'(^|\s)+' + attr + r'\(.*\)', content))
 
 
 def check_future_import(content):

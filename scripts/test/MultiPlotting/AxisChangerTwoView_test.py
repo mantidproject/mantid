@@ -6,14 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
-
 from Muon.GUI.Common import mock_widget
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class AxisChangerTwoViewTest(unittest.TestCase):

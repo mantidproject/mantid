@@ -24,8 +24,8 @@ public:
 
   void testSetSphere() {
     ShapeInfo shapeInfo;
-    V3D center(0, 0, 0);
-    double radius = 10;
+    constexpr V3D center(0, 0, 0);
+    constexpr double radius = 10;
     shapeInfo.setSphere(center, radius);
 
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::SPHERE);
@@ -38,10 +38,10 @@ public:
 
   void testSetCuboid() {
     ShapeInfo shapeInfo;
-    V3D p1(0, 0, 0);
-    V3D p2(0, 0, 1);
-    V3D p3(0, 1, 0);
-    V3D p4(0, 1, 1);
+    constexpr V3D p1(0, 0, 0);
+    constexpr V3D p2(0, 0, 1);
+    constexpr V3D p3(0, 1, 0);
+    constexpr V3D p4(0, 1, 1);
 
     shapeInfo.setCuboid(p1, p2, p3, p4);
 
@@ -55,14 +55,14 @@ public:
 
   void testSetHexahedron() {
     ShapeInfo shapeInfo;
-    V3D p1(0, 0, 0);
-    V3D p2(0, 0, 1);
-    V3D p3(0, 1, 0);
-    V3D p4(0, 1, 1);
-    V3D p5(1, 0, 0);
-    V3D p6(1, 0, 1);
-    V3D p7(1, 1, 0);
-    V3D p8(1, 1, 1);
+    constexpr V3D p1(0, 0, 0);
+    constexpr V3D p2(0, 0, 1);
+    constexpr V3D p3(0, 1, 0);
+    constexpr V3D p4(0, 1, 1);
+    constexpr V3D p5(1, 0, 0);
+    constexpr V3D p6(1, 0, 1);
+    constexpr V3D p7(1, 1, 0);
+    constexpr V3D p8(1, 1, 1);
 
     shapeInfo.setHexahedron(p1, p2, p3, p4, p5, p6, p7, p8);
 
@@ -77,11 +77,11 @@ public:
 
   void testSetHollowCylinder() {
     ShapeInfo shapeInfo;
-    V3D centerBottomBase(0, 0, 0);
-    V3D symmetryAxis(1, 1, 1);
-    double innerRadius = 5;
-    double outerRadius = 6;
-    double height = 3;
+    constexpr V3D centerBottomBase(0, 0, 0);
+    constexpr V3D symmetryAxis(1, 1, 1);
+    constexpr double innerRadius = 5;
+    constexpr double outerRadius = 6;
+    constexpr double height = 3;
     shapeInfo.setHollowCylinder(centerBottomBase, symmetryAxis, innerRadius,
                                 outerRadius, height);
 
@@ -97,10 +97,10 @@ public:
 
   void testSetCone() {
     ShapeInfo shapeInfo;
-    V3D center(0, 0, 0);
-    V3D axis(1, 0, 0);
-    double radius = 10;
-    double height = 5;
+    constexpr V3D center(0, 0, 0);
+    constexpr V3D axis(1, 0, 0);
+    constexpr double radius = 10;
+    constexpr double height = 5;
     shapeInfo.setCone(center, axis, radius, height);
 
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CONE);
@@ -114,10 +114,10 @@ public:
 
   void testSetCylinder() {
     ShapeInfo shapeInfo;
-    V3D center(0, 0, 0);
-    V3D axis(1, 0, 0);
-    double radius = 10;
-    double height = 5;
+    constexpr V3D center(0, 0, 0);
+    constexpr V3D axis(1, 0, 0);
+    constexpr double radius = 10;
+    constexpr double height = 5;
     shapeInfo.setCylinder(center, axis, radius, height);
 
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CYLINDER);
@@ -131,8 +131,8 @@ public:
 
   void testGetObjectGeometry() {
     ShapeInfo shapeInfo;
-    V3D center(0, 0, 0);
-    double radius = 10;
+    constexpr V3D center(0, 0, 0);
+    constexpr double radius = 10;
     shapeInfo.setSphere(center, radius);
 
     ShapeInfo::GeometryShape testShape;
@@ -153,37 +153,39 @@ public:
 
   void testGetObjectGeometryForCylinders() {
     ShapeInfo shapeInfo;
-    V3D centreBottomBase(0, 0, 0);
-    V3D symmetryAxis(0, 1, 1);
-    double innerRadius = 1;
-    double outerRadius = 2;
-    double height = 5;
+    constexpr V3D centreBottomBase(0, 0, 0);
+    constexpr V3D symmetryAxis(0, 1, 1);
+    constexpr double innerRadius = 1;
+    constexpr double outerRadius = 2;
+    constexpr double height = 5;
     shapeInfo.setHollowCylinder(centreBottomBase, symmetryAxis, innerRadius,
                                 outerRadius, height);
 
     ShapeInfo::GeometryShape testShape;
-    std::vector<V3D> testPoints;
+    std::vector<V3D> testPoint;
+
     double testHeight;
     double tinnerRadius;
     double touterRadius;
 
-    shapeInfo.getObjectGeometry(testShape, testPoints, tinnerRadius,
+    shapeInfo.getObjectGeometry(testShape, testPoint, tinnerRadius,
+
                                 touterRadius, testHeight);
     TS_ASSERT_EQUALS(tinnerRadius, innerRadius);
     TS_ASSERT_EQUALS(touterRadius, outerRadius);
     TS_ASSERT_EQUALS(testHeight, height);
-    TS_ASSERT(testPoints.size() == 2);
-    TS_ASSERT_EQUALS(testPoints[0], centreBottomBase);
-    TS_ASSERT_EQUALS(testPoints[1], symmetryAxis);
+    TS_ASSERT(testPoint.size() == 2);
+    TS_ASSERT_EQUALS(testPoint[0], centreBottomBase);
+    TS_ASSERT_EQUALS(testPoint[1], symmetryAxis);
     TS_ASSERT_EQUALS(testShape, ShapeInfo::GeometryShape::HOLLOWCYLINDER);
   }
 
   void testCuboidGeometry() {
     ShapeInfo shapeInfo;
-    const V3D p1(0, 0, 0);
-    const V3D p2(0, 0, 1);
-    const V3D p3(0, 1, 0);
-    const V3D p4(0, 1, 1);
+    constexpr const V3D p1(0, 0, 0);
+    constexpr const V3D p2(0, 0, 1);
+    constexpr const V3D p3(0, 1, 0);
+    constexpr const V3D p4(0, 1, 1);
 
     shapeInfo.setCuboid(p1, p2, p3, p4);
     const auto geometry = shapeInfo.cuboidGeometry();
@@ -195,14 +197,14 @@ public:
 
   void testHexahedronGeometry() {
     ShapeInfo shapeInfo;
-    V3D p1(0, 0, 0);
-    V3D p2(0, 0, 1);
-    V3D p3(0, 1, 0);
-    V3D p4(0, 1, 1);
-    V3D p5(1, 0, 0);
-    V3D p6(1, 0, 1);
-    V3D p7(1, 1, 0);
-    V3D p8(1, 1, 1);
+    constexpr V3D p1(0, 0, 0);
+    constexpr V3D p2(0, 0, 1);
+    constexpr V3D p3(0, 1, 0);
+    constexpr V3D p4(0, 1, 1);
+    constexpr V3D p5(1, 0, 0);
+    constexpr V3D p6(1, 0, 1);
+    constexpr V3D p7(1, 1, 0);
+    constexpr V3D p8(1, 1, 1);
 
     shapeInfo.setHexahedron(p1, p2, p3, p4, p5, p6, p7, p8);
     const auto geometry = shapeInfo.hexahedronGeometry();
@@ -218,7 +220,7 @@ public:
 
   void testSphereGeometry() {
     ShapeInfo shapeInfo;
-    const V3D center(0, 0, 0);
+    constexpr V3D center(0, 0, 0);
     constexpr double radius = 10;
     shapeInfo.setSphere(center, radius);
     const auto geometry = shapeInfo.sphereGeometry();
@@ -228,8 +230,8 @@ public:
 
   void testCylinderGeometry() {
     ShapeInfo shapeInfo;
-    const V3D center(0, 0, 0);
-    const V3D axis(1, 0, 0);
+    constexpr V3D center(0, 0, 0);
+    constexpr V3D axis(1, 0, 0);
     constexpr double radius = 10;
     constexpr double height = 5;
     shapeInfo.setCylinder(center, axis, radius, height);
@@ -242,8 +244,8 @@ public:
 
   void testHollowCylinderGeometry() {
     ShapeInfo shapeInfo;
-    const V3D centerOfBottomBase(0, 0, 0);
-    const V3D symmetryAxis(1, 0, 0);
+    constexpr V3D centerOfBottomBase(0, 0, 0);
+    constexpr V3D symmetryAxis(1, 0, 0);
     constexpr double height = 5;
     constexpr double innerRadius = 5;
     constexpr double outerRadius = 6;
@@ -259,8 +261,8 @@ public:
 
   void testConeGeometry() {
     ShapeInfo shapeInfo;
-    const V3D center(0, 0, 0);
-    const V3D axis(1, 0, 0);
+    constexpr V3D center(0, 0, 0);
+    constexpr V3D axis(1, 0, 0);
     constexpr double radius = 10;
     constexpr double height = 5;
     shapeInfo.setCone(center, axis, radius, height);
@@ -273,8 +275,8 @@ public:
 
   void testCopyConstructor() {
     ShapeInfo shapeInfo;
-    V3D center(0, 2, 1);
-    double radius = 10;
+    constexpr V3D center(0, 2, 1);
+    constexpr double radius = 10;
     shapeInfo.setSphere(center, radius);
 
     ShapeInfo shapeInfoCopy(shapeInfo);
@@ -287,8 +289,8 @@ public:
 
   void testEquality() {
     ShapeInfo shapeInfo;
-    V3D center(0, 2, 1);
-    double radius = 10;
+    constexpr V3D center(0, 2, 1);
+    constexpr double radius = 10;
     shapeInfo.setSphere(center, radius);
     ShapeInfo shapeInfo2, shapeInfo3;
     shapeInfo2.setSphere(center, radius);
