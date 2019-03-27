@@ -21,12 +21,12 @@ warnings.filterwarnings(action='ignore',
                         module='.*uic.*')
 
 # 3rd-party modules
-from qtpy import QT_VERSION
-from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import QAction, QMenu
-from qtpy.uic import loadUi, loadUiType
+from qtpy import QT_VERSION # noqa
+from qtpy.QtGui import QKeySequence # noqa
+from qtpy.QtWidgets import QAction, QMenu # noqa
+from qtpy.uic import loadUi, loadUiType # noqa
 
-from ...icons import get_icon
+from ...icons import get_icon # noqa
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 

@@ -19,12 +19,12 @@ warnings.filterwarnings(action='ignore',
                         module='.*jupyter.*')
 
 # third-party library imports
-from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from qtpy.QtWidgets import QVBoxLayout
+from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole # noqa
+from qtpy.QtWidgets import QVBoxLayout # noqa
 
 # local package imports
-from ..config.fonts import text_font
-from ..plugins.base import PluginWidget
+from ..config.fonts import text_font # noqa
+from ..plugins.base import PluginWidget # noqa
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
