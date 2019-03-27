@@ -722,7 +722,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
         if len(rb) > 1:
             ','.join(toStitch)
-            # need to defined reduction.two_theta for stitched angles, list
+            # Stitch could list sample log infos of reduction.two_theta , reduction.line_position, ...
             Stitch1DMany(
                 InputWorkspaces=toStitch,
                 OutputWorkspace='{}'.format(wsPrefix),
