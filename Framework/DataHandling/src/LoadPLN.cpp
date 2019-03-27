@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -101,9 +100,9 @@ double GetNeXusValue<double>(NeXus::NXEntry &entry, const std::string &path,
 }
 
 template <>
-std::string GetNeXusValue<std::string>(NeXus::NXEntry &entry,
-                                       const std::string &path,
-                                       const std::string &defval, int32_t) {
+std::string
+GetNeXusValue<std::string>(NeXus::NXEntry &entry, const std::string &path,
+                           const std::string &defval, int32_t /*unused*/) {
 
   try {
     NeXus::NXChar dataSet = entry.openNXChar(path);
@@ -127,12 +126,10 @@ void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path,
 
 // sting is a special case
 template <>
-void MapNeXusToProperty<std::string>(NeXus::NXEntry &entry,
-                                     const std::string &path,
-                                     const std::string &defval,
-                                     API::LogManager &logManager,
-                                     const std::string &name,
-                                     const std::string &, int32_t index) {
+void MapNeXusToProperty<std::string>(
+    NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
+    API::LogManager &logManager, const std::string &name,
+    const std::string & /*unused*/, int32_t index) {
 
   std::string value = GetNeXusValue<std::string>(entry, path, defval, index);
   logManager.addProperty<std::string>(name, value);
@@ -350,7 +347,8 @@ protected:
   const std::vector<double> &m_L2;
   SimpleHist m_histogram;
 
-  void addEventImpl(size_t id, size_t, size_t, double tobs) override {
+  void addEventImpl(size_t id, size_t /*x*/, size_t /*y*/,
+                    double tobs) override {
     m_eventCounts[id]++;
     // the maximum occurs at the elastic peak
     double deltaT = 1.0e6 * (m_L1 + m_L2[id]) / m_V0 - tobs;
@@ -405,7 +403,8 @@ protected:
   double m_tofCorrection;
   double m_sampleTime;
 
-  void addEventImpl(size_t id, size_t, size_t, double tobs) override {
+  void addEventImpl(size_t id, size_t /*x*/, size_t /*y*/,
+                    double tobs) override {
 
     // get the absolute time for the start of the frame
     auto const offset = m_startTime + frameStart();

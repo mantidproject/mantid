@@ -85,7 +85,7 @@ void HelpWindow::showAlgorithm(QWidget *parent, const QString &name,
     QString baseUrl = "https://docs.mantidproject.org/algorithms/";
     QString url = baseUrl + name + "-v" + QString::number(version) + ".html";
     MantidDesktopServices::openUrl(QUrl(url));
-    g_log.notice("Opening online help page:\n" + url.toStdString());
+    g_log.debug("Opening online help page:\n" + url.toStdString());
   }
 }
 
@@ -134,7 +134,7 @@ void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
     QString baseUrl = "https://docs.mantidproject.org/interfaces/";
     QString url = baseUrl + name + ".html";
     MantidDesktopServices::openUrl(QUrl(url));
-    g_log.notice("Opening online help page:\n" + url.toStdString());
+    g_log.debug("Opening online help page:\n" + url.toStdString());
   }
 }
 

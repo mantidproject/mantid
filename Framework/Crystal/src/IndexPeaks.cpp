@@ -112,7 +112,7 @@ void IndexPeaks::exec() {
     std::vector<V3D> q_vectors;
 
     q_vectors.reserve(n_peaks);
-    for (auto &peak : peaks) {
+    for (const auto &peak : peaks) {
       q_vectors.push_back(peak.getQSampleFrame());
     }
 
@@ -132,7 +132,7 @@ void IndexPeaks::exec() {
 
     // get list of run numbers in this peaks workspace
     std::vector<int> run_numbers;
-    for (auto &peak : peaks) {
+    for (const auto &peak : peaks) {
       int run = peak.getRunNumber();
       bool found = false;
       size_t k = 0;
@@ -149,12 +149,11 @@ void IndexPeaks::exec() {
     // index the peaks for each run separately, using a UB matrix optimized for
     // that run
 
-    for (size_t run_index = 0; run_index < run_numbers.size(); run_index++) {
+    for (const int run : run_numbers) {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
 
-      int run = run_numbers[run_index];
-      for (auto &peak : peaks) {
+      for (const auto &peak : peaks) {
         if (peak.getRunNumber() == run)
           q_vectors.push_back(peak.getQSampleFrame());
       }

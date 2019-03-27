@@ -23,8 +23,6 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalMapper>
-// System headers
-#include <iostream>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -137,7 +135,7 @@ void FitControl::finishIndividualFit(bool error) {
   if (error) {
     return;
   }
-  std::cout << "FitControl::finishIndividualFit\n";
+  g_log.debug() << "FitControl::finishIndividualFit\n";
   Mantid::API::IFunction_sptr fun;
   fun = m_fitRunner->getAlgorithm()->getProperty("Function");
   // prevent the function browser to emit signal after update
@@ -272,7 +270,7 @@ void FitControl::fitSimultaneous() {
  */
 void FitControl::fitIndividual(const bool &isEvaluation) {
   try {
-    std::cout << "FitControl::fitIndividual\n";
+    g_log.debug() << "FitControl::fitIndividual\n";
     auto fun = m_functionBrowser->getFunction();
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();

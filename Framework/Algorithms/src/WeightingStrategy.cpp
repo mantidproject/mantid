@@ -34,8 +34,8 @@ WeightingStrategy::WeightingStrategy() : m_cutOff(0) {}
 Calculate the weight at distance from epicenter. Always returns 1 for this
 implementation
 */
-double FlatWeighting::weightAt(const double &, const double &, const double &,
-                               const double &) {
+double FlatWeighting::weightAt(const double & /*adjX*/, const double & /*ix*/,
+                               const double & /*adjY*/, const double & /*iy*/) {
   return 1;
 }
 
@@ -43,7 +43,9 @@ double FlatWeighting::weightAt(const double &, const double &, const double &,
 Calculate the weight at distance from epicenter. Always returns 1
 @return 1
 */
-double FlatWeighting::weightAt(const Mantid::Kernel::V3D &) { return 1; }
+double FlatWeighting::weightAt(const Mantid::Kernel::V3D & /*distance*/) {
+  return 1;
+}
 
 //----------------------------------------------------------------------------
 // Linear Weighting Implementations
@@ -121,7 +123,7 @@ double ParabolicWeighting::weightAt(const double &adjX, const double &ix,
 Calculate the weight at distance from epicenter. Always throws.
 @throw runtime_error if used
 */
-double NullWeighting::weightAt(const Mantid::Kernel::V3D &) {
+double NullWeighting::weightAt(const Mantid::Kernel::V3D & /*distance*/) {
   throw std::runtime_error(
       "NullWeighting strategy cannot be used to evaluate weights.");
 }
@@ -130,8 +132,8 @@ double NullWeighting::weightAt(const Mantid::Kernel::V3D &) {
 Calculate the weight at distance from epicenter. Always throws.
 @throws runtime_error if called
 */
-double NullWeighting::weightAt(const double &, const double &, const double &,
-                               const double &) {
+double NullWeighting::weightAt(const double & /*adjX*/, const double & /*ix*/,
+                               const double & /*adjY*/, const double & /*iy*/) {
   throw std::runtime_error(
       "NullWeighting strategy cannot be used to evaluate weights.");
 }
