@@ -295,9 +295,9 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   // Create a kernel for each dimension and
   std::vector<KernelVector> gaussian_kernels;
   gaussian_kernels.reserve(widthVector.size());
-  std::transform(widthVector.cbegin(), widthVector.cend(),
-                 std::back_inserter(gaussian_kernels),
-                 [](auto width) { return gaussianKernel(width); });
+  for (const auto width : widthVector) {
+    gaussian_kernels.emplace_back(gaussianKernel(width));
+  }
 
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
