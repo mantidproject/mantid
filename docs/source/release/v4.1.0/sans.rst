@@ -18,3 +18,4 @@ Improvements
 ############
 
 - Increased font size in run table.
+- canSAS output mode will be disable if 2D reduction mode is selected to avoid accidental errors with data dimension.
