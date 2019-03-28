@@ -1,9 +1,12 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
+#-------------------------------------------------------------------------
+# CxxTest: A lightweight C++ unit testing library.
+# Copyright (c) 2008 Sandia Corporation.
+# This software is distributed under the LGPL License v3
+# For more information, see the COPYING file in the top CxxTest directory.
+# Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+# the U.S. Government retains certain rights in this software.
+#-------------------------------------------------------------------------
+
 """
 Script to generate the installer for cxxtest.
 """
@@ -19,35 +22,20 @@ Programming Language :: Python
 Topic :: Software Development :: Libraries :: Python Modules
 """
 
-import cxxtest
-import glob
 import os
+import sys
+from os.path import realpath, dirname
+if sys.version_info >= (3,0):
+    sys.path.insert(0, dirname(realpath(__file__))+os.sep+'python3')
+    os.chdir('python3')
 
-def _find_packages(path):
-    """
-    Generate a list of nested packages
-    """
-    pkg_list=[]
-    if not os.path.exists(path):
-        return []
-    if not os.path.exists(path+os.sep+"__init__.py"):
-        return []
-    else:
-        pkg_list.append(path)
-    for root, dirs, files in os.walk(path, topdown=True):
-      if root in pkg_list and "__init__.py" in files:
-         for name in dirs:
-           if os.path.exists(root+os.sep+name+os.sep+"__init__.py"):
-              pkg_list.append(root+os.sep+name)
-    return map(lambda x:x.replace(os.sep,"."), pkg_list)
+import cxxtest
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-packages = _find_packages('cxxtest')
 
-scripts = glob.glob("scripts/*")
 doclines = cxxtest.__doc__.split("\n")
 
 setup(name="cxxtest",
@@ -60,8 +48,15 @@ setup(name="cxxtest",
       description = doclines[0],
       classifiers = filter(None, classifiers.split("\n")),
       long_description = "\n".join(doclines[2:]),
-      packages=packages,
+      packages=['cxxtest'],
       keywords=['utility'],
-      scripts=scripts
+      scripts=['scripts/cxxtestgen']
+      #
+      # The entry_points option is not supported by distutils.core
+      #
+      #entry_points="""
+        #[console_scripts]
+        #cxxtestgen = cxxtest.cxxtestgen:main
+      #"""
       )
 

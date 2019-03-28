@@ -1,20 +1,21 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 # coding=UTF-8
+#-------------------------------------------------------------------------
+# CxxTest: A lightweight C++ unit testing library.
+# Copyright (c) 2008 Sandia Corporation.
+# This software is distributed under the LGPL License v3
+# For more information, see the COPYING file in the top CxxTest directory.
+# Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+# the U.S. Government retains certain rights in this software.
+#-------------------------------------------------------------------------
 #
 # == Preamble ==
 # Authors of this script are in the Authors file in the same directory as this
-# scrip.
+# script.
 #
-# please send bugreports/praise/comments/criticism to
-# gasper.azman at gmail.com or the cxxtest mailing list (dev at cxxtest.tigris.org)
+# Maintainer: Gašper Ažman <gasper.azman@gmail.com>
 #
 # This file is maintained as a part of the CxxTest test suite.
-# 
+#
 # == About ==
 #
 # This builder correctly tracks dependencies and supports just about every
@@ -23,10 +24,10 @@
 #  % scons check
 # This will first compile and then run the tests.
 #
-# The default configuration assumes that cxxtest is located at the
-# base source directory (where SConstruct is), that the cxxtestgen is under
-# cxxtest/python/scripts/cxxtestgen and headers are in cxxtest/cxxtest/. The header
-# include path is automatically added to CPPPATH. It, however, can also
+# The default configuration assumes that cxxtest is located at the base source
+# directory (where SConstruct is), that the cxxtestgen is under
+# cxxtest/bin/cxxtestgen and headers are in cxxtest/cxxtest/. The
+# header include path is automatically added to CPPPATH. It, however, can also
 # recognise that cxxtest is installed system-wide (based on redhat's RPM).
 #
 # For a list of environment variables and their defaults, see the generate()
@@ -64,6 +65,7 @@
 
 from SCons.Script import *
 from SCons.Builder import Builder
+from SCons.Util import PrependPath, unique, uniquer
 import os
 
 # A warning class to notify users of problems
@@ -99,6 +101,25 @@ def envget(env, key, default=None):
     """Look in the env, then in os.environ. Otherwise same as multiget."""
     return multiget([env, os.environ], key, default)
 
+def prepend_ld_library_path(env, overrides, **kwargs):
+    """Prepend LD_LIBRARY_PATH with LIBPATH to run successfully programs that
+    were linked against local shared libraries."""
+    # make it unique but preserve order ...
+    libpath = uniquer(Split(kwargs.get('CXXTEST_LIBPATH', [])) +
+                      Split(env.get(   'CXXTEST_LIBPATH', [])))
+    if len(libpath) > 0:
+        libpath = env.arg2nodes(libpath, env.fs.Dir)
+        platform = env.get('PLATFORM','')
+        if platform == 'win32':
+            var = 'PATH'
+        else:
+            var = 'LD_LIBRARY_PATH'
+        eenv = overrides.get('ENV', env['ENV'].copy())
+        canonicalize = lambda p : p.abspath
+        eenv[var] = PrependPath(eenv.get(var,''), libpath, os.pathsep, 1, canonicalize)
+        overrides['ENV'] = eenv
+    return overrides
+
 def UnitTest(env, target, source = [], **kwargs):
     """
     Prepares the Program call arguments, calls Program and adds the result to
@@ -117,24 +138,31 @@ def UnitTest(env, target, source = [], **kwargs):
     kwargs["CXXFLAGS"] = cxxflags
     kwargs["CCFLAGS"]  = ccflags
     test = env.Program(target, source = source, **kwargs)
-    if multiget([kwargs, env, os.environ], 'CXXTEST_SKIP_ERRORS', False):
-        runner = env.Action(test[0].abspath, exitstatfunc=lambda x:0)
+    testCommand = multiget([kwargs, env, os.environ], 'CXXTEST_COMMAND')
+    if testCommand:
+        testCommand = testCommand.replace('%t', test[0].abspath)
     else:
-        runner = env.Action(test[0].abspath)
-    env.Alias(env['CXXTEST_TARGET'], test, runner)
-    env.AlwaysBuild(env['CXXTEST_TARGET'])
+        testCommand = test[0].abspath
+    if multiget([kwargs, env, os.environ], 'CXXTEST_SKIP_ERRORS', False):
+        runner = env.Action(testCommand, exitstatfunc=lambda x:0)
+    else:
+        runner = env.Action(testCommand)
+    overrides = prepend_ld_library_path(env, {}, **kwargs)
+    cxxtest_target = multiget([kwargs, env], 'CXXTEST_TARGET')
+    env.Alias(cxxtest_target, test, runner, **overrides)
+    env.AlwaysBuild(cxxtest_target)
     return test
 
 def isValidScriptPath(cxxtestgen):
     """check keyword arg or environment variable locating cxxtestgen script"""
-       
+
     if cxxtestgen and os.path.exists(cxxtestgen):
         return True
     else:
         SCons.Warnings.warn(ToolCxxTestWarning,
                             "Invalid CXXTEST environment variable specified!")
         return False
-    
+
 def defaultCxxTestGenLocation(env):
     return os.path.join(
                 envget(env, 'CXXTEST_CXXTESTGEN_DEFAULT_LOCATION'),
@@ -143,7 +171,7 @@ def defaultCxxTestGenLocation(env):
 
 def findCxxTestGen(env):
     """locate the cxxtestgen script by checking environment, path and project"""
-    
+
     # check the SCons environment...
     # Then, check the OS environment...
     cxxtest = envget(env, 'CXXTEST', None)
@@ -173,16 +201,18 @@ def findCxxTestGen(env):
         # make sure it was correct
         if isValidScriptPath(cxxtest):
            return os.path.realpath(cxxtest)
-    
+
     # No valid environment variable found, so...
     # Next, check the path...
     # Next, check the project
     check_path = os.path.join(
             envget(env, 'CXXTEST_INSTALL_DIR'),
             envget(env, 'CXXTEST_CXXTESTGEN_DEFAULT_LOCATION'))
-    cxxtest = (env.WhereIs('cxxtestgen') or 
-               env.WhereIs('cxxtestgen', path=[Dir(check_path).abspath]))
-    
+
+    cxxtest = (env.WhereIs(envget(env, 'CXXTEST_CXXTESTGEN_SCRIPT_NAME')) or
+               env.WhereIs(envget(env, 'CXXTEST_CXXTESTGEN_SCRIPT_NAME'),
+                   path=[Dir(check_path).abspath]))
+
     if cxxtest:
         return cxxtest
     else:
@@ -202,12 +232,15 @@ def findCxxTestHeaders(env):
 
     default_path = Dir(envget(env,'CXXTEST_INSTALL_DIR')).abspath
 
-    alt_path = Dir(File(env['CXXTEST']).abspath[:-cxxtestgen_pathlen]).abspath
+    os_cxxtestgen = os.path.realpath(File(env['CXXTEST']).abspath)
+    alt_path = os_cxxtestgen[:-cxxtestgen_pathlen]
 
     searchpaths = [default_path, alt_path]
+    foundpaths = []
     for p in searchpaths:
         if os.path.exists(os.path.join(p, 'cxxtest', searchfile)):
-            return p
+            foundpaths.append(p)
+    return foundpaths
 
 def generate(env, **kwargs):
     """
@@ -220,6 +253,10 @@ def generate(env, **kwargs):
     CXXTEST_OPTS    - other options to pass to cxxtest.  Default: ''
     CXXTEST_SUFFIX  - the suffix of the test files.  Default: '.t.h'
     CXXTEST_TARGET  - the target to append the tests to.  Default: check
+    CXXTEST_COMMAND - the command that will be executed to run the test,
+                       %t will be replace with the test executable.
+                       Can be used for example for MPI or valgrind tests.
+                       Default: %t
     CXXTEST_CXXFLAGS_REMOVE - the flags that cxxtests can't compile with,
                               or give lots of warnings. Will be stripped.
                               Default: -pedantic -Weffc++
@@ -233,6 +270,11 @@ def generate(env, **kwargs):
                         CxxTest header files and other stuff you only need for
                         your tests, this is the variable to set. Behaves as
                         CPPPATH does.
+    CXXTEST_LIBPATH - If your test is linked to shared libraries which are
+                        outside of standard directories. This is used as LIBPATH
+                        when compiling the test program and to modify
+                        LD_LIBRARY_PATH (or PATH on win32) when running the
+                        program.
     CXXTEST_INSTALL_DIR - this is where you tell the builder where CxxTest is
                             installed. The install directory has cxxtest,
                             python, docs and other subdirectories.
@@ -244,7 +286,7 @@ def generate(env, **kwargs):
     #
     # Expected behaviour: keyword arguments override environment variables;
     # environment variables override default settings.
-    #          
+    #
     env.SetDefault( CXXTEST_RUNNER  = 'ErrorPrinter'        )
     env.SetDefault( CXXTEST_OPTS    = ''                    )
     env.SetDefault( CXXTEST_SUFFIX  = '.t.h'                )
@@ -260,8 +302,7 @@ def generate(env, **kwargs):
 
     # this one's not for public use - it documents where the cxxtestgen script
     # is located in the CxxTest tree normally.
-    env.SetDefault( CXXTEST_CXXTESTGEN_DEFAULT_LOCATION =
-            os.path.join('python', 'scripts') )
+    env.SetDefault( CXXTEST_CXXTESTGEN_DEFAULT_LOCATION = 'bin' )
     # the cxxtestgen script name.
     env.SetDefault( CXXTEST_CXXTESTGEN_SCRIPT_NAME = 'cxxtestgen' )
 
@@ -274,8 +315,8 @@ def generate(env, **kwargs):
         env["CXXTEST"] = findCxxTestGen(env)
 
     # find and add the CxxTest headers to the path.
-    env.AppendUnique( CXXTEST_CPPPATH = [findCxxTestHeaders(env)]  )
-    
+    env.AppendUnique( CXXTEST_CPPPATH = findCxxTestHeaders(env) )
+
     cxxtest = env['CXXTEST']
     if cxxtest:
         #
@@ -332,17 +373,23 @@ def generate(env, **kwargs):
         else:
             deps.append(env.CxxTestCpp(headers.pop(0), **kwargs))
             deps.extend(
-                [env.CxxTestCpp(header, CXXTEST_RUNNER = 'none', 
+                [env.CxxTestCpp(header, CXXTEST_RUNNER = 'none',
                     CXXTEST_ROOT_PART = '--part', **kwargs)
                     for header in headers]
                 )
         deps.extend(linkins)
-        kwargs['CPPPATH'] = list(set(
+        kwargs['CPPPATH'] = unique(
             Split(kwargs.get('CPPPATH', [])) +
             Split(env.get(   'CPPPATH', [])) +
             Split(kwargs.get('CXXTEST_CPPPATH', [])) +
             Split(env.get(   'CXXTEST_CPPPATH', []))
-            ))
+            )
+        kwargs['LIBPATH'] = unique(
+            Split(kwargs.get('LIBPATH', [])) +
+            Split(env.get(   'LIBPATH', [])) +
+            Split(kwargs.get('CXXTEST_LIBPATH', [])) +
+            Split(env.get(   'CXXTEST_LIBPATH', []))
+            )
 
         return UnitTest(env, target, source = deps, **kwargs)
 
@@ -350,3 +397,4 @@ def generate(env, **kwargs):
 
 def exists(env):
     return os.path.exists(env['CXXTEST'])
+

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //
 // This file is used to test WorldDescription::strTotalTests()
 //
@@ -25,29 +19,32 @@ public:
     enum Limit { MAX_STRLEN_TOTAL_TESTS = CxxTest::WorldDescription::MAX_STRLEN_TOTAL_TESTS };
     char buffer[MAX_STRLEN_TOTAL_TESTS * 2];
 
-    const char *convert( unsigned n )
+    const char *convert(unsigned n)
     {
         x.n = n;
-        return x.strTotalTests( buffer );
+        return x.strTotalTests(buffer);
     }
 
     void test_Some_numbers()
     {
-        TS_WARN( convert(53) );
-        for ( unsigned n = 0; n < 64; ++ n ) {
-            TS_ASSERT_DIFFERS( n, 32 );
-            TS_WARN( convert(n) );
+        TS_WARN(convert(53));
+        for (unsigned n = 0; n < 64; ++ n)
+        {
+            TS_ASSERT_DIFFERS(n, 32);
+            TS_WARN(convert(n));
         }
     }
 
     class ShorterThan
     {
     public:
-        bool operator()( const char *s, unsigned n ) const
+        bool operator()(const char *s, unsigned n) const
         {
             unsigned len = 0;
-            while ( *s++ != '\0' )
+            while (*s++ != '\0')
+            {
                 ++ len;
+            }
             return (len < n);
         }
     };
@@ -55,22 +52,18 @@ public:
     class NotShorterThan
     {
         ShorterThan _shorterThan;
-        
+
     public:
-        bool operator()( const char *s, unsigned n ) const { return !_shorterThan( s, n ); }
+        bool operator()(const char *s, unsigned n) const { return !_shorterThan(s, n); }
     };
 
     void test_Lengths()
     {
         unsigned reasonableLimit = 60060;
-        for ( unsigned n = 0; n < reasonableLimit; ++ n )
-            TS_ASSERT_RELATION( ShorterThan, convert(n), MAX_STRLEN_TOTAL_TESTS );
-        TS_ASSERT_RELATION( NotShorterThan, convert(reasonableLimit), MAX_STRLEN_TOTAL_TESTS );
+        for (unsigned n = 0; n < reasonableLimit; ++ n)
+        {
+            TS_ASSERT_RELATION(ShorterThan, convert(n), MAX_STRLEN_TOTAL_TESTS);
+        }
+        TS_ASSERT_RELATION(NotShorterThan, convert(reasonableLimit), MAX_STRLEN_TOTAL_TESTS);
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 
 //
@@ -18,7 +12,8 @@ public:
 
     void setUp()
     {
-        for ( unsigned i = 0; i < DATA_SIZE; ++ i ) {
+        for (unsigned i = 0; i < DATA_SIZE; ++ i)
+        {
             x[i] = (unsigned char)i;
             y[i] = (unsigned char)~x[i];
         }
@@ -26,27 +21,21 @@ public:
 
     void testAssertSameData()
     {
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 
     void testAssertMessageSameData()
     {
-        TSM_ASSERT_SAME_DATA( "Not same data", x, y, DATA_SIZE );
+        TSM_ASSERT_SAME_DATA("Not same data", x, y, DATA_SIZE);
     }
 
     void testSafeAssertSameData()
     {
-        ETS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        ETS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 
     void testSafeAssertMessageSameData()
     {
-        ETSM_ASSERT_SAME_DATA( "Not same data", x, y, DATA_SIZE );
+        ETSM_ASSERT_SAME_DATA("Not same data", x, y, DATA_SIZE);
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

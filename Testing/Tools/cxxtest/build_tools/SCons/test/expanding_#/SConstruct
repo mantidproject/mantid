@@ -1,7 +1,7 @@
 env = Environment(
     toolpath=['../../'],
     tools=['default','cxxtest'],
-    CXXTEST='./../../../../python/scripts/cxxtestgen'
+    CXXTEST='./../../../../bin/cxxtestgen'
     )
 
 env['CXXTEST_SKIP_ERRORS'] = True

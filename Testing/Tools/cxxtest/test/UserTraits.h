@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //
 // This sample demonstrates rolling your own ValueTraits.
 // For the sake of simplicity, the value traits are in the
@@ -22,14 +16,14 @@
 
 namespace CxxTest
 {
-    CXXTEST_TEMPLATE_INSTANTIATION
-    class ValueTraits<int>
-    {
-        char _asString[128]; // Crude, but it should be enough
-    public:
-        ValueTraits( int i ) { sprintf( _asString, "0x%X", i ); }
-        const char *asString( void ) { return _asString; }
-    };
+CXXTEST_TEMPLATE_INSTANTIATION
+class ValueTraits<int>
+{
+    char _asString[128]; // Crude, but it should be enough
+public:
+    ValueTraits(int i) { sprintf(_asString, "0x%X", i); }
+    const char *asString(void) { return _asString; }
+};
 }
 
 class TestUserTraits : public CxxTest::TestSuite
@@ -37,12 +31,6 @@ class TestUserTraits : public CxxTest::TestSuite
 public:
     void testUserTraits()
     {
-        TS_FAIL( 127 );
+        TS_FAIL(127);
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

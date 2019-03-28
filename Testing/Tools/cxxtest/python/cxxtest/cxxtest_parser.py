@@ -1,44 +1,64 @@
-from __future__ import absolute_import
+#-------------------------------------------------------------------------
+# CxxTest: A lightweight C++ unit testing library.
+# Copyright (c) 2008 Sandia Corporation.
+# This software is distributed under the LGPL License v3
+# For more information, see the COPYING file in the top CxxTest directory.
+# Under the terms of Contract DE-AC04-94AL85000 with Sandia Corporation,
+# the U.S. Government retains certain rights in this software.
+#-------------------------------------------------------------------------
+
+from __future__ import division
+
+import codecs
 import re
-#import sys
-#import getopt
-#import glob
-from .cxxtest_misc import abort
+import sys
+from cxxtest.cxxtest_misc import abort
 
 # Global variables
 suites = []
 suite = None
 inBlock = 0
 options=None
-lastLineVoid = False
 
 def scanInputFiles(files, _options):
     '''Scan all input files for test suites'''
+    #
+    # Reset global data
+    #
     global options
     options=_options
+    global suites
+    suites = []
+    global suite
+    suite = None
+    global inBlock
+    inBlock = 0
+    #
     for file in files:
         scanInputFile(file)
-    global suites
     if len(suites) is 0 and not options.root:
         abort( 'No tests defined' )
-
-    #print "INFO\n"
-    #for suite in suites:
-        #for key in suite:
-            #print key,suite[key]
-        #print ""
-
     return [options,suites]
 
 lineCont_re = re.compile('(.*)\\\s*$')
 def scanInputFile(fileName):
     '''Scan single input file for test suites'''
-    file = open(fileName)
+    # mode 'rb' is problematic in python3 - byte arrays don't behave the same as
+    # strings.
+    # As far as the choice of the default encoding: utf-8 chews through
+    # everything that the previous ascii codec could, plus most of new code.
+    # TODO: figure out how to do this properly - like autodetect encoding from
+    # file header.
+    file = codecs.open(fileName, mode='r', encoding='utf-8')
     prev = ""
     lineNo = 0
     contNo = 0
     while 1:
-        line = file.readline()
+        try:
+            line = file.readline()
+        except UnicodeDecodeError:
+            sys.stderr.write("Could not decode unicode character at %s:%s\n" % (fileName, lineNo + 1));
+            raise
         if not line:
             break
         lineNo += 1
@@ -109,15 +129,21 @@ def scanLineForExceptionHandling( line ):
 
 classdef = '(?:::\s*)?(?:\w+\s*::\s*)*\w+'
 baseclassdef = '(?:public|private|protected)\s+%s' % (classdef,)
+general_suite = r"\bclass\s+(%s)\s*:(?:\s*%s\s*,)*\s*public\s+" \
+                % (classdef, baseclassdef,)
 testsuite = '(?:(?:::)?\s*CxxTest\s*::\s*)?TestSuite'
-suite_re = re.compile( r"\bclass\s+(%s)\s*:(?:\s*%s\s*,)*\s*public\s+%s"
-                       % (classdef, baseclassdef, testsuite) )
+suites_re = { re.compile( general_suite + testsuite ) : None }
 generatedSuite_re = re.compile( r'\bCXXTEST_SUITE\s*\(\s*(\w*)\s*\)' )
 def scanLineForSuiteStart( fileName, lineNo, line ):
     '''Check if current line starts a new test suite'''
-    m = suite_re.search( line )
-    if m:
-        startSuite( m.group(1), fileName, lineNo, 0 )
+    for i in list(suites_re.items()):
+        m = i[0].search( line )
+        if m:
+            suite = startSuite( m.group(1), fileName, lineNo, 0 )
+            if i[1] is not None:
+                for test in i[1]['tests']:
+                    addTest(suite, test['name'], test['line'])
+            break
     m = generatedSuite_re.search( line )
     if m:
         sys.stdout.write( "%s:%s: Warning: Inline test suites are deprecated.\n" % (fileName, lineNo) )
@@ -128,7 +154,8 @@ def startSuite( name, file, line, generated ):
     global suite
     closeSuite()
     object_name = name.replace(':',"_")
-    suite = { 'name'         : name,
+    suite = { 'fullname'     : name,
+              'name'         : name,
               'file'         : file,
               'cfile'        : cstr(file),
               'line'         : line,
@@ -138,30 +165,19 @@ def startSuite( name, file, line, generated ):
               'tlist'        : 'Tests_%s' % object_name,
               'tests'        : [],
               'lines'        : [] }
+    suites_re[re.compile( general_suite + name )] = suite
+    return suite
 
 def lineStartsBlock( line ):
     '''Check if current line starts a new CXXTEST_CODE() block'''
     return re.search( r'\bCXXTEST_CODE\s*\(', line ) is not None
 
 test_re = re.compile( r'^([^/]|/[^/])*\bvoid\s+([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
-void_re = re.compile( r'^([^/]|/[^/])*\bvoid\s*$' )
-test_novoid_re = re.compile( r'^([^/]|/[^/])*\b([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
 def scanLineForTest( suite, lineNo, line ):
     '''Check if current line starts a test'''
-    global lastLineVoid
     m = test_re.search( line )
     if m:
         addTest( suite, m.group(2), lineNo )
-        lastLineVoid = False
-    elif lastLineVoid:
-        m2 = test_novoid_re.search(line)
-        if m2:
-            addTest( suite, m2.group(2), lineNo )
-        lastLineVoid = False
-    else:
-        m3 = void_re.search(line)
-        if m3:
-            lastLineVoid = True
 
 def addTest( suite, name, line ):
     '''Add a test function to the current suite'''
@@ -236,8 +252,3 @@ def rememberSuite(suite):
     global suites
     suites.append( suite )
 
-#
-# Copyright 2008 Sandia Corporation. Under the terms of Contract
-# DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
-# retains certain rights in this software.
-#

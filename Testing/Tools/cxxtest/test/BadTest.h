@@ -1,24 +1,55 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 
-class BadTest : public CxxTest::TestSuite
+//
+// A simple test suite that cannot be parsed with the default test discovery mechanism
+//
+
+class BadTest
+    :
+public CxxTest::TestSuite
 {
 public:
-    static BadTest *createSuite() { return new BadTest(); }
-
-    void testSomething()
+    void testEquality()
     {
-        TS_FAIL( "Bad suite!" );
+        TS_ASSERT_EQUALS(1, 1);
+        TS_ASSERT_EQUALS(1, 2);
+        TS_ASSERT_EQUALS('a', 'A');
+        TS_ASSERT_EQUALS(1.0, -12345678900000000000000000000000000000000000000000.1234);
+    }
+
+    void testAddition()
+    {
+        TS_ASSERT_EQUALS(1 + 1, 2);
+        TS_ASSERT_EQUALS(2 + 2, 5);
+    }
+
+    void TestMultiplication()
+    {
+        TS_ASSERT_EQUALS(2 * 2, 4);
+        TS_ASSERT_EQUALS(4 * 4, 44);
+        TS_ASSERT_DIFFERS(-2 * -2, 4);
+    }
+
+    void testComparison()
+    {
+        TS_ASSERT_LESS_THAN((int)1, (unsigned long)2);
+        TS_ASSERT_LESS_THAN(-1, -2);
+    }
+
+    void testTheWorldIsCrazy()
+    {
+        TS_ASSERT_EQUALS(true, false);
+    }
+
+    void test_Failure()
+    {
+        TS_FAIL("Not implemented");
+        TS_FAIL(1569779912);
+    }
+
+    void test_TS_WARN_macro()
+    {
+        TS_WARN("Just a friendly warning");
+        TS_WARN("Warnings don't abort the test");
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 
 class DynamicMax : public CxxTest::TestSuite
@@ -14,7 +8,8 @@ public:
 
     void setUp()
     {
-        for ( unsigned i = 0; i < DATA_SIZE; ++ i ) {
+        for (unsigned i = 0; i < DATA_SIZE; ++ i)
+        {
             x[i] = (unsigned char)i;
             y[i] = (unsigned char)~x[i];
         }
@@ -22,24 +17,24 @@ public:
 
     void test_Max_size_from_define()
     {
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 
     void test_Set_max_size()
     {
-        CxxTest::setMaxDumpSize( 16 );
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        CxxTest::setMaxDumpSize(16);
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 
     void test_Revert_to_max_size_from_define()
     {
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 
     void test_Set_max_size_to_zero__dumps_all()
     {
-        CxxTest::setMaxDumpSize( 0 );
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        CxxTest::setMaxDumpSize(0);
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 };
 
@@ -51,27 +46,22 @@ public:
 
     void setUp()
     {
-        for ( unsigned i = 0; i < DATA_SIZE; ++ i ) {
+        for (unsigned i = 0; i < DATA_SIZE; ++ i)
+        {
             x[i] = (unsigned char)i;
             y[i] = (unsigned char)~x[i];
         }
-        
-        CxxTest::setMaxDumpSize( 12 );
+
+        CxxTest::setMaxDumpSize(12);
     }
 
     void test_Use_12_in_this_test()
     {
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 
     void test_Use_12_in_this_test_too()
     {
-        TS_ASSERT_SAME_DATA( x, y, DATA_SIZE );
+        TS_ASSERT_SAME_DATA(x, y, DATA_SIZE);
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

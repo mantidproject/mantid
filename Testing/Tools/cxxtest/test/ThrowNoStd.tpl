@@ -1,4 +1,3 @@
-// -*- C++ -*-
 #define CXXTEST_ABORT_TEST_ON_FAIL
 #include <cxxtest/ErrorPrinter.h>
 
@@ -9,10 +8,3 @@ int main()
 
 // The CxxTest "world"
 <CxxTest world>
-
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

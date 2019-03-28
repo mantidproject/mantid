@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 
 //
@@ -14,23 +8,23 @@ class NullCreate : public CxxTest::TestSuite
 {
 public:
     static NullCreate *createSuite() { return 0; }
-    static void destroySuite( NullCreate * ) { TS_FAIL( "Should not be called" ); }
+    static void destroySuite(NullCreate *) { TS_FAIL("Should not be called"); }
 
     void testNothing()
     {
-        TS_FAIL( "Test called although no suite" );
+        TS_FAIL("Test called although no suite");
     }
 };
 
 class ThrowCreate : public CxxTest::TestSuite
 {
 public:
-    static ThrowCreate *createSuite() { throw -3; }
-    static void destroySuite( ThrowCreate * ) { TS_FAIL( "Should not be called" ); }
+    static ThrowCreate *createSuite() { throw - 3; }
+    static void destroySuite(ThrowCreate *) { TS_FAIL("Should not be called"); }
 
     void testNothing()
     {
-        TS_FAIL( "Test called although no suite" );
+        TS_FAIL("Test called although no suite");
     }
 };
 
@@ -38,8 +32,8 @@ class ThrowDestroy : public CxxTest::TestSuite
 {
 public:
     static ThrowDestroy *createSuite() { return new ThrowDestroy; }
-    static void destroySuite( ThrowDestroy * ) { throw 42; }
-    
+    static void destroySuite(ThrowDestroy *suite) { delete suite; throw 42; }
+
     void testNothing() {}
 };
 
@@ -47,9 +41,9 @@ class ThrowSetUp : public CxxTest::TestSuite
 {
 public:
     void setUp() { throw 5; }
-    void tearDown() { TS_FAIL( "Shouldn't get here" ); }
+    void tearDown() { TS_FAIL("Shouldn't get here"); }
 
-    void testNothing() { TS_FAIL( "Shouldn't get here" ); }
+    void testNothing() { TS_FAIL("Shouldn't get here"); }
 };
 
 class ThrowTearDown : public CxxTest::TestSuite
@@ -71,12 +65,6 @@ public:
 
     void testMoveOn()
     {
-        TS_WARN( "One failed test doesn't affect the others" );
+        TS_TRACE("One failed test doesn't affect the others");
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

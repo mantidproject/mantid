@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //
 // This file tests CxxTest global fixtures
 //
@@ -18,7 +12,7 @@ class Fixture1 : public CxxTest::GlobalFixture
 {
     unsigned _setUpCount;
     unsigned _tearDownCount;
-    
+
 public:
     Fixture1() { _setUpCount = _tearDownCount = 0; }
     bool setUp() { ++ _setUpCount; return true; }
@@ -76,9 +70,3 @@ public:
         TS_ASSERT_EQUALS(fixture2.tearDownCount(), 1);
     }
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

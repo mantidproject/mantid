@@ -1,4 +1,4 @@
-Running 9 tests
+Running cxxtest tests (9 tests)
 In StlTraits::test_Pair:
 StlTraits.h:13: Error: Test failed: <3, "Three">
 StlTraits.h:15: Error: Test failed: <"Four", 4.0000>
@@ -41,6 +41,6 @@ In StlTraits::test_Complex:
 StlTraits.h:148: Error: Test failed: (3.1400 + 2.7100 * i)
 StlTraits.h:149: Error: Test failed: (1.0000 * i)
 StlTraits.h:150: Error: Test failed: 1.0000
-Failed 9 of 9 tests
+Failed 9 and Skipped 0 of 9 tests
 Success rate: 0%
 Error level = 9

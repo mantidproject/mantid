@@ -1,0 +1,21 @@
+Running cxxtest tests (16 tests)....
+In CharAssertions::test_dfcc:
+CharAssertions.h:24: Error: Expected (str1 != str2), found (toto)
+In CharAssertions::test_dfcm:
+CharAssertions.h:24: Error: Expected (str1 != str2), found (toto)
+In CharAssertions::test_dfmc:
+CharAssertions.h:24: Error: Expected (str1 != str2), found (toto)
+In CharAssertions::test_dfmm:
+CharAssertions.h:24: Error: Expected (str1 != str2), found (toto)
+....
+In CharAssertions::test_efcc:
+CharAssertions.h:36: Error: Expected (str1 == str2), found (toto != nekobus)
+In CharAssertions::test_efcm:
+CharAssertions.h:36: Error: Expected (str1 == str2), found (toto != nekobus)
+In CharAssertions::test_efmc:
+CharAssertions.h:36: Error: Expected (str1 == str2), found (toto != nekobus)
+In CharAssertions::test_efmm:
+CharAssertions.h:36: Error: Expected (str1 == str2), found (toto != nekobus)
+Failed 8 and Skipped 0 of 16 tests
+Success rate: 50%
+Error level = 8

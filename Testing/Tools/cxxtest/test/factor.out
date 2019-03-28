@@ -1,4 +1,4 @@
-Running 2 :) tests
+Running cxxtest tests (2 tests)
 In Factor::test_Some_numbers:
 Factor.h:30: Warning: 53 :)
 Factor.h:33: Warning: 0

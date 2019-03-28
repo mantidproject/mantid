@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 //
 // This file tests CxxTest global fixtures setUpWorld()/tearDownWorld()
 //
@@ -15,10 +9,10 @@
 class PrintingFixture : public CxxTest::GlobalFixture
 {
 public:
-    bool setUpWorld() { printf( "<world>" ); return true; }
-    bool tearDownWorld() { printf( "</world>" ); return true; }
-    bool setUp() { printf( "<test>" ); return true; }
-    bool tearDown() { printf( "</test>" ); return true; }
+    bool setUpWorld() { printf("<world>"); return true; }
+    bool tearDownWorld() { printf("</world>"); return true; }
+    bool setUp() { printf("<test>"); return true; }
+    bool tearDown() { printf("</test>"); return true; }
 };
 
 //
@@ -26,10 +20,10 @@ public:
 // and declare this global variable in the header file.
 //
 static PrintingFixture printingFixture;
- 
+
 //
 // Now define some tests
-// 
+//
 
 class FirstSuite : public CxxTest::TestSuite
 {
@@ -44,9 +38,3 @@ public:
     void testOne() {}
     void testTwo() {}
 };
-
-//
-// Local Variables:
-// compile-command: "perl test.pl"
-// End:
-//

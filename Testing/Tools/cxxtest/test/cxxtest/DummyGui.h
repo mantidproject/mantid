@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef __CXXTEST__DUMMYGUI_H
 #define __CXXTEST__DUMMYGUI_H
 
@@ -18,34 +12,34 @@
 
 namespace CxxTest
 {
-    class DummyGui : public GuiListener
+class DummyGui : public GuiListener
+{
+public:
+    void guiEnterWorld(unsigned numTotalTests)
     {
-    public:
-        void guiEnterWorld( unsigned numTotalTests )
-        {
-            (CXXTEST_STD(cout) << " {Start " << numTotalTests << " tests} ").flush();
-        }
-        
-        void guiEnterTest( const char *suiteName, const char *testName )
-        {
-            (CXXTEST_STD(cout) << " {" << suiteName << "::" << testName << "()} ").flush();
-        }
-        
-        void yellowBar()
-        {
-            (CXXTEST_STD(cout) << " {Yellow} ").flush();
-        }
+        (CXXTEST_STD(cout) << " {Start " << numTotalTests << " tests} ").flush();
+    }
 
-        void redBar()
-        {
-            (CXXTEST_STD(cout) << " {Red} ").flush();
-        }
+    void guiEnterTest(const char *suiteName, const char *testName)
+    {
+        (CXXTEST_STD(cout) << " {" << suiteName << "::" << testName << "()} ").flush();
+    }
 
-        void leaveWorld( const WorldDescription & )
-        {
-            (CXXTEST_STD(cout) << " {Stop} ").flush();
-        }
-    };
+    void yellowBar()
+    {
+        (CXXTEST_STD(cout) << " {Yellow} ").flush();
+    }
+
+    void redBar()
+    {
+        (CXXTEST_STD(cout) << " {Red} ").flush();
+    }
+
+    void leaveWorld(const WorldDescription &)
+    {
+        (CXXTEST_STD(cout) << " {Stop} ").flush();
+    }
+};
 }
 
 #endif //__CXXTEST__DUMMYGUI_H

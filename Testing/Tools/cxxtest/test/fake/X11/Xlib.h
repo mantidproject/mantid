@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 // Fake Xlib.h
 
 struct Display {};
@@ -30,7 +24,7 @@ inline int XFreeFontInfo( char **, XFontStruct *, int ) { return 0; }
 inline int XSelectInput( Display *, Window, int ) { return 0; }
 inline int XMapWindow( Display *, Window ) { return 0; }
 inline Screen *XDefaultScreenOfDisplay( Display * ) { return 0; }
-inline int WidthOfScreen( Screen * ) { return 0; }    
+inline int WidthOfScreen( Screen * ) { return 0; }
 inline int HeightOfScreen( Screen * ) { return 0; }
 inline int XMoveResizeWindow( Display *, Window, int, int, int, int ) { return 0; }
 

@@ -1,0 +1,17 @@
+Running cxxtest tests (5 tests)
+In NullPtrFormatterTest::testTsAssert:
+filename:1: Error: Assertion failed:
+In NullPtrFormatterTest::testTsFail:
+filename:1: Error: Test failed:
+In NullPtrFormatterTest::testTsWarn:
+filename:1: Warning:
+.
+In NullPtrFormatterTest::testTsSkip:
+filename:1: Warning: Test skipped:
+s
+In NullPtrFormatterTest::testTsTrace:
+filename:1: Trace:
+.
+Failed 2 and Skipped 1 of 5 tests
+Success rate: 50%
+Error level=2
