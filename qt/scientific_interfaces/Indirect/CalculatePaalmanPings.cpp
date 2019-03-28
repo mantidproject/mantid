@@ -597,6 +597,21 @@ void CalculatePaalmanPings::plotClicked() {
 
 void CalculatePaalmanPings::runClicked() { runTab(); }
 
+void CalculatePaalmanPings::setSampleDensityOptions(int index) {
+  if (index == 0)
+    setComboBoxOptions(m_uiForm.cbSampleDensity,
+                       {"Mass Density", "Number Density"});
+  else
+    setComboBoxOptions(m_uiForm.cbSampleDensity, {"Number Density"});
+}
+
+void CalculatePaalmanPings::setComboBoxOptions(
+    QComboBox *combobox, std::vector<std::string> const &options) {
+  combobox->clear();
+  for (auto const &option : options)
+    combobox->addItem(QString::fromStdString(option));
+}
+
 /**
  * Handle changing of the sample density unit
  */
@@ -626,6 +641,7 @@ void CalculatePaalmanPings::setCanDensityValue(int index) {
 }
 
 void CalculatePaalmanPings::changeSampleMaterialOptions(int index) {
+  setSampleDensityOptions(index);
   m_uiForm.swSampleMaterialDetails->setCurrentIndex(index);
 }
 
@@ -634,14 +650,14 @@ void CalculatePaalmanPings::changeCanMaterialOptions(int index) {
 }
 
 void CalculatePaalmanPings::setSampleDensity(double value) {
-  if (m_uiForm.cbSampleDensity->currentIndex() == 0)
+  if (m_uiForm.cbSampleDensity->currentText() == "Mass Density")
     m_sampleDensities->setMassDensity(value);
   else
     m_sampleDensities->setNumberDensity(value);
 }
 
 void CalculatePaalmanPings::setCanDensity(double value) {
-  if (m_uiForm.cbCanDensity->currentIndex() == 0)
+  if (m_uiForm.cbCanDensity->currentText() == "Mass Density")
     m_canDensities->setMassDensity(value);
   else
     m_canDensities->setNumberDensity(value);

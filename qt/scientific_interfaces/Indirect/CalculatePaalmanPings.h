@@ -43,6 +43,7 @@ private slots:
   void saveClicked();
   void plotClicked();
   void runClicked();
+  void setSampleDensityOptions(int index);
   void setSampleDensityUnit(int);
   void setCanDensityUnit(int);
   void setSampleDensityValue(int index);
@@ -64,6 +65,9 @@ private:
                                      QString shape);
   void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
                                   QString shape);
+
+  void setComboBoxOptions(QComboBox *combobox,
+                          std::vector<std::string> const &options);
 
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
