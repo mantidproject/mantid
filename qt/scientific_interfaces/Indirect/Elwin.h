@@ -47,6 +47,7 @@ private:
 
   void checkForELTWorkspace();
 
+  std::vector<std::string> getOutputWorkspaceNames();
   QString getOutputBasename();
 
   void updatePlotSpectrumOptions();

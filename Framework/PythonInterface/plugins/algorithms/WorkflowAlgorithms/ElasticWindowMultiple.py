@@ -194,7 +194,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         else:
             if not workspaces_have_same_size(q_workspaces) or not workspaces_have_same_size(q2_workspaces):
                 raise RuntimeError('The ElasticWindow algorithm produced differently sized workspaces. Please check '
-                                   'the input files are of the same type.')
+                                   'the input files are compatible.')
             q_workspace = _append_all(q_workspaces)
             q2_workspace = _append_all(q2_workspaces)
 

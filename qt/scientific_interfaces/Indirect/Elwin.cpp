@@ -54,44 +54,51 @@ int getNumberOfSpectra(std::string const &name) {
 
 std::string extractLastOf(const std::string &str,
                           const std::string &delimiter) {
-  const auto cutIndex = str.rfind(delimiter);
+  auto const cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
     return str.substr(cutIndex + 1, str.size() - cutIndex);
   return str;
 }
 
-template <typename Iterator, typename Predicate>
-std::vector<std::string> copyIf(Iterator const fromIterator,
-                                Iterator const toIterator,
-                                Predicate const &predicate) {
+template <typename Iterator, typename Functor>
+std::vector<std::string> transformElements(Iterator const fromIter,
+                                           Iterator const toIter,
+                                           Functor const &functor) {
   std::vector<std::string> newVector;
-  std::copy_if(fromIterator, toIterator, std::back_inserter(newVector),
-               predicate);
+  newVector.reserve(toIter - fromIter);
+  std::transform(fromIter, toIter, std::back_inserter(newVector), functor);
   return newVector;
 }
 
-template <typename Iterator, typename Predicate>
-std::vector<std::string> transform(Iterator const fromIterator,
-                                   Iterator const toIterator,
-                                   Predicate const &predicate) {
-  std::vector<std::string> newVector;
-  newVector.reserve(toIterator - fromIterator);
-  std::transform(fromIterator, toIterator, std::back_inserter(newVector),
-                 predicate);
-  return newVector;
+template <typename T, typename Predicate>
+void removeElementsIf(std::vector<T> &vector, Predicate const &filter) {
+  auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
+  if (iter != vector.end())
+    vector.erase(iter);
 }
 
-std::vector<std::string> getInputSuffixes(QStringList files) {
-  auto const allSuffixes =
-      transform(files.begin(), files.end(), [&](QString const &file) {
+std::vector<std::string> extractSuffixes(QStringList const &files,
+                                         std::string const &delimiter) {
+  return transformElements(
+      files.begin(), files.end(), [&](QString const &file) {
         QFileInfo const fileInfo(file);
-        return extractLastOf(fileInfo.baseName().toStdString(), "_");
+        return extractLastOf(fileInfo.baseName().toStdString(), delimiter);
       });
+}
 
-  auto const suffixes = copyIf(allSuffixes.begin(), allSuffixes.end(),
-                               [&](std::string const &suffix) {
-                                 return suffix == "red" || suffix == "sqw";
-                               });
+std::vector<std::string> attachPrefix(std::vector<std::string> const &strings,
+                                      std::string const &prefix) {
+  return transformElements(
+      strings.begin(), strings.end(),
+      [&prefix](std::string const &str) { return prefix + str; });
+}
+
+std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
+  auto suffixes = extractSuffixes(files, "_");
+
+  removeElementsIf(suffixes, [&](std::string const &suffix) {
+    return suffix != "red" && suffix != "sqw";
+  });
   return suffixes;
 }
 
@@ -422,7 +429,8 @@ bool Elwin::validate() {
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
 
-  auto const suffixes = getInputSuffixes(m_uiForm.dsInputFiles->getFilenames());
+  auto const suffixes =
+      getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
   if (std::adjacent_find(suffixes.begin(), suffixes.end(),
                          std::not_equal_to<>()) != suffixes.end())
     uiv.addErrorMessage("The input files must be all _red or all _sqw.");
@@ -628,13 +636,18 @@ void Elwin::plotClicked() {
  * Handles saving of workspaces
  */
 void Elwin::saveClicked() {
-  auto const workspaceBaseName = getOutputBasename().toStdString();
-
-  for (auto const &suffix : getOutputWorkspaceSuffices())
-    if (checkADSForPlotSaveWorkspace(workspaceBaseName + suffix, false))
-      addSaveWorkspaceToQueue(workspaceBaseName + suffix);
-
+  for (auto const &name : getOutputWorkspaceNames())
+    addSaveWorkspaceToQueue(name);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+std::vector<std::string> Elwin::getOutputWorkspaceNames() {
+  auto outputNames = attachPrefix(getOutputWorkspaceSuffices(),
+                                  getOutputBasename().toStdString());
+  removeElementsIf(outputNames, [](std::string const &workspaceName) {
+    return !doesExistInADS(workspaceName);
+  });
+  return outputNames;
 }
 
 QString Elwin::getOutputBasename() {
