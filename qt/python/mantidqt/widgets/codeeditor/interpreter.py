@@ -224,17 +224,9 @@ class PythonFileInterpreter(QWidget):
         self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
 
     def toggle_comment(self):
-        if self.editor.selectedText() == '':  # If nothing selected, do nothing
-            return
-
+        selection_idxs = self._get_selection_idxs()
+        self._expand_selection(selection_idxs)
         # Note selection indices to restore highlighting later
-        selection_idxs = list(self.editor.getSelection())
-
-        # Expand selection from first character on start line to end char on last line
-        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
-        line_selection_idxs = [selection_idxs[0], 0,
-                               selection_idxs[2], line_end_pos]
-        self.editor.setSelection(*line_selection_idxs)
         selected_lines = self.editor.selectedText().split('\n')
 
         if self._are_comments(selected_lines) is True:
@@ -307,6 +299,24 @@ class PythonFileInterpreter(QWidget):
                 if not line.strip().startswith('#'):
                     return False
         return True
+
+    def _get_selection_idxs(self):
+        if self.editor.selectedText() == '':
+            cursor_pos = list(self.editor.getCursorPosition())
+            return cursor_pos + cursor_pos
+        else:
+            return list(self.editor.getSelection())
+
+    def _expand_selection(self, selection_idxs):
+        """
+        Expands selection from first character of first selected line to
+        last character of the last selected line.
+        :param selection_idxs: Length 4 list, e.g. [row0, col0, row1, col1]
+        """
+        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
+        line_selection_idxs = [selection_idxs[0], 0,
+                               selection_idxs[2], line_end_pos]
+        self.editor.setSelection(*line_selection_idxs)
 
 
 class PythonFileInterpreterPresenter(QObject):
