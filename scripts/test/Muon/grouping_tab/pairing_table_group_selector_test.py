@@ -9,6 +9,10 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common import mock_widget
 
 
@@ -26,9 +30,14 @@ class GroupSelectorTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonDataContext()
+        self.loaded_data = MuonLoadData()
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
 
-        self.model = GroupingTabModel(context=self.data)
+        self.model = GroupingTabModel(context=self.context)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
@@ -51,9 +60,9 @@ class GroupSelectorTest(unittest.TestCase):
         group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
         group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
         group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
-        self.data.add_group(group1)
-        self.data.add_group(group2)
-        self.data.add_group(group3)
+        self.group_context.add_group(group1)
+        self.group_context.add_group(group2)
+        self.group_context.add_group(group3)
 
     def add_two_pairs_to_table(self):
         pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
@@ -87,7 +96,6 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertNotEqual(self.get_group_1_selector_from_pair(0).findText("my_group_2"), -1)
 
     def test_that_get_index_of_text_returns_correct_index_if_text_exists(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
         index = self.view.get_index_of_text(self.get_group_1_selector_from_pair(0), 'my_group_1')
@@ -95,7 +103,6 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(index, 1)
 
     def test_that_get_index_of_text_returns_0_if_text_does_not_exists(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
         index = self.view.get_index_of_text(self.get_group_1_selector_from_pair(0), 'random string')
@@ -104,7 +111,6 @@ class GroupSelectorTest(unittest.TestCase):
 
     def test_that_added_groups_appear_in_group_combo_boxes_in_existing_pairs_if_update_called(self):
         self.presenter.handle_add_pair_button_clicked()
-        self.add_three_groups_to_model()
         # the following method must be called
         self.presenter.update_view_from_model()
 
@@ -114,7 +120,6 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertNotEqual(self.get_group_1_selector_from_pair(0).findText("my_group_2"), -1)
 
     def test_that_changing_group_selection_triggers_cell_changed_method_in_view(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
         self.presenter.handle_add_pair_button_clicked()
 
@@ -125,10 +130,9 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 1))
 
     def test_that_removing_groups_and_then_calling_update_removes_groups_from_selections(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
-        del self.data.groups["my_group_1"]
-        del self.data.groups["my_group_2"]
+        self.group_context.remove_group("my_group_1")
+        self.group_context.remove_group('my_group_2')
         self.presenter.update_view_from_model()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 1)
@@ -137,7 +141,6 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertNotEqual(self.get_group_2_selector_from_pair(0).findText("my_group_0"), -1)
 
     def test_adding_new_group_does_not_change_pair_selection(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
@@ -146,7 +149,7 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
 
         group4 = MuonGroup(group_name="my_group_4", detector_ids=[4])
-        self.data.add_group(group4)
+        self.group_context.add_group(group4)
         self.presenter.update_view_from_model()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 4)
@@ -155,10 +158,9 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
 
     def test_removing_group_used_in_pair_handled_gracefully(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
-        del self.data.groups["my_group_0"]
+        self.group_context.remove_group("my_group_0")
         self.presenter.update_view_from_model()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 2)
@@ -167,7 +169,6 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
 
     def test_group_changed_to_other_group_switches_groups(self):
-        self.add_three_groups_to_model()
         self.presenter.handle_add_pair_button_clicked()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 3)
@@ -182,8 +183,6 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 3)
         self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_1')
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_0')
-
-
 
 
 if __name__ == '__main__':

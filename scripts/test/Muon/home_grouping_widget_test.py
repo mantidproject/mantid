@@ -17,6 +17,9 @@ from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeG
 from Muon.GUI.Common.observer_pattern import Observer
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.muon_pair import MuonPair
 import Muon.GUI.Common.utilities.load_utils as load_utils
 
@@ -27,8 +30,12 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
         ConfigService['default.instrument'] = 'MUSR'
         self.loaded_data = MuonLoadData()
-        self.context = MuonDataContext(self.loaded_data)
-        self.context.gui_variables['RebinType'] = 'None'
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
+        self.gui_context['RebinType'] = 'None'
         self.view = HomeGroupingWidgetView(self.obj)
         self.model = HomeGroupingWidgetModel(self.context)
         self.presenter = HomeGroupingWidgetPresenter(self.view, self.model)
@@ -38,13 +45,13 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
-        self.context._loaded_data.remove_data(run=run)
-        self.context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
-        self.context.current_runs = [[22725]]
+        self.data_context._loaded_data.remove_data(run=run)
+        self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.data_context.current_runs = [[22725]]
 
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
-        self.context.add_pair(pair=test_pair)
+        self.group_context.add_pair(pair=test_pair)
         self.presenter.update_group_pair_list()
 
     def tearDown(self):

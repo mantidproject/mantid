@@ -10,9 +10,12 @@ from mantid.py3compat import mock
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 
 
 class IteratorWithException:
@@ -70,8 +73,13 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
             return_value=["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
         self.data = MuonLoadData()
-        self.context = MuonDataContext
-        self.context.instrument = 'EMU'
+        self.data.get_main_field_direction = mock.MagicMock(return_value='transverse')
+        self.data_context = MuonDataContext(self.data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
+        self.data_context.instrument = 'EMU'
         self.model = BrowseFileWidgetModel(self.data, self.context)
         self.model.exception_message_for_failed_files = mock.Mock()
 

@@ -13,6 +13,10 @@ from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import I
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common import mock_widget
 
 from Muon.GUI.Common.observer_pattern import Observer
@@ -22,11 +26,16 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
-        self.context = MuonDataContext()
+        self.loaded_data = MuonLoadData()
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
         self.gui_variable_observer = Observer()
 
-        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
-        self.context.instrument = 'MUSR'
+        self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.data_context.instrument = 'MUSR'
         self.view = InstrumentWidgetView(self.obj)
         self.view.set_instrument('MUSR', block=True)
         self.model = InstrumentWidgetModel(self.context)
@@ -59,12 +68,12 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
     def test_that_subscribers_notified_when_instrument_changed(self):
         observer = Observer()
         observer.update = mock.MagicMock()
-        self.context.instrumentNotifier.add_subscriber(observer)
+        self.data_context.instrumentNotifier.add_subscriber(observer)
 
         self.view.set_instrument('MUSR', block=True)
         self.view.set_instrument('CHRONUS')
 
-        observer.update.assert_called_once_with(self.context.instrumentNotifier, 'CHRONUS')
+        observer.update.assert_called_once_with(self.data_context.instrumentNotifier, 'CHRONUS')
 
     def test_that_changeing_time_zero_updates_model(self):
         time_zero = 1.23456
@@ -130,23 +139,23 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.rebin_steps_edit.setText('50')
         self.view.rebin_steps_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.gui_variables['RebinFixed'], '50')
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.assertEqual(self.model._context.gui_context['RebinFixed'], '50')
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_that_changeing_variable_rebin_updates_variable_binning_in_model(self):
         self.view.rebin_variable_edit.setText('1,5,21')
         self.view.rebin_variable_edit.editingFinished.emit()
 
-        self.assertEqual(self.model._data.gui_variables['RebinVariable'], '1,5,21')
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.assertEqual(self.model._context.gui_context['RebinVariable'], '1,5,21')
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_that_steps_only_accepts_a_single_integer(self):
         self.view.rebin_steps_edit.insert('1,0.1,70')
         self.view.rebin_steps_edit.editingFinished.emit()
 
         self.assertEqual(self.view.rebin_steps_edit.text(), '')
-        self.assertEqual(self.model._data.gui_variables['RebinFixed'], '')
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.assertEqual(self.model._context.gui_context['RebinFixed'], '')
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_that_variable_rebin_only_accepts_a_valid_rebin_string(self):
         self.view.rebin_variable_edit.insert('1-0.1-80')
@@ -155,22 +164,22 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.rebin_variable_edit.text(), '')
 
     def test_that_rebin_type_starts_as_none(self):
-        self.assertEqual(self.model._data.gui_variables['RebinType'], 'None')
+        self.assertEqual(self.model._context.gui_context['RebinType'], 'None')
 
     def test_that_updating_rebin_combobox_updates_context(self):
         self.view.rebin_selector.setCurrentIndex(1)
 
-        self.assertEqual(self.model._data.gui_variables['RebinType'], 'Fixed')
+        self.assertEqual(self.model._context.gui_context['RebinType'], 'Fixed')
         self.assertEqual(self.gui_variable_observer.update.call_count, 1)
 
         self.view.rebin_selector.setCurrentIndex(2)
 
-        self.assertEqual(self.model._data.gui_variables['RebinType'], 'Variable')
+        self.assertEqual(self.model._context.gui_context['RebinType'], 'Variable')
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
         self.view.rebin_selector.setCurrentIndex(0)
 
-        self.assertEqual(self.model._data.gui_variables['RebinType'], 'None')
+        self.assertEqual(self.model._context.gui_context['RebinType'], 'None')
         self.assertEqual(self.gui_variable_observer.update.call_count, 3)
 
     def test_that_on_dead_time_unselected_deadtime_model_set_to_none(self):
@@ -179,7 +188,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.deadtime_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
         self.assertEqual(self.model._data.current_data["DeadTimeTable"], None)
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_that_on_deadtime_data_selected_updates_with_no_loaded_data(self):
         self.view.deadtime_selector.setCurrentIndex(1)
@@ -195,7 +204,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.view.deadtime_selector.setCurrentIndex(1)
 
         self.assertEqual(self.view.deadtime_label_3.text(), 'From 0.001 to 0.003 (ave. 0.002)')
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     @mock.patch(
         'Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter.load_utils.get_table_workspace_names_from_ADS')
@@ -221,7 +230,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.view.deadtime_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")
         self.assertTrue(self.view.deadtime_file_selector.isHidden())
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_browse_button_displayed_when_from_other_file_selected(self):
         self.assertTrue(self.view.deadtime_browse_button.isHidden())
@@ -281,7 +290,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.deadtime_selector.currentIndex(), 2)
         self.view.warning_popup.assert_not_called()
         self.assertEqual(self.view.deadtime_file_selector.currentText(), 'MUSR00015196_deadTimes')
-        self.gui_variable_observer.update.assert_called_once_with(self.context.gui_variables_notifier, None)
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_validate_variable_rebin_string_allows_single_number(self):
         result, message = self.model.validate_variable_rebin_string('0.034')

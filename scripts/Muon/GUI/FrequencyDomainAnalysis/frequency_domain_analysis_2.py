@@ -65,7 +65,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
 
-        self.group_pair_context = MuonGroupPairContext()
+        self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
                                    muon_group_context=self.group_pair_context)

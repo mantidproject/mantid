@@ -8,6 +8,10 @@ import sys
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 from mantid.api import AnalysisDataService
 import unittest
@@ -26,22 +30,26 @@ else:
 class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         self.loaded_data = MuonLoadData()
-        self.context = MuonDataContext(self.loaded_data)
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
         self.frequency_context = FrequencyContext(self.context)
         self.gui_variable_observer = Observer()
         self.gui_variable_observer.update = mock.MagicMock()
-        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
-        self.context.instrument = 'CHRONUS'
+        self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.data_context.instrument = 'CHRONUS'
         self.gui_variable_observer = Observer()
         self.gui_variable_observer.update = mock.MagicMock()
-        self.context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
 
         filepath = FileFinder.findRuns('CHRONUS00003422.nxs')[0]
 
         load_result, run, filename = load_workspace_from_filename(filepath)
 
         self.loaded_data.add_data(workspace=load_result, run=[run], filename=filename, instrument='CHRONUS')
-        self.context.current_runs = [[run]]
+        self.data_context.current_runs = [[run]]
         self.context.update_current_data()
 
     def tearDown(self):

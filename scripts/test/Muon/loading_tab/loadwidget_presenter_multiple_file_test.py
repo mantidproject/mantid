@@ -17,8 +17,11 @@ from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPres
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common import mock_widget
 
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
@@ -39,7 +42,11 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         ConfigService['default.instrument'] = 'MUSR'
 
         self.data = MuonLoadData()
-        self.context = MuonDataContext(self.data)
+        self.data_context = MuonDataContext(self.data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
         self.context.instrument = 'MUSR'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)

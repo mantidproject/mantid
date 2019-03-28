@@ -17,8 +17,11 @@ from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common import mock_widget
 
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
@@ -60,8 +63,12 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_run_mock = self.load_run_patcher.start()
 
         self.data = MuonLoadData()
-        self.context = MuonDataContext(self.data)
-        self.context.instrument = 'EMU'
+        self.data_context = MuonDataContext(self.data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
+        self.data_context.instrument = 'EMU'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.data, self.context)

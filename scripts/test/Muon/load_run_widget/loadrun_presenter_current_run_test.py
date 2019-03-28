@@ -14,6 +14,9 @@ from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPres
 from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_context import MuonContext
+from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
 
 
@@ -35,14 +38,21 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
             thread_model._thread.wait()
             self._qapp.processEvents()
 
+    def create_fake_workspace(self):
+        return {'MainFieldDirection': 'transverse'}
+
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.context = MuonDataContext()
-        self.context.instrument = 'EMU'
         self.data = MuonLoadData()
+        self.data_context = MuonDataContext(self.data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext()
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
+        self.data_context.instrument = 'EMU'
         self.view = LoadRunWidgetView(parent=self.obj)
         self.model = LoadRunWidgetModel(self.data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
@@ -70,19 +80,21 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_load_current_run_loads_run_into_model(self):
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], 1234, "currentRun.nxs"))
+        workspace = self.create_fake_workspace()
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "currentRun.nxs"))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.presenter.filenames, ["currentRun.nxs"])
         self.assertEqual(self.presenter.runs, [[1234]])
-        self.assertEqual(self.presenter.workspaces, [[1, 2, 3]])
+        self.assertEqual(self.presenter.workspaces, [workspace])
 
         self.assertEqual(self.model._data_context.current_runs, [[1234]])
 
     @run_test_with_and_without_threading
     def test_load_current_run_correctly_displays_run_if_load_successful(self):
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
+        workspace = self.create_fake_workspace()
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs"))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -99,7 +111,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
         # set up previous data
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
+        workspace = self.create_fake_workspace()
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs"))
         self.view.set_run_edit_text("1234")
         self.presenter.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
@@ -110,29 +123,31 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.filenames, ["1234.nxs"])
         self.assertEqual(self.presenter.runs, [[1234]])
-        self.assertEqual(self.presenter.workspaces, [[1]])
+        self.assertEqual(self.presenter.workspaces, [workspace])
 
     @run_test_with_and_without_threading
     def test_load_current_run_clears_previous_data_if_load_succeeds(self):
         # set up previous data
-        self.load_utils_patcher.return_value = ([1], "1234.nxs", 1234)
+        workspace = self.create_fake_workspace()
+        self.load_utils_patcher.return_value = (workspace, "1234.nxs", 1234)
         self.view.set_run_edit_text("1234")
         self.presenter.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([2], 9999, "9999.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 9999, "9999.nxs"))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.view.get_run_edit_text(), "9999")
         self.assertEqual(self.presenter.filenames, ["9999.nxs"])
         self.assertEqual(self.presenter.runs, [[9999]])
-        self.assertEqual(self.presenter.workspaces, [[2]])
+        self.assertEqual(self.presenter.workspaces, [workspace])
 
     @run_test_with_and_without_threading
     def test_load_current_run_displays_error_if_incrementing_past_current_run(self):
         # set up current run
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1234, "1234.nxs"))
+        workspace = self.create_fake_workspace()
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs"))
         self.view.set_run_edit_text("1234")
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)

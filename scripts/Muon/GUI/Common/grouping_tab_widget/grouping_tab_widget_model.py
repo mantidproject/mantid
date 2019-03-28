@@ -105,7 +105,8 @@ class GroupingTabModel(object):
         return pair
 
     def reset_groups_and_pairs_to_default(self):
-        self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument, self._data.main_field_direction)
+        self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
+                                                                self._data.main_field_direction)
 
     def update_pair_alpha(self, pair_name, new_alpha):
         self._groups_and_pairs[pair_name].alpha = new_alpha

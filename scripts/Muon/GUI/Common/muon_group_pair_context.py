@@ -70,11 +70,13 @@ class MessageNotifier(Observable):
 
 
 class MuonGroupPairContext(object):
-    def __init__(self):
+    def __init__(self, check_group_contains_valid_detectors=lambda x : True):
         self._groups = []
         self._pairs = []
 
         self.message_notifier = MessageNotifier(self)
+
+        self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 
     def __getitem__(self, name):
         for item in self._groups + self.pairs:
@@ -106,10 +108,13 @@ class MuonGroupPairContext(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        if self._check_name_unique(group.name):
-            self._groups.append(group)
+        if self._check_group_contains_valid_detectors(group):
+            if self._check_name_unique(group.name):
+                self._groups.append(group)
+            else:
+                raise ValueError('Groups and pairs must have unique names')
         else:
-            raise ValueError('Groups and pairs must have unique names')
+            raise ValueError('Invalid detectors in group {}'.format(group.name))
 
     def remove_group(self, group_name):
         for group in self._groups:

@@ -31,7 +31,7 @@ class MuonGUIContextTest(unittest.TestCase):
 
         context.update_and_send_signal(FirstGoodData=12.0)
 
-        observer.update.assert_called_once_with(context.notifier, None, FirstGoodData=12.0)
+        observer.update.assert_called_once_with(context.gui_variables_notifier, None)
 
 
 if __name__ == '__main__':
