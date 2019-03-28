@@ -21,7 +21,7 @@ try:
 except ImportError:
     # Find the egg link (relative to THIS file), and import it's linked path to the PYTHONPATH
     _mantid_egg_link = 'mantid.egg-link'
-    _mantid_egg_link_path = osp.join(osp.dirname(__file__), _mantid_egg_link) + "PALEPSALPD"
+    _mantid_egg_link_path = osp.join(osp.dirname(__file__), _mantid_egg_link)
     try:
         with open(_mantid_egg_link_path) as f:
             python_interface_dir = f.readline().strip()
