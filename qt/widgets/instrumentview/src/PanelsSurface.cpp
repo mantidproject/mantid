@@ -129,7 +129,7 @@ bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
   for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
     const auto vector = normalize(componentInfo.position(children[0]) -
-                  componentInfo.position(children[1]));
+                                  componentInfo.position(children[1]));
     if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
       g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
                       << " isn't flat.\n";

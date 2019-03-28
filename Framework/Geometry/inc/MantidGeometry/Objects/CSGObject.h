@@ -137,10 +137,10 @@ public:
   double solidAngle(const Kernel::V3D &observer,
                     const Kernel::V3D &scaleFactor) const override;
   // solid angle via triangulation
-  double triangulatedSolidAngle(const Kernel::V3D &observer) const ;
+  double triangulatedSolidAngle(const Kernel::V3D &observer) const;
   // Solid angle via triangulation with scaling factor for object size
   double triangulatedSolidAngle(const Kernel::V3D &observer,
-                            const Kernel::V3D &scaleFactor) const ;
+                                const Kernel::V3D &scaleFactor) const;
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 

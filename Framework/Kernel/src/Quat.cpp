@@ -36,12 +36,7 @@ Quat::Quat() : w(1), a(0), b(0), c(0) {}
  * @param des :: the destination position
  */
 Quat::Quat(const V3D &src, const V3D &des) {
-  const V3D sum = src + des;
-  const double l = sum.norm();
-  if (l == 0.) {
-    throw std::runtime_error("Quat: the source and destination vectors cancel each other out.");
-  }
-  const V3D v = sum / l;
+  const V3D v = Kernel::normalize(src + des);
 
   const V3D cross = v.cross_prod(des);
 
