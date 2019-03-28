@@ -96,7 +96,8 @@ public:
   // Transfer rows into the table
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
-  void tableDataUpdated(const QModelIndex & /*topLeft*/, const QModelIndex & /*bottomRight*/);
+  void tableDataUpdated(const QModelIndex & /*topLeft*/,
+                        const QModelIndex & /*bottomRight*/);
 
 private:
   void updateGroupData(const int groupIdx, const int start, const int end);

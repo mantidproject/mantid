@@ -35,8 +35,9 @@ public slots:
   void doRefinements();
 
 signals:
-  void refinementsComplete(Mantid::API::IAlgorithm_sptr /*_t1*/,
-                           std::vector<GSASIIRefineFitPeaksOutputProperties> /*_t2*/);
+  void refinementsComplete(
+      Mantid::API::IAlgorithm_sptr /*_t1*/,
+      std::vector<GSASIIRefineFitPeaksOutputProperties> /*_t2*/);
 
   void refinementSuccessful(Mantid::API::IAlgorithm_sptr /*_t1*/,
                             GSASIIRefineFitPeaksOutputProperties /*_t2*/);

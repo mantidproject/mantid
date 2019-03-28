@@ -170,14 +170,17 @@ public:
   /// can
   /// then be contained
   /// in the IntervalList given, else false.
-  static bool isParsable(const QString & /*input*/, const IntervalList & /*container*/);
+  static bool isParsable(const QString & /*input*/,
+                         const IntervalList & /*container*/);
 
   /// Returns an IntervalList which is the intersection of the given
   /// IntervalList and Interval
-  static IntervalList intersect(const IntervalList & /*aList*/, const Interval & /*bInterval*/);
+  static IntervalList intersect(const IntervalList & /*aList*/,
+                                const Interval & /*bInterval*/);
   /// Returns an IntervalList which is the intersection of the given
   /// IntervalLists
-  static IntervalList intersect(const IntervalList & /*a*/, const IntervalList & /*b*/);
+  static IntervalList intersect(const IntervalList & /*a*/,
+                                const IntervalList & /*b*/);
 
 private:
   /// A list of all the Intervals in this IntervalList

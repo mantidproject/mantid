@@ -56,7 +56,8 @@ public:
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
-  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/, double /*nearz*/, double /*farz*/,
+  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/,
+                     double /*nearz*/, double /*farz*/,
                      ProjectionType type = Viewport::ORTHO);
   /// Set a projection.
   void setProjection(const Mantid::Kernel::V3D &minBounds,
@@ -114,8 +115,9 @@ public:
   void setTranslation(double /*xval*/, double /*yval*/);
 
   // void getProjection(double&,double&,double&,double&,double&,double&);
-  void getInstantProjection(double & /*xmin*/, double & /*xmax*/, double & /*ymin*/, double & /*ymax*/, double & /*zmin*/,
-                            double & /*zmax*/) const;
+  void getInstantProjection(double & /*xmin*/, double & /*xmax*/,
+                            double & /*ymin*/, double & /*ymax*/,
+                            double & /*zmin*/, double & /*zmax*/) const;
 
   /// Apply the transformation to a vector
   void transform(Mantid::Kernel::V3D &pos) const;

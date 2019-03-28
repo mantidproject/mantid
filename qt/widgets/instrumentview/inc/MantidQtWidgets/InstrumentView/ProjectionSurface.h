@@ -286,8 +286,9 @@ signals:
   void peaksWorkspaceDeleted();
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> & /*_t1*/,
                   const Mantid::Geometry::IPeak * /*_t2*/);
-  void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                                    std::vector<Mantid::Geometry::IPeak *>> & /*_t1*/);
+  void comparePeaks(
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                      std::vector<Mantid::Geometry::IPeak *>> & /*_t1*/);
 
   // other
   void redrawRequired(); ///< request redrawing of self

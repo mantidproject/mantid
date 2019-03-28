@@ -44,7 +44,8 @@ public:
 
   ScaleTransformation(const ScaleEngine *engine)
       : QwtScaleTransformation(Other), d_engine(engine){};
-  double xForm(double x, double /*s1*/, double /*s2*/, double p1, double p2) const override;
+  double xForm(double x, double /*s1*/, double /*s2*/, double p1,
+               double p2) const override;
   double invXForm(double x, double s1, double s2, double p1,
                   double p2) const override;
   QwtScaleTransformation *copy() const override;

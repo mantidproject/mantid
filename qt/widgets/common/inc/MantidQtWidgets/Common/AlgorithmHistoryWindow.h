@@ -143,8 +143,9 @@ signals:
   void updateAlgorithmHistoryWindow(QString algName);
 
 public:
-  AlgorithmHistoryWindow(QWidget *parent,
-                         const boost::shared_ptr<const Mantid::API::Workspace> /*wsptr*/);
+  AlgorithmHistoryWindow(
+      QWidget *parent,
+      const boost::shared_ptr<const Mantid::API::Workspace> /*wsptr*/);
   AlgorithmHistoryWindow(QWidget *parent, const QString &workspaceName);
   ~AlgorithmHistoryWindow() override;
 

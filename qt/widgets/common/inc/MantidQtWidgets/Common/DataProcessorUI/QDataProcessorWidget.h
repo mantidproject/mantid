@@ -40,19 +40,24 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = nullptr);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/, QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/, const ProcessingAlgorithm & /*algorithm*/,
-                       QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/, const PreprocessMap & /*preprocessMap*/,
-                       const ProcessingAlgorithm & /*algorithm*/, QWidget *parent,
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, QWidget *parent,
                        int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/, const ProcessingAlgorithm & /*algorithm*/,
-                       const PostprocessingAlgorithm & /*postprocessor*/, QWidget *parent,
-                       int group = 0);
-  QDataProcessorWidget(const WhiteList & /*whitelist*/, const PreprocessMap & /*preprocessMap*/,
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
                        const ProcessingAlgorithm & /*algorithm*/,
-                       const PostprocessingAlgorithm & /*postprocessor*/, QWidget *parent,
-                       int group = 0);
+                       QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const PreprocessMap & /*preprocessMap*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
+                       QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
+                       const PostprocessingAlgorithm & /*postprocessor*/,
+                       QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const PreprocessMap & /*preprocessMap*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
+                       const PostprocessingAlgorithm & /*postprocessor*/,
+                       QWidget *parent, int group = 0);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar

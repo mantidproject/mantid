@@ -75,7 +75,8 @@ signals:
   // signal  to notify mask file loaded
   void userfileLoaded();
   /// signal to send gemoetry information
-  void sendGeometryInformation(QString & /*_t1*/, QString & /*_t2*/, QString & /*_t3*/, QString & /*_t4*/);
+  void sendGeometryInformation(QString & /*_t1*/, QString & /*_t2*/,
+                               QString & /*_t3*/, QString & /*_t4*/);
 
 private:
   /// Stores the batch or single run mode selection

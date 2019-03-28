@@ -32,7 +32,8 @@ const QString MASK_LIST =
 
 class ExcludeRegionDelegate : public QItemDelegate {
 public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+  QWidget *createEditor(QWidget *parent,
+                        const QStyleOptionViewItem & /*option*/,
                         const QModelIndex & /*index*/) const override {
     auto lineEdit = Mantid::Kernel::make_unique<QLineEdit>(parent);
     auto validator = Mantid::Kernel::make_unique<QRegExpValidator>(

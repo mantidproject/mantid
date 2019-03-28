@@ -35,8 +35,8 @@ public:
                                    AlgorithmProgressModel &model);
 
   void algorithmStartedSlot(Mantid::API::AlgorithmID /*unused*/) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/, double /*unused*/,
-                             QString /*unused*/) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/,
+                             double /*unused*/, QString /*unused*/) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID /*unused*/) override;
 
 private:

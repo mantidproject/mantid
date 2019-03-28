@@ -87,7 +87,7 @@ public slots:
   void importBoxDataTable() override;
   void showListData() override;
   void importTransposed() override;
-  void renameWorkspace(QStringList  /*unused*/= QStringList()) override;
+  void renameWorkspace(QStringList /*unused*/ = QStringList()) override;
 
   // Algorithm Display and Execution Methods
   void showAlgorithmDialog(const QString &algName, int version = -1) override;

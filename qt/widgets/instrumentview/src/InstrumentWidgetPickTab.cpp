@@ -542,7 +542,8 @@ QColor InstrumentWidgetPickTab::getShapeBorderColor() const {
 /**
  * Do something when the time bin integraion range has changed.
  */
-void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/, double /*unused*/) {
+void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   m_plotController->updatePlot();
   auto surface = m_instrWidget->getSurface();
   if (surface) {

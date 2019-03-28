@@ -359,7 +359,8 @@ void PeaksWorkspaceWidget::workspaceUpdate(
  * @brief PeaksWorkspaceWidget::onCurrentChanged
  * @param index : Index of the table newly selected
  */
-void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex /*unused*/) {
+void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index,
+                                            QModelIndex /*unused*/) {
   if (index.isValid()) {
     index = m_tableModel->mapToSource(index);
     emit zoomToPeak(this->m_ws, index.row());

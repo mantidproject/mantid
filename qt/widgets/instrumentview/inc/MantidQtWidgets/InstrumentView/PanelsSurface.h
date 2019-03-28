@@ -54,7 +54,8 @@ public:
                 const Mantid::Kernel::V3D &axis);
   ~PanelsSurface() override;
   void init() override;
-  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
+  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
+               double & /*v*/, double & /*uscale*/,
                double & /*vscale*/) const override;
 
 protected:

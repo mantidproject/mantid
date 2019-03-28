@@ -117,7 +117,8 @@ std::shared_ptr<PeakPrimitives> PeakRepresentationCross::getDrawingInformation(
 }
 
 void PeakRepresentationCross::doDraw(
-    QPainter &painter, PeakViewColor &foregroundColor, PeakViewColor & /*backgroundColor*/,
+    QPainter &painter, PeakViewColor &foregroundColor,
+    PeakViewColor & /*backgroundColor*/,
     std::shared_ptr<PeakPrimitives> drawingInformation,
     PeakRepresentationViewInformation viewInformation) {
   auto drawingInformationCross =

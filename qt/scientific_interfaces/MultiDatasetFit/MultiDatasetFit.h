@@ -103,7 +103,8 @@ private slots:
   void setLogNames();
   void setParameterNamesForPlotting();
   void invalidateOutput();
-  void updateGuessFunction(const QString & /*unused*/, const QString & /*unused*/);
+  void updateGuessFunction(const QString & /*unused*/,
+                           const QString & /*unused*/);
 
 protected:
   void initLayout() override;

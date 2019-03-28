@@ -347,7 +347,8 @@ protected slots:
   /// Called when a constraint property changes
   void constraintChanged(QtProperty * /*prop*/);
   /// Called when "Global" check-box was clicked
-  void globalChanged(QtProperty * /*unused*/, const QString & /*unused*/, bool /*unused*/);
+  void globalChanged(QtProperty * /*unused*/, const QString & /*unused*/,
+                     bool /*unused*/);
   /// Set value of an attribute (as a property) to a function
   void setAttributeToFunction(Mantid::API::IFunction &fun, QtProperty *prop);
 

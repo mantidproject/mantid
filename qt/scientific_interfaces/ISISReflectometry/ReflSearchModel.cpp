@@ -97,7 +97,9 @@ int ReflSearchModel::rowCount(const QModelIndex & /*parent*/) const {
 /**
 @return the number of columns in the model.
 */
-int ReflSearchModel::columnCount(const QModelIndex & /*parent*/) const { return 3; }
+int ReflSearchModel::columnCount(const QModelIndex & /*parent*/) const {
+  return 3;
+}
 
 /**
 Overrident data method, allows consuming view to extract data for an index and

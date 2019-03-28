@@ -63,7 +63,8 @@ signals:
   void dataChanged();
   void startXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
   void endXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
-  void excludeRegionChanged(const std::string & /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
+  void excludeRegionChanged(const std::string & /*_t1*/, std::size_t /*_t2*/,
+                            std::size_t /*_t3*/);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();

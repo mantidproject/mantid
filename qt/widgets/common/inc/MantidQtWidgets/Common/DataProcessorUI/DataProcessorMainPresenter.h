@@ -36,24 +36,30 @@ public:
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
-  virtual void notifyADSChanged(const QSet<QString> & /*unused*/, int /*unused*/) {}
+  virtual void notifyADSChanged(const QSet<QString> & /*unused*/,
+                                int /*unused*/) {}
 
   /// Return global options for pre-processing
   virtual ColumnOptionsQMap getPreprocessingOptions(int /*unused*/) const {
     return ColumnOptionsQMap();
   }
   /// Return global options for reduction
-  virtual OptionsQMap getProcessingOptions(int /*unused*/) const { return OptionsQMap(); }
+  virtual OptionsQMap getProcessingOptions(int /*unused*/) const {
+    return OptionsQMap();
+  }
   /// Return global options for post-processing as a string
   virtual QString getPostprocessingOptionsAsString(int /*unused*/) const {
     return QString();
   }
   /// Return time-slicing values
-  virtual QString getTimeSlicingValues(int /*unused*/) const { return QString(); }
+  virtual QString getTimeSlicingValues(int /*unused*/) const {
+    return QString();
+  }
   /// Return time-slicing type
   virtual QString getTimeSlicingType(int /*unused*/) const { return QString(); }
   /// Return transmission runs for a particular angle
-  virtual OptionsQMap getOptionsForAngle(const double /*unused*/, int /*unused*/) const {
+  virtual OptionsQMap getOptionsForAngle(const double /*unused*/,
+                                         int /*unused*/) const {
     return OptionsQMap();
   }
   /// Return true if there are per-angle transmission runs set
@@ -72,10 +78,12 @@ public:
   virtual void confirmReductionCompleted(int /*unused*/) {}
   virtual void confirmReductionPaused(int /*unused*/){};
   virtual void confirmReductionResumed(int /*unused*/){};
-  virtual void completedGroupReductionSuccessfully(GroupData const & /*unused*/,
-                                                   std::string const & /*unused*/){};
-  virtual void completedRowReductionSuccessfully(GroupData const & /*unused*/,
-                                                 std::string const & /*unused*/){};
+  virtual void
+  completedGroupReductionSuccessfully(GroupData const & /*unused*/,
+                                      std::string const & /*unused*/){};
+  virtual void
+  completedRowReductionSuccessfully(GroupData const & /*unused*/,
+                                    std::string const & /*unused*/){};
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets

@@ -70,7 +70,8 @@ protected slots:
   void changedSlicePoint(Mantid::Kernel::VMD /*slice*/);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
-  void changeStartOrEnd(Mantid::Kernel::VMD /*start*/, Mantid::Kernel::VMD /*end*/);
+  void changeStartOrEnd(Mantid::Kernel::VMD /*start*/,
+                        Mantid::Kernel::VMD /*end*/);
   void changePlanarWidth(double /*width*/);
   void resizeWindow();
   void lineViewer_changedFixedBinWidth(bool fixed, double binWidth);

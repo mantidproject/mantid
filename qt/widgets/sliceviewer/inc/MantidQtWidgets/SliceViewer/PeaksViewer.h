@@ -59,11 +59,15 @@ public:
 public slots:
   void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
                           PeakViewColor /*newColor*/);
-  void onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
-                                PeakViewColor /*newColor*/);
-  void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/, bool /*show*/);
+  void onBackgroundColorChanged(
+      Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
+      PeakViewColor /*newColor*/);
+  void
+  onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
+                          bool /*show*/);
   void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/);
-  void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool /*hide*/);
+  void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
+                    bool /*hide*/);
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                     int peakIndex);
   void showPeaksTableColumnOptions();

@@ -24,7 +24,8 @@ protected:
   QWidget *createEditorForManager(QtStringPropertyManager *manager,
                                   QtProperty *property,
                                   QWidget *parent) override;
-  void disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
+  void
+  disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
 };
 
 class StringEditor : public QLineEdit {

@@ -359,7 +359,8 @@ void SequentialFitDialog::populateParameters() {
 
 void SequentialFitDialog::functionChanged() { populateParameters(); }
 
-void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm * /*alg*/) {
+void SequentialFitDialog::finishHandle(
+    const Mantid::API::IAlgorithm * /*alg*/) {
   emit needShowPlot(&ui, m_fitBrowser);
 }
 

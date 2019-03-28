@@ -631,7 +631,8 @@ void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
                                    const QModelIndex & /*bottomRight*/) {
 #else
 void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
-                                   const QModelIndex & /*bottomRight*/, const QVector<int> & /*roles*/) {
+                                   const QModelIndex & /*bottomRight*/,
+                                   const QVector<int> & /*roles*/) {
 #endif
   emit treeDataChange(
       dynamic_cast<BinaryTreeWidgetItem *>(itemFromIndex(topLeft)),
@@ -698,8 +699,8 @@ void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
  * @param option :: The style option
  * @param index :: The index for the model given
  */
-void ComboBoxDelegate::updateEditorGeometry(QWidget *editor,
-                                            const QStyleOptionViewItem &option,
-                                            const QModelIndex & /*index*/) const {
+void ComboBoxDelegate::updateEditorGeometry(
+    QWidget *editor, const QStyleOptionViewItem &option,
+    const QModelIndex & /*index*/) const {
   editor->setGeometry(option.rect);
 }

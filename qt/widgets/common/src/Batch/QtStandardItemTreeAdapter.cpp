@@ -106,11 +106,11 @@ std::vector<Cell> QtStandardItemTreeModelAdapter::cellsAtRow(
     QModelIndexForMainModel const &firstCellIndex) const {
   auto cells = std::vector<Cell>();
   cells.reserve(m_model.columnCount());
-  enumerateCellsInRow(
-      firstCellIndex, m_model.columnCount(),
-      [this, &cells](QModelIndexForMainModel const &cellIndex, int /*unused*/) -> void {
-        cells.emplace_back(cellFromCellIndex(cellIndex));
-      });
+  enumerateCellsInRow(firstCellIndex, m_model.columnCount(),
+                      [this, &cells](QModelIndexForMainModel const &cellIndex,
+                                     int /*unused*/) -> void {
+                        cells.emplace_back(cellFromCellIndex(cellIndex));
+                      });
   return cells;
 }
 

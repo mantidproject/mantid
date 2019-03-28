@@ -216,7 +216,8 @@ public:
 
 public slots:
   /// Slot for Q-Point selection notification
-  void QPointSelection_slot(bool /*lab_coords*/, double /*qx*/, double /*qy*/, double /*qz*/);
+  void QPointSelection_slot(bool /*lab_coords*/, double /*qx*/, double /*qy*/,
+                            double /*qz*/);
 
 private slots:
 

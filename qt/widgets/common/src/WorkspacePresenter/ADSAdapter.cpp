@@ -76,7 +76,8 @@ std::string ADSAdapter::getOldName() const { return m_oldName; }
 std::string ADSAdapter::getNewName() const { return m_newName; }
 
 // ADS Observation methods
-void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr /*unused*/) {
+void ADSAdapter::handleAddWorkspace(
+    Mantid::API::WorkspaceAddNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceLoaded);
@@ -96,7 +97,8 @@ void ADSAdapter::handleDeleteWorkspace(
       WorkspaceProviderNotifiable::Flag::WorkspaceDeleted);
 }
 
-void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr /*unused*/) {
+void ADSAdapter::handleClearADS(
+    Mantid::API::ClearADSNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesCleared);

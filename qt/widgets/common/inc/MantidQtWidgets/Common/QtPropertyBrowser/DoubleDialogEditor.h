@@ -73,8 +73,10 @@ signals:
   void closeEditor();
 
 protected:
-  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
-  void disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
+  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {
+  }
+  void
+  disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
 };
 
 #endif // DOUBLEDIALOGEDITORFACTORY_H

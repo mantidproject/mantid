@@ -865,7 +865,8 @@ void InstrumentWidget::componentSelected(size_t componentIndex) {
   }
 }
 
-void InstrumentWidget::executeAlgorithm(const QString & /*unused*/, const QString & /*unused*/) {
+void InstrumentWidget::executeAlgorithm(const QString & /*unused*/,
+                                        const QString & /*unused*/) {
   // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 

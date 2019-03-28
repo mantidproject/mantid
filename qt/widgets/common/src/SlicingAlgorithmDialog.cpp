@@ -132,8 +132,8 @@ formattedAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr dim) {
 
  @return : empty string.
 */
-QString
-formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr /*unused*/) {
+QString formatNonAlignedDimensionInput(
+    Mantid::Geometry::IMDDimension_const_sptr /*unused*/) {
   // Deliberately return an empty string here, because it's not obvious how the
   // basis vectors could be automatically formed.
   return QString("");

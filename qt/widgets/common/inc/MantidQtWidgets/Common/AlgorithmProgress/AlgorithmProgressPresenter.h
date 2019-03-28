@@ -35,11 +35,12 @@ class AlgorithmProgressPresenter : public AlgorithmProgressPresenterBase {
   Q_OBJECT
 
 public:
-  AlgorithmProgressPresenter(QWidget *parent, AlgorithmProgressWidget * /*view*/);
+  AlgorithmProgressPresenter(QWidget *parent,
+                             AlgorithmProgressWidget * /*view*/);
 
   void algorithmStartedSlot(Mantid::API::AlgorithmID /*unused*/) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/, double /*unused*/,
-                             QString /*unused*/) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/,
+                             double /*unused*/, QString /*unused*/) override;
   void algorithmEndedSlot(Mantid::API::AlgorithmID /*unused*/) override;
 
   AlgorithmProgressModel &model() { return m_model; }

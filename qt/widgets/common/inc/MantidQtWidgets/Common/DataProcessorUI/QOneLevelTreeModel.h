@@ -86,7 +86,8 @@ public:
   // Transfer rows into the table
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
-  void tableDataUpdated(const QModelIndex & /*unused*/, const QModelIndex & /*unused*/);
+  void tableDataUpdated(const QModelIndex & /*unused*/,
+                        const QModelIndex & /*unused*/);
 
 private:
   /// Update all cached row data from the table data

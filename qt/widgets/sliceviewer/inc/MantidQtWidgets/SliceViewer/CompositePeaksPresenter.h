@@ -80,8 +80,8 @@ public:
   }
   std::string getTransformName() const override;
   bool isHidden() const override { return m_default->isHidden(); }
-  void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/) override { /*Do nothing*/
+  void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/)
+      override { /*Do nothing*/
   }
   bool deletePeaksIn(PeakBoundingBox box) override;
   bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) override;

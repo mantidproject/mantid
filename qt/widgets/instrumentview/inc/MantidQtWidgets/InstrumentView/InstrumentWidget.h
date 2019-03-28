@@ -158,8 +158,10 @@ public:
 
 signals:
   void enableLighting(bool /*_t1*/);
-  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
-  void createDetectorTable(const QString & /*_t1*/, const std::vector<int> & /*_t2*/, bool /*_t3*/);
+  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/,
+              bool /*_t3*/);
+  void createDetectorTable(const QString & /*_t1*/,
+                           const std::vector<int> & /*_t2*/, bool /*_t3*/);
   void needSetIntegrationRange(double /*_t1*/, double /*_t2*/);
   void surfaceTypeChanged(int /*_t1*/);
   void colorMapChanged();
@@ -191,14 +193,14 @@ public slots:
   void setupColorMap();
 
   void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
-  void changeScaleType(int /*type*/);                               // Deprecated
+  void changeScaleType(int /*type*/);                      // Deprecated
   void changeNthPower(double /*nth_power*/);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated
   void changeColorMapRange(double minValue, double maxValue); // Deprecated
   void setIntegrationRange(double /*xmin*/, double /*xmax*/);
   void setBinRange(double /*xmin*/, double /*xmax*/);
-  void disableColorMapAutoscaling(); // Deprecated
+  void disableColorMapAutoscaling();        // Deprecated
   void setColorMapAutoscaling(bool /*on*/); // Deprecated
 
   void setViewDirection(const QString & /*input*/);

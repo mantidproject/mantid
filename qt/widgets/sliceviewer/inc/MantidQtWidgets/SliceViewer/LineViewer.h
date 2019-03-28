@@ -91,7 +91,8 @@ signals:
   /// Signal emitted when the planar width changes
   void changedPlanarWidth(double /*_t1*/);
   /// Signal emitted when the start or end position has changed
-  void changedStartOrEnd(Mantid::Kernel::VMD /*_t1*/, Mantid::Kernel::VMD /*_t2*/);
+  void changedStartOrEnd(Mantid::Kernel::VMD /*_t1*/,
+                         Mantid::Kernel::VMD /*_t2*/);
   /// Signal emitted when changing fixed bin width mode
   void changedFixedBinWidth(bool /*_t1*/, double /*_t2*/);
 

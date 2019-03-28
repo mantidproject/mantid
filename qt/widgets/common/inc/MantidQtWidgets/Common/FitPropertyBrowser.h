@@ -569,7 +569,8 @@ private:
   QtProperty *getTieProperty(QtProperty *parProp) const;
 
   /// Callback for FunctionFactory update notifications
-  void handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr /*notice*/);
+  void handleFactoryUpdate(
+      Mantid::API::FunctionFactoryUpdateNotification_ptr /*notice*/);
   /// Observes algorithm factory update notifications
   Poco::NObserver<FitPropertyBrowser,
                   Mantid::API::FunctionFactoryUpdateNotification>

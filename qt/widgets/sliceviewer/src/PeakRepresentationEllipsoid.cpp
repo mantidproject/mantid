@@ -186,11 +186,13 @@ double PeakRepresentationEllipsoid::getEffectiveRadius() const {
   return m_showBackgroundRadii ? m_backgroundOuterRadii[0] : m_peakRadii[0];
 }
 
-void PeakRepresentationEllipsoid::setOccupancyInView(const double /*fraction*/) {
+void PeakRepresentationEllipsoid::setOccupancyInView(
+    const double /*fraction*/) {
   // DO NOTHING
 }
 
-void PeakRepresentationEllipsoid::setOccupancyIntoView(const double /*fraction*/) {
+void PeakRepresentationEllipsoid::setOccupancyIntoView(
+    const double /*fraction*/) {
   // DO NOTHING
 }
 

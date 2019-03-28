@@ -2436,7 +2436,9 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
 /**
  * Emit a signal when any of the Global options change.
  */
-void FunctionBrowser::globalChanged(QtProperty * /*unused*/, const QString & /*unused*/, bool /*unused*/) {
+void FunctionBrowser::globalChanged(QtProperty * /*unused*/,
+                                    const QString & /*unused*/,
+                                    bool /*unused*/) {
   emit globalsChanged();
 }
 

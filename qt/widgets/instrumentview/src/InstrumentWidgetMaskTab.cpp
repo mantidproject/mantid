@@ -1193,7 +1193,8 @@ void InstrumentWidgetMaskTab::storeMask() {
   }
 }
 
-void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/, double /*unused*/) {
+void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   enableApplyButtons();
 }
 

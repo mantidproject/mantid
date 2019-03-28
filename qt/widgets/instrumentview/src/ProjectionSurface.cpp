@@ -292,7 +292,8 @@ void ProjectionSurface::resize(int /*unused*/, int /*unused*/) { updateView(); }
  * @param image :: Image to draw on.
  * @param picking :: If true draw a picking image.
  */
-void ProjectionSurface::drawSimpleToImage(QImage * /*unused*/, bool /*unused*/) const {}
+void ProjectionSurface::drawSimpleToImage(QImage * /*unused*/,
+                                          bool /*unused*/) const {}
 
 void ProjectionSurface::mousePressEvent(QMouseEvent *e) {
   getController()->mousePressEvent(e);

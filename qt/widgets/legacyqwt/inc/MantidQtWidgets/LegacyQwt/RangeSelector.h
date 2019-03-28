@@ -56,8 +56,8 @@ public slots:
   void setRange(double /*min*/, double /*max*/);
   void setMinimum(double /*val*/); ///< outside setting of value
   void setMaximum(double /*val*/); ///< outside setting of value
-  void reapply();          ///< re-apply the range selector lines
-  void detach();           ///< Detach range selector lines from the plot
+  void reapply();                  ///< re-apply the range selector lines
+  void detach(); ///< Detach range selector lines from the plot
   void setColour(QColor colour);
   void setInfoOnly(bool state);
   void setVisible(bool state);

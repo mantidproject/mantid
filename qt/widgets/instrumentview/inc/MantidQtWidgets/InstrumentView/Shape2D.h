@@ -165,10 +165,13 @@ protected:
   virtual size_t getShapeNControlPoints() const { return 0; }
   // returns position of a shape specific control point, 0 < i <
   // getShapeNControlPoints()
-  virtual QPointF getShapeControlPoint(size_t /*unused*/) const { return QPointF(); }
+  virtual QPointF getShapeControlPoint(size_t /*unused*/) const {
+    return QPointF();
+  }
   // sets position of a shape specific control point, 0 < i <
   // getShapeNControlPoints()
-  virtual void setShapeControlPoint(size_t /*unused*/, const QPointF & /*unused*/) {}
+  virtual void setShapeControlPoint(size_t /*unused*/,
+                                    const QPointF & /*unused*/) {}
   // make sure the bounding box is correct
   virtual void resetBoundingRect() {}
 

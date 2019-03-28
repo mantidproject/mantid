@@ -165,7 +165,8 @@ Q_SIGNALS:
 
   void collapsed(QtBrowserItem *item);
   void expanded(QtBrowserItem *item);
-  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/, bool /*_t3*/);
+  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/,
+                     bool /*_t3*/);
 
 public Q_SLOTS:
 
@@ -217,7 +218,8 @@ public:
   void setChecked(bool on) { m_checked = on; }
   bool isChecked() const { return m_checked; }
 signals:
-  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/, bool /*_t3*/);
+  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/,
+                     bool /*_t3*/);
 
 private:
   QtProperty *m_property;
@@ -287,7 +289,8 @@ public:
   void disableItem(QtBrowserItem *item);
 
   void slotCurrentBrowserItemChanged(QtBrowserItem *item);
-  void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/);
+  void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem,
+                                  QTreeWidgetItem * /*unused*/);
 
   QTreeWidgetItem *editedItem() const;
   void closeEditor();
@@ -340,7 +343,8 @@ public:
   void setModelData(QWidget * /*editor*/, QAbstractItemModel * /*model*/,
                     const QModelIndex & /*index*/) const override {}
 
-  void setEditorData(QWidget * /*editor*/, const QModelIndex & /*index*/) const override {}
+  void setEditorData(QWidget * /*editor*/,
+                     const QModelIndex & /*index*/) const override {}
 
   bool eventFilter(QObject *object, QEvent *event) override;
   void closeEditor(QtProperty *property);
@@ -348,7 +352,8 @@ public:
   QTreeWidgetItem *editedItem() const { return m_editedItem; }
 
 signals:
-  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/, bool /*_t3*/);
+  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/,
+                     bool /*_t3*/);
 
 private slots:
   void slotEditorDestroyed(QObject *object);

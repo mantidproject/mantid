@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h"
 
-QWidget *StringEditorFactory::createEditorForManager(QtStringPropertyManager * /*manager*/,
-                                                     QtProperty *property,
-                                                     QWidget *parent) {
+QWidget *StringEditorFactory::createEditorForManager(
+    QtStringPropertyManager * /*manager*/, QtProperty *property,
+    QWidget *parent) {
   return new StringEditor(property, parent);
 }
 
