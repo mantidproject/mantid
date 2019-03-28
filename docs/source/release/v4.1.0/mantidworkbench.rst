@@ -8,6 +8,7 @@ MantidWorkbench Changes
 Improvements
 ############
 - The log level of help page notices has been reduced to declutter your message window.
+- Single line commenting in the script editor is now enabled without needing to highlight any text.
 
 Bugfixes
 ########
