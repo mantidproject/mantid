@@ -231,6 +231,7 @@ set ( QT5_UI_FILES
   inc/MantidQtWidgets/Common/RenameParDialog.ui
   inc/MantidQtWidgets/Common/SequentialFitDialog.ui
   inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
+  inc/MantidQtWidgets/Common/SlitCalculator.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
 

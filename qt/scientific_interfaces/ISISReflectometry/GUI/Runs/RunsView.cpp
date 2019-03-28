@@ -7,8 +7,6 @@
 #include "RunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"

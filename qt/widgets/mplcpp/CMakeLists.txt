@@ -23,6 +23,9 @@ set ( MOC_HEADERS
 )
 
 set (NOMOC_HEADERS
+  inc/MantidQtWidgets/MplCpp/Python/Object.h
+  inc/MantidQtWidgets/MplCpp/Python/QHashToDict.h
+  inc/MantidQtWidgets/MplCpp/Python/Sip.h
   inc/MantidQtWidgets/MplCpp/Artist.h
   inc/MantidQtWidgets/MplCpp/Axes.h
   inc/MantidQtWidgets/MplCpp/Colors.h
