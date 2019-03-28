@@ -984,7 +984,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
     g_log.error()
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. \n";
-  } catch (Mantid::API::Algorithm::CancelException&) {
+  } catch (Mantid::API::Algorithm::CancelException &) {
     m_calibFinishedOK = false;
     g_log.error() << "Execution terminated by user. \n";
   }
@@ -1592,7 +1592,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                           ") for run " + runNo + " into: "
                    << effectiveFilenames[idx] << '\n';
     try {
-      
+
       doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
                  dgFile);
       m_focusFinishedOK = true;
@@ -1609,7 +1609,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                        "were not valid. "
                        "See log messages for details. Error: "
                     << ia.what() << '\n';
-    }catch (Mantid::API::Algorithm::CancelException) {
+    } catch (Mantid::API::Algorithm::CancelException) {
       m_focusFinishedOK = false;
       g_log.error() << "Focus terminated by user.\n";
     }

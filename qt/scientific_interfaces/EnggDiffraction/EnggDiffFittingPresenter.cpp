@@ -7,12 +7,12 @@
 #include "EnggDiffFittingPresenter.h"
 #include "EnggDiffFittingPresWorker.h"
 #include "IEnggDiffFittingModel.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
-#include "MantidAPI/Algorithm.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -509,7 +509,7 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       g_log.error() << "Fit terminated by user.\n";
       return;
     }
-    
+
     const auto outFilename = userHDFRunFilename(runLabel.runNumber);
     m_model->saveFitResultsToHDF5({runLabel}, outFilename);
 
