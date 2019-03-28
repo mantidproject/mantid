@@ -235,13 +235,18 @@ For other operating systems, Mantid provides clang-tidy functionality through cm
 - **Ubuntu**: Run ``sudo apt-get install clang-tidy`` in the command line.
 - **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
 
-For non-Ubuntu systems, download the latest clang-tidy `pre-compile binaries <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
+For non-Ubuntu systems, download the latest clang-tidy `pre-compiled binary <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
 
 Visual Studio
 ~~~~~~~~~~~~~
 
 Once you have installed the clang-tidy extension, Visual Studio will have additional options under ``Tools -> Options -> Clang Power Tools``.
-Here you can set clang-tidy after to run after building and select which checks to run. The default settings *should* not require alteration for clang-tidy to work.
+Here you can which checks to run via a checkbox or by supplying a custom check string. For example::
+
+    -*,modernize-*
+
+will disable basic default checks (``-*``) and run all conversions to modern C++ (``modernize-*``), such as converting to range-based for loops or using the auto keyword.
+Other settings *should* not require alteration for clang-tidy to work.
 
 To run clang-tidy, right click on a target and highlight ``Clang Power Tools``. You will have a number of options. ``Tidy`` will highlight code which fails one of the checks, whereas
 ``Tidy fix`` will automatically change your code.
