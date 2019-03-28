@@ -1,0 +1,39 @@
+"line_width": 80,
+  "tab_size": 2,
+  "max_subargs_per_line": 3,
+  "separate_ctrl_name_with_space": false,
+  "separate_fn_name_with_space": false,
+  "dangle_parens": false,
+  "bullet_char": "*",
+  "enum_char": ".",
+  "line_ending": "unix",
+  "command_case": "lower",
+  "keyword_case": "unchanged",
+  "additional_commands": {
+    "foo": {
+      "flags": [
+        "BAR",
+        "BAZ"
+      ],
+      "kwargs": {
+        "HEADERS": "*",
+        "SOURCES": "*",
+        "DEPENDS": "*"
+      }
+    }
+  },
+  "always_wrap": [],
+  "algorithm_order": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "enable_markup": true,
+  "first_comment_is_literal": false,
+  "literal_comment_pattern": null,
+  "fence_pattern": "^\\s*([`~]{3}[`~]*)(.*)$",
+  "ruler_pattern": "^\\s*[^\\w\\s]{3}.*[^\\w\\s]{3}$",
+  "emit_byteorder_mark": false,
+  "per_command": {}
+}
