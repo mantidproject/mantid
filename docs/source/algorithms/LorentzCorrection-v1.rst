@@ -10,7 +10,9 @@
 Description
 -----------
 
-Calculates and applies the lorentz correction weights to a workspace. The Lorentz correction *L* is calculated according to:
+Calculates the Lorentz correction for time-of-flight diffraction and
+and multiplies the input workspace by it. The Lorentz correction,
+``L``, is calculated according to:
 
 .. math::
    L = \frac{\sin^{2}\theta}{\lambda^{4}}
