@@ -9,11 +9,8 @@
 #
 
 import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
+from mantid.py3compat import mock
 from mantidqt.widgets.codeeditor.scriptcompatibility import (mantid_api_import_needed,
                                                              mantid_algorithm_used_without_import)
 

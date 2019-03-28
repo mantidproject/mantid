@@ -18,7 +18,7 @@ Mantid 4.0.0 Release Notes
 We are proud to announce version 4.0.0 of Mantid.
 
 
-This release sees the introduction of a brand new graphical user interface, ``MantidWorkbench``, which will eventually
+This major release sees the introduction of a brand new graphical user interface, ``MantidWorkbench``, which will eventually
 replace ``MantidPlot``. The ``MantidWorkbench`` has been built from the ground up to allow more automated testing in an
 effort to vastly improve on the stability of ``MantidPlot``. In addition it offers:
 
@@ -77,7 +77,6 @@ Changes
 
   - :doc:`Indirect Geometry <indirect_inelastic>`
 
-- :doc:`Error Reporter <error_reporter>`
 - :doc:`Kafka Live Streaming <kafka>`
 
 Full Change Listings

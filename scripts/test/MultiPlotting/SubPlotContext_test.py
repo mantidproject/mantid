@@ -6,13 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
 from MultiPlotting.subplot.subplot_context import subplotContext
 from mantid import plots
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class line(object):

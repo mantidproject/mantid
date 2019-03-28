@@ -469,12 +469,10 @@ private:
   static const std::string SNSFac;
   static const std::string ISISFac;
   static const std::string FermiName;
-  static const std::string SCARFName;
 };
 
 const std::string MantidWebServiceAPIJobManagerTest::SNSFac = "SNS";
 const std::string MantidWebServiceAPIJobManagerTest::ISISFac = "ISIS";
 const std::string MantidWebServiceAPIJobManagerTest::FermiName = "Fermi";
-const std::string MantidWebServiceAPIJobManagerTest::SCARFName = "SCARF@STFC";
 
 #endif // MANTID_REMOTEJOGMANAGERS_MANTIDWEBSERVICEJOBMANAGERTEST_H_

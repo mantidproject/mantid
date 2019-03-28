@@ -92,7 +92,9 @@ void PeaksOnSurface::validateExtentsInput() const {
   }
 }
 
-bool PeaksOnSurface::pointOutsideAnyExtents(const V3D &) const { return true; }
+bool PeaksOnSurface::pointOutsideAnyExtents(const V3D & /*testPoint*/) const {
+  return true;
+}
 
 bool lineIntersectsSphere(const V3D &line, const V3D &lineStart,
                           const V3D &peakCenter, const double peakRadius) {

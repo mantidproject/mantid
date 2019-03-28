@@ -10,13 +10,11 @@
 
 # std imports
 import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+
 
 # 3rdparty imports
 from mantid.api import WorkspaceFactory
+from mantid.py3compat import mock
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QDialogButtonBox
 

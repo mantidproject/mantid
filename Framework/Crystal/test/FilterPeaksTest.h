@@ -8,7 +8,6 @@
 #define MANTID_CRYSTAL_FILTERPEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/FilterPeaks.h"

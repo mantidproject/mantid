@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.models.binning_type import BinningType
@@ -13,10 +14,6 @@ from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 from fake_signal import FakeSignal
 
 from assert_called import assert_called
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):

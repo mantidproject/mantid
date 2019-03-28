@@ -8,12 +8,8 @@ from __future__ import absolute_import, print_function
 
 import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class PeriodicTableModelTest(unittest.TestCase):

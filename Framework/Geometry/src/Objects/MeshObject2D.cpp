@@ -356,18 +356,18 @@ int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
   return this->isValid(point) ? 1 : 0;
 }
 
-Kernel::V3D
-MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
-                                    const size_t) const {
+Kernel::V3D MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const size_t /*unused*/) const {
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
   // use the bounding box
   throw std::runtime_error("Not implemented.");
 }
 
-Kernel::V3D
-MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
-                                    const BoundingBox &, const size_t) const {
+Kernel::V3D MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const BoundingBox & /*activeRegion*/, const size_t /*unused*/) const {
 
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
@@ -400,9 +400,10 @@ detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
   return detail::ShapeInfo::GeometryShape::NOSHAPE;
 }
 
-void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
-                                 std::vector<Kernel::V3D> &, double &,
-                                 double &) const {
+void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape & /*type*/,
+                                 std::vector<Kernel::V3D> & /*vectors*/,
+                                 double & /*myradius*/,
+                                 double & /*myheight*/) const {
 
   throw std::runtime_error("Not implemented");
 }
