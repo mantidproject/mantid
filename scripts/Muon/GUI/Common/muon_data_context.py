@@ -9,22 +9,12 @@ from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
-from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
-                                                         get_pair_data_workspace_name, get_base_data_directory,
-                                                         get_raw_data_directory, get_group_data_directory,
-                                                         get_pair_data_directory, get_group_asymmetry_name)
-
-from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, estimate_group_asymmetry_data
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
-
-from collections import OrderedDict
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl, ConfigService
@@ -125,10 +115,11 @@ class MuonDataContext(object):
 
     @instrument.setter
     def instrument(self, value):
-        ConfigService['default.instrument'] = value
-        self._instrument = value
-        self._main_field_direction = ''
-        self.instrumentNotifier.notify_subscribers(self._instrument)
+        if value != self.instrument:
+            ConfigService['default.instrument'] = value
+            self._instrument = value
+            self._main_field_direction = ''
+            self.instrumentNotifier.notify_subscribers(self._instrument)
 
     @property
     def current_runs(self):
@@ -162,7 +153,7 @@ class MuonDataContext(object):
         if self.current_data['MainFieldDirection'] and self.current_data['MainFieldDirection'] != self._main_field_direction\
                 and self._main_field_direction:
             self.message_notifier.notify_subscribers('MainFieldDirection has changed between'
-                                                        ' data sets, click default to reset grouping if required')
+                                                     ' data sets, click default to reset grouping if required')
         self._main_field_direction = self.current_data['MainFieldDirection']
 
     @property
@@ -258,7 +249,7 @@ class MuonDataContext(object):
             return True
 
         first_field = self._loaded_data.get_main_field_direction(run=run_list[0], instrument=self.instrument)
-        return all(first_field==self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
+        return all(first_field == self._loaded_data.get_main_field_direction(run=run, instrument=self.instrument)
                    for run in run_list)
 
     def create_multiple_field_directions_error_message(self, run_list):

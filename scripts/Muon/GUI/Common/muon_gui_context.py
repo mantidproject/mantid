@@ -15,6 +15,7 @@ class GuiVariablesNotifier(Observable):
     def notify_subscribers(self, *args, **kwargs):
         Observable.notify_subscribers(self, *args, **kwargs)
 
+
 class MuonGuiContext(dict):
     def __init__(self, *args, **kwargs):
         super(MuonGuiContext, self).__init__(*args, **kwargs)

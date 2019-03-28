@@ -7,13 +7,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_context import MuonContext
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
-millions_counts_conversion = 1./1e6
+millions_counts_conversion = 1. / 1e6
 
 
 class HomeRunInfoWidgetModel(object):
-
     def __init__(self, context=MuonContext()):
         self._data = context.data_context
 
@@ -46,7 +44,7 @@ class HomeRunInfoWidgetModel(object):
         good_frames = self.get_log_value("goodfrm")
 
         if good_frames != 'Log not found':
-            return round(counts/float(good_frames), 3)
+            return round(counts / float(good_frames), 3)
         else:
             return 'Good frames not defined'
 
@@ -54,7 +52,7 @@ class HomeRunInfoWidgetModel(object):
         good_frames = self.get_log_value("goodfrm")
 
         if good_frames != 'Log not found':
-            return round(counts/float(good_frames)/float(self._data.num_detectors), 3)
+            return round(counts / float(good_frames) / float(self._data.num_detectors), 3)
         else:
             return 'Good frames not defined'
 

@@ -40,8 +40,7 @@ class MuonGroup(object):
         if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._workspace = new_workspace
         else:
-            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
-                                 " but should be MuonWorkspaceWrapper")
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) + " but should be MuonWorkspaceWrapper")
 
     @property
     def name(self):

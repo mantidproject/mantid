@@ -66,20 +66,7 @@ def _get_pre_processing_params(context, run, rebin):
         pass
 
     if rebin:
-        try:
-            if context.gui_context['RebinType'] == 'Variable' and context.gui_context["RebinVariable"]:
-                pre_process_params["RebinArgs"] = context.gui_context["RebinVariable"]
-        except KeyError:
-            pass
-
-        try:
-            if context.gui_context['RebinType'] == 'Fixed' and context.gui_context["RebinFixed"]:
-                x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.data_context.instrument
-                                                       )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
-                original_step = x_data[1] - x_data[0]
-                pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step
-        except KeyError:
-            pass
+        _setup_rebin_options(context, pre_process_params, run)
 
     try:
         if context.gui_context['DeadTimeSource'] == 'FromFile':
@@ -95,6 +82,23 @@ def _get_pre_processing_params(context, run, rebin):
         pass
 
     return pre_process_params
+
+
+def _setup_rebin_options(context, pre_process_params, run):
+    try:
+        if context.gui_context['RebinType'] == 'Variable' and context.gui_context["RebinVariable"]:
+            pre_process_params["RebinArgs"] = context.gui_context["RebinVariable"]
+    except KeyError:
+        pass
+
+    try:
+        if context.gui_context['RebinType'] == 'Fixed' and context.gui_context["RebinFixed"]:
+            x_data = context.data_context._loaded_data.get_data(run=run, instrument=context.dainstrument
+                                                                )['workspace']['OutputWorkspace'][0].workspace.dataX(0)
+            original_step = x_data[1] - x_data[0]
+            pre_process_params["RebinArgs"] = float(context.gui_context["RebinFixed"]) * original_step
+    except KeyError:
+        pass
 
 
 def _get_MuonGroupingCounts_parameters(context, group_name, run):

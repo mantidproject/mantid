@@ -8,6 +8,7 @@ from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
 from Muon.GUI.Common.observer_pattern import Observable
 
+
 def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
     if instrument == "MUSR" or instrument == 'CHRONUS':
