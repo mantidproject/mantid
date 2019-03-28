@@ -220,14 +220,13 @@ void Expression::tokenize() {
 
   size_t min_prec = 1000;
   size_t is = 0;
-  size_t is1 = 0;
   unsigned int lvl = 0;
-  size_t last = m_expr.size() - 1;
+  const size_t last = m_expr.size() - 1;
   bool inString = false;
   int skip = 0;
   bool canBeBinary = false;
-  bool isNumber =
-      false; // if parser is inside a number (important case is 123.45e+67)
+  // if parser is inside a number (important case is 123.45e+67)
+  bool isNumber = false;
   bool canDotBeAdded = false;
   bool canEBeAdded = false;
   bool canPlusBeAdded = false;
@@ -279,12 +278,7 @@ void Expression::tokenize() {
                                m_expr, i);
           }
         }
-
-        if (is_op_symbol(m_expr[i + 1])) {
-          is1 = i + 2;
-        } else {
-          is1 = i + 1;
-        }
+        auto is1 = i + (is_op_symbol(m_expr[i + 1]) ? 2 : 1);
 
         if (is1 > last) {
           throw ParsingError("Syntax error", m_expr, last);

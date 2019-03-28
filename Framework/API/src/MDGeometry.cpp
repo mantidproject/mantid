@@ -194,11 +194,10 @@ Mantid::Geometry::VecIMDDimension_const_sptr
 MDGeometry::getNonIntegratedDimensions() const {
   using namespace Mantid::Geometry;
   VecIMDDimension_const_sptr vecCollapsedDimensions;
-  for (const auto &current : this->m_dimensions) {
-    if (!current->getIsIntegrated()) {
-      vecCollapsedDimensions.push_back(current);
-    }
-  }
+  std::copy_if(
+      m_dimensions.cbegin(), m_dimensions.cend(),
+      std::back_inserter(vecCollapsedDimensions),
+      [](const auto &dimension) { return !dimension->getIsIntegrated(); });
   return vecCollapsedDimensions;
 }
 
