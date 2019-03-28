@@ -25,12 +25,13 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("CalculatePaalmanPings");
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
-    : CorrectionsTab(parent) {
+    : m_sampleDensities(std::make_shared<Densities>()),
+      m_canDensities(std::make_shared<Densities>()), CorrectionsTab(parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
@@ -57,6 +58,15 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(changeSampleDensityUnit(int)));
   connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeCanDensityUnit(int)));
+
+  connect(m_uiForm.cbSampleMaterialMethod, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changeSampleMaterialOptions(int)));
+  connect(m_uiForm.cbCanMaterialMethod, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeCanMaterialOptions(int)));
+  connect(m_uiForm.spSampleDensity, SIGNAL(valueChanged(QString const &value)),
+          this, SLOT(setSampleDensity(QString const &value)));
+  connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(QString const &value)),
+          this, SLOT(setCanDensity(QString const &value)));
 
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
@@ -574,24 +584,42 @@ void CalculatePaalmanPings::runClicked() { runTab(); }
  * Handle changing of the sample density unit
  */
 void CalculatePaalmanPings::changeSampleDensityUnit(int index) {
-
-  if (index == 0) {
-    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
-  } else {
-    m_uiForm.spSampleDensity->setSuffix(" /A3");
-  }
+  m_uiForm.spSampleDensity->setSuffix(index == 0 ? " g/cm3" : " /A3");
+  m_uiForm.spSampleDensity->setValue(
+      index == 0 ? m_sampleDensities->getMassDensity()
+                 : m_sampleDensities->getNumberDensity());
 }
 
 /**
  * Handle changing of the can density unit
  */
 void CalculatePaalmanPings::changeCanDensityUnit(int index) {
+  m_uiForm.spCanDensity->setSuffix(index == 0 ? " g/cm3" : " /A3");
+  m_uiForm.spCanDensity->setValue(index == 0
+                                      ? m_sampleDensities->getMassDensity()
+                                      : m_sampleDensities->getNumberDensity());
+}
 
-  if (index == 0) {
-    m_uiForm.spCanDensity->setSuffix(" g/cm3");
-  } else {
-    m_uiForm.spCanDensity->setSuffix(" /A3");
-  }
+void CalculatePaalmanPings::changeSampleMaterialOptions(int index) {
+  m_uiForm.swSampleMaterialDetails->setCurrentIndex(index);
+}
+
+void CalculatePaalmanPings::changeCanMaterialOptions(int index) {
+  m_uiForm.swCanMaterialDetails->setCurrentIndex(index);
+}
+
+void CalculatePaalmanPings::setSampleDensity(QString const &value) {
+  if (m_uiForm.swSampleMaterialDetails->currentIndex() == 0)
+    m_sampleDensities->setMassDensity(value.toDouble());
+  else
+    m_sampleDensities->setNumberDensity(value.toDouble());
+}
+
+void CalculatePaalmanPings::setCanDensity(QString const &value) {
+  if (m_uiForm.swCanMaterialDetails->currentIndex() == 0)
+    m_canDensities->setMassDensity(value.toDouble());
+  else
+    m_canDensities->setNumberDensity(value.toDouble());
 }
 
 void CalculatePaalmanPings::setRunEnabled(bool enabled) {

@@ -14,6 +14,20 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+struct Densities {
+  Densities() : m_massDensity(1.0), m_numberDensity(0.1){};
+
+  void setMassDensity(double value) { m_massDensity = value; }
+  void setNumberDensity(double value) { m_numberDensity = value; }
+  double getMassDensity() const { return m_massDensity; }
+  double getNumberDensity() const { return m_numberDensity; }
+
+private:
+  double m_massDensity;
+  double m_numberDensity;
+};
+
 class DLLExport CalculatePaalmanPings : public CorrectionsTab {
   Q_OBJECT
 
@@ -29,8 +43,12 @@ private slots:
   void saveClicked();
   void plotClicked();
   void runClicked();
-  void changeSampleDensityUnit(int /*index*/);
-  void changeCanDensityUnit(int /*index*/);
+  void changeSampleDensityUnit(int);
+  void changeCanDensityUnit(int);
+  void changeSampleMaterialOptions(int index);
+  void changeCanMaterialOptions(int index);
+  void setSampleDensity(QString const &value);
+  void setCanDensity(QString const &value);
 
 private:
   void setup() override;
@@ -55,6 +73,9 @@ private:
   boost::optional<double>
   getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
                          const std::string &parameterName);
+
+  std::shared_ptr<Densities> m_sampleDensities;
+  std::shared_ptr<Densities> m_canDensities;
 
   Ui::CalculatePaalmanPings m_uiForm;
 };
