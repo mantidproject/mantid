@@ -553,7 +553,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         cleanup = self.getProperty(Prop.CLEANUP).value
         autoCleanup = common.WSCleanup(cleanup, subalgLogging == SubalgLogging.ON)
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        names = common.WSNameSource(wsPrefix, cleanup)
+        #names = common.WSNameSource(wsPrefix, cleanup)
 
         rb = self.getProperty(PropAutoProcess.RB).value
         workflowProgress = Progress(self, start=0.0, end=1.0, nreports=len(rb))
@@ -719,10 +719,10 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             autoCleanup.cleanupLater(outWS)
             workflowProgress.report()
 
-        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        if len(rb) > 1:
+        autoCleanup.protect(wsPrefix)
+        if len(rb) > 100:
             ','.join(toStitch)
-            # Stitch could list sample log infos of reduction.two_theta , reduction.line_position, ...
+            # Stitch could list sample log infos of reduction.two_theta , reduction.line_position, ... beam_statistics
             Stitch1DMany(
                 InputWorkspaces=toStitch,
                 OutputWorkspace='{}'.format(wsPrefix),
@@ -731,7 +731,6 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 UseManualScaleFactors=self.getProperty(PropAutoProcess.USE_MANUAL_SCALE_FACTORS).value,
                 ManualScaleFactors=self.getProperty(PropAutoProcess.MANUAL_SCALE_FACTORS).value,
             )
-            autoCleanup.cleanupLater(toStitch)
         else:
             RenameWorkspace(
                 InputWorkspace='{}'.format(toStitch[0]),
