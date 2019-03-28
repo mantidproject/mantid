@@ -353,8 +353,9 @@ public:
     double radius, height, innerRadius;
     Mantid::Geometry::detail::ShapeInfo::GeometryShape shape;
 
-    TS_ASSERT_THROWS(mesh.GetObjectGeom(shape, vectors, innerRadius, radius, height),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(
+        mesh.GetObjectGeom(shape, vectors, innerRadius, radius, height),
+        std::runtime_error &);
   }
 
   void test_get_material() {
