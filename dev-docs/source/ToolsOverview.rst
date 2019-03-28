@@ -241,7 +241,7 @@ Visual Studio
 ~~~~~~~~~~~~~
 
 Once you have installed the clang-tidy extension, Visual Studio will have additional options under ``Tools -> Options -> Clang Power Tools``.
-Here you can which checks to run via a checkbox or by supplying a custom check string. For example::
+Here you can select which checks to run via a checkbox or by supplying a custom check string. For example::
 
     -*,modernize-*
 
