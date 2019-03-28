@@ -43,12 +43,14 @@ private slots:
   void saveClicked();
   void plotClicked();
   void runClicked();
-  void changeSampleDensityUnit(int);
-  void changeCanDensityUnit(int);
+  void setSampleDensityUnit(int);
+  void setCanDensityUnit(int);
+  void setSampleDensityValue(int index);
+  void setCanDensityValue(int index);
   void changeSampleMaterialOptions(int index);
   void changeCanMaterialOptions(int index);
-  void setSampleDensity(QString const &value);
-  void setCanDensity(QString const &value);
+  void setSampleDensity(double value);
+  void setCanDensity(double value);
 
 private:
   void setup() override;
