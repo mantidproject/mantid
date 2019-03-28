@@ -1353,7 +1353,7 @@ std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(m_attrs.size());
   for (const auto &attr : m_attrs) {
-    names.push_back(attr.first);
+    names.emplace_back(attr.first);
   }
   return names;
 }

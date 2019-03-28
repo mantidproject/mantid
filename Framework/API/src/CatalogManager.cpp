@@ -63,13 +63,15 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
     return composite;
   }
 
-  for (auto &activeCatalog : m_activeCatalogs) {
-    if (sessionID == activeCatalog.first->getSessionId())
-      return activeCatalog.second;
+  const auto found =
+      std::find_if(m_activeCatalogs.cbegin(), m_activeCatalogs.cend(),
+                   [&sessionID](const auto &catalog) {
+                     return catalog.first->getSessionId() == sessionID;
+                   });
+  if (found == m_activeCatalogs.cend()) {
+    throw std::runtime_error("The session ID you have provided is invalid.");
   }
-
-  // If we reached this point then the session is corrupt/invalid.
-  throw std::runtime_error("The session ID you have provided is invalid.");
+  return found->second;
 }
 
 /**
@@ -103,10 +105,9 @@ void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
 std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
   sessions.reserve(m_activeCatalogs.size());
-  for (auto &activeCatalog : m_activeCatalogs) {
-    sessions.push_back(activeCatalog.first);
+  for (const auto &activeCatalog : m_activeCatalogs) {
+    sessions.emplace_back(activeCatalog.first);
   }
-
   return sessions;
 }
 
