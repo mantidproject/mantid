@@ -122,7 +122,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws = self._moveDetector(ws, linePosition)
 
-        ws = self._calibrateDetectorAngleByDirectBeam(ws)
+        ws = self._calibrateDetectorAngleByDirectBeam(ws, linePosition)
 
         ws = self._waterCalibration(ws)
 
@@ -434,7 +434,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _moveDetector(self, ws, linePosition):
         """Perform detector position correction for direct and reflected beams."""
         detectorMovedWSName = self._names.withSuffix('detectors_moved')
-        twoTheta = ws.run().getProperty(common.SampleLogs.TWO_THETA).value
+        run = ws.run()
+        twoTheta = run.getProperty(common.SampleLogs.TWO_THETA).value
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
@@ -447,22 +448,23 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'EnableLogging': self._subalgLogging
         }
         if not self.getProperty(Prop.TWO_THETA).isDefault:
-            # We should use user angle
-            args['TwoTheta'] = self.getProperty(Prop.TWO_THETA).value
+            # We should use the user angle
+            twoTheta = self.getProperty(Prop.TWO_THETA).value
+            args['TwoTheta'] = twoTheta
             # We need to subtract an offsetAngle from user given TwoTheta
             args['LinePosition'] = linePosition
         else:
-            logs = ws.run()
-            args['TwoTheta'] = twoTheta + common.deflectionAngle(logs)
+            twoTheta = twoTheta + common.deflectionAngle(run)
+            args['TwoTheta'] = twoTheta
         detectorMovedWS = SpecularReflectionPositionCorrect(**args)
         # Write twoTheta to the sample logs
         run.addProperty(common.SampleLogs.REDUCTION_TWO_THETA, float(twoTheta), 'Degree', True)
         self._cleanup.cleanup(ws)
         return detectorMovedWS
 
-    def _calibrateDetectorAngleByDirectBeam(self, ws):
+    def _calibrateDetectorAngleByDirectBeam(self, ws, linePosition):
         """Perform detector position correction for reflected beams."""
-        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault:
+        if self.getProperty(Prop.DIRECT_LINE_WORKSPACE).isDefault or not self.getProperty(Prop.TWO_THETA).isDefault:
             return ws
         calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
         directLineWS = self.getProperty(Prop.DIRECT_LINE_WORKSPACE).value
@@ -473,6 +475,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             DetectorComponentName='detector',
             DirectLineWorkspace=directLineWS,
             DirectLinePosition=directLine,
+            LinePosition=linePosition,
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorCorrectionType='RotateAroundSample',
             DetectorFacesSample=True,

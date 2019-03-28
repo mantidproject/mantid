@@ -72,6 +72,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
+
         processReflected = not self._directOnly()
         if processReflected:
             self._addBeamStatisticsToLogs(ws)
