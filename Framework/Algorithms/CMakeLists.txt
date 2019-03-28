@@ -1050,7 +1050,7 @@ set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
-target_include_directories ( Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} )
+target_include_directories (Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(Algorithms
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}

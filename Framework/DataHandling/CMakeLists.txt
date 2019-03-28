@@ -606,7 +606,7 @@ endif()
 set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
 target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} )
+target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(DataHandling
                       LINK_PRIVATE

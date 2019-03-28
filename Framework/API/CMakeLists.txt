@@ -535,7 +535,7 @@ endif()
 set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
 
-target_include_directories ( API SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} )
+target_include_directories (API SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(API
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}

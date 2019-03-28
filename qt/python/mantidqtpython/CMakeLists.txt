@@ -89,7 +89,7 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      ${CMAKE_CURRENT_LIST_DIR}
                      ${COMMON_SIP_DIR}
                      ${PYTHON_INCLUDE_PATH}
-		     ${SIP_INCLUDE_DIR}
+                     ${SIP_INCLUDE_DIR}
                      ../../../Framework/PythonInterface/core/inc
                    PYQT_VERSION 4
                    LINK_LIBS
