@@ -93,7 +93,7 @@ public slots:
 private slots:
   void fit();
   void editLocalParameterValues(const QString &parName);
-  void finishFit(bool);
+  void finishFit(bool /*error*/);
   void enableZoom();
   void enablePan();
   void enableRange();
@@ -103,7 +103,7 @@ private slots:
   void setLogNames();
   void setParameterNamesForPlotting();
   void invalidateOutput();
-  void updateGuessFunction(const QString &, const QString &);
+  void updateGuessFunction(const QString & /*unused*/, const QString & /*unused*/);
 
 protected:
   void initLayout() override;

@@ -24,7 +24,7 @@ private slots:
   void newInputFiles();
   void newPreviewFileSelected(int index);
   void plotInput();
-  void twoRanges(QtProperty *prop, bool);
+  void twoRanges(QtProperty *prop, bool /*val*/);
   void minChanged(double val);
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);

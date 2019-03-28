@@ -631,7 +631,7 @@ void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
                                    const QModelIndex & /*bottomRight*/) {
 #else
 void BinaryTreeWidget::dataChanged(const QModelIndex &topLeft,
-                                   const QModelIndex &, const QVector<int> &) {
+                                   const QModelIndex & /*bottomRight*/, const QVector<int> & /*roles*/) {
 #endif
   emit treeDataChange(
       dynamic_cast<BinaryTreeWidgetItem *>(itemFromIndex(topLeft)),

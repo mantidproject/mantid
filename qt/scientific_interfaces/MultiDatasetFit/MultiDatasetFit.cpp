@@ -830,7 +830,7 @@ void MultiDatasetFit::showParameterPlot() {
   runPythonCode(pyInput);
 }
 
-void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
+void MultiDatasetFit::updateGuessFunction(const QString & /*unused*/, const QString & /*unused*/) {
   auto fun = m_functionBrowser->getFunction();
   auto composite =
       boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);

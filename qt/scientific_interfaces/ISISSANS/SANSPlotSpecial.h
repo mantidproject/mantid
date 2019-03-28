@@ -82,14 +82,14 @@ public:
   ~SANSPlotSpecial() override;
 
 public slots:
-  void rangeChanged(double, double);
+  void rangeChanged(double /*low*/, double /*high*/);
   void plot();
-  void updateAxisLabels(const QString &);
+  void updateAxisLabels(const QString & /*value*/);
   void clearTable();
   void calculateDerivatives();
   void tableUpdated(int row, int column);
   void clearInterceptDerived();
-  void scalePlot(double, double);
+  void scalePlot(double /*start*/, double /*end*/);
   void resetSelectors();
 
 private:
@@ -110,7 +110,7 @@ private:
   void deriveKratky();
   void derivePorod();
 
-  double getValue(QTableWidgetItem *);
+  double getValue(QTableWidgetItem * /*item*/);
   QPair<QStringList, QMap<QString, double>>
   getProperties(const QString &transform);
 

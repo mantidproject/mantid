@@ -29,8 +29,8 @@ private slots:
   void saveClicked();
   void plotClicked();
   void runClicked();
-  void changeSampleDensityUnit(int);
-  void changeCanDensityUnit(int);
+  void changeSampleDensityUnit(int /*index*/);
+  void changeCanDensityUnit(int /*index*/);
 
 private:
   void setup() override;
