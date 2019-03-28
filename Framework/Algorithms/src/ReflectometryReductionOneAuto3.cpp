@@ -157,8 +157,7 @@ ReflectometryReductionOneAuto3::validateInputs() {
     // If it is not a group, we don't need to validate its size
     if (!secondTransGroup)
       return results;
-    const bool polarizationCorrections =
-        getProperty("PolarizationAnalysis");
+    const bool polarizationCorrections = getProperty("PolarizationAnalysis");
 
     if (group->size() != secondTransGroup->size() && !polarizationCorrections) {
       results["SecondTransmissionRun"] =
@@ -320,8 +319,9 @@ void ReflectometryReductionOneAuto3::init() {
   initMomentumTransferProperties();
 
   // Polarization correction
-  declareProperty(make_unique<PropertyWithValue<bool>>(
-      "PolarizationAnalysis", false, Direction::Input), "Apply polarization corrections");
+  declareProperty(make_unique<PropertyWithValue<bool>>("PolarizationAnalysis",
+                                                       false, Direction::Input),
+                  "Apply polarization corrections");
 
   // Flood correction
   std::vector<std::string> propOptions = {"Workspace", "ParameterFile"};
@@ -799,11 +799,12 @@ void ReflectometryReductionOneAuto3::setOutputWorkspaces(
  * runs and polarization analysis. If transmission run is a matrix workspace,
  * it will be applied to each of the members in the input workspace group. If
  * transmission run is a workspace group, the behaviour is different depending
- * on polarization analysis. If polarization analysis is false each item in the transmission
- * group is associated with the corresponding item in the input workspace
- * group. If polarization analysis is true items in the transmission group will be summed to produce a
- * matrix workspace that will be applied to each of the items in the input
- * workspace group. See documentation of this algorithm for more details.
+ * on polarization analysis. If polarization analysis is false each item in the
+ * transmission group is associated with the corresponding item in the input
+ * workspace group. If polarization analysis is true items in the transmission
+ * group will be summed to produce a matrix workspace that will be applied to
+ * each of the items in the input workspace group. See documentation of this
+ * algorithm for more details.
  */
 bool ReflectometryReductionOneAuto3::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
