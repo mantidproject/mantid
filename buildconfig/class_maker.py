@@ -19,6 +19,11 @@ from cmakelists_utils import *
 VERSION = "1.0"
 
 #======================================================================
+def getYear():
+    """returns the current year"""
+    return datetime.datetime.now().date().year
+
+#======================================================================
 def write_header(subproject, classname, filename, args):
     """Write a class header file"""
     print("Writing header file to", filename)
@@ -50,7 +55,7 @@ private:
     # The full text
     s = r"""// Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; {today} ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; {year} ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -73,7 +78,7 @@ public:{algorithm_header}}};
 
 #endif /* {guard} */""".format(guard=guard, subproject=subproject,
        alg_include=alg_include, classname=classname,
-       today=datetime.datetime.now().date().year, subproject_upper=subproject_upper,
+       year=getYear(), subproject_upper=subproject_upper,
        alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
 
     f.write(s)
@@ -140,7 +145,7 @@ void {algname}::exec() {{
     # ------- Now the normal class text ------------------------------
     s = """// Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; {today} ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; {year} ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -153,7 +158,7 @@ namespace {subproject} {{
 }} // namespace {subproject}
 }} // namespace Mantid
 """.format(
-        today=datetime.datetime.now().date().year, subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
+        year=getYear(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
         algorithm_source=algorithm_source)
     f.write(s)
     f.close()
@@ -204,7 +209,7 @@ def write_test(subproject, classname, filename, args):
 
     s = """// Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; {today} ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; {year} ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -234,7 +239,7 @@ public:
 }};
 
 
-#endif /* {guard} */""".format(today=datetime.datetime.now().date().year,
+#endif /* {guard} */""".format(year=getYear(),
           guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
           algorithm_test=algorithm_test)
     f.write(s)
