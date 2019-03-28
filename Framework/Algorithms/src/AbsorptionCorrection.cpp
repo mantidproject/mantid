@@ -331,8 +331,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
     // Create track for distance in cylinder between scattering point and
     // detector
-    V3D direction = detectorPos - m_elementPositions[i];
-    direction.normalize();
+    const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
     int temp = m_sampleObject->interceptSurface(outgoing);
 

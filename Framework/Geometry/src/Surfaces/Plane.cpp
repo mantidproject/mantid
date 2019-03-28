@@ -139,9 +139,9 @@ int Plane::setPlane(const Kernel::V3D &P, const Kernel::V3D &N)
   @retval 0 :: success
 */
 {
-  NormV = N;
-  NormV.normalize();
-  if (NormV.norm2() == 0.0) {
+  try {
+    NormV = normalize(N);
+  } catch (std::runtime_error &) {
     throw std::invalid_argument("Attempt to create Plane with zero normal");
   }
   Dist = P.scalar_prod(NormV);

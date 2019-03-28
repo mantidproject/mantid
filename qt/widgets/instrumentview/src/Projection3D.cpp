@@ -294,10 +294,9 @@ void Projection3D::componentSelected(size_t componentIndex) {
   }
 
   auto pos = componentInfo.position(componentIndex);
-  auto compDir = pos - componentInfo.samplePosition();
   Quat rot;
   try {
-    compDir.normalize();
+    const auto compDir = normalize(pos - componentInfo.samplePosition());
     V3D up(0, 0, 1);
     V3D x = up.cross_prod(compDir);
     up = compDir.cross_prod(x);

@@ -309,10 +309,10 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre,
   // facing away from the observer gives a negative solid angle and is excluded
   // For simplicity the triangulation points are constructed such that the cone
   // axis points up the +Z axis and then rotated into their final position
-  const V3D axis_direction = normalize(axis);
+
   // Required rotation
   constexpr V3D initial_axis(0., 0., 1.0);
-  const Quat transform(initial_axis, axis_direction);
+  const Quat transform(initial_axis, axis);
 
   // Do the base cap which is a point at the centre and nslices points around it
   constexpr double angle_step =
@@ -770,12 +770,10 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
         return true;
     }
   }
-  Kernel::V3D NormPair;
   for (auto xs = Snorms.begin(); xs != Snorms.end(); ++xs)
     for (auto ys = std::next(xs); ys != Snorms.end(); ++ys) {
-      NormPair = (*ys) + (*xs);
       try {
-        NormPair.normalize();
+        const V3D NormPair = normalize((*ys) + (*xs));
         if (!checkSurfaceValid(point, NormPair))
           return true;
       } catch (std::runtime_error &) {

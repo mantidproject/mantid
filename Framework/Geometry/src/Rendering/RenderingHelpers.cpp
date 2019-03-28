@@ -80,17 +80,15 @@ void render(detail::GeometryTriangulator &triangulator) {
   const auto &faces = triangulator.getTriangleFaces();
   const auto &points = triangulator.getTriangleVertices();
   glBegin(GL_TRIANGLES);
-  V3D normal;
   for (size_t i = 0; i < triangulator.numTriangleFaces(); i++) {
     auto index2 = static_cast<size_t>(faces[i * 3 + 1] * 3);
     auto index3 = static_cast<size_t>(faces[i * 3 + 2] * 3);
     auto index1 = static_cast<size_t>(faces[i * 3] * 3);
     // Calculate normal and normalize
-    V3D v1(points[index1], points[index1 + 1], points[index1 + 2]);
-    V3D v2(points[index2], points[index2 + 1], points[index2 + 2]);
-    V3D v3(points[index3], points[index3 + 1], points[index3 + 2]);
-    normal = (v1 - v2).cross_prod(v2 - v3);
-    normal.normalize();
+    const V3D v1(points[index1], points[index1 + 1], points[index1 + 2]);
+    const V3D v2(points[index2], points[index2 + 1], points[index2 + 2]);
+    const V3D v3(points[index3], points[index3 + 1], points[index3 + 2]);
+    const auto normal = normalize((v1 - v2).cross_prod(v2 - v3));
     glNormal3d(normal[0], normal[1], normal[2]);
     glVertex3dv(&points[index1]);
     glVertex3dv(&points[index2]);
@@ -177,13 +175,11 @@ void renderCuboid(const detail::ShapeInfo &shapeInfo) {
       {0, 4, 5, 1}, // front
       {4, 7, 6, 5}, // bottom
   };
-  V3D normal;
   // first face
   glBegin(GL_QUADS);
   for (auto &row : faceindex) {
-    normal = (vertex[row[0]] - vertex[row[1]])
-                 .cross_prod((vertex[row[0]] - vertex[row[2]]));
-    normal.normalize();
+    const auto normal = normalize((vertex[row[0]] - vertex[row[1]])
+                 .cross_prod((vertex[row[0]] - vertex[row[2]])));
     glNormal3d(normal[0], normal[1], normal[2]);
     for (const int ij : row) {
       if (ij == 0)

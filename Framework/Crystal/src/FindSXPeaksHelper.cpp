@@ -102,11 +102,9 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   const auto sourcePos = spectrumInfo.sourcePosition();
   const auto detPos = spectrumInfo.position(m_wsIndex);
   // Normalized beam direction
-  auto beamDir = samplePos - sourcePos;
-  beamDir.normalize();
+  const auto beamDir = normalize(samplePos - sourcePos);
   // Normalized detector direction
-  auto detDir = (detPos - samplePos);
-  detDir.normalize();
+  const auto detDir = normalize(detPos - samplePos);
   m_unitWaveVector = beamDir - detDir;
   m_qConvention = Kernel::ConfigService::Instance().getString("Q.convention");
 }

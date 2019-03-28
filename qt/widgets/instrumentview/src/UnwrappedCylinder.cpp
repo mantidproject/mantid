@@ -53,8 +53,7 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
   if (!eye.nullVector()) {
     // eye must point towards the detector and be perpendicular to the
     // cylinder's axis
-    Mantid::Kernel::V3D up = m_zaxis;
-    up.normalize();
+    const auto up = normalize(m_zaxis);
     eye = eye - up * eye.scalar_prod(up);
     if (!eye.nullVector()) {
       eye.normalize();

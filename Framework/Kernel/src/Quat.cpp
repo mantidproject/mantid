@@ -119,8 +119,7 @@ void Quat::setAngleAxis(const double _deg, const V3D &_axis) {
   double deg2rad = M_PI / 180.0;
   w = cos(0.5 * _deg * deg2rad);
   double s = sin(0.5 * _deg * deg2rad);
-  V3D temp(_axis);
-  temp.normalize();
+  const V3D temp = Kernel::normalize(_axis);
   a = s * temp[0];
   b = s * temp[1];
   c = s * temp[2];

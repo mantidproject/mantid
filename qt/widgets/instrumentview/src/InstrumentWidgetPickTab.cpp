@@ -1474,8 +1474,8 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
     PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
   }
 
-  auto normal = componentInfo.position(ass[1]) - componentInfo.position(ass[0]);
-  normal.normalize();
+  const auto normal = normalize(componentInfo.position(ass[1]) -
+                                componentInfo.position(ass[0]));
   const auto &detectorInfo = actor.detectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
@@ -1663,8 +1663,7 @@ double
 DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                            const Mantid::Kernel::V3D &origin,
                                            const Mantid::Kernel::V3D &normal) {
-  Mantid::Kernel::V3D vec = pos - origin;
-  vec.normalize();
+  const auto vec = normalize(pos - origin);
   return asin(vec.scalar_prod(normal));
 }
 

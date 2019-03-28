@@ -119,8 +119,7 @@ calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
   // find the normal
   auto xaxis = panelCorners[1] - panelCorners[0];
   auto yaxis = panelCorners[3] - panelCorners[0];
-  auto normal = xaxis.cross_prod(yaxis);
-  normal.normalize();
+  const auto normal = normalize(xaxis.cross_prod(yaxis));
   return normal;
 }
 
@@ -129,9 +128,8 @@ bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
                 const Mantid::Kernel::V3D &normal) {
   for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
-    auto vector = componentInfo.position(children[0]) -
-                  componentInfo.position(children[1]);
-    vector.normalize();
+    const auto vector = normalize(componentInfo.position(children[0]) -
+                  componentInfo.position(children[1]));
     if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
       g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
                       << " isn't flat.\n";
@@ -507,17 +505,14 @@ PanelsSurface::processUnstructured(size_t rootIndex,
     else if (child == children[1]) {
       // at first set the normal to an argbitrary vector orthogonal to
       // the line between the first two detectors
-      y = pos - pos0;
-      y.normalize();
+      y = normalize(pos - pos0);
       setupBasisAxes(y, normal, x);
     } else if (fabs(normal.scalar_prod(pos - pos0)) >
                Mantid::Kernel::Tolerance) {
       if (!normalFound) {
         // when first non-colinear detector is found set the normal
-        x = pos - pos0;
-        x.normalize();
-        normal = x.cross_prod(y);
-        normal.normalize();
+        x = normalize(pos - pos0);
+        normal = normalize(x.cross_prod(y));
         x = y.cross_prod(normal);
         normalFound = true;
       } else {

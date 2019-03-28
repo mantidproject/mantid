@@ -741,8 +741,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(
         nominalPos[m_upIdx] + (m_randgen->flat() - 0.5) * m_detHeight;
 
     // Distance to exit the sample for this order
-    V3D scToDet = detPos - scatterPt;
-    scToDet.normalize();
+    const V3D scToDet = normalize(detPos - scatterPt);
     Geometry::Track scatterToDet(scatterPt, scToDet);
     if (m_sampleShape->interceptSurface(scatterToDet) > 0) {
       scang = direcBeforeSc.angle(scToDet);

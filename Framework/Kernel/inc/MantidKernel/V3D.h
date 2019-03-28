@@ -359,7 +359,16 @@ private:
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const V3D &);
 MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, V3D &);
 
-MANTID_KERNEL_DLL V3D normalize(const V3D &v);
+
+/** Normalizes a V3D.
+ * @param v a vector to normalize.
+ * @return a vector with norm 1 parallel to v
+ * @throw std::runtime_error if v is a null vector.
+ */
+inline MANTID_KERNEL_DLL V3D normalize(V3D v) {
+  v.normalize();
+  return v;
+}
 
 } // Namespace Kernel
 } // Namespace Mantid

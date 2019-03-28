@@ -245,8 +245,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
     // now get the sin of the angle, it's the magnitude of the cross product of
     // unit vector along the detector tube axis and a unit vector directed from
     // the sample to the detector centre
-    V3D vectorFromSample = det_member.getPos() - m_samplePos;
-    vectorFromSample.normalize();
+    const V3D vectorFromSample = normalize(det_member.getPos() - m_samplePos);
     Quat rot = det_member.getRotation();
     // rotate the original cylinder object axis to get the detector axis in the
     // actual instrument
@@ -377,9 +376,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
 double DetectorEfficiencyCor::distToSurface(const V3D &start,
                                             const IObject *shape) const {
   // get a vector from the point that was passed to the origin
-  V3D direction = V3D(0.0, 0.0, 0.0) - start;
-  // it needs to be a unit vector
-  direction.normalize();
+  const V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line, here
   // called a track
   Track track(start, direction);
