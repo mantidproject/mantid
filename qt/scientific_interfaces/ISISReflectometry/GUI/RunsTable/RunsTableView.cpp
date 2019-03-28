@@ -147,6 +147,20 @@ void RunsTableView::addToolbarActions() {
   connect(addToolbarItem(Action::Pause, "://pause.png",
                          "Pause processing of runs."),
           SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
+  connect(
+      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
+      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
+  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
+                         "Collapse all groups"),
+          SIGNAL(triggered(bool)), this,
+          SLOT(onCollapseAllGroupsPressed(bool)));
+  connect(addToolbarItem(Action::PlotSelected, "://graph.png",
+                         "Plot selected rows as graphs"),
+          SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed));
+  connect(
+      addToolbarItem(Action::PlotSelectedStitchedOutput, "://trajectory.png",
+                     "Plot selected rows with stitched outputs as graphs"),
+      SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedStitchedOutputPressed));
   connect(addToolbarItem(Action::InsertRow, "://insert_row.png",
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
@@ -168,13 +182,6 @@ void RunsTableView::addToolbarActions() {
   connect(
       addToolbarItem(Action::Cut, "://cut.png", "Cut the current selection"),
       SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
-  connect(
-      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
-      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
-  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
-                         "Collapse all groups"),
-          SIGNAL(triggered(bool)), this,
-          SLOT(onCollapseAllGroupsPressed(bool)));
 }
 
 MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
@@ -232,6 +239,14 @@ void RunsTableView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
 
 void RunsTableView::onPastePressed(bool) {
   m_notifyee->notifyPasteRowsRequested();
+}
+
+void RunsTableView::onPlotSelectedPressed(bool) {
+  m_notifyee->notifyPlotSelectedPressed();
+}
+
+void RunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
+  m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
 
 /** Set a combo box to the given value

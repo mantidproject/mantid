@@ -556,5 +556,13 @@ bool RunsTablePresenter::isProcessing() const {
 bool RunsTablePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
+
+void RunsTablePresenter::notifyPlotSelectedPressed() {
+  const auto rowsToPlot = m_view->jobs().selectedSubtrees();
+}
+
+void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
+  const auto rowsToPlot = m_view->jobs().selectedSubtrees();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

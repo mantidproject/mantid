@@ -48,6 +48,8 @@ public:
   void notifyInstrumentChanged() override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
+  void notifyPlotSelectedPressed() override;
+  void notifyPlotSelectedStitchedOutputPressed() override;
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionPaused() override;

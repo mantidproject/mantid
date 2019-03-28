@@ -58,6 +58,8 @@ private slots:
   void onPastePressed(bool);
   void onFilterChanged(QString const &);
   void onInstrumentChanged(int index);
+  void onPlotSelectedPressed(bool);
+  void onPlotSelectedStitchedOutputPressed(bool);
 
 private:
   void addToolbarActions();

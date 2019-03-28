@@ -26,6 +26,8 @@ public:
   virtual void notifyInstrumentChanged() = 0;
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
+  virtual void notifyPlotSelectedPressed() = 0;
+  virtual void notifyPlotSelectedStitchedOutputPressed() = 0;
 
   virtual ~RunsTableViewSubscriber() = default;
 };
@@ -50,7 +52,9 @@ public:
     Paste,
     Cut,
     Expand,
-    Collapse
+    Collapse,
+    PlotSelected,
+    PlotSelectedStitchedOutput
   };
 
   virtual void subscribe(RunsTableViewSubscriber *notifyee) = 0;
