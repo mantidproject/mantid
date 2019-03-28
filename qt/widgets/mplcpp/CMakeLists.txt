@@ -1,5 +1,6 @@
 # Rules for matplotlib cpp library
 set ( LIB_SRCS
+  src/Python/Sip.cpp
   src/Artist.cpp
   src/Axes.cpp
   src/BackendQt.cpp
