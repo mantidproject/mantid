@@ -19,11 +19,16 @@ Improvements
 
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` resolves between run with old and new DAS
+- :ref:`BASISReduction <algm-BASISReduction>` permits now flux normalization by proton charge and run duration.
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
 
 
 Data Analysis Interface
 -----------------------
+
+Improvements
+############
+- Improved the output options of MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit so that Chi_squared can now be plotted.
 
 Bug Fixes
 #########

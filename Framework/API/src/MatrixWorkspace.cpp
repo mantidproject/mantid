@@ -604,9 +604,8 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
   for (const auto detId : detIdList) {
     auto wsIndices = detectorIDtoWSIndices.find(detId);
     if (wsIndices != detectorIDtoWSIndices.end()) {
-      for (auto index : wsIndices->second) {
-        indexList.push_back(index);
-      }
+      std::copy(wsIndices->second.cbegin(), wsIndices->second.cend(),
+                std::back_inserter(indexList));
     }
   }
   return indexList;
@@ -1003,7 +1002,6 @@ bool MatrixWorkspace::isCommonBins() const {
 
   // Check that the values of each histogram are identical.
   if (m_isCommonBinsFlag) {
-    const size_t numBins = x(0).size();
     const size_t lastSpec = numHist - 1;
     for (size_t i = 0; i < lastSpec; ++i) {
       const auto &xi = x(i);
@@ -1136,8 +1134,8 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  for (auto &mb : maskedBins) {
-    maskedIds.push_back(mb.first);
+  for (const auto &mb : maskedBins) {
+    maskedIds.emplace_back(mb.first);
   }
   return maskedIds;
 }
@@ -1451,12 +1449,10 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId),
+      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(dimensionId),
         m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
             m_ws->getAxis(0)->unit()->label(),
-            m_ws->getAxis(0)->unit()->label())) {
-    m_X = ws->readX(0);
-  }
+            m_ws->getAxis(0)->unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {

@@ -691,6 +691,12 @@
     <technique>Reflectometry</technique>
   </instrument>
 
+  <instrument name="PANTHER">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
