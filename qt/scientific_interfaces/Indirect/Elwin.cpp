@@ -74,7 +74,7 @@ template <typename T, typename Predicate>
 void removeElementsIf(std::vector<T> &vector, Predicate const &filter) {
   auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
   if (iter != vector.end())
-    vector.erase(iter);
+    vector.erase(iter, vector.end());
 }
 
 std::vector<std::string> extractSuffixes(QStringList const &files,
