@@ -770,10 +770,12 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
         return true;
     }
   }
+  Kernel::V3D NormPair;
   for (auto xs = Snorms.begin(); xs != Snorms.end(); ++xs)
     for (auto ys = std::next(xs); ys != Snorms.end(); ++ys) {
+      NormPair = (*ys) + (*xs);
       try {
-        const V3D NormPair = normalize((*ys) + (*xs));
+        NormPair.normalize();
         if (!checkSurfaceValid(point, NormPair))
           return true;
       } catch (std::runtime_error &) {
