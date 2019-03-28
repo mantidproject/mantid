@@ -19,7 +19,7 @@ from cmakelists_utils import *
 VERSION = "1.0"
 
 #======================================================================
-def getYear():
+def get_year():
     """returns the current year"""
     return datetime.datetime.now().date().year
 
@@ -78,7 +78,7 @@ public:{algorithm_header}}};
 
 #endif /* {guard} */""".format(guard=guard, subproject=subproject,
        alg_include=alg_include, classname=classname,
-       year=getYear(), subproject_upper=subproject_upper,
+       year=get_year(), subproject_upper=subproject_upper,
        alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
 
     f.write(s)
@@ -158,7 +158,7 @@ namespace {subproject} {{
 }} // namespace {subproject}
 }} // namespace Mantid
 """.format(
-        year=getYear(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
+        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
         algorithm_source=algorithm_source)
     f.write(s)
     f.close()
@@ -239,7 +239,7 @@ public:
 }};
 
 
-#endif /* {guard} */""".format(year=getYear(),
+#endif /* {guard} */""".format(year=get_year(),
           guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
           algorithm_test=algorithm_test)
     f.write(s)
