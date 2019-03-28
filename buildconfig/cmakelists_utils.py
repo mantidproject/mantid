@@ -37,8 +37,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     rewrite. Only touches first section found to avoid messing up any other set
     sections in the rest of the file
     """
-    search_for1 = "set( " + cmake_tag
-    search_for2 = "set(" + cmake_tag
+    search_for = "set(" + cmake_tag
     # List of files in the thingie
     files = []
     lines_before = []
@@ -46,8 +45,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     section_num = 0
     section_processed = False
     for line in lines:
-        if line.strip().startswith(search_for1): section_num = 1
-        if line.strip().startswith(search_for2): section_num = 1
+        if line.strip().startswith(search_for): section_num = 1
 
         if section_num == 0:
             # These are the lines before
@@ -56,8 +54,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
             #this is a line with the name of a file
             line = line.strip()
             # Take off the tag
-            if line.startswith(search_for1): line = line[len(search_for1):].strip()
-            if line.startswith(search_for2): line = line[len(search_for2):].strip()
+            if line.startswith(search_for): line = line[len(search_for):].strip()
             # Did we reach the last one?
             if line.endswith(")"):
                 section_num = 2
