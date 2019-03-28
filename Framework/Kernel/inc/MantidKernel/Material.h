@@ -38,11 +38,15 @@ namespace Kernel {
     <LI>number density (nAtoms / Angstrom^3)</LI>
   </UL>
 
+  To understand how the effective scattering information is calculated, see
+  Sears, Varley F. "Neutron scattering lengths and cross sections." Neutron
+  news 3.3 (1992): 26-37. To highlight a point that may be missed, the
+  absorption is the only quantity that is wavelength dependent.
 */
-class MANTID_KERNEL_DLL Material {
+class MANTID_KERNEL_DLL Material final {
 public:
   /// Structure to hold the information for a parsed chemical formula
-  struct FormulaUnit {
+  struct FormulaUnit final {
     boost::shared_ptr<PhysicalConstants::Atom> atom;
     double multiplicity;
     FormulaUnit(const boost::shared_ptr<PhysicalConstants::Atom> &atom,
@@ -99,6 +103,24 @@ public:
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /**
+   * Returns the linear coefficient of absorption for the material in units of
+   * cm^-1
+   * this should match the implementation of the iterator version
+   */
+  double
+  linearAbsorpCoef(const double lambda =
+                       PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /**
+   * Returns the linear coefficient of absorption for the material in units of
+   * cm^-1
+   * this should match the implementation of the scalar version
+   */
+  std::vector<double>
+  linearAbsorpCoef(std::vector<double>::const_iterator lambdaBegin,
+                   std::vector<double>::const_iterator lambdaEnd) const;
 
   /// Get the coherent scattering length for a given wavelength in fm
   double

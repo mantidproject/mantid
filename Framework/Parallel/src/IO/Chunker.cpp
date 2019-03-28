@@ -72,9 +72,9 @@ size_t taskSize(const std::pair<int, std::vector<size_t>> &partition,
   if (workers == 0)
     return UINT64_MAX;
   const auto &indices = std::get<1>(partition);
-  size_t total = 0;
-  for (const auto index : indices)
-    total += tasks[index];
+  const size_t total = std::accumulate(
+      indices.cbegin(), indices.cend(), static_cast<size_t>(0),
+      [&tasks](auto sum, const auto index) { return sum + tasks[index]; });
   // Rounding *up*. Some workers in partition maybe have less work but we want
   // the maximum.
   return (total + workers - 1) / workers;
@@ -163,10 +163,12 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
   // Compute maximum chunk count (on any worker).
   int64_t maxChunkCount = 0;
   for (const auto &partition : m_partitioning) {
-    size_t chunksInPartition = 0;
-    for (const auto bank : partition.second)
-      chunksInPartition += m_chunkCounts[bank];
-    int workersInPartition = partition.first;
+    const size_t chunksInPartition = std::accumulate(
+        partition.second.cbegin(), partition.second.cend(),
+        static_cast<size_t>(0), [this](auto sum, const auto bank) {
+          return sum + m_chunkCounts[bank];
+        });
+    const int workersInPartition = partition.first;
     int64_t maxChunkCountInPartition =
         (chunksInPartition + workersInPartition - 1) / workersInPartition;
     maxChunkCount = std::max(maxChunkCount, maxChunkCountInPartition);
@@ -228,8 +230,11 @@ Chunker::makeBalancedPartitioning(const int workers,
     for (auto &item : partitioning)
       std::get<0>(item)--;
     std::vector<size_t> taskSizes;
-    for (const auto &partition : partitioning)
-      taskSizes.push_back(taskSize(partition, sizes));
+    taskSizes.reserve(partitioning.size());
+    std::transform(
+        partitioning.cbegin(), partitioning.cend(),
+        std::back_inserter(taskSizes),
+        [&sizes](const auto &partition) { return taskSize(partition, sizes); });
     for (int i = 0; i < tooMany; ++i) {
       const auto itemWithSmallestIncrease =
           std::distance(taskSizes.begin(),

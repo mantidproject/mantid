@@ -49,7 +49,10 @@ public:
 
   void setPlotExtraOptionsEnabled(bool enable) override;
   void setPlotEnabled(bool enable) override;
+  void setEditResultEnabled(bool enable) override;
   void setSaveEnabled(bool enable) override;
+
+  void setEditResultVisible(bool visible) override;
 
   void displayWarning(std::string const &message) override;
 
@@ -57,6 +60,7 @@ private slots:
   void emitGroupWorkspaceChanged(QString const &group);
   void emitPlotClicked();
   void emitSaveClicked();
+  void emitEditResultClicked();
 
 private:
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;

@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantid.simpleapi import Load
 from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
 from mantidqt.widgets.workspacedisplay.table import StatusBarView

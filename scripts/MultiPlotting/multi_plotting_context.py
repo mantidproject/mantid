@@ -5,7 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
+
+from MultiPlotting.gridspec_engine import gridspecEngine
+
 from MultiPlotting.subplot.subplot_context import subplotContext
+import mantid.simpleapi as mantid
 
 
 xBounds = "xBounds"
@@ -14,30 +18,48 @@ yBounds = "yBounds"
 
 class PlottingContext(object):
 
-    def __init__(self):
+    def __init__(self, gridspec_engine=gridspecEngine()):
         self.context = {}
         self.subplots = {}
         self.context[xBounds] = [0., 0.]
         self.context[yBounds] = [0., 0.]
+        self._gridspec_engine = gridspec_engine
+        self._gridspec = None
 
     def addSubplot(self, name, subplot):
         self.subplots[name] = subplotContext(name, subplot)
 
     def addLine(self, subplotName, workspace, specNum):
         try:
-            if len(workspace) > 1:
+            if isinstance(workspace, str):
+                ws = mantid.AnalysisDataService.retrieve(workspace)
+                self.subplots[subplotName].addLine(ws, specNum)
+
+            elif len(workspace) > 1:
                 self.subplots[subplotName].addLine(
                     workspace.OutputWorkspace, specNum)
             else:
                 self.subplots[subplotName].addLine(workspace, specNum)
         except:
-            print("cannot plot workspace")
+            return
 
     def add_annotate(self, subplotName, label):
         self.subplots[subplotName].add_annotate(label)
 
     def add_vline(self, subplotName, xvalue, name):
         self.subplots[subplotName].add_vline(xvalue, name)
+
+    def removeLabel(self, subplotName, name):
+        try:
+            self.subplots[subplotName].removeLabel(name)
+        except:
+            return
+
+    def removeVLine(self, subplotName, name):
+        try:
+            self.subplots[subplotName].removeVLine(name)
+        except:
+            return
 
     def get_xBounds(self):
         return self.context[xBounds]
@@ -50,3 +72,20 @@ class PlottingContext(object):
 
     def set_yBounds(self, values):
         self.context[yBounds] = values
+
+    def update_gridspec(self, number):
+        self._gridspec = self._gridspec_engine.getGridSpec(number)
+
+    @property
+    def gridspec(self):
+        return self._gridspec
+
+    def update_layout(self, figure):
+        keys = list(self.subplots.keys())
+        for counter, name in zip(range(len(keys)), keys):
+            self.subplots[name].update_gridspec(
+                self._gridspec, figure, counter)
+
+    def delete(self, name):
+        self.subplots[name].delete()
+        del self.subplots[name]

@@ -15,7 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 import os
-from qtpy import QtGui, QtWidgets
+from qtpy import QtWidgets
 from six import with_metaclass, PY3
 
 from mantidqt.utils.qt import load_ui
@@ -131,20 +131,20 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
     def fill_tree_widget(self, item, value):
         item.setExpanded(True)
         if type(value) is dict:
-            for key, val in sorted(value.iteritems()):
+            for key, val in sorted(value.items()):
                 if key in self.excluded:
                     continue
-                child = QtGui.QTreeWidgetItem()
+                child = QtWidgets.QTreeWidgetItem()
                 child.setText(0, unicode(key))
                 item.addChild(child)
                 self.fill_tree_widget(child, val)
         elif type(value) is list:
             for val in value:
-                child = QtGui.QTreeWidgetItem()
+                child = QtWidgets.QTreeWidgetItem()
                 child.setText(1, unicode(val))
                 item.addChild(child)
         else:
-            child = QtGui.QTreeWidgetItem()
+            child = QtWidgets.QTreeWidgetItem()
             value = self.clean_class_type(value)
             child.setText(1, unicode(value))
             item.addChild(child)

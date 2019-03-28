@@ -16,7 +16,7 @@ import unittest
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
+from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -108,7 +108,7 @@ class AsyncTaskTest(unittest.TestCase):
 
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in asynchronous.py
-        self.assertEqual(91, recv.task_exc_stack[0][1])
+        self.assertEqual(50, recv.task_exc_stack[0][1])
         # line number of raise statement above
         self.assertEqual(95, recv.task_exc_stack[1][1])
 
@@ -154,7 +154,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertRaises(TypeError, AsyncTask, object())
 
 
-class BlockingAsyncTaskTest(unittest.TestCase):
+class BlockingAsyncTaskWithCallbackTest(unittest.TestCase):
 
     # ---------------------------------------------------------------
     # Success cases
@@ -163,29 +163,35 @@ class BlockingAsyncTaskTest(unittest.TestCase):
         def foo():
             return 42
 
-        self.assertEqual(42, blocking_async_task(foo))
+        task = BlockingAsyncTaskWithCallback(foo)
+
+        self.assertEqual(42, task.start())
 
     def test_successful_positional_args_operation(self):
         def foo(shift):
             return 42 + shift
 
         shift = 2
-        self.assertEqual(42 + shift, blocking_async_task(foo, args=(shift,)))
+        task = BlockingAsyncTaskWithCallback(foo, args=(shift,))
+
+        self.assertEqual(42 + shift, task.start())
 
     def test_successful_args_and_kwargs_operation(self):
         def foo(scale, shift):
             return scale*42 + shift
 
         scale, shift = 2, 4
-        self.assertEqual(scale*42 + shift, blocking_async_task(foo, args=(scale,), kwargs={'shift': shift}))
+
+        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={'shift': shift})
+        self.assertEqual(scale * 42 + shift, task.start())
 
     def test_unsuccessful_args_and_kwargs_operation_raises_exception(self):
         def foo(scale, shift):
             raise RuntimeError("Bad operation")
 
         scale, shift = 2, 4
-        self.assertRaises(RuntimeError,
-                          blocking_async_task, foo, args=(scale,), kwargs={'shift': shift})
+        task = BlockingAsyncTaskWithCallback(foo, args=(scale,), kwargs={'shift': shift})
+        self.assertRaises(RuntimeError, task.start)
 
 
 if __name__ == "__main__":

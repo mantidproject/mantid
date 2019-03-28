@@ -62,20 +62,19 @@ that in places where there are no counts (:math:`Y=0`) and no acceptance
 result.
 
 The algorithm operates in *non-PSD mode* by default. This means that the 
-detectors are assumed to be infinitely thin and their 'width' in scattering 
-angle :math:`\Delta(2\theta)` is calculated from the detector's height only. 
-For grouped detectors, :math:`\Delta(2\theta)` is the span of all angular 
-widths of the detectors in the group.
+scattering angle :math:`2\theta` range covered by a detector is calculated for 
+each detector individually. For grouped detectors, it is the minimum and 
+maximum :math:`2\theta` of all detectors in the group. The computation is 
+accurate for simple detector shapes (cylinder, cuboid); for other shapes a 
+more rough method is used. It is possible to provide precalculated 
+per-detector :math:`2\theta` values using the ``DetectorTwoThetaRanges`` input 
+property.
 
-*PSD mode* will determine the :math:`\Delta(2\theta)` angular widths from the 
+*PSD mode* will determine the detector :math:`2\theta` ranges from the 
 instrument geometry. This mode is activated by placing the following named 
 parameter in the instrument definition file: *detector-neighbour-offset*. The 
 integer value of this parameter should be the number of pixels that separates 
 two pixels at the same vertical position in adjacent tubes.
-
-Note that in both non-PSD and PSD modes, the scattering angle widths are 
-determined from the detector geometry and may vary from detector to detector 
-as defined by the instrument definition files.
 
 See :ref:`algm-SofQWCentre` for centre-point binning or :ref:`algm-SofQWPolygon`
 for simpler and less precise but faster binning strategies. The speed-up

@@ -26,12 +26,15 @@ class TransformWidget(QtGui.QWidget):
         self.LoadObserver = LoadObserver(self)
         self.instrumentObserver = instrumentObserver(self)
         self.GroupPairObserver = GroupPairObserver(self)
+        self.enable_observer = EnableObserver(self)
+        self.disable_observer = DisableObserver(self)
 
         groupedViews = self.getViews()
 
         self._view = TransformView(self._selector.widget, groupedViews, parent)
 
         self._selector.setSelectionConnection(self.updateDisplay)
+        self.updateDisplay('FFT')
 
     @property
     def widget(self):
@@ -66,6 +69,12 @@ class TransformWidget(QtGui.QWidget):
         # may have new groups/pairs for multiple runs
         self._fft.runChanged()
 
+    def disable_view(self):
+        self._view.setEnabled(False)
+
+    def enable_view(self):
+        self._view.setEnabled(True)
+
 
 class LoadObserver(Observer):
 
@@ -95,3 +104,21 @@ class GroupPairObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.handle_new_group_pair()
+
+
+class EnableObserver(Observer):
+    def __init__(self, outer):
+        Observer.__init__(self)
+        self.outer = outer
+
+    def update(self, observable, arg):
+        self.outer.enable_view()
+
+
+class DisableObserver(Observer):
+    def __init__(self, outer):
+        Observer.__init__(self)
+        self.outer = outer
+
+    def update(self, observable, arg):
+        self.outer.disable_view()

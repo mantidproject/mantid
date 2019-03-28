@@ -4,19 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from PyQt4 import QtGui
 import unittest
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-from PyQt4 import QtGui
-
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
-
+from mantid.api import FileFinder
+from mantid.py3compat import mock
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
@@ -29,7 +21,10 @@ from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-from mantid.api import FileFinder
+
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 
 
 class LoadRunWidgetPresenterTest(unittest.TestCase):
@@ -88,7 +83,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         instrument_mock.getName.return_value = 'EMU'
         workspace_mock.workspace.getInstrument.return_value = instrument_mock
 
-        return {'OutputWorkspace': [workspace_mock]}
+        return {'OutputWorkspace': [workspace_mock], 'MainFieldDirection': 'transverse'}
 
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(

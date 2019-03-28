@@ -98,7 +98,7 @@ public:
   void clearView() override;
   std::string getFilterText() const override;
   SaveFileType getSaveFileType() const override;
-  void saveWorkspace(SaveFileType type) override;
+  void saveWorkspace(const std::string &wsName, SaveFileType type) override;
   void
   saveWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void filterWorkspaces(const std::string &filterText) override;

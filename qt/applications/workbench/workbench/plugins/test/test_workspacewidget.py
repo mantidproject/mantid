@@ -9,17 +9,16 @@
 #
 
 import unittest
-try:
-    import mock
-except ImportError:
-    from unittest import mock
 
 from qtpy.QtWidgets import QMainWindow, QApplication
 
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateWorkspace,
                               GroupWorkspaces)
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
+import matplotlib as mpl
+mpl.use('Agg')  # noqa
 from workbench.plugins.workspacewidget import WorkspaceWidget
 
 

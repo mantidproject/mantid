@@ -12,7 +12,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <map>
-
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -57,7 +56,8 @@ public:
   virtual void sortWorkspaces(SortCriteria criteria,
                               SortDirection direction) = 0;
   virtual SaveFileType getSaveFileType() const = 0;
-  virtual void saveWorkspace(SaveFileType type) = 0;
+  virtual void saveWorkspace(const std::string &wsName,
+                             const SaveFileType type) = 0;
   virtual void saveWorkspaces(const StringList &wsNames) = 0;
   virtual std::string getFilterText() const = 0;
   virtual void filterWorkspaces(const std::string &filterText) = 0;

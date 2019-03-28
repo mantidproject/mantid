@@ -30,6 +30,9 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
 
+        if self.load.version == 2:
+            self.view.setup_raw_checkbox_changed(self.handle_use_raw_data_changed)
+
     def cancel(self):
         if self.thread is not None:
             self.thread.cancel()
@@ -51,7 +54,10 @@ class FFTPresenter(object):
 
     def getWorkspaceNames(self):
         name = self.view.getInputWS()
-        final_options = self.load.getWorkspaceNames()
+        if self.load.version == 2:
+            final_options = self.load.getWorkspaceNames(self.view.isRaw())
+        else:
+            final_options = self.load.getWorkspaceNames()
         self.view.addItems(final_options)
 
         if self.load.version == 2:
@@ -59,6 +65,14 @@ class FFTPresenter(object):
             self.removePhaseFromIM(final_options)
 
             self.view.setReTo(name)
+
+    def handle_use_raw_data_changed(self):
+        if not self.view.isRaw() and not self.load.context.do_rebin():
+            self.view.set_raw_checkbox_state(True)
+            self.view.warning_popup('No rebin options specified')
+            return
+
+        self.getWorkspaceNames()
 
     def removePhaseFromIM(self, final_options):
         for option in final_options:
@@ -103,7 +117,7 @@ class FFTPresenter(object):
         # for new version 2 of FDA
         if self.load.version == 2:
             inputs["Run"] = self.getRun(
-                self.view.getInputWS().split(";", 1)[0])
+                self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
         # do apodization and padding to real data
 
         preInputs = self.view.initAdvanced()
@@ -118,6 +132,7 @@ class FFTPresenter(object):
             if self.load.version == 2:
                 phaseTable["InputWorkspace"] = self.clean(
                     self.view.getInputWS())
+                phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
 
             inputs["phaseTable"] = phaseTable
             self.view.RePhaseAdvanced(preInputs)
@@ -189,8 +204,10 @@ class FFTPresenter(object):
         return FFTInputs
 
     def clean(self, name):
-        if "PhaseQuad" in name:
+        if "PhaseQuad" in name and not self.load.version == 2:
             return self.getRun(name) + "_raw_data"
+        elif "PhaseQuad" in name:
+            return self.getRun(name)
         return name
 
     def getRun(self, name):

@@ -104,10 +104,7 @@ class MaxEntPresenter(object):
                 phaseTable["LastGoodData"] = self.view.getLastGoodData()
                 phaseTable["InputWorkspace"] = self.view.getInputWS()
 
-                if self.load.version == 2:
-                    phaseTable["InputWorkspace"] += raw_data
-
-                elif "MuonAnalysisGrouped" not in phaseTable["InputWorkspace"]:
+                if self.load.version == 1 and "MuonAnalysisGrouped" not in phaseTable["InputWorkspace"]:
                     phaseTable["InputWorkspace"] = "MuonAnalysis"
 
                 phaseTable["DetectorTable"] = "PhaseTable"
@@ -120,7 +117,7 @@ class MaxEntPresenter(object):
 
         # for new version 2 of FDA
         if self.load.version == 2:
-            inputs["Run"] = self.view.getInputWS()
+            inputs["Run"] = self.view.getInputWS().split("_", 1)[0]
 
         self.thread.loadData(inputs)
         self.thread.start()
@@ -171,7 +168,7 @@ class MaxEntPresenter(object):
         return inputs
 
     def cleanOutputsForVersion2(self, inputs):
-        inputs["InputWorkspace"] = self.view.getInputWS() + raw_data
+        inputs["InputWorkspace"] = self.view.getInputWS()
         keys = [
             "OutputWorkspace",
             "OutputPhaseTable",

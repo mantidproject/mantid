@@ -24,6 +24,7 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL MaterialBuilder {
 public:
+  enum class NumberDensityUnit { Atoms, FormulaUnits };
   MaterialBuilder();
 
   MaterialBuilder &setName(const std::string &name);
@@ -33,6 +34,7 @@ public:
   MaterialBuilder &setMassNumber(int massNumber);
 
   MaterialBuilder &setNumberDensity(double rho);
+  MaterialBuilder &setNumberDensityUnit(NumberDensityUnit unit);
   MaterialBuilder &setZParameter(double zparam);
   MaterialBuilder &setUnitCellVolume(double cellVolume);
   MaterialBuilder &setMassDensity(double massDensity);
@@ -62,6 +64,7 @@ private:
   boost::optional<double> m_numberDensity, m_zParam, m_cellVol, m_massDensity;
   boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
       m_absSection;
+  NumberDensityUnit m_numberDensityUnit;
 };
 
 } // namespace Kernel

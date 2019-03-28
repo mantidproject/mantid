@@ -4,48 +4,52 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import sys
-
-import PyQt4.QtGui as QtGui
-
-from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.Common.utilities import load_utils
-from Muon.GUI.Common import message_box
+from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis_2 import FrequencyAnalysisGui
+import PyQt4.QtCore as QtCore
+from save_python import getWidgetIfOpen
 
 
-class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
-    def __init__(self,parent=None):
-        super(FrequencyDomainAnalysisGui,self).__init__(parent)
-
-        load = load_utils.LoadUtils()
-        if not load.MuonAnalysisExists:
-            return
-        self.transform = TransformWidget(load = load, parent = self)
-
-        self.setCentralWidget(self.transform.widget)
-        self.setWindowTitle("Frequency Domain Analysis")
-
-    # cancel algs if window is closed
-    def closeEvent(self,event):
-        self.transform.closeEvent(event)
+Name = "Frequency_Domain_Analysis_2"
 
 
-def qapp():
-    if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
-    else:
-        _app = QtGui.QApplication(sys.argv)
-    return _app
+def main():
+    try:
+        global muon_freq
+        if not muon_freq.isHidden():
+            muon_freq.setWindowState(
+                muon_freq.windowState(
+                ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+            muon_freq.activateWindow()
+        else:
+            muon_freq = FrequencyAnalysisGui()
+            muon_freq.resize(700, 700)
+            muon_freq.show()
+    except:
+        muon_freq = FrequencyAnalysisGui()
+        muon_freq.resize(700, 700)
+        muon_freq.show()
+    return muon_freq
 
 
-app = qapp()
-try:
-    ex= FrequencyDomainAnalysisGui()
-    ex.resize(700,700)
-    ex.show()
-    app.exec_()
-except RuntimeError as error:
-    message_box.warning(str(error))
+def saveToProject():
+    widget = getWidgetIfOpen(Name)
+    if widget is None:
+        return ""
+    widget.update()
+    project = widget.saveToProject()
+    return project
+
+
+def loadFromProject(project):
+    global muon_freq
+    muon_freq = main()
+    muon_freq.dock_widget.loadFromProject(project)
+    muon_freq.loadFromContext(project)
+    return muon_freq
+
+
+if __name__ == '__main__':
+    muon = main()

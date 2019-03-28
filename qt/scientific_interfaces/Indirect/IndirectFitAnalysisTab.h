@@ -134,11 +134,13 @@ protected:
 
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setRunEnabled(bool enable) = 0;
+  void setEditResultVisible(bool visible);
 
 signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
+  void updateAvailableFitTypes();
 
 protected slots:
 

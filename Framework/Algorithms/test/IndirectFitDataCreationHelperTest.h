@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITDATACREATIONHELPERTEST_H_
 #define MANTID_INDIRECTFITDATACREATIONHELPERTEST_H_
 
@@ -15,6 +21,8 @@ namespace {
 std::vector<std::string> getTextAxisLabels() {
   return {"f0.Width", "f1.Width", "f2.EISF"};
 }
+
+std::vector<double> getNumericAxisLabels() { return {2.2, 3.3, 4.4}; }
 
 void storeWorkspaceInADS(std::string const &workspaceName,
                          MatrixWorkspace_sptr workspace) {
@@ -110,6 +118,51 @@ public:
     auto const labels = std::vector<std::string>({"f0.Width", "f1.EISF"});
     TS_ASSERT_THROWS(createWorkspaceWithTextAxis(6, labels),
                      std::runtime_error);
+  }
+
+  void
+  test_that_createWorkspaceWithBinValues_returns_a_workspace_with_the_number_of_spectra_specified() {
+    auto const workspace =
+        createWorkspaceWithBinValues(3, getNumericAxisLabels(), 3);
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 3);
+  }
+
+  void
+  test_that_createWorkspaceWithBinValues_throws_when_the_number_of_bins_is_not_equal_to_the_number_of_labels() {
+    auto const labels = getNumericAxisLabels();
+    TS_ASSERT_THROWS(createWorkspaceWithBinValues(3, labels, 2),
+                     std::runtime_error);
+  }
+
+  void
+  test_that_createWorkspaceWithBinValues_returns_a_workspace_with_the_numeric_bin_axis_labels_specified() {
+    auto const labels = getNumericAxisLabels();
+    auto const workspace =
+        createWorkspaceWithBinValues(3, getNumericAxisLabels(), 3);
+
+    auto const xAxis = workspace->getAxis(0);
+
+    auto const expectedLabels = std::vector<std::string>{"2.2", "3.3", "4.4"};
+    for (auto index = 0u; index < workspace->getNumberHistograms(); ++index)
+      TS_ASSERT_EQUALS(xAxis->label(index), expectedLabels[index]);
+  }
+
+  void
+  test_that_createGroupWorkspace_will_create_a_group_workspace_with_the_expected_number_of_entries() {
+    auto const group = createGroupWorkspace(3, 5);
+
+    TS_ASSERT(group->isGroup());
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 3);
+  }
+
+  void
+  test_that_createGroupWorkspaceWithTextAxes_will_create_a_group_workspace_containing_workspace_with_the_specified_number_of_spectra() {
+    auto const group =
+        createGroupWorkspaceWithTextAxes(5, getTextAxisLabels(), 3);
+
+    TS_ASSERT(group->isGroup());
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 5);
   }
 
   void

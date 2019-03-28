@@ -440,8 +440,11 @@ void LoadILLDiffraction::calculateRelativeRotations(
   double firstTubeRotationAngle =
       firstTubePosition.angle(V3D(0, 0, 1)) * RAD_TO_DEG;
 
+  // note that for D20 we have to subtract the offset here
+  // unlike in the static detector case, because in the transform
+  // below, we take (angle - firstTubeRotatingAngle)
   if (m_instName == "D20") {
-    firstTubeRotationAngle += m_offsetTheta;
+    firstTubeRotationAngle -= m_offsetTheta;
   } else if (m_instName == "D2B") {
     firstTubeRotationAngle = -firstTubeRotationAngle;
     std::transform(tubeRotations.begin(), tubeRotations.end(),
@@ -596,7 +599,7 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
       }
-      mutableRun.addLogData(std::move(property));
+      mutableRun.addLogData(std::move(property), true);
     }
   }
 }
@@ -717,12 +720,14 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
  */
 void LoadILLDiffraction::resolveScanType() {
   ScanType result = NoScan;
-  for (const auto &scanVar : m_scanVar) {
-    if (scanVar.scanned == 1) {
-      result = OtherScan;
-      if (scanVar.name == "2theta") {
-        result = DetectorScan;
-        break;
+  if (m_numberScanPoints != 1) {
+    for (const auto &scanVar : m_scanVar) {
+      if (scanVar.scanned == 1) {
+        result = OtherScan;
+        if (scanVar.name == "2theta") {
+          result = DetectorScan;
+          break;
+        }
       }
     }
   }

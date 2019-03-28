@@ -80,6 +80,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))
 
     def handle_periods_changed(self):
+        self._view.summed_period_edit.blockSignals(True)
+        self._view.subtracted_period_edit.blockSignals(True)
         summed = self.string_to_list(self._view.get_summed_periods())
         subtracted = self.string_to_list(self._view.get_subtracted_periods())
 
@@ -91,13 +93,17 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         if len(bad_periods) > 0:
             self._view.warning_popup("The following periods are invalid : " + ",".join([str(period) for period in bad_periods]))
 
-        summed = [p for p in summed if (p <= n_periods) and p > 0]
-        subtracted = [p for p in subtracted if (p <= n_periods) and p > 0]
+        summed = [p for p in summed if (p <= n_periods) and p > 0 and p not in bad_periods]
+        if not summed:
+            summed = [1]
 
-        self._model.update_summed_periods(summed)
-        self._model.update_subtracted_periods(subtracted)
+        subtracted = [p for p in subtracted if (p <= n_periods) and p > 0 and p not in bad_periods]
+
+        self._model.update_periods(summed, subtracted)
 
         self.update_period_edits()
+        self._view.summed_period_edit.blockSignals(False)
+        self._view.subtracted_period_edit.blockSignals(False)
 
     class PairAlphaNotifier(Observable):
 

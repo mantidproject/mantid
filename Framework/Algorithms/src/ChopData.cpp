@@ -114,7 +114,7 @@ void ChopData::exec() {
     size_t indexLow, indexHigh;
 
     try {
-      indexLow = inputWS->binIndexOf(stepDiff);
+      indexLow = inputWS->yIndexOfX(stepDiff);
       if (indexLow < (nBins + 1)) {
         indexLow++;
       }
@@ -127,7 +127,7 @@ void ChopData::exec() {
     }
 
     try {
-      indexHigh = inputWS->binIndexOf((i + 1) * step);
+      indexHigh = inputWS->yIndexOfX((i + 1) * step);
     } catch (std::out_of_range &) {
       indexHigh = nBins;
     }

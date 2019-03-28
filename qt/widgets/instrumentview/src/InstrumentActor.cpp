@@ -933,9 +933,9 @@ void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye,
 
   // Basis vectors of the OpenGL reference frame. Z points into the screen, Y
   // points up.
-  const Mantid::Kernel::V3D X(1, 0, 0);
-  const Mantid::Kernel::V3D Y(0, 1, 0);
-  const Mantid::Kernel::V3D Z(0, 0, 1);
+  constexpr Mantid::Kernel::V3D X(1, 0, 0);
+  constexpr Mantid::Kernel::V3D Y(0, 1, 0);
+  constexpr Mantid::Kernel::V3D Z(0, 0, 1);
 
   Mantid::Kernel::V3D x, y, z;
   z = eye;

@@ -9,8 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mock import Mock
-
+from mantid.py3compat.mock import Mock
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 
 

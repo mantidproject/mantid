@@ -7,11 +7,11 @@
 #  This file is part of the mantid workbench.
 from unittest import TestCase
 
-from mock import Mock, patch
+from mantid.py3compat.mock import Mock, patch
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
-from mantidqt.widgets.workspacedisplay.test_mocks.mock_qt import MockQClipboard, MockQModelIndex, \
+from mantidqt.utils.testing.mocks.mock_qt import MockQClipboard, MockQModelIndex, \
     MockQSelectionModel, MockQStatusBar, MockQTableView
 from mantidqt.widgets.workspacedisplay.user_notifier import UserNotifier
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView

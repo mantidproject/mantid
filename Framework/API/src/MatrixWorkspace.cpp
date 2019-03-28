@@ -604,9 +604,8 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(
   for (const auto detId : detIdList) {
     auto wsIndices = detectorIDtoWSIndices.find(detId);
     if (wsIndices != detectorIDtoWSIndices.end()) {
-      for (auto index : wsIndices->second) {
-        indexList.push_back(index);
-      }
+      std::copy(wsIndices->second.cbegin(), wsIndices->second.cend(),
+                std::back_inserter(indexList));
     }
   }
   return indexList;
@@ -877,6 +876,12 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
   m_axes[axisIndex] = newAxis;
 }
 
+/**
+ * Return the number of Axis stored by this workspace
+ * @return int
+ */
+size_t MatrixWorkspace::numberOfAxis() const { return m_axes.size(); }
+
 /// Returns the units of the data in the workspace
 std::string MatrixWorkspace::YUnit() const { return m_YUnit; }
 
@@ -997,7 +1002,6 @@ bool MatrixWorkspace::isCommonBins() const {
 
   // Check that the values of each histogram are identical.
   if (m_isCommonBinsFlag) {
-    const size_t numBins = x(0).size();
     const size_t lastSpec = numHist - 1;
     for (size_t i = 0; i < lastSpec; ++i) {
       const auto &xi = x(i);
@@ -1130,8 +1134,8 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  for (auto &mb : maskedBins) {
-    maskedIds.push_back(mb.first);
+  for (const auto &mb : maskedBins) {
+    maskedIds.emplace_back(mb.first);
   }
   return maskedIds;
 }
@@ -1238,49 +1242,97 @@ Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
 }
 
 /**
- * Returns the bin index of the given X value
+ * Returns the y index which corresponds to the X Value provided
  * @param xValue :: The X value to search for
  * @param index :: The index within the workspace to search within (default = 0)
- * @returns An index to the bin containing X
+ * @param tolerance :: The tolerance to accept between the passed xValue and the
+ *                     stored value (default = 0.0)
+ * @returns The index corresponding to the X value provided
  */
-size_t MatrixWorkspace::binIndexOf(const double xValue,
-                                   const std::size_t index) const {
-  if (index >= getNumberHistograms()) {
-    throw std::out_of_range(
-        "MatrixWorkspace::binIndexOf - Index out of range.");
-  }
+std::size_t MatrixWorkspace::yIndexOfX(const double xValue,
+                                       const std::size_t index,
+                                       const double tolerance) const {
+  if (index >= getNumberHistograms())
+    throw std::out_of_range("MatrixWorkspace::yIndexOfX - Index out of range.");
+
   const auto &xValues = this->x(index);
   const bool ascendingOrder = xValues.front() < xValues.back();
   const auto minX = ascendingOrder ? xValues.front() : xValues.back();
   const auto maxX = ascendingOrder ? xValues.back() : xValues.front();
-  if (xValue < minX) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value lower"
-                            " than lowest in current range.");
-  } else if (xValue > maxX) {
-    throw std::out_of_range("MatrixWorkspace::binIndexOf - X value greater"
-                            " than highest in current range.");
-  }
-  size_t hops;
+
+  if (xValue < minX)
+    throw std::out_of_range("MatrixWorkspace::yIndexOfX - X value is lower"
+                            " than the lowest in the current range.");
+  else if (xValue > maxX)
+    throw std::out_of_range("MatrixWorkspace::yIndexOfX - X value is greater"
+                            " than the highest in the current range.");
+
+  if (this->isHistogramData())
+    return binIndexOfValue(xValues, xValue, ascendingOrder, tolerance);
+  else
+    return xIndexOfValue(xValues, xValue, tolerance);
+}
+
+/**
+ * Returns the bin index of the given X value
+ * @param xValues :: The histogram to search
+ * @param xValue :: The X value to search for
+ * @param ascendingOrder :: True if the order of the xValues is ascending
+ * @param tolerance :: The tolerance to accept between the passed xValue and the
+ *                     stored value (default = 0.0)
+ * @returns An index to the bin containing X
+ */
+std::size_t MatrixWorkspace::binIndexOfValue(
+    HistogramData::HistogramX const &xValues, double const &xValue,
+    bool const &ascendingOrder, double const &tolerance) const {
+  std::size_t hops;
   if (ascendingOrder) {
-    auto lowit = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
-    // If we are pointing at the first value then that means we still want to be
-    // in the first bin
-    if (lowit == xValues.cbegin()) {
-      ++lowit;
-    }
-    hops = std::distance(xValues.cbegin(), lowit);
+    auto lowerIter =
+        std::lower_bound(xValues.cbegin(), xValues.cend(), xValue - tolerance);
+
+    // If we are pointing at the first value then we want to be in the first bin
+    if (lowerIter == xValues.cbegin())
+      ++lowerIter;
+
+    hops = std::distance(xValues.cbegin(), lowerIter);
   } else {
-    auto lowit = std::upper_bound(xValues.crbegin(), xValues.crend(), xValue);
-    if (lowit == xValues.crend()) {
-      --lowit;
-    } else if (lowit == xValues.crbegin()) {
-      ++lowit;
-    }
-    hops = xValues.size() - std::distance(xValues.crbegin(), lowit);
+    auto lowerIter = std::upper_bound(xValues.crbegin(), xValues.crend(),
+                                      xValue + tolerance);
+
+    if (lowerIter == xValues.crend())
+      --lowerIter;
+    else if (lowerIter == xValues.crbegin())
+      ++lowerIter;
+
+    hops = xValues.size() - std::distance(xValues.crbegin(), lowerIter);
   }
   // The bin index is offset by one from the number of hops between iterators as
-  // they start at zero
+  // they start at zero (for a histogram workspace)
   return hops - 1;
+}
+
+/**
+ * Returns the X index of the given X value
+ * @param xValues :: The histogram to search
+ * @param xValue :: The X value to search for
+ * @param tolerance :: The tolerance to accept between the passed xValue and the
+ *                     stored value (default = 0.0)
+ * @returns The index of the X value
+ */
+std::size_t
+MatrixWorkspace::xIndexOfValue(HistogramData::HistogramX const &xValues,
+                               double const &xValue,
+                               double const &tolerance) const {
+  auto const iter = std::find_if(xValues.cbegin(), xValues.cend(),
+                                 [&xValue, &tolerance](double const &value) {
+                                   return std::abs(xValue - value) <= tolerance;
+                                 });
+  if (iter != xValues.cend())
+    return std::distance(xValues.cbegin(), iter);
+  else
+    throw std::invalid_argument(
+        "MatrixWorkspace::yIndexOfX - the X value provided could not be found "
+        "in the workspace containing point data.");
 }
 
 uint64_t MatrixWorkspace::getNPoints() const {
@@ -1397,12 +1449,10 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId),
+      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(dimensionId),
         m_frame(Kernel::make_unique<Geometry::GeneralFrame>(
             m_ws->getAxis(0)->unit()->label(),
-            m_ws->getAxis(0)->unit()->label())) {
-    m_X = ws->readX(0);
-  }
+            m_ws->getAxis(0)->unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   std::string getName() const override {
@@ -1647,7 +1697,8 @@ signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
 MDMasking for a Matrix Workspace has not been implemented.
 @param :
 */
-void MatrixWorkspace::setMDMasking(Mantid::Geometry::MDImplicitFunction *) {
+void MatrixWorkspace::setMDMasking(
+    Mantid::Geometry::MDImplicitFunction * /*maskingRegion*/) {
   throw std::runtime_error(
       "MatrixWorkspace::setMDMasking has no implementation");
 }
@@ -1975,14 +2026,15 @@ void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
 /// Cache a lookup of grouped detIDs to member IDs. Always throws
 /// std::runtime_error since MatrixWorkspace supports detector grouping via
 /// spectra instead of the caching mechanism.
-void MatrixWorkspace::cacheDetectorGroupings(const det2group_map &) {
+void MatrixWorkspace::cacheDetectorGroupings(
+    const det2group_map & /*mapping*/) {
   throw std::runtime_error("Cannot cache detector groupings in a "
                            "MatrixWorkspace -- grouping must be defined via "
                            "spectra");
 }
 
 /// Throws an exception. This method is only for MDWorkspaces.
-size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
+size_t MatrixWorkspace::groupOfDetectorID(const detid_t /*detID*/) const {
   throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
                            "for MatrixWorkspace, only for MDWorkspaces");
 }

@@ -23,6 +23,9 @@ private:
   void run() override;
   void setup() override;
   bool validate() override;
+  bool validWorkspaceProperty(std::string const &sampleName,
+                              std::string const &resolutionName,
+                              std::string const &parameter) const;
   void loadSettings(const QSettings &settings) override;
   void setBrowserWorkspace() override{};
 

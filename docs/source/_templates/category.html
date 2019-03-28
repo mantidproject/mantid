@@ -31,18 +31,38 @@
     </div>
 {%- endmacro %}
 
+{% macro list_to_single_column(item_list) -%}
+{# Output a list in a single column #}
+{# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
+  <ul>
+  {% for item in item_list %}
+    <li><a href="{{ item.link(outpath) }}">{{ item.name }}</a></li>
+  {%- endfor -%}
+  </ul>
+{%- endmacro %}
+
 {%- block body -%}
     <h1> Category: {{ title }} </h1>
+    {% set header_file = text_page %}
+    {% include header_file ignore missing %}
     {% if subcategories %}
     <br>
     <h2> Subcategories </h2>
-    {{ split_to_three_columns(subcategories) }}
+    {% if subcategories|length > 10 %}
+      {{ split_to_three_columns(subcategories) }}
+    {% else %}
+      {{ list_to_single_column(subcategories) }}
+    {% endif %}
     <hr>
     {% endif %}
 
     {% if pages %}
-    <h2> Pages </h2>
-    {{ split_to_three_columns(pages) }}
+    <h2>  Pages  </h2>
+      {% if pages|length > 10 %}
+        {{ split_to_three_columns(pages) }}
+      {% else %}
+        {{ list_to_single_column(pages) }}
+      {% endif %}
     {% endif %}
     
     {% if parentcategory %}

@@ -149,30 +149,43 @@ void readAnalyserFromFile(const std::string &analyser,
 
 Mantid::Geometry::IComponent_const_sptr
 getAnalyser(MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto analysers = instrument->getStringParameter("analyser");
+  auto const instrument = workspace->getInstrument();
+  auto const analysers = instrument->getStringParameter("analyser");
 
   if (analysers.empty())
     throw std::invalid_argument(
         "Could not load instrument resolution from parameter file");
 
-  auto component = instrument->getComponentByName(analysers[0]);
-  auto resolutionParameters = component->getNumberParameter("resolution");
-  if (nullptr == component || resolutionParameters.empty())
+  auto const component = instrument->getComponentByName(analysers[0]);
+  if (component) {
+    if (component->hasParameter("resolution")) {
+      auto const resolutionParameters =
+          component->getNumberParameter("resolution");
+      if (resolutionParameters.empty())
+        readAnalyserFromFile(analysers[0], workspace);
+    }
+  } else {
     readAnalyserFromFile(analysers[0], workspace);
-  return workspace->getInstrument()->getComponentByName(analysers[0]);
+  }
+  return instrument->getComponentByName(analysers[0]);
 }
 
 boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   try {
-    auto analyser = getAnalyser(workspace);
-    if (analyser != nullptr)
+    auto const analyser = getAnalyser(workspace);
+    if (analyser && analyser->hasParameter("resolution"))
       return analyser->getNumberParameter("resolution")[0];
-    else
-      return workspace->getInstrument()->getNumberParameter("resolution")[0];
-  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+
+    auto const instrument = workspace->getInstrument();
+    if (instrument && instrument->hasParameter("resolution"))
+      return instrument->getNumberParameter("resolution")[0];
+    else if (instrument && instrument->hasParameter("EFixed"))
+      return instrument->getNumberParameter("EFixed")[0] * 0.01;
+
     return boost::none;
-  } catch (const std::invalid_argument &) {
+  } catch (Mantid::Kernel::Exception::NotFoundError const &) {
+    return boost::none;
+  } catch (std::invalid_argument const &) {
     return boost::none;
   }
 }

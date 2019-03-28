@@ -100,7 +100,7 @@ public:
   void draw() const override { m_shape->draw(); }
   void initDraw() const override { m_shape->initDraw(); }
 
-  const Kernel::Material material() const override {
+  const Kernel::Material &material() const override {
     return m_shape->material();
   }
   void setID(const std::string &id);

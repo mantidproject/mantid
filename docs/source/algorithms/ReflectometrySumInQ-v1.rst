@@ -10,10 +10,13 @@
 Description
 -----------
 
-This algorithm sums the Y values of histograms given by *InputWorkspaceIndexSet* into a single single histogram. The summation is done using the method proposed by Cubitt et al. [#CUBITT]_ This involves a projection to an
-arbitrary reference angle, :math:`2\theta_R`, with a "virtual" wavelength,
-:math:`\lambda_v`. This is the wavelength the neutron would have had if it had
-arrived at :math:`2\theta_R` with the same momentum transfer (:math:`Q`).
+This algorithm sums the Y values of histograms given by 
+*InputWorkspaceIndexSet* into a single single histogram. The summation is done 
+using the method proposed by Cubitt et al. [#CUBITT]_ This involves a 
+projection to an arbitrary reference angle, :math:`2\theta_R`, with a 
+"virtual" wavelength, :math:`\lambda_v`. This is the wavelength the neutron 
+would have had if it had arrived at :math:`2\theta_R` with the same momentum 
+transfer (:math:`Q`).
 
 Counts are considered to be spread evenly over the input pixel, and the
 top-left and bottom-right corner of the pixel are projected onto
@@ -24,7 +27,9 @@ bins.
 
 The input workspace should have wavelength as the X units as well as an instrument.
 
-To produce a reflectivity, the input workspace has to be the reflected beam workspace where each histogram is individually divided by the summed (in lambda) direct beam data.
+To produce a reflectivity, the input workspace has to be the reflected beam 
+workspace where each histogram is individually divided by the summed (in 
+lambda) direct beam data.
 
 Usage
 -----

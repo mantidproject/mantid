@@ -11,6 +11,9 @@
 #include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
+namespace DataObjects {
+class TableWorkspace;
+}
 namespace Algorithms {
 
 /**
@@ -66,14 +69,16 @@ private:
   void initAngularCachesNonPSD(const API::MatrixWorkspace &workspace);
   /// Get angles and calculate angular widths.
   void initAngularCachesPSD(const API::MatrixWorkspace &workspace);
+  void initAngularCachesTable(const API::MatrixWorkspace &workspace,
+                              const DataObjects::TableWorkspace &widthTable);
 
   SofQCommon m_EmodeProperties;
   /// Output Q axis
   std::vector<double> m_Qout;
-  /// Array for the two theta angles
-  std::vector<double> m_theta;
-  /// Array for the theta widths
-  std::vector<double> m_thetaWidths;
+  /// Array for the lower 2theta angles, in radians
+  std::vector<double> m_twoThetaLowers;
+  /// Array for the upper 2theta angles, in radians
+  std::vector<double> m_twoThetaUppers;
   /// Offset for finding neighbor in nearest tube
   int m_detNeighbourOffset{-1};
 };

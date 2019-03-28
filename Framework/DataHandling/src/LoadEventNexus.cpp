@@ -281,6 +281,11 @@ void LoadEventNexus::init() {
                   "Set type of loader. 2 options {Default, Multiproceess},"
                   "'Multiprocess' should work faster for big files and it is "
                   "experimental, available only in Linux");
+
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadNexusInstrumentXML",
+                                                       true, Direction::Input),
+                  "Reads the embedded Instrument XML from the NeXus file "
+                  "(optional, default True). ");
 }
 
 //----------------------------------------------------------------------------------------------

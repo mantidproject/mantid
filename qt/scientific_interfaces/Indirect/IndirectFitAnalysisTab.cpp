@@ -130,7 +130,7 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
   connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
-          SLOT(updateAvailableFitTypes()));
+          SIGNAL(updateAvailableFitTypes()));
 
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this,
           SLOT(plotSelectedSpectra()));
@@ -999,6 +999,7 @@ void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
 
   m_outOptionsPresenter->setPlotEnabled(
       enable && m_outOptionsPresenter->isResultGroupPlottable());
+  m_outOptionsPresenter->setEditResultEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
 }
 
@@ -1017,6 +1018,14 @@ void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
   } else
     m_outOptionsPresenter->removePDFWorkspace();
   m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enablePDFOptions);
+}
+
+/**
+ * Sets the visiblity of the output options Edit Result button
+ * @param visible :: true to make the edit result button visible
+ */
+void IndirectFitAnalysisTab::setEditResultVisible(bool visible) {
+  m_outOptionsPresenter->setEditResultVisible(visible);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1082,6 +1091,7 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   if (isFit)
     m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
   m_outOptionsPresenter->setPlotEnabled(isFit);
+  m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 

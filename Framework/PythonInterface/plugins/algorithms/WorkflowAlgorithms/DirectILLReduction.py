@@ -11,13 +11,16 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, RebinParamsValidator, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property, RebinParamsValidator,
+                           StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
-                              DetectorEfficiencyCorUser, Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon,
-                              Transpose)
+                              DetectorEfficiencyCorUser, Divide, GenerateGroupingPowder, GroupDetectors, MaskDetectors, Rebin, Scale,
+                              SofQWNormalisedPolygon, Transpose)
 import math
 import numpy
+import os
 from scipy import constants
+import tempfile
 
 
 def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
@@ -341,7 +344,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._correctByDetectorEfficiency(mainWS, wsNames, wsCleanup, subalgLogging)
 
         progress.report('Grouping detectors')
-        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup, subalgLogging)
 
@@ -357,6 +360,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
+        positiveFloat = FloatBoundedValidator(0., exclusive=True)
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
 
         # Properties.
@@ -405,6 +409,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace for masking.')
+        self.declareProperty(name=common.PROP_GROUPING_ANGLE_STEP,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             doc='A scattering angle step to which to group detectors, in degrees.')
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W, validator=validRebinParams),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, PROPGROUP_REBINNING)
@@ -505,26 +513,39 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.finalCleanup()
         report.toLog(self.log())
 
-    def _groupDetectors(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _groupDetectors(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Group detectors with similar thetas."""
-        import os
-        import tempfile
-        groups = _createDetectorGroups(mainWS)
-        instrumentName = mainWS.getInstrument().getName()
-        groupsXml = _detectorGroupsToXml(groups, instrumentName)
-        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrumentName))
-        _writeXml(groupsXml, path)
+        instrument = mainWS.getInstrument()
+        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrument.getName()))
+        # We don't need the handle, just the path.
         os.close(fileHandle)
-        groupedWSName = wsNames.withSuffix('grouped_detectors')
-        groupedWS = GroupDetectors(InputWorkspace=mainWS,
-                                   OutputWorkspace=groupedWSName,
-                                   MapFile=path,
-                                   KeepUngroupedSpectra=False,
-                                   Behaviour='Average',
-                                   EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        os.remove(path)
-        return groupedWS
+        angleStepProperty = self.getProperty(common.PROP_GROUPING_ANGLE_STEP)
+        if angleStepProperty.isDefault:
+            if instrument.hasParameter('natural-angle-step'):
+                angleStep = instrument.getNumberParameter('natural-angle-step', recursive=False)[0]
+                report.notice('Using grouping angle step of {} degrees from the IPF.'.format(angleStep))
+            else:
+                angleStep = 0.01
+                report.notice('Using the default grouping angle step of {} degrees.'.format(angleStep))
+        else:
+            angleStep = angleStepProperty.value
+        GenerateGroupingPowder(InputWorkspace=mainWS,
+                               AngleStep=angleStep,
+                               GroupingFilename=path,
+                               GenerateParFile=False,
+                               EnableLogging=subalgLogging)
+        try:
+            groupedWSName = wsNames.withSuffix('grouped_detectors')
+            groupedWS = GroupDetectors(InputWorkspace=mainWS,
+                                       OutputWorkspace=groupedWSName,
+                                       MapFile=path,
+                                       KeepUngroupedSpectra=False,
+                                       Behaviour='Average',
+                                       EnableLogging=subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return groupedWS
+        finally:
+            os.remove(path)
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         """Return the raw input workspace."""

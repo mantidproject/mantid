@@ -38,8 +38,8 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
       m_replaceObserver(*this, &WorkspaceSelector::handleReplaceEvent),
       m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
-      m_optional(false), m_suffix(), m_algName(), m_algPropName(),
-      m_algorithm() {
+      m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
+      m_algName(), m_algPropName(), m_algorithm() {
   setEditable(false);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads =
@@ -130,6 +130,14 @@ void WorkspaceSelector::setSuffixes(const QStringList &suffix) {
       refresh();
     }
   }
+}
+
+void WorkspaceSelector::setLowerBinLimit(int numberOfBins) {
+  m_binLimits.first = numberOfBins;
+}
+
+void WorkspaceSelector::setUpperBinLimit(int numberOfBins) {
+  m_binLimits.second = numberOfBins;
 }
 
 QString WorkspaceSelector::getValidatingAlgorithm() const { return m_algName; }
@@ -253,6 +261,8 @@ bool WorkspaceSelector::checkEligibility(
     return false;
   } else if (!hasValidSuffix(name)) {
     return false;
+  } else if (!hasValidNumberOfBins(object)) {
+    return false;
   } else if (!m_showGroups) {
     auto group =
         boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
@@ -275,6 +285,21 @@ bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
   }
 
   return false;
+}
+
+bool WorkspaceSelector::hasValidNumberOfBins(
+    Mantid::API::Workspace_sptr object) const {
+  if (m_binLimits.first != 0 || m_binLimits.second != -1) {
+    if (auto const workspace =
+            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
+      auto const numberOfBins = static_cast<int>(workspace->y(0).size());
+      if (m_binLimits.second != -1)
+        return numberOfBins >= m_binLimits.first &&
+               numberOfBins <= m_binLimits.second;
+      return numberOfBins >= m_binLimits.first;
+    }
+  }
+  return true;
 }
 
 void WorkspaceSelector::refresh() {

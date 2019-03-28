@@ -9,8 +9,8 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+
 from qtpy.QtWidgets import QFileDialog, QMessageBox
-from qtpy.QtGui import QIcon  # noqa
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantidqt.io import open_a_file_dialog
@@ -40,6 +40,11 @@ class Project(AnalysisDataServiceObserver):
         self.plot_gfm.add_observer(self)
 
         self.interface_populating_function = interface_populating_function
+
+        self.prompt_save_on_close = True
+
+    def load_settings_from_config(self, config):
+        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
 
     def __get_saved(self):
         return self.__saved
@@ -72,19 +77,14 @@ class Project(AnalysisDataServiceObserver):
             # Cancel close dialogs
             return
 
-        overwriting = False
         # If the selected path is a project directory ask if overwrite is required?
         if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
             answer = self._offer_overwriting_gui()
             if answer == QMessageBox.No:
                 return
             elif answer == QMessageBox.Yes:
-                overwriting = True
-
-        if not overwriting and os.path.exists(path) and os.listdir(path) != []:
-            QMessageBox.warning(None, "Empty directory or project required!",
-                                "Please choose either an new directory or an already saved project", QMessageBox.Ok)
-            return
+                # Just continue on
+                pass
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
@@ -100,16 +100,16 @@ class Project(AnalysisDataServiceObserver):
                                     "Would you like to overwrite the selected project?",
                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
-    @staticmethod
-    def _save_file_dialog():
-        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.Directory)
+    def _save_file_dialog(self):
+        return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
+                                  file_filter="Project files ( *" + self.project_file_ext + ")")
 
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
         plots_to_save = self.plot_gfm.figs
         interfaces_to_save = self.interface_populating_function()
         project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
+        project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
                                    plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
         self.__saved = True
 
@@ -129,11 +129,9 @@ class Project(AnalysisDataServiceObserver):
         if file_ext != ".mtdproj":
             QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
 
-        directory = os.path.dirname(file_name)
-
         project_loader = ProjectLoader(self.project_file_ext)
-        project_loader.load_project(directory)
-        self.last_project_location = directory
+        project_loader.load_project(file_name)
+        self.last_project_location = file_name
         self.__saved = True
 
     def _load_file_dialog(self):
@@ -159,11 +157,15 @@ class Project(AnalysisDataServiceObserver):
         # if yes or no return false
         return False
 
-    @staticmethod
-    def _offer_save_message_box(parent):
-        return QMessageBox.question(parent, 'Unsaved Project', "The project is currently unsaved would you like to "
-                                    "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                                    QMessageBox.Yes)
+    def _offer_save_message_box(self, parent):
+        if self.prompt_save_on_close:
+            return QMessageBox.question(parent, 'Unsaved Project',
+                                        "The project is currently unsaved. Would you like to "
+                                        "save before closing?",
+                                        QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                        QMessageBox.Yes)
+        else:
+            return QMessageBox.No
 
     def modified_project(self):
         self.__saved = False

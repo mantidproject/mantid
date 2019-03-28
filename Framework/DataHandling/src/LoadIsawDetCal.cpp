@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 #include <fstream>
-#include <iostream>
 #include <numeric>
 #include <sstream>
 
@@ -441,28 +440,33 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
   rY.normalize();
 
   // These are the original axes
-  const V3D oX(1., 0., 0.);
-  const V3D oY(0., 1., 0.);
+  constexpr V3D oX(1., 0., 0.);
+  constexpr V3D oY(0., 1., 0.);
 
   // Axis that rotates X
-  V3D ax1 = oX.cross_prod(rX);
-  // Rotation angle from oX to rX
-  double angle1 = oX.angle(rX) * DegreesPerRadian;
-  if (doWishCorrection)
-    angle1 += 180.0;
-  // Create the first quaternion
-  Quat Q1(angle1, ax1);
+  const V3D ax1 = oX.cross_prod(rX);
+  Quat Q1;
+  if (!ax1.nullVector(1e-12)) {
+    // Rotation angle from oX to rX
+    double angle1 = oX.angle(rX) * DegreesPerRadian;
+    if (doWishCorrection)
+      angle1 += 180.0;
+    // Create the first quaternion
+    Q1.setAngleAxis(angle1, ax1);
+  }
 
   // Now we rotate the original Y using Q1
   V3D roY = oY;
   Q1.rotate(roY);
   // Find the axis that rotates oYr onto rY
-  V3D ax2 = roY.cross_prod(rY);
-  const double angle2 = roY.angle(rY) * DegreesPerRadian;
-  Quat Q2(angle2, ax2);
-
+  const V3D ax2 = roY.cross_prod(rY);
+  Quat Q2;
+  if (!ax2.nullVector(1e-12)) {
+    const double angle2 = roY.angle(rY) * DegreesPerRadian;
+    Q2.setAngleAxis(angle2, ax2);
+  }
   // Final = those two rotations in succession; Q1 is done first.
-  Quat Rot = Q2 * Q1;
+  const Quat Rot = Q2 * Q1;
 
   // Then find the corresponding relative position
   const auto componentIndex = componentInfo.indexOf(comp->getComponentID());

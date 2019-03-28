@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
 
@@ -25,17 +26,37 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
+std::string cutLastOf(const std::string &str, const std::string &delimiter) {
+  const auto cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
 std::string extractLastOf(const std::string &str,
                           const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
-    return str.substr(cutIndex, str.size() - cutIndex);
+    return str.substr(cutIndex + 1, str.size() - cutIndex);
   return str;
+}
+
+bool fileFound(std::string const &file) {
+  return !FileFinder::Instance().getFullPath(file).empty();
 }
 
 std::string loadAlgName(const std::string &filePath) {
   const auto suffix = extractLastOf(filePath, ".");
-  return suffix == ".dave" ? "LoadDaveGrp" : "Load";
+  return suffix == "dave" ? "LoadDaveGrp" : "Load";
+}
+
+void loadFile(std::string const &filename, std::string const &workspaceName) {
+  auto const loadAlg =
+      AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", filename);
+  loadAlg->setProperty("OutputWorkspace", workspaceName);
+  loadAlg->execute();
 }
 
 } // namespace
@@ -139,21 +160,16 @@ bool DataSelector::isValid() {
     // check to make sure the user hasn't deleted the auto-loaded file
     // since choosing it.
     if (isValid && m_autoLoad) {
-      const QString wsName = getCurrentDataName();
+      auto const wsName = getCurrentDataName().toStdString();
 
-      if (!doesExistInADS(wsName.toStdString())) {
+      if (!doesExistInADS(wsName)) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
-        const QString filepath =
-            m_uiForm.rfFileInput->getUserInput().toString();
-        const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(
-            loadAlgName(filepath.toStdString()));
-        loadAlg->initialize();
-        loadAlg->setProperty("Filename", filepath.toStdString());
-        loadAlg->setProperty("OutputWorkspace", wsName.toStdString());
-        loadAlg->execute();
+        auto const filepath =
+            m_uiForm.rfFileInput->getUserInput().toString().toStdString();
+        loadFile(filepath, wsName);
 
-        isValid = doesExistInADS(wsName.toStdString());
+        isValid = doesExistInADS(wsName);
 
         if (!isValid) {
           m_uiForm.rfFileInput->setFileProblem("The specified workspace is "
@@ -401,7 +417,9 @@ void DataSelector::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   auto before_action = de->dropAction();
 
-  if (de->mimeData() && doesExistInADS(mimeData->text().toStdString())) {
+  auto const dragData = mimeData->text().toStdString();
+
+  if (de->mimeData() && doesExistInADS(dragData)) {
     m_uiForm.wsWorkspaceInput->dropEvent(de);
     if (de->dropAction() == before_action) {
       setWorkspaceSelectorIndex(mimeData->text());
@@ -414,6 +432,18 @@ void DataSelector::dropEvent(QDropEvent *de) {
   m_uiForm.rfFileInput->dropEvent(de);
   if (de->dropAction() == before_action) {
     m_uiForm.cbInputType->setCurrentIndex(0);
+  }
+
+  auto const filepath = m_uiForm.rfFileInput->getText().toStdString();
+  if (de->mimeData() && !doesExistInADS(dragData) && !filepath.empty()) {
+    auto const file = extractLastOf(filepath, "/");
+    if (fileFound(file)) {
+      auto const workspaceName = cutLastOf(file, ".");
+      loadFile(filepath, workspaceName);
+
+      setWorkspaceSelectorIndex(QString::fromStdString(workspaceName));
+      m_uiForm.cbInputType->setCurrentIndex(1);
+    }
   }
 }
 

@@ -24,3 +24,6 @@ class PeakSelectorPresenter(object):
 
     def unreg_on_finished(self, slot):
         self.view.unreg_on_finished(slot)
+
+    def get_checked(self):
+        return self.view.get_checked()

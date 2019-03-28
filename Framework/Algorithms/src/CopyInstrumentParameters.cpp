@@ -10,7 +10,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 namespace Algorithms {

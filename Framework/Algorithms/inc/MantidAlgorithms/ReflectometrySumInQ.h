@@ -33,6 +33,7 @@ public:
     double horizon{std::numeric_limits<double>::quiet_NaN()};
     double twoTheta{std::numeric_limits<double>::quiet_NaN()};
     double delta{std::numeric_limits<double>::quiet_NaN()};
+    size_t referenceWSIndex{0};
   };
 
   struct MinMax {
@@ -65,13 +66,12 @@ private:
   MinMax findWavelengthMinMax(const API::MatrixWorkspace &detectorWS,
                               const Indexing::SpectrumIndexSet &indices,
                               const Angles &refAngles);
-  void
-  processValue(const int inputIdx, const MinMax &twoThetaRange,
-               const Angles &refAngles,
-               const Mantid::HistogramData::BinEdges &inputX,
-               const Mantid::HistogramData::Counts &inputY,
-               const Mantid::HistogramData::CountStandardDeviations &inputE,
-               API::MatrixWorkspace &IvsLam, std::vector<double> &outputE);
+  void processValue(const int inputIdx, const MinMax &twoThetaRange,
+                    const Angles &refAngles,
+                    const HistogramData::BinEdges &edges,
+                    const HistogramData::Counts &counts,
+                    const HistogramData::CountStandardDeviations &stdDevs,
+                    API::MatrixWorkspace &IvsLam, std::vector<double> &outputE);
   MinMax projectedLambdaRange(const MinMax &wavelengthRange,
                               const MinMax &twoThetaRange,
                               const Angles &refAngles);

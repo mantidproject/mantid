@@ -17,6 +17,7 @@ Ui_AddRunsPage, _ = load_ui(__file__, "add_runs_page.ui")
 class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
     sum = Signal()
     outFileChanged = Signal()
+    saveDirectoryClicked = Signal()
 
     def __init__(self, parent=None):
         super(AddRunsPage, self).__init__(parent)
@@ -26,6 +27,7 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
         self.fileNameEdit.editingFinished.connect(self.outFileChanged)
+        self.saveDirectoryButton.clicked.connect(self.saveDirectoryClicked)
 
     def run_selector_view(self):
         return self.run_selector
@@ -57,6 +59,11 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
 
     def disable_summation_settings(self):
         self.summation_settings_view().setEnabled(False)
+
+    def display_save_directory_box(self, title, default_path):
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, title, default_path,
+                                                              QtWidgets.QFileDialog.ShowDirsOnly)
+        return filename
 
     def setupUi(self, other):
         Ui_AddRunsPage.setupUi(self, other)

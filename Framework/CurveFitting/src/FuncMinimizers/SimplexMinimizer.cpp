@@ -55,7 +55,8 @@ SimplexMinimizer::SimplexMinimizer(const double epsabs)
   gslContainer.params = nullptr;
 }
 
-void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
+void SimplexMinimizer::initialize(API::ICostFunction_sptr function,
+                                  size_t /*maxIterations*/) {
   m_costFunction = function;
 
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
@@ -86,7 +87,7 @@ void SimplexMinimizer::initialize(API::ICostFunction_sptr function, size_t) {
  * Do one iteration.
  * @return :: true if iterations to be continued, false if they can stop
  */
-bool SimplexMinimizer::iterate(size_t) {
+bool SimplexMinimizer::iterate(size_t /*iteration*/) {
   int status = gsl_multimin_fminimizer_iterate(m_gslSolver);
   if (status) {
     m_errorString = gsl_strerror(status);

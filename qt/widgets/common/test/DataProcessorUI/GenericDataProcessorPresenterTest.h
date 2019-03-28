@@ -267,7 +267,7 @@ private:
         << "12346"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -287,7 +287,7 @@ private:
         << "24682"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -315,7 +315,7 @@ private:
         << "12346"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -335,7 +335,7 @@ private:
         << "24682"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -355,7 +355,7 @@ private:
         << "30001"
         << "1.5"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -383,7 +383,7 @@ private:
         << "12346"
         << "1.5"
         << "11116"
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -405,7 +405,7 @@ private:
         << "24682"
         << "1.5"
         << "22222"
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -1653,7 +1653,7 @@ public:
         << "dataB"
         << "2.3"
         << ""
-        << "1.4"
+        << "0.13"
         << "2.9"
         << "0.04"
         << "1"
@@ -2416,7 +2416,7 @@ public:
     rowlist[0].insert(1);
 
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2466,9 +2466,9 @@ public:
 
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
+        "1\t24682\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2496,7 +2496,7 @@ public:
     rowlist[0].insert(1);
 
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2538,7 +2538,7 @@ public:
 
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "0\t12346\t1.5\t\t0.13\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
         "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
@@ -3299,16 +3299,16 @@ public:
             "IvsQ_TOF_12345_TOF_12346");
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[0], 0.01108, 1e-5);
+        out->x(0)[0], 0.13860, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[1], 0.01153, 1e-5);
+        out->x(0)[1], 0.14415, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[2], 0.01199, 1e-5);
+        out->x(0)[2], 0.14991, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[3], 0.01247, 1e-5);
+        out->x(0)[3], 0.15591, 1e-5);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);

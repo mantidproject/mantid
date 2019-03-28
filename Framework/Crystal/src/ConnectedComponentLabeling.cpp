@@ -439,9 +439,8 @@ ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(
   // Get the keys (label ids) first in order to do the next stage in parallel.
   VecIndexes keys;
   keys.reserve(clusters.size());
-  for (auto &cluster : clusters) {
-    keys.push_back(cluster.first);
-  }
+  std::transform(clusters.cbegin(), clusters.cend(), std::back_inserter(keys),
+                 [](const auto &cluster) { return cluster.first; });
   // Write each cluster out to the output workspace
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(keys.size()); ++i) { // NOLINT

@@ -64,22 +64,22 @@ Usage
 	# First the spectra. They contain a single peak at peakPosition.
 	spectrum = 'name = Gaussian, PeakCentre = {0}, Height = 500.0, Sigma = 30.0'.format(peakPosition)
 	# The workspace itself.
-	ws = CreateSampleWorkspace(WorkspaceType = 'Histogram', XUnit = 'TOF',\
-	XMin = 100.0, XMax = 1100.0, BinWidth = 10.0,\
-	NumBanks = 2, BankDistanceFromSample = sampleToDetector,\
+	ws = CreateSampleWorkspace(WorkspaceType = 'Histogram', XUnit = 'TOF',
+	XMin = 100.0, XMax = 1100.0, BinWidth = 10.0,
+	NumBanks = 2, BankDistanceFromSample = sampleToDetector,
 	Function = 'User Defined', UserDefinedFunction = spectrum)
 	# Move the detector.
-	MoveInstrumentComponent(Workspace = ws, ComponentName = 'basic_rect/bank2',\
-	X = -monitorToSample,\
+	MoveInstrumentComponent(Workspace = ws, ComponentName = 'basic_rect/bank2',
+	X = -monitorToSample,
 	RelativePosition = False)
 
 	# Preparations are done, actual calibration ensues.
 	eppTable = FindEPP(InputWorkspace = ws)
 	# We choose all detectors in the detector bank, and only the
 	# centre detector as the monitor in the monitor bank.
-	calibratedE_i = GetEiMonDet(DetectorWorkspace = ws, DetectorEPPTable = eppTable,\
-	Detectors = "100-199", Monitor = 200,\
-	NominalIncidentEnergy = E_i, PulseInterval = pulseInterval)
+	calibratedE_i = GetEiMonDet(DetectorWorkspace = ws, DetectorEPPTable = eppTable,
+	Detectors = "100-199", Monitor = 200,
+	NominalIncidentEnergy = E_i, PulseInterval = pulseInterval, Version=2)
 
 	print('Nominal incident energy: {0:.5f}'.format(E_i))
 	print('Calibrated energy: {0:.5f}'.format(calibratedE_i))

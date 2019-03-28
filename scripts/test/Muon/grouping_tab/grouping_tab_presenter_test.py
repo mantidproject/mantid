@@ -1,8 +1,8 @@
-import unittest
-import sys
-import six
 from PyQt4 import QtGui
+import six
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
 
@@ -15,11 +15,6 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import Groupin
 
 from Muon.GUI.Common.muon_data_context import MuonDataContext
 from Muon.GUI.Common import mock_widget
-
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
 
 
 class GroupingTabPresenterTest(unittest.TestCase):
@@ -45,6 +40,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
                                               self.grouping_table_widget,
                                               self.pairing_table_widget)
 
+        self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
         self.view.display_warning_box = mock.MagicMock()
         self.grouping_table_view.warning_popup = mock.MagicMock()
         self.pairing_table_view.warning_popup = mock.MagicMock()
@@ -156,12 +152,11 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.assertEqual(mock_save.call_args[0][-1], "grouping.xml")
 
     def test_update_all_calculates_groups_and_pairs(self):
-        self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
-        self.view.update_button.clicked.emit(True)
+        self.presenter.handle_update_all_clicked()
 
         self.presenter.update_thread.threadWrapperSetUp.assert_called_once_with(self.presenter.disable_editing,
-                                                                                self.presenter.enable_editing,
-                                                                                self.view.display_warning_box)
+                                                                                self.presenter.handle_update_finished,
+                                                                                self.presenter.error_callback)
         self.presenter.update_thread.start.assert_called_once_with()
 
     def test_removing_group_removes_linked_pairs(self):

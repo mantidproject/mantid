@@ -21,6 +21,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/File.h>
@@ -39,7 +40,7 @@ using namespace API;
 using namespace Geometry;
 
 void LoadSampleEnvironment::init() {
-  auto wsValidator = boost::make_shared<API::InstrumentValidator>();
+  auto wsValidator = boost::make_shared<InstrumentValidator>();
   // input workspace
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
@@ -111,6 +112,10 @@ void LoadSampleEnvironment::init() {
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
+  const std::vector<std::string> units({"Atoms", "Formula Units"});
+  declareProperty("NumberDensityUnit", units.front(),
+                  boost::make_shared<StringListValidator>(units),
+                  "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
   std::string formulaGrp("By Formula or Atomic Number");
@@ -126,6 +131,7 @@ void LoadSampleEnvironment::init() {
 
   std::string densityGrp("Sample Density");
   setPropertyGroup("SampleNumberDensity", densityGrp);
+  setPropertyGroup("NumberDensityUnit", densityGrp);
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
   setPropertyGroup("SampleMassDensity", densityGrp);
@@ -138,6 +144,9 @@ void LoadSampleEnvironment::init() {
                                             "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>(
                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "NumberDensityUnit",
+      make_unique<EnabledWhenProperty>("SampleNumberDensity", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -205,6 +214,13 @@ void LoadSampleEnvironment::exec() {
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
     params.scatteringXSection = getProperty("ScatteringXSection");
+    const std::string numberDensityUnit = getProperty("NumberDensityUnit");
+    if (numberDensityUnit == "Atoms") {
+      params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
+    } else {
+      params.numberDensityUnit =
+          MaterialBuilder::NumberDensityUnit::FormulaUnits;
+    }
     binaryStlReader = std::make_unique<LoadBinaryStl>(filename, params);
     asciiStlReader = std::make_unique<LoadAsciiStl>(filename, params);
   } else {
@@ -217,7 +233,7 @@ void LoadSampleEnvironment::exec() {
   } else if (asciiStlReader->isAsciiSTL(filename)) {
     environmentMesh = asciiStlReader->readStl();
   } else {
-    throw Kernel::Exception::ParseError(
+    throw Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
   }
   environmentMesh = translate(environmentMesh);
@@ -226,14 +242,13 @@ void LoadSampleEnvironment::exec() {
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
-  std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
+  std::unique_ptr<SampleEnvironment> environment = nullptr;
   if (add) {
-    environment =
-        std::make_unique<Geometry::SampleEnvironment>(sample.getEnvironment());
+    environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
     auto can = boost::make_shared<Container>(environmentMesh);
-    environment = std::make_unique<Geometry::SampleEnvironment>(name, can);
+    environment = std::make_unique<SampleEnvironment>(name, can);
   }
   // Put Environment into sample.
 
@@ -283,8 +298,8 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
       throw std::invalid_argument(
           "Invalid Translation vector, must have exactly 3 dimensions");
     }
-    Kernel::V3D translate = Kernel::V3D(
-        translationVector[0], translationVector[1], translationVector[2]);
+    V3D translate =
+        V3D(translationVector[0], translationVector[1], translationVector[2]);
     environmentMesh->translate(translate);
   }
   return environmentMesh;
@@ -308,7 +323,7 @@ LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
           "Invalid Rotation Matrix, must have exactly 9 values, not: " +
           std::to_string(rotationMatrix.size()));
     }
-    Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
+    Matrix<double> rotation = Matrix<double>(rotationMatrix);
     double determinant = rotation.determinant();
     if (!(std::abs(determinant) == 1.0)) {
       throw std::invalid_argument("Invalid Rotation Matrix");

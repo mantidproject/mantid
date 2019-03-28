@@ -25,6 +25,7 @@ set ( SRC_FILES
 	IndirectDataReductionTab.cpp
 	IndirectDataTablePresenter.cpp
 	IndirectDiffractionReduction.cpp
+	IndirectEditResultsDialog.cpp
 	IndirectFitAnalysisTab.cpp
 	IndirectFitData.cpp
 	IndirectFitDataPresenter.cpp
@@ -102,6 +103,7 @@ set ( INC_FILES
 	IndirectDataReductionTab.h
 	IndirectDataTablePresenter.h
 	IndirectDiffractionReduction.h
+	IndirectEditResultsDialog.h
 	IndirectFitAnalysisTab.h
 	IndirectFitData.h
 	IndirectFitDataPresenter.h
@@ -173,6 +175,7 @@ set ( MOC_FILES
     IndirectDataReductionTab.h
     IndirectDataTablePresenter.h
     IndirectDiffractionReduction.h
+    IndirectEditResultsDialog.h
     IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
@@ -227,6 +230,7 @@ set ( UI_FILES
    IndirectDataAnalysis.ui
    IndirectDataReduction.ui
    IndirectDiffractionReduction.ui
+   IndirectEditResultsDialog.ui
    IndirectFitDataView.ui
    IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui

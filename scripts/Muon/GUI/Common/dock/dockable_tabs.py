@@ -27,6 +27,9 @@ class DetachableTabWidget(QtGui.QTabWidget):
         # does not have a parent
         self.detachedTabs = {}
 
+        self.tab_order = []
+        self.attached_tab_names = []
+
         # Close all detached tabs if the application is closed explicitly
         # QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
 
@@ -39,6 +42,11 @@ class DetachableTabWidget(QtGui.QTabWidget):
         so as not to conflict with the added features.
         """
         pass
+
+    def addTabWithOrder(self, tab, name):
+        self.tab_order.append(name)
+        self.attached_tab_names.append(name)
+        super(DetachableTabWidget, self).addTab(tab, name)
 
     @pyqtSlot(int, int)
     def move_tab(self, from_index, to_index):
@@ -67,6 +75,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
         """
         # Get the tab content
         name = self.tabText(index)
+        self.attached_tab_names.remove(name)
         icon = self.tabIcon(index)
         if icon.isNull():
             icon = self.window().windowIcon()
@@ -90,6 +99,13 @@ class DetachableTabWidget(QtGui.QTabWidget):
         # Create a reference to maintain access to the detached tab
         self.detachedTabs[name] = detached_tab
 
+    def determine_insert_position(self, name):
+        tabs_to_check = self.tab_order[self.tab_order.index(name) + 1:]
+        for tab in tabs_to_check:
+            if tab in self.attached_tab_names:
+                return self.attached_tab_names.index(tab)
+        return len(self.attached_tab_names)
+
     def attach_tab(self, content_widget, name, icon, insert_at=None):
         """
         Re-attach the tab by removing the content from the DetachedTab window,
@@ -100,7 +116,10 @@ class DetachableTabWidget(QtGui.QTabWidget):
         :param insert_at: insert the re-attached tab at the given index.
         :return: None
         """
+        if not insert_at:
+            insert_at = self.determine_insert_position(name)
 
+        self.attached_tab_names.insert(insert_at, name)
         # Make the content widget a child of this widget
         content_widget.setParent(self)
 

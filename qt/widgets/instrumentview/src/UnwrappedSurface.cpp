@@ -597,9 +597,9 @@ void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
  */
 void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   // U is the horizontal axis on the screen
-  const Mantid::Kernel::V3D U(-1, 0, 0);
+  constexpr Mantid::Kernel::V3D U(-1, 0, 0);
   // V is the vertical axis on the screen
-  const Mantid::Kernel::V3D V(0, 1, 0);
+  constexpr Mantid::Kernel::V3D V(0, 1, 0);
 
   // find the detector's rotation
   Mantid::Kernel::Quat R;

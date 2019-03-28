@@ -52,8 +52,10 @@ constexpr double energyToK = 8.0 * M_PI * M_PI *
                              PhysicalConstants::meV * 1e-20 /
                              (PhysicalConstants::h * PhysicalConstants::h);
 
-// compare absolute values of integers
-static bool abs_compare(int a, int b) { return (std::abs(a) < std::abs(b)); }
+// compare absolute values of doubles
+static bool abs_compare(double a, double b) {
+  return (std::fabs(a) < std::fabs(b));
+}
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory

@@ -31,7 +31,7 @@ class TransformToIqtTest(unittest.TestCase):
         self._param_table.addColumn('float', 'Resolution')
         self._param_table.addColumn('int', 'ResolutionBins')
 
-        self._param_table.addRow([1725, 10.0, 172, -0.5, 0.5, 0.00581395, 0.0175, 6])
+        self._param_table.addRow([1725, 10.0, 172, -0.5, 0.5, 0.00581395, 0.01845, 6])
 
 
     def test_with_can_reduction(self):

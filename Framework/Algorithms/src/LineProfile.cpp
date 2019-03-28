@@ -260,7 +260,8 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
  * @param n Number of summed points.
  * @return The average.
  */
-double averageMode(const double sum, const size_t n, const size_t) noexcept {
+double averageMode(const double sum, const size_t n,
+                   const size_t /*unused*/) noexcept {
   return sum / static_cast<double>(n);
 }
 

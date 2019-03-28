@@ -706,6 +706,7 @@ void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
 void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_infoController->displayInfo(pickID);
   m_plotController->setPlotData(pickID);
+  m_plotController->zoomOutOnPlot();
   m_plotController->updatePlot();
 }
 
@@ -1809,5 +1810,15 @@ void DetectorPlotController::addPeak(double x, double y) {
   }
 }
 
+/**
+ * Zoom out back to the natural home of the mini plot
+ */
+void DetectorPlotController::zoomOutOnPlot() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+// Do nothing if in Qt4 or below.
+#else
+  m_plot->zoomOutOnPlot();
+#endif
+}
 } // namespace MantidWidgets
 } // namespace MantidQt

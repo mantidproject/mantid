@@ -176,6 +176,12 @@ void renameResult(Workspace_sptr resultWorkspace,
     renameWorkspace(name, newName);
 }
 
+void renameResult(WorkspaceGroup_sptr resultWorkspace,
+                  IndirectFitData const *fitData) {
+  for (auto const &workspace : *resultWorkspace)
+    renameResult(workspace, fitData);
+}
+
 void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,
                                 const FitDataIterator &fitDataBegin,
                                 const FitDataIterator &fitDataEnd) {

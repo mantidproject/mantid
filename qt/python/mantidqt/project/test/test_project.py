@@ -8,23 +8,16 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import unittest
-import sys
-import tempfile
 import os
+import tempfile
+import unittest
 
 from qtpy.QtWidgets import QMessageBox
 
-from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
+from mantid.py3compat import mock
 from mantidqt.project.project import Project
-
-if sys.version_info.major >= 3:
-    # Python 3 and above
-    from unittest import mock
-else:
-    # Python 2
-    import mock
 
 
 class FakeGlobalFigureManager(object):
@@ -56,36 +49,38 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(self.project.save_as.call_count, 0)
 
     def test_save_saves_project_successfully(self):
-        working_directory = tempfile.mkdtemp()
-        self.project.last_project_location = working_directory
+        working_file = os.path.join(tempfile.mkdtemp(), "temp" + ".mtdproj")
+        self.project.last_project_location = working_file
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project._offer_overwriting_gui = mock.MagicMock(return_value=QMessageBox.Yes)
 
         self.project.save()
 
-        self.assertTrue(os.path.isdir(working_directory))
-        file_list = os.listdir(working_directory)
-        self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
+        self.assertTrue(os.path.isfile(working_file))
+        file_list = os.listdir(os.path.dirname(working_file))
+        self.assertTrue(os.path.basename(working_file) in file_list)
         self.assertTrue("ws1.nxs" in file_list)
         self.assertEqual(self.project._offer_overwriting_gui.call_count, 1)
 
     def test_save_as_saves_project_successfully(self):
-        working_directory = tempfile.mkdtemp()
-        self.project._save_file_dialog = mock.MagicMock(return_value=working_directory)
+        working_file = os.path.join(tempfile.mkdtemp(), "temp" + ".mtdproj")
+        working_directory = os.path.dirname(working_file)
+        self.project._save_file_dialog = mock.MagicMock(return_value=working_file)
         CreateSampleWorkspace(OutputWorkspace="ws1")
 
         self.project.save_as()
 
         self.assertEqual(self.project._save_file_dialog.call_count, 1)
+        self.assertTrue(os.path.isfile(working_file))
         self.assertTrue(os.path.isdir(working_directory))
         file_list = os.listdir(working_directory)
-        self.assertTrue(os.path.basename(working_directory) + ".mtdproj" in file_list)
+        self.assertTrue(os.path.basename(working_file) in file_list)
         self.assertTrue("ws1.nxs" in file_list)
 
     def test_load_calls_loads_successfully(self):
         working_directory = tempfile.mkdtemp()
         return_value_for_load = os.path.join(working_directory, os.path.basename(working_directory) + ".mtdproj")
-        self.project._save_file_dialog = mock.MagicMock(return_value=working_directory)
+        self.project._save_file_dialog = mock.MagicMock(return_value=return_value_for_load)
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project.save_as()
 

@@ -67,6 +67,7 @@ signals:
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
+  void updateAvailableFitTypes();
 
 protected:
   IIndirectFitDataView const *getView() const;

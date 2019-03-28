@@ -420,7 +420,12 @@ WorkspaceTreeWidget::SaveFileType WorkspaceTreeWidget::getSaveFileType() const {
   return m_saveFileType;
 }
 
-void WorkspaceTreeWidget::saveWorkspace(SaveFileType type) {
+void WorkspaceTreeWidget::saveWorkspace(const std::string &wsName,
+                                        SaveFileType type) {
+  QHash<QString, QString> presets;
+  if (!wsName.empty()) {
+    presets["InputWorkspace"] = QString::fromStdString(wsName);
+  }
   int version = -1;
   std::string algorithmName;
 
@@ -436,7 +441,7 @@ void WorkspaceTreeWidget::saveWorkspace(SaveFileType type) {
   }
 
   m_mantidDisplayModel->showAlgorithmDialog(
-      QString::fromStdString(algorithmName), version);
+      QString::fromStdString(algorithmName), presets, nullptr, version);
 }
 
 void WorkspaceTreeWidget::saveWorkspaces(const StringList &wsNames) {

@@ -6,18 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from Muon.GUI.Common import mock_widget
-
+from mantid.py3compat import mock
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.multi_plotting_context import PlottingContext
+from Muon.GUI.Common import mock_widget
 
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 class bounds(object):
     def __init__(self,x,y):
@@ -37,6 +32,7 @@ class bounds(object):
     def errors(self):
         return self.error
 
+
 def data():
     values = {}
     values["one"] = bounds([5,20],[5,10])
@@ -44,6 +40,7 @@ def data():
     values["three"] = bounds([-1,11],[7,8])
     values["four"] = bounds([4,12],[4,50])
     return values
+
 
 class MultiPlotWidgetTest(unittest.TestCase):
 
@@ -54,7 +51,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
  
     def test_add_subplot(self):
         with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
-            self.widget.add_subplot("test",111)
+            self.widget.add_subplot("test")
             self.assertEquals(qe_patch.call_count,1)
 
     def test_plot(self):
@@ -78,6 +75,16 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget.set_all_values()
         self.widget._x_range_changed.assert_called_with([-1,20])
         self.widget._y_range_changed.assert_called_with([0,50])
+
+    def test_updateQuickEditNoMatch(self):
+        self.widget._context.subplots = data()
+        # mocks as we only want to test logic
+        self.widget.quickEdit.get_selection = mock.MagicMock(return_value = data())
+        self.widget.quickEdit.rm_subplot = mock.Mock()
+        self.widget.quickEdit._if_empty_close = mock.Mock()
+
+        self.widget._update_quick_edit("no match")
+        self.assertEquals(self.widget.quickEdit.rm_subplot.call_count, 1)
 
     def test_updateQuickEdit1Match(self):
         self.widget._context.subplots = data()
@@ -125,7 +132,6 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget.quickEdit.set_plot_x_range.assert_called_with([6,10])
         self.widget.quickEdit.set_plot_y_range.assert_called_with([0,9])
 
-  
     def test_selectionChangedAll(self):
         self.widget._context.subplots = data()
         # mocks as we only want to test logic

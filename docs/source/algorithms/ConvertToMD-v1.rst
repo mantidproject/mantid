@@ -129,7 +129,7 @@ Usage examples
 
 .. testoutput:: ExConvertToMDNoQ
 
-   Resulting MD workspace has 801 events and 3 dimensions
+   Resulting MD workspace has 802 events and 3 dimensions
    --------------------------------------------
 
 **Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**

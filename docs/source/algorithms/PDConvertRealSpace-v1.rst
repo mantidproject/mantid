@@ -63,7 +63,7 @@ Usage
     import matplotlib.pyplot as plt
     from mantid.simpleapi import CreateWorkspace 
     # Grab the real data for argon
-    url = "https://raw.githubusercontent.com/marshallmcdonnell/pystog/master/data/test_data/argon.real_space.dat"
+    url = "https://raw.githubusercontent.com/marshallmcdonnell/pystog/master/tests/test_data/argon.real_space.dat"
     filename = wget.download(url)
     r, gofr, GofR_, GKofR_ = np.loadtxt(filename, skiprows=2, unpack=True)
 

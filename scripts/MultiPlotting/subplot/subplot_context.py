@@ -21,6 +21,11 @@ class subplotContext(object):
         self._labelObjects = {}
         self._labels = {}
 
+    def update_gridspec(self, gridspec, figure, j):
+        tmp = gridspec[j].get_position(figure)
+        self._subplot.set_position(tmp)
+        self._subplot.set_subplotspec(gridspec[j])
+
     def add_vline(self, xvalue, name):
         self._vLines[name] = self._subplot.axvline(xvalue, 0, 1)
 
@@ -145,6 +150,8 @@ class subplotContext(object):
             self.removeLabel(name)
 
     def removePlotLine(self, name):
+        if name not in self._lines:
+            return
         lines = self._lines[name]
         for line in lines:
             line.remove()
@@ -162,14 +169,23 @@ class subplotContext(object):
             del self._ws[key]
 
     def removeVLine(self, name):
+        if name not in self._vLines:
+            return
         line = self._vLines[name]
         line.remove()
         del self._vLines[name]
 
     def removeLabel(self, name):
+        self._remove_label_object(name)
+        if name not in self._labels:
+            return
         label = self._labels[name]
         label.remove()
         del self._labels[name]
+
+    def _remove_label_object(self, name):
+        if name not in self._labelObjects:
+            return
         del self._labelObjects[name]
 
     def delete(self):

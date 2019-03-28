@@ -2021,11 +2021,9 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Make the shape defined in 1st argument face the position in the second
- *argument,
- *  by rotating the z-axis of the component passed in 1st argument so that it
- *points in the
- *  direction: from the position (as specified 2nd argument) to the component
- *(1st argument).
+ * argument, by rotating the z-axis of the component passed in 1st argument so
+ * that it points in the direction: from the position (as specified 2nd
+ * argument) to the component (1st argument).
  *
  *  @param in ::  Component to be rotated
  *  @param facingPoint :: position to face
@@ -2036,22 +2034,22 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
   // vector from facing object to component we want to rotate
   Kernel::V3D facingDirection = pos - facingPoint;
-  facingDirection.normalize();
-
   if (facingDirection.norm() == 0.0)
     return;
+  facingDirection.normalize();
 
   // now aim to rotate shape such that the z-axis of of the object we want to
-  // rotate
-  // points in the direction of facingDirection. That way the XY plane faces
-  // the
-  // 'facing object'.
-  Kernel::V3D z = Kernel::V3D(0, 0, 1);
+  // rotate points in the direction of facingDirection. That way the XY plane
+  // faces the 'facing object'.
+  constexpr Kernel::V3D z(0, 0, 1);
   Kernel::Quat R = in->getRotation();
   R.inverse();
   R.rotate(facingDirection);
 
   Kernel::V3D normal = facingDirection.cross_prod(z);
+  if (normal.norm() == 0.) {
+    normal = -facingDirection;
+  }
   normal.normalize();
   double theta = (180.0 / M_PI) * facingDirection.angle(z);
 
@@ -2059,8 +2057,7 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
     in->rotate(Kernel::Quat(-theta, normal));
   else {
     // To take into account the case where the facing direction is in the
-    // (0,0,1)
-    // or (0,0,-1) direction.
+    // (0,0,1) or (0,0,-1) direction.
     in->rotate(Kernel::Quat(-theta, Kernel::V3D(0, 1, 0)));
   }
 }

@@ -67,30 +67,40 @@ def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
     return eppWS
 
 
-def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace,
-                              eiCalibrationMon, wsNames, log, algorithmLogging):
+def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument().getName()
     eiWorkspace = None
     if instrument in ['IN4', 'IN6']:
-        eiCalibrationDets = [i for i in range(detWorkspace.getNumberHistograms())]
-        pulseInterval = detWorkspace.getRun().getLogData('pulse_interval').value
+        if instrument == 'IN4':
+            run = detWorkspace.run()
+            fermiChopperSpeed = run.getProperty('FC.setpoint_rotation_speed').value
+            backgroundChopperSpeed = run.getProperty('BC1.setpoint_rotation_speed').value
+            if abs(fermiChopperSpeed / 4. - backgroundChopperSpeed) > 10.:
+                log.warning('Fermi speed not four times the background chopper speed. Omitting incident energy calibration.')
+                return None
+            eiCalibrationDets = '0-299'
+            maximumEnergy = 1000.
+        else:
+            # IN6
+            eiCalibrationDets = '0-336'
+            maximumEnergy = 10.
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
-                             DetectorEPPTable=detEPPWorkspace,
-                             IndexType='Workspace Index',
-                             Detectors=eiCalibrationDets,
+                             DetectorWorkspaceIndexType='WorkspaceIndex',
+                             DetectorWorkspaceIndexSet=eiCalibrationDets,
                              MonitorWorkspace=monWorkspace,
-                             MonitorEppTable=monEPPWorkspace,
-                             Monitor=eiCalibrationMon,
-                             PulseInterval=pulseInterval,
+                             MonitorEPPTable=monEPPWorkspace,
+                             MonitorIndex=eiCalibrationMon,
+                             MaximumEnergy=maximumEnergy,
                              EnableLogging=algorithmLogging)
         eiWSName = wsNames.withSuffix('incident_energy')
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
                                                   DataValue=energy,
                                                   EnableLogging=algorithmLogging)
+        return eiWorkspace
     else:
         log.error('Instrument ' + instrument + ' not supported for incident energy calibration')
-    return eiWorkspace
+        return None
 
 
 def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
@@ -541,11 +551,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         eiCalibrationWS = None
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
-                detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
                 monIndex = self._monitorIndex(monWS)
-                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, monIndex, wsNames,
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, monWS, monEPPWS, monIndex, wsNames,
                                                             self.log(), subalgLogging)
-                wsCleanup.cleanup(detEPPWS)
             else:
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
                 wsCleanup.protect(eiCalibrationWS)

@@ -17,7 +17,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 

@@ -255,6 +255,8 @@ public:
   QString getTubeXUnitsUnits() const;
   QString getPlotCaption() const;
 
+  void zoomOutOnPlot();
+
 private slots:
 
   void addPeak(double x, double y);

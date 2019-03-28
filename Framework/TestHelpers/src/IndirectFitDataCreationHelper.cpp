@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -30,6 +36,19 @@ createWorkspaceWithTextAxis(int const &numberOfSpectra,
         "The number of spectra is not equal to the number of labels");
 }
 
+MatrixWorkspace_sptr
+createWorkspaceWithBinValues(int const &numberOfSpectra,
+                             std::vector<double> const &values,
+                             int const &numberOfBins) {
+  if (static_cast<std::size_t>(numberOfBins) == values.size()) {
+    auto workspace = createWorkspace(numberOfSpectra, numberOfBins);
+    workspace->replaceAxis(0, getNumericAxis(numberOfBins, values));
+    return workspace;
+  } else
+    throw std::runtime_error(
+        "The number of bins is not equal to the number of labels");
+}
+
 WorkspaceGroup_sptr createGroupWorkspace(std::size_t const &numberOfWorkspaces,
                                          int const &numberOfSpectra,
                                          int const &numberOfBins) {
@@ -57,6 +76,14 @@ TextAxis *getTextAxis(int const &numberOfSpectra,
   auto axis = new TextAxis(numberOfSpectra);
   for (auto index = 0; index < numberOfSpectra; ++index)
     axis->setLabel(index, labels[index]);
+  return axis;
+}
+
+NumericAxis *getNumericAxis(int const &numberOfLabels,
+                            std::vector<double> const &values) {
+  auto axis = new NumericAxis(numberOfLabels);
+  for (auto index = 0; index < numberOfLabels; ++index)
+    axis->setValue(index, values[index]);
   return axis;
 }
 

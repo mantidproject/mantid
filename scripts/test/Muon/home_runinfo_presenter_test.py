@@ -4,30 +4,28 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+from PyQt4 import QtGui
+import unittest
 
+from mantid.api import FileFinder
+from mantid.py3compat import mock
+from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
 from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
-from mantid.api import FileFinder
-import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_pair import MuonPair
-import unittest
-from PyQt4 import QtGui
-
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class HomeTabRunInfoPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
-        self.context = MuonDataContext()
+        self.loaded_data = MuonLoadData()
+        self.context = MuonDataContext(self.loaded_data)
+        self.context.instrument = 'MUSR'
         self.view = HomeRunInfoWidgetView(self.obj)
         self.model = HomeRunInfoWidgetModel(self.context)
         self.presenter = HomeRunInfoWidgetPresenter(self.view, self.model)
@@ -41,7 +39,8 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
         self.context._loaded_data.remove_data(run=run)
-        self.context._loaded_data.add_data(run=run, workspace=ws, filename=filename)
+        self.context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.context.current_runs = [[22725]]
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
         self.context.add_pair(pair=test_pair)

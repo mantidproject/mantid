@@ -183,7 +183,7 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._samWS, self._resWS)
+        CheckAnalysersOrEFixed(self._samWS, self._resWS)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._samWS)
         theta, Q = GetThetaQ(self._samWS)
@@ -335,7 +335,8 @@ class BayesQuasi(PythonAlgorithm):
 
             workflow_prog.report('Creating OutputWorkspace')
             s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
-                                  Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+                                  Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names,
+                                  EnableLogging=False)
 
             # append workspace to list of results
             group += fout + ','
@@ -363,7 +364,7 @@ class BayesQuasi(PythonAlgorithm):
             prob_axis_names = '0 Peak, 1 Peak, 2 Peak, 3 Peak'
             s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
                                   Nspec=4, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-                                  VerticalAxisValues=prob_axis_names)
+                                  VerticalAxisValues=prob_axis_names, EnableLogging=False)
             outWS = self.C2Fw(fname)
         elif self._program == 'QSe':
             comp_prog.report('Running C2Se')
@@ -482,7 +483,7 @@ class BayesQuasi(PythonAlgorithm):
         logger.information('Vaxis=' + str(Vaxis))
         s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
                               UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis,
-                              YUnitLabel='')
+                              YUnitLabel='', EnableLogging=False)
 
         return outWS
 
@@ -668,7 +669,7 @@ class BayesQuasi(PythonAlgorithm):
 
         s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
                               UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text',
-                              VerticalAxisValues=axis_names)
+                              VerticalAxisValues=axis_names, EnableLogging=False)
 
         return output_workspace
 

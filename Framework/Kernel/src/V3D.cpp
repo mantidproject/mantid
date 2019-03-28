@@ -4,17 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <cfloat>
-#include <cmath>
-#include <complex>
-#include <vector>
 
-#include "MantidKernel/Exception.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
-#include "MantidKernel/Tolerance.h"
-#include "MantidKernel/V3D.h"
+#include <algorithm>
 #include <boost/version.hpp>
+#include <sstream>
 
 #if BOOST_VERSION < 106700
 #include <boost/math/common_factor.hpp>
@@ -25,6 +21,28 @@ using boost::integer::gcd;
 #endif
 
 #include <nexus/NeXusFile.hpp>
+
+namespace {
+/** transform vector into form, used to describe directions in crystallogaphical
+ * coodinate system, assuming that the vector describes perpendicular to a
+ * crystallogaphic plain or is close to such plain.
+ *
+ * As crystallographical coordinate sytem is based on 3 integers, eps is used
+ * as accuracy to convert into integers
+ */
+double nearInt(double val, double eps, double mult) noexcept {
+  if (val > 0) {
+    if (val < 1) {
+      mult /= val;
+    } else {
+      if (std::abs(val - std::round(val)) > eps) {
+        mult *= std::ceil(val / eps) * eps / val;
+      }
+    }
+  }
+  return mult;
+}
+} // namespace
 
 namespace Mantid {
 namespace Kernel {
@@ -38,20 +56,10 @@ namespace Kernel {
   @param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points
   along +X and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical(const double &R, const double &theta, const double &phi) {
+void V3D::spherical(const double R, const double theta,
+                    const double phi) noexcept {
   constexpr double deg2rad = M_PI / 180.0;
-  z = R * cos(theta * deg2rad);
-  const double ct = sin(theta * deg2rad);
-  x = R * ct * cos(phi * deg2rad);
-  y = R * ct * sin(phi * deg2rad);
-
-  // Setting this way can lead to very small values of x & y that should really
-  // be zero.
-  // This can cause confusion for the atan2 function used in getSpherical.
-  if (std::abs(x) < Tolerance)
-    x = 0.0;
-  if (std::abs(y) < Tolerance)
-    y = 0.0;
+  spherical_rad(R, theta * deg2rad, phi * deg2rad);
 }
 
 /**
@@ -62,20 +70,20 @@ void V3D::spherical(const double &R, const double &theta, const double &phi) {
   @param azimuth :: the azimuthal angle (in radians), where 0 points along +X
   and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical_rad(const double &R, const double &polar,
-                        const double &azimuth) {
-  z = R * cos(polar);
+void V3D::spherical_rad(const double R, const double polar,
+                        const double azimuth) noexcept {
+  m_pt[2] = R * cos(polar);
   const double ct = R * sin(polar);
-  x = ct * cos(azimuth);
-  y = ct * sin(azimuth);
+  m_pt[0] = ct * cos(azimuth);
+  m_pt[1] = ct * sin(azimuth);
 
   // Setting this way can lead to very small values of x & y that should really
   // be zero.
   // This can cause confusion for the atan2 function used in getSpherical.
-  if (std::abs(x) < Tolerance)
-    x = 0.0;
-  if (std::abs(y) < Tolerance)
-    y = 0.0;
+  if (std::abs(m_pt[0]) < Tolerance)
+    m_pt[0] = 0.0;
+  if (std::abs(m_pt[1]) < Tolerance)
+    m_pt[1] = 0.0;
 }
 
 /**
@@ -88,22 +96,22 @@ void V3D::spherical_rad(const double &R, const double &polar,
   @param polar :: The polar value (in Radians)
 */
 
-void V3D::azimuth_polar_SNS(const double &R, const double &azimuth,
-                            const double &polar) {
-  y = R * cos(polar);
+void V3D::azimuth_polar_SNS(const double R, const double azimuth,
+                            const double polar) noexcept {
+  m_pt[1] = R * cos(polar);
   const double ct = R * sin(polar);
-  x = ct * cos(azimuth);
-  z = ct * sin(azimuth);
+  m_pt[0] = ct * cos(azimuth);
+  m_pt[2] = ct * sin(azimuth);
 
   // Setting this way can lead to very small values of x & y that should really
   // be zero.
   // This can cause confusion for the atan2 function used in getSpherical.
-  if (std::abs(x) < Tolerance)
-    x = 0.0;
-  if (std::abs(y) < Tolerance)
-    y = 0.0;
-  if (std::abs(z) < Tolerance)
-    z = 0.0;
+  if (std::abs(m_pt[0]) < Tolerance)
+    m_pt[0] = 0.0;
+  if (std::abs(m_pt[1]) < Tolerance)
+    m_pt[1] = 0.0;
+  if (std::abs(m_pt[2]) < Tolerance)
+    m_pt[2] = 0.0;
 }
 
 /** Return the vector's position in spherical coordinates
@@ -111,57 +119,43 @@ void V3D::azimuth_polar_SNS(const double &R, const double &azimuth,
  *  @param theta :: Returns the theta angle in degrees
  *  @param phi ::   Returns the phi (azimuthal) angle in degrees
  */
-void V3D::getSpherical(double &R, double &theta, double &phi) const {
+void V3D::getSpherical(double &R, double &theta, double &phi) const noexcept {
   constexpr double rad2deg = 180.0 / M_PI;
   R = norm();
   theta = 0.0;
   if (R != 0.0)
-    theta = acos(z / R) * rad2deg;
-  phi = atan2(y, x) * rad2deg;
+    theta = acos(m_pt[2] / R) * rad2deg;
+  phi = atan2(m_pt[1], m_pt[0]) * rad2deg;
 }
 
 /**
-  Vector length
-  @return vec.length()
-*/
-double V3D::norm() const { return sqrt(x * x + y * y + z * z); }
-
-/**
-  Normalises the vector and
-  then returns the scalar value of the vector
-  @return Norm
+  Normalises the vector and returns its original length
+  @return the norm of the vector before normalization
 */
 double V3D::normalize() {
   const double ND(norm());
+  if (ND == 0) {
+    throw std::runtime_error("Unable to normalize a zero length vector.");
+  }
   this->operator/=(ND);
   return ND;
 }
 
 /** Round each component to the nearest integer */
-void V3D::round() {
-  x = std::round(x);
-  y = std::round(y);
-  z = std::round(z);
-}
-
-/**
-  Calculates the distance between two vectors
-  @param v :: The second vector to include in the calculation
-  @return The distance between the two vectors
-*/
-double V3D::distance(const V3D &v) const {
-  const double dx(x - v.x), dy(y - v.y), dz(z - v.z);
-  return sqrt(dx * dx + dy * dy + dz * dz);
+void V3D::round() noexcept {
+  for (auto &p : m_pt) {
+    p = std::round(p);
+  }
 }
 
 /** Calculates the zenith angle (theta) of this vector with respect to another
  *  @param v :: The other vector
  *  @return The azimuthal angle in radians (0 < theta < pi)
  */
-double V3D::zenith(const V3D &v) const {
-  double R = distance(v);
-  double zOffset = z - v.z;
+double V3D::zenith(const V3D &v) const noexcept {
+  const double R = distance(v);
   if (R != 0.0) {
+    const double zOffset = m_pt[2] - v.m_pt[2];
     return acos(zOffset / R);
   } else {
     return 0.0;
@@ -174,7 +168,13 @@ double V3D::zenith(const V3D &v) const {
  *  @return The angle between the vectors in radians (0 < theta < pi)
  */
 double V3D::angle(const V3D &v) const {
-  const double ratio = this->scalar_prod(v) / (this->norm() * v.norm());
+  const double n1 = norm();
+  const double n2 = v.norm();
+  if (n1 == 0. || n2 == 0.) {
+    throw std::runtime_error(
+        "Cannot calculate an angle when one of the vectors has zero length.");
+  }
+  const double ratio = this->scalar_prod(v) / (n1 * n2);
 
   if (ratio >= 1.0)       // NOTE: Due to rounding errors, if v is
     return 0.0;           //       is nearly the same as "this" or
@@ -184,7 +184,6 @@ double V3D::angle(const V3D &v) const {
   return acos(ratio);
 }
 
-int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
 /**
    Re-express this point as components of A,B,C.
    Assuming that A,B,C form a basis set (which does not have to be
@@ -195,7 +194,7 @@ int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
    @retval -1 :: The points do not form a basis set.
    @retval 0  :: Vec3D has successfully been re-expressed.
 */
-{
+int V3D::reBase(const V3D &A, const V3D &B, const V3D &C) noexcept {
   Matrix<double> T(3, 3);
   for (int i = 0; i < 3; i++) {
     T[i][0] = A[i];
@@ -203,85 +202,82 @@ int V3D::reBase(const V3D &A, const V3D &B, const V3D &C)
     T[i][2] = C[i];
   }
   const double det = T.Invert();
-  if (fabs(det) < 1e-13) // failed
+  if (std::abs(det) < 1e-13) // failed
     return -1;
   rotate(T);
   return 0;
 }
 
-void V3D::rotate(const Kernel::Matrix<double> &A)
 /**
   Rotate a point by a matrix
-  @param A :: Rotation matrix (needs to be >3x3)
+  @param A :: Rotation matrix (needs to be >= 3x3)
 */
-{
-  double xold(x), yold(y), zold(z);
-  x = A[0][0] * xold + A[0][1] * yold + A[0][2] * zold;
-  y = A[1][0] * xold + A[1][1] * yold + A[1][2] * zold;
-  z = A[2][0] * xold + A[2][1] * yold + A[2][2] * zold;
+void V3D::rotate(const Kernel::Matrix<double> &A) noexcept {
+  const double xold(m_pt[0]), yold(m_pt[1]), zold(m_pt[2]);
+  for (size_t i = 0; i < m_pt.size(); ++i) {
+    m_pt[i] = A[i][0] * xold + A[i][1] * yold + A[i][2] * zold;
+  }
 }
 
 /**
   Determines if this,B,C are collinear
   @param Bv :: Vector to test
   @param Cv :: Vector to test
-  @return false is no colinear and true if they are (within Ptolerance)
+  @return false if no colinear and true if they are (within Tolerance)
 */
-bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const {
+bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const noexcept {
   const V3D &Av = *this;
   const V3D Tmp((Bv - Av).cross_prod(Cv - Av));
   return Tmp.norm() <= Tolerance;
 }
 
-bool V3D::nullVector(const double Tol) const
 /**
   Checks the size of the vector
-  @param Tol :: size of the biggest zero vector allowed.
-  @retval 1 : the vector squared components
-  magnitude are less than Tol
-  @retval 0 :: Vector bigger than Tol
+  @param tolerance :: size of the biggest zero vector allowed.
+  @return true if the vector's elements are less in magnitude than tolerance
 */
-{
-  using namespace std;
-  if (fabs(x) > Tol)
-    return false;
-  if (fabs(y) > Tol)
-    return false;
-  if (fabs(z) > Tol)
-    return false;
-
+bool V3D::nullVector(const double tolerance) const noexcept {
+  for (const double p : m_pt) {
+    if (std::abs(p) > tolerance) {
+      return false;
+    }
+  }
   // Getting to this point means a null vector
   return true;
 }
 
-int V3D::masterDir(const double Tol) const
+bool V3D::unitVector(const double tolerance) const noexcept {
+  const auto l = norm();
+  return std::abs(l - 1.) < tolerance;
+}
+
 /**
    Calculates the index of the primary direction (if there is one)
-   @param Tol :: Tolerance accepted
+   @param tolerance :: Tolerance accepted
    @retval range -3,-2,-1 1,2,3  if the vector
-   is orientaged within Tol on the x,y,z direction (the sign
+   is orientaged within tolerance on the x,y,z direction (the sign
    indecates the direction to the +ve side )
    @retval 0 :: No master direction
 */
-{
+int V3D::masterDir(const double tolerance) const noexcept {
   // Calc max dist
-  double max = x * x;
+  double max = m_pt[0] * m_pt[0];
   double other = max;
-  double u2 = y * y;
-  int idx = (x > 0) ? 1 : -1;
+  double u2 = m_pt[1] * m_pt[1];
+  int idx = (m_pt[0] > 0) ? 1 : -1;
   if (u2 > max) {
     max = u2;
-    idx = (y > 0) ? 2 : -2;
+    idx = (m_pt[1] > 0) ? 2 : -2;
   }
   other += u2;
-  u2 = z * z;
+  u2 = m_pt[2] * m_pt[2];
   if (u2 > max) {
     max = u2;
-    idx = (z > 0) ? 3 : -3;
+    idx = (m_pt[2] > 0) ? 3 : -3;
   }
   other += u2;
   other -= max;
-  if ((other / max) > Tol) // doesn't have master direction
+  if ((other / max) > tolerance) // doesn't have master direction
   {
     return 0;
   }
@@ -297,7 +293,7 @@ int V3D::masterDir(const double Tol) const
  * @param vectors :: list of 2 vectors
  * @return list of 3 vectors
  */
-std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
+std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
   if (vectors.size() != 2)
     throw std::invalid_argument(
         "makeVectorsOrthogonal() only works with 2 vectors");
@@ -308,6 +304,7 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
   v1.normalize();
 
   std::vector<V3D> out;
+  out.reserve(3);
   out.push_back(v0);
 
   // Make a rotation 90 degrees from 0 to 1
@@ -329,7 +326,7 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
   \todo Check Error handling
   @param IX :: Input Stream
 */
-void V3D::read(std::istream &IX) { IX >> x >> y >> z; }
+void V3D::read(std::istream &IX) { IX >> m_pt[0] >> m_pt[1] >> m_pt[2]; }
 
 void V3D::write(std::ostream &OX) const
 /**
@@ -337,7 +334,7 @@ void V3D::write(std::ostream &OX) const
   @param OX :: Output stream
 */
 {
-  OX << x << " " << y << " " << z;
+  OX << m_pt[0] << " " << m_pt[1] << " " << m_pt[2];
 }
 
 /** @return the vector as a string "X Y Z" */
@@ -359,7 +356,7 @@ void V3D::fromString(const std::string &str) {
   @param os :: the Stream to output to
 */
 void V3D::printSelf(std::ostream &os) const {
-  os << "[" << x << "," << y << "," << z << "]";
+  os << "[" << m_pt[0] << "," << m_pt[1] << "," << m_pt[2] << "]";
 }
 
 /**
@@ -382,9 +379,9 @@ void V3D::readPrinted(std::istream &IX) {
   if (c1 == std::string::npos || c2 == std::string::npos)
     throw std::runtime_error("Wrong format for V3D input: [" + in + "]");
 
-  x = std::stod(in.substr(i + 1, c1 - i - 1));
-  y = std::stod(in.substr(c1 + 1, c2 - c1 - 1));
-  z = std::stod(in.substr(c2 + 1, j - c2 - 1));
+  m_pt[0] = std::stod(in.substr(i + 1, c1 - i - 1));
+  m_pt[1] = std::stod(in.substr(c1 + 1, c2 - c1 - 1));
+  m_pt[2] = std::stod(in.substr(c2 + 1, j - c2 - 1));
 }
 
 /**
@@ -417,8 +414,7 @@ std::istream &operator>>(std::istream &IX, V3D &A)
  */
 void V3D::saveNexus(::NeXus::File *file, const std::string &name) const {
   file->makeData(name, ::NeXus::FLOAT64, 3, true);
-  double data[3] = {x, y, z};
-  file->putData(data);
+  file->putData(m_pt.data());
   file->closeData();
 }
 
@@ -434,31 +430,9 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
     throw std::runtime_error(
         "Unexpected data size when reading a V3D NXS field '" + name +
         "'. Expected 3.");
-  x = data[0];
-  y = data[1];
-  z = data[2];
+  std::copy(data.cbegin(), data.cend(), m_pt.begin());
 }
 
-/** transform vector into form, used to describe directions in crystallogaphical
- *coodinate system, assuming that
- * the vector describes perpendicular to a crystallogaphic plain or is close to
- *such plain.
- *
- *  As crystallographical coordinate sytem is based on 3 integers, eps is used
- *as accuracy to convert into integers
- */
-double nearInt(double val, double eps, double mult) {
-  if (val > 0) {
-    if (val < 1) {
-      mult /= val;
-    } else {
-      if (std::abs(val - std::round(val)) > eps) {
-        mult *= std::ceil(val / eps) * eps / val;
-      }
-    }
-  }
-  return mult;
-}
 double V3D::toMillerIndexes(double eps) {
   if (eps < 0)
     eps = -eps;
@@ -467,9 +441,9 @@ double V3D::toMillerIndexes(double eps) {
 
   // assuming eps is in 1.e-x form
 
-  double ax = std::fabs(x);
-  double ay = std::fabs(y);
-  double az = std::fabs(z);
+  double ax = std::abs(m_pt[0]);
+  double ay = std::abs(m_pt[1]);
+  double az = std::abs(m_pt[2]);
 
   double amax = (ax > ay) ? ax : ay;
   amax = (az > amax) ? az : amax;
@@ -478,15 +452,15 @@ double V3D::toMillerIndexes(double eps) {
         std::invalid_argument("vector length is less then accuracy requested"));
 
   if (ax < eps) {
-    x = 0;
+    m_pt[0] = 0;
     ax = 0;
   }
   if (ay < eps) {
-    y = 0;
+    m_pt[1] = 0;
     ay = 0;
   }
   if (az < eps) {
-    z = 0;
+    m_pt[2] = 0;
     az = 0;
   }
 
@@ -495,15 +469,13 @@ double V3D::toMillerIndexes(double eps) {
   mult = nearInt(ay, eps, mult);
   mult = nearInt(az, eps, mult);
 
-  size_t iax = std::lround(ax * mult / eps);
-  size_t iay = std::lround(ay * mult / eps);
-  size_t iaz = std::lround(az * mult / eps);
+  const size_t iax = std::lround(ax * mult / eps);
+  const size_t iay = std::lround(ay * mult / eps);
+  const size_t iaz = std::lround(az * mult / eps);
 
-  size_t div = gcd(iax, gcd(iay, iaz));
+  const size_t div = gcd(iax, gcd(iay, iaz));
   mult /= (static_cast<double>(div) * eps);
-  x *= mult;
-  y *= mult;
-  z *= mult;
+  this->operator*=(mult);
 
   return mult;
 }
@@ -514,9 +486,9 @@ double V3D::toMillerIndexes(double eps) {
    @param v2  seconde vector
    @return true if v1.norm() < v2.norm().
  */
-bool V3D::CompareMagnitude(const V3D &v1, const V3D &v2) {
-  double mag_sq_1 = v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2];
-  double mag_sq_2 = v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2];
+bool V3D::compareMagnitude(const V3D &v1, const V3D &v2) {
+  const double mag_sq_1 = v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2];
+  const double mag_sq_2 = v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2];
   return (mag_sq_1 < mag_sq_2);
 }
 
@@ -527,14 +499,48 @@ bool V3D::CompareMagnitude(const V3D &v1, const V3D &v2) {
  * @return V3D containing anlges.
  */
 V3D V3D::directionAngles(bool inDegrees) const {
-  double conversionFactor = 1.0;
-  if (inDegrees) {
-    conversionFactor = 180.0 / M_PI;
-  }
+  const double conversionFactor = inDegrees ? 180. / M_PI : 1.0;
   const double divisor = this->norm();
-  return V3D(conversionFactor * acos(x / divisor),
-             conversionFactor * acos(y / divisor),
-             conversionFactor * acos(z / divisor));
+  if (divisor == 0.) {
+    throw std::runtime_error(
+        "Cannot calculate direction angles for zero length vector");
+  }
+  return V3D(conversionFactor * acos(m_pt[0] / divisor),
+             conversionFactor * acos(m_pt[1] / divisor),
+             conversionFactor * acos(m_pt[2] / divisor));
+}
+
+/**
+  Vector maximum absolute integer value
+  @return maxCoeff()
+*/
+int V3D::maxCoeff() {
+  int MaxOrder = 0;
+  if (abs(static_cast<int>(m_pt[0])) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(m_pt[0]));
+  if (abs(static_cast<int>(m_pt[1])) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(m_pt[1]));
+  if (abs(static_cast<int>(m_pt[2])) > MaxOrder)
+    MaxOrder = abs(static_cast<int>(m_pt[2]));
+  return MaxOrder;
+}
+
+/**
+  Calculates the absolute value.
+  @return The absolute value
+*/
+V3D V3D::absoluteValue() const {
+  return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2]));
+}
+
+/**
+  Calculates the error of the HKL to compare with tolerance
+  @return The error
+*/
+double V3D::hklError() const {
+  return fabs(m_pt[0] - std::round(m_pt[0])) +
+         fabs(m_pt[1] - std::round(m_pt[1])) +
+         fabs(m_pt[2] - std::round(m_pt[2]));
 }
 
 } // Namespace Kernel

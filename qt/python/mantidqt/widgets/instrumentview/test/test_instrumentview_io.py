@@ -12,7 +12,7 @@ from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, InstrumentViewDecoder
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 
 INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',

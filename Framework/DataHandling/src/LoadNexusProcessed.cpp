@@ -66,9 +66,9 @@ using IntArray_shared = boost::shared_array<int>;
 // Struct to contain spectrum information.
 struct SpectraInfo {
   // Number of spectra
-  int nSpectra;
+  int nSpectra{0};
   // Do we have any spectra
-  bool hasSpectra;
+  bool hasSpectra{false};
   // Contains spectrum numbers for each workspace index
   IntArray_shared spectraNumbers;
   // Index of the detector in the workspace.
@@ -77,15 +77,6 @@ struct SpectraInfo {
   IntArray_shared detectorCount;
   // Detector list contains a list of all of the detector numbers
   IntArray_shared detectorList;
-
-  SpectraInfo() : nSpectra(0), hasSpectra(false) {}
-
-  SpectraInfo(int _nSpectra, bool _hasSpectra, IntArray_shared _spectraNumbers,
-              IntArray_shared _detectorIndex, IntArray_shared _detectorCount,
-              IntArray_shared _detectorList)
-      : nSpectra(_nSpectra), hasSpectra(_hasSpectra),
-        spectraNumbers(_spectraNumbers), detectorIndex(_detectorIndex),
-        detectorCount(_detectorCount), detectorList(_detectorList) {}
 };
 
 // Helper typdef.
@@ -99,57 +90,57 @@ using SpectraInfo_optional = boost::optional<SpectraInfo>;
  * @return
  */
 SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
+  SpectraInfo spectraInfo;
   // Instrument information
   NXInstrument inst = mtd_entry.openNXInstrument("instrument");
   if (!inst.containsGroup("detector")) {
     logger.information() << "Detector block not found. The workspace will not "
                             "contain any detector information.\n";
-    return SpectraInfo();
+    return spectraInfo;
   }
 
   // Populate the spectra-detector map
   NXDetector detgroup = inst.openNXDetector("detector");
 
+  // Spectra block - Contains spectrum numbers for each workspace index
+  // This might not exist so wrap and check. If it doesn't exist create a
+  // default mapping
+  try {
+    NXInt spectra_block = detgroup.openNXInt("spectra");
+    spectra_block.load();
+    spectraInfo.spectraNumbers = spectra_block.sharedBuffer();
+    spectraInfo.nSpectra = spectra_block.dim0();
+    spectraInfo.hasSpectra = true;
+  } catch (std::runtime_error &) {
+    spectraInfo.hasSpectra = false;
+  }
+
   // Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not
   // present then we can't update the spectra
   // map
-  boost::shared_array<int> detectorList;
   try {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
     detlist_group.load();
-    detectorList = detlist_group.sharedBuffer();
+    spectraInfo.detectorList = detlist_group.sharedBuffer();
   } catch (std::runtime_error &) {
     logger.information() << "detector_list block not found. The workspace will "
                             "not contain any detector information.\n";
-    return SpectraInfo();
+    return spectraInfo;
   }
 
   // Detector count contains the number of detectors associated with each
   // spectra
   NXInt det_count = detgroup.openNXInt("detector_count");
   det_count.load();
-  boost::shared_array<int> detectorCount = det_count.sharedBuffer();
+  spectraInfo.detectorCount = det_count.sharedBuffer();
   // Detector index - contains the index of the detector in the workspace
   NXInt det_index = detgroup.openNXInt("detector_index");
   det_index.load();
-  int nspectra = det_index.dim0();
-  boost::shared_array<int> detectorIndex = det_index.sharedBuffer();
+  spectraInfo.nSpectra = det_index.dim0();
+  spectraInfo.detectorIndex = det_index.sharedBuffer();
 
-  // Spectra block - Contains spectrum numbers for each workspace index
-  // This might not exist so wrap and check. If it doesn't exist create a
-  // default mapping
-  bool have_spectra(true);
-  boost::shared_array<int> spectra;
-  try {
-    NXInt spectra_block = detgroup.openNXInt("spectra");
-    spectra_block.load();
-    spectra = spectra_block.sharedBuffer();
-  } catch (std::runtime_error &) {
-    have_spectra = false;
-  }
-  return SpectraInfo(nspectra, have_spectra, spectra, detectorIndex,
-                     detectorCount, detectorList);
+  return spectraInfo;
 }
 
 /**
@@ -464,10 +455,9 @@ void LoadNexusProcessed::exec() {
       // complicated to bother with.
       bAccelleratedMultiPeriodLoading =
           bIsMultiPeriod && bFastMultiPeriod && !m_list;
-      tempMatrixWorkspace->mutableRun().clearLogs(); // Strip out any loaded
-                                                     // logs. That way we don't
-                                                     // pay for copying that
-                                                     // information around.
+      // Strip out any loaded logs. That way we don't pay for copying that
+      // information around.
+      tempMatrixWorkspace->mutableRun().clearLogs();
     }
 
     if (bAccelleratedMultiPeriodLoading) {
@@ -1218,6 +1208,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peakWS->getPeak(i).setPeakShape(peakShape);
       }
     }
+    // After all columns read set IntHKL
+    for (int r = 0; r < numberPeaks; r++) {
+      V3D intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(),
+                       peakWS->getPeak(r).getL());
+      peakWS->getPeak(r).setIntHKL(intHKL);
+    }
   }
 
   return boost::static_pointer_cast<API::Workspace>(peakWS);
@@ -1661,11 +1657,13 @@ void LoadNexusProcessed::readInstrumentGroup(
       spec.setSpectrumNo(spectrum);
       ++index;
 
-      int start = spectraInfo.detectorIndex[i - 1];
-      int end = start + spectraInfo.detectorCount[i - 1];
-      spec.setDetectorIDs(
-          std::set<detid_t>(spectraInfo.detectorList.get() + start,
-                            spectraInfo.detectorList.get() + end));
+      if (spectraInfo.detectorIndex) {
+        const int start = spectraInfo.detectorIndex[i - 1];
+        const int end = start + spectraInfo.detectorCount[i - 1];
+        spec.setDetectorIDs(
+            std::set<detid_t>(spectraInfo.detectorList.get() + start,
+                              spectraInfo.detectorList.get() + end));
+      }
     }
   }
 }

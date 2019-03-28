@@ -55,8 +55,8 @@ of input files.
   :width: 450
   :widget: tabElwin
 
-Options
-~~~~~~~
+Elwin Options
+~~~~~~~~~~~~~
 
 Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
@@ -112,7 +112,48 @@ Plot Spectrum
 
 Save Result
   Saves the result in the default save directory.
-  
+
+.. _elwin-example-workflow:
+
+Elwin Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~
+The Elwin tab operates on ``_red`` and ``_sqw`` files. The files used in this workflow can
+be produced using the run numbers 104371-104375 on the
+:doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS Energy
+Transfer tab. The instrument used to produce these files is OSIRIS, the analyser is graphite
+and the reflection is 002.
+
+1. Untick the **Load History** checkbox next to the file selector if you want to load your data
+   without history.
+
+2. Click **Browse** and select the files ``osiris104371_graphite002_red``,
+   ``osiris104372_graphite002_red``, ``osiris104373_graphite002_red``, ``osiris104374_graphite002_red``
+   and ``osiris104375_graphite002_red``. Load these files and they will be plotted in the mini-plot
+   automatically.
+
+3. The workspace and spectrum displayed in the mini-plot can be changed using the combobox and
+   spinbox seen directly above the mini-plot.
+
+4. You may opt to change the x range of the mini-plot by changing the **Integration Range**, or
+   by sliding the blue lines seen on the mini-plot using the cursor. For the purpose of this
+   demonstration, use the default x range.
+
+5. Tick **Normalise to Lowest Temp**. This option will produce an extra workspace with end suffix
+   _elt. However, for this to work the input workspaces must have a temperature. See the
+   description above for more information.
+
+6. Click **Plot Current Preview** if you want a larger plot of the mini-plot.
+
+7. Click **Run** and wait for the interface to finish processing. This should generate four
+   workspaces ending in _eq, _eq2, _elf and _elt.
+
+8. In the **Output** section, select the workspace ending with _eq and then choose a workspace
+   index. Click **Plot Spectrum** to plot the spectrum from the selected workspace.
+
+9. Choose a default save directory and then click **Save Result** to save the output workspaces.
+   The workspace ending in _eq will be used in the :ref:`msdfit-example-workflow`.
+
+
 MSD Fit
 -------
 
@@ -145,8 +186,8 @@ equal to zero.
   :width: 450
   :widget: tabMSD
 
-Options
-~~~~~~~
+MSD Fit Options
+~~~~~~~~~~~~~~~
 
 Sample
   A file with extension *_eq.nxs* that has been created using the Elwin tab with an :math:`x` axis of
@@ -178,8 +219,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -189,11 +230,49 @@ Plot
   Plots the selected parameter stored in the result workspace.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
+
+.. _msdfit-example-workflow:
+
+MSD Fit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The MSD Fit tab operates on ``_eq`` files. The files used in this workflow are produced on the Elwin
+tab as seen in the :ref:`elwin-example-workflow`.
+
+1. Click **Browse** and select the file ``osi104371-104375_graphite002_red_elwin_eq``. Load this
+   file and it will be automatically plotted in the upper mini-plot.
+
+2. Change the **Plot Spectrum** spinbox seen underneath the mini-plots to change the spectrum displayed
+   in the upper mini-plot.
+
+3. Change the **EndX** variable to be around 0.8 in order to change the Q range over which the fit shall
+   take place. Alternatively, drag the **EndX** blue line seen on the mini-plot using the cursor.
+
+4. Choose the **Fit Type** to be Gaussian. The parameters for this function can be seen if you
+   expand the row labelled **f0-MsdGauss**. Choose appropriate starting values for these parameters.
+   It is possible to constrain one of the parameters by right clicking a parameter and selecting
+   **Constrain**.
+
+5. Tick **Plot Guess** to get a prediction of what your fit will look like.
+
+6. Click **Run** and wait for the interface to finish processing. This should generate a
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+7. Alternatively, you can click **Fit Single Spectrum** to perform a fit only for the spectrum
+   currently displayed in the upper mini-plot. Do not click this for the purposes of this
+   demonstration.
+
+8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
+   Msd parameter which can be found within the _Results group workspace.
+
+Go to the :ref:`iqt-example-workflow`.
 
 
 I(Q, t)
@@ -206,8 +285,8 @@ in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
   :width: 450
   :widget: tabIqt
 
-Options
-~~~~~~~
+I(Q, t) Options
+~~~~~~~~~~~~~~~
 
 Sample
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
@@ -247,6 +326,40 @@ Tiled Plot
 Save Result
   Saves the result workspace in the default save directory.
 
+.. _iqt-example-workflow:
+
+I(Q, t) Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The I(Q, t) tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
+``_res`` for the resolution file. The sample file used in this workflow can be produced using the run
+number 26176 on the :doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS
+Energy Transfer tab. The resolution file is created in the ISIS Calibration tab using the run number
+26173. The instrument used to produce these files is IRIS, the analyser is graphite
+and the reflection is 002.
+
+1. Click **Browse** for the sample and select the file ``iris26176_graphite002_red``. Then click **Browse**
+   for the resolution and select the file ``iris26173_graphite002_res``.
+
+2. Change the **SampleBinning** variable to be 5. Changing this will calculate values for the **EWidth**,
+   **SampleBins** and **ResolutionBins** variables automatically by using the
+   :ref:`TransformToIqt <algm-TransformToIqt>` algorithm where the **BinReductionFactor** is given by the
+   **SampleBinning** value. The **SampleBinning** value must be low enough for the **ResolutionBins** to be
+   at least 5. A description of this option can be found in the :ref:`a-note-on-binning` section.
+
+3. Untick **Calculate Errors** if you do not want to calculate the errors for the output workspace which
+   ends with the suffix _iqt.
+
+4. Click **Run** and wait for the interface to finish processing. This should generate a workspace ending
+   with a suffix _iqt.
+
+5. In the **Output** section, select a workspace index **Range** for a tiled plot and then click
+   **Tiled Plot**. Note that there is a maximum of 18 plots allowed for the tiled plot.
+
+6. Choose a default save directory and then click **Save Result** to save the _iqt workspace.
+   This workspace will be used in the :ref:`iqtfit-example-workflow`.
+
+.. _a-note-on-binning:
+
 A note on Binning
 ~~~~~~~~~~~~~~~~~
   
@@ -283,8 +396,8 @@ The fit types available for use in IqtFit are :ref:`Exponentials <func-ExpDecay>
   :width: 450
   :widget: tabIqtFit
 
-Options
-~~~~~~~
+I(Q, t) Fit Options
+~~~~~~~~~~~~~~~~~~~
 
 Sample
   Either a file (*_iqt.nxs*) or workspace (*_iqt*) that has been created using
@@ -329,8 +442,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -339,13 +452,52 @@ Run
 Plot
   Plots the selected parameter stored in the result (or PDF) workspace.
 
+Edit Result
+  Allows you to replace values within your *_Results* workspace using the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
+  algorithm. See below for more detail.
+
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
+.. _iqtfit-example-workflow:
+
+I(Q, t) Fit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The I(Q, t) Fit tab operates on ``_iqt`` files. The files used in this workflow are produced on the
+I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
+
+1. Click **Browse** and select the file ``irs26176_graphite002_iqt``. 
+
+2. Change the **EndX** variable to be around 0.2 in order to change the time range. Alternatively, drag
+   the **EndX** blue line seen on the upper mini-plot using the cursor.
+
+3. Choose the number of **Exponentials** to be 1. Select a **Flat Background**.
+
+4. Change the **Fit Spectra** to go from 0 to 7. This will ensure that only the spectra within the input
+   workspace with workspace indices between 0 and 7 are fitted.
+
+5. Click **Run** and wait for the interface to finish processing. This should generate a
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+6. In the **Output** section, you can choose which parameter you want to plot.
+
+7. Click **Fit Single Spectrum** to produce a fit result for the first spectrum.
+
+8. In the **Output** section, click **Edit Result** and then select the _Result workspace containing 
+   multiple fits (1), and in the second combobox select the _Result workspace containing the single fit
+   (2). Choose an output name and click **Replace Fit Result**. This will replace the corresponding fit result
+   in (1) with the fit result found in (2). See the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
+   algorithm for more details. Note that the output workspace is inserted into the group workspace in which
+   (1) is found.
+
+Go to the :ref:`convfit-example-workflow`.
 
 Conv Fit
 --------
@@ -373,8 +525,8 @@ The fit types available in ConvFit are One :ref:`Lorentzian <func-Lorentzian>`, 
   :width: 450
   :widget: tabConvFit
 
-Options
-~~~~~~~
+Conv Fit Options
+~~~~~~~~~~~~~~~~
 
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
@@ -428,8 +580,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -438,8 +590,45 @@ Run
 Plot
   Plots the selected parameter stored in the result (or PDF) workspace.
 
+Edit Result
+  Allows you to replace values within your *_Results* workspace using the :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`
+  algorithm. See below for more detail.
+
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
+
+.. _convfit-example-workflow:
+
+ConvFit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The Conv Fit tab allows ``_red`` and ``_sqw`` for its sample file, and allows ``_red``, ``_sqw`` and
+``_res`` for the resolution file. The sample file used in this workflow can be produced using the run
+number 26176 on the :doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS
+Energy Transfer tab. The resolution file is created in the ISIS Calibration tab using the run number
+26173. The instrument used to produce these files is IRIS, the analyser is graphite
+and the reflection is 002.
+
+1. Click **Browse** for the sample and select the file ``iris26176_graphite002_red``. Then click **Browse**
+   for the resolution and select the file ``iris26173_graphite002_res``.
+
+2. Choose the **Fit Type** to be One Lorentzian. Tick the **Delta Function** checkbox. Set the background
+   to be a **Flat Background**.
+
+3. Expand the variables called **f0-Lorentzian** and **f1-DeltaFunction**. To tie the delta functions Centre
+   to the PeakCentre of the Lorentzian, right click on the Centre parameter and go to Tie->Custom Tie and then
+   enter f0.PeakCentre.
+
+4. Tick **Plot Guess** to get a prediction of what your fit will look like.
+
+5. Click **Run** and wait for the interface to finish processing. This should generate a
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+6. Choose a default save directory and then click **Save Result** to save the _result workspaces 
+   found inside of the group workspace ending with _Results. The saved workspace will be used in
+   the :ref:`fqfit-example-workflow`.
 
 Theory
 ~~~~~~
@@ -466,8 +655,8 @@ The fit types available in F(Q)Fit are :ref:`ChudleyElliot <func-ChudleyElliot>`
   :widget: tabJumpFit
 
 
-Options
-~~~~~~~
+F(Q) Fit Options
+~~~~~~~~~~~~~~~~
 
 Sample
   A sample workspace created with either ConvFit or Quasi.
@@ -508,8 +697,8 @@ Plot Guess
 Fit Spectra
   Choose a range or discontinuous list of spectra to be fitted.
 
-Mask Energies
-  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask Energies of Spectrum’ label 
+Mask X Range
+  Energy ranges may be excluded from a fit by selecting a spectrum next to the ‘Mask X Range of Spectrum’ label
   and then providing a comma-separated list of pairs, where each pair designates a range to exclude from the fit.
 
 Run
@@ -519,11 +708,39 @@ Plot
   Plots the selected parameter stored in the result workspace.
 
 Save Result
-  Saves the result workspace in the default save directory.
+  Saves the workspaces from the *_Results* group workspace in the default save directory.
   
 .. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
- .. _qens-fitting-features:
+.. _fqfit-example-workflow:
+
+F(Q) Fit Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The F(Q) Fit tab operates on ``_result`` files which can be produced on the ConvFit tab.  The
+sample file used in this workflow is produced on the Conv Fit tab as seen in the
+:ref:`convfit-example-workflow`.
+
+1. Click **Browse** and select the file ``irs26176_graphite002_conv_Delta1LFitF_s0_to_9_Result``.
+
+2. Change the mini-plot data by choosing the type of **Fit Parameter** you want to display. For the
+   purposes of this demonstration select **EISF**. The combobox immediately to the right can be used to
+   choose which EISF you want to see in the mini-plot. In this example there is only one available.
+
+3. Change the **Fit Parameter** back to **Width**.
+
+4. Choose the **Fit Type** to be TeixeiraWater.
+
+5. Click **Run** and wait for the interface to finish processing. This should generate a
+   _Parameters table workspace and two group workspaces with end suffixes _Results and
+   _Workspaces. The mini-plots should also update, with the upper plot displaying the
+   calculated fit and the lower mini-plot displaying the difference between the input data and the
+   fit.
+
+6. In the **Output** section, you can choose which parameter you want to plot. In this case the plotting
+   option is disabled as the output workspace ending in _Result only has one data point to plot.
+
+
+.. _qens-fitting-features:
   
 QENS Fitting Interfaces Features
 --------------------------------
@@ -615,15 +832,21 @@ a separate plotting window.
 
 The 'Plot Guess' check-box can be used to enable/disable the guess curve in the top preview plot.
 
-
 Output
 ~~~~~~
 
 The results of the fit may be plotted and saved under the 'Output' section of the fitting interfaces.
 
-Next to the 'Plot Output' label, you can select a parameter to plot and then click 'Plot' to plot it with error 
+Next to the 'Plot' label, you can select a parameter to plot and then click 'Plot' to plot it with error 
 bars across the fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
 The 'Plot Output' options will be disabled after a fit if there is only one data point for the parameters.
+
+During a sequential fit, the parameters calculated for one spectrum become the start parameters for the next spectrum to be fitted. 
+Although this normally yields better parameter values for the later spectra, it can also lead to poorly fitted parameters if the
+next spectrum is not 'related' to the previous spectrum. It may be useful to replace this poorly fitted spectrum with the results 
+from a single fit using the 'Edit Result' option. 
+Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using results 
+produced from a singly fit spectrum. See the algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
 

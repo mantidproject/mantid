@@ -8,7 +8,7 @@ from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
-from mantidqt.utils.qt.test.gui_window_test import GuiWindowTest
+from mantidqt.utils.qt.testing.gui_window_test import GuiWindowTest
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 

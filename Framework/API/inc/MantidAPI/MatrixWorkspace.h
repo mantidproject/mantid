@@ -143,8 +143,9 @@ public:
   virtual Types::Core::DateAndTime getFirstPulseTime() const;
   Types::Core::DateAndTime getLastPulseTime() const;
 
-  /// Returns the bin index for a given X value of a given workspace index
-  size_t binIndexOf(const double xValue, const std::size_t = 0) const;
+  /// Returns the y index which corresponds to the X Value provided
+  std::size_t yIndexOfX(const double xValue, const std::size_t = 0,
+                        const double tolerance = 0.0) const;
 
   //----------------------------------------------------------------------
   // DATA ACCESSORS
@@ -413,8 +414,12 @@ public:
   virtual Axis *getAxis(const std::size_t &axisIndex) const;
   void replaceAxis(const std::size_t &axisIndex, Axis *const newAxis);
 
-  /// Returns true if the workspace contains data in histogram form (as opposed
-  /// to point-like)
+  /// Will return the number of Axis currently stored in the workspace it is not
+  /// always safe to assume it is just 2
+  size_t numberOfAxis() const;
+
+  /// Returns true if the workspace contains data in histogram form (as
+  /// opposed to point-like)
   virtual bool isHistogramData() const;
 
   /// Returns true if the workspace contains common X bins
@@ -565,6 +570,13 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
+  std::size_t binIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
+                              double const &xValue, bool const &ascendingOrder,
+                              double const &tolerance) const;
+  std::size_t xIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
+                            double const &xValue,
+                            double const &tolerance) const;
+
   MatrixWorkspace *doClone() const override = 0;
   MatrixWorkspace *doCloneEmpty() const override = 0;
 

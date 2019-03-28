@@ -66,7 +66,7 @@ Elastic peak positions (EPP)
 
 Information on the elastic peaks (position, peak width) is needed for incident energy calibration, as well as for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` algorithms. This data comes in the form of an EPP workspace which is a TableWorkspace containing columns specified by the :ref:`FindEPP <algm-FindEPP>` algorithm.
 
-If an EPP table is needed, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default (:literal:`'EPP Method AUTO'`) is to calculate the positions for the IN5 instrument, and to fit for any other instrument.
+If an EPP table is needed, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default (:literal:`'EPP Method AUTO'`) is to calculate the positions for the IN5 and PANTHER instruments, and to fit for any other instrument.
 
 In the calculation case, a nominal peak width can be given using the *Sigma* property. The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
 
@@ -86,7 +86,7 @@ The calibrated energy can be retrieved as a single-value workspace using the *Ou
 TOF axis adjustment
 ^^^^^^^^^^^^^^^^^^^
 
-The TOF axis is adjusted such that the nominal elastic channel corresponds to the L1 + L2 distance. For this, incident energy and elastic channel number are needed. The energy is read from the :literal:`Ei` sample log while the elastic channel from `Detector.elasticpeak`. Alternatively, the elastic channel can be determined by fitting, as done with IN5. Whether to use the sample logs or fitting is determined by the *ElasticChannel* property. The channel can be given also directly as a single valued workspace in *ElasticChannelWorkspace*.
+The TOF axis is adjusted such that the nominal elastic channel corresponds to the L1 + L2 distance. For this, incident energy and elastic channel number are needed. The energy is read from the :literal:`Ei` sample log while the elastic channel from `Detector.elasticpeak`. Alternatively, the elastic channel can be determined by fitting, as done with IN5 and PANTHER. Whether to use the sample logs or fitting is determined by the *ElasticChannel* property. The channel can be given also directly as a single valued workspace in *ElasticChannelWorkspace*.
 
 Optional inputs and outputs
 ###########################
@@ -109,17 +109,17 @@ ILL's instrument specific defaults
 
 The following settings are used when the :literal:`AUTO` keyword is encountered:
 
-+---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
-| Property                  | IN4                     | IN5                    | IN6                     | Others                  |
-+===========================+=========================+========================+=========================+=========================+
-| EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Fit EPP                 |
-+---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
-| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Default Elastic Channel |
-+---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
-| IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration ON   |
-+---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
-| FlatBkg                   | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             | Flat Bkg ON             |
-+---------------------------+-------------------------+------------------------+-------------------------+-------------------------+
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
+| Property                  | IN4                     | IN5                    | IN6                     | PANTHER                | Others                  |
++===========================+=========================+========================+=========================+========================+=========================+
+| EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Calculate EPP          | Fit EPP                 |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
+| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Fit Elastic Channel    | Default Elastic Channel |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
+| IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
+| FlatBkg                   | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
 
 Usage
 -----
@@ -162,7 +162,7 @@ Output:
     Number of histograms in 'raw': 397, and in 'preprocessed': 396
     Wavelength from sample logs: 3.06A
     'raw' wavelength at channel 150: 1.63A (incorrect!)
-    'preprocessed' wavelength at channel 150: 3.05A
+    'preprocessed' wavelength at channel 150: 3.04A
 
 .. categories::
 

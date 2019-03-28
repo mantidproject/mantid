@@ -31,18 +31,16 @@ static constexpr double DETECTOR_DISTANCE = 1.78;
 static constexpr double EI = 66.6; // meV
 static constexpr double MONITOR_DISTANCE = 0.44;
 
-double velocity(const double energy) {
-  return std::sqrt(2 * energy * meV / NeutronMass);
-}
-
-constexpr double time_of_flight(const double velocity) {
-  return (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity * 1e6;
-}
-
 class GetEiMonDet2Test : public CxxTest::TestSuite {
 public:
   static GetEiMonDet2Test *createSuite() { return new GetEiMonDet2Test(); }
   static void destroySuite(GetEiMonDet2Test *suite) { delete suite; }
+  static double velocity(const double energy) {
+    return std::sqrt(2 * energy * meV / NeutronMass);
+  }
+  static constexpr double time_of_flight(const double velocity) {
+    return (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity * 1e6;
+  }
 
   void testName() {
     GetEiMonDet2 algorithm;

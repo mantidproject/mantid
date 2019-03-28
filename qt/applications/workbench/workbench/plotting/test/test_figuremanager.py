@@ -12,7 +12,7 @@ try:
 except ImportError:
     from mock import MagicMock, patch
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
 

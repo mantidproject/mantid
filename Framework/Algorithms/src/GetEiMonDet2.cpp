@@ -25,9 +25,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Algorithms {
-
 namespace {
 /** A private namespace to store string constants dealing with
  *  tables returned by the FindEPP algorithm.
@@ -87,8 +84,16 @@ const static std::string PULSE_INTERVAL("pulse_interval");
 } // namespace SampleLogs
 } // anonymous namespace
 
+namespace Mantid {
+namespace Algorithms {
+
 // Register the algorithm into the algorithm factory.
 DECLARE_ALGORITHM(GetEiMonDet2)
+
+/** Construct a GetEiMonDet2 object.
+ *
+ */
+GetEiMonDet2::GetEiMonDet2() { useAlgorithm("GetEiMonDet", 3); }
 
 /** Initialized the algorithm.
  *
@@ -219,7 +224,8 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
-  for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {
+  for (int i = 0; i < static_cast<int>(detectorIndices.size());
+       ++i) { // NOLINT (modernize-for-loop)
     PARALLEL_START_INTERUPT_REGION
     const size_t index = detectorIndices[i];
     interruption_point();

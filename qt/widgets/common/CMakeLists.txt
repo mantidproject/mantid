@@ -56,6 +56,7 @@ set ( QT5_SRC_FILES
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
   src/TextPropertyWidget.cpp
+  src/TSVSerialiser.cpp
   src/UserFunctionDialog.cpp
   src/UserSubWindow.cpp
   src/VatesViewerInterface.cpp
@@ -67,6 +68,13 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidget.cpp
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
+
+  src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
+  src/AlgorithmProgress/AlgorithmProgressModel.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenter.cpp
+  src/AlgorithmProgress/AlgorithmProgressPresenterBase.cpp
+  src/AlgorithmProgress/AlgorithmProgressWidget.cpp
 
   src/Batch/RowLocation.cpp
   src/Batch/RowLocationAdapter.cpp
@@ -102,7 +110,7 @@ set ( QT5_SRC_FILES
   src/QtPropertyBrowser/StringEditorFactory.cpp
   src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
 )
-  
+
 set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -156,9 +164,15 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
 
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
+
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
-  
+
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
@@ -215,11 +229,13 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h
+  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceDockMockObjects.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
+
+  inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 )
 
 set ( QT5_UI_FILES
@@ -906,7 +922,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
 # This file is NOT packaged. See installers/WinInstaller for the package
 # version.
 ###########################################################################
-if ( WIN32 )
+if ( WIN32 AND ENABLE_MANTIDPLOT)
   set ( QT_CONF qt.conf )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
   add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD

@@ -69,7 +69,10 @@ public:
 
   MOCK_METHOD1(setPlotExtraOptionsEnabled, void(bool enable));
   MOCK_METHOD1(setPlotEnabled, void(bool enable));
+  MOCK_METHOD1(setEditResultEnabled, void(bool enable));
   MOCK_METHOD1(setSaveEnabled, void(bool enable));
+
+  MOCK_METHOD1(setEditResultVisible, void(bool visible));
 
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
@@ -105,6 +108,10 @@ public:
 
   MOCK_CONST_METHOD1(isResultGroupSelected,
                      bool(std::string const &selectedGroup));
+
+  MOCK_METHOD3(replaceFitResult, void(std::string const &inputName,
+                                      std::string const &singleBinName,
+                                      std::string const &outputName));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -383,6 +390,7 @@ public:
 
     EXPECT_CALL(*m_view, setPlotText(QString("Plotting..."))).Times(1);
     EXPECT_CALL(*m_view, setPlotEnabled(!isPlotting)).Times(1);
+    EXPECT_CALL(*m_view, setEditResultEnabled(!isPlotting)).Times(1);
     EXPECT_CALL(*m_view, setSaveEnabled(!isPlotting)).Times(1);
 
     m_presenter->setPlotting(isPlotting);
@@ -394,6 +402,7 @@ public:
 
     EXPECT_CALL(*m_view, setPlotText(QString("Plot"))).Times(1);
     EXPECT_CALL(*m_view, setPlotEnabled(!isPlotting)).Times(1);
+    EXPECT_CALL(*m_view, setEditResultEnabled(!isPlotting)).Times(1);
     EXPECT_CALL(*m_view, setSaveEnabled(!isPlotting)).Times(1);
 
     m_presenter->setPlotting(isPlotting);
@@ -402,6 +411,12 @@ public:
   void test_that_setPlotEnabled_will_invoke_setPlotEnabled_in_the_view() {
     EXPECT_CALL(*m_view, setPlotEnabled(true)).Times(1);
     m_presenter->setPlotEnabled(true);
+  }
+
+  void
+  test_that_setEditResultEnabled_will_invoke_setEditResultEnabled_in_the_view() {
+    EXPECT_CALL(*m_view, setEditResultEnabled(true)).Times(1);
+    m_presenter->setEditResultEnabled(true);
   }
 
   void test_that_setSaveEnabled_will_invoke_setSaveEnabled_in_the_view() {
@@ -418,6 +433,12 @@ public:
   void test_that_getSpectraToPlot_will_invoke_getSpectraToPlot_in_the_model() {
     EXPECT_CALL(*m_model, getSpectraToPlot()).Times(1);
     m_presenter->getSpectraToPlot();
+  }
+
+  void
+  test_that_setEditResultVisible_will_invoke_setEditResultVisible_in_the_view() {
+    EXPECT_CALL(*m_view, setEditResultVisible(true)).Times(1);
+    m_presenter->setEditResultVisible(true);
   }
 
 private:

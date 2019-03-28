@@ -8,9 +8,9 @@
 from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import CreateEmptyTableWorkspace
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 
 class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
@@ -19,24 +19,24 @@ class TableWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         ws = CreateEmptyTableWorkspace()
 
         p = TableWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         p.close(ws.name())
 
         QApplication.processEvents()
 
         self.assertEqual(None, p.ads_observer)
-        self.find_qt_widget("work")
-        self.assert_no_widgets()
+        self.assert_widget_not_present("work")
+        self.assert_no_toplevel_widgets()
 
     def test_window_force_deleted_correctly(self):
         ws = CreateEmptyTableWorkspace()
 
         p = TableWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         p.force_close()
 
         QApplication.processEvents()
 
         self.assertEqual(None, p.ads_observer)
-        self.find_qt_widget("work")
-        self.assert_no_widgets()
+        self.assert_widget_not_present("work")
+        self.assert_no_toplevel_widgets()

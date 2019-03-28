@@ -16,7 +16,6 @@ import mantid.simpleapi as simple
 from mantid import config
 from Engineering.EnginX import main
 
-
 DIRS = config['datasearch.directories'].split(';')
 ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))),
                        "SystemTests", "tests", "analysis", "reference")
@@ -47,15 +46,22 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-2
+        self.tolerance = 5e-2
+
+        # this is neccesary due to appendspectra creating spectrum numbers of 0
+        self.disableChecking.append('SpectraMap')
         if _current_os_has_gsl_lvl2():
-            return("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
-                   "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
-                   "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters.nxs")
+            return ("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
+                    "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
+                    "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters.nxs",
+                    "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
+                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs"
+                    )
         return ("engg_calibration_bank_1", "engggui_calibration_bank_1_gsl1.nxs",
                 "engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters_gsl1.nxs"
-                )
+                "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters_gsl1.nxs",
+                "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
+                "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
 
     def cleanup(self):
         simple.mtd.clear()
@@ -72,11 +78,16 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-2
+
+        # this is neccesary due to appendspectra creating spectrum numbers of 0
+        self.disableChecking.append('SpectraMap')
         if _current_os_has_gsl_lvl2():
             return ("cropped", "engggui_calibration_bank_cropped.nxs",
-                    "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs")
+                    "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs",
+                    "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
         return ("cropped", "engggui_calibration_bank_cropped.nxs_gsl1.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs")
+                "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs",
+                "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
 
     def cleanup(self):
         simple.mtd.clear()
@@ -93,11 +104,16 @@ class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-2
+
+        # this is neccesary due to appendspectra creating spectrum numbers of 0
+        self.disableChecking.append('SpectraMap')
         if _current_os_has_gsl_lvl2():
-            return("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
-                   "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs")
+            return ("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
+                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs",
+                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
         return ("engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs")
+                "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs",
+                "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
 
     def cleanup(self):
         simple.mtd.clear()

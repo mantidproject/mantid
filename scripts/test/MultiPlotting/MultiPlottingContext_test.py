@@ -6,14 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.py3compat import mock
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot_context import subplotContext
 
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 class gen_ws(object):
     def __init__(self,mock):
@@ -26,6 +22,7 @@ class gen_ws(object):
     @property
     def OutputWorkspace(self):
         return self._OutputWorkspace
+
 
 class MultiPlottingContextTest(unittest.TestCase):
     def setUp(self):
@@ -55,6 +52,22 @@ class MultiPlottingContextTest(unittest.TestCase):
             self.context.addLine("one",ws,specNum)
             self.assertEquals(patch.call_count,1)
             patch.assert_called_with(mockWS,specNum)
+
+    def test_updateLayout(self):
+        # add mocks
+        figure = mock.Mock()
+        self.subplot = mock.create_autospec(subplotContext)
+        names = ["one","two","three"]
+        for name in names:
+            self.context.addSubplot(name, mock.Mock())
+
+        gridspec = mock.Mock()
+        self.context._gridspec = gridspec
+        with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
+            self.context.update_layout(figure)
+            self.assertEquals(patch.call_count,3)
+            # only last iteration survives
+            patch.assert_called_with(gridspec,figure,2)
 
 
 if __name__ == "__main__":

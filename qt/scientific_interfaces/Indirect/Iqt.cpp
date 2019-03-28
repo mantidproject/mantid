@@ -353,15 +353,43 @@ bool Iqt::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-  const auto eLow = m_dblManager->value(m_properties["ELow"]);
-  const auto eHigh = m_dblManager->value(m_properties["EHigh"]);
+  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
+  auto const resolutionName =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+
+  auto const eLow = m_dblManager->value(m_properties["ELow"]);
+  auto const eHigh = m_dblManager->value(m_properties["EHigh"]);
+
   if (eLow >= eHigh)
     uiv.addErrorMessage("ELow must be strictly less than EHigh.\n");
 
+  if (!validWorkspaceProperty(sampleName, resolutionName, "analyser"))
+    uiv.addErrorMessage("The sample and resolution workspaces must have the "
+                        "same analyser.\n");
+
+  if (!validWorkspaceProperty(sampleName, resolutionName, "reflection"))
+    uiv.addErrorMessage("The sample and resolution workspaces must have the "
+                        "same reflection.\n");
+
   QString message = uiv.generateErrorMessage();
+
   showMessageBox(message);
 
   return message.isEmpty();
+}
+
+bool Iqt::validWorkspaceProperty(std::string const &sampleName,
+                                 std::string const &resolutionName,
+                                 std::string const &parameter) const {
+  auto const sample = getADSMatrixWorkspace(sampleName);
+  auto const resolution = getADSMatrixWorkspace(resolutionName);
+
+  auto const sampleValue =
+      sample->getInstrument()->getStringParameter(parameter)[0];
+  auto const resolutionValue =
+      resolution->getInstrument()->getStringParameter(parameter)[0];
+
+  return sampleValue == resolutionValue;
 }
 
 /**
@@ -406,6 +434,12 @@ void Iqt::updateDisplayedBinParameters() {
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
   if (wsName.isEmpty() || resName.isEmpty())
+    return;
+
+  auto const sampleName = wsName.toStdString();
+  auto const resolutionName = resName.toStdString();
+  if (!validWorkspaceProperty(sampleName, resolutionName, "analyser") ||
+      !validWorkspaceProperty(sampleName, resolutionName, "reflection"))
     return;
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);

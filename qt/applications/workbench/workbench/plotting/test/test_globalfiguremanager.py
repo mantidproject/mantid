@@ -1,26 +1,24 @@
 import unittest
-try:
-    from unittest import Mock, call, patch
-except ImportError:
-    from mock import Mock, call, patch
 
+from mantid.py3compat import mock
+from mock import call, patch
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager, GlobalFigureManagerObserver
 from workbench.plotting.observabledictionary import DictionaryAction
 
 
 class MockGlobalFigureManager:
     def __init__(self):
-        self.notify_observers = Mock()
+        self.notify_observers = mock.Mock()
         self.mock_figs = {}
-        self.figs = Mock()
-        self.figs.keys = Mock(return_value=self.mock_figs)
+        self.figs = mock.Mock()
+        self.figs.keys = mock.Mock(return_value=self.mock_figs)
 
 
 class MockCanvas:
     def __init__(self):
-        self.mpl_disconnect = Mock()
+        self.mpl_disconnect = mock.Mock()
         self.figure = None
-        self.draw_idle = Mock()
+        self.draw_idle = mock.Mock()
 
 
 class MockFigureManager:
@@ -28,7 +26,7 @@ class MockFigureManager:
         self.num = num
         self.canvas = MockCanvas()
         self._cidgcf = -1231231
-        self.destroy = Mock()
+        self.destroy = mock.Mock()
 
 
 class TestGlobalFigureManagerObserver(unittest.TestCase):
@@ -92,7 +90,7 @@ class TestGlobalFigureManager(unittest.TestCase):
 
     def add_manager(self, num=0):
         mock_manager = MockFigureManager(num)
-        mock_fig = Mock()
+        mock_fig = mock.Mock()
         mock_manager.canvas.figure = mock_fig
         GlobalFigureManager.set_active(mock_manager)
         return mock_manager, mock_fig
@@ -171,7 +169,7 @@ class TestGlobalFigureManager(unittest.TestCase):
         num = 0
         self.add_manager(num)
 
-        other_mock_fig = Mock()
+        other_mock_fig = mock.Mock()
         other_mock_manager = MockFigureManager(num + 1)
         other_mock_manager.canvas.figure = other_mock_fig
         GlobalFigureManager.set_active(other_mock_manager)
@@ -261,8 +259,8 @@ class TestGlobalFigureManager(unittest.TestCase):
         self.assertEqual({0: 4, 1: 3, 2: 2, 3: 1}, last_active_values)
 
     def test_add_observer(self):
-        good_observer = Mock()
-        good_observer.notify = Mock()
+        good_observer = mock.Mock()
+        good_observer.notify = mock.Mock()
         self.assertTrue(1, len(GlobalFigureManager.observers))
 
     def test_fail_adding_bad_observer(self):
@@ -277,8 +275,8 @@ class TestGlobalFigureManager(unittest.TestCase):
         num = 10
         mock_observers = []
         for i in range(num):
-            good_observer = Mock()
-            good_observer.notify = Mock()
+            good_observer = mock.Mock()
+            good_observer.notify = mock.Mock()
             GlobalFigureManager.add_observer(good_observer)
             mock_observers.append(good_observer)
 

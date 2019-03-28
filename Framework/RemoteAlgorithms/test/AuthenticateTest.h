@@ -56,7 +56,7 @@ public:
 
   // TODO: when we have a RemoteJobManager capable of creating
   // algorithms for different types of compute resources (example:
-  // Fermi@SNS and SCARF@STFC), create different algorithms for them
+  // Fermi@SNS), create different algorithms for them
   void test_propertiesMissing() {
     Authenticate alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
@@ -101,7 +101,6 @@ public:
 
   void test_propertiesOK() {
     testFacilities.emplace_back("SNS", "Fermi");
-    testFacilities.emplace_back("ISIS", "SCARF@STFC");
 
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();

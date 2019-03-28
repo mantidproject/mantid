@@ -86,7 +86,7 @@ class LoadAndMerge(PythonAlgorithm):
         alg.setLogging(self.isLogging())
         alg.initialize()
         for key in self._loader_options.keys():
-            alg.setPropertyValue(key, self._loader_options.getPropertyValue(key))
+            alg.setProperty(key, self._loader_options.getProperty(key).value)
         return alg
 
     def PyExec(self):

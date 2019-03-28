@@ -46,6 +46,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.alpha_edit = QtGui.QLineEdit(self)
         self.alpha_edit.setObjectName("alphaEdit")
         self.alpha_edit.setText("1.0")
+        self.alpha_edit.setEnabled(False)
 
         reg_ex = QtCore.QRegExp(valid_alpha_regex)
         alpha_validator = QtGui.QRegExpValidator(reg_ex, self.alpha_edit)

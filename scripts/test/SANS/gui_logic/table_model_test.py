@@ -8,14 +8,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
+from mantid.py3compat import mock
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel, options_column_bool)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from qtpy.QtCore import QCoreApplication
 from sans.common.enums import (RowState, SampleShape)
-try:
-    from unittest import mock
-except:
-    import mock
 
 
 class TableModelTest(unittest.TestCase):

@@ -79,6 +79,7 @@ class MessageDisplay : QWidget, Configurable {
 
 public:
   MessageDisplay(QWidget *parent = 0);
+  MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
 
   void appendFatal(const QString &text);
@@ -89,6 +90,17 @@ public:
   void appendDebug(const QString &text);
   void setSource(const QString &source);
 };
+
+%If (Qt_5_0_0 -)
+class AlgorithmProgressWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+%End
+
+public:
+    AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+};
+%End
 
 class ScriptEditor : QWidget {
 %TypeHeaderCode
@@ -115,7 +127,7 @@ public:
   };
 
 public:
-  ScriptEditor(const QString & language,
+  ScriptEditor(const QString &lexer, const QFont &font = QFont(),
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
 
   QString fileName() const;
@@ -258,6 +270,7 @@ class WorkspaceTreeWidget : QWidget {
 public:
   WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
                       QWidget *parent /TransferThis/ = nullptr);
+  std::vector<std::string> getSelectedWorkspaceNames() const;
 };
 
 // Implementation to override context menu
@@ -285,7 +298,7 @@ class AlgorithmHistoryWindow : public QDialog {
 #include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 %End
 public:
-	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName);
+	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName) throw(std::invalid_argument);
 };
 
 // ---------------------------------
@@ -313,8 +326,12 @@ public:
     void init();
     SIP_PYOBJECT getFittingFunction() const;
 %MethodCode
-    auto f = sipCpp->getFittingFunction();
-    sipRes = FROM_CSTRING(f->asString().c_str());
+    try {
+      auto f = sipCpp->getFittingFunction();
+      sipRes = FROM_CSTRING(f->asString().c_str());
+    } catch (std::out_of_range&) {
+      sipRes = FROM_CSTRING("");
+    }
 %End
     int sizeOfFunctionsGroup() const;
     void loadFunction(QString funStr);
@@ -328,10 +345,56 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    void setTextPlotGuess(const QString);
+
+    SIP_PYOBJECT defaultPeakType() const;
+%MethodCode
+    auto f = sipCpp->defaultPeakType();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+    void setDefaultPeakType(SIP_PYOBJECT);
+%MethodCode
+    sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+%End
+    QStringList registeredPeaks() const;
+    QStringList registeredBackgrounds() const;
+    QStringList registeredOthers() const;
+    QStringList getPeakPrefixes() const;
+    QString addFunction(QString);
+    double getPeakCentreOf(QString);
+    void setPeakCentreOf(QString, double);
+    double getPeakHeightOf(QString);
+    void setPeakHeightOf(QString, double);
+    double getPeakFwhmOf(QString);
+    void setPeakFwhmOf(QString, double);
+
+    SIP_PYOBJECT workspaceName() const;
+%MethodCode
+    auto f = sipCpp->workspaceName();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+
+    SIP_PYOBJECT outputName() const;
+%MethodCode
+    auto f = sipCpp->outputName();
+    sipRes = FROM_CSTRING(f.c_str());
+%End
+
+    void setOutputName(SIP_PYOBJECT);
+%MethodCode
+    sipCpp->setOutputName(TO_CSTRING(a0));
+%End
+
+    void setPeakToolOn(bool on);
+
 signals:
+    void functionChanged();
     void startXChanged(double);
     void endXChanged(double);
-    void fittingDone(const QString &);
+    void changedParameterOf(const QString &prefix);
+    void algorithmFinished(const QString &);
+    void removeFitCurves();
+    void plotGuess();
 };
 
 // ---------------------------------

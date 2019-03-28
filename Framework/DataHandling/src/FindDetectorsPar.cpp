@@ -237,13 +237,17 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector &det,
   Geometry::BoundingBox bbox;
   std::vector<Kernel::V3D> coord(3);
 
-  Kernel::V3D er(0, 1, 0), e_th,
-      ez(0, 0, 1); // ez along beamline, which is always oz;
+  // ez along beamline, which is always oz;
+  Kernel::V3D er(0, 1, 0), ez(0, 0, 1);
   if (dist2Det != 0.0)
     er = toDet / dist2Det; // direction to the detector
-  Kernel::V3D e_tg =
-      er.cross_prod(ez); // tangential to the ring and anticloakwise;
-  e_tg.normalize();
+  // tangential to the ring and anticlockwise.
+  Kernel::V3D e_tg = er.cross_prod(ez);
+  if (e_tg.nullVector(1e-12)) {
+    e_tg = V3D(1., 0., 0.);
+  } else {
+    e_tg.normalize();
+  }
   // make orthogonal -- projections are calculated in this coordinate system
   ez = e_tg.cross_prod(er);
 

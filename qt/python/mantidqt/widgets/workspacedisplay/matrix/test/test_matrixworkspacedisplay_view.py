@@ -8,9 +8,9 @@
 from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 
 class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
@@ -18,29 +18,29 @@ class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
         ws = CreateSampleWorkspace()
 
         p = MatrixWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
         p.close(ws.name())
 
-        self.assert_window_created()
+        self.assert_widget_created()
 
         QApplication.processEvents()
 
         self.assertEqual(None, p.ads_observer)
-        self.find_qt_widget("work")
-        self.assert_no_widgets()
+        self.assert_widget_not_present("work")
+        self.assert_no_toplevel_widgets()
 
     def test_window_force_deleted_correctly(self):
         ws = CreateSampleWorkspace()
 
         p = MatrixWorkspaceDisplay(ws)
-        self.assert_window_created()
+        self.assert_widget_created()
 
         p.force_close()
 
-        self.assert_window_created()
+        self.assert_widget_created()
 
         QApplication.processEvents()
 
         self.assertEqual(None, p.ads_observer)
-        self.find_qt_widget("work")
-        self.assert_no_widgets()
+        self.assert_widget_not_present("work")
+        self.assert_no_toplevel_widgets()

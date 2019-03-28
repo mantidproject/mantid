@@ -36,6 +36,21 @@ tuple chemicalFormula(Material &self) {
   return make_tuple(atoms, numberAtoms);
 }
 
+bool toBool(Material &self) {
+  return (self.cohScatterXSection() != 0.) ||
+         (self.incohScatterXSection() != 0.) ||
+         (self.totalScatterXSection() != 0.) || (self.absorbXSection() != 0.) ||
+         (self.cohScatterLength() != 0.) || (self.incohScatterLength() != 0.) ||
+         (self.totalScatterLength() != 0.) ||
+         (self.cohScatterLengthReal() != 0.) ||
+         (self.cohScatterLengthImg() != 0.) ||
+         (self.incohScatterLengthReal() != 0.) ||
+         (self.incohScatterLengthImg() != 0.) ||
+         (self.cohScatterLengthSqrd() != 0.) ||
+         (self.incohScatterLengthSqrd() != 0.) ||
+         (self.totalScatterLengthSqrd() != 0.);
+}
+
 /**
  *
  * @param rmm the relative molecular (formula) mass of this material
@@ -62,6 +77,13 @@ void export_Material() {
       .add_property("temperature", make_function(&Material::temperature),
                     "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
+#if PY_MAJOR_VERSION >= 3
+      .def("__bool__", &toBool,
+           "Returns True if any of the scattering values are non-zero")
+#else
+      .def("__nonzero__", &toBool,
+           "Returns True if any of the scattering values are non-zero")
+#endif
       .def("cohScatterXSection",
            (double (Material::*)(double) const)(&Material::cohScatterXSection),
            (arg("self"),
@@ -86,7 +108,6 @@ void export_Material() {
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Absorption Cross-Section for the given wavelength in barns")
-
       .def("cohScatterLength",
            (double (Material::*)(double) const)(&Material::cohScatterLength),
            (arg("self"),
@@ -102,7 +123,6 @@ void export_Material() {
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Total Scattering Length for the given wavelength in fm")
-
       .def(
           "cohScatterLengthReal",
           (double (Material::*)(double) const)(&Material::cohScatterLengthReal),
@@ -153,8 +173,10 @@ void export_Material() {
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Total Scattering Length Squared <b^2> for the given wavelength in "
            "fm^2")
-
-      .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
+      .def("chemicalFormula", &chemicalFormula, arg("self"),
+           "Chemical formula as a tuple of two lists: the first one contains "
+           "the Atom object the second their multiplicities within the "
+           "formula.")
       .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),
            "Relative Molecular Mass");
 }

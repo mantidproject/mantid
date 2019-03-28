@@ -15,7 +15,7 @@ namespace Kernel {
  */
 NetworkProxy::NetworkProxy() : m_logger("network_proxy_logger_generic") {}
 
-ProxyInfo NetworkProxy::getHttpProxy(const std::string &) {
+ProxyInfo NetworkProxy::getHttpProxy(const std::string & /*unused*/) {
   ProxyInfo proxyInfo; // NoProxy.
   char *proxy_var = getenv("http_proxy");
   if (proxy_var == nullptr)

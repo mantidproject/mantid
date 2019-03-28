@@ -5,9 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <iostream>
+
 #include <limits>
 
 #ifdef ENABLE_OPENCASCADE
@@ -32,7 +33,9 @@ GNU_DIAG_ON("cast-qual")
 namespace Mantid {
 
 namespace Geometry {
-
+namespace {
+Kernel::Logger logger("Cylinder");
+}
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -344,9 +347,9 @@ void Cylinder::print() const
  */
 {
   Quadratic::print();
-  std::cout << "Axis ==" << Normal << " ";
-  std::cout << "Centre == " << Centre << " ";
-  std::cout << "Radius == " << Radius << '\n';
+  logger.debug() << "Axis ==" << Normal << " ";
+  logger.debug() << "Centre == " << Centre << " ";
+  logger.debug() << "Radius == " << Radius << '\n';
 }
 
 void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,

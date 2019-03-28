@@ -4,16 +4,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from matplotlib.gridspec import GridSpec
 import unittest
 
+from mantid.py3compat import mock
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.multi_plotting_context import PlottingContext
-
 from Muon.GUI.Common import mock_widget
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 def rm_logic(name):
@@ -149,6 +146,16 @@ class SubplotTest(unittest.TestCase):
                 "test"].removeLine.call_count,
             2)
         self.assertEquals(self.subplot._close_rm_window.call_count, 1)
+
+    def test_addSubplot(self):
+         self.subplot._update = mock.Mock()
+         gridspec = GridSpec(2,2)
+         self.subplot._context.update_gridspec = mock.Mock()
+         self.subplot._context._gridspec = gridspec
+
+         self.subplot.add_subplot("test",3)
+         self.subplot._context.update_gridspec.assert_called_with(4)
+         self.assertEquals(self.subplot._update.call_count,1)
 
 if __name__ == "__main__":
     unittest.main()

@@ -83,6 +83,12 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.sig_grid_toggle_triggered.emit()
 
     def toggle_fit(self):
+        fit_action = self._actions['toggle_fit']
+        if fit_action.isChecked():
+            if self._actions['zoom'].isChecked():
+                self.zoom()
+            if self._actions['pan'].isChecked():
+                self.pan()
         self.sig_toggle_fit_triggered.emit()
 
     def trigger_fit_toggle_action(self):
@@ -99,3 +105,33 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                                                QtCore.Qt.KeepAspectRatio)
             painter.drawPixmap(0, 0, pixmap)
             painter.end()
+
+    def contextMenuEvent(self, event):
+        pass
+
+
+class ToolbarStateChecker(object):
+    """
+    An object that lets users check the state of the toolbar hiding at the same time any implementation details.
+    """
+
+    def __init__(self, toolbar):
+        self._toolbar = toolbar
+
+    def is_zoom_active(self):
+        """
+        Check if the Zoom button is checked
+        """
+        return self._toolbar._actions['zoom'].isChecked()
+
+    def is_pan_active(self):
+        """
+        Check if the Pan button is checked
+        """
+        return self._toolbar._actions['pan'].isChecked()
+
+    def is_tool_active(self):
+        """
+        Check if any of the zoom buttons are checked
+        """
+        return self.is_pan_active() or self.is_zoom_active()

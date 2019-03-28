@@ -11,6 +11,7 @@ from PyQt4 import QtCore, QtGui
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common.utilities import table_utils
+from Muon.GUI.Common.message_box import warning
 
 
 class FFTView(QtGui.QWidget):
@@ -97,7 +98,7 @@ class FFTView(QtGui.QWidget):
             ("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA, 0, "Apodization Function")
-        options = ["None", "Lorentz", "Gaussian"]
+        options = ["Lorentz", "Gaussian", "None"]
         self.apodization = table_utils.addComboToTable(
             self.FFTTableA, 0, options)
 
@@ -105,7 +106,7 @@ class FFTView(QtGui.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 1.4, 1)
+        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(
@@ -282,6 +283,20 @@ class FFTView(QtGui.QWidget):
     def isRaw(self):
         return self.Raw_box.checkState() == QtCore.Qt.Checked
 
+    def set_raw_checkbox_state(self, state):
+        if state:
+            self.Raw_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            self.Raw_box.setCheckState(QtCore.Qt.Unchecked)
+
+    def setup_raw_checkbox_changed(self, slot):
+        self.FFTTable.itemChanged.connect(self.raw_checkbox_changed)
+        self.signal_raw_option_changed = slot
+
+    def raw_checkbox_changed(self, table_item):
+        if table_item == self.Raw_box:
+            self.signal_raw_option_changed()
+
     def getImBoxRow(self):
         return self.Im_box_row
 
@@ -305,3 +320,6 @@ class FFTView(QtGui.QWidget):
 
     def isPhaseBoxShown(self):
         return self.FFTTable.isRowHidden(8)
+
+    def warning_popup(self, message):
+        warning(message, parent=self)

@@ -9,10 +9,12 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
+import unittest
+
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.utils.qt.test import GuiTest
-from mantidqt.utils.qt.test.qt_widget_finder import QtWidgetFinder
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
@@ -37,8 +39,14 @@ class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
         widget.close_all()
 
         QApplication.processEvents()
-        # there will always be 1, because we never allow an empty editor widget
-        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
+        # there should be zero interpreters
+        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
+
+        # close the whole widget, this should delete everything from the QApplication
+        widget.close()
+        QApplication.processEvents()
+        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
+        self.assert_no_toplevel_widgets()
 
     def test_editor_widget_deletes_find_replace_dialog(self):
         widget = MultiPythonFileInterpreter()
@@ -55,6 +63,12 @@ class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
         self.assert_number_of_widgets_matching("Embedded", 0)
 
+        # close the whole widget, this should delete everything from the QApplication
+        widget.close()
+        QApplication.processEvents()
+        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
+        self.assert_no_toplevel_widgets()
+
     def test_editor_widget_doesnt_create_find_replace_unless_requested(self):
         widget = MultiPythonFileInterpreter()
         self.assertEqual(1, widget.editor_count)
@@ -68,3 +82,13 @@ class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
         # there will always be 1, because we never allow an empty editor widget
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
         self.assert_number_of_widgets_matching("Embedded", 0)
+
+        # close the whole widget, this should delete everything from the QApplication
+        widget.close()
+        QApplication.processEvents()
+        self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
+        self.assert_no_toplevel_widgets()
+
+
+if __name__ == '__main__':
+    unittest.main()
