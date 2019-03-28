@@ -218,3 +218,26 @@ Use
 	- ``--page_handle`` the page handle to use [default page name]
 	- ``--add_heading`` add a heading to the page (uses the page name)
 
+CMake-format
+---------------------
+
+`CMake-format <https://github.com/cheshirekow/cmake_format/>`__ is a tool which is used to format individual ``CMakeLists.txt`` to make them easier to read. 
+The package can be installed using ``pip install cmake_format`` or ``sudo pip install cmake_format``.
+
+To use cmake-format on a specific ``CMakeLists.txt`` file in the command line run 
+
+.. code::
+
+	python -m cmake_format -c /path/to/mantid/.cmake-format.json -i /path/to/CMakeLists.txt
+	
+This will format the file using the config file in the mantid directory. Details on the configuration file can be found `here <https://github.com/cheshirekow/cmake_format/>`__.
+
+There is an official visual studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format/>`__.
+
+ 
+
+
+
+  
+
+
