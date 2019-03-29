@@ -300,7 +300,7 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
     def __init__(self):
         super(PowderSampleTest, self).__init__()
         self.config = None
-        self.prepset('BASISPowderDiffraction')
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -312,8 +312,10 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         Override parent method, does the work of running the test
         """
         try:
+            # run with old DAS
             BASISPowderDiffraction(RunNumbers='74799',
                                    OutputWorkspace='powder',
+                                   MaskFile='BASIS_Mask_default_diff.xml',
                                    BackgroundRuns='75527',
                                    VanadiumRuns='64642')
         finally:
@@ -328,3 +330,40 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'
+
+
+class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample in the newer DAS"""
+
+    def __init__(self):
+        super(PowderSampleNewDASTest, self).__init__()
+        self.config = None
+        self.prepset('BASISDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_90176.nxs.h5', 'BSS_90177.nxs.h5',
+                'BASIS_powder_90177.nxs']
+
+    def runTest(self):
+        r"""
+        Override parent method, does the work of running the test
+        """
+        try:
+            # run with new DAS
+            BASISPowderDiffraction(RunNumbers='90177',
+                                   OutputWorkspace='powder',
+                                   MaskFile='BASIS_Mask_default_diff.xml',
+                                   VanadiumRuns='90176')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        r"""
+        Inform of workspace output after runTest(), and associated file to
+        compare to.
+        :return: strings for workspace and file name
+        """
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'powder', 'BASIS_powder_90177.nxs'
