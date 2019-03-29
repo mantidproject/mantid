@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import random
 import os
+import string
 import numpy as np
 from collections import namedtuple
 from contextlib import contextmanager
@@ -32,6 +34,54 @@ class VDAS(Enum):
     """Specifices the version of the Data Acquisition System (DAS)"""
     v1900_2018 = 0  # Up to Dec 31 2018
     v2019_2100 = 1  # From Jan 01 2018
+
+
+def unique_workspace_name(n=5, prefix='', suffix=''):
+    r"""
+    Create a random sequence of `n` lowercase characters that is guaranteed
+    not to collide with the name of any existing Mantid workspace registered
+    in the analysis data service.
+
+    uws stands for Unique Workspace Name
+
+    Parameters
+    ----------
+    n: int
+        Size of the sequence
+    prefix: str
+        String to prefix the randon sequence
+    suffix: str
+        String to suffix the randon sequence
+
+    Returns
+    -------
+    str
+    """
+
+    ws_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(n))
+    ws_name = '{}{}{}'.format(str(prefix), ws_name, str(suffix))
+    while ws_name in AnalysisDataService.getObjectNames():
+        characters = [random.choice(string.ascii_lowercase) for _ in range(n)]
+        ws_name = ''.join(characters)
+        ws_name = '{}{}{}'.format(str(prefix), ws_name, str(suffix))
+    return ws_name
+
+
+def tws(marker=''):
+    r"""
+    String starting with '_t_' and guaranteed not to collide with the name of
+    any existing Mantid workspace in the analysis data service
+
+    Parameters
+    ----------
+    marker: str
+        String to identify the data contained in the workspace. Used as suffix
+
+    Returns
+    -------
+    str
+    """
+    return unique_workspace_name(prefix='_t_', suffix='_'+marker)
 
 
 @contextmanager
@@ -233,7 +283,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             self._t_mask = LoadMask(Instrument='BASIS',
                                     InputFile=self.getProperty('MaskFile').
                                     value,
-                                    OutputWorkspace='_t_mask')
+                                    OutputWorkspace=tws('mask'))
             #
             # Find the version of the Data Acquisition System
             #
@@ -380,9 +430,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_all_w = None
         for run in rl:
             file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
-            _t_w = LoadNexusMonitors(file_name)
+            _t_w = LoadNexusMonitors(file_name, OutputWorkspace=tws('monitor'))
             if _t_all_w is None:
-                _t_all_w = CloneWorkspace(_t_w)
+                _t_all_w = CloneWorkspace(_t_w, OutputWorkspace=tws('monitor'))
             else:
                 _t_all_w += _t_w
         return _t_all_w
@@ -404,13 +454,19 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Mantid.EventWorkspace
         """
         _t_mon = self._load_monitors(target)
-        _t_mon = ConvertUnits(_t_mon, Target='Wavelength', Emode='Elastic')
-        _t_mon = CropWorkspace(_t_mon, XMin=self._wavelength_band[0],
-                               XMax=self._wavelength_band[1])
-        _t_mon = OneMinusExponentialCor(_t_mon, C='0.20749999999999999',
-                                        C1='0.001276')
-        _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply')
-        _t_mon = Integration(_t_mon)  # total monitor count
+        _t_mon = ConvertUnits(_t_mon, Target='Wavelength', Emode='Elastic',
+                              OutputWorkspace=_t_mon.name())
+        _t_mon = CropWorkspace(_t_mon,
+                               XMin=self._wavelength_band[0],
+                               XMax=self._wavelength_band[1],
+                               OutputWorkspace=_t_mon.name())
+        _t_mon = OneMinusExponentialCor(_t_mon,
+                                        C='0.20749999999999999',
+                                        C1='0.001276',
+                                        OutputWorkspace=_t_mon.name())
+        _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply',
+                       OutputWorkspace=_t_mon.name())
+        _t_mon = Integration(_t_mon, OutputWorkspace=_t_mon.name())
         _t_w = Divide(w, _t_mon, OutputWorkspace=w.name())
         return _t_w
 
