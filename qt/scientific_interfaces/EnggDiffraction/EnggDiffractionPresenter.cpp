@@ -232,7 +232,9 @@ void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
  *
  * @param fname name of the calibration/GSAS iparm file
  */
-void EnggDiffractionPresenter::grabCalibParms(const std::string &fname, std::string &vanNo, std::string &ceriaNo) {
+void EnggDiffractionPresenter::grabCalibParms(const std::string &fname,
+                                              std::string &vanNo,
+                                              std::string &ceriaNo) {
   std::vector<GSASCalibrationParms> parms;
 
   // To grab the bank indices, lines like "INS   BANK     2"
@@ -269,7 +271,7 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname, std::str
                           << " elements as expected. The calibration may not "
                              "load correctly\n";
         }
-      }else if(line.find("CALIB") != std::string::npos){
+      } else if (line.find("CALIB") != std::string::npos) {
         Mantid::Kernel::StringTokenizer tokenizer(line, " ", opts);
         ceriaNo = tokenizer[2];
         vanNo = tokenizer[3];
@@ -387,9 +389,6 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   m_view->showStatus("Calculating cropped calibration...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo, specNo/bankName);
-  // calibrationFinished()
   startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specNo);
 }
 
@@ -535,9 +534,6 @@ void EnggDiffractionPresenter::startFocusing(
 
   m_view->showStatus("Focusing...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // GUI-blocking alternative:
-  // doFocusRun(outFilenames, runNo, banks, specNos, dgFile)
-  // focusingFinished()
   startAsyncFocusWorker(multi_RunNo, banks, specNos, dgFile);
 }
 
@@ -565,9 +561,6 @@ void EnggDiffractionPresenter::processRebinTime() {
 
   m_view->showStatus("Rebinning by time...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // GUI-blocking alternative:
-  // doRebinningTime(runNo, bin, outWSName)
-  // rebinningFinished()
   startAsyncRebinningTimeWorker(runNo, bin, outWSName);
 }
 
@@ -593,9 +586,6 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
 
   m_view->showStatus("Rebinning by pulses...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // GUI-blocking alternative:
-  // doRebinningPulses(runNo, nperiods, timeStep, outWSName)
-  // rebinningFinished()
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
@@ -691,45 +681,7 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
   std::vector<std::string> multi_run_number;
   if (paths.empty() || paths.front().empty())
     return multi_run_number;
-
-  for (const auto &path : paths) {
-    std::string run_number;
-    try {
-      if (Poco::File(path).exists()) {
-        Poco::Path inputDir = path;
-
-        // get file name name via poco::path
-        std::string filename = inputDir.getFileName();
-
-        // convert to int or assign it to size_t
-        for (const char &ch : filename) {
-          if (std::isdigit(ch)) {
-            run_number += ch;
-          }
-        }
-        run_number.erase(0, run_number.find_first_not_of('0'));
-
-        recordPathBrowsedTo(inputDir.toString());
-      }
-    } catch (std::runtime_error &re) {
-      throw std::invalid_argument(
-          "Error while looking for a run number in the files selected: " +
-          static_cast<std::string>(re.what()));
-    } catch (Poco::FileNotFoundException &rexc) {
-      throw std::invalid_argument("Error while looking for a run number in the "
-                                  "files selected. There was a problem with "
-                                  "the file(s): " +
-                                  std::string(rexc.what()));
-    }
-
-    multi_run_number.push_back(run_number);
-  }
-
-  g_log.debug()
-      << "First and last run number inferred from a multi-run selection: "
-      << multi_run_number.front() << " ... " << multi_run_number.back() << '\n';
-
-  return multi_run_number;
+  return paths;
 }
 
 /**
@@ -856,10 +808,8 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   }
   const std::string castMsg =
       "It is not possible to interpret as an integer number ";
-  
 
   instName = parts[0];
-
 }
 
 /**
@@ -938,7 +888,7 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::invalid_argument &iaexc) {
     m_calibFinishedOK = false;
     m_calibError = "The calibration calculations failed. Some input properties "
-                   "were not valid. See log messages for details. \n Error: "+
+                   "were not valid. See log messages for details. \n Error: " +
                    std::string(iaexc.what());
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -966,6 +916,7 @@ void EnggDiffractionPresenter::calibrationFinished() {
       m_view->userWarning("Calibration Error", m_calibError);
     }
     m_cancelled = false;
+
     m_view->showStatus("Calibration didn't finish succesfully. Ready");
   } else {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
@@ -1007,10 +958,17 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 
   // default extension for calibration files
   const std::string calibExt = ".prm";
-  const std::string vanFilename = Poco::Path(vanNo).getBaseName();
-  const std::string ceriaFilename = Poco::Path(ceriaNo).getBaseName();
+  std::string vanFilename = Poco::Path(vanNo).getBaseName();
+  std::string ceriaFilename = Poco::Path(ceriaNo).getBaseName();
+  std::string vanRun =
+      vanFilename.substr(vanFilename.find(instStr) + instStr.size());
+  std::string ceriaRun =
+      ceriaFilename.substr(ceriaFilename.find(instStr) + instStr.size());
+  vanRun.erase(0, std::min(vanRun.find_first_not_of('0'), vanRun.size() - 1));
+  ceriaRun.erase(
+      0, std::min(ceriaRun.find_first_not_of('0'), ceriaRun.size() - 1));
   std::string sugg =
-      instStr + "_" + vanFilename + "_" + ceriaFilename + nameAppendix + calibExt;
+      instStr + "_" + vanRun + "_" + ceriaRun + nameAppendix + calibExt;
 
   return sugg;
 }
@@ -1393,9 +1351,20 @@ std::vector<std::string>
 EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
                                                const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
+  const std::string runNumber = Poco::Path(runNo).getBaseName();
   std::vector<std::string> res;
   res.reserve(banks.size());
-  std::string prefix = instStr + "_" + runNo + "_focused_bank_";
+  const auto instrumentPresent = runNumber.find(instStr);
+  std::string runName =
+      (instrumentPresent != std::string::npos)
+          ? runNumber.substr(instrumentPresent + instStr.size())
+          : runNumber;
+
+  std::string prefix = instStr + "_" +
+                       runName.erase(0, std::min(runName.find_first_not_of('0'),
+                                                 runName.size() - 1)) +
+                       "_focused_bank_";
+
   for (size_t b = 1; b <= banks.size(); b++) {
     res.emplace_back(prefix + boost::lexical_cast<std::string>(b) + ".nxs");
   }
@@ -1405,8 +1374,10 @@ EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
 std::string
 EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
   const std::string instStr = m_view->currentInstrument();
-
-  return instStr + "_" + runNo + "_focused_cropped.nxs";
+  const std::string runNumber = Poco::Path(runNo).getBaseName();
+  const std::string runName =
+      runNumber.substr(runNumber.find(instStr) + instStr.size());
+  return instStr + "_" + runName + "_focused_cropped.nxs";
 }
 
 std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
@@ -1425,7 +1396,9 @@ std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
 std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
     const std::string &runNo, const std::vector<size_t> &bankIDs) {
   const std::string instStr = m_view->currentInstrument();
-
+  const std::string runNumber = Poco::Path(runNo).getBaseName();
+  const std::string runName =
+      runNumber.substr(runNumber.find(instStr) + instStr.size());
   std::vector<std::string> res;
   res.reserve(bankIDs.size());
   std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
@@ -1556,8 +1529,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                    << effectiveFilenames[idx] << '\n';
     try {
 
-      doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
-                 dgFile);
+      doFocusing(cs, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
       m_focusFinishedOK = false;
@@ -1696,7 +1668,8 @@ void EnggDiffractionPresenter::focusingFinished() {
  * texture focusing
  */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
-                                          const RunLabel &runLabel,
+                                          const std::string &runLabel,
+                                          const size_t bank,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
   MatrixWorkspace_sptr inWS;
@@ -1717,9 +1690,9 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   for (size_t i = 0; i < multi_RunNo.size(); i++) {
     // if last run number in list
     if (i + 1 == multi_RunNo.size())
-      loadInput += instStr + multi_RunNo[i];
+      loadInput += multi_RunNo[i];
     else
-      loadInput += instStr + multi_RunNo[i] + '+';
+      loadInput += multi_RunNo[i] + '+';
   }
 
   // if its not empty the global variable is set for sumOfFiles
@@ -1759,8 +1732,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     try {
       auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
-      load->setPropertyValue("Filename",
-                             instStr + std::to_string(runLabel.runNumber));
+      load->setPropertyValue("Filename", runLabel);
       load->setPropertyValue("OutputWorkspace", inWSName);
       load->execute();
 
@@ -1772,14 +1744,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                        "Could not run the algorithm Load succesfully for "
                        "the focusing "
                        "sample (run number: " +
-                           std::to_string(runLabel.runNumber) +
-                           "). Error description: " + re.what() +
+                           runLabel + "). Error description: " + re.what() +
                            " Please check also the previous log messages "
                            "for details.";
       throw;
     }
   }
-  const auto bankString = std::to_string(runLabel.bank);
+  const auto bankString = std::to_string(bank);
   std::string outWSName;
   if (!dgFile.empty()) {
     // doing focus "texture"
@@ -1822,11 +1793,14 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   const bool saveOutputFiles = m_view->saveFocusedOutputFiles();
   if (saveOutputFiles) {
     try {
-      saveFocusedXYE(runLabel, outWSName);
-      saveGSS(runLabel, outWSName);
-      saveOpenGenie(runLabel, outWSName);
-      saveNexus(runLabel, outWSName);
-      exportSampleLogsToHDF5(outWSName, userHDFRunFilename(runLabel.runNumber));
+      const int runNo =
+          stoi(runLabel.substr(runLabel.rfind(instStr) + instStr.size()));
+      RunLabel label(runNo, bank);
+      saveFocusedXYE(label, outWSName);
+      saveGSS(label, outWSName);
+      saveOpenGenie(label, outWSName);
+      saveNexus(label, outWSName);
+      exportSampleLogsToHDF5(outWSName, userHDFRunFilename(runNo));
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "

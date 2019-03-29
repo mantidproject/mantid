@@ -120,7 +120,8 @@ private:
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
 
-  void grabCalibParms(const std::string &fname, std::string &vanNo, std::string &ceriaNo);
+  void grabCalibParms(const std::string &fname, std::string &vanNo,
+                      std::string &ceriaNo);
 
   void updateCalibParmsTable();
 
@@ -189,8 +190,9 @@ private:
                                std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs, const RunLabel &runLabel,
-                  const std::string &specNos, const std::string &dgFile);
+  void doFocusing(const EnggDiffCalibSettings &cs, const std::string &runLabel,
+                  const size_t bank, const std::string &specNos,
+                  const std::string &dgFile);
 
   /// @name Methods related to pre-processing / re-binning
   //@{
@@ -301,7 +303,7 @@ private:
 
   QThread *m_workerThread;
 
-  ///true if the last thing ran was cancelled
+  /// true if the last thing ran was cancelled
   bool m_cancelled;
 
   /// true if the last calibration completed successfully
@@ -318,7 +320,7 @@ private:
 
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
-/// error that caused the focus to fail
+  /// error that caused the focus to fail
   std::string m_focusError;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
