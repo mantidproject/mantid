@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 
+
 def warning(error, parent=None):
     if not parent:
         parent = QtWidgets.QWidget()

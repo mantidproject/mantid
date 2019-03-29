@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis_2 import FrequencyAnalysisGui
-from qtpy import QtWidgets, QtCore
+from qtpy import QtCore
 from save_python import getWidgetIfOpen
 
 
@@ -27,6 +27,8 @@ setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
 setMovable is only available in Qt4. Use setSectionsMovable instead.
 setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
 """
+
+
 def main():
     try:
         global muon_freq

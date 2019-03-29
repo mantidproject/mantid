@@ -40,10 +40,15 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
         self.browse_button = QtWidgets.QPushButton(self)
 
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed,
+            QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.browse_button.sizePolicy().hasHeightForWidth())
+        size_policy.setHeightForWidth(
+            self.browse_button.sizePolicy(
+            ).hasHeightForWidth(
+            ))
 
         self.browse_button.setSizePolicy(size_policy)
         self.browse_button.setObjectName("browseButton")
@@ -51,10 +56,15 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
         self.file_path_edit = QtWidgets.QLineEdit(self)
 
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        size_policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Minimum,
+            QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.file_path_edit.sizePolicy().hasHeightForWidth())
+        size_policy.setHeightForWidth(
+            self.file_path_edit.sizePolicy(
+            ).hasHeightForWidth(
+            ))
 
         self.file_path_edit.setSizePolicy(size_policy)
         self.file_path_edit.setToolTip("")
@@ -81,15 +91,16 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
     def on_file_edit_changed(self, slot):
         self.file_path_edit.returnPressed.connect(slot)
 
-    def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
+    def show_file_browser_and_return_selection(
+           self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
         if multiple_files:
-            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
-                                                              file_filter)
+            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(
+                self, "Select files", default_directory, file_filter)
             return [str(chosen_file) for chosen_file in chosen_files]
         else:
-            chosen_file = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", default_directory,
-                                                            file_filter)
+            chosen_file = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Select file", default_directory, file_filter)
             return [str(chosen_file)]
 
     def disable_loading(self):
@@ -125,7 +136,8 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         if store:
             self._store_edit_text = True
             self._stored_edit_text = text
-            self.file_path_edit.setText("(... more than 10 files, use right-click -> copy)")
+            self.file_path_edit.setText(
+                "(... more than 10 files, use right-click -> copy)")
         else:
             self.file_path_edit.setText(text)
         self._cached_text = self.get_file_edit_text()

@@ -35,19 +35,23 @@ class GroupingTabView(QtWidgets.QWidget):
 
         self.load_grouping_button = QtWidgets.QPushButton(self)
         self.load_grouping_button.setText("Load")
-        self.load_grouping_button.setToolTip("Load a previously saved grouping (in XML format)")
+        self.load_grouping_button.setToolTip(
+            "Load a previously saved grouping (in XML format)")
 
         self.save_grouping_button = QtWidgets.QPushButton(self)
         self.save_grouping_button.setText("Save")
-        self.save_grouping_button.setToolTip("Save the current state of the group/pair table to XML format")
+        self.save_grouping_button.setToolTip(
+            "Save the current state of the group/pair table to XML format")
 
         self.clear_grouping_button = QtWidgets.QPushButton(self)
         self.clear_grouping_button.setText("Clear")
-        self.clear_grouping_button.setToolTip("Clear the grouping/pairing tables")
+        self.clear_grouping_button.setToolTip(
+            "Clear the grouping/pairing tables")
 
         self.default_grouping_button = QtWidgets.QPushButton(self)
         self.default_grouping_button.setText("Default")
-        self.default_grouping_button.setToolTip("Restore the default grouping for the currently selected instrument.")
+        self.default_grouping_button.setToolTip(
+            "Restore the default grouping for the currently selected instrument.")
 
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
@@ -113,14 +117,21 @@ class GroupingTabView(QtWidgets.QWidget):
     def get_description_text(self):
         return self.description_edit.text()
 
-    def show_file_browser_and_return_selection(self, file_filter, search_directories):
+    def show_file_browser_and_return_selection(
+            self, file_filter, search_directories):
         default_directory = search_directories[0]
-        chosen_file = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", default_directory,
-                                                        file_filter)
+        chosen_file = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Select file", default_directory,
+            file_filter)
         return str(chosen_file)
 
     def show_file_save_browser_and_return_selection(self):
-        chosen_file = str(QtWidgets.QFileDialog.getSaveFileName(self, "Select file", '', 'XML files (*.xml)'))
+        chosen_file = str(
+            QtWidgets.QFileDialog.getSaveFileName(
+                self,
+                "Select file",
+                '',
+                'XML files (*.xml)'))
         if chosen_file == '':
             return chosen_file
 

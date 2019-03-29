@@ -8,9 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets
 
+
 class HomeTabView(QtWidgets.QWidget):
 
-    def __init__(self, parent=None,widget_list=None):
+    def __init__(self, parent=None, widget_list=None):
         super(HomeTabView, self).__init__(parent)
 
         self._widget_list = widget_list

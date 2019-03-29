@@ -5,10 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 
 
 class RunSelectionDialog(QtWidgets.QDialog):
+
     def __init__(self, current_runs, instrument, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
 
@@ -19,7 +20,8 @@ class RunSelectionDialog(QtWidgets.QDialog):
         self.message.setText('Which run do you wish to use for calculation?')
         layout.addWidget(self.message)
 
-        current_runs_as_string = [instrument + str(run[0]) for run in current_runs]
+        current_runs_as_string = [
+            instrument + str(run[0]) for run in current_runs]
         self.run_selector_combo = QtWidgets.QComboBox()
         self.run_selector_combo.addItems(current_runs_as_string)
 
