@@ -23,7 +23,7 @@ class MuonGuiContext(dict):
 
     def update_and_send_signal(self, *args, **kwargs):
         updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
-        if not updated_items:
+        if not updated_items and kwargs:
             return
 
         super(MuonGuiContext, self).update(*args, **kwargs)

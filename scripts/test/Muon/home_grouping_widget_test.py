@@ -13,16 +13,12 @@ from mantid.py3compat import mock
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class HomeTabGroupingPresenterTest(unittest.TestCase):
@@ -30,12 +26,7 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
         ConfigService['default.instrument'] = 'MUSR'
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
         self.gui_context['RebinType'] = 'None'
         self.view = HomeGroupingWidgetView(self.obj)
         self.model = HomeGroupingWidgetModel(self.context)

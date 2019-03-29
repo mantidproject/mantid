@@ -11,27 +11,18 @@ from mantid.api import FileFinder
 from mantid.py3compat import mock
 
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class HomeTabInstrumentPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
         self.gui_variable_observer = Observer()
 
         self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)

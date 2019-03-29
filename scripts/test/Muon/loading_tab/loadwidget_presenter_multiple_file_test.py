@@ -12,20 +12,16 @@ from mantid.api import FileFinder
 from mantid.py3compat import mock
 
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
@@ -40,21 +36,16 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         self.obj = QtGui.QWidget()
         ConfigService['default.instrument'] = 'MUSR'
 
-        self.data = MuonLoadData()
-        self.data_context = MuonDataContext(self.data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
         self.context.instrument = 'MUSR'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
-        self.load_file_model = BrowseFileWidgetModel(self.data, self.context)
-        self.load_run_model = LoadRunWidgetModel(self.data, self.context)
+        self.load_file_model = BrowseFileWidgetModel(self.loaded_data, self.context)
+        self.load_run_model = LoadRunWidgetModel(self.loaded_data, self.context)
 
         self.view = LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view,
                                    load_run_view=self.load_run_view)
-        self.presenter = LoadWidgetPresenter(self.view, LoadWidgetModel(self.data, self.context))
+        self.presenter = LoadWidgetPresenter(self.view, LoadWidgetModel(self.loaded_data, self.context))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 

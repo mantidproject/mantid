@@ -12,27 +12,18 @@ from mantid.py3compat import mock
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class HomeTabRunInfoPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
         self.data_context.instrument = 'MUSR'
         self.view = HomeRunInfoWidgetView(self.obj)
         self.model = HomeRunInfoWidgetModel(self.context)

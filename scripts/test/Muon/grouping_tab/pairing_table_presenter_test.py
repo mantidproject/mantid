@@ -5,16 +5,12 @@ import six
 from mantid.py3compat import mock
 
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 def pair_name():
@@ -30,12 +26,8 @@ class PairingTablePresenterTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
+
         self.add_three_groups_to_model()
 
         self.model = GroupingTabModel(context=self.context)

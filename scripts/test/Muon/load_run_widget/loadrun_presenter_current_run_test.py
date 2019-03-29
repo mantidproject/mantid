@@ -11,14 +11,10 @@ from mantid.py3compat import mock
 
 import Muon.GUI.Common.utilities.muon_file_utils as fileUtils
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
@@ -47,15 +43,11 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonLoadData()
-        self.data_context = MuonDataContext(self.data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
+
         self.data_context.instrument = 'EMU'
         self.view = LoadRunWidgetView(parent=self.obj)
-        self.model = LoadRunWidgetModel(self.data, self.context)
+        self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
         self.model.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], "currentRun.nxs", 1234))

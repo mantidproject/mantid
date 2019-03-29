@@ -8,25 +8,16 @@ import unittest
 
 from mantid.py3compat import mock
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.muon_test_helpers import IteratorWithException
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetModelTest(unittest.TestCase):
     def setUp(self):
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
         self.data_context.instrument = 'EMU'
-        self.model = LoadRunWidgetModel(MuonLoadData(), self.context)
+        self.model = LoadRunWidgetModel(self.loaded_data, self.context)
 
     def test_model_initialized_with_empty_lists_of_loaded_data(self):
         self.assertEqual(self.model.loaded_workspaces, [])

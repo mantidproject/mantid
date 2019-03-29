@@ -9,15 +9,10 @@ import unittest
 
 from mantid.api import AnalysisDataService
 from mantid.api import FileFinder
-
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.observer_pattern import Observer
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -27,12 +22,7 @@ else:
 
 class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
-        self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
-        self.gui_context = MuonGuiContext()
-        self.group_context = MuonGroupPairContext()
-        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
-                                   muon_gui_context=self.gui_context)
+        setup_context_for_tests(self)
         self.frequency_context = FrequencyContext(self.context)
         self.gui_variable_observer = Observer()
         self.gui_variable_observer.update = mock.MagicMock()
