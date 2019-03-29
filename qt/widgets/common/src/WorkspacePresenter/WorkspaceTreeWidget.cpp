@@ -1147,7 +1147,8 @@ void WorkspaceTreeWidget::onClickDeleteWorkspaces() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 }
 
-void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item, int) {
+void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item,
+                                           int /*unused*/) {
   Q_UNUSED(item);
 }
 

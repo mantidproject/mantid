@@ -93,7 +93,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // This is created from a QWidget* -> use null-deleter to prevent double-free
   // with Qt
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
-      this, [](EnggDiffractionViewQtGUI *) {});
+      this, [](EnggDiffractionViewQtGUI * /*unused*/) {});
   m_fittingWidget =
       new EnggDiffFittingViewQtWidget(m_ui.tabMain, sharedView, sharedView,
                                       fullPres, fullPres, sharedView, fullPres);
@@ -1054,7 +1054,7 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
 }
 
-void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent * /*unused*/) {
   // make sure that the RB number is checked on interface startup/show
   m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }

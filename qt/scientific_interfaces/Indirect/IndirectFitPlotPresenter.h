@@ -33,8 +33,8 @@ public:
   void setFitSingleSpectrumEnabled(bool enable);
 
 public slots:
-  void setStartX(double);
-  void setEndX(double);
+  void setStartX(double /*startX*/);
+  void setEndX(double /*endX*/);
   void updatePlotSpectrum(int spectrum);
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
@@ -50,14 +50,14 @@ public slots:
   void disablePlotGuessInSeparateWindow();
 
 signals:
-  void selectedFitDataChanged(std::size_t);
+  void selectedFitDataChanged(std::size_t /*_t1*/);
   void noFitDataSelected();
-  void plotSpectrumChanged(std::size_t);
-  void fitSingleSpectrum(std::size_t, std::size_t);
-  void startXChanged(double);
-  void endXChanged(double);
-  void fwhmChanged(double);
-  void backgroundChanged(double);
+  void plotSpectrumChanged(std::size_t /*_t1*/);
+  void fitSingleSpectrum(std::size_t /*_t1*/, std::size_t /*_t2*/);
+  void startXChanged(double /*_t1*/);
+  void endXChanged(double /*_t1*/);
+  void fwhmChanged(double /*_t1*/);
+  void backgroundChanged(double /*_t1*/);
   void runAsPythonScript(const QString &code, bool noOutput = false);
 
 private slots:

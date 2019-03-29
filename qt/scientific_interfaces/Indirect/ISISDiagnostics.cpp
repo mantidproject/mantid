@@ -360,7 +360,7 @@ void ISISDiagnostics::handleNewFile() {
  *
  * @param state :: True to show the second range selectors, false to hide
  */
-void ISISDiagnostics::sliceTwoRanges(QtProperty *, bool state) {
+void ISISDiagnostics::sliceTwoRanges(QtProperty * /*unused*/, bool state) {
   m_uiForm.ppRawPlot->getRangeSelector("SliceBackground")->setVisible(state);
 }
 

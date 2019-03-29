@@ -138,7 +138,7 @@ protected:
 
 signals:
   void functionChanged();
-  void parameterChanged(const Mantid::API::IFunction *);
+  void parameterChanged(const Mantid::API::IFunction * /*_t1*/);
   void customBoolChanged(const QString &key, bool value);
   void updateAvailableFitTypes();
 

@@ -42,14 +42,16 @@ public:
   explicit InstrumentWidgetRenderTab(InstrumentWidget *instrWindow);
   ~InstrumentWidgetRenderTab();
   void initSurface() override;
-  void saveSettings(QSettings &) const override;
-  void loadSettings(const QSettings &) override;
+  void saveSettings(QSettings & /*unused*/) const override;
+  void loadSettings(const QSettings & /*unused*/) override;
   // legacy interface for MantidPlot python api
   ColorMap::ScaleType getScaleType() const;
   void setScaleType(ColorMap::ScaleType type);
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
-  void setupColorBar(const ColorMap &, double, double, double, bool);
+  void setupColorBar(const ColorMap & /*cmap*/, double /*minValue*/,
+                     double /*maxValue*/, double /*minPositive*/,
+                     bool /*autoscaling*/);
   /// Load the render window tab settings from file.
   virtual void loadFromProject(const std::string &lines) override;
   /// Save the render window tab settings to file.
@@ -57,7 +59,7 @@ public:
 
 signals:
   void rescaleColorMap();
-  void setAutoscaling(bool);
+  void setAutoscaling(bool /*_t1*/);
 
 public slots:
   void setMinValue(double value, bool apply = true);
@@ -66,31 +68,31 @@ public slots:
   void showAxes(bool on);
   void displayDetectorsOnly(bool yes);
   void enableGL(bool on);
-  void setColorMapAutoscaling(bool);
+  void setColorMapAutoscaling(bool /*on*/);
   void changeColorMap(const QString &filename = "");
-  void setSurfaceType(int);
-  void flipUnwrappedView(bool);
+  void setSurfaceType(int /*index*/);
+  void flipUnwrappedView(bool /*on*/);
   void saveImage(QString filename = "");
 
 private slots:
 
-  void showResetView(int);
-  void showFlipControl(int);
+  void showResetView(int /*iv*/);
+  void showFlipControl(int /*iv*/);
   /// Called before the display setting menu opens. Filters out menu options.
   void displaySettingsAboutToshow();
   /// Change the type of the surfac
   void surfaceTypeChanged(int index);
   void colorMapChanged();
-  void scaleTypeChanged(int);
-  void nthPowerChanged(double);
-  void glOptionChanged(bool);
-  void showMenuToolTip(QAction *);
+  void scaleTypeChanged(int /*type*/);
+  void nthPowerChanged(double /*nth_power*/);
+  void glOptionChanged(bool /*on*/);
+  void showMenuToolTip(QAction * /*action*/);
   void setUCorrection();
   void toggleLayerDisplay(bool on);
   void setVisibleLayer(int layer);
 
 private: // methods
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
   QMenu *createPeaksMenu();
   QFrame *setupAxisFrame();
   void setPrecisionMenuItemChecked(int n);
