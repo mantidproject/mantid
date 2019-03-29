@@ -106,9 +106,6 @@ public:
   /// return the actual type and points of one of the "standard" objects,
   /// cuboid/cone/cyl/sphere
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &radius,
-                     double &height) const;
-  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vector, double &innerRadius,
                      double &radius, double &height) const;
   void setShapeInfo(detail::ShapeInfo &&shapeInfo);
