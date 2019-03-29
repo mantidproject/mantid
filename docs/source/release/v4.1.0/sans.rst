@@ -18,3 +18,4 @@ Improvements
 ############
 
 - Increased font size in run table.
+- For ZOOM, SHIFT user file command now moves monitor 5.
