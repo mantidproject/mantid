@@ -1,20 +1,19 @@
-from PyQt4 import QtGui
-import six
 import unittest
+from PyQt4 import QtGui
 
 from mantid.py3compat import mock
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
-from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_context import MuonContext
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.observer_pattern import Observer
 
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.observer_pattern import Observer
 
 maximum_number_of_groups = 20
 

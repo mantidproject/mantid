@@ -6,10 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context import MuonContext
-from mantid.api import ITableWorkspace
-from mantid import api
 from decimal import Decimal, InvalidOperation
+
+from mantid import api
+from mantid.api import ITableWorkspace
+
+from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 
 class InstrumentWidgetModel(object):

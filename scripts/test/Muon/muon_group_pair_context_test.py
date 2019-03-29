@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 import unittest
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.observer_pattern import Observer
+
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 
@@ -89,10 +89,10 @@ class MuonGroupPairContextTest(unittest.TestCase):
         group_3 = MuonGroup('group_3', [1, 3, 4, 7, 9])
 
         self.context.add_group(group_1)
-        self.context.add_group(group_2)
         self.context.add_group(group_3)
+        self.context.add_group(group_2)
 
-        self.assertEquals(self.context.group_names, ['group_1', 'group_2', 'group_3'])
+        self.assertEquals(self.context.group_names, ['group_1', 'group_3', 'group_2'])
 
     def test_pair_names_returns_ordered_list_of_names(self):
         pair_1 = MuonPair('pair_1')

@@ -7,25 +7,24 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
+import PyQt4.QtGui as QtGui
 from mantid.kernel import ConfigServiceImpl
-from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 
-from Muon.GUI.Common.muon_context import MuonContext
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 import Muon.GUI.Common.message_box as message_box
-from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
-
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
-
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
+from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
 

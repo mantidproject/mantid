@@ -1,19 +1,20 @@
-from PyQt4 import QtGui
 import unittest
+from PyQt4 import QtGui
 
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from mantid.py3compat import mock
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 
-from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_context import MuonContext
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+
 
 def pair_name():
     name = []

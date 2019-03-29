@@ -1,16 +1,17 @@
-import six
 import unittest
 
+import six
 from mantid.py3compat import mock
+
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_context import MuonContext
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
 
 
 class IteratorWithException:

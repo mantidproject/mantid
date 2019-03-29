@@ -10,8 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common import group_object
 from Muon.GUI.Common import pair_object
 
-from Muon.GUI.Common.muon_context.muon_context import *
-
 
 class ContextExampleModel(object):
 

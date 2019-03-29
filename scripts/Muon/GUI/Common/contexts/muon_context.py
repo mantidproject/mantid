@@ -4,25 +4,25 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, estimate_group_asymmetry_data
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
-
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_raw_data_directory, get_group_data_directory,
                                                          get_pair_data_directory, get_group_asymmetry_name)
+from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
+    estimate_group_asymmetry_data
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
 class MuonContext(object):
-    base_directory = "Muon Data"
-
-    def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(), muon_group_context=MuonGroupPairContext()):
+    def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
+                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data'):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
+        self.base_directory = base_directory
 
     @property
     def data_context(self):

@@ -4,21 +4,21 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui
 import unittest
+from PyQt4 import QtGui
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_context import MuonContext
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common import mock_widget
 
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
+from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
+from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.observer_pattern import Observer
 
 

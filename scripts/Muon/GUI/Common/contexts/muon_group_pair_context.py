@@ -120,13 +120,13 @@ class MuonGroupPairContext(object):
         for group in self._groups:
             if group.name == group_name:
                 self._groups.remove(group)
-                break
+                return
 
     def remove_pair(self, pair_name):
         for pair in self._pairs:
             if pair.name == pair_name:
                 self._pairs.remove(pair)
-                break
+                return
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)

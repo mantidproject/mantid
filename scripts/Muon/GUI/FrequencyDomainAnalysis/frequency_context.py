@@ -7,10 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
-from Muon.GUI.Common.muon_data_context import get_default_grouping
 
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
+from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
 class FrequencyContext(object):

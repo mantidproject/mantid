@@ -9,10 +9,10 @@ import unittest
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid.py3compat import mock
+
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.observer_pattern import Observer
 
 
 class MuonDataContextTest(unittest.TestCase):

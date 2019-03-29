@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 import unittest
-from Muon.GUI.Common.muon_gui_context import MuonGuiContext
+
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.observer_pattern import Observer
 
 if sys.version_info.major < 2:
