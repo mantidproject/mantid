@@ -43,6 +43,7 @@
 #include <cxxtest/StdHeaders.h>
 #include <iostream>
 #include <sstream>
+#include <chrono>
 #include <cstring>
 #include <cstdio>
 #include <ctime>
@@ -226,9 +227,13 @@ public:
 
     void write(OutputStream &o)
     {
+        std::ostringstream timeStr;
+        timeStr << runtime;
         o << "    <testcase classname=\"" << className.c_str()
           << "\" name=\"" << testName.c_str()
-          << "\" line=\"" << line.c_str() << "\"";
+          << "\" line=\"" << line.c_str()
+          << "\" time=\"" << timeStr.str().c_str()
+          << "\"";
         bool elts = false;
         element_t curr = elements.begin();
         element_t end  = elements.end();
@@ -273,6 +278,9 @@ public:
     int nfail;
     int nerror;
     double totaltime;
+    std::chrono::time_point<std::chrono::high_resolution_clock>
+      testRunStartTime, testRunStopTime;
+
 
     int run()
     {
@@ -359,6 +367,24 @@ public:
             new TeeOutputStreams(CXXTEST_STD(cout), CXXTEST_STD(cerr));
     }
 
+    /** Call this method before the run() call for a single test
+     * Used for timing, mostly
+     * */
+    void enterRun( const TestDescription & /*desc*/ )
+    {
+      // Record the time now.
+      testRunStartTime = std::chrono::high_resolution_clock::now();
+    }
+
+    /** Call this method after the run() call, but before tearDown()
+     * Used for timing, mostly
+     * */
+    void leaveRun( const TestDescription & /*desc*/ )
+    {
+      testRunStopTime = std::chrono::high_resolution_clock::now();
+    }
+
+
     void leaveTest(const TestDescription &)
     {
         if (stream_redirect != NULL)
@@ -380,6 +406,10 @@ public:
             delete stream_redirect;
             stream_redirect = NULL;
         }
+        // This excludes the test setup time
+        const std::chrono::duration<double> duration_test =
+            testRunStopTime - testRunStartTime;
+        testcase->runtime = duration_test.count();
     }
 
     void leaveWorld(const WorldDescription& desc)
@@ -661,4 +691,3 @@ private:
 }
 
 #endif // __CXXTEST__XMLFORMATTER_H
-

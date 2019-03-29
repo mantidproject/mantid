@@ -35,6 +35,7 @@ public:
     virtual void enterWorld(const WorldDescription & /*desc*/) {}
     virtual void enterSuite(const SuiteDescription & /*desc*/) {}
     virtual void enterTest(const TestDescription & /*desc*/) {}
+    virtual void enterRun(const TestDescription & /*desc*/) {}
     virtual void trace(const char * /*file*/, int /*line*/,
                        const char * /*expression*/) {}
     virtual void warning(const char * /*file*/, int /*line*/,
@@ -77,6 +78,7 @@ public:
                                        const char * /*expression*/) {}
     virtual void failedAssertSameFiles(const char* /*file*/, int /*line*/,
                                        const char* , const char*, const char*) {}
+    virtual void leaveRun(const TestDescription & /*desc*/) {}
     virtual void leaveTest(const TestDescription & /*desc*/) {}
     virtual void leaveSuite(const SuiteDescription & /*desc*/) {}
     virtual void leaveWorld(const WorldDescription & /*desc*/) {}

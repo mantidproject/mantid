@@ -194,7 +194,7 @@ bool DynamicSuiteDescription<S>::setUp()
     _TS_CATCH_ABORT( { return false; })
     _TS_CATCH_SKIPPED( { return false; });
 
-    return (suite() != 0);
+    return (suite() != 0) && !suite()->skipTests();
 }
 
 template<class S>
@@ -240,4 +240,3 @@ bool leaveOnly(const char *suiteName, const char *testName = 0);
 }
 
 #endif // __cxxtest__RealDescriptions_h__
-

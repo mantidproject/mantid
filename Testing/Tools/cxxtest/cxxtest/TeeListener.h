@@ -62,6 +62,12 @@ public:
         _second->enterTest(d);
     }
 
+    void enterRun( const TestDescription &d )
+    {
+        _first->enterRun( d );
+        _second->enterRun( d );
+    }
+
     void trace(const char *file, int line, const char *expression)
     {
         _first->trace(file, line, expression);
@@ -175,6 +181,12 @@ public:
     {
         _first->failedAssertThrowsNot(file, line, expression);
         _second->failedAssertThrowsNot(file, line, expression);
+    }
+
+    void leaveRun( const TestDescription &d )
+    {
+        _first->leaveRun(d);
+        _second->leaveRun(d);
     }
 
     void leaveTest(const TestDescription &d)

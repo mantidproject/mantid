@@ -25,6 +25,7 @@ namespace CxxTest
 TestSuite::~TestSuite() {}
 void TestSuite::setUp() {}
 void TestSuite::tearDown() {}
+bool TestSuite::skipTests() { return false; }
 
 //
 // Test-aborting stuff
@@ -314,4 +315,3 @@ void doFailAssertThrowsNot(const char * file, int line,
 }
 
 #endif // __cxxtest__TestSuite_cpp__
-

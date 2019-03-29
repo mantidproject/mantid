@@ -38,6 +38,7 @@ public:
     virtual ~TestSuite();
     virtual void setUp();
     virtual void tearDown();
+    virtual bool skipTests();
 };
 
 class AbortTest {};
@@ -793,4 +794,3 @@ CXXTEST_SMALL_BIG(long, _CXXTEST_LONGLONG);
 #endif // _CXXTEST_HAVE_STD
 
 #endif // __cxxtest__TestSuite_h__
-

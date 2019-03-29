@@ -334,14 +334,22 @@ def writeMain( output ):
         tester_t = "CxxTest::GuiTuiRunner<CxxTest::%s, CxxTest::%s> " % (options.gui, options.runner)
     else:
         tester_t = "CxxTest::%s" % (options.runner)
+    # Build the filename to output, using the suitename if specified
+    output.write(' std::string output_filename = "%s";  \n' % (options.xunit_file))
+    output.write(
+        ' // Look for an argument giving the suite name (not starting with -) and change the output filename to use it.  \n ')
+    output.write('if (argc > 1) { \n ')
+    output.write(' if (argv[1][0] != \'-\') { \n ')
+    output.write(
+        '   output_filename = "TEST-{}." + std::string(argv[1]) + ".xml"; \n  }}\n }} \n'.format(options.world))
     if options.xunit_printer:
-       output.write( '    std::ofstream ofstr("%s");\n' % options.xunit_file )
-       output.write( '    %s tmp(ofstr);\n' % tester_t )
+       output.write(' std::ofstream ofstr(output_filename.c_str());\n')
+       output.write(' {} tmp(ofstr);\n'.format(tester_t))
     else:
-       output.write( '    %s tmp;\n' % tester_t )
-    output.write( '    CxxTest::RealWorldDescription::_worldName = "%s";\n' % options.world )
-    output.write( '    status = CxxTest::Main< %s >( tmp, argc, argv );\n' % tester_t )
-    output.write( '    return status;\n')
+       output.write(' {} tmp;\n'.format(tester_t))
+    output.write( ' CxxTest::RealWorldDescription::_worldName = "%s";\n' % options.world )
+    output.write( ' status = CxxTest::Main< %s >( tmp, argc, argv );\n' % tester_t )
+    output.write( ' return status;\n')
     output.write( '}\n' )
 
 
@@ -460,7 +468,7 @@ def writeTestDescription( output, suite, test ):
             output.write( ' %s(%s& _%s) : %s(_%s) { }\n' %
                       (test['class'], suite['fullname'], suite['object'], suite['object'], suite['object']) )
             output.write( ' %s& %s;\n' % (suite['fullname'], suite['object']) )
-    output.write( ' void runTest() { %s }\n' % runBody( suite, test ) )
+    output.write( ' void runTest() override { %s }\n' % runBody( suite, test ) )
     #
     if not options.noStaticInit:
         output.write( '} %s;\n\n' % test['object'] )

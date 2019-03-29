@@ -207,7 +207,11 @@ TestSuite *StaticSuiteDescription::suite() const
     return _suite;
 }
 
-bool StaticSuiteDescription::setUp() { return true; }
+bool StaticSuiteDescription::setUp() {
+  // Set up failed if we are skipping tests
+  return !suite()->skipTests();
+}
+
 bool StaticSuiteDescription::tearDown() { return true; }
 
 CommonDynamicSuiteDescription::CommonDynamicSuiteDescription() {}
@@ -358,4 +362,3 @@ bool leaveOnly(const char *suiteName, const char *testName)
 }
 
 #endif // __cxxtest__RealDescriptions_cpp__
-

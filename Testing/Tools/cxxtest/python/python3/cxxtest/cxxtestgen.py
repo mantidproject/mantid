@@ -460,7 +460,7 @@ def writeTestDescription( output, suite, test ):
             output.write( ' %s(%s& _%s) : %s(_%s) { }\n' %
                       (test['class'], suite['fullname'], suite['object'], suite['object'], suite['object']) )
             output.write( ' %s& %s;\n' % (suite['fullname'], suite['object']) )
-    output.write( ' void runTest() { %s } \n' % runBody( suite, test ) )
+    output.write( ' void runTest() override { %s } \n' % runBody( suite, test ) )
     #
     if not options.noStaticInit:
         output.write( '} %s;\n\n' % test['object'] )
