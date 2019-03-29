@@ -568,15 +568,7 @@ bool RunsTablePresenter::isAutoreducing() const {
 }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {
-  const auto subtreesToPlot = m_view->jobs().selectedSubtrees().get();
-  QOrderedSet<QString> workspaces;
-
-  for (const auto &subtree : subtreesToPlot) {
-    for (const auto &row : subtree) {
-      const auto &cells = row.cells();
-      auto q = 1;
-    }
-  }
+  std::vector<std::string> workspaces = m_model.postProcessedWorkspaceName();
 
   Plotter plotter;
   plotter.reflectometryPlot(workspaces);

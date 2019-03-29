@@ -15,18 +15,18 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-void Plotter::reflectometryPlot(const QOrderedSet<QString> &workspaces) {
+void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  if (!workspaces.isEmpty()) {
-    QString pythonSrc;
+  if (!workspaces.empty()) {
+    std::string pythonSrc;
     pythonSrc += "base_graph = None\n";
-    for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-      pythonSrc += "base_graph = plotSpectrum(\"" + ws.key() +
+    for (const auto &workspace : workspaces)
+      pythonSrc += "base_graph = plotSpectrum(\"" + workspace +
                    "\", 0, True, window = base_graph)\n";
 
     pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
 
-    this->runPython(pythonSrc);
+    this->runPython(QString::fromStdString(pythonSrc));
   }
 #else
   throw std::runtime_error(

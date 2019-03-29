@@ -47,5 +47,15 @@ boost::optional<Item &>
 RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_reductionJobs.getItemWithOutputWorkspaceOrNone(wsName);
 }
+
+std::vector<Group> selectedGroups() const {
+  for (const auto &rowLocation : m_selectedRowLocations) {
+    const auto rowPath = rowLocation.path();
+    const auto group = m_reductionJobs.getGroupFromPath();
+    if () {
+    }
+  }
+}
+std::vector<Row> selectedRows() const {}
 } // namespace CustomInterfaces
 } // namespace MantidQt

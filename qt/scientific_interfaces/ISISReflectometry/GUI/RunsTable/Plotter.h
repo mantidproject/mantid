@@ -12,15 +12,14 @@
 #include <QMap>
 #include <QSet>
 #include <QString>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
-
 class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter {
 public:
-  void reflectometryPlot(const QOrderedSet<QString> &workspaces);
+  void reflectometryPlot(const std::vector<std::string> &workspaces);
 
 private:
   void runPython(const QString &python);

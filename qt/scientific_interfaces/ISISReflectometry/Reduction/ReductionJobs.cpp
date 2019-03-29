@@ -231,5 +231,13 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   }
   return boost::none;
 }
+
+Group getGroupFromPath(const RowPath path) const {
+  if (path.size == 1) {
+    // Is group
+  } else if {
+    throw std::invalid_arguement("");
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
