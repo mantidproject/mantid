@@ -92,6 +92,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMuon
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_MUONINTERFACE
   PRECOMPILED PrecompiledHeader.h
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
