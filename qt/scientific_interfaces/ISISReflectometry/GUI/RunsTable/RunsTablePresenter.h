@@ -127,6 +127,8 @@ private:
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
                      UpdateCellWithTooltipFunc updateFunc,
                      std::string const &tooltip);
+  void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath,
+                            Item const &item);
 
   bool isProcessing() const;
   bool isAutoreducing() const;

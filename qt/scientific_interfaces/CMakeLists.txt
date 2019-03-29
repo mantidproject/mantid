@@ -49,6 +49,7 @@ set ( TEST_FILES
   test/UserInputValidatorTest.h
   test/ISISReflectometry/Batch/BatchJobRunnerTest.h
   test/ISISReflectometry/Batch/BatchPresenterTest.h
+  test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
   test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
   test/ISISReflectometry/Reduction/GroupTest.h
   test/ISISReflectometry/Reduction/ValidateRowTest.h

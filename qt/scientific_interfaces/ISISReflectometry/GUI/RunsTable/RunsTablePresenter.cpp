@@ -104,6 +104,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
       removeRowsFromModel(selected);
       ensureAtLeastOneGroupExists();
       notifyRowStateChanged();
+      notifySelectionChanged();
     } else {
       m_view->mustNotSelectGroup();
     }
@@ -120,6 +121,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
     ensureAtLeastOneGroupExists();
     notifyRowStateChanged();
+    notifySelectionChanged();
   } else {
     m_view->mustSelectGroupOrRow();
   }
@@ -449,12 +451,14 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
   ensureAtLeastOneGroupExists();
+  notifySelectionChanged();
 }
 
 void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
   removeAllRowsAndGroupsFromModel();
   removeAllRowsAndGroupsFromView();
   ensureAtLeastOneGroupExists();
+  notifySelectionChanged();
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
@@ -471,6 +475,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
     m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
     m_view->jobs().clearSelection();
     ensureAtLeastOneGroupExists();
+    notifySelectionChanged();
   } else {
     m_view->invalidSelectionForCut();
   }
@@ -486,6 +491,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
       m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
                                       m_clipboard.get());
     notifyRowStateChanged();
+    notifySelectionChanged();
   } else {
     m_view->invalidSelectionForPaste();
   }
@@ -509,40 +515,43 @@ void RunsTablePresenter::forAllCellsAt(
   m_view->jobs().setCellsAt(location, cells);
 }
 
+void RunsTablePresenter::setRowStylingForItem(
+    MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
+  forAllCellsAt(rowPath, clearStateStyling);
+
+  switch (item.state()) {
+  case State::ITEM_NOT_STARTED: // fall through
+  case State::ITEM_STARTING:
+    break;
+  case State::ITEM_RUNNING:
+    forAllCellsAt(rowPath, applyRunningStateStyling);
+    break;
+  case State::ITEM_COMPLETE:
+    forAllCellsAt(rowPath, applyCompletedStateStyling);
+    break;
+  case State::ITEM_ERROR:
+    forAllCellsAt(rowPath, applyErrorStateStyling, item.message());
+    break;
+  case State::ITEM_WARNING:
+    forAllCellsAt(rowPath, applyWarningStateStyling, item.message());
+    break;
+  };
+}
+
 void RunsTablePresenter::notifyRowStateChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
-    forAllCellsAt(groupPath, clearStateStyling);
+    setRowStylingForItem(groupPath, group);
 
     int rowIndex = 0;
     for (auto &row : group.rows()) {
       auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-      forAllCellsAt(rowPath, clearStateStyling);
 
-      if (!row) {
+      if (!row)
         forAllCellsAt(rowPath, applyInvalidStateStyling);
-        ++rowIndex;
-        continue;
-      }
-
-      switch (row->state()) {
-      case State::ITEM_NOT_STARTED: // fall through
-      case State::ITEM_STARTING:
-        break;
-      case State::ITEM_RUNNING:
-        forAllCellsAt(rowPath, applyRunningStateStyling);
-        break;
-      case State::ITEM_COMPLETE:
-        forAllCellsAt(rowPath, applyCompletedStateStyling);
-        break;
-      case State::ITEM_ERROR:
-        forAllCellsAt(rowPath, applyErrorStateStyling, row->message());
-        break;
-      case State::ITEM_WARNING:
-        forAllCellsAt(rowPath, applyWarningStateStyling, row->message());
-        break;
-      };
+      else
+        setRowStylingForItem(rowPath, *row);
 
       ++rowIndex;
     }

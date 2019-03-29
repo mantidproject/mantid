@@ -74,6 +74,8 @@ public:
   void clearADSHandle() override;
 
 private:
+  bool
+  startBatch(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms);
   void resumeReduction();
   void reductionResumed();
   void pauseReduction();

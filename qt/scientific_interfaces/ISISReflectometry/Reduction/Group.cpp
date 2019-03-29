@@ -32,23 +32,35 @@ std::string const &Group::name() const { return m_name; }
  */
 bool Group::hasPostprocessing() const { return m_rows.size() > 1; }
 
-/** Returns true if the group requires (and is ready for) postprocessing, i.e.
- * if it has multiple rows that have be processed successfully and are ready to
- * be stitched, but have not been stitched yet.
- * @param reprocessFailed : if true, groups that have failed will be
- * reprocessed;
- * otherwise, they will be ignored
+/** Returns true if the group requires processing; that is if its rows require
+ * processing (note the 'processing' here means reduction, not postprocessing)
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
+  for (auto const &row : m_rows) {
+    if (row && row->requiresProcessing(reprocessFailed))
+      return true;
+  }
+
+  return false;
+}
+
+/** Returns true if the group is ready to be postprocessed, i.e. if its rows
+ * have all been reduced successfully but the group itself has not already been
+ * postprocessed yet. Returns false if postprocessing is not applicable.
+ */
+bool Group::requiresPostprocessing(bool reprocessFailed) const {
+  // Check if postprocessing is applicable
   if (!hasPostprocessing())
     return false;
 
+  // Check if it's already been done
   if (!Item::requiresProcessing(reprocessFailed))
     return false;
 
-  // Post-processing can only be done if all rows have completed successfully
-  for (auto &row : m_rows) {
-    if (row && row->state() != State::ITEM_COMPLETE)
+  // If any of the rows are invalid or not completed successfully, then we're
+  // not ready to postprocess
+  for (auto const &row : m_rows) {
+    if (!row || row->state() != State::ITEM_COMPLETE)
       return false;
   }
 
@@ -77,6 +89,13 @@ void Group::resetState() {
       row->resetState();
 }
 
+void Group::resetSkipped() {
+  Item::setSkipped(false);
+  for (auto &row : m_rows)
+    if (row)
+      row->setSkipped(false);
+}
+
 bool Group::allRowsAreValid() const {
   return std::all_of(m_rows.cbegin(), m_rows.cend(),
                      [](boost::optional<Row> const &row) -> bool {
@@ -89,6 +108,7 @@ std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
 std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }
 
 void Group::appendRow(boost::optional<Row> const &row) {
+  Item::resetState();
   m_rows.emplace_back(row);
 }
 
@@ -99,15 +119,25 @@ void Group::setOutputNames(std::vector<std::string> const &outputNames) {
   m_postprocessedWorkspaceName = outputNames[0];
 }
 
-void Group::appendEmptyRow() { m_rows.emplace_back(boost::none); }
+void Group::resetOutputNames() { m_postprocessedWorkspaceName = ""; }
+
+void Group::appendEmptyRow() {
+  Item::resetState();
+  m_rows.emplace_back(boost::none);
+}
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
+  Item::resetState();
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
-void Group::removeRow(int rowIndex) { m_rows.erase(m_rows.begin() + rowIndex); }
+void Group::removeRow(int rowIndex) {
+  Item::resetState();
+  m_rows.erase(m_rows.begin() + rowIndex);
+}
 
 void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
+  Item::resetState();
   m_rows[rowIndex] = row;
 }
 
