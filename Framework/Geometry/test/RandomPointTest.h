@@ -13,6 +13,7 @@
 #include "MantidGeometry/RandomPoint.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
+#include <boost/math/special_functions/pow.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Geometry::RandomPoint;
@@ -253,6 +254,50 @@ public:
     constexpr size_t maxAttempts{1};
     const auto point = bounded(*shell, rng, box, maxAttempts);
     TS_ASSERT(!point)
+  }
+
+  void test_localPointInCylinder() {
+    // This test uses a hollow cylinder geometry
+    using namespace ::testing;
+    constexpr double radialLength{0.3};
+    constexpr double polarAngle{0.4};
+    const V3D alongAxis{0., 0., 1.};
+    const V3D basis{0., 1., 0.};
+
+    const Mantid::Kernel::V3D basis2{1., 0., 0.};
+    const Mantid::Kernel::V3D basis3{basis.cross_prod(basis2)};
+
+    auto localPoint =
+        localPointInCylinder(basis, alongAxis, polarAngle, radialLength);
+    const V3D localPointResult =
+        ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) *
+         radialLength) +
+        alongAxis;
+    TS_ASSERT_EQUALS(localPoint, localPointResult);
+  }
+
+  void test_localPointInCylinderWithNonzeroXAndZBasisElements() {
+    // This test uses a hollow cylinder geometry
+    using namespace ::testing;
+    using boost::math::pow;
+    constexpr double radialLength{0.3};
+    constexpr double polarAngle{0.4};
+    constexpr V3D alongAxis{0., 0., 1.};
+    constexpr V3D basis{1., 1., 1.}; // X and Z elements are not 0 here
+
+    Mantid::Kernel::V3D basis2{1., 0., 0.};
+    const auto inverseXZSumSq = 1. / (pow<2>(basis.X()) + pow<2>(basis.Z()));
+    basis2.setX(std::sqrt(1. - pow<2>(basis.X()) * inverseXZSumSq));
+    basis2.setZ(basis.X() * std::sqrt(inverseXZSumSq));
+    const Mantid::Kernel::V3D basis3{basis.cross_prod(basis2)};
+
+    auto localPoint =
+        localPointInCylinder(basis, alongAxis, polarAngle, radialLength);
+    const V3D localPointResult =
+        ((basis2 * std::cos(polarAngle) + basis3 * std::sin(polarAngle)) *
+         radialLength) +
+        alongAxis;
+    TS_ASSERT_EQUALS(localPoint, localPointResult);
   }
 };
 

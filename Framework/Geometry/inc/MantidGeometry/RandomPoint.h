@@ -45,6 +45,10 @@ MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
 inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
                size_t maxAttempts);
 
+MANTID_GEOMETRY_DLL Kernel::V3D
+localPointInCylinder(const Kernel::V3D &basis, const Kernel::V3D alongAxis,
+                     double polarAngle, double radialLength);
+
 template <Kernel::V3D (*T)(const detail::ShapeInfo &,
                            Kernel::PseudoRandomNumberGenerator &)>
 boost::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo,
