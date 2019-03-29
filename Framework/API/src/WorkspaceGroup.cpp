@@ -39,11 +39,13 @@ WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
  * group
  */
 const std::string WorkspaceGroup::toString() const {
-  std::string descr = this->id() + "\n";
+  const std::string firstLine = this->id() + "\n";
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
-    descr += " -- " + workspace->getName() + '\n';
-  }
+  const auto descr =
+      std::accumulate(m_workspaces.cbegin(), m_workspaces.cend(), firstLine,
+                      [](const auto &string, const auto &workspace) {
+                        return string + " -- " + workspace->getName() + '\n';
+                      });
   return descr;
 }
 
@@ -128,11 +130,10 @@ void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
  */
 bool WorkspaceGroup::contains(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
-    if (workspace->getName() == wsName)
-      return true;
-  }
-  return false;
+  return std::any_of(m_workspaces.cbegin(), m_workspaces.cend(),
+                     [&wsName](const auto &workspace) {
+                       return workspace->getName() == wsName;
+                     });
 }
 
 /**
@@ -161,11 +162,11 @@ void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> &memberList) const {
  * vector is being iterated over.
  */
 std::vector<std::string> WorkspaceGroup::getNames() const {
-  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   std::vector<std::string> out;
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   out.reserve(m_workspaces.size());
   for (const auto &workspace : m_workspaces) {
-    out.push_back(workspace->getName());
+    out.emplace_back(workspace->getName());
   }
   return out;
 }
@@ -194,13 +195,16 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-  for (const auto &workspace : m_workspaces) {
-    if (workspace->getName() == wsName) {
-      return workspace;
-    }
+  const auto found = std::find_if(m_workspaces.cbegin(), m_workspaces.cend(),
+                                  [&wsName](const auto &workspace) {
+                                    return workspace->getName() == wsName;
+                                  });
+  if (found == m_workspaces.cend()) {
+    throw std::out_of_range("Workspace " + wsName +
+                            " not contained in the group");
+  } else {
+    return *found;
   }
-  throw std::out_of_range("Workspace " + wsName +
-                          " not contained in the group");
 }
 
 /** Return all workspaces in the group as one call for thread safety
