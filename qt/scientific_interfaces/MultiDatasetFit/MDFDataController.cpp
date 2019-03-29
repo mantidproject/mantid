@@ -74,9 +74,9 @@ void DataController::addWorkspace() {
       if (!matrixWorkspaces.empty()) {
         for (auto iws = matrixWorkspaces.begin(); iws != matrixWorkspaces.end();
              ++iws) {
-          auto name = QString::fromStdString((**iws).getName());
+          wsName = QString::fromStdString((**iws).getName());
           for (auto i = indices.begin(); i != indices.end(); ++i) {
-            addWorkspaceSpectrum(name, *i, **iws);
+            addWorkspaceSpectrum(wsName, *i, **iws);
           }
         }
         emit spectraAdded(

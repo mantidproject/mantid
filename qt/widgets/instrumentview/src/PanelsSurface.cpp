@@ -420,7 +420,6 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   }
 
   // Now we found all the tubes that may form a flat struture.
-  auto name = componentInfo.name(bankIndex);
   // Use two of the tubes to calculate the normal to the plain of that structure
   auto normal =
       tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();

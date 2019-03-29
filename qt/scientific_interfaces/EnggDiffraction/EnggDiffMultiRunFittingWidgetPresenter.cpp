@@ -45,17 +45,19 @@ size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {
   const std::string name = ws->getName();
   std::vector<std::string> chunks;
   boost::split(chunks, name, boost::is_any_of("_"));
-  bool isNum = isDigit(chunks.back());
-  if (!chunks.empty() && isNum) {
-    try {
-      return boost::lexical_cast<size_t>(chunks.back());
-    } catch (boost::exception &) {
-      // If we get a bad cast or something goes wrong then
-      // the file is probably not what we were expecting
-      // so throw a runtime error
-      throw std::runtime_error(
-          "Failed to fit file: The data was not what is expected. "
-          "Does the file contain a focused workspace?");
+  if (!chunks.empty()) {
+    const bool isNum = isDigit(chunks.back());
+    if (isNum) {
+      try {
+        return boost::lexical_cast<size_t>(chunks.back());
+      } catch (boost::exception &) {
+        // If we get a bad cast or something goes wrong then
+        // the file is probably not what we were expecting
+        // so throw a runtime error
+        throw std::runtime_error(
+            "Failed to fit file: The data was not what is expected. "
+            "Does the file contain a focused workspace?");
+      }
     }
   }
 

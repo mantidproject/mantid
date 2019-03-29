@@ -332,15 +332,15 @@ void IndirectDataTablePresenter::removeSelectedData() {
 void IndirectDataTablePresenter::updateFromRemovedIndices(
     const std::vector<std::size_t> &indices) {
   for (const auto &index : indices) {
-    const auto spectra = getSpectra(index);
-    if (spectra)
-      m_model->setSpectra(*spectra, index);
+    const auto existingSpectra = getSpectra(index);
+    if (existingSpectra)
+      m_model->setSpectra(*existingSpectra, index);
     else {
-      const auto numberOfWorkspaces = m_model->numberOfWorkspaces();
+      const auto originalNumberOfWorkspaces = m_model->numberOfWorkspaces();
       m_model->removeWorkspace(index);
       m_dataPositions.erase(m_dataPositions.begin() + index);
 
-      if (m_model->numberOfWorkspaces() == numberOfWorkspaces - 2)
+      if (m_model->numberOfWorkspaces() == originalNumberOfWorkspaces - 2)
         m_dataPositions.erase(m_dataPositions.begin() + index);
     }
   }

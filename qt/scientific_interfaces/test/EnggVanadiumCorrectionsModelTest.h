@@ -47,7 +47,7 @@ public:
 private:
   std::pair<Mantid::API::ITableWorkspace_sptr,
             Mantid::API::MatrixWorkspace_sptr>
-  calculateCorrectionWorkspaces(const std::string &runNumber) const override;
+  calculateCorrectionWorkspaces() const override;
 };
 
 inline TestEnggVanadiumCorrectionsModel::TestEnggVanadiumCorrectionsModel(
@@ -58,9 +58,7 @@ inline TestEnggVanadiumCorrectionsModel::TestEnggVanadiumCorrectionsModel(
 
 inline std::pair<Mantid::API::ITableWorkspace_sptr,
                  Mantid::API::MatrixWorkspace_sptr>
-TestEnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
-    const std::string &runNumber) const {
-  UNUSED_ARG(runNumber);
+TestEnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces() const {
   m_calculateCorrectionsCalled = true;
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();

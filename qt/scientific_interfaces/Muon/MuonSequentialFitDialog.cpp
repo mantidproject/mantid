@@ -496,9 +496,9 @@ void MuonSequentialFitDialog::continueFit() {
 
       // If multiple groups/periods, set up simultaneous fit
       if (datasetsPerRun > 1) {
-        for (size_t i = 1; i < workspacesToFit.size(); i++) {
-          std::string suffix = boost::lexical_cast<std::string>(i);
-          fit->setPropertyValue("InputWorkspace_" + suffix, workspacesToFit[i]);
+        for (size_t j = 1; j < workspacesToFit.size(); j++) {
+          std::string suffix = boost::lexical_cast<std::string>(j);
+          fit->setPropertyValue("InputWorkspace_" + suffix, workspacesToFit[j]);
           fit->setProperty("WorkspaceIndex_" + suffix, 0);
           fit->setProperty("StartX_" + suffix, m_fitPropBrowser->startX());
           fit->setProperty("EndX_" + suffix, m_fitPropBrowser->endX());

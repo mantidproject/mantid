@@ -374,10 +374,6 @@ QString MWDiag::createDiagnosticScript() const {
     sampleRun = "None";
   }
   QString whiteBeam = "r'" + m_designWidg.white_file->getFirstFilename() + "'";
-  QString whiteBeam2 =
-      "r'" + m_designWidg.white_file_2->getFirstFilename() + "'";
-  if (whiteBeam2 == "r''")
-    whiteBeam2 = "None";
   QString removeZeroes =
       m_designWidg.ckZeroCounts->isChecked() ? "True" : "False";
   QString lowCounts = m_designWidg.leLowAbs->text();

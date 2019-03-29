@@ -516,8 +516,8 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
 
     // it requires a new connection to the uploader server
     if (!upload_threads.isFinished()) {
-      QWidget *father = qobject_cast<QWidget *>(QObject::parent());
-      QMessageBox::information(father, "Wait",
+      QWidget *mother = qobject_cast<QWidget *>(QObject::parent());
+      QMessageBox::information(mother, "Wait",
                                "The connection with the server "
                                "is busy now, wait a while and "
                                "try again. ");
@@ -866,8 +866,6 @@ void RepoModel::setupModelData(RepoItem *root) {
   QList<RepoItem *> parents;
   // the first one will always be the root
   parents << root;
-
-  QString last_directory = "";
 
   // FOREACH entry in LISTFILES
   for (unsigned int number = 0; number < list.size(); number++) {

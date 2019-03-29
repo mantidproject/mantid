@@ -60,10 +60,10 @@ public:
   /// Handled configuration changes
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  Mantid::API::MatrixWorkspace_sptr
-  loadInstrumentIfNotExist(std::string instrumentName,
-                           std::string analyser = "",
-                           std::string reflection = "");
+  static Mantid::API::MatrixWorkspace_sptr
+  loadInstrumentIfNotExist(const std::string &instrumentName,
+                           const std::string &analyser = "",
+                           const std::string &reflection = "");
 
   std::vector<std::pair<std::string, std::vector<std::string>>>
   getInstrumentModes();

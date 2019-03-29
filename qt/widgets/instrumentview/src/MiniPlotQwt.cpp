@@ -279,7 +279,7 @@ void MiniPlotQwt::clearCurve() {
     double ymax = br.bottom();
     ++curve;
     for (; curve != m_stored.end(); ++curve) {
-      QwtDoubleRect br = (**curve).boundingRect();
+      br = (**curve).boundingRect();
       if (br.left() < xmin)
         xmin = br.left();
       if (br.right() > xmax)

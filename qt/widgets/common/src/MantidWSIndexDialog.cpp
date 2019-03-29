@@ -388,6 +388,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
         previousValue = currentValue;
       } else {
         if (previousValue < currentValue) {
+          // cpp-check unreadVariable
           previousValue = currentValue;
         } else {
           m_logValues->setError(
@@ -668,7 +669,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
   // loop over all of the workspaces in the group to see that the value has
   // changed
   for (auto &wsName : m_wsNames) {
-    auto ws = getWorkspace(wsName);
+    ws = getWorkspace(wsName);
     if (ws) {
       const auto runObj = ws->run();
       for (auto &logItem : usableLogs) {

@@ -87,10 +87,6 @@ AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox() {
     delete m_Datelabel;
     m_Datelabel = nullptr;
   }
-  if (m_Datelabel) {
-    delete m_Datelabel;
-    m_Datelabel = nullptr;
-  }
   if (m_execDateTimeEdit) {
     delete m_execDateTimeEdit;
     m_execDateTimeEdit = nullptr;
@@ -168,10 +164,6 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
   if (m_osNameLabel) {
     delete m_osNameLabel;
     m_osNameLabel = nullptr;
-  }
-  if (m_osNameEdit) {
-    delete m_osNameEdit;
-    m_osNameEdit = nullptr;
   }
   if (m_osNameEdit) {
     delete m_osNameEdit;
@@ -724,10 +716,10 @@ void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(
       wsHist.getAlgorithmHistories();
   auto algHistIter = entries.begin();
 
-  QString algName = "";
   for (; algHistIter != entries.end(); ++algHistIter) {
     int nAlgVersion = (*algHistIter)->version();
-    algName = concatVersionwithName((*algHistIter)->name(), nAlgVersion);
+    const QString algName =
+        concatVersionwithName((*algHistIter)->name(), nAlgVersion);
 
     AlgHistoryItem *item =
         new AlgHistoryItem(QStringList(algName), *algHistIter);
@@ -741,7 +733,6 @@ void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(
 
 void AlgHistoryTreeWidget::populateNestedHistory(
     AlgHistoryItem *parentWidget, Mantid::API::AlgorithmHistory_sptr history) {
-  QString algName = "";
   const Mantid::API::AlgorithmHistories &entries = history->getChildHistories();
   if (history->childHistorySize() > 0) {
     parentWidget->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable |
@@ -752,7 +743,8 @@ void AlgHistoryTreeWidget::populateNestedHistory(
   for (auto algHistIter = entries.begin(); algHistIter != entries.end();
        ++algHistIter) {
     int nAlgVersion = (*algHistIter)->version();
-    algName = concatVersionwithName((*algHistIter)->name(), nAlgVersion);
+    const auto algName =
+        concatVersionwithName((*algHistIter)->name(), nAlgVersion);
 
     AlgHistoryItem *item =
         new AlgHistoryItem(QStringList(algName), *algHistIter, parentWidget);

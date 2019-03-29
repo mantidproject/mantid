@@ -330,7 +330,6 @@ void InstrumentRenderer::reset() {
 }
 
 void InstrumentRenderer::resetColors() {
-  auto sharedWorkspace = m_actor.getWorkspace();
   const double vmin(m_actor.minValue()), vmax(m_actor.maxValue());
   // Reset all colors to 0 and resize m_colors to the appropriate size
   const auto zero = m_colorMap.rgb(vmin, vmax, 0);

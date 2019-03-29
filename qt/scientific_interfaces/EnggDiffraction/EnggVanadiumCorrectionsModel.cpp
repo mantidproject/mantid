@@ -30,11 +30,7 @@ const std::string EnggVanadiumCorrectionsModel::VANADIUM_INPUT_WORKSPACE_NAME =
     "engggui_vanadium_ws";
 
 std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
-EnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
-    const std::string &vanadiumRunNumber) const {
-  const auto vanadiumRunName = generateVanadiumRunName(vanadiumRunNumber);
-  const auto vanadiumWS =
-      loadMatrixWorkspace(vanadiumRunName, VANADIUM_INPUT_WORKSPACE_NAME);
+EnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces() const {
 
   auto enggVanadiumCorrections =
       Mantid::API::AlgorithmManager::Instance().create(
@@ -70,8 +66,7 @@ EnggVanadiumCorrectionsModel::fetchCorrectionWorkspaces(
       !m_calibSettings.m_forceRecalcOverwrite) {
     return std::make_pair(cachedIntegratedWorkspace, cachedCurvesWorkspace);
   } else {
-    const auto correctionWorkspaces =
-        calculateCorrectionWorkspaces(vanadiumRunNumber);
+    const auto correctionWorkspaces = calculateCorrectionWorkspaces();
     saveCorrectionsToCache(vanadiumRunNumber, correctionWorkspaces.second,
                            correctionWorkspaces.first);
     return correctionWorkspaces;

@@ -108,7 +108,7 @@ void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
     if (grp) {
       int maxIndex = std::numeric_limits<int>::max();
       for (auto ws : grp->getAllItems()) {
-        auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
         if (mws) {
           maxIndex = std::min(maxIndex,
                               static_cast<int>(mws->getNumberHistograms()) - 1);

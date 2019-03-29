@@ -196,9 +196,9 @@ WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
 StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
-
+  names.reserve(static_cast<size_t>(items.size()));
   for (auto &item : items)
-    names.push_back(item->text(0).toStdString());
+    names.emplace_back(item->text(0).toStdString());
 
   return names;
 }
@@ -481,10 +481,10 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
   QRegExp filterRegEx(text, Qt::CaseInsensitive);
 
   // show all items
-  QTreeWidgetItemIterator it(m_tree);
-  while (*it) {
-    (*it)->setHidden(false);
-    ++it;
+  QTreeWidgetItemIterator unhideIter(m_tree);
+  while (*unhideIter) {
+    (*unhideIter)->setHidden(false);
+    ++unhideIter;
   }
 
   int hiddenCount = 0;

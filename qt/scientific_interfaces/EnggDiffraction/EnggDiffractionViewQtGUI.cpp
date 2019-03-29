@@ -281,7 +281,6 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
-  auto fname = qs.fileName();
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -759,7 +758,7 @@ EnggDiffractionViewQtGUI::enggRunPythonCode(const std::string &pyCode) {
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
-    QString prevPath =
+    prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 
@@ -858,7 +857,7 @@ void EnggDiffractionViewQtGUI::browseInputDirRaw() {
 void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
-    QString prevPath =
+    prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 

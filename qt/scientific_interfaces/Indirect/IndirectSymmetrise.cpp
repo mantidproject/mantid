@@ -323,11 +323,9 @@ void IndirectSymmetrise::replotNewSpectrum(QtProperty *prop, double value) {
       m_dblManager->setValue(m_properties["PreviewSpec"], maxSpectrumRange);
       return;
     }
-  }
-
-  // If we get this far then properties are valid so update mini plots
-  if (prop == m_properties["PreviewSpec"])
+    // If we get this far then properties are valid so update mini plots
     updateMiniPlots();
+  }
 }
 
 /**

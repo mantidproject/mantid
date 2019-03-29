@@ -76,7 +76,6 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   std::vector<GSASIIRefineFitPeaksParameters> inputParams;
   std::vector<std::string> GSASIIProjectFiles;
   inputParams.reserve(runLabels.size());
-  GSASIIProjectFiles.reserve(runLabels.size());
 
   const auto refinementMethod = m_view->getRefinementMethod();
   const auto instParamFile = m_view->getInstrumentFileName();
@@ -86,6 +85,7 @@ EnggDiffGSASFittingPresenter::collectAllInputParameters() const {
   if (runLabels.size() == 1) {
     GSASIIProjectFiles = std::vector<std::string>({GSASIIProjectFile});
   } else {
+    GSASIIProjectFiles.reserve(runLabels.size());
     for (const auto &runLabel : runLabels) {
       GSASIIProjectFiles.emplace_back(
           addRunNumberToGSASIIProjectFile(GSASIIProjectFile, runLabel));

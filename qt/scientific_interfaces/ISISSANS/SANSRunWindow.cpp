@@ -886,8 +886,6 @@ bool SANSRunWindow::loadUserFile() {
     return false;
   }
 
-  const auto settings = getReductionSettings();
-
   const double unit_conv(1000.);
   // Radius
   double dbl_param =
@@ -1913,16 +1911,16 @@ void SANSRunWindow::setSANS2DGeometry(
              << "Rear_Det_X";
   int index = 0;
   foreach (QString detname, dets_names) {
-    QString distance = logvalues[index];
+    QString logDistance = logvalues[index];
     try {
-      double d = distance.toDouble();
-      distance = QString::number(d, 'f', 1);
+      double d = logDistance.toDouble();
+      logDistance = QString::number(d, 'f', 1);
     } catch (...) {
       // if distance is not a double, for now just proceed
     }
     QLabel *lbl = m_s2d_detlabels[wscode].value(detname);
     if (lbl)
-      lbl->setText(distance);
+      lbl->setText(logDistance);
     index += 1;
   }
 }
@@ -2034,8 +2032,6 @@ void SANSRunWindow::saveFileBrowse() {
                  QString::fromStdString(ConfigService::Instance().getString(
                      "defaultsave.directory")))
           .toString();
-
-  const QString filter = ";;AllFiles (*)";
 
   QString oFile = QFileDialog::getSaveFileName(
       this, title, prevPath + "/" + m_uiForm.outfile_edit->text());
@@ -2165,8 +2161,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
 
   // Set the geometry if the sample has been changed
   if (m_sample_file != sample) {
-    const auto sample = sample_workspace->sample();
-    const int geomId = sample.getGeometryFlag();
+    const auto sampleWs = sample_workspace->sample();
+    const int geomId = sampleWs.getGeometryFlag();
 
     if (geomId > 0 && geomId < 4) {
       m_uiForm.sample_geomid->setCurrentIndex(geomId - 1);
@@ -2184,10 +2180,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
           make_tuple(m_uiForm.sample_height, &Sample::getHeight, "height"));
 
       // Populate the sample geometry fields, but replace any zero values with
-      // 1.0, and
-      // warn the user where this has occured.
+      // 1.0, and warn the user where this has occured.
       for (auto info : sampleInfoList) {
-        const auto value = info.get<1>()(&sample);
+        const auto value = info.get<1>()(&sampleWs);
         if (value == 0.0)
           g_log.warning("The sample geometry " + info.get<2>() +
                         " was found to be zero, so using a default value of "
@@ -4752,9 +4747,6 @@ void SANSRunWindow::updateBeamCenterCoordinates() {
  * Set the beam finder details
  */
 void SANSRunWindow::setBeamFinderDetails() {
-  // The instrument name
-  auto instrumentName = m_uiForm.inst_opt->currentText();
-
   // Set the labels according to the instrument
   auto requiresAngle = runReduceScriptFunction(
                            "print(i.is_current_workspace_an_angle_workspace())")

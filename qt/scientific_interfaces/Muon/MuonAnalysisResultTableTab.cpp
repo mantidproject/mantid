@@ -690,8 +690,9 @@ void MuonAnalysisResultTableTab::populateFittings(
 
   // Get workspace names using the provided function
   std::vector<Workspace_sptr> workspaces;
+  workspaces.reserve(static_cast<size_t>(names.size()));
   for (const auto &name : names) {
-    workspaces.push_back(wsFromName(name));
+    workspaces.emplace_back(wsFromName(name));
   }
 
   // Get colors for names in table

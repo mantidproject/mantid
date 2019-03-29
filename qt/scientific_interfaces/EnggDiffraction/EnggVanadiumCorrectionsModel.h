@@ -42,7 +42,7 @@ private:
 
   virtual std::pair<Mantid::API::ITableWorkspace_sptr,
                     Mantid::API::MatrixWorkspace_sptr>
-  calculateCorrectionWorkspaces(const std::string &vanadiumRunNumber) const;
+  calculateCorrectionWorkspaces() const;
 
   Mantid::API::MatrixWorkspace_sptr
   fetchCachedCurvesWorkspace(const std::string &vanadiumRunNumber) const;

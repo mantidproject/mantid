@@ -670,7 +670,6 @@ public:
 protected:
   /// Create string property
   void apply(std::string &str) const override {
-    QString attName = m_prop->propertyName();
     str = m_browser->getStringPropertyValue(m_prop).toStdString();
   }
   /// Create double property
@@ -722,7 +721,6 @@ protected:
   /// Set string property
   void apply(const std::string &str) const override {
     m_browser->m_changeSlotsEnabled = false;
-    QString attName = m_prop->propertyName();
     m_browser->setStringPropertyValue(m_prop, QString::fromStdString(str));
     m_browser->m_changeSlotsEnabled = true;
   }
@@ -1189,7 +1187,6 @@ void PropertyHandler::removeTie(QtProperty *prop) {
   QtProperty *parProp = getParameterProperty(parName);
   if (parProp != nullptr) {
     m_browser->m_changeSlotsEnabled = false;
-    auto tom = parName.toStdString();
     m_fun->removeTie(parName.toStdString());
     parProp->removeSubProperty(prop);
     m_ties.remove(parName);

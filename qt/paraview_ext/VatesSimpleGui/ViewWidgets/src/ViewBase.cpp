@@ -617,13 +617,6 @@ bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src) {
     return false;
   }
 
-  QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
-                     .GetAsString());
-
-  if (wsType.isEmpty()) {
-    wsType = src->getSMName();
-  }
-
   QString wsName(vtkSMPropertyHelper(src->getProxy(), "WorkspaceName", true)
                      .GetAsString());
 
