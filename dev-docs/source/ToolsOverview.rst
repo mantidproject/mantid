@@ -218,6 +218,73 @@ Use
 	- ``--page_handle`` the page handle to use [default page name]
 	- ``--add_heading`` add a heading to the page (uses the page name)
 
+Clang-tidy
+----------
+
+Clang-tidy is a set of tools which allows a developer to detect and fix code which does not follow current best practices,
+such as unused parameters or not using range-based for loops. Primarily this is used for modernising C++ code.
+
+The full list of clang-tidy checks can be seen `here <https://clang.llvm.org/extra/clang-tidy/checks/list.html>`_.
+
+Installing
+~~~~~~~~~~
+
+Mantid does not come packaged with clang-tidy; each developer must download it themselves. Windows users can utilise clang-tidy support for Visual Studio.
+For other operating systems, Mantid provides clang-tidy functionality through cmake.
+
+- **Ubuntu**: Run ``sudo apt-get install clang-tidy`` in the command line.
+- **Windows**: Download the `Visual Studio extension <https://marketplace.visualstudio.com/items?itemName=caphyon.ClangPowerTools>`_. Windows can operate clang-tidy from Visual Studio alone and so do not need to touch cmake.
+
+For non-Ubuntu systems, download the latest clang-tidy `pre-compiled binary <http://releases.llvm.org/download.html>`_. Windows users should add to path when prompted.
+
+Visual Studio
+~~~~~~~~~~~~~
+
+Once you have installed the clang-tidy extension, Visual Studio will have additional options under ``Tools -> Options -> Clang Power Tools``.
+Here you can select which checks to run via a checkbox or by supplying a custom check string. For example::
+
+    -*,modernize-*
+
+will disable basic default checks (``-*``) and run all conversions to modern C++ (``modernize-*``), such as converting to range-based for loops or using the auto keyword.
+Other settings *should* not require alteration for clang-tidy to work.
+
+To run clang-tidy, right click on a target and highlight ``Clang Power Tools``. You will have a number of options. ``Tidy`` will highlight code which fails one of the checks, whereas
+``Tidy fix`` will automatically change your code.
+
+*Note: clang-tidy does not work on* **ALL BUILD** *so it is necessary to select a subtarget.*
+
+Cmake
+~~~~~
+
+In the cmake gui, find the ``CLANG_TIDY_EXE`` parameter. If you are a non-Linux developer, you may have to manually point to your clang-tidy install.
+Configure, and check the cmake log for the message `clang-tidy found`. If the `clang-tidy not found` warning was posted instead then it has not worked.
+
+Once you have clang-tidy, there are several relevant parameters you will want to change:
+
+- ``ENABLE_CLANG_TIDY`` will turn on clang-tidy support.
+- ``CLANG_TIDY_CHECKS`` is a semi-colon separated list of checks for clang-tidy to carry out. This defaults to all ``modernize-`` checks.
+- ``APPLY_CLANG_TIDY_FIX`` will automatically change the code whenever a check has returned a result. The behaviour of ``ENABLE_CLANG_TIDY`` without this checked is to highlight issues only.
+
+Configure the build to check that your selected options are reflected in ``CMAKE_CXX_CLANG_TIDY``, and then generate.
+When you next build, clang-tidy will perform the selected checks on the code included in the target.
+
+*Note: There is a known issue that clang-tidy is only being applied to certain directories within* ``Framework`` *and* ``Mantidplot``.
+
+Options
+~~~~~~~
+
+Some clang-tidy checks have optional arguments. For example, ``modernize-loop-convert``, which changes loops to range-based,
+assigns a riskiness to each loop and can accept a ``MinConfidence`` argument to determine which risk levels to address.
+
+Adding the optional arguments is clunky and will rarely be required, so it has not been directly added to Mantid's cmake setup.
+To add optional arguments, add the following onto the end of ``CLANG_TIDY_CHECKS``::
+
+    ;-config={CheckOptions: [ {key: check-to-choose-option.option-name, value: option-value} ]}
+
+For example, to convert all loops classified as *risky* or above, we would append::
+
+    ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
+
 CMake-format
 ---------------------
 
@@ -233,11 +300,4 @@ To use cmake-format on a specific ``CMakeLists.txt`` file in the command line ru
 This will format the file using the config file in the mantid directory. Details on the configuration file can be found `here <https://github.com/cheshirekow/cmake_format/>`__.
 
 There is an official visual studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format/>`__.
-
- 
-
-
-
-  
-
 
