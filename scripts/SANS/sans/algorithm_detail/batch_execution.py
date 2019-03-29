@@ -846,17 +846,17 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # Set the output workspaces for the calculated and unfitted transmission
     # ------------------------------------------------------------------------------------------------------------------
     sample_calculated_transmission, \
-    sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
-                                                                       multi_reduction_type, True)
+        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                           multi_reduction_type, True)
     can_calculated_transmission, \
-    can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
-                                                                    multi_reduction_type, True)
+        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                        multi_reduction_type, True)
     sample_unfitted_transmission, \
-    sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
-                                                                     multi_reduction_type, False)
+        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                         multi_reduction_type, False)
     can_unfitted_transmission, \
-    can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
-                                                                  multi_reduction_type, False)
+        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                      multi_reduction_type, False)
 
     _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",
                                  sample_calculated_transmission, sample_calculated_transmission_base
@@ -1105,6 +1105,7 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
             optimizations_to_delete.extend([reduction_package.reduced_lab_can,
                                             reduction_package.reduced_hab_can])
         _delete_workspaces(delete_alg, optimizations_to_delete)
+
 
 def get_transmission_names_to_save(reduction_package, can):
     """
