@@ -190,7 +190,7 @@ QListWidget *ManageUserDirectories::listWidget() {
 
 // SLOTS
 void ManageUserDirectories::helpClicked() {
-  HelpWindow::showConcept(this, QString("ManageUserDirectories"));
+  HelpWindow::showCustomInterface(this, QString("ManageUserDirectories"));
 }
 void ManageUserDirectories::cancelClicked() { this->close(); }
 void ManageUserDirectories::confirmClicked() {
