@@ -18,3 +18,8 @@ Improvements
 ############
 
 - Increased font size in run table.
+
+Bug Fixes
+#########
+
+- Fixed the error seen when saving to file with event slice data. Event slice output files now contain transmission workspaces.
