@@ -120,7 +120,7 @@ private:
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
 
-  void grabCalibParms(const std::string &fname);
+  void grabCalibParms(const std::string &fname, std::string &vanNo, std::string &ceriaNo);
 
   void updateCalibParmsTable();
 
@@ -301,8 +301,14 @@ private:
 
   QThread *m_workerThread;
 
+  ///true if the last thing ran was cancelled
+  bool m_cancelled;
+
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+
+  /// error that caused the calibration to fail
+  std::string m_calibError;
   /// path where the calibration has been produced (par/prm file)
   std::string m_calibFullPath;
 
@@ -312,6 +318,8 @@ private:
 
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
+/// error that caused the focus to fail
+  std::string m_focusError;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
 

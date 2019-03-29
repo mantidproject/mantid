@@ -215,7 +215,7 @@ void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
   }
 
   try {
-    grabCalibParms(fname);
+    grabCalibParms(fname, vanNo, ceriaNo);
     updateCalibParmsTable();
     m_view->newCalibLoaded(vanNo, ceriaNo, fname);
   } catch (std::runtime_error &rexc) {
@@ -232,7 +232,7 @@ void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
  *
  * @param fname name of the calibration/GSAS iparm file
  */
-void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
+void EnggDiffractionPresenter::grabCalibParms(const std::string &fname, std::string &vanNo, std::string &ceriaNo) {
   std::vector<GSASCalibrationParms> parms;
 
   // To grab the bank indices, lines like "INS   BANK     2"
@@ -269,6 +269,10 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
                           << " elements as expected. The calibration may not "
                              "load correctly\n";
         }
+      }else if(line.find("CALIB") != std::string::npos){
+        Mantid::Kernel::StringTokenizer tokenizer(line, " ", opts);
+        ceriaNo = tokenizer[2];
+        vanNo = tokenizer[3];
       }
     }
 
@@ -336,8 +340,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
   m_view->showStatus("Calculating calibration...");
   m_view->enableCalibrateFocusFitUserActions(false);
   // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
-  // calibrationFinished()
+  // doNewCalibration(outFilename, vanNo, ceriaNo, "");
+  // calibrationFinished();
   startAsyncCalibWorker(outFilename, vanNo, ceriaNo, "");
 }
 
@@ -671,44 +675,7 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
   if (userPaths.empty() || userPaths.front().empty()) {
     return run_number;
   }
-
-  for (const auto &path : userPaths) {
-    run_number = "";
-    try {
-      if (Poco::File(path).exists()) {
-        Poco::Path inputDir = path;
-
-        // get file name via poco::path
-        std::string filename = inputDir.getFileName();
-
-        // convert to int or assign it to size_t
-        for (const char &ch : filename) {
-          if (std::isdigit(ch)) {
-            run_number += ch;
-          }
-        }
-        run_number.erase(0, run_number.find_first_not_of('0'));
-
-        // The path of this file needs to be added in the search
-        // path as the user can browse to any path not included in
-        // the interface settings
-        recordPathBrowsedTo(inputDir.toString());
-      }
-
-    } catch (std::runtime_error &re) {
-      throw std::invalid_argument("Error while checking the selected file: " +
-                                  static_cast<std::string>(re.what()));
-    } catch (Poco::FileNotFoundException &rexc) {
-      throw std::invalid_argument("Error while checking the selected file. "
-                                  "There was a problem with the file: " +
-                                  std::string(rexc.what()));
-    }
-  }
-
-  g_log.debug() << "Run number inferred from browse path (" << userPaths.front()
-                << ") is: " << run_number << '\n';
-
-  return run_number;
+  return userPaths[0];
 }
 
 /**
@@ -889,22 +856,10 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   }
   const std::string castMsg =
       "It is not possible to interpret as an integer number ";
-  try {
-    boost::lexical_cast<int>(parts[1]);
-  } catch (std::runtime_error &) {
-    throw std::invalid_argument(
-        castMsg + "the Vanadium number part of the file name.\n\n" + explMsg);
-  }
-  try {
-    boost::lexical_cast<int>(parts[2]);
-  } catch (std::runtime_error &) {
-    throw std::invalid_argument(
-        castMsg + "the Ceria number part of the file name.\n\n" + explMsg);
-  }
+  
 
   instName = parts[0];
-  vanNo = parts[1];
-  ceriaNo = parts[2];
+
 }
 
 /**
@@ -971,19 +926,26 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
     doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
   } catch (std::runtime_error &rexc) {
     m_calibFinishedOK = false;
+    m_calibError = "The calibration calculations failed. One of the "
+                   "algorithms did not execute correctly. See log messages for "
+                   "further details.";
     g_log.error()
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
            "further details. Error: " +
                std::string(rexc.what())
         << '\n';
-  } catch (std::invalid_argument &) {
+  } catch (std::invalid_argument &iaexc) {
     m_calibFinishedOK = false;
+    m_calibError = "The calibration calculations failed. Some input properties "
+                   "were not valid. See log messages for details. \n Error: "+
+                   std::string(iaexc.what());
     g_log.error()
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. \n";
   } catch (Mantid::API::Algorithm::CancelException &) {
     m_calibFinishedOK = false;
+    m_cancelled = true;
     g_log.error() << "Execution terminated by user. \n";
   }
   // restore normal data search paths
@@ -1000,8 +962,10 @@ void EnggDiffractionPresenter::calibrationFinished() {
 
   m_view->enableCalibrateFocusFitUserActions(true);
   if (!m_calibFinishedOK) {
-    g_log.warning() << "The calibration did not finish correctly. Please "
-                       "check previous log messages for details.\n";
+    if (!m_cancelled) {
+      m_view->userWarning("Calibration Error", m_calibError);
+    }
+    m_cancelled = false;
     m_view->showStatus("Calibration didn't finish succesfully. Ready");
   } else {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
@@ -1043,8 +1007,10 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 
   // default extension for calibration files
   const std::string calibExt = ".prm";
+  const std::string vanFilename = Poco::Path(vanNo).getBaseName();
+  const std::string ceriaFilename = Poco::Path(ceriaNo).getBaseName();
   std::string sugg =
-      instStr + "_" + vanNo + "_" + ceriaNo + nameAppendix + calibExt;
+      instStr + "_" + vanFilename + "_" + ceriaFilename + nameAppendix + calibExt;
 
   return sugg;
 }
@@ -1070,6 +1036,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
   if (cs.m_inputDirCalib.empty()) {
+    m_calibError =
+        "No calibration directory selected. Please select a calibration "
+        "directory in Settings. This will be used to "
+        "cache Vanadium calibration data";
     g_log.warning("No calibration directory selected. Please select a "
                   "calibration directory in Settings. This will be used to "
                   "cache Vanadium calibration data");
@@ -1078,11 +1048,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     m_calibFinishedOK = false;
     return;
   }
-
-  // Append current instrument name if numerical only entry
-  // to help Load algorithm determine instrument
-  std::string vanFileHint, cerFileHint;
-  appendCalibInstPrefix(vanNo, ceriaNo, vanFileHint, cerFileHint);
 
   // TODO: the settings tab should emit a signal when these are changed, on
   // which the vanadium corrections model should be updated automatically
@@ -1097,7 +1062,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
-    load->setPropertyValue("Filename", cerFileHint);
+    load->setPropertyValue("Filename", ceriaNo);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
     load->setPropertyValue("OutputWorkspace", ceriaWSName);
     load->execute();
@@ -2406,7 +2371,7 @@ std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory() {
       "if(mtd.doesExist(van_curve_twin_ws)):\n"
       " DeleteWorkspace(van_curve_twin_ws)\n"
 
-      "CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves_ws\", "
+      "CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves\", "
       "OutputWorkspace = van_curve_twin_ws)\n"
 
       "van_curves_ws = workspace(van_curve_twin_ws)\n"
@@ -2889,8 +2854,8 @@ void EnggDiffractionPresenter::writeOutCalibFile(
   // normalize apparently not needed after the replace, but to be double-safe:
   pyCode += "GSAS_iparm_fname = os.path.normpath('" + safeOutFname + "')\n";
   pyCode += "bank_names = []\n";
-  pyCode += "ceria_number = " + ceriaNo + "\n";
-  pyCode += "van_number = " + vanNo + "\n";
+  pyCode += "ceria_number = \"" + ceriaNo + "\"\n";
+  pyCode += "van_number = \"" + vanNo + "\"\n";
   pyCode += "Difcs = []\n";
   pyCode += "Zeros = []\n";
   std::string templateFileVal = "None";
