@@ -794,8 +794,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     ${_webengine_def}
   INCLUDE_DIRS
     inc
-  SYSTEM_INCLUDE_DIRS
-    ${Boost_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${TARGET_LIBRARIES}
