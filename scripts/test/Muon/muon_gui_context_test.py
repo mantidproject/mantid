@@ -33,6 +33,17 @@ class MuonGUIContextTest(unittest.TestCase):
 
         observer.update.assert_called_once_with(context.gui_variables_notifier, None)
 
+    def test_that_signal_is_not_sent_if_item_updated_to_same_value(self):
+        context = MuonGuiContext()
+        observer = Observer()
+        observer.update = mock.MagicMock()
+        context.add_subscriber(observer)
+        context.update({'FirstGoodData': 12.0})
+
+        context.update_and_send_signal(FirstGoodData=12.0)
+
+        observer.update.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

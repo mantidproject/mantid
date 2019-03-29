@@ -22,6 +22,10 @@ class MuonGuiContext(dict):
         self.gui_variables_notifier = GuiVariablesNotifier(self)
 
     def update_and_send_signal(self, *args, **kwargs):
+        updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
+        if not updated_items:
+            return
+
         super(MuonGuiContext, self).update(*args, **kwargs)
         self.gui_variables_notifier.notify_subscribers()
 
