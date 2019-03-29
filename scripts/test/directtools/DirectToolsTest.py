@@ -15,7 +15,7 @@ import directtools
 from mantid.api import mtd
 from mantid.simpleapi import (AddSampleLog, CloneWorkspace, ComputeIncoherentDOS, ConvertSpectrumAxis, CreateSampleWorkspace,
                               CreateWorkspace, DirectILLCollectData, DeleteWorkspace, DirectILLReduction, LoadILLTOF,
-                              MoveInstrumentComponent, SetInstrumentParameter)
+                              MoveInstrumentComponent, SetInstrumentParameter, Transpose)
 import numpy
 import numpy.testing
 import testhelpers
@@ -383,6 +383,16 @@ class DirectToolsTest(unittest.TestCase):
         kwargs = {'workspace': self._sqw}
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
 
+    def test_plotSofQW_transposed(self):
+        wsName = 'ws'
+        CloneWorkspace(self._sqw, OutputWorkspace=wsName)
+        Transpose(wsName, OutputWorkspace=wsName)
+        kwargs = {'workspace': wsName}
+        testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        DeleteWorkspace(wsName)
+        kwargs = {'workspace': self._sqw}
+        testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+
     def test_subplots(self):
         testhelpers.assertRaisesNothing(self, directtools.subplots)
 
@@ -393,7 +403,8 @@ class DirectToolsTest(unittest.TestCase):
         ys[nPoints] = numpy.nan
         ys[2 * nPoints - 1] = numpy.nan
         vertAxis = numpy.array([-3, -1, 2, 4])
-        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=3, VerticalAxisUnit='Degrees', VerticalAxisValues=vertAxis, StoreInADS=False)
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=3, UnitX='MomentumTransfer',
+                             VerticalAxisUnit='Degrees', VerticalAxisValues=vertAxis, StoreInADS=False)
         qMin, qMax = directtools.validQ(ws, -2.5)
         self.assertEqual(qMin, xs[0])
         self.assertEqual(qMax, xs[-1])

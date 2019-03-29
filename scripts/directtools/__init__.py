@@ -106,7 +106,8 @@ def _energylimits(workspaces):
     workspaces = _normwslist(workspaces)
     eMax = 0.
     for ws in workspaces:
-        Xs = workspaces[0].getAxis(1).extractValues()
+        axisIndex = 0 if ws.getAxis(0).getUnit().name() == 'Energy transfer' else 1
+        Xs = ws.getAxis(axisIndex).extractValues()
         eMax = max(eMax, Xs[-1])
     eMin = -eMax
     logs = workspaces[0].run()
@@ -709,10 +710,10 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     :type colorscale: str
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
-    # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
         logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
+    qHorizontal = workspace.getAxis(0).getUnit().name() == 'q'
     isSusceptibility = workspace.YUnit() == 'Dynamic susceptibility'
     figure, axes = subplots()
     if QMin is None:
@@ -725,7 +726,8 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         else:
             EMin, unusedEMax = _energylimits(workspace)
     if EMax is None:
-        EAxis = workspace.getAxis(1).extractValues()
+        EAxisIndex = 1 if qHorizontal else 0
+        EAxis = workspace.getAxis(EAxisIndex).extractValues()
         EMax = EAxis[-1]
     if VMax is None:
         vertMax = EMax if EMax is not None else numpy.inf
@@ -751,13 +753,24 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         colorbar.set_label(r"$\chi''(Q,E)$ (arb. units)")
     else:
         colorbar.set_label(r'$S(Q,E)$ (arb. units)')
-    axes.set_xlim(left=QMin)
-    axes.set_xlim(right=QMax)
-    axes.set_ylim(bottom=EMin)
-    if EMax is not None:
-        axes.set_ylim(top=EMax)
-    axes.set_xlabel(u'$Q$ (\u00c5$^{-1}$)')
-    axes.set_ylabel('Energy (meV)')
+    if qHorizontal:
+        xLimits = {'left': QMin, 'right': QMax}
+        yLimits = {'bottom': EMin}
+        if EMax is not None:
+            yLimits['top'] = EMax
+        xLabel = u'$Q$ (\u00c5$^{-1}$)'
+        yLabel = 'Energy (meV)'
+    else:
+        xLimits = {'left': EMin}
+        if EMax is not None:
+            xLimits['right'] = EMax
+        yLimits = {'bottom': QMin, 'top': QMax}
+        xLabel = 'Energy (meV)'
+        yLabel = u'$Q$ (\u00c5$^{-1}$)'
+    axes.set_xlim(**xLimits)
+    axes.set_ylim(**yLimits)
+    axes.set_xlabel(xLabel)
+    axes.set_ylabel(yLabel)
     _SofQWtitle(workspace, figure)
     return figure, axes
 
@@ -786,19 +799,44 @@ def validQ(workspace, E=0.0):
     :returns: a tuple of (:math:`Q_{min}`, :math:`Q_{max}`)
     """
     workspace = _normws(workspace)
-    vertBins = workspace.getAxis(1).extractValues()
-    if len(vertBins) > workspace.getNumberHistograms():
-        vertBins = _bincentres(vertBins)
-    elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
-    ys = workspace.readY(int(elasticIndex))
-    validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
-    xs = workspace.readX(int(elasticIndex))
-    lower = xs[numpy.amin(validIndices)]
-    upperIndex = numpy.amax(validIndices)
-    if len(xs) > len(ys):
-        upperIndex = upperIndex + 1
-    upper = xs[upperIndex]
-    return lower, upper
+    if workspace.getAxis(0).getUnit().name() == 'q':
+        vertPoints = workspace.getAxis(1).extractValues()
+        if len(vertPoints) > workspace.getNumberHistograms():
+            vertPoints = _bincentres(vertPoints)
+        elasticIndex = int(numpy.argmin(numpy.abs(vertPoints - E)))
+        ys = workspace.readY(elasticIndex)
+        validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
+        xs = workspace.readX(elasticIndex)
+        lower = xs[numpy.amin(validIndices)]
+        upperIndex = numpy.amax(validIndices)
+        if len(xs) > len(ys):
+            upperIndex = upperIndex + 1
+        upper = xs[upperIndex]
+        return lower, upper
+    else:
+        horPoints = workspace.readX(0)
+        nPoints = len(workspace.readY(0))
+        if len(horPoints) > nPoints:
+            horPoints = _bincentres(horPoints)
+        elasticIndex = int(numpy.argmin(numpy.abs(horPoints - E)))
+        vertPoints = workspace.getAxis(1).extractValues()
+        if len(vertPoints) > workspace.getNumberHistograms():
+            vertPoints = _bincentres(vertPoints)
+        lower = numpy.inf
+        lowerIndex = None
+        upper = -numpy.inf
+        upperIndex = None
+        for i in range(workspace.getNumberHistograms()):
+            y = workspace.readY(i)[elasticIndex]
+            if not numpy.isnan(y):
+                q = vertPoints[i]
+                if q < lower:
+                    lower = q
+                    lowerIndex = i
+                if q > upper:
+                    upper = q
+                    upperIndex = i
+        return lower, upper
 
 
 def wsreport(workspace):

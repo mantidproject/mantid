@@ -29,6 +29,14 @@ Improvements
 Bugfixes
 ########
 
+Python
+------
+
+Improvements
+############
+
+- :func:`directtools.plotSofQW` now supports plotting of transposed and non-transposed workspaces.
+
 - In :ref:`PyChop <PyChop>`, the sample-size effect calculation was improved to account for the annular shape.
 
 :ref:`Release 4.1.0 <v4.1.0>`
