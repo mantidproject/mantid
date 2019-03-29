@@ -12,6 +12,7 @@ from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_model import MaxEntModel, Ma
 
 from qtpy import QtWidgets
 
+
 class MaxEntWidget(QtWidgets.QWidget):
 
     def __init__(self, load, parent=None):
