@@ -11,6 +11,8 @@ Improvements
 
 Bugfixes
 ########
+- An error raised when double-clicking an arrow in the algorithm toolbox
+  when no algorithm was selected has been fixed.
 
 * Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 
