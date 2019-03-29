@@ -8,6 +8,7 @@
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "Plotter.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
@@ -558,7 +559,20 @@ bool RunsTablePresenter::isAutoreducing() const {
 }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {
-  const auto rowsToPlot = m_view->jobs().selectedSubtrees();
+  const auto subtreesToPlot = m_view->jobs().selectedSubtrees().get();
+  QOrderedSet<QString> workspaces;
+
+  for (const auto &subtree : subtreesToPlot) {
+    for (const auto &row : subtree) {
+      const auto &cells = row.cells();
+      auto q = 1;
+    }
+  }
+
+  Plotter plotter;
+  plotter.reflectometryPlot(workspaces);
+
+  m_view->jobs().clearSelection();
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {

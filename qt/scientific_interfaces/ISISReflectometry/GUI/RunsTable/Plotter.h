@@ -7,8 +7,16 @@
 #ifndef MANTID_ISISREFLECTOMETRY_PLOTTER_H
 #define MANTID_ISISREFLECTOMETRY_PLOTTER_H
 
+#include "Common/DllConfig.h"
+
+#include <QMap>
+#include <QSet>
+#include <QString>
+
 namespace MantidQt {
 namespace CustomInterfaces {
+
+template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter {
 public:

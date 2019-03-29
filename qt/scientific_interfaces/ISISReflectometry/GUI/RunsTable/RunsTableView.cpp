@@ -154,13 +154,17 @@ void RunsTableView::addToolbarActions() {
                          "Collapse all groups"),
           SIGNAL(triggered(bool)), this,
           SLOT(onCollapseAllGroupsPressed(bool)));
+
   connect(addToolbarItem(Action::PlotSelected, "://graph.png",
                          "Plot selected rows as graphs"),
-          SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed));
-  connect(
-      addToolbarItem(Action::PlotSelectedStitchedOutput, "://trajectory.png",
-                     "Plot selected rows with stitched outputs as graphs"),
-      SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedStitchedOutputPressed));
+          SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed(bool)));
+
+  connect(addToolbarItem(Action::PlotSelectedStitchedOutput,
+                         "://trajectory.png",
+                         "Plot selected rows with stitched outputs as graphs"),
+          SIGNAL(triggered(bool)), this,
+          SLOT(onPlotSelectedStitchedOutputPressed(bool)));
+
   connect(addToolbarItem(Action::InsertRow, "://insert_row.png",
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));

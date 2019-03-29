@@ -5,6 +5,7 @@ set ( RUNS_TABLE_SRC_FILES
     RunsTableView.cpp
     IRunsTableView.h
     RunsTableView.h
+    Plotter.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -16,6 +17,7 @@ set ( RUNS_TABLE_INC_FILES
     RegexRowFilter.h
     RunsTablePresenter.h
     RunsTablePresenterFactory.h
+    Plotter.h
 )
 
 set ( RUNS_TABLE_MOC_FILES

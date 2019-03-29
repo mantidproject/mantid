@@ -9,9 +9,8 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/PythonRunner.h"
+using namespace MantidQt::API;
 #endif
-
-namespace {}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,8 +36,8 @@ void Plotter::reflectometryPlot(const QOrderedSet<QString> &workspaces) {
 
 void Plotter::runPython(const QString &python) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  PythonRunner pyRunner = PythonRunner();
-  pyRunner.runPythonCode(runPythonCode);
+  PythonRunner pyRunner;
+  pyRunner.runPythonCode(python);
 #else
   // This should never be implemented for Qt 5 or above because that is
   // workbench.
