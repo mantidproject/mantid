@@ -7,8 +7,8 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import PyQt4.QtGui as QtGui
-import PyQt4.QtCore as QtCore
+from qtpy import QtWidgets, QtCore
+
 from mantid.kernel import ConfigServiceImpl
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 
@@ -37,7 +37,7 @@ def check_facility():
                              + "\n - ".join(SUPPORTED_FACILITIES))
 
 
-class MuonAnalysisGui(QtGui.QMainWindow):
+class MuonAnalysisGui(QtWidgets.QMainWindow):
     """
     The Muon Analaysis 2.0 interface.
     """
@@ -66,8 +66,8 @@ class MuonAnalysisGui(QtGui.QMainWindow):
         self.setup_tabs()
         self.help_widget = HelpWidget()
 
-        central_widget = QtGui.QWidget()
-        vertical_layout = QtGui.QVBoxLayout()
+        central_widget = QtWidgets.QWidget()
+        vertical_layout = QtWidgets.QVBoxLayout()
 
         vertical_layout.addWidget(self.load_widget.load_widget_view)
         vertical_layout.addWidget(self.tabs)
