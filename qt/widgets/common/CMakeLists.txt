@@ -19,6 +19,7 @@ set ( QT5_SRC_FILES
   src/FitPropertyBrowser.cpp
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
+  src/FunctionModel.cpp
   src/FunctionTreeView.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
@@ -319,6 +320,7 @@ set ( SRC_FILES
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FunctionBrowser.cpp
+  src/FunctionModel.cpp
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IndirectInstrumentConfig.cpp
@@ -576,6 +578,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
   inc/MantidQtWidgets/Common/ParseKeyValueString.h
   inc/MantidQtWidgets/Common/ParseNumerics.h
+  inc/MantidQtWidgets/Common/FunctionModel.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
@@ -784,6 +787,7 @@ set( TEST_FILES
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FunctionModelTest.h
   test/InterfaceManagerTest.h
   test/LogValueFinderTest.h
   test/NonOrthogonalTest.h

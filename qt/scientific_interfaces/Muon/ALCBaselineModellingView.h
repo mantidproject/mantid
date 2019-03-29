@@ -15,6 +15,8 @@
 
 #include "ui_ALCBaselineModellingView.h"
 
+class QSignalMapper;
+
 #include <qwt_plot_curve.h>
 
 namespace MantidQt {

@@ -60,8 +60,8 @@ namespace MantidWidgets {
  * @param parent :: The parent widget.
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
-FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi)
-    : QWidget(parent), m_multiDataset(multi)//, m_numberOfDatasets(0),
+FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories)
+    : QWidget(parent), m_multiDataset(multi), m_allowedCategories(categories)//, m_numberOfDatasets(0),
       //m_currentDataset(0)
 
 {
@@ -1214,7 +1214,7 @@ void FunctionTreeView::addFunction() {
  * @returns :: function string
  */
 QString FunctionTreeView::getUserFunctionFromDialog() {
-  SelectFunctionDialog dlg(this);
+  SelectFunctionDialog dlg(this, m_allowedCategories);
   if (dlg.exec() == QDialog::Accepted) {
     return dlg.getFunction();
   } else {
@@ -1380,36 +1380,13 @@ double FunctionTreeView::getParameter(const QString &funcIndex,
   return m_parameterManager->value(prop);
 }
 
-/**
- * Split a qualified parameter name into function index and local parameter
- * name.
- * @param paramName :: Fully qualified parameter name (includes function index)
- * @return :: A string list with the first item is the function index and the
- * second
- *   item is the param local name.
- */
-QStringList
-FunctionTreeView::splitParameterName(const QString &paramName) const {
-  QString functionIndex;
-  QString parameterName = paramName;
-  int j = paramName.lastIndexOf('.');
-  if (j > 0) {
-    ++j;
-    functionIndex = paramName.mid(0, j);
-    parameterName = paramName.mid(j);
-  }
-  QStringList res;
-  res << functionIndex << parameterName;
-  return res;
-}
-
-/// Get a property for a parameter
-QtProperty *
-FunctionTreeView::getParameterProperty(const QString &paramName) const {
-  QStringList name = splitParameterName(paramName);
-  return getParameterProperty(name[0], name[1]);
-}
-
+///// Get a property for a parameter
+//QtProperty *
+//FunctionTreeView::getParameterProperty(const QString &paramName) const {
+//  QStringList name = splitParameterName(paramName);
+//  return getParameterProperty(name[0], name[1]);
+//}
+//
 /// Get a property for a parameter
 QtProperty *
 FunctionTreeView::getParameterProperty(const QString &funcIndex,

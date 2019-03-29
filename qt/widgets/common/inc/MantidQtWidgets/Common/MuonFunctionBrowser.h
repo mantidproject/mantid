@@ -26,7 +26,7 @@ public:
 
 protected:
   /// Ask user for function and return it
-  QString getUserFunctionFromDialog() override;
+  //QString getUserFunctionFromDialog() override;
 };
 
 } // namespace MantidWidgets

@@ -81,7 +81,7 @@ public:
   };
 
   /// Constructor
-  FunctionTreeView(QWidget *parent = nullptr, bool multi = false);
+  FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories);
   /// Destructor
   virtual ~FunctionTreeView() override;
   /// Clear the contents
@@ -185,11 +185,8 @@ protected:
   QString getParameterName(QtProperty *prop);
   /// Get function property for the index
   QtProperty *getFunctionProperty(const QString &index) const;
-  /// Split a qualified parameter name into function index and local parameter
-  /// name.
-  QStringList splitParameterName(const QString &paramName) const;
-  /// Get a property for a parameter
-  QtProperty *getParameterProperty(const QString &paramName) const;
+  ///// Get a property for a parameter
+  //QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter
   QtProperty *getParameterProperty(const QString &funcIndex,
                                    const QString &paramName) const;
@@ -253,8 +250,6 @@ protected slots:
   void addConstraints50();
   /// Remove one of the constraints
   void removeConstraint();
-  /// Update current function index depending on currently selected item
-  void updateCurrentFunctionIndex();
 
   //   Property change slots
 
@@ -348,6 +343,7 @@ protected:
   /// Set true if the constructed function is intended to be used in a
   /// multi-dataset fit
   bool m_multiDataset;
+  std::vector<std::string> m_allowedCategories;
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;
