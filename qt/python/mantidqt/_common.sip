@@ -257,6 +257,7 @@ public:
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());
   void showCustomInterfaceHelp(const QString &name);
+  void showWebPage(const QString &url);
 };
 
 // ---------------------------------

@@ -534,10 +534,10 @@ class MainWindow(QMainWindow):
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):
-        QDesktopServices.openUrl(QUrl('https://www.mantidproject.org'))
+        self.interface_manager.showWebPage('https://www.mantidproject.org')
 
     def open_mantid_forum(self):
-        QDesktopServices.openUrl(QUrl('https://forum.mantidproject.org/'))
+        self.interface_manager.showWebPage('https://forum.mantidproject.org/')
 
     def readSettings(self, settings):
         qapp = QApplication.instance()
