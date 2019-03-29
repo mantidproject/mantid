@@ -458,7 +458,7 @@ if(APPLE)
   add_definitions(-DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP)
 endif()
 
-include_directories (SYSTEM ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR})
+include_directories (SYSTEM ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidGeometry/PrecompiledHeader.h SRC_FILES)
