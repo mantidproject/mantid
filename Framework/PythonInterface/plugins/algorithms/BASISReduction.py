@@ -82,7 +82,6 @@ class BASISReduction(PythonAlgorithm):
         # properties related to flux normalization
         self._flux_normalization_type = None  # default to no flux normalizat.
         self._MonNorm = False  # flux normalization by monitor
-        self._aggregate_flux = None
 
         # properties related to the chosen reflection
         self._reflection = None  # entry in the reflections dictionary
@@ -494,27 +493,31 @@ the first two hours"""
             self._filterEvents(run, name)
 
     def _sum_flux(self, run_set, mon_ws, extra_ext=None):
-        self._aggregate_flux = 0.0
+        r"""
+        Generate aggregate monitor workspace from a list of run numbers
+
+        Parameters
+        ----------
+        run_set: list
+            List of run numbers
+        mon_ws: str
+            Name of output workspace
+        extra_ext: str
+            Extension to output workspace name, used for vanadium run(s)
+        """
         for run in run_set:
             ws_name = self._make_run_name(run)
             if extra_ext is not None:
                 ws_name += extra_ext
             mon_ws_name = ws_name + '_monitors'
             run_file = self._make_run_file(run)
-            if self._MonNorm:
-                sapi.LoadNexusMonitors(Filename=run_file,
-                                       OutputWorkspace=mon_ws_name)
-                if mon_ws != mon_ws_name:
-                    sapi.Plus(LHSWorkspace=mon_ws,
-                              RHSWorkspace=mon_ws_name,
-                              OutputWorkspace=mon_ws)
-                    sapi.DeleteWorkspace(mon_ws_name)
-            else:
-                ws_run = mtd[ws_name].getRun()
-                if self._flux_normalization_type == 'Proton Charge':
-                    self._aggregate_flux += ws_run.getProtonCharge()
-                if self._flux_normalization_type == 'Duration':
-                    self._aggregate_flux += ws_run.getProperty('duration').value
+            sapi.LoadNexusMonitors(Filename=run_file,
+                                   OutputWorkspace=mon_ws_name)
+            if mon_ws != mon_ws_name:
+                sapi.Plus(LHSWorkspace=mon_ws,
+                          RHSWorkspace=mon_ws_name,
+                          OutputWorkspace=mon_ws)
+                sapi.DeleteWorkspace(mon_ws_name)
 
     def _generate_flux_spectrum(self, sam_ws, mon_ws):
         r"""
@@ -551,11 +554,17 @@ the first two hours"""
             sapi.Rebin(InputWorkspace=mon_ws, OutputWorkspace=mon_ws,
                        Params=flux_binning)
         else:
+            ws = mtd[sam_ws].getRun()
+            if self._flux_normalization_type == 'Proton Charge':
+                aggregate_flux = ws.getProtonCharge()
+            elif self._flux_normalization_type == 'Duration':
+                aggregate_flux = ws.getProperty('duration').value
             # These factors ensure intensities typical of flux workspaces
             # derived from monitor data
             f = {'Proton Charge': 0.00874, 'Duration': 0.003333}
             x = np.arange(flux_binning[0], flux_binning[2], flux_binning[1])
-            y = f[self._flux_normalization_type] * self._aggregate_flux * np.ones(len(x) - 1)
+            y = f[self._flux_normalization_type] * \
+                aggregate_flux * np.ones(len(x) - 1)
             _mon_ws = sapi.CreateWorkspace(OutputWorkspace=mon_ws,
                                            DataX=x, DataY=y,
                                            UnitX='Wavelength')
@@ -589,7 +598,7 @@ the first two hours"""
         wsName += extra_extension
         wsName_mon = wsName + '_monitors'
         self._sum_runs(run_set, wsName, extra_extension)
-        if self._flux_normalization_type is not None:
+        if self._MonNorm:
             self._sum_flux(run_set, wsName_mon, extra_extension)
         self._calibrate_data(wsName, wsName_mon)
         if not self._debugMode:
