@@ -290,8 +290,6 @@ the first two hours"""
         #
         norm_runs = self.getProperty('NormRunNumbers').value
         if self._doNorm and bool(norm_runs):
-            if ';' in norm_runs:
-                raise SyntaxError('Normalization does not support run groups')
             self._normalizationType = self.getProperty('NormalizationType').value
             self.log().information('Divide by Vanadium with normalization' +
                                    self._normalizationType)
@@ -719,7 +717,7 @@ the first two hours"""
         ws_name : str
             name of the workspace to filter
         """
-        for run_fragment in self.getProperty('ExcludeTimeSegment').value.split(';'):
+        for run_fragment in self.getProperty('ExcludeTimeSegment').value.split(','):
             if run+':' in run_fragment:
                 self.generateSplitterWorkspace(run_fragment.split(':')[1])
                 sapi.FilterEvents(InputWorkspace=ws_name,
@@ -745,7 +743,7 @@ the first two hours"""
             name of the workspace to filter
         """
         inf = 172800  # a run two full days long
-        for run_fragment in self.getProperty('RetainTimeSegment').value.split(';'):
+        for run_fragment in self.getProperty('RetainTimeSegment').value.split(','):
             if str(run) + ':' in run_fragment:
                 a, b = run_fragment.split(':')[1].split('-')
                 b = inf if 'end' in b else float(b)
