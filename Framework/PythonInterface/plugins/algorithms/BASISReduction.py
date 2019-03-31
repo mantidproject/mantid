@@ -128,7 +128,7 @@ class BASISReduction(PythonAlgorithm):
                              'start to 60 seconds, "71546:300-600", ' +
                              '"71546:120-end" from 120s to the end of the run')
         help_doc = """Only retain events occurring within a time segment.
-Examples: 71546:0-3600 only retains events from the first hour of run 71546. 
+Examples: 71546:0-3600 only retains events from the first hour of run 71546.
 71546:3600-7200 retain only the second hour. 71546:7200-end retain events after
 the first two hours"""
         self.declareProperty('RetainTimeSegment', '', help_doc)
