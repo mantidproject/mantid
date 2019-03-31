@@ -127,6 +127,11 @@ class BASISReduction(PythonAlgorithm):
                              'Examples: "71546:0-60" filter run 71546 from ' +
                              'start to 60 seconds, "71546:300-600", ' +
                              '"71546:120-end" from 120s to the end of the run')
+        help_doc = """Only retain events occurring within a time segment.
+Examples: 71546:0-3600 only retains events from the first hour of run 71546. 
+71546:3600-7200 retain only the second hour. 71546:7200-end retain events after
+the first two hours"""
+        self.declareProperty('RetainTimeSegment', '', help_doc)
         grouping_type = ['None', 'Low-Resolution', 'By-Tube']
         self.declareProperty('GroupDetectors', 'None',
                              StringListValidator(grouping_type),
@@ -454,18 +459,39 @@ class BASISReduction(PythonAlgorithm):
             ws_name = self._make_run_name(run)
             if extra_ext is not None:
                 ws_name += extra_ext
-            run_file = self._make_run_file(run)
-
-            sapi.LoadEventNexus(Filename=run_file,
-                                OutputWorkspace=ws_name,
-                                BankName=self._reflection['banks'])
-            if str(run)+':' in self.getProperty('ExcludeTimeSegment').value:
-                self._filterEvents(str(run), ws_name)
+            self.load_single_run(run, ws_name)
             if sam_ws != ws_name:
                 sapi.Plus(LHSWorkspace=sam_ws,
                           RHSWorkspace=ws_name,
                           OutputWorkspace=sam_ws)
                 sapi.DeleteWorkspace(ws_name)
+
+    def load_single_run(self, run, name):
+        """
+        Find and load events.
+
+        Applies event filtering if necessary.
+
+        Parameters
+        ----------
+        run: str
+            Run number
+        name: str
+            Name of the output EventsWorkspace
+
+        Returns
+        -------
+        EventsWorkspace
+        """
+
+        kwargs = dict(Filename=self._make_run_file(run),
+                      BankName=self._reflection['banks'],
+                      OutputWorkspace=name)
+        if str(run) + ':' in self.getProperty('RetainTimeSegment').value:
+            kwargs.update(self._retainEvents(run))
+        sapi.LoadEventNexus(**kwargs)
+        if str(run) + ':' in self.getProperty('ExcludeTimeSegment').value:
+            self._filterEvents(run, name)
 
     def _sum_flux(self, run_set, mon_ws, extra_ext=None):
         self._aggregate_flux = 0.0
@@ -658,7 +684,7 @@ class BASISReduction(PythonAlgorithm):
         fragment: str
             a-b  start and end of time fragment to filter out
         """
-        inf = 86400  # a run a full day long
+        inf = 172800  # a run two full days long
         a, b = fragment.split('-')
         b = inf if 'end' in b else float(b)
         a = float(a)
@@ -697,6 +723,26 @@ class BASISReduction(PythonAlgorithm):
                 sapi.RenameWorkspace(InputWorkspace='splitted_0',
                                      OutputWorkspace=ws_name)
                 break
+
+    def _retainEvents(self, run):
+        r"""
+        Retain only events in a time segment
+
+        Parameters
+        ----------
+        run: str
+            run number
+        ws_name : str
+            name of the workspace to filter
+        """
+        inf = 172800  # a run two full days long
+        for run_fragment in self.getProperty('RetainTimeSegment').value.split(';'):
+            if str(run) + ':' in run_fragment:
+                a, b = run_fragment.split(':')[1].split('-')
+                b = inf if 'end' in b else float(b)
+                return dict(FilterByTimeStart=float(a),
+                            FilterByTimeStop=float(b))
+        raise RuntimeError('Run {} not in RetainTimeSegment '.format(run))
 
     def serialize_in_log(self, ws_name):
         r"""Save the serialization of the algorithm in the logs.
