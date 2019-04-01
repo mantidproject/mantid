@@ -335,6 +335,40 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'
 
+class PowderFluxNormalizationTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample with two flux
+    normalizations"""
+
+    def __init__(self):
+        super(PowderFluxNormalizationTest, self).__init__()
+        self.config = None
+        self.prepset('BASISDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_74799_event.nxs', 'BASISPowderFluxNorm.nxs']
+        try:
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   FluxNormalizationType='Monitor',
+                                   OutputWorkspace='powder_Mon',
+                                   MaskFile='BASIS_Mask_default_diff.xml')
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   FluxNormalizationType='Proton Charge',
+                                   OutputWorkspace='powder_Pro',
+                                   MaskFile='BASIS_Mask_default_diff.xml')
+            Divide(LHSWorkspace='powder_Pro', RHSWorkspace='powder_Mon',
+                   OutputWorkspace='powder_ratio')
+            ReplaceSpecialValues(InputWorkspace='powder_ratio',
+                                 NANValue=1.0, NANError=1.0,
+                                 OutputWorkspace='powder_ratio')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'powder_ratio', 'BASISPowderFluxNorm.nxs'
+
 
 class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Run a elastic reduction for powder sample in the newer DAS"""
