@@ -832,7 +832,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     }
   }
 
-  const bool polarizationAnalysisOn = getProperty("PolarizationCorrections");
+  const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
 
   // Check if the transmission runs are groups or not
 
