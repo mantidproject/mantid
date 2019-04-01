@@ -318,10 +318,11 @@ void EnggDiffFittingPresenter::processLoad() {
   } catch (std::invalid_argument &ex) {
     warnFileNotFound(ex);
     return;
-  } catch (Mantid::Kernel::Exception::NotFoundError &ex) {
+  } catch (std::runtime_error &ex) {
     warnFileNotFound(ex);
     return;
   }
+  
 
   const auto runLabels = m_model->getRunLabels();
   std::vector<std::string> listWidgetLabels;
@@ -661,8 +662,8 @@ bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
 void EnggDiffFittingPresenter::warnFileNotFound(const std::exception &ex) {
   m_view->showStatus("Error while loading focused run");
   m_view->userWarning("Invalid file selected",
-                      "Mantid could not load the selected file. "
-                      "Are you sure it exists? "
+                      "Mantid could not load the selected file, "
+                      "or was unable to get nessecary information."
                       "See the logger for more information");
   g_log.error("Failed to load file. Error message: ");
   g_log.error(ex.what());
