@@ -148,10 +148,9 @@ class MantidAxes(Axes):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 
     def _get_spec_number(self, workspace, kwargs):
-        keys = kwargs.keys()
-        if 'specNum' in keys and kwargs['specNum'] is not None:
+        if kwargs.get('specNum', None) is not None:
             return kwargs['specNum']
-        elif 'wkspIndex' in keys and kwargs['wkspIndex'] is not None:
+        elif kwargs.get('wkspIndex', None) is not None:
             return self.get_spec_num_from_wksp_index(workspace,
                                                      kwargs['wkspIndex'])
         else:

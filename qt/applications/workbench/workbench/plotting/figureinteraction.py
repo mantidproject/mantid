@@ -77,7 +77,7 @@ class FigureInteraction(object):
         # local variables to avoid constant self lookup
         canvas = self.canvas
         if (event.button == canvas.buttond[Qt.RightButton] and
-                self.toolbar_manager.is_tool_active() is False):
+                not self.toolbar_manager.is_tool_active()):
             self._show_context_menu(event)
         elif event.dblclick and event.button == canvas.buttond[Qt.LeftButton]:
             self._show_axis_editor(event)
