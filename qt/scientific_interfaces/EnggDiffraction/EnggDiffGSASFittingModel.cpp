@@ -227,7 +227,11 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   loadAlg->execute();
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(wsName);
+  auto wsTest = ADS.retrieveWS<API::Workspace>(wsName);
+  const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(wsTest);
+  if(!ws){
+      throw std::invalid_argument("Invalid Workspace loaded, are you sure it has been focused?");
+  }
   return ws;
 }
 
