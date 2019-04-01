@@ -15,12 +15,12 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 import csv
 import os
-import sys
 import time
 import traceback
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService
+from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
@@ -613,12 +613,6 @@ class RunTabPresenter(object):
             self.sans_logger.notice("Cannot export table as it is empty.")
             return
 
-        # Python 2 and 3 take input in different modes for writing lists to csv files
-        if sys.version_info[0] == 2:
-            open_type = 'wb'
-        else:
-            open_type = 'w'
-
         try:
             self._view.disable_buttons()
 
@@ -630,7 +624,7 @@ class RunTabPresenter(object):
                 if filename[-4:] != '.csv':
                     filename += '.csv'
 
-                with open(filename, open_type) as outfile:
+                with open(filename, csv_open_type) as outfile:
                     # Pass filewriting object rather than filename to make testing easier
                     writer = csv.writer(outfile)
                     self._export_table(writer, non_empty_rows)

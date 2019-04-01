@@ -19,3 +19,4 @@ Improvements
 
 - Increased font size in run table.
 - For ZOOM, SHIFT user file command now moves monitor 5.
+- Batch files no longer require an output name to load. When processing, an auto-generated name is used instead.
