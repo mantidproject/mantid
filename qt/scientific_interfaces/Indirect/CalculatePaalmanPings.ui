@@ -696,7 +696,12 @@
            </item>
            <item>
             <property name="text">
-             <string>Number Density</string>
+             <string>Atom Number Density</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Formula Number Density</string>
             </property>
            </item>
           </widget>
@@ -1000,7 +1005,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Number Density</string>
+          <string>Atom Number Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Formula Number Density</string>
          </property>
         </item>
        </widget>

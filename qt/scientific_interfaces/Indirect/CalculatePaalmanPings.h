@@ -46,6 +46,7 @@ private slots:
   void plotClicked();
   void runClicked();
   void setSampleDensityOptions(QString const &method);
+  void setCanDensityOptions(QString const &method);
   void setSampleDensityUnit(QString const &text);
   void setCanDensityUnit(QString const &text);
   void setSampleDensityValue(QString const &text);
@@ -71,6 +72,7 @@ private:
   void setComboBoxOptions(QComboBox *combobox,
                           std::vector<std::string> const &options);
 
+  std::vector<std::string> getDensityOptions(QString const &method) const;
   QString getDensityUnit(QString const &type) const;
   double getSampleDensityValue(QString const &type) const;
   double getCanDensityValue(QString const &type) const;

@@ -600,11 +600,11 @@ void CalculatePaalmanPings::plotClicked() {
 void CalculatePaalmanPings::runClicked() { runTab(); }
 
 void CalculatePaalmanPings::setSampleDensityOptions(QString const &method) {
-  auto const options =
-      method == "Chemical Formula"
-          ? std::vector<std::string>{"Mass Density", "Number Density"}
-          : std::vector<std::string>{"Number Density"};
-  setComboBoxOptions(m_uiForm.cbSampleDensity, options);
+  setComboBoxOptions(m_uiForm.cbSampleDensity, getDensityOptions(method));
+}
+
+void CalculatePaalmanPings::setCanDensityOptions(QString const &method) {
+  setComboBoxOptions(m_uiForm.cbCanDensity, getDensityOptions(method));
 }
 
 void CalculatePaalmanPings::setComboBoxOptions(
@@ -638,6 +638,7 @@ void CalculatePaalmanPings::changeSampleMaterialOptions(int index) {
 }
 
 void CalculatePaalmanPings::changeCanMaterialOptions(int index) {
+  setCanDensityOptions(m_uiForm.cbCanMaterialMethod->currentText());
   m_uiForm.swCanMaterialDetails->setCurrentIndex(index);
 }
 
@@ -653,6 +654,16 @@ void CalculatePaalmanPings::setCanDensity(double value) {
     m_canDensities->setMassDensity(value);
   else
     m_canDensities->setNumberDensity(value);
+}
+
+std::vector<std::string>
+CalculatePaalmanPings::getDensityOptions(QString const &method) const {
+  std::vector<std::string> densityOptions;
+  if (method == "Chemical Formula")
+    densityOptions.emplace_back("Mass Density");
+  densityOptions.emplace_back("Atom Number Density");
+  densityOptions.emplace_back("Formula Number Density");
+  return densityOptions;
 }
 
 QString CalculatePaalmanPings::getDensityUnit(QString const &type) const {
