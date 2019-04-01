@@ -343,26 +343,27 @@ UserInputValidator AbsorptionCorrections::doValidation() {
     uiv.addErrorMessage(
         "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
 
-  if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
-                               m_uiForm.leSampleChemicalFormula,
-                               m_uiForm.valSampleChemicalFormula))
-    uiv.checkFieldIsValid("Sample Chemical Formula",
-                          m_uiForm.leSampleChemicalFormula,
-                          m_uiForm.valSampleChemicalFormula);
-  auto const sampleChem =
-      m_uiForm.leSampleChemicalFormula->text().toStdString();
-  try {
-    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-  } catch (std::runtime_error &ex) {
-    UNUSED_ARG(ex);
-    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-    uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
+    if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
+                                 m_uiForm.leSampleChemicalFormula,
+                                 m_uiForm.valSampleChemicalFormula))
+      uiv.checkFieldIsValid("Sample Chemical Formula",
+                            m_uiForm.leSampleChemicalFormula,
+                            m_uiForm.valSampleChemicalFormula);
+    auto const sampleChem =
+        m_uiForm.leSampleChemicalFormula->text().toStdString();
+    try {
+      Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+    } catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+      uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+    }
   }
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
-    auto const containerChem =
-        m_uiForm.leCanChemicalFormula->text().toStdString();
+
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
     auto const containerWsName =
@@ -372,20 +373,25 @@ UserInputValidator AbsorptionCorrections::doValidation() {
       uiv.addErrorMessage(
           "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
 
-    if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
-                                 m_uiForm.leCanChemicalFormula,
-                                 m_uiForm.valCanChemicalFormula)) {
-      uiv.checkFieldIsValid("Container Chemical Formula",
-                            m_uiForm.leCanChemicalFormula,
-                            m_uiForm.valCanChemicalFormula);
-    }
+    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+      auto const containerChem =
+          m_uiForm.leCanChemicalFormula->text().toStdString();
+      if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
+                                   m_uiForm.leCanChemicalFormula,
+                                   m_uiForm.valCanChemicalFormula)) {
+        uiv.checkFieldIsValid("Container Chemical Formula",
+                              m_uiForm.leCanChemicalFormula,
+                              m_uiForm.valCanChemicalFormula);
+      }
 
-    try {
-      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
-      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+      try {
+        Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+      } catch (std::runtime_error &ex) {
+        UNUSED_ARG(ex);
+        uiv.addErrorMessage(
+            "Chemical Formula for Container was not recognised.");
+        uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+      }
     }
   } else
     uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, true);
