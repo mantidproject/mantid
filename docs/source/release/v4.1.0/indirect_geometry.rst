@@ -36,6 +36,16 @@ Bug Fixes
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
 
 
+Data Corrections Interface
+--------------------------
+
+Improvements
+############
+- Improved the setting of sample and container neutron information by allowing the entry of cross sections as an 
+  alternative to a chemical formula. The cross sections can be entered in the Calculate Paalman Pings tab and
+  Calculate Monte Carlo Absorption tab. This uses the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
+
+
 Data Reduction Interface
 ------------------------
 

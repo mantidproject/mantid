@@ -108,13 +108,23 @@ Sample Shape
   Sets the shape of the sample, this affects the options for the shape details
   (see below).
 
-Sample/Can Mass/Number Density
-  Density of the sample or container.
+Sample Details Method
+  Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
+  the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
+
+Sample/Can Mass density, Atom Number Density or Formula Number Density
+  Density of the sample or container. This is used in the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm. If Atom Number Density is used, the NumberDensityUnit property is set to *Atoms* and if
+  Formula Number Density is used then NumberDensityUnit is set to *Formula Units*.
 
 Sample/Can Chemical Formula
   Chemical formula of the sample or can material. This must be provided in the
   format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
   algorithm.
+
+Cross Sections
+  Selecting the Cross Sections option in the Sample Details combobox will allow you to enter coherent,
+  incoherent and attenuation cross sections for the Sample and Can (units in barns).
 
 Run
   Runs the processing configured on the current tab.
@@ -289,13 +299,23 @@ Beam Width
 Shape Details
   Select the shape of the sample (see specific geometry options below).
 
-Sample/Can Mass/Number Density
-  Density of the sample or container.
+Sample Details Method
+  Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
+  the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
+
+Sample/Can Mass density, Atom Number Density or Formula Number Density
+  Density of the sample or container. This is used in the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm. If Atom Number Density is used, the NumberDensityUnit property is set to *Atoms* and if
+  Formula Number Density is used then NumberDensityUnit is set to *Formula Units*.
 
 Sample/Can Chemical Formula
   Chemical formula of the sample or can material. This must be provided in the
   format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
   algorithm.
+
+Cross Sections
+  Selecting the Cross Sections option in the Sample Details combobox will allow you to enter coherent,
+  incoherent and attenuation cross sections for the Sample and Can (units in barns).
 
 Run
   Runs the processing configured on the current tab.
