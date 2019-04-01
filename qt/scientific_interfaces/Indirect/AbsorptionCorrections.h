@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 class DLLExport AbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
@@ -29,8 +30,16 @@ private slots:
   void plotClicked();
   void runClicked();
   void getParameterDefaults(QString const &dataName);
-  void changeSampleDensityUnit(int /*index*/);
-  void changeCanDensityUnit(int /*index*/);
+  void setSampleDensityOptions(QString const &method);
+  void setCanDensityOptions(QString const &method);
+  void setSampleDensityUnit(QString const &text);
+  void setCanDensityUnit(QString const &text);
+  void setSampleDensityValue(QString const &text);
+  void setCanDensityValue(QString const &text);
+  void changeSampleMaterialOptions(int index);
+  void changeCanMaterialOptions(int index);
+  void setSampleDensity(double value);
+  void setCanDensity(double value);
   UserInputValidator doValidation();
 
 private:
@@ -61,12 +70,23 @@ private:
   void setMaxAttemptsValue(Mantid::Geometry::Instrument_const_sptr instrument,
                            std::string const &maxAttemptsParamName) const;
 
+  void setComboBoxOptions(QComboBox *combobox,
+                          std::vector<std::string> const &options);
+
+  std::vector<std::string> getDensityOptions(QString const &method) const;
+  QString getDensityUnit(QString const &type) const;
+  double getSampleDensityValue(QString const &type) const;
+  double getCanDensityValue(QString const &type) const;
+
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
+
+  std::shared_ptr<Densities> m_sampleDensities;
+  std::shared_ptr<Densities> m_canDensities;
 
   Ui::AbsorptionCorrections m_uiForm;
   /// alg

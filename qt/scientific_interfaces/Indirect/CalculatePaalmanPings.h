@@ -15,21 +15,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-struct Densities {
-  Densities() : m_massDensity(1.0), m_numberDensity(0.1){};
-
-  void setMassDensity(double value) { m_massDensity = value; }
-  void setNumberDensity(double value) { m_numberDensity = value; }
-  double getMassDensity() const { return m_massDensity; }
-  double getNumberDensity() const { return m_numberDensity; }
-  std::string getMassDensityUnit() const { return " g/cm3"; }
-  std::string getNumberDensityUnit() const { return " /A3"; }
-
-private:
-  double m_massDensity;
-  double m_numberDensity;
-};
-
 class DLLExport CalculatePaalmanPings : public CorrectionsTab {
   Q_OBJECT
 

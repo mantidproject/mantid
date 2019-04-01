@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QRegExpValidator>
 
@@ -21,7 +22,7 @@ using namespace Mantid::Geometry;
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
 
-bool isWorkspaceInADS(std::string const &workspaceName) {
+bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
@@ -86,7 +87,8 @@ WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
 namespace MantidQt {
 namespace CustomInterfaces {
 AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
-    : CorrectionsTab(parent) {
+    : m_sampleDensities(std::make_shared<Densities>()),
+      m_canDensities(std::make_shared<Densities>()), CorrectionsTab(parent) {
   m_uiForm.setupUi(parent);
 
   QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
@@ -105,10 +107,25 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   // Handle density units
-  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(changeSampleDensityUnit(int)));
-  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(changeCanDensityUnit(int)));
+  connect(m_uiForm.cbSampleDensity,
+          SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(setSampleDensityUnit(QString const &)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(QString const &)),
+          this, SLOT(setCanDensityUnit(QString const &)));
+  connect(m_uiForm.cbSampleDensity,
+          SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(setSampleDensityValue(QString const &)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(QString const &)),
+          this, SLOT(setCanDensityValue(QString const &)));
+
+  connect(m_uiForm.cbSampleMaterialMethod, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changeSampleMaterialOptions(int)));
+  connect(m_uiForm.cbCanMaterialMethod, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeCanMaterialOptions(int)));
+  connect(m_uiForm.spSampleDensity, SIGNAL(valueChanged(double)), this,
+          SLOT(setSampleDensity(double)));
+  connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this,
+          SLOT(setCanDensity(double)));
 
   connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(doValidation()));
@@ -119,13 +136,13 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {
-  if (isWorkspaceInADS("__mc_corrections_wavelength"))
+  if (doesExistInADS("__mc_corrections_wavelength"))
     AnalysisDataService::Instance().remove("__mc_corrections_wavelength");
 }
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  return isWorkspaceInADS(name) ? getADSMatrixWorkspace(name) : nullptr;
+  return doesExistInADS(name) ? getADSMatrixWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -154,10 +171,19 @@ void AbsorptionCorrections::run() {
   monteCarloAbsCor->setProperty("SampleDensity",
                                 m_uiForm.spSampleDensity->value());
 
-  QString const sampleChemicalFormula =
-      m_uiForm.leSampleChemicalFormula->text();
-  monteCarloAbsCor->setProperty("SampleChemicalFormula",
-                                sampleChemicalFormula.toStdString());
+  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
+    auto const sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
+    monteCarloAbsCor->setProperty("SampleChemicalFormula",
+                                  sampleChemicalFormula.toStdString());
+  } else {
+    monteCarloAbsCor->setProperty("SampleCoherentXSection",
+                                  m_uiForm.spSampleCoherentXSection->value());
+    monteCarloAbsCor->setProperty("SampleIncoherentXSection",
+                                  m_uiForm.spSampleIncoherentXSection->value());
+    monteCarloAbsCor->setProperty(
+        "SampleAttenuationXSection",
+        m_uiForm.spSampleAttenuationXSection->value());
+  }
 
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
@@ -332,7 +358,7 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 
     auto const containerWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    if (isWorkspaceInADS(containerWsName) &&
+    if (doesExistInADS(containerWsName) &&
         !getADSMatrixWorkspace(containerWsName))
       uiv.addErrorMessage(
           "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
@@ -501,14 +527,88 @@ void AbsorptionCorrections::plotClicked() {
 
 void AbsorptionCorrections::runClicked() { runTab(); }
 
-void AbsorptionCorrections::changeSampleDensityUnit(int index) {
-  QString const suffix = index == 0 ? " g/cm3" : " 1/A3";
-  m_uiForm.spSampleDensity->setSuffix(suffix);
+void AbsorptionCorrections::setSampleDensityOptions(QString const &method) {
+  setComboBoxOptions(m_uiForm.cbSampleDensity, getDensityOptions(method));
 }
 
-void AbsorptionCorrections::changeCanDensityUnit(int index) {
-  QString const suffix = index == 0 ? " g/cm3" : " 1/A3";
-  m_uiForm.spCanDensity->setSuffix(suffix);
+void AbsorptionCorrections::setCanDensityOptions(QString const &method) {
+  setComboBoxOptions(m_uiForm.cbCanDensity, getDensityOptions(method));
+}
+
+void AbsorptionCorrections::setComboBoxOptions(
+    QComboBox *combobox, std::vector<std::string> const &options) {
+  combobox->clear();
+  for (auto const &option : options)
+    combobox->addItem(QString::fromStdString(option));
+}
+
+void AbsorptionCorrections::setSampleDensityUnit(QString const &text) {
+  m_uiForm.spSampleDensity->setSuffix(getDensityUnit(text));
+}
+
+void AbsorptionCorrections::setCanDensityUnit(QString const &text) {
+  m_uiForm.spCanDensity->setSuffix(getDensityUnit(text));
+}
+
+void AbsorptionCorrections::setSampleDensityValue(QString const &text) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSampleDensity);
+  m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
+}
+
+void AbsorptionCorrections::setCanDensityValue(QString const &text) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spCanDensity);
+  m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
+}
+
+void AbsorptionCorrections::changeSampleMaterialOptions(int index) {
+  setSampleDensityOptions(m_uiForm.cbSampleMaterialMethod->currentText());
+  m_uiForm.swSampleMaterialDetails->setCurrentIndex(index);
+}
+
+void AbsorptionCorrections::changeCanMaterialOptions(int index) {
+  setCanDensityOptions(m_uiForm.cbCanMaterialMethod->currentText());
+  m_uiForm.swCanMaterialDetails->setCurrentIndex(index);
+}
+
+void AbsorptionCorrections::setSampleDensity(double value) {
+  if (m_uiForm.cbSampleDensity->currentText() == "Mass Density")
+    m_sampleDensities->setMassDensity(value);
+  else
+    m_sampleDensities->setNumberDensity(value);
+}
+
+void AbsorptionCorrections::setCanDensity(double value) {
+  if (m_uiForm.cbCanDensity->currentText() == "Mass Density")
+    m_canDensities->setMassDensity(value);
+  else
+    m_canDensities->setNumberDensity(value);
+}
+
+std::vector<std::string>
+AbsorptionCorrections::getDensityOptions(QString const &method) const {
+  std::vector<std::string> densityOptions;
+  if (method == "Chemical Formula")
+    densityOptions.emplace_back("Mass Density");
+  densityOptions.emplace_back("Atom Number Density");
+  densityOptions.emplace_back("Formula Number Density");
+  return densityOptions;
+}
+
+QString AbsorptionCorrections::getDensityUnit(QString const &type) const {
+  auto const unit = type == "Mass Density"
+                        ? m_sampleDensities->getMassDensityUnit()
+                        : m_sampleDensities->getNumberDensityUnit();
+  return QString::fromStdString(unit);
+}
+
+double AbsorptionCorrections::getSampleDensityValue(QString const &type) const {
+  return type == "Mass Density" ? m_sampleDensities->getMassDensity()
+                                : m_sampleDensities->getNumberDensity();
+}
+
+double AbsorptionCorrections::getCanDensityValue(QString const &type) const {
+  return type == "Mass Density" ? m_canDensities->getMassDensity()
+                                : m_canDensities->getNumberDensity();
 }
 
 void AbsorptionCorrections::setRunEnabled(bool enabled) {
