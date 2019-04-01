@@ -29,3 +29,20 @@ install ( FILES ${QT5_PLUGIN_DIR}/sqldrivers/qsqlite.dll DESTINATION plugins/qt5
 install ( FILES ${QT5_PLUGIN_DIR}/styles/qwindowsvistastyle.dll DESTINATION plugins/qt5/styles )
 
 install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )
+
+###########################################################################
+# Qt Resource Files for QtWebEngine
+###########################################################################
+install ( FILES ${QT5_INSTALL_PREFIX}/bin/QtWebEngineProcess.exe DESTINATION lib/qt5/bin )
+install ( DIRECTORY ${QT5_INSTALL_PREFIX}/resources DESTINATION lib/qt5 )
+
+# set ( RESOURCE_FILES
+#      icudtl.dat
+#      qtwebengine_devtools_resources.pak
+#      qtwebengine_resources.pak
+#      qtwebengine_resources_100p.pak
+#      qtwebengine_resources_200p.pak
+# )
+# foreach ( RESOURCE_FILE ${RESOURCE_FILES} )
+#   install ( FILES ${QT5_INSTALL_PREFIX}/resources/${RESOURCE_FILE} DESTINATION lib/qt5/resources )
+# endforeach()
