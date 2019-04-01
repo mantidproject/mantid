@@ -212,9 +212,18 @@ void AbsorptionCorrections::run() {
     monteCarloAbsCor->setProperty("ContainerDensity",
                                   m_uiForm.spCanDensity->value());
 
-    auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
-    monteCarloAbsCor->setProperty("ContainerChemicalFormula",
-                                  canChemicalFormula.toStdString());
+    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+      auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+      monteCarloAbsCor->setProperty("ContainerChemicalFormula",
+                                    canChemicalFormula.toStdString());
+    } else {
+      monteCarloAbsCor->setProperty("CanCoherentXSection",
+                                    m_uiForm.spCanCoherentXSection->value());
+      monteCarloAbsCor->setProperty("CanIncoherentXSection",
+                                    m_uiForm.spCanIncoherentXSection->value());
+      monteCarloAbsCor->setProperty("CanAttenuationXSection",
+                                    m_uiForm.spCanAttenuationXSection->value());
+    }
 
     addShapeSpecificCanOptions(monteCarloAbsCor, sampleShape);
   }
