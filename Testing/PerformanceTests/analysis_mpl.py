@@ -8,24 +8,22 @@
 performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
 from __future__ import (absolute_import, division, print_function)
+
+import datetime
+import os
+
+import numpy as np
+from pylab import close, figure, gcf, plot, xticks, ylabel, xlabel, title, savefig
 from six.moves import range
 
-import testresult
-import os
-import sys
 import sqlresults
 from sqlresults import get_results
-import matplotlib
-from pylab import *
-import numpy as np
-import datetime
-import random
 
 # This is the date string format as returned by the database
 DATE_STR_FORMAT_MICRO = "%Y-%m-%d %H:%M:%S.%f"
 DATE_STR_FORMAT_NO_MICRO = "%Y-%m-%d %H:%M:%S"
 
-#============================================================================================
+
 def to_datetime(formatted_str):
     """Return a datetime object from a formatted string
 
@@ -38,7 +36,7 @@ def to_datetime(formatted_str):
 
     return date
 
-#============================================================================================
+
 def get_orderby_clause(last_num):
     """Returns a order by clause that limits to the last # revisions """
     if last_num > 0:
@@ -47,7 +45,6 @@ def get_orderby_clause(last_num):
         return ''
 
 
-#============================================================================================
 def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
     """Get the test runtime/iteration as a function of an X variable.
 
@@ -103,7 +100,6 @@ def get_runtime_data(name='', type='', x_field='revision', last_num=-1):
     return (x,y)
 
 
-#============================================================================================
 def get_unique_fields(results, field):
     """Given a list of TestResult, return a
     list of all unique values of 'field'"""
@@ -112,7 +108,7 @@ def get_unique_fields(results, field):
         out.add( res[field] )
     return list(out)
 
-#============================================================================================
+
 def get_results_matching(results, field, value):
     """Given a list of TestResult,
     return a list of TestResult's where 'field' matches 'value'."""
@@ -123,7 +119,6 @@ def get_results_matching(results, field, value):
     return out
 
 
-#============================================================================================
 def smart_ticks(index, values):
     """On the current figure, set the ticks at X positions
     given by index, with value given by values (ints).
@@ -170,8 +165,6 @@ def smart_ticks(index, values):
     xticks( tick_index, tick_strings )
 
 
-
-#============================================================================================
 def plot_success_count(type='system', last_num=-1, x_field='revision'):
     """ Plot the count of successful/failed tests vs revision number
 
@@ -204,13 +197,9 @@ def plot_success_count(type='system', last_num=-1, x_field='revision'):
     success = np.array(success)
 
     index = np.arange(len(revisions))
-#    p1 = bar(index, fail, color='r')
-#    p2 = bar(index, success, color='g', bottom=fail)
-#    legend( (p1[0], p2[0]), ('Failure', 'Success') )
 
-    p1 = fill_between(index, fail, 0, color='r')
-    p2 = fill_between(index, success+fail, fail, color='g')
-    #legend( (p1, p2), ('Failure', 'Success') )
+    fill_between(index, fail, 0, color='r')
+    fill_between(index, success+fail, fail, color='g')
 
     smart_ticks( index, revisions)
 
@@ -222,7 +211,6 @@ def plot_success_count(type='system', last_num=-1, x_field='revision'):
     title("Success/Fail History of %s tests (%s)" % (type, revsare))
 
 
-#============================================================================================
 def plot_runtime(*args, **kwargs):
     """ Call get_runtime_data()
 
@@ -246,16 +234,6 @@ def plot_runtime(*args, **kwargs):
         title("Runtime History of %s (all revs)" % kwargs['name'])
 
 
-
-
-
-
-
-
-
-
-
-
 # The default HTML header
 default_html_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html>
 <head><LINK href="report.css" rel="stylesheet" type="text/css"></head>
@@ -263,7 +241,7 @@ default_html_header = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transition
 
 default_html_footer =  """</body></html>"""
 
-#============================================================================================
+
 def make_css_file(path):
     """ Make a save the report.css file to be used by all html """
     default_css = """
@@ -298,7 +276,7 @@ font-weight: bold;
     f.write(default_css)
     f.close()
 
-#============================================================================================
+
 def make_environment_html(res):
     """Return a HTML string with details of test environment, taken from the
     'res' TestResult object"""
@@ -310,7 +288,7 @@ def make_environment_html(res):
     """ % (res['host'], res['environment'], res['runner'])
     return html
 
-#============================================================================================
+
 def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     """ Create a detailed HTML report for the named test """
     html = default_html_header
@@ -392,9 +370,6 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
     table_rows.reverse()
     for row in table_rows:
         html += row
-#        # Add the row header every 30 entries
-#        count += 1
-#        if count % 30 == 0: html += table_row_header
 
     # And one more at the end for good measure
     html += table_row_header
@@ -406,22 +381,15 @@ def make_detailed_html_file(basedir, name, fig1, fig2, last_num):
 
     html += default_html_footer
 
-#    last_date = sorted[-1][1]["date"]
-#    results = get_results(name, type='', get_log=False, where_clause=" date = '%s'" % last_date)
-#    if len(results)>0:
-#        html +=
-
     f = open(os.path.join(basedir, "%s.htm" % name), "w")
     html = html.replace("\n", os.linesep) # Fix line endings for windows
     f.write(html)
     f.close()
 
 
-#============================================================================================
 def how_long_ago(timestr):
     """Returns a string giving how long ago something happened,
     in human-friendly way """
-    import time
     now = datetime.datetime.now()
     then = to_datetime(timestr)
     td = (now-then)
@@ -449,7 +417,6 @@ def how_long_ago(timestr):
     return ""
 
 
-#============================================================================================
 def get_html_summary_table(test_names):
     """Returns a html string summarizing the tests with these names """
     html = """
@@ -485,7 +452,6 @@ def get_html_summary_table(test_names):
     return html
 
 
-#============================================================================================
 def generate_html_subproject_report(path, last_num, x_field='revision', starts_with=""):
     """ HTML report for a subproject set of tests.
 
@@ -512,7 +478,6 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     if not dofigs:
         html += """<p class="error">There was an error generating plots. No figures will be present in the report.</p>"""
 
-
     # ------ Find the test names of interest ----------------
     # Limit with only those tests that exist in the latest rev
     latest_rev = sqlresults.get_latest_revison()
@@ -529,9 +494,10 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     html += """<h2>Latest Results Summary</h2>"""
     html += get_html_summary_table(test_names)
 
-
     # -------- Report for each test ------------------------
     for name in test_names:
+        if name != 'AlgorithmsTest.CreateWorkspaceTestPerformance.testBigWorkspace':
+            continue
         print("Plotting", name)
         html += """<hr><h2>%s</h2>\n""" % name
         overview_html += """<hr><h2>%s</h2>\n""" % name
@@ -551,7 +517,6 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
             savefig(os.path.join(basedir, fig2))
             close()
 
-            #html += """<img src="%s" alt="runtime vs revision number (latest %d entries)" />\n""" % (fig1, last_num)
             html += """<img src="%s" alt="runtime vs revision number" />\n""" % (fig2)
             overview_html +=  """<img src="%s" alt="runtime vs revision number" />\n""" % (fig1)
 
@@ -574,8 +539,6 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
     return (filename, overview_html)
 
 
-
-#============================================================================================
 def generate_html_report(path, last_num, x_field='revision'):
     """Make a comprehensive HTML report of runtime history for all tests.
     Parameters
@@ -640,24 +603,6 @@ def generate_html_report(path, last_num, x_field='revision'):
     html += """<h2>Overall Results Summary</h2>"""
     html += get_html_summary_table(test_names)
 
-    # -------- Overall success history graphs ------------
-    #if dofigs:
-    #    # We report the overall success
-    #    fig_path = "OverallSuccess.png"
-    #    plot_success_count(type='',last_num=last_num, x_field=x_field)
-    #    savefig(os.path.join(basedir, fig_path))
-    #    close()
-    #
-    #    fig_path2 = "OverallSuccess.ALL.png"
-    #    plot_success_count(type='',last_num=-1, x_field=x_field)
-    #    savefig(os.path.join(basedir, fig_path2))
-    #    close()
-    #
-    #    html += """<h2>Overall Success/Failure</h2>
-    #    <img src="%s" />
-    #    <img src="%s" />
-    #    """ % (fig_path, fig_path2)
-
     html += default_html_footer
 
     f = open(os.path.join(basedir, "report.htm"), "w")
@@ -672,22 +617,3 @@ def generate_html_report(path, last_num, x_field='revision'):
     f.close()
 
     print("Report complete!")
-
-
-
-
-#============================================================================================
-if __name__ == "__main__":
-    sqlresults.set_database_filename("MyFakeData.db")
-    # Make up some test data
-    if 0:
-        if os.path.exists("MyFakeData.db"): os.remove("MyFakeData.db")
-        sqlresults.generate_fake_data(300)
-
-
-    generate_html_report("../Report", 50)
-
-#    plot_runtime(name='MyFakeTest', x_field='revision')
-#    plot_runtime(name='MyFakeTest', x_field='date')
-#    plot_success_count()
-#    show()
