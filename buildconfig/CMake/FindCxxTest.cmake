@@ -37,7 +37,10 @@
 #
 #    The variable CXXTEST_OUTPUT_DIR can be used to specify the directory for the
 #    generated files. The default is CMAKE_CURRENT_BINARY_DIR.
-#           
+#
+#    The variable CXXTEST_ADD_PERFORMANCE can be used to add the Performance tests to ctest.
+#    This also passes --xunit-printer argument to the cxxtestgen step
+#
 #       #==============
 #       Example Usage:
 #
@@ -120,12 +123,18 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     if(CXXTEST_EXTRA_HEADER_INCLUDE)
       set(_cxxtest_include  --include ${CXXTEST_EXTRA_HEADER_INCLUDE})
     endif()
+    # Use CxxTest XUnit formatter to record timings for performance tests
+    if(CXXTEST_ADD_PERFORMANCE)
+      set(_printer "--xunit-printer")
+    else()
+      set(_printer "--error-printer")
+    endif()
 
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
-        --xunit-printer --world ${_cxxtest_testname} ${_cxxtest_include} -o ${_cxxtest_real_outfname}
+         ${_printer} --world ${_cxxtest_testname} ${_cxxtest_include} -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
@@ -163,45 +172,36 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # only the package wide test is added to check
     add_dependencies(check ${_cxxtest_testname})
 
-    if (CXXTEST_SINGLE_LOGFILE)
-      # add the whole suite as a single test so the output xml doesn't overwrite itself
-      add_test ( NAME ${_cxxtest_testname}
-                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
-                         $<TARGET_FILE:${_cxxtest_testname}> )
+    # add each separate test to ctest
+    foreach ( part ${ARGN} )
+      # The filename without extension = The suite name.
+      get_filename_component(_suitename ${part} NAME_WE )
+      set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
+      add_test ( NAME ${_cxxtest_separate_name}
+                COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+            $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
+      set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
+                             TIMEOUT ${TESTING_TIMEOUT} )
 
-    else (CXXTEST_SINGLE_LOGFILE)
-      # THE FOLLOWING DESTROYS THE OUTPUT XML FILE
-      # add each separate test to ctest
-      foreach ( part ${ARGN} )
-		# The filename without extension = The suite name.
-        get_filename_component(_suitename ${part} NAME_WE )
-        set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
-        add_test ( NAME ${_cxxtest_separate_name}
-                  COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
-		          $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
-        set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
-                               TIMEOUT ${TESTING_TIMEOUT} )
-
-		if (CXXTEST_ADD_PERFORMANCE)
-			# ------ Performance test version -------
-			# Name of the possibly-existing Performance test suite
-			set( _performance_suite_name "${_suitename}Performance" )
-			# Read the contents of the header file
-		    FILE( READ ${part} _file_contents )
-			# Is that suite defined in there at all?
-			STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
-			if (NOT "${_search_res}" STREQUAL "")
-				#MESSAGE( "${_performance_suite_name} Found:                 ${_search_res}" ) 
-				set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
-				add_test ( NAME ${_cxxtest_separate_name}
-				          COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
-						  $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name} )
-        set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
-                               TIMEOUT ${TESTING_TIMEOUT} )
-			endif ()
-		endif ()
-      endforeach ( part ${ARGN} )
-    endif (CXXTEST_SINGLE_LOGFILE)
+  if (CXXTEST_ADD_PERFORMANCE)
+    # ------ Performance test version -------
+    # Name of the possibly-existing Performance test suite
+    set( _performance_suite_name "${_suitename}Performance" )
+    # Read the contents of the header file
+      FILE( READ ${part} _file_contents )
+    # Is that suite defined in there at all?
+    STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
+    if (NOT "${_search_res}" STREQUAL "")
+      #MESSAGE( "${_performance_suite_name} Found:                 ${_search_res}" )
+      set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
+      add_test ( NAME ${_cxxtest_separate_name}
+                COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+            $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name} )
+      set_tests_properties ( ${_cxxtest_separate_name} PROPERTIES
+                             TIMEOUT ${TESTING_TIMEOUT} )
+    endif ()
+  endif ()
+    endforeach ( part ${ARGN} )
 endmacro(CXXTEST_ADD_TEST)
 
 
