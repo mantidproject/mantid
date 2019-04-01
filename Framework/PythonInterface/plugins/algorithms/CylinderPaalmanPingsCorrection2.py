@@ -16,6 +16,16 @@ from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBou
                            FloatBoundedValidator, Direction, logger)
 
 
+def set_material_density(set_material_alg, density_type, density):
+    if density_type == 'Mass Density':
+        set_material_alg.setProperty('SampleMassDensity', density)
+    else:
+        set_material_alg.setProperty('SampleNumberDensity', density)
+        if density_type == 'Formula Number Density':
+            set_material_alg.setProperty('NumberDensityUnit', 'Formula Units')
+    return set_material_alg
+
+
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
     # Sample variables
@@ -73,15 +83,31 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc="Name for the input Sample workspace.")
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
-                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
-        self.declareProperty(name='SampleDensityType', defaultValue = 'Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number density')
+        self.declareProperty(name='SampleCoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The coherent cross-section for the sample material in barns. To be used instead of '
+                                 'Chemical Formula.')
+
+        self.declareProperty(name='SampleIncoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The incoherent cross-section for the sample material in barns. To be used instead of '
+                                 'Chemical Formula.')
+
+        self.declareProperty(name='SampleAttenuationXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The absorption cross-section for the sample material in barns. To be used instead of '
+                                 'Chemical Formula.')
+
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Atom Number Density',
+                                                            'Formula Number Density']),
+                             doc='Use of Mass density, Atom Number density or Formula Number Density.')
 
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
-                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+                             doc='Mass density (g/cm^3), Atom Number density (atoms/Angstrom^3) or Formula Number '
+                                 'density (1/Angstrom^3)')
 
         self.declareProperty(name='SampleInnerRadius', defaultValue=0.05,
                              validator=FloatBoundedValidator(0.0),
@@ -100,12 +126,29 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Can chemical formula')
 
-        self.declareProperty(name='CanDensityType', defaultValue = 'Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number density')
+        self.declareProperty(name='CanCoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The coherent cross-section for the can material in barns. To be used instead of '
+                                 'Chemical Formula.')
+
+        self.declareProperty(name='CanIncoherentXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The incoherent cross-section for the can material in barns. To be used instead of '
+                                 'Chemical Formula.')
+
+        self.declareProperty(name='CanAttenuationXSection', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='The absorption cross-section for the can material in barns. To be used instead of '
+                                 'Chemical Formula.')
+
+        self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Atom Number Density',
+                                                            'Formula Number Density']),
+                             doc='Use of Mass density, Atom Number density or Formula Number Density.')
 
         self.declareProperty(name='CanDensity', defaultValue=0.1,
-                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+                             doc='Mass density (g/cm^3), Atom Number density (atoms/Angstrom^3) or Formula Number '
+                                 'density (1/Angstrom^3)')
 
         self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
                              validator=FloatBoundedValidator(0.0),
@@ -296,14 +339,22 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
         self._sample_density = self.getProperty('SampleDensity').value
+        self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
+        self._sample_coherent_cross_section = self.getPropertyValue('SampleCoherentXSection')
+        self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
+        self._sample_attenuation_cross_section = self.getPropertyValue('SampleAttenuationXSection')
         self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
         self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
         self._number_can = 1
 
         self._can_ws_name = self.getPropertyValue('CanWorkspace')
         self._use_can = self._can_ws_name != ''
+        self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
         self._can_density_type = self.getPropertyValue('CanDensityType')
         self._can_density = self.getProperty('CanDensity').value
+        self._can_coherent_cross_section = self.getPropertyValue('CanCoherentXSection')
+        self._can_incoherent_cross_section = self.getPropertyValue('CanIncoherentXSection')
+        self._can_attenuation_cross_section = self.getPropertyValue('CanAttenuationXSection')
         self._can_outer_radius = self.getProperty('CanOuterRadius').value
         if self._use_can:
             self._number_can = 2
@@ -348,6 +399,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 raise RuntimeError('Could not find the Efixed parameter in the instrument. '
                                    'Please specify manually.')
 
+        self._set_sample_method = 'Chemical Formula' if self._sample_chemical_formula != '' else 'Cross Sections'
+        self._set_can_method = 'Chemical Formula' if self._can_chemical_formula != '' else 'Cross Sections'
+
         # purge the lists
         self._angles = list()
         self._waves = list()
@@ -360,10 +414,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
         sample_prog.report('Setting Sample Material for Sample')
 
-        sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-
         sample_ws, self._sample_density = self._set_material(self._sample_ws_name,
-                                                             sample_chemical_formula,
+                                                             self._set_sample_method,
+                                                             self._sample_chemical_formula,
+                                                             self._sample_coherent_cross_section,
+                                                             self._sample_incoherent_cross_section,
+                                                             self._sample_attenuation_cross_section,
                                                              self._sample_density_type,
                                                              self._sample_density)
 
@@ -381,10 +437,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         if self._use_can:
             sample_prog.report('Setting Sample Material for Container')
 
-            can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
-
             can_ws, self._can_density = self._set_material(self._can_ws_name,
-                                                           can_chemical_formula,
+                                                           self._set_can_method,
+                                                           self._can_chemical_formula,
+                                                           self._can_coherent_cross_section,
+                                                           self._can_incoherent_cross_section,
+                                                           self._can_attenuation_cross_section,
                                                            self._can_density_type,
                                                            self._can_density)
 
@@ -393,11 +451,16 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             self._sig_a[1] = can_material.absorbXSection()
             self._density[1] = self._can_density
 
-    def _set_material(self, ws_name, chemical_formula, density_type, density):
+    def _set_material(self, ws_name, method, chemical_formula, coherent_x_section, incoherent_x_section,
+                      attenuation_x_section, density_type, density):
         """
         Sets the sample material for a given workspace
         @param ws_name              :: name of the workspace to set sample material for
+        @param method               :: the method used to set the sample material
         @param chemical_formula     :: Chemical formula of sample
+        @param coherent_x_section   :: the coherent cross section
+        @param incoherent_x_section :: the incoherent cross section
+        @param attenuation_x_section:: the absorption cross section
         @param density_type         :: 'Mass Density' or 'Number Density'
         @param density              :: Density of sample
         @return pointer to the workspace with sample material set
@@ -405,12 +468,17 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 number density of the sample material
         """
         set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
-        if density_type == 'Mass Density':
-            set_material_alg.setProperty('SampleMassDensity', density)
-        else:
-            set_material_alg.setProperty('SampleNumberDensity', density)
         set_material_alg.setProperty('InputWorkspace', ws_name)
-        set_material_alg.setProperty('ChemicalFormula', chemical_formula)
+        set_material_alg = set_material_density(set_material_alg, density_type, density)
+
+        if method == 'Chemical Formula':
+            set_material_alg.setProperty('ChemicalFormula', chemical_formula)
+        else:
+            set_material_alg.setProperty('CoherentXSection', coherent_x_section)
+            set_material_alg.setProperty('IncoherentXSection', incoherent_x_section)
+            set_material_alg.setProperty('AttenuationXSection', attenuation_x_section)
+            set_material_alg.setProperty('ScatteringXSection', float(coherent_x_section) + float(incoherent_x_section))
+
         set_material_alg.execute()
         ws = set_material_alg.getProperty('InputWorkspace').value
         number_density = ws.sample().getMaterial().numberDensity

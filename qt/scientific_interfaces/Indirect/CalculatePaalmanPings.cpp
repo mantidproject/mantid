@@ -136,17 +136,17 @@ void CalculatePaalmanPings::run() {
       m_uiForm.cbSampleDensity->currentText().toStdString());
   absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
-  if (m_uiForm.cbSampleMaterialMethod->currentIndex() == 0) {
+  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
     absCorAlgo->setProperty(
         "SampleChemicalFormula",
         m_uiForm.leSampleChemicalFormula->text().toStdString());
   } else {
     absCorAlgo->setProperty("SampleCoherentXSection",
-                            m_uiForm.spCoherentXSection->value());
+                            m_uiForm.spSampleCoherentXSection->value());
     absCorAlgo->setProperty("SampleIncoherentXSection",
-                            m_uiForm.spIncoherentXSection->value());
+                            m_uiForm.spSampleIncoherentXSection->value());
     absCorAlgo->setProperty("SampleAttenuationXSection",
-                            m_uiForm.spAttenuationXSection->value());
+                            m_uiForm.spSampleAttenuationXSection->value());
   }
 
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
@@ -172,9 +172,18 @@ void CalculatePaalmanPings::run() {
                             m_uiForm.cbCanDensity->currentText().toStdString());
     absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
-    const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
-    absCorAlgo->setProperty("CanChemicalFormula",
-                            canChemicalFormula.toStdString());
+    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+      absCorAlgo->setProperty(
+          "CanChemicalFormula",
+          m_uiForm.leCanChemicalFormula->text().toStdString());
+    } else {
+      absCorAlgo->setProperty("CanCoherentXSection",
+                              m_uiForm.spCanCoherentXSection->value());
+      absCorAlgo->setProperty("CanIncoherentXSection",
+                              m_uiForm.spCanIncoherentXSection->value());
+      absCorAlgo->setProperty("CanAttenuationXSection",
+                              m_uiForm.spCanAttenuationXSection->value());
+    }
 
     addShapeSpecificCanOptions(absCorAlgo, sampleShape);
   }
@@ -226,7 +235,7 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
   }
 
   // Validate chemical formula
-  if (m_uiForm.cbSampleMaterialMethod->currentIndex() == 0) {
+  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
     if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                  m_uiForm.leSampleChemicalFormula,
                                  m_uiForm.valSampleChemicalFormula))
@@ -248,22 +257,25 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
   if (m_uiForm.ckUseCan->isChecked()) {
     uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
 
-    // Validate chemical formula
-    if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
-                                 m_uiForm.leCanChemicalFormula,
-                                 m_uiForm.valCanChemicalFormula))
-      uiv.checkFieldIsValid("Can Chemical Formula",
-                            m_uiForm.leCanChemicalFormula,
-                            m_uiForm.valCanChemicalFormula);
+    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+      // Validate chemical formula
+      if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
+                                   m_uiForm.leCanChemicalFormula,
+                                   m_uiForm.valCanChemicalFormula))
+        uiv.checkFieldIsValid("Can Chemical Formula",
+                              m_uiForm.leCanChemicalFormula,
+                              m_uiForm.valCanChemicalFormula);
 
-    const auto containerChem =
-        m_uiForm.leCanChemicalFormula->text().toStdString();
-    try {
-      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
-      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+      const auto containerChem =
+          m_uiForm.leCanChemicalFormula->text().toStdString();
+      try {
+        Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+      } catch (std::runtime_error &ex) {
+        UNUSED_ARG(ex);
+        uiv.addErrorMessage(
+            "Chemical Formula for Container was not recognised.");
+        uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+      }
     }
 
     const auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
@@ -667,10 +679,10 @@ CalculatePaalmanPings::getDensityOptions(QString const &method) const {
 }
 
 QString CalculatePaalmanPings::getDensityUnit(QString const &type) const {
-  return type == "Mass Density"
-             ? QString::fromStdString(m_sampleDensities->getMassDensityUnit())
-             : QString::fromStdString(
-                   m_sampleDensities->getNumberDensityUnit());
+  auto const unit = type == "Mass Density"
+                        ? m_sampleDensities->getMassDensityUnit()
+                        : m_sampleDensities->getNumberDensityUnit();
+  return QString::fromStdString(unit);
 }
 
 double CalculatePaalmanPings::getSampleDensityValue(QString const &type) const {
