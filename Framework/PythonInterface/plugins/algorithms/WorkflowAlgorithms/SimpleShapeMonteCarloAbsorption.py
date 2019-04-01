@@ -238,9 +238,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
             if self._set_sample_method == 'Chemical Formula':
                 sample_material['ChemicalFormula'] = self._chemical_formula
             else:
-                sample_material['CoherentXSection'] = self._coherent_cross_section
-                sample_material['IncoherentXSection'] = self._incoherent_cross_section
-                sample_material['AttenuationXSection'] = self._attenuation_cross_section
+                sample_material['CoherentXSection'] = float(self._coherent_cross_section)
+                sample_material['IncoherentXSection'] = float(self._incoherent_cross_section)
+                sample_material['AttenuationXSection'] = float(self._attenuation_cross_section)
                 sample_material['ScatteringXSection'] = float(self._coherent_cross_section) + float(self._incoherent_cross_section)
 
             if self._density_type == 'Mass Density':
