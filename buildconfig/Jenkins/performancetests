@@ -51,4 +51,4 @@ PERFORMANCE_TEST_DIR=$WORKSPACE/Testing/PerformanceTests
 python $PERFORMANCE_TEST_DIR/xunit_to_sql.py $WORKSPACE/build/bin/Testing/TEST-*.xml --db $DB_FILENAME --commit $GIT_COMMIT
 
 # ------------ Launch report generator ---------------------
-python $PERFORMANCE_TEST_DIR/make_report.py --path=$WORKSPACE/Report --plotting=matplotlib $DB_FILENAME
+MPLBACKEND=Agg python $PERFORMANCE_TEST_DIR/make_report.py --path=$WORKSPACE/Report --plotting=matplotlib $DB_FILENAME
