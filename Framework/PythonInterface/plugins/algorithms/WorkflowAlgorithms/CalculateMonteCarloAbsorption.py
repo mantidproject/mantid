@@ -495,7 +495,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._indirect_elastic = False
 
         self._set_sample_method = 'Chemical Formula' if self._sample_chemical_formula != '' else 'Cross Sections'
-        self._set_can_method = 'Chemical Formula' if self._can_chemical_formula != '' else 'Cross Sections'
+        self._set_can_method = 'Chemical Formula' if self._container_chemical_formula != '' else 'Cross Sections'
 
     def validateInputs(self):
         issues = dict()

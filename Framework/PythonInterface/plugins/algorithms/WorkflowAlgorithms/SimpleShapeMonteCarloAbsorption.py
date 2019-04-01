@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
-from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, PropertyCriterion,
+from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, Property, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 
 
@@ -46,7 +46,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         return 'Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS'
 
     def seeAlso(self):
-        return [ "CalculateMonteCarloAbsorption","MonteCarloAbsorption" ]
+        return ["CalculateMonteCarloAbsorption", "MonteCarloAbsorption"]
 
     def summary(self):
         return 'Calculates absorption corrections for a given sample shape.'
@@ -66,13 +66,30 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='Chemical formula of sample')
         self.setPropertySettings('ChemicalFormula', material_defined_prop)
 
+        self.declareProperty(name='CoherentXSection', defaultValue=Property.EMPTY_DBL,
+                             doc='The coherent cross section of the sample in barns. It can be used instead of the'
+                                 'Chemical Formula.')
+        self.setPropertySettings('CoherentXSection', material_defined_prop)
+
+        self.declareProperty(name='IncoherentXSection', defaultValue=Property.EMPTY_DBL,
+                             doc='The incoherent cross section of the sample in barns. It can be used instead of the'
+                                 'Chemical Formula.')
+        self.setPropertySettings('IncoherentXSection', material_defined_prop)
+
+        self.declareProperty(name='AttenuationXSection', defaultValue=Property.EMPTY_DBL,
+                             doc='The absorption cross section of the sample in barns. It can be used instead of the'
+                                 'Chemical Formula.')
+        self.setPropertySettings('AttenuationXSection', material_defined_prop)
+
         self.declareProperty(name='DensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Use of Mass density or Number density')
+                             validator=StringListValidator(['Mass Density', 'Atom Number Density',
+                                                            'Formula Number Density']),
+                             doc='Use of Mass density, Atom Number density or Formula Number Density.')
         self.setPropertySettings('DensityType', material_defined_prop)
 
         self.declareProperty(name='Density', defaultValue=0.1,
-                             doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+                             doc='Mass density (g/cm^3), Atom Number density (atoms/Angstrom^3) or Formula Number '
+                                 'density (1/Angstrom^3)')
         self.setPropertySettings('Density', material_defined_prop)
 
         # -------------------------------------------------------------------------------------------
@@ -218,12 +235,20 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         else:
             # set the sample material
             sample_material = dict()
-            sample_material['ChemicalFormula'] = self._chemical_formula
+            if self._set_sample_method == 'Chemical Formula':
+                sample_material['ChemicalFormula'] = self._chemical_formula
+            else:
+                sample_material['CoherentXSection'] = self._coherent_cross_section
+                sample_material['IncoherentXSection'] = self._incoherent_cross_section
+                sample_material['AttenuationXSection'] = self._attenuation_cross_section
+                sample_material['ScatteringXSection'] = float(self._coherent_cross_section) + float(self._incoherent_cross_section)
 
             if self._density_type == 'Mass Density':
                 sample_material['SampleMassDensity'] = self._density
-            if self._density_type == 'Number Density':
+            else:
                 sample_material['SampleNumberDensity'] = self._density
+                if self._density_type == 'Formula Number Density':
+                    sample_material['NumberDensityUnit'] = 'Formula Units'
 
             set_sample_alg.setProperty("Material", sample_material)
 
@@ -269,6 +294,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._material_defined = self.getProperty('MaterialAlreadyDefined').value
         self._chemical_formula = self.getPropertyValue('ChemicalFormula')
+        self._coherent_cross_section = self.getPropertyValue('CoherentXSection')
+        self._incoherent_cross_section = self.getPropertyValue('IncoherentXSection')
+        self._attenuation_cross_section = self.getPropertyValue('AttenuationXSection')
         self._density_type = self.getPropertyValue('DensityType')
         self._density = self.getProperty('Density').value
         self._shape = self.getPropertyValue('Shape')
@@ -277,6 +305,9 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._events = self.getProperty('EventsPerPoint').value
         self._interpolation = self.getProperty('Interpolation').value
         self._max_scatter_attempts = self.getProperty('MaxScatterPtAttempts').value
+
+        self._set_sample_method = 'Chemical Formula' if self._chemical_formula != '' and not self._material_defined \
+                                  else 'Cross Sections'
 
         # beam options
         self._beam_height = self.getProperty('BeamHeight').value
@@ -306,8 +337,11 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._setup()
         issues = dict()
 
-        if (not self._material_defined) and (not self._chemical_formula):
-            issues['ChemicalFormula'] = 'Please enter a chemical formula'
+        if (not self._material_defined) and (not self._chemical_formula) and\
+                (self._coherent_cross_section == Property.EMPTY_DBL
+                 or self._incoherent_cross_section == Property.EMPTY_DBL
+                 or self._attenuation_cross_section == Property.EMPTY_DBL):
+            issues['ChemicalFormula'] = 'Please enter a chemical formula or cross sections.'
 
         if not self._height:
             issues['Height'] = 'Please enter a non-zero number for height'
