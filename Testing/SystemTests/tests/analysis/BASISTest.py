@@ -10,7 +10,8 @@ import systemtesting
 from mantid import config
 from mantid.simpleapi import (BASISCrystalDiffraction, GroupWorkspaces,
                               ElasticWindowMultiple, MSDFit, BASISReduction,
-                              BASISPowderDiffraction, Load)
+                              BASISPowderDiffraction, Load, Divide,
+                              ReplaceSpecialValues)
 
 
 class PreppingMixin(object):
@@ -334,6 +335,7 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'
+
 
 class PowderFluxNormalizationTest(systemtesting.MantidSystemTest, PreppingMixin):
     r"""Run a elastic reduction for powder sample with two flux
