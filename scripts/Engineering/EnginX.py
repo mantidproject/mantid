@@ -12,8 +12,7 @@ import numpy as np
 import os
 from platform import system
 from shutil import copy2
-from six import u
-from sys import version_info
+import six
 
 import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
@@ -575,7 +574,7 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
     banks = {}
     # read the csv file to work out the banks
     # ensure csv reading works on python 2 or 3
-    if version_info[0] >= 3:
+    if not six.PY2:
         with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
             group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
 
@@ -634,7 +633,7 @@ def _save_out(run_number, focus_directory, focus_general, output, enginx_file_na
     dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
                                                                                         enginx_file_name_format,
                                                                                         run_number)
-    if not u(bank_id).isnumeric():
+    if not six.u(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False,
