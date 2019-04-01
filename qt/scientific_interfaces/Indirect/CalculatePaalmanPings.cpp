@@ -55,14 +55,16 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   // Connect slots for toggling the mass/number density unit
-  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setSampleDensityUnit(int)));
-  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setCanDensityUnit(int)));
-  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setSampleDensityValue(int)));
-  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setCanDensityValue(int)));
+  connect(m_uiForm.cbSampleDensity,
+          SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(setSampleDensityUnit(QString const &)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(QString const &)),
+          this, SLOT(setCanDensityUnit(QString const &)));
+  connect(m_uiForm.cbSampleDensity,
+          SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(setSampleDensityValue(QString const &)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(QString const &)),
+          this, SLOT(setCanDensityValue(QString const &)));
 
   connect(m_uiForm.cbSampleMaterialMethod, SIGNAL(currentIndexChanged(int)),
           this, SLOT(changeSampleMaterialOptions(int)));
@@ -597,12 +599,12 @@ void CalculatePaalmanPings::plotClicked() {
 
 void CalculatePaalmanPings::runClicked() { runTab(); }
 
-void CalculatePaalmanPings::setSampleDensityOptions(int index) {
-  if (index == 0)
-    setComboBoxOptions(m_uiForm.cbSampleDensity,
-                       {"Mass Density", "Number Density"});
-  else
-    setComboBoxOptions(m_uiForm.cbSampleDensity, {"Number Density"});
+void CalculatePaalmanPings::setSampleDensityOptions(QString const &method) {
+  auto const options =
+      method == "Chemical Formula"
+          ? std::vector<std::string>{"Mass Density", "Number Density"}
+          : std::vector<std::string>{"Number Density"};
+  setComboBoxOptions(m_uiForm.cbSampleDensity, options);
 }
 
 void CalculatePaalmanPings::setComboBoxOptions(
@@ -612,36 +614,26 @@ void CalculatePaalmanPings::setComboBoxOptions(
     combobox->addItem(QString::fromStdString(option));
 }
 
-/**
- * Handle changing of the sample density unit
- */
-void CalculatePaalmanPings::setSampleDensityUnit(int index) {
-  m_uiForm.spSampleDensity->setSuffix(index == 0 ? " g/cm3" : " /A3");
+void CalculatePaalmanPings::setSampleDensityUnit(QString const &text) {
+  m_uiForm.spSampleDensity->setSuffix(getDensityUnit(text));
 }
 
-/**
- * Handle changing of the can density unit
- */
-void CalculatePaalmanPings::setCanDensityUnit(int index) {
-  m_uiForm.spCanDensity->setSuffix(index == 0 ? " g/cm3" : " /A3");
+void CalculatePaalmanPings::setCanDensityUnit(QString const &text) {
+  m_uiForm.spCanDensity->setSuffix(getDensityUnit(text));
 }
 
-void CalculatePaalmanPings::setSampleDensityValue(int index) {
+void CalculatePaalmanPings::setSampleDensityValue(QString const &text) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSampleDensity);
-  m_uiForm.spSampleDensity->setValue(
-      index == 0 ? m_sampleDensities->getMassDensity()
-                 : m_sampleDensities->getNumberDensity());
+  m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
 }
 
-void CalculatePaalmanPings::setCanDensityValue(int index) {
+void CalculatePaalmanPings::setCanDensityValue(QString const &text) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spCanDensity);
-  m_uiForm.spCanDensity->setValue(index == 0
-                                      ? m_canDensities->getMassDensity()
-                                      : m_canDensities->getNumberDensity());
+  m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
 }
 
 void CalculatePaalmanPings::changeSampleMaterialOptions(int index) {
-  setSampleDensityOptions(index);
+  setSampleDensityOptions(m_uiForm.cbSampleMaterialMethod->currentText());
   m_uiForm.swSampleMaterialDetails->setCurrentIndex(index);
 }
 
@@ -661,6 +653,23 @@ void CalculatePaalmanPings::setCanDensity(double value) {
     m_canDensities->setMassDensity(value);
   else
     m_canDensities->setNumberDensity(value);
+}
+
+QString CalculatePaalmanPings::getDensityUnit(QString const &type) const {
+  return type == "Mass Density"
+             ? QString::fromStdString(m_sampleDensities->getMassDensityUnit())
+             : QString::fromStdString(
+                   m_sampleDensities->getNumberDensityUnit());
+}
+
+double CalculatePaalmanPings::getSampleDensityValue(QString const &type) const {
+  return type == "Mass Density" ? m_sampleDensities->getMassDensity()
+                                : m_sampleDensities->getNumberDensity();
+}
+
+double CalculatePaalmanPings::getCanDensityValue(QString const &type) const {
+  return type == "Mass Density" ? m_canDensities->getMassDensity()
+                                : m_canDensities->getNumberDensity();
 }
 
 void CalculatePaalmanPings::setRunEnabled(bool enabled) {

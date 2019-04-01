@@ -22,6 +22,8 @@ struct Densities {
   void setNumberDensity(double value) { m_numberDensity = value; }
   double getMassDensity() const { return m_massDensity; }
   double getNumberDensity() const { return m_numberDensity; }
+  std::string getMassDensityUnit() const { return " g/cm3"; }
+  std::string getNumberDensityUnit() const { return " /A3"; }
 
 private:
   double m_massDensity;
@@ -43,11 +45,11 @@ private slots:
   void saveClicked();
   void plotClicked();
   void runClicked();
-  void setSampleDensityOptions(int index);
-  void setSampleDensityUnit(int);
-  void setCanDensityUnit(int);
-  void setSampleDensityValue(int index);
-  void setCanDensityValue(int index);
+  void setSampleDensityOptions(QString const &method);
+  void setSampleDensityUnit(QString const &text);
+  void setCanDensityUnit(QString const &text);
+  void setSampleDensityValue(QString const &text);
+  void setCanDensityValue(QString const &text);
   void changeSampleMaterialOptions(int index);
   void changeCanMaterialOptions(int index);
   void setSampleDensity(double value);
@@ -68,6 +70,10 @@ private:
 
   void setComboBoxOptions(QComboBox *combobox,
                           std::vector<std::string> const &options);
+
+  QString getDensityUnit(QString const &type) const;
+  double getSampleDensityValue(QString const &type) const;
+  double getCanDensityValue(QString const &type) const;
 
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
