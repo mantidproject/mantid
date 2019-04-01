@@ -983,9 +983,6 @@ public:
         createWorkspaceSingle(startX, nBins, deltaX, yValues2);
     ADS.addOrReplace("second", second);
 
-	MatrixWorkspace_sptr inputWSGroup;
-	ADS.addOrReplace("inputWSGroup", inputWSGroup);
-
     GroupWorkspaces mkGroup;
     mkGroup.initialize();
     mkGroup.setProperty("InputWorkspaces", "input,input2");
@@ -996,9 +993,9 @@ public:
     mkGroup.setProperty("OutputWorkspace", "transWSGroup");
     mkGroup.execute();
 
-    prepareInputGroup("inputWSGroup", "Fredrikze");    
+    prepareInputGroup("inputWSGroup", "Fredrikze");
     applyPolarizationEfficiencies("inputWSGroup");
-	
+
     ReflectometryReductionOneAuto3 alg;
     alg.initialize();
     alg.setChild(true);
