@@ -19,3 +19,8 @@ Improvements
 
 - Increased font size in run table.
 - For ZOOM, SHIFT user file command now moves monitor 5.
+
+Bug Fixes
+#########
+
+- Exporting table as a batch file is fixed for Mantid Workbench.
