@@ -1,14 +1,24 @@
 # Create egg link to binary output directory
 add_python_package(workbench EXECUTABLE)
 
-# Configure resources data in place for ease of development. The output file is
-# added to the toplevel gitignore
-set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+# Create resources.qrc, qt.conf and qt resource.py file for developer-build
+set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+set(_paths_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc.build)
+set(_qt_conf_file ${CMAKE_CURRENT_LIST_DIR}/qt.conf.build)
+# Write qt.conf.build
+file ( WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n")
+# Write resources.qrc.build
+file ( WRITE ${_paths_qrc_file}
+"<!DOCTYPE RCC><RCC version=\"1.0\">\n\
+<qresource prefix=\"/qt/etc\">\n\
+<file alias=\"qt.conf\">qt.conf.build</file>\n\
+</qresource>\n</RCC>\n")
+# Add command to generate resources.py
 set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
 add_custom_command(OUTPUT ${_output_res_py}
-                   COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_qrc_file}
+                   COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
                    COMMENT "Generating workbench resources module"
-                   DEPENDS ${_qrc_file})
+                   DEPENDS ${_paths_qrc_file} ${_images_qrc_file})
 add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
 
 # Dependency chain

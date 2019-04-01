@@ -12,6 +12,9 @@ Defines the QMainWindow of the application and the main() entry point.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+# Importing resources loads the data in
+from workbench.app.resources import qCleanupResources  # noqa
+
 import argparse
 import atexit
 import importlib
@@ -102,8 +105,6 @@ MAIN_APP = qapplication()
 # -----------------------------------------------------------------------------
 # Splash screen
 # -----------------------------------------------------------------------------
-# Importing resources loads the data in
-from workbench.app.resources import qCleanupResources  # noqa
 
 atexit.register(qCleanupResources)
 
@@ -531,6 +532,13 @@ class MainWindow(QMainWindow):
         self.interface_manager.showConceptHelp('')
 
     def open_mantid_help(self):
+        from qtpy.QtCore import QLibraryInfo
+        print("Prefix: {}".format(QLibraryInfo.location(QLibraryInfo.PrefixPath)))
+        print("Libraries: {}".format(QLibraryInfo.location(QLibraryInfo.LibrariesPath)))
+        print("LibExes: {}".format(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath)))
+        print("Binaries: {}".format(QLibraryInfo.location(QLibraryInfo.BinariesPath)))
+        print("Plugins: {}".format(QLibraryInfo.location(QLibraryInfo.PluginsPath)))
+        print("Data: {}".format(QLibraryInfo.location(QLibraryInfo.DataPath)))
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):
