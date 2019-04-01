@@ -217,11 +217,11 @@ void AbsorptionCorrections::run() {
       monteCarloAbsCor->setProperty("ContainerChemicalFormula",
                                     canChemicalFormula.toStdString());
     } else {
-      monteCarloAbsCor->setProperty("CanCoherentXSection",
+      monteCarloAbsCor->setProperty("ContainerCoherentXSection",
                                     m_uiForm.spCanCoherentXSection->value());
-      monteCarloAbsCor->setProperty("CanIncoherentXSection",
+      monteCarloAbsCor->setProperty("ContainerIncoherentXSection",
                                     m_uiForm.spCanIncoherentXSection->value());
-      monteCarloAbsCor->setProperty("CanAttenuationXSection",
+      monteCarloAbsCor->setProperty("ContainerAttenuationXSection",
                                     m_uiForm.spCanAttenuationXSection->value());
     }
 
