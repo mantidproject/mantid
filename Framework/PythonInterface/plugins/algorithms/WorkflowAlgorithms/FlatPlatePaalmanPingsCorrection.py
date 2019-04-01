@@ -15,8 +15,7 @@ import numpy as np
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
-from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger)
+from mantid.kernel import (StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction, logger)
 
 
 def set_material_density(set_material_alg, density_type, density):

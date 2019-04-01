@@ -12,8 +12,7 @@ import numpy as np
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
-from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger)
+from mantid.kernel import (StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction, logger)
 
 
 def set_material_density(set_material_alg, density_type, density):
@@ -349,9 +348,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         self._can_ws_name = self.getPropertyValue('CanWorkspace')
         self._use_can = self._can_ws_name != ''
-        self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
         self._can_density_type = self.getPropertyValue('CanDensityType')
         self._can_density = self.getProperty('CanDensity').value
+        self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
         self._can_coherent_cross_section = self.getPropertyValue('CanCoherentXSection')
         self._can_incoherent_cross_section = self.getPropertyValue('CanIncoherentXSection')
         self._can_attenuation_cross_section = self.getPropertyValue('CanAttenuationXSection')
