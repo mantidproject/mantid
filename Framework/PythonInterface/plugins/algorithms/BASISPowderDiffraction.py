@@ -473,7 +473,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                     _t_flux = Plus(_t_flux, _t_w, OutputWorkspace=_t_flux_name)
 
             _t_flux = ConvertUnits(_t_flux, Target='Wavelength', Emode='Elastic',
-                                  OutputWorkspace=_t_flux_name)
+                                   OutputWorkspace=_t_flux_name)
             _t_flux = CropWorkspace(_t_flux,
                                     XMin=self._wavelength_band[0],
                                     XMax=self._wavelength_band[1],
