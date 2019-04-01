@@ -1155,19 +1155,19 @@ def get_all_names_to_save(reduction_packages, save_can):
         reduced_hab_sample = reduction_package.reduced_hab_sample
 
         trans_name = get_transmission_names_to_save(reduction_package, False)
-        transcan_name = get_transmission_names_to_save(reduction_package, True)
+        trans_can_name = get_transmission_names_to_save(reduction_package, True)
 
         if save_can:
             if reduced_merged:
-                names_to_save.append((reduced_merged.name(), trans_name, transcan_name))
+                names_to_save.append((reduced_merged.name(), trans_name, trans_can_name))
             if reduced_lab:
-                names_to_save.append((reduced_lab.name(), trans_name, transcan_name))
+                names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
             if reduced_hab:
-                names_to_save.append((reduced_hab.name(), trans_name, transcan_name))
+                names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
             if reduced_lab_can:
-                names_to_save.append((reduced_lab_can.name(), '', transcan_name))
+                names_to_save.append((reduced_lab_can.name(), '', trans_can_name))
             if reduced_hab_can:
-                names_to_save.append((reduced_hab_can.name(), '', transcan_name))
+                names_to_save.append((reduced_hab_can.name(), '', trans_can_name))
             if reduced_lab_sample:
                 names_to_save.append((reduced_lab_sample.name(), trans_name, ''))
             if reduced_hab_sample:
@@ -1175,12 +1175,12 @@ def get_all_names_to_save(reduction_packages, save_can):
 
         # If we have merged reduction then store the
         elif reduced_merged:
-            names_to_save.append((reduced_merged.name(), trans_name, transcan_name))
+            names_to_save.append((reduced_merged.name(), trans_name, trans_can_name))
         else:
             if reduced_lab:
-                names_to_save.append((reduced_lab.name(), trans_name, transcan_name))
+                names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
             if reduced_hab:
-                names_to_save.append((reduced_hab.name(), trans_name, transcan_name))
+                names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)
