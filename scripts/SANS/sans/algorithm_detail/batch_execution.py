@@ -1125,12 +1125,15 @@ def get_transmission_names_to_save(reduction_package, can):
     else:
         base_name = reduction_package.unfitted_transmission_base_name
         ws_name = reduction_package.unfitted_transmission_name
-    name_to_return = ''
+    if base_name in (None, '') or ws_name in (None, ''):
+        return ''
+
     if AnalysisDataService.doesExist(base_name):
         group = AnalysisDataService.retrieve(base_name)
         if group.contains(ws_name):
-            name_to_return = ws_name
-    return name_to_return
+            return ws_name
+
+    return ''
 
 
 def get_all_names_to_save(reduction_packages, save_can):
