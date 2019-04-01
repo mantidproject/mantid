@@ -9,7 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import numpy
 
 from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QDesktopServices)  # noqa
+from qtpy.QtCore import QUrl
 
 
 import mantid
@@ -1070,8 +1071,13 @@ class MainWindow(QMainWindow):
         return result
 
     def helpClicked(self):
-        from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("Filter Events")
+        try:
+            from pymantidplot.proxies import showCustomInterfaceHelp
+            showCustomInterfaceHelp("Filter Events")
+        except ImportError:
+            url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html"
+                   "".format("Filter Events"))
+            QDesktopServices.openUrl(QUrl(url))
 
     def _resetGUI(self, resetfilerun=False):
         """ Reset GUI including all text edits and etc.

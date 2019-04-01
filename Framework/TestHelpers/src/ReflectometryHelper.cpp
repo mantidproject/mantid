@@ -143,9 +143,6 @@ void applyPolarizationEfficiencies(WorkspaceGroup_sptr ws) {
   auto Pa = createHistoWS(nBins, startX, endX, {0.7});
   auto Aa = createHistoWS(nBins, startX, endX, {0.6});
 
-  auto Rho = Pa / Pp;
-  auto Alpha = Aa / Ap;
-
   auto Ipp = (Rpp * (Pp + 1.0) * (Ap + 1.0) +
               Raa * (Pp * (-1.0) + 1.0) * (Ap * (-1.0) + 1.0) +
               Rpa * (Pp + 1.0) * (Ap * (-1.0) + 1.0) +

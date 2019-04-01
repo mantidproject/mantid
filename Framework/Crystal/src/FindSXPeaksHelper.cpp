@@ -252,7 +252,7 @@ AbsoluteBackgroundStrategy::AbsoluteBackgroundStrategy(const double background)
     : m_background(background) {}
 
 bool AbsoluteBackgroundStrategy::isBelowBackground(
-    const double intensity, const HistogramData::HistogramY &) const {
+    const double intensity, const HistogramData::HistogramY & /*y*/) const {
   return intensity < m_background;
 }
 
@@ -327,7 +327,7 @@ PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
  * @return :: The averaged or exact value of phi
  */
 double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
-  double phi = std::numeric_limits<double>::infinity();
+  double phi;
 
   // Get the detectors for the workspace index
   const auto &spectrumDefinition =
@@ -545,9 +545,9 @@ SimpleReduceStrategy::SimpleReduceStrategy(
     const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
-std::vector<SXPeak>
-SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
-                             Mantid::Kernel::ProgressBase &) const {
+std::vector<SXPeak> SimpleReduceStrategy::reduce(
+    const std::vector<SXPeak> &peaks,
+    Mantid::Kernel::ProgressBase & /*progress*/) const {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;
@@ -602,12 +602,11 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
     Mantid::Kernel::ProgressBase &progress) const {
 
   // Create a vector of addresses. Note that the peaks live on the stack. This
-  // here only works,
-  // because the peaks are always in a stack frame below.
+  // here only works, because the peaks are always in a stack frame below.
   std::vector<SXPeak *> peaks;
-  for (const auto &peak : peakList) {
-    peaks.push_back(&const_cast<SXPeak &>(peak));
-  }
+  peaks.reserve(peakList.size());
+  std::transform(peakList.cbegin(), peakList.cend(), std::back_inserter(peaks),
+                 [](const auto &peak) { return &const_cast<SXPeak &>(peak); });
 
   // Add the peaks to a graph
   Edge edge;
@@ -633,7 +632,7 @@ std::vector<std::vector<SXPeak *>> FindMaxReduceStrategy::getPeakGroups(
                         std::string(" peaks. Investigating peak number ");
   int peakCounter = 0;
 
-  for (const auto peak : peaks) {
+  for (auto peak : peaks) {
     ++peakCounter;
 
     // 1. Add the vertex

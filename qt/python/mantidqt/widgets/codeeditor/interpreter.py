@@ -125,7 +125,6 @@ class PythonFileInterpreter(QWidget):
         font = font if font is not None else QFont()
         self.editor = CodeEditor("AlternateCSPython", font, self)
         self.find_replace_dialog = None
-        self.find_replace_dialog_shown = False
         self.status = QStatusBar(self)
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)

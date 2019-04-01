@@ -179,8 +179,7 @@ void LoadFullprofResolution::exec() {
 
   // Parse .irf and export profile parameters
   map<int, map<string, double>> bankparammap;
-  for (size_t i = 0; i < vec_bankids.size(); ++i) {
-    int bankid = vec_bankids[i];
+  for (int bankid : vec_bankids) {
     g_log.debug() << "Parse bank " << bankid << " of total "
                   << vec_bankids.size() << ".\n";
     map<string, double> parammap;

@@ -8,7 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
     FloatArrayProperty, StringListValidator, IntBoundedValidator
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty, FileProperty, FileAction
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, Progress, WorkspaceGroupProperty, FileProperty, \
+    FileAction
 from mantid.simpleapi import *
 
 
@@ -27,7 +28,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         return 'Performs powder diffraction data reduction for D2B and D20 (when doing a detector scan).'
 
     def seeAlso(self):
-        return [ "PowderILLParameterScan", "PowderILLEfficiency" ]
+        return ["PowderILLParameterScan", "PowderILLEfficiency"]
 
     def name(self):
         return "PowderILLDetectorScan"
@@ -122,9 +123,9 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
             end_bottom = start_bottom + n_pix - 1
             start_top = (tube + 1) * n_pixels - n_pix + 1
             end_top = start_top + n_pix - 1
-            mask += str(start_bottom)+'-'+str(end_bottom)+','
-            mask += str(start_top)+'-'+str(end_top)+','
-        self.log().debug('Preparing to mask with DetectorList='+mask[:-1])
+            mask += str(start_bottom) + '-' + str(end_bottom) + ','
+            mask += str(start_top) + '-' + str(end_top) + ','
+        self.log().debug('Preparing to mask with DetectorList=' + mask[:-1])
         return mask[:-1]
 
     def _reduce_1D(self, input_group):
@@ -146,8 +147,8 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                                             OutputWorkspace=output2DtubesName)
         if self._final_mask != 0:
             nSpec = mtd[output2DtubesName].getNumberHistograms()
-            mask_list = '0-{0},{1}-{2}'.format(self._final_mask,nSpec-self._final_mask,nSpec-1)
-            MaskDetectors(Workspace=output2DtubesName,WorkspaceIndexList=mask_list)
+            mask_list = '0-{0},{1}-{2}'.format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
+            MaskDetectors(Workspace=output2DtubesName, WorkspaceIndexList=mask_list)
 
         return output2DTubes
 
@@ -158,15 +159,88 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                                        HeightAxis=self._height_range,
                                        MirrorScatteringAngles=self._mirror,
                                        CropNegativeScatteringAngles=self._crop_negative,
-                                       OutputWorkspace = output2DName)
+                                       OutputWorkspace=output2DName)
         if self._final_mask != 0:
             nSpec = mtd[output2DName].getNumberHistograms()
-            mask_list = '0-{0},{1}-{2}'.format(self._final_mask,nSpec-self._final_mask,nSpec-1)
-            MaskDetectors(Workspace=output2DName,WorkspaceIndexList=mask_list)
+            mask_list = '0-{0},{1}-{2}'.format(self._final_mask, nSpec - self._final_mask, nSpec - 1)
+            MaskDetectors(Workspace=output2DName, WorkspaceIndexList=mask_list)
 
         return output2D
 
-    def PyExec(self): # noqa C901
+    def _apply_calibration(self, input_group):
+        calib_file = self.getPropertyValue('CalibrationFile')
+        if calib_file:
+            self._progress.report('Applying detector efficiencies')
+            LoadNexusProcessed(Filename=calib_file, OutputWorkspace='__det_eff')
+            for ws in input_group:
+                name = ws.getName()
+                ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
+                ApplyDetectorScanEffCorr(InputWorkspace=name, DetectorEfficiencyWorkspace='__det_eff',
+                                         OutputWorkspace=name)
+
+    def _check_instrument(self, instrument):
+        supported_instruments = ['D2B', 'D20']
+        if instrument.getName() not in supported_instruments:
+            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
+                             + str(supported_instruments))
+        if instrument.getName() == 'D20':
+            if self.getProperty('Output2DTubes').value:
+                raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
+            if self.getProperty('Output2D').value:
+                raise RuntimeError('Output2D is not supported for D20 (1D detector)')
+
+    def _component_cropping(self, input_group):
+        components = self.getPropertyValue('ComponentsToReduce')
+        if components:
+            for ws in input_group:
+                CropToComponent(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(),
+                                ComponentNames=components)
+
+    def _do_masking(self, input_group):
+        pixels_to_mask = self.getProperty('InitialMask').value
+        if pixels_to_mask != 0:
+            mask = self._generate_mask(pixels_to_mask, input_group[0].getInstrument())
+            for ws in input_group:
+                MaskDetectors(Workspace=ws, DetectorList=mask)
+        components_to_mask = self.getPropertyValue('ComponentsToMask')
+        if components_to_mask:
+            for ws in input_group:
+                MaskDetectors(Workspace=ws, ComponentList=components_to_mask)
+
+    def _do_reduction(self, input_group, output_workspaces):
+        self._progress.report('Doing Output2DTubes Option')
+        if self.getProperty('Output2DTubes').value:
+            output2DTubes = self._reduce_2DTubes(input_group)
+            output_workspaces.append(output2DTubes)
+        self._progress.report('Doing Output2D Option')
+        if self.getProperty('Output2D').value:
+            output2D = self._reduce_2D(input_group)
+            output_workspaces.append(output2D)
+        self._progress.report('Doing Output1D Option')
+        if self.getProperty('Output1D').value:
+            output1D = self._reduce_1D(input_group)
+            output_workspaces.append(output1D)
+
+    def _get_height_range(self):
+        height_range_prop = self.getProperty('HeightRange').value
+        if len(height_range_prop) == 0:
+            run = mtd["input_group"].getItem(0).getRun()
+            if run.hasProperty("PixelHeight") and run.hasProperty("MaxHeight"):
+                pixelHeight = run.getLogData("PixelHeight").value
+                maxHeight = run.getLogData("MaxHeight").value
+                self._height_range = str(-maxHeight) + ',' + str(pixelHeight) + ',' + str(maxHeight)
+        elif len(height_range_prop) == 2:
+            self._height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
+
+    def _normalise_input(self, input_group, instrument):
+        self._progress.report('Normalising to monitor')
+        if self.getPropertyValue('NormaliseTo') == 'Monitor':
+            input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
+            if instrument.getName() == 'D2B':
+                input_group = Scale(InputWorkspace=input_group, Factor=1e+6)
+        return input_group
+
+    def PyExec(self):
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
@@ -184,50 +258,13 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
         instrument = input_group[0].getInstrument()
-        supported_instruments = ['D2B', 'D20']
-        if instrument.getName() not in supported_instruments:
-            self.log.warning('Running for unsupported instrument, use with caution. Supported instruments are: '
-                             + str(supported_instruments))
-        if instrument.getName() == 'D20':
-            if self.getProperty('Output2DTubes').value:
-                raise RuntimeError('Output2DTubes is not supported for D20 (1D detector)')
-            if self.getProperty('Output2D').value:
-                raise RuntimeError('Output2D is not supported for D20 (1D detector)')
+        self._check_instrument(instrument)
 
-        self._progress.report('Normalising to monitor')
-        if self.getPropertyValue('NormaliseTo') == 'Monitor':
-            input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
-            if instrument.getName() == 'D2B':
-                input_group = Scale(InputWorkspace=input_group, Factor=1e+6)
+        input_group = self._normalise_input(input_group, instrument)
+        self._apply_calibration(input_group)
+        self._do_masking(input_group)
+        self._get_height_range()
 
-        calib_file = self.getPropertyValue('CalibrationFile')
-        if calib_file:
-            self._progress.report('Applying detector efficiencies')
-            LoadNexusProcessed(Filename=calib_file, OutputWorkspace='__det_eff')
-            for ws in input_group:
-                name = ws.getName()
-                ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
-                ApplyDetectorScanEffCorr(InputWorkspace=name,DetectorEfficiencyWorkspace='__det_eff',OutputWorkspace=name)
-
-        pixels_to_mask = self.getProperty('InitialMask').value
-        if pixels_to_mask != 0:
-            mask = self._generate_mask(pixels_to_mask, input_group[0].getInstrument())
-            for ws in input_group:
-                MaskDetectors(Workspace=ws, DetectorList=mask)
-        components_to_mask = self.getPropertyValue('ComponentsToMask')
-        if components_to_mask:
-            for ws in input_group:
-                MaskDetectors(Workspace=ws, ComponentList=components_to_mask)
-
-        height_range_prop = self.getProperty('HeightRange').value
-        if len(height_range_prop) == 0:
-            run = mtd["input_group"].getItem(0).getRun()
-            if run.hasProperty("PixelHeight") and run.hasProperty("MaxHeight"):
-                pixelHeight = run.getLogData("PixelHeight").value
-                maxHeight = run.getLogData("MaxHeight").value
-                self._height_range = str(-maxHeight) + ',' + str(pixelHeight) + ',' + str(maxHeight)
-        elif len(height_range_prop) == 2:
-            self._height_range = str(height_range_prop[0]) + ', ' + str(height_range_prop[1])
         output_workspaces = []
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._mirror = False
@@ -235,32 +272,15 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
         if instrument.hasParameter("mirror_scattering_angles"):
             self._mirror = instrument.getBoolParameter("mirror_scattering_angles")[0]
         self._final_mask = self.getProperty('FinalMask').value
+        self._component_cropping(input_group)
 
-        components = self.getPropertyValue('ComponentsToReduce')
-        if components:
-            for ws in input_group:
-                CropToComponent(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(),
-                                ComponentNames=components)
-
-        self._progress.report('Doing Output2DTubes Option')
-        if self.getProperty('Output2DTubes').value:
-            output2DTubes = self._reduce_2DTubes(input_group)
-            output_workspaces.append(output2DTubes)
-
-        self._progress.report('Doing Output2D Option')
-        if self.getProperty('Output2D').value:
-            output2D = self._reduce_2D(input_group)
-            output_workspaces.append(output2D)
-
-        self._progress.report('Doing Output1D Option')
-        if self.getProperty('Output1D').value:
-            output1D = self._reduce_1D(input_group)
-            output_workspaces.append(output1D)
+        self._do_reduction(input_group, output_workspaces)
 
         self._progress.report('Finishing up...')
         DeleteWorkspace('input_group')
         GroupWorkspaces(InputWorkspaces=output_workspaces, OutputWorkspace=self._out_ws_name)
         self.setProperty('OutputWorkspace', self._out_ws_name)
+
 
 # Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderILLDetectorScan)

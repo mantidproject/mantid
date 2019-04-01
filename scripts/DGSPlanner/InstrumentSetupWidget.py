@@ -148,7 +148,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
 
 class InstrumentSetupWidget(QtWidgets.QWidget):
     #signal when things change and valid
-    changed=QtCore.pyqtSignal(dict)
+    changed=QtCore.Signal(dict)
 
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class

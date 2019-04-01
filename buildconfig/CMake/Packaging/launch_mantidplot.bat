@@ -43,5 +43,5 @@ start "MantidPlot" /B /WAIT %_BIN_DIR%\MantidPlot.exe %*
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if %errorlevel% NEQ 0 (
 set QT_API=pyqt4
-python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%errorlevel% --directory=%_BIN_DIR%
+python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%errorlevel% --directory=%_BIN_DIR% --application=mantidplot
 )

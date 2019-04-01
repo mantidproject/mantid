@@ -54,7 +54,6 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;

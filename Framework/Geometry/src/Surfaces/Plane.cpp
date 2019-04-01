@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <iostream>
+
 #include <limits>
 
 #ifdef ENABLE_OPENCASCADE
@@ -37,7 +38,9 @@ GNU_DIAG_ON("cast-qual")
 namespace Mantid {
 
 namespace Geometry {
-
+namespace {
+Kernel::Logger logger("Plane");
+}
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -236,7 +239,7 @@ void Plane::print() const
 */
 {
   Quadratic::print();
-  std::cout << "NormV == " << NormV << " : " << Dist << '\n';
+  logger.debug() << "NormV == " << NormV << " : " << Dist << '\n';
 }
 
 std::size_t Plane::planeType() const

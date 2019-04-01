@@ -19,7 +19,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <fstream>
-#include <iostream>
 #include <set>
 
 using namespace Mantid::API;

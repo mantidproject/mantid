@@ -280,8 +280,8 @@ bool Parser::rxUnknownPkt(const Packet &pkt) {
   return false;
 }
 
-bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t *,
-                           unsigned int, unsigned int) {
+bool Parser::rxOversizePkt(const PacketHeader *hdr, const uint8_t * /*unused*/,
+                           unsigned int /*unused*/, unsigned int /*unused*/) {
   // NOTE: ADARA::PacketHeader *hdr can be NULL...! ;-o
   /* Default is to discard the data */
   if (hdr != nullptr)

@@ -520,7 +520,6 @@ void LoadSQW::readDNDDimensions(
   */
   // axis counter
   ic = 0;
-  ;
   std::vector<unsigned int> iax;
   if (niax > 0) {
     buf.resize(4 * (niax + 2 * niax));
@@ -603,16 +602,16 @@ void LoadSQW::readDNDDimensions(
   if (arrangeByMDImage) {
 
     // Place dimensions to output vector in the correct dimensions order;
-    size_t ic = 0;
+    size_t dimIndex = 0;
     DimVectorOut.resize(4);
     for (size_t i = 0; i < npax; i++) {
-      DimVectorOut[ic] = DimVectorIn[pax[dax[i]]];
-      ic++;
+      DimVectorOut[dimIndex] = DimVectorIn[pax[dax[i]]];
+      dimIndex++;
     }
 
     for (size_t i = 0; i < niax; i++) {
-      DimVectorOut[ic] = DimVectorIn[iax[i]];
-      ic++;
+      DimVectorOut[dimIndex] = DimVectorIn[iax[i]];
+      dimIndex++;
     }
   } else // arrange according to sqw
   {

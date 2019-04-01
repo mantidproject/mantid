@@ -17,7 +17,6 @@
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 #include <iomanip>
-#include <iostream>
 
 namespace Mantid {
 namespace Geometry {

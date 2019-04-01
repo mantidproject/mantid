@@ -10,7 +10,7 @@ namespace Mantid {
 namespace Kernel {
 
 /// Is the property to be shown in the GUI? Always false.
-bool InvisibleProperty::isVisible(const IPropertyManager *) const {
+bool InvisibleProperty::isVisible(const IPropertyManager * /*algo*/) const {
   return false;
 }
 

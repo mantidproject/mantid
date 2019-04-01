@@ -10,11 +10,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import tempfile
-import itertools
 from collections import namedtuple
 from contextlib import contextmanager
 import numpy as np
 
+from mantid.py3compat.enum import Enum
 from mantid import config as mantid_config
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
                         WorkspaceProperty, FileAction, PropertyMode, mtd,
@@ -26,9 +26,15 @@ from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer,
                               MultiplyMD, CreateSingleValuedWorkspace,
                               ConvertUnits, CropWorkspace, DivideMD, MinusMD,
                               RenameWorkspace, ConvertToMDMinMaxGlobal,
-                              ClearMaskFlag)
-from mantid.kernel import (Direction, IntArrayProperty, FloatArrayProperty,
-                           FloatArrayLengthValidator)
+                              ClearMaskFlag, ScaleX, Plus)
+from mantid.kernel import (Direction, FloatArrayProperty,
+                           FloatArrayLengthValidator, logger)
+
+
+class VDAS(Enum):
+    """Specifices the version of the Data Acquisition System (DAS)"""
+    v1900_2018 = 0  # Up to Dec 31 2018
+    v2019_2100 = 1  # From Jan 01 2018
 
 
 @contextmanager
@@ -81,13 +87,15 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                  'BASIS_Mask_default_diff.xml'
     _solid_angle_ws_ = '/SNS/BSS/shared/autoreduce/solid_angle_diff.nxs'
     _flux_ws_ = '/SNS/BSS/shared/autoreduce/int_flux.nxs'
+    _wavelength_bands = {'311': [3.07, 3.60], '111': [6.05, 6.60]}
+    _diff_bank_numbers = list(range(5, 14))
+    _tzero = dict(gradient=11.967, intercept=-5.0)
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
-        self._lambda_range = [5.86, 6.75]  # units of inverse Angstroms
+        self._wavelength_band = None  # units of inverse Angstroms
         self._short_inst = "BSS"
         self._long_inst = "BASIS"
-        self._run_list = None
         self._temps = None
         self._bkg = None  # Events workspace for brackground runs
         self._bkg_scale = None
@@ -113,6 +121,48 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
     def seeAlso():
         return ['AlignDetectors', 'DiffractionFocussing', 'SNSPowderReduction']
 
+    @staticmethod
+    def _run_list(runs):
+        """
+        Obtain all run numbers from input string `runs`
+
+        Parameters
+        ----------
+        runs: str
+            Run numbers to be reduced.
+        Returns
+        -------
+            list
+        """
+        rl = list()
+        rn = runs.replace(' ', '')  # remove spaces
+        for x in rn.split(','):
+            if '-' in x:
+                b, e = [int(y) for y in x.split('-')]
+                rl.extend([str(z) for z in range(b, e+1)])
+            else:
+                rl.append(x)
+        return rl
+
+    @staticmethod
+    def add_previous_pulse(w):
+        """
+        Duplicate the events but shift them by one pulse, then add to
+        input workspace
+
+        Parameters
+        ----------
+        w: Mantid.EventsWorkspace
+
+        Returns
+        -------
+        Mantid.EventsWorkspace
+        """
+        pulse_width = 1.e6/60  # in micro-seconds
+        _t_w = ScaleX(w, Factor=-pulse_width, Operation='Add')
+        _t_w = Plus(w, _t_w, OutputWorkspace=w.name())
+        return _t_w
+
     def PyInit(self):
         # Input validators
         array_length_three = FloatArrayLengthValidator(3)
@@ -124,11 +174,6 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
                              doc='See documentation for latest mask files.')
-
-        self.declareProperty(FloatArrayProperty('LambdaRange',
-                                                self._lambda_range,
-                                                direction=Direction.Input),
-                             doc='Incoming neutron wavelength range')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                optional=PropertyMode.Mandatory,
@@ -221,10 +266,6 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                               'default.instrument': 'BASIS',
                               'datasearch.searcharchive': 'On'}
 
-        # Find valid incoming momentum range
-        self._lambda_range = np.array(self.getProperty('LambdaRange').value)
-        self._momentum_range = np.sort(2 * np.pi / self._lambda_range)
-
         # implement with ContextDecorator after python2 is deprecated)
         with pyexec_setup(config_new_options) as self._temps:
             # Load the mask to a temporary workspace
@@ -232,14 +273,21 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                                     InputFile=self.getProperty('MaskFile').
                                     value,
                                     OutputWorkspace='_t_mask')
-
+            #
+            # Find the version of the Data Acquisition System
+            #
+            self._find_das_version()
+            #
+            # Find valid incoming momentum range
+            #
+            self._calculate_wavelength_band()
+            self._momentum_range = np.sort(2 * np.pi / self._wavelength_band)
+            #
             # Pre-process the background runs
+            #
             if self.getProperty('BackgroundRuns').value:
-                bkg_run_numbers = self._getRuns(
-                    self.getProperty('BackgroundRuns').value,
-                    doIndiv=True)
-                bkg_run_numbers = \
-                    list(itertools.chain.from_iterable(bkg_run_numbers))
+                bkg_run_numbers = self._run_list(
+                    self.getProperty('BackgroundRuns').value)
                 background_reporter = Progress(self, start=0.0, end=1.0,
                                                nreports=len(bkg_run_numbers))
                 for i, run in enumerate(bkg_run_numbers):
@@ -261,10 +309,8 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
             # Pre-process the vanadium run(s) by removing the delayed
             # emission time from the moderator and then saving to file(s)
             if self.getProperty('VanadiumRuns').value:
-                run_numbers = self._getRuns(
-                    self.getProperty('VanadiumRuns').value,
-                    doIndiv=True)
-                run_numbers = list(itertools.chain.from_iterable(run_numbers))
+                run_numbers = self._run_list(
+                    self.getProperty('VanadiumRuns').value)
                 vanadium_reporter = Progress(self, start=0.0, end=1.0,
                                              nreports=len(run_numbers))
                 self._vanadium_files = list()
@@ -324,9 +370,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
             _t_int_flux = self.nominal_integrated_flux('_t_int_flux')
 
         # Process a sample at a time
-        run_numbers = self._getRuns(self.getProperty("RunNumbers").value,
-                                    doIndiv=True)
-        run_numbers = list(itertools.chain.from_iterable(run_numbers))
+        run_numbers = self._run_list(self.getProperty("RunNumbers").value)
         diffraction_reporter = Progress(self, start=0.0, end=1.0,
                                         nreports=len(run_numbers))
         for i_run, run in enumerate(run_numbers):
@@ -425,11 +469,14 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         :return: file name of event file with events treated with algorithm
         ModeratorTzeroLinear.
         """
-        ws = LoadEventNexus(Filename=self._makeRunFile(run_number),
-                            NXentryName='entry-diff',
-                            OutputWorkspace=name)
+        ws = self._load_single_run(run_number, name)
         ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
+                                  Gradient=self._tzero['gradient'],
+                                  Intercept=self._tzero['intercept'],
                                   OutputWorkspace=ws.name())
+        # Correct old DAS shift of fast neutrons. See GitHub issue 23855
+        if self._das_version == VDAS.v1900_2018:
+            ws = self.add_previous_pulse(ws)
         file_name = self._spawn_tempnexus()
         SaveNexus(ws, file_name)
         return file_name
@@ -445,13 +492,15 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         :param name: name for the output workspace
         :return: workspace object
         """
-        ws = LoadEventNexus(Filename=self._makeRunFile(run_number),
-                            NXentryName='entry-diff',
-                            SingleBankPixelsOnly=False,
-                            OutputWorkspace=name)
+        ws = self._load_single_run(run_number, name)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         ws = ModeratorTzeroLinear(InputWorkspace=ws.name(),
+                                  Gradient=self._tzero['gradient'],
+                                  Intercept=self._tzero['intercept'],
                                   OutputWorkspace=ws.name())
+        # Correct old DAS shift of fast neutrons. See GitHub issue 23855
+        if self._das_version == VDAS.v1900_2018:
+            ws = self.add_previous_pulse(ws)
         ws = ConvertUnits(ws, Target='Momentum', OutputWorkspace=ws.name())
         ws = CropWorkspace(ws,
                            OutputWorkspace=ws.name(),
@@ -459,41 +508,31 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                            XMax=self._momentum_range[1])
         return ws
 
-    def _getRuns(self, rlist, doIndiv=True):
+    def _load_single_run(self, run, name):
         """
-        Create sets of run numbers for analysis. A semicolon indicates a
-        separate group of runs to be processed together.
+        Find and load events from the diffraction tubes.
+
+        Run number 90000 discriminates between the old and new DAS
 
         Parameters
         ----------
-        rlist: string
-            Run numbers to be reduced.
-        doIndiv: bool
-            Marks if files are to be reduced together
+        run: str
+            Run number
+        name: str
+            Name of the output EventsWorkspace
+
         Returns
         -------
-        list
-            If `doIndiv` is `False`, return a list of `IntArrayProperty`
-            objects. Each item is a pseudolist containing a set of runs to be
-            reduced together. If `doIndiv` is `True`, return a list of strings,
-            each string is a run number.
+        EventsWorkspace
         """
-        run_list = []
-        # ";" separates the runs into substrings. Each substring represents a set of runs
-        rlvals = rlist.split(';')
-        for rlval in rlvals:
-            iap = IntArrayProperty('', rlval)  # split the substring
-            if doIndiv:
-                run_list.extend([[x] for x in iap.value])
-            else:
-                run_list.append(iap.value)
-        return run_list
-
-    def _makeRunFile(self, run):
-        """
-        Make name like BSS_24234_event.nxs
-        """
-        return "{0}_{1}_event.nxs".format(self._short_inst, str(run))
+        banks = ','.join(['bank{}'.format(i) for i in self._diff_bank_numbers])
+        particular = {VDAS.v1900_2018: dict(NXentryName='entry-diff'),
+                      VDAS.v2019_2100: dict(BankName=banks)}
+        identifier = "{0}_{1}".format(self._short_inst, str(run))
+        kwargs = dict(Filename=identifier, SingleBankPixelsOnly=False,
+                      OutputWorkspace=name)
+        kwargs.update(particular[self._das_version])
+        return LoadEventNexus(**kwargs)
 
     def _spawn_tempnexus(self):
         """
@@ -533,6 +572,30 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         ClearMaskFlag(ws)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         return ws
+
+    def _find_das_version(self):
+        boundary_run = 90000  # from VDAS.v1900_2018 to VDAS.v2019_2100
+        runs = self.getProperty('RunNumbers').value
+        first_run = int(self._run_list(runs)[0])
+        if first_run < boundary_run:
+            self._das_version = VDAS.v1900_2018
+        else:
+            self._das_version = VDAS.v2019_2100
+        logger.information('DAS version is ' + str(self._das_version))
+
+    def _calculate_wavelength_band(self):
+        """
+        Select the wavelength band examining the logs of the first sample
+        """
+        runs = self.getProperty('RunNumbers').value
+        run = self._run_list(runs)[0]
+        _t_w = self._load_single_run(run, '_t_w')
+        wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest').value)
+        logger.error('DEBUG wavelength = ' + str(wavelength))
+        for reflection, band in self._wavelength_bands.items():
+            if band[0] <= wavelength <= band[1]:
+                self._wavelength_band = np.array(band)
+                break
 
 
 # Register algorithm with Mantid.

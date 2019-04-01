@@ -7,10 +7,6 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
 
-  <computeResource name="SCARF@STFC" jobmanagertype="SCARFLSFJobManager">
-    <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
-  </computeResource>
-
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
@@ -693,6 +689,12 @@
 
   <instrument name="FIGARO">
     <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="PANTHER">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
   </instrument>
 
 </facility>

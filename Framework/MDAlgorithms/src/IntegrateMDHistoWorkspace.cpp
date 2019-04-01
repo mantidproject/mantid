@@ -380,10 +380,10 @@ void IntegrateMDHistoWorkspace::exec() {
         // Calculate the extents for this out iterator position.
         std::vector<Mantid::coord_t> mins(nDims);
         std::vector<Mantid::coord_t> maxs(nDims);
-        for (size_t i = 0; i < nDims; ++i) {
-          const coord_t delta = binWidthsOut[i] / 2;
-          mins[i] = outIteratorCenter[i] - delta;
-          maxs[i] = outIteratorCenter[i] + delta;
+        for (size_t j = 0; j < nDims; ++j) {
+          const coord_t delta = binWidthsOut[j] / 2;
+          mins[j] = outIteratorCenter[j] - delta;
+          maxs[j] = outIteratorCenter[j] + delta;
         }
         MDBoxImplicitFunction box(mins, maxs);
 

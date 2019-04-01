@@ -29,7 +29,7 @@ struct AreaInfo {
  * implementation uses the shoelace formula but requires the last element to
  * be the same as the first element. Also note that it returns 2x the area!
  */
-template <class T> double polyArea(const T &) { return 0.; }
+template <class T> double polyArea(const T & /*unused*/) { return 0.; }
 template <class T, class... Ts>
 double polyArea(const T &v1, const T &v2, Ts &&... vertices) {
   return v2.X() * v1.Y() - v2.Y() * v1.X() +
