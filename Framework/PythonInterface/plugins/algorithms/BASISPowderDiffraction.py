@@ -468,11 +468,14 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                 run_name = '{0}_{1}'.format(self._short_inst, str(run))
                 _t_w = LoadNexusMonitors(run_name, OutputWorkspace=_t_w_name)
                 if _t_flux is None:
-                    _t_flux = CloneWorkspace(_t_w, OutputWorkspace=_t_flux_name)
+                    _t_flux = CloneWorkspace(_t_w,
+                                             OutputWorkspace=_t_flux_name)
                 else:
                     _t_flux = Plus(_t_flux, _t_w, OutputWorkspace=_t_flux_name)
 
-            _t_flux = ConvertUnits(_t_flux, Target='Wavelength', Emode='Elastic',
+            _t_flux = ConvertUnits(_t_flux,
+                                   Target='Wavelength',
+                                   Emode='Elastic',
                                    OutputWorkspace=_t_flux_name)
             _t_flux = CropWorkspace(_t_flux,
                                     XMin=self._wavelength_band[0],
