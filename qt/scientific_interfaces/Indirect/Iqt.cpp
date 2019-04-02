@@ -34,10 +34,6 @@ std::size_t getWsNumberOfSpectra(std::string const &workspaceName) {
   return getADSMatrixWorkspace(workspaceName)->getNumberHistograms();
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
   return workspace->y(0).size() > 1;
 }
@@ -66,9 +62,9 @@ std::string checkParametersMatch(MatrixWorkspace_const_sptr sampleWorkspace,
                                         parameter);
 }
 
-std::string checkParamsMatch(std::string const &sampleName,
-                             std::string const &resolutionName,
-                             std::string const &parameter) {
+std::string checkParametersMatch(std::string const &sampleName,
+                                 std::string const &resolutionName,
+                                 std::string const &parameter) {
   auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
   auto const resolutionWorkspace = getADSMatrixWorkspace(resolutionName);
   return checkParametersMatch(sampleWorkspace, resolutionWorkspace, parameter);
@@ -373,7 +369,7 @@ void Iqt::plotTiled() {
   auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
 
   // Clone workspace before cropping to keep in ADS
-  if (!doesExistInADS(tiledPlotWsName))
+  if (!AnalysisDataService::Instance().doesExist(tiledPlotWsName))
     cloneWorkspace(outWs->getName(), tiledPlotWsName);
 
   // Get first x value which corresponds to a y value below 1
@@ -424,7 +420,8 @@ bool Iqt::validate() {
   auto const resolutionName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
-  if (doesExistInADS(sampleName) && doesExistInADS(resolutionName)) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(sampleName) && ads.doesExist(resolutionName)) {
     auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
     auto const resWorkspace = getADSMatrixWorkspace(resolutionName);
 
@@ -485,11 +482,13 @@ void Iqt::updateDisplayedBinParameters() {
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
   auto const resolutionName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
-  if (!doesExistInADS(sampleName) || !doesExistInADS(resolutionName))
+
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
     return;
 
-  if (!checkParamsMatch(sampleName, resolutionName, "analyser").empty() ||
-      !checkParamsMatch(sampleName, resolutionName, "reflection").empty())
+  if (!checkParametersMatch(sampleName, resolutionName, "analyser").empty() ||
+      !checkParametersMatch(sampleName, resolutionName, "reflection").empty())
     return;
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);
