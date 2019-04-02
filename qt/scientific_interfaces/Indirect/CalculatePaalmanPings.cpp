@@ -26,6 +26,15 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("CalculatePaalmanPings");
+
+std::string extractFirstOf(std::string const &str,
+                           std::string const &delimiter) {
+  auto const cutIndex = str.find(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -131,9 +140,14 @@ void CalculatePaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
-  absCorAlgo->setProperty(
-      "SampleDensityType",
-      m_uiForm.cbSampleDensity->currentText().toStdString());
+  auto const sampleDensityType =
+      m_uiForm.cbSampleDensity->currentText().toStdString();
+  absCorAlgo->setProperty("SampleDensityType",
+                          getDensityType(sampleDensityType));
+  if (sampleDensityType != "Mass Density")
+    absCorAlgo->setProperty("SampleNumberDensityUnit",
+                            getNumberDensityUnit(sampleDensityType));
+
   absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
@@ -168,8 +182,13 @@ void CalculatePaalmanPings::run() {
       absCorProps["CanWorkspace"] = canWsName;
     }
 
-    absCorAlgo->setProperty("CanDensityType",
-                            m_uiForm.cbCanDensity->currentText().toStdString());
+    auto const canDensityType =
+        m_uiForm.cbCanDensity->currentText().toStdString();
+    absCorAlgo->setProperty("CanDensityType", getDensityType(canDensityType));
+    if (canDensityType != "Mass Density")
+      absCorAlgo->setProperty("CanNumberDensityUnit",
+                              getNumberDensityUnit(canDensityType));
+
     absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
     if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
@@ -676,6 +695,16 @@ CalculatePaalmanPings::getDensityOptions(QString const &method) const {
   densityOptions.emplace_back("Atom Number Density");
   densityOptions.emplace_back("Formula Number Density");
   return densityOptions;
+}
+
+std::string
+CalculatePaalmanPings::getDensityType(std::string const &type) const {
+  return type == "Mass Density" ? type : "Number Density";
+}
+
+std::string
+CalculatePaalmanPings::getNumberDensityUnit(std::string const &type) const {
+  return extractFirstOf(type, " ") == "Formula" ? "Formula Units" : "Atoms";
 }
 
 QString CalculatePaalmanPings::getDensityUnit(QString const &type) const {

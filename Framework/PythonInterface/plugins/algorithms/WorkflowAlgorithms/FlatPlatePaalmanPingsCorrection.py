@@ -18,13 +18,12 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixW
 from mantid.kernel import (StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction, logger)
 
 
-def set_material_density(set_material_alg, density_type, density):
+def set_material_density(set_material_alg, density_type, density, number_density_unit):
     if density_type == 'Mass Density':
         set_material_alg.setProperty('SampleMassDensity', density)
     else:
         set_material_alg.setProperty('SampleNumberDensity', density)
-        if density_type == 'Formula Number Density':
-            set_material_alg.setProperty('NumberDensityUnit', 'Formula Units')
+        set_material_alg.setProperty('NumberDensityUnit', number_density_unit)
     return set_material_alg
 
 
@@ -99,13 +98,16 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                  'Chemical Formula.')
 
         self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Atom Number Density',
-                                                            'Formula Number Density']),
-                             doc='Use of Mass density, Atom Number density or Formula Number Density.')
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Use of Mass density or Number density.')
+
+        self.declareProperty(name='SampleNumberDensityUnit', defaultValue='Atoms',
+                             validator=StringListValidator(['Atoms', 'Formula Units']),
+                             doc='Choose which units SampleDensity refers to. Allowed values: '
+                                 '[Atoms, Formula Units]')
 
         self.declareProperty(name='SampleDensity', defaultValue=0.1,
-                             doc='Mass density (g/cm^3), Atom Number density (atoms/Angstrom^3) or Formula Number '
-                                 'density (1/Angstrom^3)')
+                             doc='Mass density (g/cm^3) or Number density (1/Angstrom^3)')
 
         self.declareProperty(name='SampleThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -139,13 +141,15 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                  'Chemical Formula.')
 
         self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Atom Number Density',
-                                                            'Formula Number Density']),
-                             doc='Use of Mass density, Atom Number density or Formula Number Density.')
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Use of Mass density or Number density.')
 
+        self.declareProperty(name='CanNumberDensityUnit', defaultValue='Atoms',
+                             validator=StringListValidator(['Atoms', 'Formula Units']),
+                             doc='Choose which units CanDensity refers to. Allowed values: [Atoms, Formula Units]')
+        
         self.declareProperty(name='CanDensity', defaultValue=0.1,
-                             doc='Mass density (g/cm^3), Atom Number density (atoms/Angstrom^3) or Formula Number '
-                                 'density (1/Angstrom^3)')
+                             doc='Mass density (g/cm^3) or Number density (1/Angstrom^3)')
 
         self.declareProperty(name='CanFrontThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -218,7 +222,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                                   self._sample_incoherent_cross_section,
                                                   self._sample_attenuation_cross_section,
                                                   self._sample_density_type,
-                                                  self._sample_density)
+                                                  self._sample_density,
+                                                  self._sample_number_density_unit)
 
         # If using a can, set sample material using chemical formula
         if self._use_can:
@@ -230,7 +235,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                                    self._can_incoherent_cross_section,
                                                    self._can_attenuation_cross_section,
                                                    self._can_density_type,
-                                                   self._can_density)
+                                                   self._can_density,
+                                                   self._can_number_density_unit)
 
         # Holders for the corrected data
         data_ass = []
@@ -261,14 +267,14 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                     "A can workspace was given but the can information is incomplete. Continuing but no absorption for the can will "
                     "be computed.")
 
-        if not self._has_can_front_in:
-            logger.warning(
-                "A can workspace was given but the can front thickness was not given. Continuing but no absorption for can front"
-                " will be computed.")
-        if not self._has_can_back_in:
-            logger.warning(
-                "A can workspace was given but the can back thickness was not given. Continuing but no absorption for can back"
-                " will be computed.")
+            if not self._has_can_front_in:
+                logger.warning(
+                    "A can workspace was given but the can front thickness was not given. Continuing but no absorption for can front"
+                    " will be computed.")
+            if not self._has_can_back_in:
+                logger.warning(
+                    "A can workspace was given but the can back thickness was not given. Continuing but no absorption for can back"
+                    " will be computed.")
 
         for angle_idx in range(num_angles):
             workflow_prog.report('Running flat correction for angle %s' % angle_idx)
@@ -369,6 +375,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._sample_incoherent_cross_section = self.getPropertyValue('SampleIncoherentXSection')
         self._sample_attenuation_cross_section = self.getPropertyValue('SampleAttenuationXSection')
         self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_number_density_unit = self.getPropertyValue('SampleNumberDensityUnit')
         self._sample_density = self.getProperty('SampleDensity').value
         self._sample_thickness = self.getProperty('SampleThickness').value
         self._sample_angle = self.getProperty('SampleAngle').value
@@ -381,6 +388,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._can_incoherent_cross_section = self.getPropertyValue('CanIncoherentXSection')
         self._can_attenuation_cross_section = self.getPropertyValue('CanAttenuationXSection')
         self._can_density_type = self.getPropertyValue('CanDensityType')
+        self._can_number_density_unit = self.getPropertyValue('CanNumberDensityUnit')
         self._can_density = self.getProperty('CanDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
@@ -416,7 +424,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def _set_material(self, ws_name, method, chemical_formula, coherent_x_section, incoherent_x_section,
-                      attenuation_x_section, density_type, density):
+                      attenuation_x_section, density_type, density, number_density_unit):
         """
         Sets the sample material for a given workspace
         @param ws_name              :: name of the workspace to set sample material for
@@ -427,13 +435,14 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         @param attenuation_x_section:: the absorption cross section
         @param density_type         :: 'Mass Density' or 'Number Density'
         @param density              :: Density of sample
+        @param number_density_unit  :: the unit to use ('Atoms' or 'Formula Units') if the density type is Number density
         @return pointer to the workspace with sample material set
                 AND
                 number density of the sample material
         """
         set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
         set_material_alg.setProperty('InputWorkspace', ws_name)
-        set_material_alg = set_material_density(set_material_alg, density_type, density)
+        set_material_alg = set_material_density(set_material_alg, density_type, density, number_density_unit)
 
         if method == 'Chemical Formula':
             set_material_alg.setProperty('ChemicalFormula', chemical_formula)
