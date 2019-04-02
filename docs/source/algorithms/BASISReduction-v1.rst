@@ -14,18 +14,17 @@ Description
 -----------
 
 **Run numbers**:
-The syntax for the run numbers designation allows runs to be segregated
-into sets. The semicolon symbol ";" is used to separate the runs into sets.
-Runs within each set are jointly reduced.
+Reduction can be carried out for each run or all runs can be aggregated into
+a single data collection.
 
 Examples:
 
-- 2144-2147,2149,2156  is a single set. All runs jointly reduced.
+- 2144-2147: runs from 2144 to 2147.
 
-- 2144-2147,2149;2156  is set 2144-2147,2149 and set 2156. The sets are reduced separately from each other.
+- 2144-2147,2149,2156: runs from 2144 to 2147 and also runs 2149 and 156
 
 If *DoIndividual* is checked, then each run number is reduced separately
-from the rest. The semicolon symbol is ignored.
+from the rest.
 
 **ExcludeTimeSegment**:
 Events happening in a time segment with no proton charge are most likely
@@ -33,7 +32,7 @@ noise. Those events can be filtered out of the reduction process.
 
 Example:
 
-- "71465:0-500;71466:900-2100;71467:4000-end" will filter out events
+- "71465:0-500,71466:900-2100,71467:4000-end" will filter out events
   happening between the start of the run and 500 seconds for run 71465, then
   between 900 and 2100 seconds for run 71466 and between 4000 seconds and the
   end of the run for 71467. Only one time segment can be excluded per run number.
@@ -89,12 +88,8 @@ Vanadium Normalization
 ======================
 
 The syntax for the vanadium run numbers designation (**NormRunNumbers**) is the same as in
-the case of the sample (hyphens and commas are understood) but no
-semicolons are allowed. As a result, only one set of vanadium run numbers
-is generated, and all runs are jointly reduced into a single vanadium workspace.
-Thus, if we had entered three sets of sample run numbers, then three
-reduced workspaces will be produced and all will be divided by the same
-vanadium workspace.
+the case of the sample (hyphens and commas are understood).
+All runs are jointly reduced into a single vanadium workspace.
 
 Normalization type **by Q slice** is the default
 normalization. In this case, the sample is reduced into :math:`S_{s}(Q,E)` and

@@ -144,7 +144,7 @@ private:
   void groupWorkspaces(const std::vector<std::string> &workspaceNames,
                        const std::string &outputWSName);
 
-  size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr) const;
+  size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr /*ws*/) const;
 };
 
 } // namespace CustomInterfaces

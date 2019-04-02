@@ -40,7 +40,8 @@ class EXPORT_OPT_MANTIDQT_LEGACYQWT PowerScaleTransformation
 public:
   PowerScaleTransformation(const ScaleEngine *engine)
       : ScaleTransformation(engine), nth_power(engine->nthPower()){};
-  double xForm(double x, double, double, double p1, double p2) const override;
+  double xForm(double x, double /*unused*/, double /*unused*/, double p1,
+               double p2) const override;
   double invXForm(double x, double s1, double s2, double p1,
                   double p2) const override;
   QwtScaleTransformation *copy() const override;
@@ -68,14 +69,17 @@ public:
   ~PowerScaleEngine() override;
 
 protected:
-  QwtDoubleInterval align(const QwtDoubleInterval &, double stepSize) const;
+  QwtDoubleInterval align(const QwtDoubleInterval & /*interval*/,
+                          double stepSize) const;
 
 private:
-  void buildTicks(const QwtDoubleInterval &, double stepSize, int maxMinSteps,
+  void buildTicks(const QwtDoubleInterval & /*interval*/, double stepSize,
+                  int maxMinSteps,
                   QwtValueList ticks[QwtScaleDiv::NTickTypes]) const;
 
   void buildMinorTicks(const QwtValueList &majorTicks, int maxMinMark,
-                       double step, QwtValueList &, QwtValueList &) const;
+                       double step, QwtValueList & /*minorTicks*/,
+                       QwtValueList & /*mediumTicks*/) const;
 
   QwtValueList buildMajorTicks(const QwtDoubleInterval &interval,
                                double stepSize) const;

@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm calculates the time-independent background over instrument components. It is geared towards TOF spectrometers with position sensitive detector tubes such as IN5 at ILL and can be readily used as a part of ILL's direct geometry reduction workflow (see :ref:`here <DirectILL>`).
+This algorithm calculates the time-independent background over instrument components. It is geared towards TOF spectrometers with position sensitive detector tubes such as IN5 or PANTHER at the ILL and can be readily used as a part of ILL's direct geometry reduction workflow (see :ref:`here <DirectILL>`).
 
 The algorithm works as following:
 

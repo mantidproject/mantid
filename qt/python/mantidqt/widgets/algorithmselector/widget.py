@@ -46,7 +46,7 @@ class AlgorithmTreeWidget(QTreeWidget):
 
     def mouseDoubleClickEvent(self, mouse_event):
         if mouse_event.button() == Qt.LeftButton:
-            if not self.selectedItems()[0].child(0):
+            if self.selectedItems() and not self.selectedItems()[0].child(0):
                 self.parent.execute_algorithm()
             super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
 

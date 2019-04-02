@@ -33,7 +33,7 @@ public:
   }
 
 signals:
-  void mouseMoved(QPoint, double);
+  void mouseMoved(QPoint /*_t1*/, double /*_t2*/);
 };
 
 //=============================================================================
@@ -79,9 +79,9 @@ public:
   bool getLog();
 
   int getScale() const;
-  void setScale(int);
+  void setScale(int /*type*/);
 
-  void setExponent(double);
+  void setExponent(double /*nth_power*/);
   double getExponent() const;
 
   /// Set the label text for Auto Scale on Load checkbox label
@@ -114,9 +114,9 @@ public:
 public slots:
   void changedMinimum();
   void changedMaximum();
-  void colorBarMouseMoved(QPoint, double);
-  void changedScaleType(int);
-  void changedExponent(double);
+  void colorBarMouseMoved(QPoint /*globalPos*/, double /*fraction*/);
+  void changedScaleType(int /*type*/);
+  void changedExponent(double /*nth_power*/);
 
 signals:
   /// Signal sent when the range or log mode of the color scale changes.

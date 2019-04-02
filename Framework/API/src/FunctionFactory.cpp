@@ -214,23 +214,23 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     inputError(expr.str());
 
   for (; it != terms.end(); ++it) {
-    const Expression &term = it->bracketsRemoved();
+    const Expression &currentTerm = it->bracketsRemoved();
     IFunction_sptr fun;
     std::map<std::string, std::string> pAttributes;
-    if (term.name() == ";") {
-      fun = createComposite(term, pAttributes);
+    if (currentTerm.name() == ";") {
+      fun = createComposite(currentTerm, pAttributes);
       if (!fun)
         continue;
     } else {
-      std::string parName = term[0].name();
+      std::string parName = currentTerm[0].name();
       if (parName.size() >= 10 && parName.substr(0, 10) == "constraint") {
-        addConstraints(cfun, term[1].bracketsRemoved());
+        addConstraints(cfun, currentTerm[1].bracketsRemoved());
         continue;
       } else if (parName == "ties") {
-        addTies(cfun, term[1].bracketsRemoved());
+        addTies(cfun, currentTerm[1].bracketsRemoved());
         continue;
       } else {
-        fun = createSimple(term, pAttributes);
+        fun = createSimple(currentTerm, pAttributes);
       }
     }
     cfun->addFunction(fun);

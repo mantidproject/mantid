@@ -75,7 +75,7 @@ Output:
 .. testoutput:: ConvolutionFitSequentialExample
   :options: +NORMALIZE_WHITESPACE
 
-  Result has 2 Spectra
+  Result has 3 Spectra
   
   Amplitude 0: 4.314
   Amplitude 1: 4.213

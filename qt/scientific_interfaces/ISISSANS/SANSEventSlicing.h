@@ -43,7 +43,7 @@ private:
   void raiseWarning(QString title, QString message);
 
 protected:
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
 private slots:
 
   /// Apply the slice for the SANS data, and update the view with the last

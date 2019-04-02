@@ -98,7 +98,7 @@ signals:
   /// Signals that the axis scale has been changed
   void axisScaleChanged();
   /// Signals that workspace has been removed
-  void workspaceRemoved(Mantid::API::MatrixWorkspace_sptr);
+  void workspaceRemoved(Mantid::API::MatrixWorkspace_sptr /*_t1*/);
 
 public slots:
   void showLegend(bool show);

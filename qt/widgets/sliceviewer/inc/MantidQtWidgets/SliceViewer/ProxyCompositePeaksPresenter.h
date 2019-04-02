@@ -35,11 +35,11 @@ public:
 
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     PeakViewColor);
+                     PeakViewColor /*color*/);
   /// Change the background representation for the peaks of this workspace
   void
   setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     PeakViewColor);
+                     PeakViewColor /*color*/);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;

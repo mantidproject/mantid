@@ -57,7 +57,7 @@ public slots:
 
 signals:
   void showContextMenu();
-  void clickedAt(double, double);
+  void clickedAt(double /*_t1*/, double /*_t2*/);
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;

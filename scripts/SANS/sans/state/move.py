@@ -195,6 +195,7 @@ class StateMoveLARMOR(StateMove):
 @rename_descriptor_names
 class StateMoveZOOM(StateMove):
     lab_detector_default_sd_m = FloatParameter()
+    monitor_n_offset = FloatParameter()
 
     def __init__(self):
         super(StateMoveZOOM, self).__init__()
@@ -202,6 +203,7 @@ class StateMoveZOOM(StateMove):
 
         # Set the monitor names
         self.monitor_names = {}
+        self.monitor_n_offset = 0.0
 
         # Setup the detectors
         self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
@@ -270,7 +272,7 @@ class StateMoveZOOMBuilder(object):
         self.state = StateMoveZOOM()
         # TODO: At the moment we set the monitor names up manually here. In principle we have all necessary information
         #       in the IDF we should be able to parse it and get.
-        invalid_monitor_names = ["monitor5", "monitor6", "monitor7", "monitor8", "monitor9", "monitor10"]
+        invalid_monitor_names = ["monitor6", "monitor7", "monitor8", "monitor9", "monitor10"]
         invalid_detector_types = [DetectorType.HAB]
         setup_idf_and_ipf_content(self.state, data_info,
                                   invalid_detector_types=invalid_detector_types,
