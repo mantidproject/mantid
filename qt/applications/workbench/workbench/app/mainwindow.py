@@ -532,13 +532,6 @@ class MainWindow(QMainWindow):
         self.interface_manager.showConceptHelp('')
 
     def open_mantid_help(self):
-        from qtpy.QtCore import QLibraryInfo
-        print("Prefix: {}".format(QLibraryInfo.location(QLibraryInfo.PrefixPath)))
-        print("Libraries: {}".format(QLibraryInfo.location(QLibraryInfo.LibrariesPath)))
-        print("LibExes: {}".format(QLibraryInfo.location(QLibraryInfo.LibraryExecutablesPath)))
-        print("Binaries: {}".format(QLibraryInfo.location(QLibraryInfo.BinariesPath)))
-        print("Plugins: {}".format(QLibraryInfo.location(QLibraryInfo.PluginsPath)))
-        print("Data: {}".format(QLibraryInfo.location(QLibraryInfo.DataPath)))
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):
