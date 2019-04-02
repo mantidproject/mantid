@@ -95,8 +95,8 @@ WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
 namespace MantidQt {
 namespace CustomInterfaces {
 AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
-    : m_sampleDensities(std::make_shared<Densities>()),
-      m_canDensities(std::make_shared<Densities>()), CorrectionsTab(parent) {
+    : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
+      m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
 
   QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");

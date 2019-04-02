@@ -40,8 +40,8 @@ std::string extractFirstOf(std::string const &str,
 namespace MantidQt {
 namespace CustomInterfaces {
 CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
-    : m_sampleDensities(std::make_shared<Densities>()),
-      m_canDensities(std::make_shared<Densities>()), CorrectionsTab(parent) {
+    : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
+      m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,

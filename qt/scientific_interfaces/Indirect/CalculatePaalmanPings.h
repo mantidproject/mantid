@@ -75,10 +75,10 @@ private:
   getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
                          const std::string &parameterName);
 
+  Ui::CalculatePaalmanPings m_uiForm;
+
   std::shared_ptr<Densities> m_sampleDensities;
   std::shared_ptr<Densities> m_canDensities;
-
-  Ui::CalculatePaalmanPings m_uiForm;
 };
 
 } // namespace CustomInterfaces

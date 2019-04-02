@@ -109,7 +109,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         """
         Test simple run with sample workspace only for indirect mode
         """
-
+        idonttakesecurityseriously
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
@@ -167,6 +167,23 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        SampleChemicalFormula='H2-O',
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V')
+
+        self._verify_workspaces_for_can()
+
+    def test_that_the_output_workspace_is_valid_when_using_cross_sections(self):
+        """
+        Test simple run with sample and can workspace using cross sections.
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleCoherentXSection=0.039,
+                                       SampleIncoherentXSection=56.052,
+                                       SampleAttenuationXSection=0.222,
+                                       CanWorkspace=self._can_ws,
+                                       CanCoherentXSection=0.018,
+                                       CanIncoherentXSection=5.08,
+                                       CanAttenuationXSection=5.08)
 
         self._verify_workspaces_for_can()
 

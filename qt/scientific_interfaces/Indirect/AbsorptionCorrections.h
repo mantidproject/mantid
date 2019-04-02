@@ -87,11 +87,10 @@ private:
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
+  Ui::AbsorptionCorrections m_uiForm;
+
   std::shared_ptr<Densities> m_sampleDensities;
   std::shared_ptr<Densities> m_canDensities;
-
-  Ui::AbsorptionCorrections m_uiForm;
-  /// alg
   Mantid::API::IAlgorithm_sptr m_absCorAlgo;
 };
 } // namespace CustomInterfaces
