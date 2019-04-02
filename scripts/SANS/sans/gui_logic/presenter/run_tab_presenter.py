@@ -486,9 +486,11 @@ class RunTabPresenter(object):
         which occur.
         """
         states, errors = self.get_states(row_index=rows)
+        error_msg = "\n\n"
         for row, error in errors.items():
             self.on_processing_error(row, error)
-        return states
+            error_msg += "{}\n".format(error)
+        return states, error_msg
 
     def _plot_graph(self):
         """
@@ -518,6 +520,7 @@ class RunTabPresenter(object):
         """
         Processes a list of rows. Any errors cause the row to be coloured red.
         """
+        error_msg = ""
         try:
             for row in rows:
                 self._table_model.reset_row_state(row)
@@ -527,7 +530,7 @@ class RunTabPresenter(object):
             self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
 
-            states = self._handle_get_states(rows)
+            states, error_msg = self._handle_get_states(rows)
             if not states:
                 raise Exception("No states found")
 
@@ -548,7 +551,7 @@ class RunTabPresenter(object):
         except Exception as e:
             self.on_processing_finished(None)
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box('Warning', 'Process halted', str(e))
+            self.display_warning_box('Warning', 'Process halted', str(e) + error_msg)
 
     def on_process_all_clicked(self):
         """
@@ -582,6 +585,7 @@ class RunTabPresenter(object):
         self._processing = False
 
     def on_load_clicked(self):
+        error_msg = "\n\n"
         try:
             self._view.disable_buttons()
             self._processing = True
@@ -593,6 +597,7 @@ class RunTabPresenter(object):
 
             for row, error in errors.items():
                 self.on_processing_error(row, error)
+                error_msg += "{}\n".format(error)
 
             if not states:
                 self.on_processing_finished(None)
@@ -605,7 +610,7 @@ class RunTabPresenter(object):
         except Exception as e:
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box("Warning", "Process halted", str(e))
+            self.display_warning_box("Warning", "Process halted", str(e) + error_msg)
 
     def on_export_table_clicked(self):
         non_empty_rows = self.get_row_indices()
