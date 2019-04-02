@@ -101,7 +101,7 @@ public:
   void startMonitor() override;
   void stopMonitor() override;
 
-  void executePythonCode(const std::string pythonCode);
+  void executePythonCode(const std::string &pythonCode);
 
 private:
   /// initialise the interface

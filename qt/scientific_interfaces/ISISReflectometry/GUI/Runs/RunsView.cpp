@@ -426,7 +426,7 @@ void RunsView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-void RunsView::executePythonCode(const std::string pythonCode) {
+void RunsView::executePythonCode(const std::string &pythonCode) {
   m_batchView->executePythonCode(pythonCode);
 }
 } // namespace CustomInterfaces

@@ -601,8 +601,6 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   if (workspaces.empty())
     return;
 
-  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
-
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
   Plotter plotter(runsTable);
