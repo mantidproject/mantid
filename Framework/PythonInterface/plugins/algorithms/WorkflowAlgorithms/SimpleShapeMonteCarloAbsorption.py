@@ -248,7 +248,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
             if self._density_type == 'Mass Density':
                 sample_material['SampleMassDensity'] = self._density
-            else:
+            if self._density_type == 'Number Density':
                 sample_material['SampleNumberDensity'] = self._density
                 sample_material['NumberDensityUnit'] = self._number_density_unit
 

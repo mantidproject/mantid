@@ -147,7 +147,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanNumberDensityUnit', defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
                              doc='Choose which units CanDensity refers to. Allowed values: [Atoms, Formula Units]')
-        
+
         self.declareProperty(name='CanDensity', defaultValue=0.1,
                              doc='The value for the can Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
