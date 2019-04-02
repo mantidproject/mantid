@@ -90,8 +90,16 @@ void BatchPresenter::notifyAutoreductionCompleted() {
 
 void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
-  reductionPaused();
+
+  // Make sure views are up to date with any changes in state
   m_runsPresenter->notifyRowStateChanged();
+
+  // Continue processing the next batch of algorithms, if there is more to do
+  auto algorithms = m_jobRunner->getAlgorithms();
+  if (algorithms.size() > 0)
+    startBatch(std::move(algorithms));
+  else
+    reductionPaused();
 }
 
 void BatchPresenter::notifyBatchCancelled() {
@@ -126,16 +134,32 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm,
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::resumeReduction() {
-  reductionResumed();
+/** Start processing the next batch of algorithms.
+ * @returns : true if processing was started, false if there was nothing to do
+ */
+bool BatchPresenter::startBatch(
+    std::deque<IConfiguredAlgorithm_sptr> algorithms) {
   m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
+  m_view->setAlgorithmQueue(std::move(algorithms));
   m_view->executeAlgorithmQueue();
+  return true;
+}
+
+void BatchPresenter::resumeReduction() {
+  // Update the model
+  m_jobRunner->reductionResumed();
+  // Get the algorithms to process
+  auto algorithms = m_jobRunner->getAlgorithms();
+  if (algorithms.size() < 1) {
+    m_jobRunner->reductionPaused();
+    return;
+  }
+  // Start processing
+  reductionResumed();
+  startBatch(std::move(algorithms));
 }
 
 void BatchPresenter::reductionResumed() {
-  // Update the model
-  m_jobRunner->reductionResumed();
   // Notify child presenters
   m_savePresenter->reductionResumed();
   m_eventPresenter->reductionResumed();
@@ -158,15 +182,20 @@ void BatchPresenter::reductionPaused() {
 }
 
 void BatchPresenter::resumeAutoreduction() {
+  // Update the model
+  m_jobRunner->autoreductionResumed();
+  // Get the algorithms to run
+  auto algorithms = m_jobRunner->getAlgorithms();
+  if (algorithms.size() < 1) {
+    m_jobRunner->autoreductionPaused();
+    return;
+  }
+  // Start processing
   autoreductionResumed();
-  m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(m_jobRunner->getAlgorithms());
-  m_view->executeAlgorithmQueue();
+  startBatch(std::move(algorithms));
 }
 
 void BatchPresenter::autoreductionResumed() {
-  // Update the model
-  m_jobRunner->autoreductionResumed();
   // Notify child presenters
   m_savePresenter->autoreductionResumed();
   m_eventPresenter->autoreductionResumed();

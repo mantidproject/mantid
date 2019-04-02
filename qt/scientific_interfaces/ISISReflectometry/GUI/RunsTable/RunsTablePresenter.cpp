@@ -8,15 +8,15 @@
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "Plotter.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"
+#include "RunsTableView.h"
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
-
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -103,6 +103,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
       removeRowsFromModel(selected);
       ensureAtLeastOneGroupExists();
       notifyRowStateChanged();
+      notifySelectionChanged();
     } else {
       m_view->mustNotSelectGroup();
     }
@@ -119,6 +120,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
     ensureAtLeastOneGroupExists();
     notifyRowStateChanged();
+    notifySelectionChanged();
   } else {
     m_view->mustSelectGroupOrRow();
   }
@@ -448,12 +450,14 @@ void RunsTablePresenter::notifyRemoveRowsRequested(
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
   ensureAtLeastOneGroupExists();
+  notifySelectionChanged();
 }
 
 void RunsTablePresenter::notifyRemoveAllRowsAndGroupsRequested() {
   removeAllRowsAndGroupsFromModel();
   removeAllRowsAndGroupsFromView();
   ensureAtLeastOneGroupExists();
+  notifySelectionChanged();
 }
 
 void RunsTablePresenter::notifyCopyRowsRequested() {
@@ -470,6 +474,7 @@ void RunsTablePresenter::notifyCutRowsRequested() {
     m_view->jobs().removeRows(m_view->jobs().selectedRowLocations());
     m_view->jobs().clearSelection();
     ensureAtLeastOneGroupExists();
+    notifySelectionChanged();
   } else {
     m_view->invalidSelectionForCut();
   }
@@ -485,6 +490,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
       m_view->jobs().appendSubtreesAt(MantidWidgets::Batch::RowLocation(),
                                       m_clipboard.get());
     notifyRowStateChanged();
+    notifySelectionChanged();
   } else {
     m_view->invalidSelectionForPaste();
   }
@@ -508,40 +514,43 @@ void RunsTablePresenter::forAllCellsAt(
   m_view->jobs().setCellsAt(location, cells);
 }
 
+void RunsTablePresenter::setRowStylingForItem(
+    MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
+  forAllCellsAt(rowPath, clearStateStyling);
+
+  switch (item.state()) {
+  case State::ITEM_NOT_STARTED: // fall through
+  case State::ITEM_STARTING:
+    break;
+  case State::ITEM_RUNNING:
+    forAllCellsAt(rowPath, applyRunningStateStyling);
+    break;
+  case State::ITEM_COMPLETE:
+    forAllCellsAt(rowPath, applyCompletedStateStyling);
+    break;
+  case State::ITEM_ERROR:
+    forAllCellsAt(rowPath, applyErrorStateStyling, item.message());
+    break;
+  case State::ITEM_WARNING:
+    forAllCellsAt(rowPath, applyWarningStateStyling, item.message());
+    break;
+  };
+}
+
 void RunsTablePresenter::notifyRowStateChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
-    forAllCellsAt(groupPath, clearStateStyling);
+    setRowStylingForItem(groupPath, group);
 
     int rowIndex = 0;
     for (auto &row : group.rows()) {
       auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-      forAllCellsAt(rowPath, clearStateStyling);
 
-      if (!row) {
+      if (!row)
         forAllCellsAt(rowPath, applyInvalidStateStyling);
-        ++rowIndex;
-        continue;
-      }
-
-      switch (row->state()) {
-      case State::ITEM_NOT_STARTED: // fall through
-      case State::ITEM_STARTING:
-        break;
-      case State::ITEM_RUNNING:
-        forAllCellsAt(rowPath, applyRunningStateStyling);
-        break;
-      case State::ITEM_COMPLETE:
-        forAllCellsAt(rowPath, applyCompletedStateStyling);
-        break;
-      case State::ITEM_ERROR:
-        forAllCellsAt(rowPath, applyErrorStateStyling, row->message());
-        break;
-      case State::ITEM_WARNING:
-        forAllCellsAt(rowPath, applyWarningStateStyling, row->message());
-        break;
-      };
+      else
+        setRowStylingForItem(rowPath, *row);
 
       ++rowIndex;
     }
@@ -555,6 +564,52 @@ bool RunsTablePresenter::isProcessing() const {
 
 bool RunsTablePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+void RunsTablePresenter::notifyPlotSelectedPressed() {
+  std::vector<std::string> workspaces;
+  const auto rows = m_model.selectedRows();
+
+  for (const auto &row : rows) {
+    const auto workspaceName = row.reducedWorkspaceNames().iVsQBinned();
+    if (workspaceName != "")
+      workspaces.emplace_back(workspaceName);
+  }
+
+  if (workspaces.empty())
+    return;
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
+  Plotter plotter(runsTable);
+#else
+  Plotter plotter;
+#endif
+  plotter.reflectometryPlot(workspaces);
+
+  m_view->jobs().clearSelection();
+}
+
+void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
+  std::vector<std::string> workspaces;
+  const auto groups = m_model.selectedGroups();
+
+  for (const auto &group : groups) {
+    workspaces.emplace_back(group.postprocessedWorkspaceName());
+  }
+
+  if (workspaces.empty())
+    return;
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
+  Plotter plotter(runsTable);
+#else
+  Plotter plotter;
+#endif
+  plotter.reflectometryPlot(workspaces);
+
+  m_view->jobs().clearSelection();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

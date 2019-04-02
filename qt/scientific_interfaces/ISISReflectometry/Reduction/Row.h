@@ -43,17 +43,12 @@ public:
   ReductionWorkspaces const &reducedWorkspaceNames() const;
 
   void setOutputNames(std::vector<std::string> const &outputNames) override;
-
-  Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
-
-  void algorithmStarted() override;
-  void algorithmComplete(
-      std::vector<std::string> const &outputWorkspaceNames) override;
-  void algorithmError(std::string const &msg) override;
-
+  void resetOutputNames() override;
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName,
                              std::string const &newName) override;
+
+  Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
 private:
   std::vector<std::string> m_runNumbers;

@@ -35,6 +35,7 @@ namespace CustomInterfaces {
 
 // Forward decs
 class SearchModel;
+class BatchView;
 
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
@@ -47,7 +48,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsView
       public IRunsView {
   Q_OBJECT
 public:
-  RunsView(QWidget *parent, RunsTableViewFactory makeView);
+  RunsView(QWidget *parent, RunsTableViewFactory makeView,
+           BatchView *batchView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   IRunsTableView *table() const override;
@@ -99,6 +101,8 @@ public:
   void startMonitor() override;
   void stopMonitor() override;
 
+  void executePythonCode(const std::string &pythonCode);
+
 private:
   /// initialise the interface
   void initLayout();
@@ -123,6 +127,7 @@ private:
   QBasicTimer m_timer;
 
   RunsTableView *m_tableView;
+  BatchView *m_batchView;
 
 private slots:
   void on_actionSearch_triggered();

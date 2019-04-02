@@ -71,6 +71,11 @@ void ReductionJobs::resetState() {
     group.resetState();
 }
 
+void ReductionJobs::resetSkippedItems() {
+  for (auto &group : m_groups)
+    group.resetSkipped();
+}
+
 std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }
@@ -225,6 +230,31 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
       return boost::optional<Item &>(maybeRow.get());
   }
   return boost::none;
+}
+
+Group ReductionJobs::getGroupFromPath(
+    const MantidWidgets::Batch::RowPath path) const {
+  if (path.size() == 1) {
+    // Is group
+    return m_groups[path[0]];
+  } else {
+    throw std::invalid_argument("Path given does not point to a group.");
+  }
+}
+
+Row ReductionJobs::getRowFromPath(
+    const MantidWidgets::Batch::RowPath path) const {
+  if (path.size() == 2) {
+    // Is Row
+    const auto group = m_groups[path[0]];
+    const auto row = group[path[1]];
+    if (row.is_initialized())
+      return row.get();
+    else
+      throw std::invalid_argument("Row is not initialised");
+  } else {
+    throw std::invalid_argument("Path given does not point to a row.");
+  }
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

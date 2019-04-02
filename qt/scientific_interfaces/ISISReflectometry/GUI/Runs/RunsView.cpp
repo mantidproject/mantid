@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsView.h"
+#include "../Batch/BatchView.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
@@ -24,9 +25,11 @@ using namespace MantidQt::MantidWidgets;
  * @param parent :: The parent of this view
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
-RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
+RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView,
+                   BatchView *batchView)
     : MantidWidget(parent), m_notifyee(nullptr),
-      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()) {
+      m_calculator(new SlitCalculator(this)),
+      m_tableView(makeRunsTableView(this)), m_batchView(batchView) {
   initLayout();
 }
 void RunsView::loginFailed(std::string const &fullError) {
@@ -419,6 +422,10 @@ void RunsView::setSelected(QComboBox &box, std::string const &str) {
   auto const index = box.findText(QString::fromStdString(str));
   if (index != -1)
     box.setCurrentIndex(index);
+}
+
+void RunsView::executePythonCode(const std::string &pythonCode) {
+  m_batchView->executePythonCode(pythonCode);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

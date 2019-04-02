@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTableView.h"
+#include "../Runs/RunsView.h"
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
@@ -14,9 +15,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
+RunsTableView::RunsTableView(RunsView *parent,
+                             std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex)
-    : m_jobs(), m_instruments(instruments) {
+    : m_jobs(), m_instruments(instruments), m_runsView(parent) {
   m_ui.setupUi(this);
   m_jobs =
       Mantid::Kernel::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
@@ -147,6 +149,24 @@ void RunsTableView::addToolbarActions() {
   connect(addToolbarItem(Action::Pause, "://pause.png",
                          "Pause processing of runs."),
           SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
+  connect(
+      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
+      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
+  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
+                         "Collapse all groups"),
+          SIGNAL(triggered(bool)), this,
+          SLOT(onCollapseAllGroupsPressed(bool)));
+
+  connect(addToolbarItem(Action::PlotSelected, "://graph.png",
+                         "Plot selected rows as graphs"),
+          SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed(bool)));
+
+  connect(addToolbarItem(Action::PlotSelectedStitchedOutput,
+                         "://trajectory.png",
+                         "Plot selected rows with stitched outputs as graphs"),
+          SIGNAL(triggered(bool)), this,
+          SLOT(onPlotSelectedStitchedOutputPressed(bool)));
+
   connect(addToolbarItem(Action::InsertRow, "://insert_row.png",
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
@@ -168,13 +188,6 @@ void RunsTableView::addToolbarActions() {
   connect(
       addToolbarItem(Action::Cut, "://cut.png", "Cut the current selection"),
       SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
-  connect(
-      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
-      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
-  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
-                         "Collapse all groups"),
-          SIGNAL(triggered(bool)), this,
-          SLOT(onCollapseAllGroupsPressed(bool)));
 }
 
 MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
@@ -234,6 +247,14 @@ void RunsTableView::onPastePressed(bool) {
   m_notifyee->notifyPasteRowsRequested();
 }
 
+void RunsTableView::onPlotSelectedPressed(bool) {
+  m_notifyee->notifyPlotSelectedPressed();
+}
+
+void RunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
+  m_notifyee->notifyPlotSelectedStitchedOutputPressed();
+}
+
 /** Set a combo box to the given value
  */
 void RunsTableView::setSelected(QComboBox &box, std::string const &str) {
@@ -242,12 +263,17 @@ void RunsTableView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
+void RunsTableView::executePythonCode(std::string pythonCode) {
+  return m_runsView->executePythonCode(pythonCode);
+}
+
 RunsTableViewFactory::RunsTableViewFactory(
     std::vector<std::string> const &instruments)
     : m_instruments(instruments) {}
 
-RunsTableView *RunsTableViewFactory::operator()() const {
-  return new RunsTableView(m_instruments, defaultInstrumentFromConfig());
+RunsTableView *RunsTableViewFactory::operator()(RunsView *parent) const {
+  return new RunsTableView(parent, m_instruments,
+                           defaultInstrumentFromConfig());
 }
 
 int RunsTableViewFactory::indexOfElseFirst(

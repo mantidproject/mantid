@@ -9,13 +9,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-Item::Item() : m_itemState() {}
+Item::Item() : m_itemState(), m_skipped(false) {}
 
 State Item::state() const { return m_itemState.state(); }
 
 std::string Item::message() const { return m_itemState.message(); }
 
-void Item::resetState() { m_itemState.reset(); }
+void Item::resetState() {
+  resetOutputNames();
+  m_itemState.reset();
+}
+
+void Item::setSkipped(bool skipped) { m_skipped = skipped; }
 
 void Item::setProgress(double p, std::string const &msg) {
   m_itemState.setProgress(p, msg);
@@ -30,6 +35,11 @@ void Item::setSuccess() { m_itemState.setSuccess(); }
 void Item::setError(std::string const &msg) { m_itemState.setError(msg); }
 
 bool Item::requiresProcessing(bool reprocessFailed) const {
+  // Check the skipped flag. This means that items will not be processed even
+  // if we're reprocessing failed rows
+  if (m_skipped)
+    return false;
+
   switch (state()) {
   case State::ITEM_NOT_STARTED:
     return true;
@@ -45,15 +55,5 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   }
   return false;
 }
-
-void Item::algorithmStarted() { setRunning(); }
-
-void Item::algorithmComplete(
-    std::vector<std::string> const &outputWorkspaceNames) {
-  UNUSED_ARG(outputWorkspaceNames);
-  setSuccess();
-}
-
-void Item::algorithmError(std::string const &msg) { setError(msg); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

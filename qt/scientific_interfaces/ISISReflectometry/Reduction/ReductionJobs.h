@@ -32,6 +32,7 @@ public:
   void removeGroup(int index);
   void removeAllGroups();
   void resetState();
+  void resetSkippedItems();
 
   std::vector<Group> &mutableGroups();
   std::vector<Group> const &groups() const;
@@ -43,6 +44,9 @@ public:
   Group const &getParentGroup(Row const &row) const;
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+
+  Group getGroupFromPath(const MantidWidgets::Batch::RowPath path) const;
+  Row getRowFromPath(const MantidWidgets::Batch::RowPath path) const;
 
 private:
   std::vector<Group> m_groups;

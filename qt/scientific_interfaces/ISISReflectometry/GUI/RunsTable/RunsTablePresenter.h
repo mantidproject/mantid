@@ -48,6 +48,8 @@ public:
   void notifyInstrumentChanged() override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
+  void notifyPlotSelectedPressed() override;
+  void notifyPlotSelectedStitchedOutputPressed() override;
   void reductionPaused() override;
   void reductionResumed() override;
   void autoreductionPaused() override;
@@ -125,6 +127,8 @@ private:
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location,
                      UpdateCellWithTooltipFunc updateFunc,
                      std::string const &tooltip);
+  void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath,
+                            Item const &item);
 
   bool isProcessing() const;
   bool isAutoreducing() const;
