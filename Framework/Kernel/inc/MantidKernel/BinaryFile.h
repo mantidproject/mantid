@@ -63,14 +63,14 @@ public:
    * @throw invalid_argument if the file does not exist
    * */
   void open(const std::string &filename) {
-    this->handle = nullptr;
+    this->handle.reset(nullptr);
     if (!Poco::File(filename).exists()) {
       std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
       throw std::invalid_argument("File does not exist.");
     }
     // Open the file
-    this->handle = new std::ifstream(filename.c_str(), std::ios::binary);
+    this->handle = std::make_unique<std::ifstream>(filename.c_str(), std::ios::binary);
     // Count the # of elements.
     this->num_elements = this->getFileSize();
     // Make sure we are starting at 0
@@ -81,8 +81,7 @@ public:
   /** Close the file
    * */
   void close() {
-    delete handle;
-    handle = nullptr;
+    handle.reset(nullptr);
   }
 
   //-----------------------------------------------------------------------------
@@ -263,7 +262,7 @@ private:
   }
 
   /// File stream
-  std::ifstream *handle;
+  std::unique_ptr<std::ifstream> handle;
   /// Size of each object.
   size_t obj_size;
   /// Number of elements of size T in the file
