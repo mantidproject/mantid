@@ -1,46 +1,39 @@
 # Create egg link to binary output directory
 add_python_package(workbench EXECUTABLE)
 
-# Create resource files for Qt5
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
-# Create resources.qrc, qt.conf and qt resource.py file for developer-build
-set(_paths_qrc_file_build ${CMAKE_CURRENT_LIST_DIR}/resources.qrc.build)
-set(_qt_conf_file_build ${CMAKE_CURRENT_LIST_DIR}/qt.conf.build)
-set(_output_res_py_build ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
-# Write qt.conf.build
-file ( WRITE ${_qt_conf_file_build} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n")
-# Write resources.qrc.build
-file ( WRITE ${_paths_qrc_file_build}
-"<!DOCTYPE RCC><RCC version=\"1.0\">\n\
-<qresource prefix=\"/qt/etc\">\n\
-<file alias=\"qt.conf\">qt.conf.build</file>\n\
-</qresource>\n</RCC>\n")
-# Add command to generate resources.py
-add_custom_command(OUTPUT ${_output_res_py_build}
-                   COMMAND ${PYRCC5_CMD} -o ${_output_res_py_build} ${_images_qrc_file} ${_paths_qrc_file_build}
-                   COMMENT "Generating workbench resources module"
-                   DEPENDS ${_paths_qrc_file_build} ${_images_qrc_file})
+function ( CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
+  # Set path and file content variables
+  set(_paths_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc.${BUILD_TYPE})
+  set(_qt_conf_file ${CMAKE_CURRENT_LIST_DIR}/qt.conf.${BUILD_TYPE})
+  set(_qrc_file_contents "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n")
 
-# Create resources.qrc, qt.conf and qt resource.py file for package install
-set(_paths_qrc_file_install ${CMAKE_CURRENT_LIST_DIR}/resources.qrc.install)
-set(_qt_conf_file_install ${CMAKE_CURRENT_LIST_DIR}/qt.conf.install)
-set(_output_res_py_install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py.install)
-# Write qt.conf.install
-file ( WRITE ${_qt_conf_file_install} "[Paths]\nPrefix = ../lib/qt5\n")
-# Write resources.qrc.install
-file ( WRITE ${_paths_qrc_file_install}
-"<!DOCTYPE RCC><RCC version=\"1.0\">\n\
-<qresource prefix=\"/qt/etc\">\n\
-<file alias=\"qt.conf\">qt.conf.install</file>\n\
-</qresource>\n</RCC>\n")
-# Add command to generate resources.py.install
-add_custom_command(OUTPUT ${_output_res_py_install}
-                   COMMAND ${PYRCC5_CMD} -o ${_output_res_py_install} ${_images_qrc_file} ${_paths_qrc_file_install}
-                   COMMENT "Generating workbench resources module"
-                   DEPENDS ${_paths_qrc_file_install} ${_images_qrc_file})
+  # Write qt.conf.BUILD_TYPE file and get resources file name
+  if ( ${BUILD_TYPE} STREQUAL "build" )
+    file ( WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n" ) 
+    set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  elseif( ${BUILD_TYPE} STREQUAL "install" )
+    file ( WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n")
+    set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py.install)
+  endif()
 
-add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py_build} ${_output_res_py_install})
+  # Write resources.qrc.BUILD_TYPE
+  file ( WRITE ${_paths_qrc_file} ${_qrc_file_contents})
+
+  # Add command to generate resources.py file
+  add_custom_command(OUTPUT ${_output_res_py}
+                     COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
+                     COMMENT "Generating workbench resources module for ${BUILD_TYPE}"
+                     DEPENDS ${_paths_qrc_file} ${_images_qrc_file})
+endfunction()
+
+# Create PyQt resource files (qt.conf and resources.qrc) and link to workbench_resources target to produce
+# resources.py on build
+foreach(BUILD_TYPE "build" "install")
+  CREATE_QRC_FILE_TEMPLATE(${BUILD_TYPE})
+endforeach()
+add_custom_target(workbench_resources ALL DEPENDS ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py.install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
 
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)
