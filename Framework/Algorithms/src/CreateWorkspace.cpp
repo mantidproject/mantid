@@ -257,23 +257,23 @@ void CreateWorkspace::exec() {
   // mapping
   if (vUnit != "SpectraNumber") {
     if (vUnit == "Text") {
-      auto const newAxis = new TextAxis(vAxis.size());
-      outputWS->replaceAxis(1, newAxis);
+      auto newAxis = std::make_unique<TextAxis>(vAxis.size());
+      outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
         newAxis->setLabel(i, vAxis[i]);
       }
     } else {
-      NumericAxis *newAxis(nullptr);
+      std::unique_ptr<NumericAxis> newAxis(nullptr);
       if (vAxisSize == nSpec)
-        newAxis = new NumericAxis(vAxisSize); // treat as points
+        newAxis = std::make_unique<NumericAxis>(vAxisSize); // treat as points
       else if (vAxisSize == nSpec + 1)
-        newAxis = new BinEdgeAxis(vAxisSize); // treat as bin edges
+        newAxis = std::make_unique<BinEdgeAxis>(vAxisSize); // treat as bin edges
       else
         throw std::range_error("Invalid vertical axis length. It must be the "
                                "same length as NSpec or 1 longer.");
 
       newAxis->unit() = UnitFactory::Instance().create(vUnit);
-      outputWS->replaceAxis(1, newAxis);
+      outputWS->replaceAxis(1, std::move(newAxis));
       for (size_t i = 0; i < vAxis.size(); i++) {
         try {
           newAxis->setValue(i,

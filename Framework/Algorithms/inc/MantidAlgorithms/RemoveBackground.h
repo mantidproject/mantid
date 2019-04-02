@@ -52,7 +52,7 @@ public:
 
 private:
   // vector of pointers to the units conversion class for the working workspace;
-  std::vector<Kernel::Unit *> m_WSUnit;
+  std::vector<std::unique_ptr<Kernel::Unit>> m_WSUnit;
 
   // shared pointer to the workspace containing background
   API::MatrixWorkspace_const_sptr m_bgWs;

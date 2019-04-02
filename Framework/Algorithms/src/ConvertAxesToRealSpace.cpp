@@ -198,13 +198,13 @@ void ConvertAxesToRealSpace::exec() {
   yRef.resize(axisVector[1].bins);
   fillAxisValues(yRef, axisVector[1], false);
 
-  auto const yAxis = new NumericAxis(yRef);
+  auto yAxis = std::make_unique<NumericAxis>(yRef);
   boost::shared_ptr<Units::Label> ylabel =
       boost::dynamic_pointer_cast<Units::Label>(
           UnitFactory::Instance().create("Label"));
   ylabel->setLabel(axisVector[1].label, m_unitMap[axisVector[1].label]);
   yAxis->unit() = ylabel;
-  outputWs->replaceAxis(1, yAxis);
+  outputWs->replaceAxis(1, std::move(yAxis));
 
   // work out where to put the data into the output workspace, but don't do it
   // yet as that needs to be single threaded

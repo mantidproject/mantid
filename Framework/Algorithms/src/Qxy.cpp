@@ -452,8 +452,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   outputWorkspace->mutableDetectorInfo().clearMaskFlags();
 
   // Create a numeric axis to replace the vertical one
-  Axis *verticalAxis = new BinEdgeAxis(nBins);
-  outputWorkspace->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<BinEdgeAxis>(nBins);
+  outputWorkspace->replaceAxis(1, std::move(verticalAxis));
   for (int i = 0; i < nBins; ++i) {
     const double currentVal = axis[i];
     // Set the Y value on the axis

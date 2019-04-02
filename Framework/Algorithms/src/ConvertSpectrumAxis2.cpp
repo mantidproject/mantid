@@ -227,7 +227,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::MatrixWorkspace_sptr &inputWS) {
 
   MatrixWorkspace_sptr outputWorkspace = nullptr;
-  NumericAxis *newAxis = nullptr;
+  std::unique_ptr<NumericAxis> newAxis = nullptr;
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
   if (m_toOrder) {
@@ -241,13 +241,13 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     for (const auto &it : m_indexMap) {
       axis.emplace_back(it.first);
     }
-    newAxis = new NumericAxis(std::move(axis));
+    newAxis = std::make_unique<NumericAxis>(std::move(axis));
   } else {
     // If there is no reordering we can simply clone.
     outputWorkspace = inputWS->clone();
-    newAxis = new NumericAxis(m_axis);
+    newAxis = std::make_unique<NumericAxis>(m_axis);
   }
-  outputWorkspace->replaceAxis(1, newAxis);
+
 
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
@@ -260,7 +260,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   } else if (targetUnit == "ElasticDSpacing") {
     newAxis->unit() = UnitFactory::Instance().create("dSpacing");
   }
-
+  outputWorkspace->replaceAxis(1, std::move(newAxis));
   // Note that this is needed only for ordered case
   if (m_toOrder) {
     size_t currentIndex = 0;

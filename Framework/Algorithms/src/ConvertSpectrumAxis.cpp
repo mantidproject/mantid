@@ -162,8 +162,8 @@ void ConvertSpectrumAxis::exec() {
       create<MatrixWorkspace>(*inputWS, indexMap.size(), builder.build());
   // Now set up a new, numeric axis holding the theta values corresponding to
   // each spectrum
-  auto const newAxis = new NumericAxis(indexMap.size());
-  outputWS->replaceAxis(1, newAxis);
+  auto newAxis = std::make_unique<NumericAxis>(indexMap.size());
+  outputWS->replaceAxis(1, std::move(newAxis));
   // The unit of this axis is radians. Use the 'radians' unit defined above.
   if (unitTarget == "theta" || unitTarget == "signed_theta") {
     newAxis->unit() = boost::make_shared<Units::Degrees>();

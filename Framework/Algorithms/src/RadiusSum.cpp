@@ -627,11 +627,11 @@ void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
   // for instrument related, the axis Y (1) continues to be the same.
   // it is necessary to change only the axis X. We have to change it to radius.
   if (inputWorkspaceHasInstrumentAssociated(inputWS)) {
-    API::Axis *const horizontal = new API::NumericAxis(xSize);
+    auto horizontal = std::make_unique<API::NumericAxis>(xSize);
     auto labelX = UnitFactory::Instance().create("Label");
     boost::dynamic_pointer_cast<Units::Label>(labelX)->setLabel("Radius");
     horizontal->unit() = labelX;
-    outputWS->replaceAxis(0, horizontal);
+    outputWS->replaceAxis(0, std::move(horizontal));
   }
 
   setProperty("OutputWorkspace", outputWS);
