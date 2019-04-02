@@ -15,7 +15,7 @@ namespace RandomPoint {
 
 /**
  * Return a local point in a cylinder shape
- * 
+ *
  * @param basis a basis vector
  * @param alongAxis symmetry axis vector of a cylinder
  * @param polarAngle a polar angle (in radians) of a point in a cylinder
