@@ -109,6 +109,9 @@ class RunTabPresenter(object):
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
+        def on_reduction_dimensionality_changed(self, is_1d):
+            self._presenter.verify_output_modes(is_1d)
+
         def on_data_changed(self, row, column, new_value, old_value):
             self._presenter.on_data_changed(row, column, new_value, old_value)
 
@@ -552,6 +555,21 @@ class RunTabPresenter(object):
             self.on_processing_finished(None)
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e) + error_msg)
+
+    def verify_output_modes(self, is_1d):
+        """
+        Unchecks and disabled canSAS output mode if switching to 2D reduction.
+        Enabled canSAS if switching to 1D.
+        :param is_1d: bool. If true then switching TO 1D reduction.
+        """
+        if is_1d:
+            self._view.can_sas_checkbox.setEnabled(True)
+        else:
+            if self._view.can_sas_checkbox.isChecked():
+                self._view.can_sas_checkbox.setChecked(False)
+                self.sans_logger.information("2D reductions are incompatible with canSAS output. "
+                                             "canSAS output has been unchecked.")
+            self._view.can_sas_checkbox.setEnabled(False)
 
     def on_process_all_clicked(self):
         """

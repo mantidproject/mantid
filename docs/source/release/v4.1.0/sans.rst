@@ -19,3 +19,4 @@ Improvements
 
 - Increased font size in run table.
 - For ZOOM, SHIFT user file command now moves monitor 5.
+- canSAS output mode will be disable if 2D reduction mode is selected to avoid accidental errors with data dimension.
