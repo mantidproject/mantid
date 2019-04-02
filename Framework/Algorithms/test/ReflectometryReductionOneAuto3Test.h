@@ -18,7 +18,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidDataHandling/CreatePolarizationEfficiencies.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -966,15 +965,12 @@ public:
     const double startX = 1000;
     const int nBins = 3;
     const double deltaX = 1000;
+    const double endX = 4000;
+
+	prepareInputGroup("inputWSGroup", "Fredrikze", 4, startX, endX, nBins);
+
     const std::vector<double> yValues1 = {1, 2, 3};
     const std::vector<double> yValues2 = {4, 5, 6};
-    MatrixWorkspace_sptr input =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
-    ADS.addOrReplace("input", input);
-
-    MatrixWorkspace_sptr input2 =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
-    ADS.addOrReplace("input2", input2);
 
     MatrixWorkspace_sptr first =
         createWorkspaceSingle(startX, nBins, deltaX, yValues1);
@@ -985,16 +981,9 @@ public:
 
     GroupWorkspaces mkGroup;
     mkGroup.initialize();
-    mkGroup.setProperty("InputWorkspaces", "input,input2");
-    mkGroup.setProperty("OutputWorkspace", "inputWSGroup");
-    mkGroup.execute();
-
     mkGroup.setProperty("InputWorkspaces", "first,second");
     mkGroup.setProperty("OutputWorkspace", "transWSGroup");
     mkGroup.execute();
-
-    prepareInputGroup("inputWSGroup", "Fredrikze");
-    applyPolarizationEfficiencies("inputWSGroup");
 
     ReflectometryReductionOneAuto3 alg;
     alg.initialize();
@@ -1015,17 +1004,17 @@ public:
     auto outQGroup = retrieveOutWS("IvsQ");
     auto outLamGroup = retrieveOutWS("IvsLam");
 
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 2.8022, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 11.2088, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 3.4710, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 13.8841, 0.0001);
 
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.3484, 0.0001);
-    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.9207, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.5810, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.7785, 0.0001);
 
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1946, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.7787, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1430, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.5719, 0.0001);
 
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
-    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.7785, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 0.5810, 0.0001);
 
     ADS.clear();
   }
