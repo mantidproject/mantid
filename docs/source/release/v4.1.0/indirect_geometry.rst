@@ -43,3 +43,4 @@ Data Reduction Interface
 Bug Fixes
 #########
 - Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
+- Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.
