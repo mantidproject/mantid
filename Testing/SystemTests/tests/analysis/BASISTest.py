@@ -349,6 +349,8 @@ class PowderFluxNormalizationTest(systemtesting.MantidSystemTest, PreppingMixin)
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
                 'BSS_74799_event.nxs', 'BASISPowderFluxNorm.nxs']
+
+    def runTest(self):
         try:
             BASISPowderDiffraction(RunNumbers='74799',
                                    FluxNormalizationType='Monitor',
