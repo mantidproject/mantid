@@ -109,7 +109,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         """
         Test simple run with sample workspace only for indirect mode
         """
-        idonttakesecurityseriously
+
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
