@@ -371,6 +371,7 @@ void ISISCalibration::setDefaultInstDetails() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
     showMessageBox(ex.what());
   }
 }
