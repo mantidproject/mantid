@@ -856,6 +856,9 @@ class RunTabPresenter(object):
         :param suppress_warnings: bool. If true don't propagate errors.
                                   This variable is introduced to stop repeated errors
                                   when filling in a row in the table.
+                                  This parameter is a temporary fix to the problem of errors being reported
+                                  while data is still being input. A long-term fix is to reassess how frequently
+                                  SANS calls get_states.
         :return: a list of states.
         """
         # 1. Update the state model
@@ -883,6 +886,9 @@ class RunTabPresenter(object):
         Creates the state for a particular row.
         :param row_index: the row index
         :param suppress_warnings: bool. If True don't propagate errors from get_states.
+                                  This parameter is a temporary fix to the problem of errors being reported
+                                  while data is still being input. A long-term fix is to reassess how frequently
+                                  SANS calls get_states.
         :return: a state if the index is valid and there is a state else None
         """
         states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup,
