@@ -65,14 +65,14 @@ public:
   void setGuessFunction(const QString &funStr);
   void updateGuessFunction(const Mantid::API::IFunction &fun);
 signals:
-  void currentIndexChanged(int);
-  void fittingRangeChanged(int, double, double);
+  void currentIndexChanged(int /*_t1*/);
+  void fittingRangeChanged(int /*_t1*/, double /*_t2*/, double /*_t3*/);
 public slots:
   void enableZoom();
   void enablePan();
   void enableRange();
   void updateRange(int index);
-  void showDataErrors(bool);
+  void showDataErrors(bool /*on*/);
   void resetRange();
   void zoomToRange();
   void exportCurrentPlot();
@@ -82,7 +82,7 @@ private slots:
   void tableUpdated();
   void prevPlot();
   void nextPlot();
-  void plotDataSet(int);
+  void plotDataSet(int /*index*/);
   void updateFittingRange(double startX, double endX);
   void updateGuessPlot();
 

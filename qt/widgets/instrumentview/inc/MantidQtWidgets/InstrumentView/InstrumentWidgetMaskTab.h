@@ -80,10 +80,10 @@ public:
   virtual std::string saveToProject() const override;
 
 signals:
-  void executeAlgorithm(const QString &, const QString &);
+  void executeAlgorithm(const QString & /*_t1*/, const QString & /*_t2*/);
 
 public slots:
-  void changedIntegrationRange(double, double);
+  void changedIntegrationRange(double /*unused*/, double /*unused*/);
 
 protected slots:
   void setActivity();
@@ -111,13 +111,13 @@ protected slots:
   void sumDetsToWorkspace();
   void saveIncludeGroupToFile();
   void saveExcludeGroupToFile();
-  void showSaveMenuTooltip(QAction *);
+  void showSaveMenuTooltip(QAction * /*action*/);
   void toggleMaskGroup();
   void enableApplyButtons();
-  void doubleChanged(QtProperty *);
+  void doubleChanged(QtProperty * /*prop*/);
 
 protected:
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
 
   void clearProperties();
   void setProperties();

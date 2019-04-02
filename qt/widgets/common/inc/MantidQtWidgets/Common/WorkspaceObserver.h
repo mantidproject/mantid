@@ -231,7 +231,7 @@ protected:
   Poco::NObserver<WorkspaceObserver, Mantid::API::ClearADSNotification>
       m_clearADSObserver;
   /// ADS clear notification
-  void _clearADSHandle(Mantid::API::ClearADSNotification_ptr) {
+  void _clearADSHandle(Mantid::API::ClearADSNotification_ptr /*unused*/) {
     m_proxy->adsCleared();
   }
 

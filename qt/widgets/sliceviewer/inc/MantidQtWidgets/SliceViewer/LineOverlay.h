@@ -79,9 +79,9 @@ public:
 
 signals:
   /// Signal sent while the line is being dragged
-  void lineChanging(QPointF, QPointF, double);
+  void lineChanging(QPointF /*_t1*/, QPointF /*_t2*/, double /*_t3*/);
   /// Signal sent once the drag is completed
-  void lineChanged(QPointF, QPointF, double);
+  void lineChanged(QPointF /*_t1*/, QPointF /*_t2*/, double /*_t3*/);
 
 private:
   QPoint transform(QPointF coords) const;

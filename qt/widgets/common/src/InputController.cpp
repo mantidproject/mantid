@@ -66,7 +66,7 @@ void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
  * Process the mouse release event.
  * Finalize the interaction.
  */
-void InputController3DMove::mouseReleaseEvent(QMouseEvent *) {
+void InputController3DMove::mouseReleaseEvent(QMouseEvent * /*unused*/) {
   m_isButtonPressed = false;
   emit finish();
 }
@@ -114,7 +114,7 @@ void InputControllerPick::mouseMoveEvent(QMouseEvent *event) {
 /**
  * Process the mouse release event.
  */
-void InputControllerPick::mouseReleaseEvent(QMouseEvent *) {
+void InputControllerPick::mouseReleaseEvent(QMouseEvent * /*unused*/) {
   m_isButtonPressed = false;
   emit finishSelection();
 }
@@ -171,7 +171,7 @@ void InputControllerDrawShape::mouseMoveEvent(QMouseEvent *event) {
 /**
  * Process the mouse button release event.
  */
-void InputControllerDrawShape::mouseReleaseEvent(QMouseEvent *) {
+void InputControllerDrawShape::mouseReleaseEvent(QMouseEvent * /*unused*/) {
   m_isButtonPressed = false;
   m_creating = false;
   m_shapeType = "";
@@ -193,7 +193,7 @@ void InputControllerDrawShape::keyPressEvent(QKeyEvent *event) {
 /**
  * Process event of the mouse leaving the widget.
  */
-void InputControllerDrawShape::leaveEvent(QEvent *) {
+void InputControllerDrawShape::leaveEvent(QEvent * /*unused*/) {
   emit restoreOverrideCursor();
 }
 
@@ -323,13 +323,13 @@ void InputControllerDraw::wheelEvent(QWheelEvent *event) {
   }
 }
 
-void InputControllerDraw::enterEvent(QEvent *) {
+void InputControllerDraw::enterEvent(QEvent * /*unused*/) {
   redrawCursor();
   QApplication::setOverrideCursor(QCursor(*m_cursor, 0, 0));
   m_isActive = true;
 }
 
-void InputControllerDraw::leaveEvent(QEvent *) {
+void InputControllerDraw::leaveEvent(QEvent * /*unused*/) {
   QApplication::restoreOverrideCursor();
   m_isActive = false;
 }

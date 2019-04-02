@@ -88,7 +88,7 @@ void SortTableWorkspaceDialog::parseInput() {
  * Tie static widgets to their properties
  * @param readHistory :: If true then the history will be re read.
  */
-void SortTableWorkspaceDialog::tieStaticWidgets(const bool) {
+void SortTableWorkspaceDialog::tieStaticWidgets(const bool /*unused*/) {
   QStringList allowedTypes;
   allowedTypes << "TableWorkspace";
   m_form.workspace->setWorkspaceTypes(allowedTypes);
@@ -215,7 +215,7 @@ void SortTableWorkspaceDialog::addColumn() {
 /**
  * Sync column names in the combo-boxes and m_sortColumns.
  */
-void SortTableWorkspaceDialog::changedColumnName(int) {
+void SortTableWorkspaceDialog::changedColumnName(int /*unused*/) {
   // don't try to figure out which column changed - just reset all cached names
   auto n = m_sortColumns.size();
   for (int i = 0; i < n; ++i) {

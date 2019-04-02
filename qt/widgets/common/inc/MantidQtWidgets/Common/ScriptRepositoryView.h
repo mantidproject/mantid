@@ -72,16 +72,16 @@ public:
 
 signals:
   // allow Mantid Plot to open a python file to be seen
-  void loadScript(const QString);
+  void loadScript(const QString /*_t1*/);
 
 protected slots:
   // allow to interact with the cells, in order to update the description of the
   // files
-  void cell_activated(const QModelIndex &);
+  void cell_activated(const QModelIndex & /*in*/);
   void updateModel();
   void currentChanged(const QModelIndex &current);
   void helpClicked();
-  void openFolderLink(QString);
+  void openFolderLink(QString /*link*/);
 
 private:
   Ui::ScriptRepositoryView *ui;

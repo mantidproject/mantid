@@ -351,10 +351,10 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
   std::vector<boost::shared_ptr<const IDetector>> groupMembers;
   groupMembers.reserve(vecOfDetectors.size());
   for (auto &det : vecOfDetectors) {
-    groupMembers.push_back(boost::shared_ptr<const IDetector>(std::move(det)));
+    groupMembers.emplace_back(std::move(det));
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers);
+  return boost::make_shared<DetectorGroup>(std::move(groupMembers));
 }
 
 Instrument_sptr createTestInstrumentCylindrical(
