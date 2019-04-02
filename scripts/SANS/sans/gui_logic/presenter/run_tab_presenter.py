@@ -871,11 +871,17 @@ class RunTabPresenter(object):
         return selected_rows
 
     @log_times
-    def get_states(self, row_index=None, file_lookup=True):
+    def get_states(self, row_index=None, file_lookup=True, suppress_warnings=False):
         """
         Gathers the state information for all rows.
         :param row_index: if a single row is selected, then only this row is returned,
                           else all the state for all rows is returned.
+        :param suppress_warnings: bool. If true don't propagate errors.
+                                  This variable is introduced to stop repeated errors
+                                  when filling in a row in the table.
+                                  This parameter is a temporary fix to the problem of errors being reported
+                                  while data is still being input. A long-term fix is to reassess how frequently
+                                  SANS calls get_states.
         :return: a list of states.
         """
         # 1. Update the state model
@@ -891,20 +897,25 @@ class RunTabPresenter(object):
                                            row_index=row_index,
                                            file_lookup=file_lookup)
 
-        if errors:
+        if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
             for _, v in errors.items():
                 self.sans_logger.warning("{}".format(v))
 
         return states, errors
 
-    def get_state_for_row(self, row_index, file_lookup=True):
+    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False):
         """
         Creates the state for a particular row.
         :param row_index: the row index
+        :param suppress_warnings: bool. If True don't propagate errors from get_states.
+                                  This parameter is a temporary fix to the problem of errors being reported
+                                  while data is still being input. A long-term fix is to reassess how frequently
+                                  SANS calls get_states.
         :return: a state if the index is valid and there is a state else None
         """
-        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup)
+        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup,
+                                         suppress_warnings=suppress_warnings)
         if states is None:
             self.sans_logger.warning(
                 "There does not seem to be data for a row {}.".format(row_index))
