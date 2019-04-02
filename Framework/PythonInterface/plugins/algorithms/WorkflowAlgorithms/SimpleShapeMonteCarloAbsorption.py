@@ -82,19 +82,17 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertySettings('AttenuationXSection', material_defined_prop)
 
         self.declareProperty(name='DensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Atom Number Density',
-                                                            'Formula Number Density']),
-                             doc='Use of Mass density, Atom Number density or Formula Number Density.')
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Use of Mass density or Number density.')
         self.setPropertySettings('DensityType', material_defined_prop)
 
         self.declareProperty(name='Density', defaultValue=0.1,
-                             doc='Mass density (g/cm^3), Atom Number density (atoms/Angstrom^3) or Formula Number '
-                                 'density (1/Angstrom^3)')
+                             doc='The value for the Mass density (g/cm^3) or Number density (1/Angstrom^3).')
         self.setPropertySettings('Density', material_defined_prop)
 
         self.declareProperty(name='NumberDensityUnit', defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
-                             doc='Choose which units SampleDensity refers to. Allowed values: [Atoms, Formula Units]')
+                             doc='Choose which units Density refers to. Allowed values: [Atoms, Formula Units]')
         self.setPropertySettings('NumberDensityUnit', material_defined_prop)
 
         # -------------------------------------------------------------------------------------------

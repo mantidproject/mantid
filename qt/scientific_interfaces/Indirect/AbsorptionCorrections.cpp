@@ -41,6 +41,14 @@ void addWorkspaceToADS(std::string const &workspaceName, T const &workspace) {
   AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
 }
 
+std::string extractFirstOf(std::string const &str,
+                           std::string const &delimiter) {
+  auto const cutIndex = str.find(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
 MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
                                   std::string const &target) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
@@ -165,9 +173,14 @@ void AbsorptionCorrections::run() {
   QString const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   monteCarloAbsCor->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
-  monteCarloAbsCor->setProperty(
-      "SampleDensityType",
-      m_uiForm.cbSampleDensity->currentText().toStdString());
+  auto const sampleDensityType =
+      m_uiForm.cbSampleDensity->currentText().toStdString();
+  monteCarloAbsCor->setProperty("SampleDensityType",
+                                getDensityType(sampleDensityType));
+  if (sampleDensityType != "Mass Density")
+    monteCarloAbsCor->setProperty("SampleNumberDensityUnit",
+                                  getNumberDensityUnit(sampleDensityType));
+
   monteCarloAbsCor->setProperty("SampleDensity",
                                 m_uiForm.spSampleDensity->value());
 
@@ -206,9 +219,14 @@ void AbsorptionCorrections::run() {
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
     monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
 
-    monteCarloAbsCor->setProperty(
-        "ContainerDensityType",
-        m_uiForm.cbCanDensity->currentText().toStdString());
+    auto const containerDensityType =
+        m_uiForm.cbCanDensity->currentText().toStdString();
+    monteCarloAbsCor->setProperty("ContainerDensityType",
+                                  getDensityType(containerDensityType));
+    if (containerDensityType != "Mass Density")
+      monteCarloAbsCor->setProperty("ContainerNumberDensityUnit",
+                                    getNumberDensityUnit(containerDensityType));
+
     monteCarloAbsCor->setProperty("ContainerDensity",
                                   m_uiForm.spCanDensity->value());
 
@@ -607,6 +625,16 @@ AbsorptionCorrections::getDensityOptions(QString const &method) const {
   densityOptions.emplace_back("Atom Number Density");
   densityOptions.emplace_back("Formula Number Density");
   return densityOptions;
+}
+
+std::string
+AbsorptionCorrections::getDensityType(std::string const &type) const {
+  return type == "Mass Density" ? type : "Number Density";
+}
+
+std::string
+AbsorptionCorrections::getNumberDensityUnit(std::string const &type) const {
+  return extractFirstOf(type, " ") == "Formula" ? "Formula Units" : "Atoms";
 }
 
 QString AbsorptionCorrections::getDensityUnit(QString const &type) const {

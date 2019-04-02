@@ -74,6 +74,8 @@ private:
                           std::vector<std::string> const &options);
 
   std::vector<std::string> getDensityOptions(QString const &method) const;
+  std::string getDensityType(std::string const &type) const;
+  std::string getNumberDensityUnit(std::string const &type) const;
   QString getDensityUnit(QString const &type) const;
   double getSampleDensityValue(QString const &type) const;
   double getCanDensityValue(QString const &type) const;

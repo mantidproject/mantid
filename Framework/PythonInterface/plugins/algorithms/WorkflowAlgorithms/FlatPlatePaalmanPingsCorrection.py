@@ -190,8 +190,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Ensure that a can chemical formula is given when using a can workspace
         if use_can:
             can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
-            if can_chemical_formula == '':
-                issues['CanChemicalFormula'] = 'Must provide a chemical formula when providing a can workspace'
+            can_coherent_cross_section = self.getPropertyValue('CanCoherentXSection')
+            can_incoherent_cross_section = self.getPropertyValue('CanIncoherentXSection')
+            can_attenuation_cross_section = self.getPropertyValue('CanAttenuationXSection')
+            if can_chemical_formula == '' and (can_coherent_cross_section == 0.0 and can_incoherent_cross_section == 0.0
+                                               and can_attenuation_cross_section == 0.0):
+                issues['CanChemicalFormula'] = 'Must provide a chemical formula or cross sections when providing a ' \
+                                               'can workspace.'
 
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
