@@ -18,13 +18,6 @@
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
 
-#include <iostream>
-
-// Delete these before PR as for Debugging
-#include "../Batch/BatchView.h"
-#include "../MainWindow/MainWindowView.h"
-#include "../Runs/RunsView.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Colour {
@@ -586,23 +579,15 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   if (workspaces.empty())
     return;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
   Plotter plotter(runsTable);
+#else
+  Plotter plotter;
+#endif
   plotter.reflectometryPlot(workspaces);
 
   m_view->jobs().clearSelection();
-  /*
-    if (!workspaces.isEmpty()) {
-    QString pythonSrc;
-    pythonSrc += "base_graph = None\n";
-    for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-      pythonSrc += "base_graph = plotSpectrum(\"" + ws.key() +
-                   "\", 0, True, window = base_graph)\n";
-
-    pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
-
-    m_view->runPythonAlgorithm(pythonSrc);
-  }*/
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
@@ -613,44 +598,20 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
     workspaces.emplace_back(group.postprocessedWorkspaceName());
   }
 
-  // Plotter plotter;
-  // plotter.reflectometryPlot(workspaces);
-
-  m_view->jobs().clearSelection();
-
-  /*
-    if (m_processor.name().isEmpty())
+  if (workspaces.empty())
     return;
 
-  // This method shouldn't be called if a post-processing algorithm is not
-  // defined
-  if (!hasPostprocessing())
-    throw std::runtime_error("Can't plot group.");
+  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
 
-  // Set of workspaces to plot
-  QOrderedSet<QString> workspaces;
-  // Set of workspaces not found in the ADS
-  QSet<QString> notFound;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
+  Plotter plotter(runsTable);
+#else
+  Plotter plotter;
+#endif
+  plotter.reflectometryPlot(workspaces);
 
-  auto const items = m_manager->selectedData();
-
-  if (hasPostprocessing()) {
-    for (const auto &item : items) {
-      if (item.second.size() > 1) {
-        auto const wsName = getPostprocessedWorkspaceName(item.second);
-
-        if (workspaceExists(wsName))
-          workspaces.insert(wsName, nullptr);
-        else
-          notFound.insert(wsName);
-      }
-    }
-  }
-
-  if (!notFound.empty())
-    issueNotFoundWarning("groups", notFound);
-
-  plotWorkspaces(workspaces);*/
+  m_view->jobs().clearSelection();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
