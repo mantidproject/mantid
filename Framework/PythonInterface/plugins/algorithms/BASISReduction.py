@@ -409,14 +409,24 @@ the first two hours"""
                  AnalysisDataService.doesExist(name)]
 
     def _get_runs(self, rlist, doIndiv=True):
-        """
+        r"""
         Create sets of run numbers for analysis. A semicolon indicates a
         separate group of runs to be processed together.
-        @param rlist: string containing all the run numbers to be reduced.
-        @return if _doIndiv is False, return a list of IntArrayProperty
-         objects. Each item is a pseudolist containing a set of runs to
-         be reduced together. if _doIndiv is True, return a list of strings,
-         each string is a run number.
+
+        Parameters
+        ----------
+        rlist: str
+            All the run numbers to be reduced.
+        doIndiv: bool
+            Return each run on its own list
+
+        Returns
+        -------
+        list
+            If _doIndiv is False, return a list of IntArrayProperty
+            objects. Each item is a pseudolist containing a set of runs to
+            be reduced together. if _doIndiv is True, return a list of
+            strings, each string is a run number.
         """
         run_list = []
         # ';' separates the runs into substrings. Each substring
@@ -431,8 +441,20 @@ the first two hours"""
         return run_list
 
     def _make_run_name(self, run, useShort=True):
-        """
-        Make name like BSS_24234
+        r"""
+        Make name like BSS_24234, for instance
+
+        Parameters
+        ----------
+        run: str
+            Run number
+        useShort: bool
+            Whether to use 'BSS' or 'BASIS'
+
+        Returns
+        -------
+        str
+            Identifier of instrument and run numbers
         """
         if useShort:
             return self._short_inst + '_' + str(run)
@@ -440,17 +462,33 @@ the first two hours"""
             return self._long_inst + '_' + str(run)
 
     def _make_run_file(self, run):
-        """
+        r"""
         Make name like BSS_24234_event.nxs
+
+        Parameters
+        ----------
+        run: str
+            Run number
+
+        Returns
+        -------
+        str
+            events file name
         """
         return '{0}_{1}_event.nxs'.format(self._short_inst, str(run))
 
     def _sum_runs(self, run_set, sam_ws, extra_ext=None):
-        """
+        r"""
         Aggregate the set of runs
-        @param run_set: list of run numbers
-        @param sam_ws:  name of aggregate workspace for the sample
-        @param extra_ext: string to be added to the temporary workspaces
+
+        Parameters
+        ----------
+        run_set: list
+            Run numbers
+        sam_ws:  str
+            Name of aggregate workspace for the sample
+        extra_ext: str
+            Suffix to be added to the temporary workspaces
         """
         for run in run_set:
             ws_name = self._make_run_name(run)
@@ -464,7 +502,7 @@ the first two hours"""
                 sapi.DeleteWorkspace(ws_name)
 
     def load_single_run(self, run, name):
-        """
+        r"""
         Find and load events.
 
         Applies event filtering if necessary.
@@ -588,9 +626,18 @@ the first two hours"""
     def _sum_and_calibrate(self, run_set, extra_extension=''):
         """
         Aggregate the set of runs and calibrate
-        @param run_set: list of run numbers
-        @param extra_extension: string to be added to the workspace names
-        @return: workspace name of the aggregated and calibrated data
+
+        Parameters
+        ----------
+        run_set: list
+            Run numbers
+        extra_extension: str
+            Suffix to be added to the workspace names
+
+        Returns
+        -------
+        str
+            workspace name of the aggregated and calibrated data
         """
         wsName = self._make_run_name(run_set[0])
         wsName += extra_extension
@@ -605,11 +652,22 @@ the first two hours"""
         return wsName
 
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):
-        """ Transforms from wavelength and detector ID to S(Q,E)
-        @param wsName: workspace as a function of wavelength and detector id
-        @param etRebins: final energy domain and bin width
-        @param isSample: discriminates between sample and vanadium
-        @return: string name of S(Q,E)
+        r"""
+        Transforms from wavelength and detector ID to S(Q,E)
+
+        Parameters
+        ----------
+        wsName: str
+            Name of a workspace as a function of wavelength and detector id
+        etRebins: list
+            Final energy domain and bin width
+        isSample: bool
+            Discriminates between sample and vanadium
+
+        Returns
+        -------
+        str
+            Name of S(Q,E) workspace
         """
         sapi.ConvertUnits(InputWorkspace=wsName,
                           OutputWorkspace=wsName,
@@ -671,10 +729,14 @@ the first two hours"""
         return wsSqwName
 
     def _ScaleY(self, wsName):
-        """
+        r"""
         Scale all spectra by a number so that the maximum of the first spectra
         is rescaled to 1
-        @param wsName: name of the workspace to rescale
+
+        Parameters
+        ----------
+        wsName: str
+            Name of the workspace to rescale
         """
         workspace = sapi.mtd[wsName]
         maximumYvalue = workspace.dataY(0).max()
@@ -684,7 +746,8 @@ the first two hours"""
                    Operation='Multiply')
 
     def generateSplitterWorkspace(self, fragment):
-        r"""Create a table workspace with time intervals to keep
+        r"""
+        Create a table workspace with time intervals to keep
 
         Parameters
         ----------
@@ -708,7 +771,8 @@ the first two hours"""
             splitter.addRow([b, inf, '0'])
 
     def _filterEvents(self, run, ws_name):
-        r"""Filter out ExcludeTimeSegment if applicable
+        r"""
+        Filter out ExcludeTimeSegment if applicable
 
         Parameters
         ----------
