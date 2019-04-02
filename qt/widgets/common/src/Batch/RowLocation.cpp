@@ -23,8 +23,8 @@ RowLocation::RowLocation(RowPath path) {
   if (pathSize == 1 || pathSize == 2) {
     m_path = std::move(path);
   } else {
-    throw std::invalid_arguement("Cannot have a RowPath object with an empty "
-                                 "row path or too long of a path");
+    throw std::invalid_argument("Cannot have a RowPath object with an empty "
+                                "row path or too long of a path");
   }
 }
 RowPath const &RowLocation::path() const { return m_path; }
@@ -147,14 +147,6 @@ bool pathsSameUntilDepth(int depth, RowLocation const &locationA,
                 "equal to the depth of both locations");
   return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth,
                                  pathB.cbegin(), pathB.cbegin() + depth);
-}
-
-RowType rowType() const {
-  if (m_path.size() == 1) {
-    return RowType::Group;
-  } else {
-    return RowType::Row;
-  }
 }
 } // namespace Batch
 } // namespace MantidWidgets

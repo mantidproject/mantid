@@ -8,12 +8,16 @@
 #include "Plotter.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/PythonRunner.h"
-using namespace MantidQt::API;
+#include "RunsTableView.h"
 #endif
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+Plotter::Plotter(RunsTableView *runsTableView)
+    : m_runsTableView(runsTableView) {}
+#endif
 
 void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -26,7 +30,7 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 
     pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
 
-    this->runPython(QString::fromStdString(pythonSrc));
+    this->runPython(pythonSrc);
   }
 #else
   throw std::runtime_error(
@@ -34,16 +38,13 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 #endif
 }
 
-void Plotter::runPython(const QString &python) {
+// This should never be implemented for Qt 5 or above because that is
+// workbench.
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  PythonRunner pyRunner;
-  pyRunner.runPythonCode(python);
-#else
-  // This should never be implemented for Qt 5 or above because that is
-  // workbench.
-  throw std::runtime_error("Plotter::runPython() not implemented for Qt >= 5");
-#endif
+void Plotter::runPython(const std::string &pythonCode) {
+  m_runsTableView->executePythonCode(pythonCode);
 }
+#endif
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

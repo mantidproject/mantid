@@ -20,8 +20,6 @@ namespace Batch {
 
 using RowPath = std::vector<int>;
 
-enum RowType { Group, Row };
-
 class EXPORT_OPT_MANTIDQT_COMMON RowLocation {
 public:
   RowLocation() = default;
@@ -43,7 +41,6 @@ public:
   bool operator<=(RowLocation const &other) const;
   bool operator>(RowLocation const &other) const;
   bool operator>=(RowLocation const &other) const;
-  RowType rowType() const;
 
 private:
   RowPath m_path;

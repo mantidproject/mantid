@@ -232,11 +232,28 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return boost::none;
 }
 
-Group getGroupFromPath(const RowPath path) const {
-  if (path.size == 1) {
+Group ReductionJobs::getGroupFromPath(
+    const MantidWidgets::Batch::RowPath path) const {
+  if (path.size() == 1) {
     // Is group
-  } else if {
-    throw std::invalid_arguement("");
+    return m_groups[path[0]];
+  } else {
+    throw std::invalid_argument("Path given does not point to a group.");
+  }
+}
+
+Row ReductionJobs::getRowFromPath(
+    const MantidWidgets::Batch::RowPath path) const {
+  if (path.size() == 2) {
+    // Is Row
+    const auto group = m_groups[path[0]];
+    const auto row = group[path[1]];
+    if (row.is_initialized())
+      return row.get();
+    else
+      throw std::invalid_argument("Row is not initialised");
+  } else {
+    throw std::invalid_argument("Path given does not point to a row.");
   }
 }
 } // namespace CustomInterfaces

@@ -45,7 +45,8 @@ public:
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
-  Group getGroupFromPath(const RowPath path) const;
+  Group getGroupFromPath(const MantidWidgets::Batch::RowPath path) const;
+  Row getRowFromPath(const MantidWidgets::Batch::RowPath path) const;
 
 private:
   std::vector<Group> m_groups;

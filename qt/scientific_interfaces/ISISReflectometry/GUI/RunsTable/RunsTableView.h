@@ -17,11 +17,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class RunsView;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTableView : public QWidget,
                                                      public IRunsTableView {
   Q_OBJECT
 public:
-  explicit RunsTableView(std::vector<std::string> const &instruments,
+  explicit RunsTableView(RunsView *parent,
+                         std::vector<std::string> const &instruments,
                          int defaultInstrumentIndex);
   void subscribe(RunsTableViewSubscriber *notifyee) override;
   void setProgress(int value) override;
@@ -43,6 +46,8 @@ public:
   void setInstrumentSelectorEnabled(bool enable) override;
   void setProcessButtonEnabled(bool enable) override;
   void setActionEnabled(Action action, bool enable) override;
+
+  void executePythonCode(std::string pythonCode);
 
 private slots:
   void onProcessPressed(bool);
@@ -74,13 +79,13 @@ private:
   std::vector<std::string> m_instruments;
   RunsTableViewSubscriber *m_notifyee;
   std::map<Action, QAction *> m_actions;
+  RunsView *m_runsView;
 };
 
 class RunsTableViewFactory {
 public:
   explicit RunsTableViewFactory(std::vector<std::string> const &instruments);
-  RunsTableView *operator()(int defaultInstrumentIndex) const;
-  RunsTableView *operator()() const;
+  RunsTableView *operator()(RunsView *parent) const;
   int defaultInstrumentFromConfig() const;
   int indexOfElseFirst(std::string const &instrument) const;
 

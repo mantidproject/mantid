@@ -34,7 +34,7 @@ MainWindowView::MainWindowView(QWidget *parent)
 
 IBatchView *MainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
-  auto *newTab = new BatchView(this);
+  auto *newTab = new BatchView(this, this);
   m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
   m_batchViews.emplace_back(newTab);
   return newTab;

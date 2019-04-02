@@ -13,11 +13,17 @@
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"
+#include "RunsTableView.h"
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
 
 #include <iostream>
+
+// Delete these before PR as for Debugging
+#include "../Batch/BatchView.h"
+#include "../MainWindow/MainWindowView.h"
+#include "../Runs/RunsView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -568,16 +574,83 @@ bool RunsTablePresenter::isAutoreducing() const {
 }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {
-  std::vector<std::string> workspaces = m_model.postProcessedWorkspaceName();
+  std::vector<std::string> workspaces;
+  const auto rows = m_model.selectedRows();
 
-  Plotter plotter;
+  for (const auto &row : rows) {
+    const auto workspaceName = row.reducedWorkspaceNames().iVsQBinned();
+    if (workspaceName != "")
+      workspaces.emplace_back(workspaceName);
+  }
+
+  if (workspaces.empty())
+    return;
+
+  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
+  Plotter plotter(runsTable);
   plotter.reflectometryPlot(workspaces);
 
   m_view->jobs().clearSelection();
+  /*
+    if (!workspaces.isEmpty()) {
+    QString pythonSrc;
+    pythonSrc += "base_graph = None\n";
+    for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
+      pythonSrc += "base_graph = plotSpectrum(\"" + ws.key() +
+                   "\", 0, True, window = base_graph)\n";
+
+    pythonSrc += "base_graph.activeLayer().logLogAxes()\n";
+
+    m_view->runPythonAlgorithm(pythonSrc);
+  }*/
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
-  const auto rowsToPlot = m_view->jobs().selectedSubtrees();
+  std::vector<std::string> workspaces;
+  const auto groups = m_model.selectedGroups();
+
+  for (const auto &group : groups) {
+    workspaces.emplace_back(group.postprocessedWorkspaceName());
+  }
+
+  // Plotter plotter;
+  // plotter.reflectometryPlot(workspaces);
+
+  m_view->jobs().clearSelection();
+
+  /*
+    if (m_processor.name().isEmpty())
+    return;
+
+  // This method shouldn't be called if a post-processing algorithm is not
+  // defined
+  if (!hasPostprocessing())
+    throw std::runtime_error("Can't plot group.");
+
+  // Set of workspaces to plot
+  QOrderedSet<QString> workspaces;
+  // Set of workspaces not found in the ADS
+  QSet<QString> notFound;
+
+  auto const items = m_manager->selectedData();
+
+  if (hasPostprocessing()) {
+    for (const auto &item : items) {
+      if (item.second.size() > 1) {
+        auto const wsName = getPostprocessedWorkspaceName(item.second);
+
+        if (workspaceExists(wsName))
+          workspaces.insert(wsName, nullptr);
+        else
+          notFound.insert(wsName);
+      }
+    }
+  }
+
+  if (!notFound.empty())
+    issueNotFoundWarning("groups", notFound);
+
+  plotWorkspaces(workspaces);*/
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
