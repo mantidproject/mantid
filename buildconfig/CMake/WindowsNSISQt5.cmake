@@ -35,14 +35,5 @@ install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )
 ###########################################################################
 install ( FILES ${QT5_INSTALL_PREFIX}/bin/QtWebEngineProcess.exe DESTINATION lib/qt5/bin )
 install ( DIRECTORY ${QT5_INSTALL_PREFIX}/resources DESTINATION lib/qt5 )
-
-# set ( RESOURCE_FILES
-#      icudtl.dat
-#      qtwebengine_devtools_resources.pak
-#      qtwebengine_resources.pak
-#      qtwebengine_resources_100p.pak
-#      qtwebengine_resources_200p.pak
-# )
-# foreach ( RESOURCE_FILE ${RESOURCE_FILES} )
-#   install ( FILES ${QT5_INSTALL_PREFIX}/resources/${RESOURCE_FILE} DESTINATION lib/qt5/resources )
-# endforeach()
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/qt/applications/workbench/workbench/app/resources.py.install
+          DESTINATION bin/workbench/app RENAME resources.py)
