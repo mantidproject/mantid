@@ -967,7 +967,7 @@ public:
     const double deltaX = 1000;
     const double endX = 4000;
 
-	prepareInputGroup("inputWSGroup", "Fredrikze", 4, startX, endX, nBins);
+    prepareInputGroup("inputWSGroup", "Fredrikze", 4, startX, endX, nBins);
 
     const std::vector<double> yValues1 = {1, 2, 3};
     const std::vector<double> yValues2 = {4, 5, 6};
