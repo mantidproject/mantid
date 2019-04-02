@@ -92,6 +92,11 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                                  'density (1/Angstrom^3)')
         self.setPropertySettings('Density', material_defined_prop)
 
+        self.declareProperty(name='NumberDensityUnit', defaultValue='Atoms',
+                             validator=StringListValidator(['Atoms', 'Formula Units']),
+                             doc='Choose which units SampleDensity refers to. Allowed values: [Atoms, Formula Units]')
+        self.setPropertySettings('NumberDensityUnit', material_defined_prop)
+
         # -------------------------------------------------------------------------------------------
 
         # Monte Carlo options
@@ -247,8 +252,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                 sample_material['SampleMassDensity'] = self._density
             else:
                 sample_material['SampleNumberDensity'] = self._density
-                if self._density_type == 'Formula Number Density':
-                    sample_material['NumberDensityUnit'] = 'Formula Units'
+                sample_material['NumberDensityUnit'] = self._number_density_unit
 
             set_sample_alg.setProperty("Material", sample_material)
 
@@ -299,6 +303,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._attenuation_cross_section = self.getPropertyValue('AttenuationXSection')
         self._density_type = self.getPropertyValue('DensityType')
         self._density = self.getProperty('Density').value
+        self._number_density_unit = self.getPropertyValue('NumberDensityUnit')
         self._shape = self.getPropertyValue('Shape')
 
         self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value

@@ -99,7 +99,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Use of Mass density or Number density.')
+                             doc='Use of Mass density or Number density for the sample.')
 
         self.declareProperty(name='SampleNumberDensityUnit', defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
@@ -142,7 +142,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='CanDensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Use of Mass density or Number density.')
+                             doc='Use of Mass density or Number density for the can.')
 
         self.declareProperty(name='CanNumberDensityUnit', defaultValue='Atoms',
                              validator=StringListValidator(['Atoms', 'Formula Units']),
