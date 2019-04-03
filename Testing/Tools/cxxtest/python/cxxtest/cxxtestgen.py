@@ -9,33 +9,31 @@
 
 # vim: fileencoding=utf-8
 
-from __future__ import division
-# the above import important for forward-compatibility with python3,
-# which is already the default in archlinux!
+from __future__ import (absolute_import, division)
 
 __all__ = ['main', 'create_manpage']
 
-import __release__
+from . import __release__
 import os
 import sys
 import re
 import glob
 from optparse import OptionParser
-import cxxtest_parser
+from . import cxxtest_parser
 from string import Template
 
 try:
-    import cxxtest_fog
+    from . import cxxtest_fog
     imported_fog=True
 except ImportError:
     imported_fog=False
 
-from cxxtest_misc import abort
+from .cxxtest_misc import abort
 
 try:
     from os.path import relpath
 except ImportError:
-    from cxxtest_misc import relpath
+    from .cxxtest_misc import relpath
 
 # Global data is initialized by main()
 options = []
@@ -334,19 +332,19 @@ def writeMain( output ):
         tester_t = "CxxTest::GuiTuiRunner<CxxTest::%s, CxxTest::%s> " % (options.gui, options.runner)
     else:
         tester_t = "CxxTest::%s" % (options.runner)
-    # Build the filename to output, using the suitename if specified
-    output.write(' std::string output_filename = "%s";  \n' % (options.xunit_file))
-    output.write(
-        ' // Look for an argument giving the suite name (not starting with -) and change the output filename to use it.  \n ')
-    output.write('if (argc > 1) { \n ')
-    output.write(' if (argv[1][0] != \'-\') { \n ')
-    output.write(
-        '   output_filename = "TEST-{}." + std::string(argv[1]) + ".xml"; \n  }}\n }} \n'.format(options.world))
     if options.xunit_printer:
-       output.write(' std::ofstream ofstr(output_filename.c_str());\n')
-       output.write(' {} tmp(ofstr);\n'.format(tester_t))
+        # Build the filename to output, using the suitename if specified
+        output.write(' std::string output_filename = "%s";  \n' % (options.xunit_file))
+        output.write(' // Look for an argument giving the suite name \n')
+        output.write(' // (not starting with -) and change the output filename to use it.  \n ')
+        output.write('if (argc > 1) { \n ')
+        output.write(' if (argv[1][0] != \'-\') { \n ')
+        output.write(
+            '   output_filename = "TEST-{}." + std::string(argv[1]) + ".xml"; \n  }}\n }} \n'.format(options.world))
+        output.write(' std::ofstream ofstr(output_filename.c_str());\n')
+        output.write(' {} tmp(ofstr);\n'.format(tester_t))
     else:
-       output.write(' {} tmp;\n'.format(tester_t))
+        output.write(' {} tmp;\n'.format(tester_t))
     output.write( ' CxxTest::RealWorldDescription::_worldName = "%s";\n' % options.world )
     output.write( ' status = CxxTest::Main< %s >( tmp, argc, argv );\n' % tester_t )
     output.write( ' return status;\n')

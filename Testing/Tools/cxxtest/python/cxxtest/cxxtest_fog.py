@@ -12,7 +12,7 @@
 # TODO: add test function names
 #
 
-from __future__ import division
+from __future__ import (division, print_function)
 
 import sys
 import re
@@ -29,14 +29,14 @@ def scanInputFiles(files, _options):
     suites=[]
     for file in files:
         try:
-            print "Parsing file "+file,
+            print("Parsing file "+file),
             sys.stdout.flush()
             parse_info = cxx_parser.parse_cpp(filename=file,optimize=1)
-        except IOError, err:
-            print " error."
-            print str(err)
+        except IOError as err:
+            print(" error.")
+            print(str(err))
             continue
-        print "done."
+        print("done.")
         sys.stdout.flush()
         #
         # WEH: see if it really makes sense to use parse information to
