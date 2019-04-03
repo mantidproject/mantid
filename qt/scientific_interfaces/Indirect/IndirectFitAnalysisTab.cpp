@@ -301,42 +301,45 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
 }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
-  setSampleSuffices(filter);
-  if (!getResolutionWSSuffices().empty())
-    setResolutionSuffices(filter);
+  auto const tab = tabName();
+  setSampleSuffixes(tab, filter);
+  if (hasResolution())
+    setResolutionSuffixes(tab, filter);
 }
 
-void IndirectFitAnalysisTab::setSampleSuffices(bool filter) {
+void IndirectFitAnalysisTab::setSampleSuffixes(std::string const &tab,
+                                               bool filter) {
   QStringList const noSuffixes{""};
-  setSampleWSSuffices(filter ? getSampleWSSuffices() : noSuffixes);
-  setSampleFBSuffices(filter ? getSampleFBSuffices() : getAllowedExtensions());
+  setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
+  setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
   m_dataPresenter->setMultiInputSampleWSSuffixes();
   m_dataPresenter->setMultiInputSampleFBSuffixes();
 }
 
-void IndirectFitAnalysisTab::setResolutionSuffices(bool filter) {
+void IndirectFitAnalysisTab::setResolutionSuffixes(std::string const &tab,
+                                                   bool filter) {
   QStringList const noSuffixes{""};
-  setResolutionWSSuffices(filter ? getResolutionWSSuffices() : noSuffixes);
-  setResolutionFBSuffices(filter ? getResolutionFBSuffices()
-                                 : getAllowedExtensions());
+  setResolutionWSSuffixes(filter ? getResolutionFBSuffixes(tab) : noSuffixes);
+  setResolutionFBSuffixes(filter ? getResolutionWSSuffixes(tab)
+                                 : getExtensions(tab));
   m_dataPresenter->setMultiInputResolutionWSSuffixes();
   m_dataPresenter->setMultiInputResolutionFBSuffixes();
 }
 
-void IndirectFitAnalysisTab::setSampleWSSuffices(const QStringList &suffices) {
+void IndirectFitAnalysisTab::setSampleWSSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setSampleFBSuffices(const QStringList &suffices) {
+void IndirectFitAnalysisTab::setSampleFBSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleFBSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setResolutionWSSuffices(
+void IndirectFitAnalysisTab::setResolutionWSSuffixes(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setResolutionFBSuffices(
+void IndirectFitAnalysisTab::setResolutionFBSuffixes(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionFBSuffices(suffices);
 }

@@ -22,10 +22,9 @@ class DLLExport MSDFit : public IndirectFitAnalysisTab {
 public:
   MSDFit(QWidget *parent = nullptr);
 
-  QStringList getSampleWSSuffices() const override;
-  QStringList getSampleFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
-  QStringList getResolutionFBSuffices() const override;
+  std::string tabName() const override { return "msdfit"; }
+
+  bool hasResolution() const override { return false; }
 
 protected slots:
   void runClicked();
@@ -38,8 +37,6 @@ protected:
 private:
   void setupFitTab() override;
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };

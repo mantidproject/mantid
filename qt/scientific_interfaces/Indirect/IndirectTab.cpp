@@ -22,6 +22,12 @@
 #include <boost/algorithm/string/find.hpp>
 #include <boost/pointer_cast.hpp>
 
+#include "MantidKernel/Strings.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+using namespace Poco::XML;
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -40,6 +46,47 @@ void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
                    std::string const &value, Predicate const &condition) {
   if (condition)
     algorithm->setPropertyValue(propName, value);
+}
+
+std::string findXMLAttribute(Document const *document, XMLString const &tag,
+                             XMLString const &attribute) {
+  auto const root = document->documentElement();
+  for (auto *node = root->firstChild(); node != 0; node = node->nextSibling()) {
+    auto const element = dynamic_cast<Poco::XML::Element *>(node);
+    if (element && element->tagName() == tag)
+      return std::string(element->getAttribute(attribute));
+  }
+  throw std::runtime_error("The tag " + tag + " was not found in the file.");
+}
+
+std::string getAttributeFromFile(std::string const &filepath,
+                                 XMLString const &tag,
+                                 XMLString const &attribute) {
+  DOMParser parser;
+  Document *document;
+  std::string attributeValue;
+  try {
+    auto const xmlText = Strings::loadFile(filepath);
+    document = parser.parseString(xmlText);
+    if (document)
+      attributeValue = findXMLAttribute(document, tag, attribute);
+  } catch (Poco::Exception const &ex) {
+    g_log.warning(ex.displayText() + ". Unable to parse File:" + filepath);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
+  return attributeValue;
+}
+
+QStringList convertToQStringList(std::string const &str,
+                                 std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+
+  QStringList list;
+  for (auto const &subString : subStrings)
+    list << QString::fromStdString(subString);
+  return list;
 }
 
 } // namespace
@@ -166,6 +213,44 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
   loader->execute();
 
   return loader->isExecuted();
+}
+
+std::string
+IndirectTab::getInterfaceProperty(std::string const &interfaceName,
+                                  std::string const &propertyName) const {
+  auto const filepath =
+      "C:/Users/mlc47243/Documents/Work-Work/Reading-xml-files/AATESTDOC.xml";
+  return getAttributeFromFile(filepath, interfaceName, propertyName);
+}
+
+QStringList
+IndirectTab::getSampleFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "sample-file-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getSampleWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "sample-workspace-suffixes"), ",");
+}
+
+QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {
+  return convertToQStringList(getInterfaceProperty(interfaceName, "extensions"),
+                              ",");
+}
+
+QStringList
+IndirectTab::getResolutionFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "resolution-file-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getResolutionWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "resolution-workspace-suffixes"),
+      ",");
 }
 
 /**

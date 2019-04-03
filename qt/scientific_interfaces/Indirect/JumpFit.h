@@ -23,12 +23,11 @@ class DLLExport JumpFit : public IndirectFitAnalysisTab {
 public:
   JumpFit(QWidget *parent = nullptr);
 
-  void setupFitTab() override;
+  std::string tabName() const override { return "fqfit"; }
 
-  QStringList getSampleFBSuffices() const override;
-  QStringList getSampleWSSuffices() const override;
-  QStringList getResolutionFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
+  bool hasResolution() const override { return false; }
+
+  void setupFitTab() override;
 
 protected slots:
   void updateModelFitTypeString();
@@ -44,8 +43,6 @@ private slots:
 private:
   void addFunctions(std::vector<std::string> const &functions);
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
 };

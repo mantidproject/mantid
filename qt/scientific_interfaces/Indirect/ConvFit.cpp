@@ -37,11 +37,6 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
-      m_sampleFBExtensions({"_red.nxs", "_sqw.nxs", "_sqw.dave"}),
-      m_sampleWSExtensions({"_red", "_sqw"}),
-      m_resolutionFBExtensions(
-          {"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"}),
-      m_resolutionWSExtensions({"_res", "_red", "_sqw"}),
       m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
@@ -59,11 +54,6 @@ ConvFit::ConvFit(QWidget *parent)
 void ConvFit::setupFitTab() {
   setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
-
-  setSampleFBSuffices(m_sampleFBExtensions);
-  setSampleWSSuffices(m_sampleWSExtensions);
-  setResolutionFBSuffices(m_resolutionFBExtensions);
-  setResolutionWSSuffices(m_resolutionWSExtensions);
 
   // Initialise fitTypeStrings
   m_fitStrings["None"] = "";
@@ -122,22 +112,6 @@ void ConvFit::setupFitTab() {
   // Post Plot and Save
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
-}
-
-QStringList ConvFit::getSampleFBSuffices() const {
-  return m_sampleFBExtensions;
-}
-
-QStringList ConvFit::getSampleWSSuffices() const {
-  return m_sampleWSExtensions;
-}
-
-QStringList ConvFit::getResolutionFBSuffices() const {
-  return m_resolutionFBExtensions;
-}
-
-QStringList ConvFit::getResolutionWSSuffices() const {
-  return m_resolutionWSExtensions;
 }
 
 void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {

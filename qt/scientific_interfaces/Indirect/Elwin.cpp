@@ -117,8 +117,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent),
-      m_nameExtensions({"_red.nxs", "_sqw.nxs"}), m_elwTree(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -219,8 +218,6 @@ void Elwin::setup() {
 
   m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
   m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
-
-  setFileExtensionsByName(true);
 }
 
 void Elwin::run() {
@@ -447,8 +444,8 @@ void Elwin::loadSettings(const QSettings &settings) {
 }
 
 void Elwin::setFileExtensionsByName(bool filter) {
-  m_uiForm.dsInputFiles->setFileExtensions(filter ? m_nameExtensions
-                                                  : getAllowedExtensions());
+  m_uiForm.dsInputFiles->setFileExtensions(filter ? getSampleFBSuffixes("elwin")
+                                                  : getExtensions("elwin"));
 }
 
 void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,

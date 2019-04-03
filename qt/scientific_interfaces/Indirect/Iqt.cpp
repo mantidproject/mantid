@@ -533,12 +533,13 @@ void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
 void Iqt::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsInput->setFBSuffixes(filter ? m_sampleFBExtensions
-                                         : getAllowedExtensions());
-  m_uiForm.dsInput->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
-                                              : getAllowedExtensions());
-  m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes("iqt")
+                                         : getExtensions("iqt"));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes("iqt")
+                                         : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes("iqt")
+                                              : getExtensions("iqt"));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes("iqt")
                                               : noSuffixes);
 }
 

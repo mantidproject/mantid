@@ -30,7 +30,6 @@ namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
     : IndirectFitAnalysisTab(new MSDFitModel, parent),
-      m_sampleFBExtensions({"_eq.nxs"}), m_sampleWSExtensions({"_eq"}),
       m_uiForm(new Ui::MSDFit) {
   m_uiForm->setupUi(parent);
 
@@ -54,21 +53,10 @@ void MSDFit::setupFitTab() {
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
 
-  setSampleFBSuffices(m_sampleFBExtensions);
-  setSampleWSSuffices(m_sampleWSExtensions);
-
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
 }
-
-QStringList MSDFit::getSampleFBSuffices() const { return m_sampleFBExtensions; }
-
-QStringList MSDFit::getSampleWSSuffices() const { return m_sampleWSExtensions; }
-
-QStringList MSDFit::getResolutionFBSuffices() const { return {}; }
-
-QStringList MSDFit::getResolutionWSSuffices() const { return {}; }
 
 void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());

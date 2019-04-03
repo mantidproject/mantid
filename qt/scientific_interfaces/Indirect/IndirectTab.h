@@ -65,6 +65,12 @@ public:
 
   QStringList getAllowedExtensions() const;
 
+  QStringList getExtensions(std::string const &interfaceName) const;
+  QStringList getSampleFBSuffixes(std::string const &interfaceName) const;
+  QStringList getSampleWSSuffixes(std::string const &interfaceName) const;
+  QStringList getResolutionFBSuffixes(std::string const &interfaceName) const;
+  QStringList getResolutionWSSuffixes(std::string const &interfaceName) const;
+
   /// Allows the user to turn the plotting of error bars off and on
   void setPlotErrorBars(bool errorBars);
 
@@ -232,6 +238,10 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
+
+private:
+  std::string getInterfaceProperty(std::string const &interfaceName,
+                                   std::string const &propertyName) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

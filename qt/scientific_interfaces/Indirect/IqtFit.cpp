@@ -35,7 +35,6 @@ namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent),
-      m_sampleFBExtensions({"_iqt.nxs"}), m_sampleWSExtensions({"_iqt"}),
       m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
@@ -51,9 +50,6 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setupFitTab() {
-  setSampleFBSuffices(m_sampleFBExtensions);
-  setSampleWSSuffices(m_sampleWSExtensions);
-
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
   const auto exponential = functionFactory.createFunction("ExpDecay");
@@ -78,14 +74,6 @@ void IqtFit::setupFitTab() {
   connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
           SLOT(customBoolUpdated(const QString &, bool)));
 }
-
-QStringList IqtFit::getSampleFBSuffices() const { return m_sampleFBExtensions; }
-
-QStringList IqtFit::getSampleWSSuffices() const { return m_sampleWSExtensions; }
-
-QStringList IqtFit::getResolutionFBSuffices() const { return {}; }
-
-QStringList IqtFit::getResolutionWSSuffices() const { return {}; }
 
 void IqtFit::fitFunctionChanged() {
   if (numberOfCustomFunctions("StretchExp") > 0) {

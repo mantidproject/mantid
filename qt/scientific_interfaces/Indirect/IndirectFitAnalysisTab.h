@@ -43,10 +43,9 @@ public:
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
-  virtual QStringList getSampleWSSuffices() const = 0;
-  virtual QStringList getSampleFBSuffices() const = 0;
-  virtual QStringList getResolutionWSSuffices() const = 0;
-  virtual QStringList getResolutionFBSuffices() const = 0;
+  virtual std::string tabName() const = 0;
+
+  virtual bool hasResolution() const = 0;
 
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
@@ -125,12 +124,12 @@ public slots:
 protected:
   IndirectFittingModel *fittingModel() const;
 
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
-
   void run() override;
+
+  void setSampleWSSuffixes(const QStringList &suffices);
+  void setSampleFBSuffixes(const QStringList &suffices);
+  void setResolutionWSSuffixes(const QStringList &suffices);
+  void setResolutionFBSuffixes(const QStringList &suffices);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -203,11 +202,12 @@ private:
   /// Overidden by child class.
   void setup() override;
   void loadSettings(const QSettings &settings) override;
-  void setFileExtensionsByName(bool filter) override;
-  void setSampleSuffices(bool filter);
-  void setResolutionSuffices(bool filter);
   virtual void setupFitTab() = 0;
   bool validate() override;
+
+  void setFileExtensionsByName(bool filter) override;
+  void setSampleSuffixes(std::string const &tab, bool filter);
+  void setResolutionSuffixes(std::string const &tab, bool filter);
 
   void connectDataAndPlotPresenters();
   void connectSpectrumAndPlotPresenters();

@@ -65,7 +65,6 @@ private:
   void setPlotResultEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
 
-  QStringList m_nameExtensions;
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
 };

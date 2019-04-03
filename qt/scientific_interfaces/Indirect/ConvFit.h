@@ -24,10 +24,9 @@ class DLLExport ConvFit : public IndirectFitAnalysisTab {
 public:
   ConvFit(QWidget *parent = nullptr);
 
-  QStringList getSampleFBSuffices() const override;
-  QStringList getSampleWSSuffices() const override;
-  QStringList getResolutionFBSuffices() const override;
-  QStringList getResolutionWSSuffices() const override;
+  std::string tabName() const override { return "convfit"; }
+
+  bool hasResolution() const override { return true; }
 
 protected slots:
   void setModelResolution(const QString &resolutionName);
@@ -43,11 +42,6 @@ private:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
   std::string fitTypeString() const;
-
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
-  QStringList m_resolutionFBExtensions;
-  QStringList m_resolutionWSExtensions;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
   // ShortHand Naming for fit functions
