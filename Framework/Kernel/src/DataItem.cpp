@@ -15,13 +15,13 @@ namespace Kernel {
 
 /** Default constructor
  */
-DataItem::DataItem() { m_lock = new Poco::RWLock(); }
+DataItem::DataItem() { m_lock = std::make_unique<Poco::RWLock>(); }
 
 /** Copy constructor
  */
 DataItem::DataItem(const DataItem & /*other*/) {
   // Always make a unique lock!
-  m_lock = new Poco::RWLock();
+  m_lock = std::make_unique<Poco::RWLock>();
 }
 
 /**
@@ -29,15 +29,13 @@ DataItem::DataItem(const DataItem & /*other*/) {
  * inherit from DataItem
  */
 DataItem::~DataItem() {
-  delete m_lock;
-  m_lock = nullptr;
 }
 
 /** Private method to access the RWLock object.
  *
  * @return the RWLock object.
  */
-Poco::RWLock *DataItem::getLock() const { return m_lock; }
+Poco::RWLock *DataItem::getLock() const { return m_lock.get(); }
 
 } // namespace Kernel
 } // namespace Mantid
