@@ -9,7 +9,6 @@ import os
 from mantid.kernel import ConfigService
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, SANSGuiPropertiesHandler, set_setting
-from sans.gui_logic.models.run_selection import has_any_event_data
 
 
 class AddRunsFilenameManager(object):
