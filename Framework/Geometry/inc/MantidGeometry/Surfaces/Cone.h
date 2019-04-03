@@ -87,9 +87,9 @@ public:
                       double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cone
-  static int g_nslices;
+  constexpr static int g_nslices = 10;
   /// The number of stacks to approximate a cone
-  static int g_nstacks;
+  constexpr static int g_nstacks = 1;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif
