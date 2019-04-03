@@ -17,10 +17,20 @@ using namespace Mantid::Kernel;
 
 namespace {
 
+template <typename T, typename Predicate>
+void removeElementsIf(T &iterable, Predicate const &filter) {
+  auto const iter = std::remove_if(iterable.begin(), iterable.end(), filter);
+  if (iter != iterable.end())
+    iterable.erase(iter, iterable.end());
+}
+
 std::vector<std::string> splitBy(std::string const &str,
                                  std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
+  removeElementsIf(subStrings, [](std::string const &subString) {
+    return subString.empty();
+  });
   return subStrings;
 }
 
