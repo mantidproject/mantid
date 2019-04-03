@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/MplCpp/Plot.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidQtWidgets/MplCpp/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/Python/QHashToDict.h"
 
 using namespace Mantid::API;
@@ -33,8 +34,8 @@ Python::Object plot(std::vector<MatrixWorkspace_sptr> workspaces,
   UNUSED_ARG(window_title)
   UNUSED_ARG(errors)
   UNUSED_ARG(overplot)
-  auto funcs = PyImport_ImportModule("mantidqt.plotting.functions");
-  UNUSED_ARG(funcs)
+  // auto funcs = PyImport_ImportModule("mantidqt.plotting.functions");
+  // UNUSED_ARG(funcs)
   GlobalInterpreterLock lock;
   // workspaces, spectrum_nums, wksp_indices, errors, overplot, fig,
   // plot_kwargs, ax_properties, window_title;

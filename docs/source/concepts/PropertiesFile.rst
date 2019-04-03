@@ -88,7 +88,7 @@ Directory Properties
 | ``framework.plugins.directory``      | The path to the directory that contains the       | ``../plugins``                      |
 |                                      | Mantid plugin libraries                           |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
-| ``framework.plugins.exclude``        | A list of substrings to allow libraries to be     | ``Qt4;Qt5``                         |
+| ``framework.plugins.exclude``        | A list of substrings to allow libraries to be     | ``Qt4``                             |
 |                                      | skipped                                           |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``instrumentDefinition.directory``   | Where to load instrument definition files from    | ``../Test/Instrument``              |

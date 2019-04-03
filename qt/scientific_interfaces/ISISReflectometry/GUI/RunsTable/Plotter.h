@@ -9,9 +9,8 @@
 
 #include "Common/DllConfig.h"
 
-#include <QMap>
-#include <QSet>
-#include <QString>
+#include <QtGlobal>
+#include <string>
 #include <vector>
 
 namespace MantidQt {

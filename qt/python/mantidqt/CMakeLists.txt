@@ -78,6 +78,7 @@ if ( ENABLE_WORKBENCH )
     LINK_LIBS
       ${common_link_libs}
       MantidQtWidgetsCommonQt5
+      MantidQtWidgetsMplCppQt5
       Qt5::Core
       Qt5::Gui
       Qt5::Widgets

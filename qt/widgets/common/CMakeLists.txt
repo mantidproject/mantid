@@ -42,12 +42,14 @@ set ( QT5_SRC_FILES
   src/MultifitSetupDialog.cpp
   src/MWRunFiles.cpp
   src/OptionsPropertyWidget.cpp
+  src/ParseKeyValueString.cpp
   src/pixmaps.cpp
   src/PluginLibraries.cpp
   src/ProcessingAlgoWidget.cpp
   src/PropertyHandler.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
+  src/ProgressableView.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
   src/RenameParDialog.cpp
@@ -55,6 +57,7 @@ set ( QT5_SRC_FILES
   src/SequentialFitDialog.cpp
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
+  src/SlitCalculator.cpp
   src/TextPropertyWidget.cpp
   src/TSVSerialiser.cpp
   src/UserFunctionDialog.cpp
@@ -128,10 +131,8 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/GenericDialog.h
-  inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
-  inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
@@ -154,11 +155,11 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
   inc/MantidQtWidgets/Common/SelectWorkspacesDialog.h
+  inc/MantidQtWidgets/Common/SlitCalculator.h
   inc/MantidQtWidgets/Common/TextPropertyWidget.h
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
   inc/MantidQtWidgets/Common/VatesViewerInterface.h
-  inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
@@ -203,15 +204,20 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/FileDialogHandler.h
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/HelpWindow.h
+  inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/InterfaceFactory.h
+  inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
+  inc/MantidQtWidgets/Common/ParseKeyValueString.h
   inc/MantidQtWidgets/Common/pixmaps.h
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+  inc/MantidQtWidgets/Common/ProgressableView.h
   inc/MantidQtWidgets/Common/SequentialFitDialog.h
   inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+  inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
   inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
   inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
@@ -449,7 +455,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
-  inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
@@ -673,6 +678,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
+  inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
 )
 
 set ( UI_FILES

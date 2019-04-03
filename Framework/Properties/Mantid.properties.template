@@ -30,7 +30,7 @@ mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 framework.plugins.directory = @FRAMEWORK_PLUGINS_DIR@
 
 # Libraries to skip. The strings are searched for when loading libraries so they don't need to be exact
-framework.plugins.exclude = Qt4;Qt5
+framework.plugins.exclude = Qt4
 
 # Where to find mantid paraview plugin libraries
 pvplugins.directory = @PV_PLUGINS_DIR@

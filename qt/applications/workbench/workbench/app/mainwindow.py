@@ -51,6 +51,7 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
+from mantidqt.interfacemanager import InterfaceManager  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -309,10 +310,27 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
 
-    def launch_custom_gui(self, filename):
+    def launch_custom_python_gui(self, filename):
         executioner = PythonCodeExecution()
         executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
+
+    def launch_custom_cpp_gui(self, subwindow):
+        subwindow.show()
+
+    def populate_cpp_interfaces_list(self, blacklist):
+        interface_manager = InterfaceManager()
+
+        interface_names = interface_manager.getUserSubWindowKeys()
+
+        interfaces = {}
+        for interface_name in interface_names:
+            if interface_name not in blacklist:
+                interfaces[interface_name] = interface_manager.createSubWindow(interface_name, self)
+            else:
+                logger.information('Not adding gui "{}"'.format(interface_name))
+
+        return interfaces
 
     def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
@@ -338,6 +356,8 @@ class MainWindow(QMainWindow):
             temp.append(scriptname)
             interfaces[key] = temp
 
+        interfaces.update(self.populate_cpp_interfaces_list(GUI_BLACKLIST))
+
         # add the interfaces to the menu
         keys = list(interfaces.keys())
         keys.sort()
@@ -346,9 +366,17 @@ class MainWindow(QMainWindow):
             names = interfaces[key]
             names.sort()
             for name in names:
-                action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
-                script = os.path.join(interface_dir, name)
-                action.triggered.connect(lambda checked, script=script: self.launch_custom_gui(script))
+                if '.py' in name:
+                    name.replace('.py', '')
+                    name.replace('_', ' ')
+                    action = submenu.addAction(name)
+                    script = os.path.join(interface_dir, name)
+                    action.triggered.connect(lambda checked_py, script=script: self.launch_custom_python_gui(script))
+                else:
+                    interface = interfaces[key]
+                    action = submenu.addAction(name)
+                    action.triggered.connect(lambda checked_cpp, interface=interface:
+                                             self.launch_custom_cpp_gui(interface))
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
