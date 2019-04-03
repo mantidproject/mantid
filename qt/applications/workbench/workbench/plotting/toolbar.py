@@ -110,9 +110,10 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         pass
 
 
-class ToolbarStateChecker(object):
+class ToolbarStateManager(object):
     """
-    An object that lets users check the state of the toolbar hiding at the same time any implementation details.
+    An object that lets users check and manipulate the state of the toolbar
+    whilst hiding any implementation details.
     """
 
     def __init__(self, toolbar):
@@ -135,3 +136,10 @@ class ToolbarStateChecker(object):
         Check if any of the zoom buttons are checked
         """
         return self.is_pan_active() or self.is_zoom_active()
+
+    def toggle_fit_button_checked(self):
+        fit_action = self._toolbar._actions['toggle_fit']
+        if fit_action.isChecked():
+            fit_action.setChecked(False)
+        else:
+            fit_action.setChecked(True)

@@ -37,6 +37,16 @@ Example:
   between 900 and 2100 seconds for run 71466 and between 4000 seconds and the
   end of the run for 71467. Only one time segment can be excluded per run number.
 
+**RetainTimeSegment**:
+When interested only in a single and contiguous part of the run. Only events
+within that time window can be kept.
+
+Examples:
+- "71465:0-3600,71466:3600-7200,71467:3600-end" will retain events of the first
+hour of run 71465, events of the second hour of run 71466, and events after
+the first hour of run 71467. Events outside these time windows will not be
+taken into account.
+
 **Momentum transfer binning scheme**: Three values are required, the
 center of the bin with the minimum momentum, the bin width, and the
 center of the bin with the maximum momentum.

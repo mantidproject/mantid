@@ -29,17 +29,18 @@ class FitInteractiveTool(QObject):
 
     default_background = 'LinearBackground'
 
-    def __init__(self, canvas, toolbar_state_checker, current_peak_type):
+    def __init__(self, canvas, toolbar_manager, current_peak_type):
         """
         Create an instance of FitInteractiveTool.
         :param canvas: A MPL canvas to draw on.
-        :param toolbar_state_checker: A helper object that checks the state of the plot toolbar. It is necessary to
-            disable this tool's editing when zoom/pan is enabled by the user.
+        :param toolbar_manager: A helper object that checks and manipulates
+            the state of the plot toolbar. It is necessary to disable this
+            tool's editing when zoom/pan is enabled by the user.
         :param current_peak_type: A name of a peak fit function to create by default.
         """
         super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
-        self.toolbar_state_checker = toolbar_state_checker
+        self.toolbar_manager = toolbar_manager
         ax = canvas.figure.get_axes()[0]
         self.ax = ax
         xlim = ax.get_xlim()
@@ -423,7 +424,7 @@ class FitInteractiveTool(QObject):
         self.current_peak_type = current_peak_type
         self.background_names = background_names
         self.other_names = other_names
-        if not self.toolbar_state_checker.is_tool_active():
+        if not self.toolbar_manager.is_tool_active():
             menu.addAction("Add peak", self.add_default_peak)
             menu.addAction("Select peak type", self.add_peak_dialog)
             menu.addAction("Add background", self.add_background_dialog)
