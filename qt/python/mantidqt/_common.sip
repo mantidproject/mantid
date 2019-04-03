@@ -252,7 +252,6 @@ public:
   UserSubWindow *createSubWindow(
       const QString &interface_name,
       QWidget *parent = nullptr);
-  QStringList getUserSubWindowKeys() const;
 };
 
 // ---------------------------------

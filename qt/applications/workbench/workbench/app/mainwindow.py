@@ -315,9 +315,6 @@ class MainWindow(QMainWindow):
         executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
 
-    def launch_custom_cpp_gui(self, subwindow):
-        subwindow.show()
-
     def populate_cpp_interfaces_list(self, blacklist):
         interface_manager = InterfaceManager()
 
@@ -326,21 +323,14 @@ class MainWindow(QMainWindow):
         interfaces = {}
         for interface_name in interface_names:
             if interface_name not in blacklist:
-                interfaces[interface_name] = interface_manager.createSubWindow(interface_name, self)
+                interfaces[interface_name] = lambda: interface_manager.createSubWindow(interface_name, self)
             else:
                 logger.information('Not adding gui "{}"'.format(interface_name))
 
         return interfaces
 
-    def populate_interfaces_menu(self):
-        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+    def populate_python_interfaces_list(self, blacklist, interface_dir):
         items = ConfigService['mantidqt.python_interfaces'].split()
-
-        # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis_Old.py',
-                         'Frequency_Domain_Analysis.py',
-                         'Elemental_Analysis.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -349,16 +339,18 @@ class MainWindow(QMainWindow):
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname in GUI_BLACKLIST:
+            if scriptname in blacklist:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             temp = interfaces.get(key, [])
             temp.append(scriptname)
             interfaces[key] = temp
 
-        interfaces.update(self.populate_cpp_interfaces_list(GUI_BLACKLIST))
+        return interfaces
 
+    def populate_interfaces_menu_with_interfaces(self, interfaces, interface_dir):
         # add the interfaces to the menu
+        interface_manager = InterfaceManager()
         keys = list(interfaces.keys())
         keys.sort()
         for key in keys:
@@ -367,16 +359,30 @@ class MainWindow(QMainWindow):
             names.sort()
             for name in names:
                 if '.py' in name:
-                    name.replace('.py', '')
-                    name.replace('_', ' ')
-                    action = submenu.addAction(name)
+                    action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
                     script = os.path.join(interface_dir, name)
                     action.triggered.connect(lambda checked_py, script=script: self.launch_custom_python_gui(script))
                 else:
-                    interface = interfaces[key]
                     action = submenu.addAction(name)
-                    action.triggered.connect(lambda checked_cpp, interface=interface:
-                                             self.launch_custom_cpp_gui(interface))
+                    action.triggered.connect(lambda checked_cpp, name=name:
+                                             interface_manager.createSubWindow(name, self))
+
+    def populate_interfaces_menu(self):
+        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+
+        # list of custom interfaces that are not qt4/qt5 compatible
+        GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
+                         'Frequency_Domain_Analysis_Old.py',
+                         'Frequency_Domain_Analysis.py',
+                         'Elemental_Analysis.py']
+
+        # Dictionary of custom interfaces that are qt5 and C++
+        CPP_GUI = {u'Reflectometry': ['ISIS Reflectometry']}
+
+        interfaces = self.populate_python_interfaces_list(GUI_BLACKLIST, interface_dir)
+        interfaces.update(CPP_GUI)
+
+        self.populate_interfaces_menu_with_interfaces(interfaces, interface_dir)
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
