@@ -59,7 +59,7 @@ QProgressBar *AlgorithmProgressWidget::progressBar() const {
 }
 
 void AlgorithmProgressWidget::blockUpdates(bool block) {
-	m_presenter->blockSignals(block);
+  m_presenter->blockSignals(block);
 }
 
 } // namespace MantidWidgets
