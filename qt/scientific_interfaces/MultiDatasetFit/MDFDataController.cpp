@@ -234,7 +234,9 @@ std::pair<double, double> DataController::getFittingRange(int i) const {
 }
 
 /// Inform the others that a dataset was updated.
-void DataController::updateDataset(int row, int) { emit dataSetUpdated(row); }
+void DataController::updateDataset(int row, int /*unused*/) {
+  emit dataSetUpdated(row);
+}
 
 /// Object's parent cast to MultiDatasetFit.
 MultiDatasetFit *DataController::owner() const {

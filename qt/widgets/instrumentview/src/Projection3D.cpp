@@ -91,7 +91,8 @@ void Projection3D::resize(int w, int h) {
 /**
  * Draw the instrument on MantidGLWidget.
  */
-void Projection3D::drawSurface(MantidGLWidget *, bool picking) const {
+void Projection3D::drawSurface(MantidGLWidget * /*widget*/,
+                               bool picking) const {
   OpenGLError::check("GL3DWidget::draw3D()[begin]");
 
   glEnable(GL_DEPTH_TEST);

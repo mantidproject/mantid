@@ -54,7 +54,7 @@ public:
 
   double value(double x, double y) const override;
 
-  QSize rasterHint(const QwtDoubleRect &) const override;
+  QSize rasterHint(const QwtDoubleRect & /*unused*/) const override;
 
   void setFastMode(bool fast);
 

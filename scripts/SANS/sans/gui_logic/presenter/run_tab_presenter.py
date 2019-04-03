@@ -109,6 +109,9 @@ class RunTabPresenter(object):
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
+        def on_reduction_dimensionality_changed(self, is_1d):
+            self._presenter.verify_output_modes(is_1d)
+
         def on_data_changed(self, row, column, new_value, old_value):
             self._presenter.on_data_changed(row, column, new_value, old_value)
 
@@ -486,9 +489,11 @@ class RunTabPresenter(object):
         which occur.
         """
         states, errors = self.get_states(row_index=rows)
+        error_msg = "\n\n"
         for row, error in errors.items():
             self.on_processing_error(row, error)
-        return states
+            error_msg += "{}\n".format(error)
+        return states, error_msg
 
     def _plot_graph(self):
         """
@@ -518,6 +523,7 @@ class RunTabPresenter(object):
         """
         Processes a list of rows. Any errors cause the row to be coloured red.
         """
+        error_msg = ""
         try:
             for row in rows:
                 self._table_model.reset_row_state(row)
@@ -527,7 +533,7 @@ class RunTabPresenter(object):
             self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
 
-            states = self._handle_get_states(rows)
+            states, error_msg = self._handle_get_states(rows)
             if not states:
                 raise Exception("No states found")
 
@@ -548,7 +554,22 @@ class RunTabPresenter(object):
         except Exception as e:
             self.on_processing_finished(None)
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box('Warning', 'Process halted', str(e))
+            self.display_warning_box('Warning', 'Process halted', str(e) + error_msg)
+
+    def verify_output_modes(self, is_1d):
+        """
+        Unchecks and disabled canSAS output mode if switching to 2D reduction.
+        Enabled canSAS if switching to 1D.
+        :param is_1d: bool. If true then switching TO 1D reduction.
+        """
+        if is_1d:
+            self._view.can_sas_checkbox.setEnabled(True)
+        else:
+            if self._view.can_sas_checkbox.isChecked():
+                self._view.can_sas_checkbox.setChecked(False)
+                self.sans_logger.information("2D reductions are incompatible with canSAS output. "
+                                             "canSAS output has been unchecked.")
+            self._view.can_sas_checkbox.setEnabled(False)
 
     def on_process_all_clicked(self):
         """
@@ -582,6 +603,7 @@ class RunTabPresenter(object):
         self._processing = False
 
     def on_load_clicked(self):
+        error_msg = "\n\n"
         try:
             self._view.disable_buttons()
             self._processing = True
@@ -593,6 +615,7 @@ class RunTabPresenter(object):
 
             for row, error in errors.items():
                 self.on_processing_error(row, error)
+                error_msg += "{}\n".format(error)
 
             if not states:
                 self.on_processing_finished(None)
@@ -605,7 +628,7 @@ class RunTabPresenter(object):
         except Exception as e:
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
-            self.display_warning_box("Warning", "Process halted", str(e))
+            self.display_warning_box("Warning", "Process halted", str(e) + error_msg)
 
     def on_export_table_clicked(self):
         non_empty_rows = self.get_row_indices()
@@ -848,11 +871,17 @@ class RunTabPresenter(object):
         return selected_rows
 
     @log_times
-    def get_states(self, row_index=None, file_lookup=True):
+    def get_states(self, row_index=None, file_lookup=True, suppress_warnings=False):
         """
         Gathers the state information for all rows.
         :param row_index: if a single row is selected, then only this row is returned,
                           else all the state for all rows is returned.
+        :param suppress_warnings: bool. If true don't propagate errors.
+                                  This variable is introduced to stop repeated errors
+                                  when filling in a row in the table.
+                                  This parameter is a temporary fix to the problem of errors being reported
+                                  while data is still being input. A long-term fix is to reassess how frequently
+                                  SANS calls get_states.
         :return: a list of states.
         """
         # 1. Update the state model
@@ -868,20 +897,25 @@ class RunTabPresenter(object):
                                            row_index=row_index,
                                            file_lookup=file_lookup)
 
-        if errors:
+        if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
             for _, v in errors.items():
                 self.sans_logger.warning("{}".format(v))
 
         return states, errors
 
-    def get_state_for_row(self, row_index, file_lookup=True):
+    def get_state_for_row(self, row_index, file_lookup=True, suppress_warnings=False):
         """
         Creates the state for a particular row.
         :param row_index: the row index
+        :param suppress_warnings: bool. If True don't propagate errors from get_states.
+                                  This parameter is a temporary fix to the problem of errors being reported
+                                  while data is still being input. A long-term fix is to reassess how frequently
+                                  SANS calls get_states.
         :return: a state if the index is valid and there is a state else None
         """
-        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup)
+        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup,
+                                         suppress_warnings=suppress_warnings)
         if states is None:
             self.sans_logger.warning(
                 "There does not seem to be data for a row {}.".format(row_index))

@@ -22,7 +22,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullPeaksPresenter
     : public PeaksPresenter {
 public:
   void update() override {}
-  void updateWithSlicePoint(const PeakBoundingBox &) override {}
+  void updateWithSlicePoint(const PeakBoundingBox & /*unused*/) override {}
   bool changeShownDim(size_t dimX, size_t dimY) override {
     (void)dimX;
     (void)dimY;
@@ -31,14 +31,18 @@ public:
   void setNonOrthogonal(bool nonOrthogonalEnabled) override {
     (void)nonOrthogonalEnabled;
   }
-  bool isLabelOfFreeAxis(const std::string &) const override { return false; }
+  bool isLabelOfFreeAxis(const std::string & /*label*/) const override {
+    return false;
+  }
   SetPeaksWorkspaces presentedWorkspaces() const override {
     SetPeaksWorkspaces empty;
     return empty;
   }
-  void setForegroundColor(const PeakViewColor) override { /*Do nothing*/
+  void
+  setForegroundColor(const PeakViewColor /*unused*/) override { /*Do nothing*/
   }
-  void setBackgroundColor(const PeakViewColor) override { /*Do nothing*/
+  void
+  setBackgroundColor(const PeakViewColor /*unused*/) override { /*Do nothing*/
   }
   PeakViewColor getBackgroundPeakViewColor() const override {
     return PeakViewColor();
@@ -47,34 +51,39 @@ public:
     return PeakViewColor();
   }
   std::string getTransformName() const override { return ""; }
-  void showBackgroundRadius(const bool) override { /*Do nothing*/
+  void showBackgroundRadius(const bool /*shown*/) override { /*Do nothing*/
   }
-  void setShown(const bool) override { /*Do nothing*/
+  void setShown(const bool /*shown*/) override { /*Do nothing*/
   }
-  PeakBoundingBox getBoundingBox(const int) const override {
+  PeakBoundingBox getBoundingBox(const int /*peakIndex*/) const override {
     return PeakBoundingBox();
   }
-  void setPeakSizeOnProjection(const double) override { /*Do Nothing*/
+  void
+  setPeakSizeOnProjection(const double /*fraction*/) override { /*Do Nothing*/
   }
-  void setPeakSizeIntoProjection(const double) override { /*Do Nothing*/
+  void
+  setPeakSizeIntoProjection(const double /*fraction*/) override { /*Do Nothing*/
   }
   double getPeakSizeOnProjection() const override { return 0; }
   double getPeakSizeIntoProjection() const override { return 0; }
   bool getShowBackground() const override { return false; }
-  void registerOwningPresenter(UpdateableOnDemand *) override {}
-  void zoomToPeak(const int) override {}
+  void registerOwningPresenter(UpdateableOnDemand * /*owner*/) override {}
+  void zoomToPeak(const int /*peakIndex*/) override {}
   bool isHidden() const override { return true; }
-  void reInitialize(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace>) override { /*Do nothing*/
+  void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> /*peaksWS*/)
+      override { /*Do nothing*/
   }
-  bool contentsDifferent(const PeaksPresenter *) const override { return true; }
+  bool contentsDifferent(const PeaksPresenter * /*other*/) const override {
+    return true;
+  }
 
-  void peakEditMode(EditMode) override { /*Do nothing*/
+  void peakEditMode(EditMode /*mode*/) override { /*Do nothing*/
   }
-  bool deletePeaksIn(PeakBoundingBox) override {
+  bool deletePeaksIn(PeakBoundingBox /*plotCoordsBox*/) override {
     return false; /*Do nothing. Delete nothing.*/
   }
-  bool addPeakAt(double, double) override {
+  bool addPeakAt(double /*plotCoordsPointX*/,
+                 double /*plotCoordsPointY*/) override {
     return false; /*Do nothing. Add nothing.*/
   }
 };

@@ -33,8 +33,8 @@ public:
   UserInputValidator &validate(UserInputValidator &validator);
 
 signals:
-  void spectraChanged(std::size_t);
-  void maskChanged(std::string const &);
+  void spectraChanged(std::size_t /*_t1*/);
+  void maskChanged(std::string const & /*_t1*/);
   void invalidSpectraString(QString const &errorMessage);
   void invalidMaskBinsString(QString const &errorMessage);
 

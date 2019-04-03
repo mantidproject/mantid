@@ -24,7 +24,7 @@ PeaksViewer::PeaksViewer(QWidget *parent) : QWidget(parent) {
       "Feature", "SliceViewer->PeaksViewer", false);
 }
 
-void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces &) {}
+void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces & /*unused*/) {}
 
 /**
  * Remove the layout

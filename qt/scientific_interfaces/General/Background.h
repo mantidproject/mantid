@@ -34,8 +34,8 @@ public:
 
 private:
   void initLayout();
-  void showEvent(QShowEvent *) override;
-  void closeEvent(QCloseEvent *) override;
+  void showEvent(QShowEvent * /*e*/) override;
+  void closeEvent(QCloseEvent * /*event*/) override;
   bool sanityCheck();
 
 private:

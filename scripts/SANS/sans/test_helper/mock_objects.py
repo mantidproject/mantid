@@ -234,11 +234,11 @@ class FakeState(object):
         return self.dummy_state
 
 
-def get_state_for_row_mock(row_index, file_lookup=True):
+def get_state_for_row_mock(row_index, file_lookup=True, suppress_warnings=False):
     return FakeState() if row_index == 3 else ""
 
 
-def get_state_for_row_mock_with_real_state(row_index, file_lookup=True):
+def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress_warnings=False):
     _ = row_index  # noqa
     test_director = TestDirector()
     return test_director.construct()

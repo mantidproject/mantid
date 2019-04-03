@@ -496,7 +496,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
 /**
  * Respond to the show event.
  */
-void InstrumentWidgetPickTab::showEvent(QShowEvent *) {
+void InstrumentWidgetPickTab::showEvent(QShowEvent * /*unused*/) {
   // Make the state of the display view consistent with the current selection
   // type
   setSelectionType();
@@ -542,7 +542,8 @@ QColor InstrumentWidgetPickTab::getShapeBorderColor() const {
 /**
  * Do something when the time bin integraion range has changed.
  */
-void InstrumentWidgetPickTab::changedIntegrationRange(double, double) {
+void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   m_plotController->updatePlot();
   auto surface = m_instrWidget->getSurface();
   if (surface) {

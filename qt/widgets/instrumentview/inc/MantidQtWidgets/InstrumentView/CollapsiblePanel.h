@@ -24,7 +24,7 @@ public:
   void collapse();
   void expand();
 signals:
-  void collapseOrExpand(bool);
+  void collapseOrExpand(bool /*_t1*/);
 
 private:
   bool m_collapsed;
@@ -47,7 +47,7 @@ public slots:
   void collapse();
   void expand();
 private slots:
-  void collapseOrExpand(bool);
+  void collapseOrExpand(bool /*collapse*/);
 
 private:
   QWidget *m_widget;

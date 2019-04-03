@@ -25,8 +25,8 @@ public:
   PeakPalette &operator=(const PeakPalette &other);
   C foregroundIndexToColour(const int index) const;
   C backgroundIndexToColour(const int index) const;
-  void setForegroundColour(const int index, const C);
-  void setBackgroundColour(const int index, const C);
+  void setForegroundColour(const int index, const C /*colour*/);
+  void setBackgroundColour(const int index, const C /*colour*/);
   int paletteSize() const;
   bool operator==(const PeakPalette &other) const;
   ~PeakPalette();

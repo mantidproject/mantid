@@ -32,9 +32,9 @@ public:
   ~StepScan() override;
 
 signals:
-  void logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &);
-  void logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &);
-  void updatePlot(const QString &);
+  void logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);
+  void logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr & /*_t1*/);
+  void updatePlot(const QString & /*_t1*/);
 
 private slots:
   void triggerLiveListener(bool checked);

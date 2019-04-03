@@ -169,7 +169,8 @@ QString DoubleSpinBox::textFromValue(double value) const {
   return locale().toString(value, d_format, 6);
 }
 
-QValidator::State DoubleSpinBox::validate(QString &, int &) const {
+QValidator::State DoubleSpinBox::validate(QString & /*input*/,
+                                          int & /*pos*/) const {
   return QValidator::Acceptable;
 }
 

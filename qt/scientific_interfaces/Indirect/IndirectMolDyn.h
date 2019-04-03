@@ -27,7 +27,7 @@ public:
   void loadSettings(const QSettings &settings) override;
 
 private slots:
-  void versionSelected(const QString &);
+  void versionSelected(const QString & /*version*/);
   void runClicked();
   void plotClicked();
   void saveClicked();
