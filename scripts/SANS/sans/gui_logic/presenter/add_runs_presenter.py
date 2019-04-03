@@ -130,8 +130,8 @@ class AddRunsPagePresenter(object):
     def _handle_output_directory_changed(self):
         directory = self._view.display_save_directory_box("Save sum runs", self.save_directory)
         directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
-        self.gui_properties_handler.update_default("add_runs_output_directory", directory)
         self.set_output_directory(directory)
+        self.gui_properties_handler.update_default("add_runs_output_directory", directory)
 
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()
@@ -151,3 +151,4 @@ class AddRunsPagePresenter(object):
             directory = ConfigService.Instance().getString("defaultsave.directory")
         self.save_directory = directory
         self._view.set_out_file_directory(directory)
+        return directory
