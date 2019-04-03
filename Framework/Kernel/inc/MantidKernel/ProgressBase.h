@@ -11,6 +11,7 @@
 
 #include <atomic>
 #include <string>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -87,7 +88,7 @@ protected:
   /// Last loop counter value the was a peport
   std::atomic<int64_t> m_last_reported;
   /// Timer that is started when the progress bar is constructed.
-  Kernel::Timer *m_timeElapsed;
+  std::unique_ptr<Kernel::Timer> m_timeElapsed;
   /// Digits of precision in the reporting
   int m_notifyStepPrecision;
 };
