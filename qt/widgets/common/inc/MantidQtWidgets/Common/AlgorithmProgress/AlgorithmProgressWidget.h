@@ -44,6 +44,8 @@ public:
   void algorithmStarted();
   /// Setup the view for whenever an algorithm has ended.
   void algorithmEnded();
+  /// Enable or disable the processing of updates to the algorithm progress
+  void blockUpdates(bool = true);
 
 public slots:
   void showDetailsDialog();
