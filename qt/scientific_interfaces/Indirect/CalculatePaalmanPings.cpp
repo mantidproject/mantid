@@ -619,10 +619,10 @@ void CalculatePaalmanPings::plotClicked() {
   QString plotType = m_uiForm.cbPlotOutput->currentText();
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
-    if (plotType == "Both" || plotType == "Wavelength")
+    if (plotType == "All" || plotType == "Wavelength")
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
-    if (plotType == "Both" || plotType == "Angle")
+    if (plotType == "All" || plotType == "Angle")
       plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
   setPlotResultIsPlotting(false);

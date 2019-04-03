@@ -549,10 +549,10 @@ void AbsorptionCorrections::plotClicked() {
   auto const plotType = m_uiForm.cbPlotOutput->currentText();
 
   if (checkADSForPlotSaveWorkspace("__mc_corrections_wavelength", false)) {
-    if (plotType == "Both" || plotType == "Wavelength")
+    if (plotType == "All" || plotType == "Wavelength")
       plotSpectrum(QString::fromStdString("__mc_corrections_wavelength"));
 
-    if (plotType == "Both" || plotType == "Angle")
+    if (plotType == "All" || plotType == "Angle")
       plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
   }
   setPlotResultIsPlotting(false);

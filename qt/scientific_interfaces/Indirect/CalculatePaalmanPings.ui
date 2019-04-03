@@ -23,7 +23,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="lbInputType">
         <property name="text">
-         <string>Sample:</string>
+         <string>Sample Input:</string>
         </property>
        </widget>
       </item>
@@ -64,7 +64,7 @@
       <item row="1" column="0">
        <widget class="QCheckBox" name="ckUseCan">
         <property name="text">
-         <string>Use Can:</string>
+         <string>Use Container:</string>
         </property>
        </widget>
       </item>
@@ -356,8 +356,17 @@
           </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spFlatSampleAngle">
+            <property name="suffix">
+             <string>°</string>
+            </property>
             <property name="decimals">
-             <number>3</number>
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -433,6 +442,9 @@
           </item>
           <item row="7" column="1">
            <widget class="QDoubleSpinBox" name="spCylStepSize">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -561,6 +573,9 @@
           </item>
           <item row="7" column="1">
            <widget class="QDoubleSpinBox" name="spAnnStepSize">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -948,7 +963,7 @@
       </size>
      </property>
      <property name="title">
-      <string>Can Details</string>
+      <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0" colspan="6">
@@ -1271,17 +1286,17 @@
         </property>
         <item>
          <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Wavelength</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Angle</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
          </property>
         </item>
        </widget>

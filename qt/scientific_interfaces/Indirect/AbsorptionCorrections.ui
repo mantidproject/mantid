@@ -341,7 +341,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -361,7 +361,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -381,7 +381,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -414,7 +414,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -432,6 +432,12 @@
            <widget class="QDoubleSpinBox" name="spFlatSampleAngle">
             <property name="suffix">
              <string>°</string>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -454,7 +460,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -486,7 +492,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -502,7 +508,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -515,7 +521,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -535,7 +541,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -575,7 +581,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -611,7 +617,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -624,7 +630,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -664,7 +670,7 @@
              <string> cm</string>
             </property>
             <property name="decimals">
-             <number>5</number>
+             <number>3</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -1292,17 +1298,17 @@
         </property>
         <item>
          <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Wavelength</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Angle</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
          </property>
         </item>
        </widget>
