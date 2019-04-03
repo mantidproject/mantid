@@ -20,8 +20,6 @@ from sans.state.state_base import create_deserialized_sans_state_from_property_m
 class PropertyManagerService(object):
     sans_property_manager_prefix = "SANS_PROPERTY_MANAGER_THIS_NEEDS_TO_BE_UNIQUE_"
 
-    def __init__(self):
-
     def add_states_to_pmds(self, states):
         # 1. Remove all property managers which belong to the sans property manager type
         self.remove_sans_property_managers()
