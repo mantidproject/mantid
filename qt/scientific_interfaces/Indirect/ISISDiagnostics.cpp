@@ -462,11 +462,12 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
 
 void ISISDiagnostics::setFileExtensionsByName(bool filter) {
   QStringList const noSuffices{""};
+  auto const tabName("isis-diagnostics");
   m_uiForm.dsCalibration->setFBSuffixes(
-      filter ? getCalibrationFBSuffixes("isis-diagnostics")
-             : getCalibrationExtensions("isis-diagnostics"));
+      filter ? getCalibrationFBSuffixes(tabName)
+             : getCalibrationExtensions(tabName));
   m_uiForm.dsCalibration->setWSSuffixes(
-      filter ? getCalibrationWSSuffixes("isis-diagnostics") : noSuffices);
+      filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
 }
 
 /**

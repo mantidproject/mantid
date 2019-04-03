@@ -179,13 +179,13 @@ void IndirectDataAnalysis::exportTabPython() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectDataAnalysis::applySettings() {
-  auto const restrict =
+  auto const filter =
       m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
   auto const errorBars =
       m_settingsPresenter->getSetting("plot-error-bars").toBool();
 
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->filterInputData(restrict);
+    tab->second->filterInputData(filter);
     tab->second->setPlotErrorBars(errorBars);
   }
 }

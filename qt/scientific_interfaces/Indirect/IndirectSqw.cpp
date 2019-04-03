@@ -207,9 +207,10 @@ void IndirectSqw::plotRqwContour() {
 
 void IndirectSqw::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes("sqw")
-                                               : getExtensions("sqw"));
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes("sqw")
+  auto const tabName("sqw");
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                               : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
                                                : noSuffixes);
 }
 

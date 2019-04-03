@@ -804,11 +804,12 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
 
 void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
+  auto const tabName("isis-energy-transfer");
   m_uiForm.dsCalibrationFile->setFBSuffixes(
-      filter ? getCalibrationFBSuffixes("isis-energy-transfer")
-             : getCalibrationExtensions("isis-energy-transfer"));
+      filter ? getCalibrationFBSuffixes(tabName)
+             : getCalibrationExtensions(tabName));
   m_uiForm.dsCalibrationFile->setWSSuffixes(
-      filter ? getCalibrationWSSuffixes("isis-energy-transfer") : noSuffixes);
+      filter ? getCalibrationWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

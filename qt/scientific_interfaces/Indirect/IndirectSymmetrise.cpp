@@ -548,9 +548,10 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
 
 void IndirectSymmetrise::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes("symmetrise")
-                                         : getExtensions("symmetrise"));
-  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes("symmetrise")
+  auto const tabName("symmetrise");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
                                          : noSuffixes);
 }
 

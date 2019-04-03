@@ -11,43 +11,17 @@
 #include "MantidKernel/FacilityInfo.h"
 
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::Kernel;
 
 namespace {
 
-std::string::const_iterator
-findNextNotCharacter(std::string::const_iterator fromIterator,
-                     std::string::const_iterator toIterator,
-                     std::string const &characters) {
-  for (auto iter = fromIterator; iter < toIterator; ++iter)
-    if (characters.find(*iter) == std::string::npos)
-      return iter;
-  return toIterator;
-}
-
-std::string::const_iterator
-findNextCharacter(std::string::const_iterator fromIterator,
-                  std::string::const_iterator toIterator,
-                  std::string const &characters) {
-  for (auto iter = fromIterator; iter < toIterator; ++iter)
-    if (characters.find(*iter) != std::string::npos)
-      return iter;
-  return toIterator;
-}
-
-std::vector<std::string> splitBy(std::string::const_iterator fromIterator,
-                                 std::string::const_iterator toIterator,
-                                 std::string const &delimiters) {
-  std::vector<std::string> substrings;
-  auto iter = findNextNotCharacter(fromIterator, toIterator, delimiters);
-
-  while (iter != toIterator) {
-    auto const nextIter = findNextCharacter(iter, toIterator, delimiters);
-    substrings.emplace_back(iter, nextIter);
-    iter = findNextNotCharacter(nextIter, toIterator, delimiters);
-  }
-  return substrings;
+std::vector<std::string> splitBy(std::string const &str,
+                                 std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  return subStrings;
 }
 
 } // namespace
@@ -59,8 +33,7 @@ namespace IDA {
 IndirectSettingsModel::IndirectSettingsModel(
     std::string const &settingsGroup, std::string const &availableSettings)
     : m_settingsGroup(settingsGroup),
-      m_settingsAvailable(
-          splitBy(availableSettings.begin(), availableSettings.end(), ",")) {}
+      m_settingsAvailable(splitBy(availableSettings, ",")) {}
 
 std::string IndirectSettingsModel::getSettingsGroup() const {
   return m_settingsGroup;

@@ -12,6 +12,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -19,15 +20,13 @@
 
 #include <QMessageBox>
 
-#include <boost/algorithm/string/find.hpp>
-#include <boost/pointer_cast.hpp>
-
-#include "MantidKernel/Strings.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-using namespace Poco::XML;
+#include <boost/algorithm/string/find.hpp>
+#include <boost/pointer_cast.hpp>
 
+using namespace Poco::XML;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -56,37 +55,38 @@ std::string findXMLAttribute(Document const *document, XMLString const &tag,
     if (element && element->tagName() == tag)
       return std::string(element->getAttribute(attribute));
   }
-  throw std::runtime_error("The tag " + tag + " was not found in the file.");
+  throw std::runtime_error("The tag " + tag + " was not found in the file: ");
 }
 
 std::string getAttributeFromFile(std::string const &filepath,
                                  XMLString const &tag,
                                  XMLString const &attribute) {
-  DOMParser parser;
-  Document *document;
   std::string attributeValue;
   try {
-    auto const xmlText = Strings::loadFile(filepath);
-    document = parser.parseString(xmlText);
+    DOMParser parser;
+    auto const *document = parser.parseString(Strings::loadFile(filepath));
     if (document)
       attributeValue = findXMLAttribute(document, tag, attribute);
   } catch (Poco::Exception const &ex) {
     g_log.warning(ex.displayText() + ". Unable to parse File:" + filepath);
   } catch (std::exception const &ex) {
-    g_log.warning(ex.what());
+    g_log.warning(ex.what() + filepath);
   }
   return attributeValue;
+}
+
+QStringList convertToQStringList(std::vector<std::string> const &strings) {
+  QStringList list;
+  for (auto const &str : strings)
+    list << QString::fromStdString(str);
+  return list;
 }
 
 QStringList convertToQStringList(std::string const &str,
                                  std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
-
-  QStringList list;
-  for (auto const &subString : subStrings)
-    list << QString::fromStdString(subString);
-  return list;
+  return convertToQStringList(subStrings);
 }
 
 } // namespace

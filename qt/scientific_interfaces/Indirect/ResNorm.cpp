@@ -83,14 +83,15 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
 
 void ResNorm::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes("resnorm")
-                                            : getExtensions("resnorm"));
-  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes("resnorm")
+  auto const tabName("resnorm");
+  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes(tabName)
+                                            : getExtensions(tabName));
+  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes(tabName)
                                             : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(
-      filter ? getResolutionFBSuffixes("resnorm") : getExtensions("resnorm"));
-  m_uiForm.dsResolution->setWSSuffixes(
-      filter ? getResolutionWSSuffixes("resnorm") : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
 }
 
 void ResNorm::setup() {}

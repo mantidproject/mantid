@@ -94,13 +94,14 @@ void Quasi::loadSettings(const QSettings &settings) {
 
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes("quasi")
-                                          : getExtensions("quasi"));
-  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes("quasi")
+  auto const tabName("quasi");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
                                           : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes("quasi")
-                                              : getExtensions("quasi"));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes("quasi")
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
                                               : noSuffixes);
 }
 
