@@ -38,7 +38,7 @@ public:
 
 private:
   /// The original unfiltered property as an owned pointer
-  const TimeSeriesProperty<HeldType> *m_unfiltered;
+  std::unique_ptr<const TimeSeriesProperty<HeldType>> m_unfiltered;
 };
 
 } // namespace Kernel

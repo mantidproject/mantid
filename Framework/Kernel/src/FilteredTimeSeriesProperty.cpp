@@ -27,9 +27,10 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     const TimeSeriesProperty<bool> &filterProp, const bool transferOwnership)
     : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(nullptr) {
   if (transferOwnership)
-    m_unfiltered = seriesProp;
+    m_unfiltered = std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp);
   else
-    m_unfiltered = seriesProp->clone();
+    m_unfiltered =
+        std::unique_ptr<const TimeSeriesProperty<HeldType>>(seriesProp->clone());
 
   // Now filter us with the filter
   this->filterWith(&filterProp);
@@ -39,9 +40,7 @@ FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
  * Destructor
  */
 template <typename HeldType>
-FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {
-  delete m_unfiltered;
-}
+FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {}
 
 /**
  * Access the unfiltered log
@@ -50,7 +49,7 @@ FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty() {
 template <typename HeldType>
 const TimeSeriesProperty<HeldType> *
 FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
-  return m_unfiltered;
+  return m_unfiltered.get();
 }
 
 /// @cond
