@@ -63,16 +63,21 @@ public:
   IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
-  QStringList getAllowedExtensions() const;
-
+  /// Get the suffixes used for an interface from the xml file
   QStringList getExtensions(std::string const &interfaceName) const;
   QStringList getCalibrationExtensions(std::string const &interfaceName) const;
   QStringList getSampleFBSuffixes(std::string const &interfaceName) const;
   QStringList getSampleWSSuffixes(std::string const &interfaceName) const;
+  QStringList getVanadiumFBSuffixes(std::string const &interfaceName) const;
+  QStringList getVanadiumWSSuffixes(std::string const &interfaceName) const;
   QStringList getResolutionFBSuffixes(std::string const &interfaceName) const;
   QStringList getResolutionWSSuffixes(std::string const &interfaceName) const;
   QStringList getCalibrationFBSuffixes(std::string const &interfaceName) const;
   QStringList getCalibrationWSSuffixes(std::string const &interfaceName) const;
+  QStringList getContainerFBSuffixes(std::string const &interfaceName) const;
+  QStringList getContainerWSSuffixes(std::string const &interfaceName) const;
+  QStringList getCorrectionsFBSuffixes(std::string const &interfaceName) const;
+  QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) const;
 
   /// Allows the user to turn the plotting of error bars off and on
   void setPlotErrorBars(bool errorBars);

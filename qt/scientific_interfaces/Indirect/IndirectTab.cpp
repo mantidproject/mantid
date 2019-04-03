@@ -184,12 +184,6 @@ void IndirectTab::exportPythonScript() {
 }
 
 /**
- * Returns the allowed input data file extensions
- * @return The allowed input data file extensions
- */
-QStringList IndirectTab::getAllowedExtensions() const { return {".nxs"}; }
-
-/**
  * Run the load algorithm with the supplied filename and spectrum range
  *
  * @param filename :: The name of the file to load
@@ -248,6 +242,18 @@ IndirectTab::getSampleWSSuffixes(std::string const &interfaceName) const {
 }
 
 QStringList
+IndirectTab::getVanadiumFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "vanadium-file-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getVanadiumWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "vanadium-workspace-suffixes"), ",");
+}
+
+QStringList
 IndirectTab::getResolutionFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
       getInterfaceProperty(interfaceName, "resolution-file-suffixes"), ",");
@@ -270,6 +276,31 @@ QStringList
 IndirectTab::getCalibrationWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
       getInterfaceProperty(interfaceName, "calib-workspace-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getContainerFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "container-file-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getContainerWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "container-workspace-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getCorrectionsFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "corrections-file-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "corrections-workspace-suffixes"),
+      ",");
 }
 
 /**

@@ -63,10 +63,6 @@ private:
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
-  QStringList m_resolutionFBExtensions;
-  QStringList m_resolutionWSExtensions;
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

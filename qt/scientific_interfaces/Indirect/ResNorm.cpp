@@ -36,12 +36,7 @@ ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ResNorm::ResNorm(QWidget *parent)
-    : IndirectBayesTab(parent),
-      m_vanadiumFBExtensions({"_red.nxs", "_sqw.nxs"}),
-      m_vanadiumWSExtensions({"_red", "_sqw"}),
-      m_resolutionFBExtensions({"_res.nxs"}),
-      m_resolutionWSExtensions({"_res"}), m_previewSpec(0) {
+ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -88,14 +83,14 @@ ResNorm::ResNorm(QWidget *parent)
 
 void ResNorm::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsVanadium->setFBSuffixes(filter ? m_vanadiumFBExtensions
-                                            : getAllowedExtensions());
-  m_uiForm.dsVanadium->setWSSuffixes(filter ? m_vanadiumWSExtensions
+  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes("resnorm")
+                                            : getExtensions("resnorm"));
+  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes("resnorm")
                                             : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
-                                              : getAllowedExtensions());
-  m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
-                                              : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(
+      filter ? getResolutionFBSuffixes("resnorm") : getExtensions("resnorm"));
+  m_uiForm.dsResolution->setWSSuffixes(
+      filter ? getResolutionWSSuffixes("resnorm") : noSuffixes);
 }
 
 void ResNorm::setup() {}

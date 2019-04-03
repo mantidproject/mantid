@@ -76,10 +76,6 @@ private:
   getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
                          const std::string &parameterName);
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
-  QStringList m_containerFBExtensions;
-  QStringList m_containerWSExtensions;
   Ui::CalculatePaalmanPings m_uiForm;
 
   std::shared_ptr<Densities> m_sampleDensities;

@@ -34,10 +34,7 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 namespace MantidQt {
 namespace CustomInterfaces {
 Stretch::Stretch(QWidget *parent)
-    : IndirectBayesTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
-      m_sampleWSExtensions({"_red", "_sqw"}),
-      m_resolutionFBExtensions({"_res.nxs"}),
-      m_resolutionWSExtensions({"_res"}), m_previewSpec(0), m_save(false) {
+    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -102,13 +99,14 @@ Stretch::Stretch(QWidget *parent)
 
 void Stretch::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
-                                          : getAllowedExtensions());
-  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? m_resolutionFBExtensions
-                                              : getAllowedExtensions());
-  m_uiForm.dsResolution->setWSSuffixes(filter ? m_resolutionWSExtensions
-                                              : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes("stretch")
+                                          : getExtensions("stretch"));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes("stretch")
+                                          : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(
+      filter ? getResolutionFBSuffixes("stretch") : getExtensions("stretch"));
+  m_uiForm.dsResolution->setWSSuffixes(
+      filter ? getResolutionWSSuffixes("stretch") : noSuffixes);
 }
 
 void Stretch::setup() {}

@@ -21,11 +21,7 @@ Mantid::Kernel::Logger g_log("ContainerSubtraction");
 namespace MantidQt {
 namespace CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent)
-    : CorrectionsTab(parent),
-      m_sampleFBExtensions({"_red.nxs", "_sqw.nxs", "_elf.nxs"}),
-      m_sampleWSExtensions({"_red", "_sqw", "_elf"}),
-      m_containerFBExtensions({"_red.nxs", "_sqw.nxs", "_elf.nxs"}),
-      m_containerWSExtensions({"_red", "_sqw", "_elf"}), m_spectra(0) {
+    : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
@@ -219,12 +215,14 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
 
 void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
-                                          : getAllowedExtensions());
-  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
-                                             : getAllowedExtensions());
-  m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
+  auto const tabName("container-subtraction");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
                                              : noSuffixes);
 }
 

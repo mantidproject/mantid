@@ -8,6 +8,12 @@
 	<sqw extensions=".nxs" sample-file-suffixes="_red.nxs" sample-workspace-suffixes="_red"/>
 	<moments extensions=".nxs" sample-file-suffixes="_sqw.nxs" sample-workspace-suffixes="_sqw"/>
 	
+	<!--Allowed suffixes for Input data on Indirect Data Corrections-->
+	<container-subtraction extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs,_elf.nxs" sample-workspace-suffixes="_red,_sqw,_elf" container-file-suffixes="_red.nxs,_sqw.nxs,_elf.nxs" container-workspace-suffixes="_red,_sqw,_elf"/>
+	<paalman-pings extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" container-file-suffixes="_red.nxs,_sqw.nxs" container-workspace-suffixes="_red,_sqw"/>
+	<monte-carlo extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" container-file-suffixes="_red.nxs,_sqw.nxs" container-workspace-suffixes="_red,_sqw"/>
+	<apply-corrections extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" container-file-suffixes="_red.nxs,_sqw.nxs" container-workspace-suffixes="_red,_sqw" corrections-file-suffixes="_Corrections.nxs" corrections-workspace-suffixes="_Corrections"/>
+		
 	<!--Allowed suffixes for Input data on Indirect Data Analysis-->
 	<elwin extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" />
 	<msdfit extensions=".nxs" sample-file-suffixes="_eq.nxs" sample-workspace-suffixes="_eq"/>
@@ -16,4 +22,9 @@
 	<convfit extensions=".nxs,.dave" sample-file-suffixes="_red.nxs,_sqw.nxs,_sqw.dave" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs,_sqw.dave" resolution-workspace-suffixes="_res,_red,_sqw"/>
 	<fqfit extensions=".nxs" sample-file-suffixes="_Result.nxs" sample-workspace-suffixes="_Result"/>
 	
+	<!--Allowed suffixes for Input data on Indirect Bayes-->
+	<resnorm extensions=".nxs" vanadium-file-suffixes="_red.nxs,_sqw.nxs" vanadium-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs" resolution-workspace-suffixes="_res"/>
+	<quasi extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs" resolution-workspace-suffixes="_res,_red,_sqw"/>
+	<stretch extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs" resolution-workspace-suffixes="_res"/>
+
 </interface-properties-file>

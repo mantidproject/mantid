@@ -108,11 +108,6 @@ private:
   void setPlotSpectrumIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
-  QStringList m_containerFBExtensions;
-  QStringList m_containerWSExtensions;
-
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;
 

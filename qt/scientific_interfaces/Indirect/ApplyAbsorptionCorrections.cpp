@@ -23,12 +23,7 @@ Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 namespace MantidQt {
 namespace CustomInterfaces {
 ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
-    : CorrectionsTab(parent), m_sampleFBExtensions({"_red.nxs", "_sqw.nxs"}),
-      m_sampleWSExtensions({"_red", "_sqw"}),
-      m_containerFBExtensions({"_red.nxs", "_sqw.nxs"}),
-      m_containerWSExtensions({"_red", "_sqw"}),
-      m_correctionsFBExtensions({"_Corrections.nxs"}),
-      m_correctionsWSExtensions({"_Corrections"}) {
+    : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
 
@@ -526,17 +521,19 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 
 void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsSample->setFBSuffixes(filter ? m_sampleFBExtensions
-                                          : getAllowedExtensions());
-  m_uiForm.dsSample->setWSSuffixes(filter ? m_sampleWSExtensions : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? m_containerFBExtensions
-                                             : getAllowedExtensions());
-  m_uiForm.dsContainer->setWSSuffixes(filter ? m_containerWSExtensions
+  auto const tabName("apply-corrections");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
                                              : noSuffixes);
-  m_uiForm.dsCorrections->setFBSuffixes(filter ? m_correctionsFBExtensions
-                                               : getAllowedExtensions());
-  m_uiForm.dsCorrections->setWSSuffixes(filter ? m_correctionsWSExtensions
-                                               : noSuffixes);
+  m_uiForm.dsCorrections->setFBSuffixes(
+      filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsCorrections->setWSSuffixes(
+      filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

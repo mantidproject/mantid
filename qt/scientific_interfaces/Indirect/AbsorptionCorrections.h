@@ -96,11 +96,6 @@ private:
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
-  QStringList m_containerFBExtensions;
-  QStringList m_containerWSExtensions;
-
   Ui::AbsorptionCorrections m_uiForm;
 
   std::shared_ptr<Densities> m_sampleDensities;
