@@ -16,6 +16,7 @@
 using namespace Mantid::API;
 
 namespace {
+Mantid::Kernel::Logger g_log("ResNorm");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -289,15 +290,20 @@ void ResNorm::loadSettings(const QSettings &settings) {
  */
 void ResNorm::handleVanadiumInputReady(const QString &filename) {
   // Plot the vanadium
-  m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
+  try {
+    m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 
   QPair<double, double> res;
   QPair<double, double> const range =
       m_uiForm.ppPlot->getCurveRange("Vanadium");
 
   auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
-  m_uiForm.spPreviewSpectrum->setMaximum(
-      static_cast<int>(vanWs->getNumberHistograms()) - 1);
+  if (vanWs)
+    m_uiForm.spPreviewSpectrum->setMaximum(
+        static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
@@ -329,8 +335,11 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
  * @param filename Name of the workspace to plot
  */
 void ResNorm::handleResolutionInputReady(const QString &filename) {
-  // Plot the resolution
-  m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
+  try {
+    m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 }
 
 /**
@@ -380,8 +389,12 @@ void ResNorm::previewSpecChanged(int value) {
 
   // Update vanadium plot
   if (m_uiForm.dsVanadium->isValid())
-    m_uiForm.ppPlot->addSpectrum(
-        "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+    try {
+      m_uiForm.ppPlot->addSpectrum(
+          "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+    } catch (std::exception const &ex) {
+      g_log.warning(ex.what());
+    }
 
   // Update fit plot
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
@@ -401,7 +414,11 @@ void ResNorm::previewSpecChanged(int value) {
 
       fit->mutableY(0) /= scaleFactors->cell<double>(m_previewSpec);
 
-      m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::green);
+      try {
+        m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::green);
+      } catch (std::exception const &ex) {
+        g_log.warning(ex.what());
+      }
 
       AnalysisDataService::Instance().addOrReplace(
           "__" + fitWsGroupName + "_scaled", fit);

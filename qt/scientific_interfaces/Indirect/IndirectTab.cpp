@@ -754,23 +754,26 @@ bool IndirectTab::getResolutionRangeFromWs(const QString &workspace,
  *found)
  */
 bool IndirectTab::getResolutionRangeFromWs(
-    Mantid::API::MatrixWorkspace_const_sptr ws, QPair<double, double> &res) {
-  auto inst = ws->getInstrument();
-  auto analyser = inst->getStringParameter("analyser");
+    Mantid::API::MatrixWorkspace_const_sptr workspace,
+    QPair<double, double> &res) {
+  if (workspace) {
+    auto const instrument = workspace->getInstrument();
+    if (instrument && instrument->hasParameter("analyser")) {
+      auto const analyser = instrument->getStringParameter("analyser");
+      if (analyser.size() > 0) {
+        auto comp = instrument->getComponentByName(analyser[0]);
+        if (comp) {
+          auto params = comp->getNumberParameter("resolution", true);
 
-  if (analyser.size() > 0) {
-    auto comp = inst->getComponentByName(analyser[0]);
-    if (comp) {
-      auto params = comp->getNumberParameter("resolution", true);
-
-      // set the default instrument resolution
-      if (params.size() > 0) {
-        res = qMakePair(-params[0], params[0]);
-        return true;
+          // set the default instrument resolution
+          if (params.size() > 0) {
+            res = qMakePair(-params[0], params[0]);
+            return true;
+          }
+        }
       }
     }
   }
-
   return false;
 }
 

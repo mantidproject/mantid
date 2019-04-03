@@ -10,6 +10,10 @@
 
 using namespace Mantid::API;
 
+namespace {
+Mantid::Kernel::Logger g_log("Quasi");
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -257,7 +261,11 @@ void Quasi::updateMiniPlot() {
   m_uiForm.ppPlot->clear();
 
   QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  try {
+    m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 
   // Update fit plot
   QString program = m_uiForm.cbProgram->currentText();
@@ -308,8 +316,12 @@ void Quasi::updateMiniPlot() {
     else
       continue;
 
-    m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex,
-                                 curveColour);
+    try {
+      m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex,
+                                   curveColour);
+    } catch (std::exception const &ex) {
+      g_log.warning(ex.what());
+    }
   }
 }
 
