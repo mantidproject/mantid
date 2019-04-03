@@ -29,7 +29,7 @@ createWorkspaceWithTextAxis(int const &numberOfSpectra,
                             int const &numberOfBins) {
   if (static_cast<std::size_t>(numberOfSpectra) == labels.size()) {
     auto workspace = createWorkspace(numberOfSpectra, numberOfBins);
-    workspace->replaceAxis(1, getTextAxis(numberOfSpectra, labels));
+    workspace->replaceAxis(1, std::unique_ptr<Axis>(getTextAxis(numberOfSpectra, labels)));
     return workspace;
   } else
     throw std::runtime_error(
@@ -42,7 +42,7 @@ createWorkspaceWithBinValues(int const &numberOfSpectra,
                              int const &numberOfBins) {
   if (static_cast<std::size_t>(numberOfBins) == values.size()) {
     auto workspace = createWorkspace(numberOfSpectra, numberOfBins);
-    workspace->replaceAxis(0, getNumericAxis(numberOfBins, values));
+    workspace->replaceAxis(0, std::unique_ptr<Axis>(getNumericAxis(numberOfBins, values)));
     return workspace;
   } else
     throw std::runtime_error(

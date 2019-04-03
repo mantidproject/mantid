@@ -234,16 +234,16 @@ protected:
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(this);
-    m_axes[1] = new Mantid::API::SpectraAxis(this);
+    m_axes[0] = std::make_unique<Mantid::API::RefAxis>(this);
+    m_axes[1] = std::make_unique<Mantid::API::SpectraAxis>(this);
   }
   void init(const Mantid::HistogramData::Histogram &histogram) override {
     AxeslessWorkspaceTester::init(histogram);
 
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(this);
-    m_axes[1] = new Mantid::API::SpectraAxis(this);
+    m_axes[0] = std::make_unique<Mantid::API::RefAxis>(this);
+    m_axes[1] = std::make_unique<Mantid::API::SpectraAxis>(this);
   }
 
 private:

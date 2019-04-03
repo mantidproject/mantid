@@ -484,7 +484,7 @@ public:
     addTimeSeriesEntry(run1, "omega", 78.9);
     addTimeSeriesEntry(run1, "proton_charge", 78.9);
 
-    run1.saveNexus(th.file, "logs");
+    run1.saveNexus(th.file.get(), "logs");
     th.file->openGroup("logs", "NXgroup");
     th.file->makeGroup("junk_to_ignore", "NXmaterial");
     th.file->makeGroup("more_junk_to_ignore", "NXsample");
@@ -492,7 +492,7 @@ public:
     // ---- Now re-load the same and compare ------
     th.reopenFile();
     LogManager run2;
-    run2.loadNexus(th.file, "logs");
+    run2.loadNexus(th.file.get(), "logs");
     TS_ASSERT(run2.hasProperty("double_series"));
     TS_ASSERT(run2.hasProperty("int_val"));
     TS_ASSERT(run2.hasProperty("string_val"));
@@ -502,8 +502,8 @@ public:
     // Reload without opening the group (for backwards-compatible reading of old
     // files)
     LogManager run3;
-    th.file->openGroup("logs", "NXgroup");
-    run3.loadNexus(th.file, "");
+    th.file.get()->openGroup("logs", "NXgroup");
+    run3.loadNexus(th.file.get(), "");
     TS_ASSERT(run3.hasProperty("double_series"));
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
@@ -519,7 +519,7 @@ public:
     th.reopenFile();
     th.file->openGroup("sample", "NXsample");
     LogManager run3;
-    run3.loadNexus(th.file, "");
+    run3.loadNexus(th.file.get(), "");
   }
 
 private:
