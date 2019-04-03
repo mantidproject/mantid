@@ -32,6 +32,11 @@ class ProjectRecoveryLoader(object):
         Attempt to recover by launching the GUI relevant to project recovery and repeating with failure if failure
         occurs.
         """
+
+        # Make sure to disable and re-enable the algorithm progress bar whilst recovery is running to avoid any race
+        # conditions, using long call to avoid adding extra functions to a bloated mainwindow.py.
+        self.main_window.algorithm_selector.algorithm_selector.algorithm_progress_widget.blockUpdates(True)
+
         self.recovery_presenter = ProjectRecoveryPresenter(self.pr)
 
         success = self.recovery_presenter.start_recovery_view(parent=self.main_window)
@@ -44,6 +49,9 @@ class ProjectRecoveryLoader(object):
         # Restart project recovery as we stay synchronous
         self.pr.clear_all_unused_checkpoints(pid_dir)
         self.pr.start_recovery_thread()
+
+        # Re-enable the algorithm progress bar after recovery has finished etc.
+        self.main_window.algorithm_selector.algorithm_selector.algorithm_progress_widget.blockUpdates(False)
 
     def load_checkpoint(self, directory):
         """
