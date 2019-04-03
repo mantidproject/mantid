@@ -275,10 +275,10 @@ class SANSGuiPropertiesHandler(object):
         for property_key, (load_func, property_type) in self.keys.items():
             args = []
             if self.line_edits is not None and property_type == "line_edit":
-                load_default_file(self.line_edits[property_key], self.__generic_settings, property_key)
+                self._load_default_file(self.line_edits[property_key], self.__generic_settings, property_key)
             else:
                 try:
-                    property_value = load_property(self.__generic_settings, property_key)
+                    property_value = self._load_property(self.__generic_settings, property_key)
                     args.append(property_value)
                 except RuntimeError:
                     pass
@@ -286,7 +286,32 @@ class SANSGuiPropertiesHandler(object):
 
     def update_default(self, gui_property, value):
         if gui_property in self.keys:
-            set_setting(self.__generic_settings, gui_property, value)
+            self._set_setting(self.__generic_settings, gui_property, value)
         elif self.logger:
             self.logger.notice("Trying to set property {} for which a default property "
                                "does not exist".format(gui_property))
+
+    @staticmethod
+    def _load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        default_file = settings.value(q_settings_key, "", type=str)
+        settings.endGroup()
+
+        line_edit_field.setText(default_file)
+
+    @staticmethod
+    def _load_property(q_settings_group_key, q_settings_key):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        default_property = settings.value(q_settings_key, "", type=str)
+        settings.endGroup()
+
+        return default_property
+
+    @staticmethod
+    def _set_setting(q_settings_group_key, q_settings_key, value):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        settings.setValue(q_settings_key, value)
+        settings.endGroup()
