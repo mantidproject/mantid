@@ -16,6 +16,7 @@ from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
+from sans.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentrefinder
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.single_execution import perform_can_subtraction
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
@@ -26,25 +27,7 @@ from sans.common.general_functions import create_child_algorithm
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
-PYQT4 = False
-IN_MANTIDPLOT = False
-WITHOUT_GUI = False
-try:
-    from qtpy import PYQT4
-except ImportError:
-    pass  # it is already false
-if PYQT4:
-    try:
-        import mantidplot
-        IN_MANTIDPLOT = True
-    except (Exception, Warning):
-        pass
-else:
-    try:
-        from mantidqt.plotting.functions import plot
-    except ImportError:
-        WITHOUT_GUI = True
-
+PYQT4, IN_MANTIDPLOT, WITHOUT_GUI = can_plot_beamcentrefinder()
 do_plotting = not PYQT4 or IN_MANTIDPLOT
 
 
