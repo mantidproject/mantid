@@ -44,13 +44,6 @@ pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
   workbench ${TEST_FILES}
 )
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
-  set(PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/workbench-script.pyw
-      -x)
-else()
-  set(PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/workbench -x)
-endif()
-
 # Install MantidWorkbench for OSX
 if( APPLE )
   set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )

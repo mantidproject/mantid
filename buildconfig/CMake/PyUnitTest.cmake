@@ -31,15 +31,14 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
     set ( _test_runner_module ${PYUNITTEST_RUNNER} )
   endif()
 
-
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA}$ENV{PYTHONPATH} )
+    set ( _python_path ${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA}$ENV{PYTHONPATH} )
     # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
     string ( REPLACE ";" ":" _python_path "${PYUNITTEST_PYTHONPATH_EXTRA}" )
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH} )
+    set ( _python_path ${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH} )
   endif()
   # Define the environment
   list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
@@ -66,21 +65,3 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
     endif ()
   endforeach ( part ${ARGN} )
 endfunction ()
-
-#=============================================================
-# main()
-#=============================================================
-
-# find the driver script
-find_program ( PYUNITTEST_GEN_EXEC pyunit_gen.py
-               PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/pyunit_gen
-                     ${PROJECT_SOURCE_DIR}/../Testing/Tools/pyunit_gen )
-
-# let people know whether or not it was found
-if (PYUNITTEST_GEN_EXEC)
-  set ( PYUNITTEST_FOUND TRUE )
-else ()
-  set ( PYUNITTEST_FOUND FALSE )
-endif ()
-
-mark_as_advanced ( PYUNITTEST_GEN_EXEC )

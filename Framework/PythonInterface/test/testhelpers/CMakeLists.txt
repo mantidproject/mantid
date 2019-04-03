@@ -5,7 +5,6 @@ set(PY_FILES
     algorithm_decorator.py
     illhelpers.py
     tempfile_wrapper.py
-    testrunner.py
     mlzhelpers.py)
 
 # Copy python files to output directory
