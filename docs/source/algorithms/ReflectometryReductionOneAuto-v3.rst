@@ -125,7 +125,7 @@ not represented but it is handled analogously to :literal:`OutputWorkspace`).
 Previous Versions
 -----------------
 
-This is version 3 of the algorithm. For version 2, please see `here. <ReflectometryReductionOneAuto-v2.html>`_ and for version 1, please see `here. <ReflectometryReductionOneAuto-v1.html>`_.
+This is version 3 of the algorithm. For version 2, please see `here <ReflectometryReductionOneAuto-v2.html>`_ and for version 1, please see `here. <ReflectometryReductionOneAuto-v1.html>`_
 
 Usage
 -----
