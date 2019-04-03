@@ -8,7 +8,7 @@ import os
 
 from mantid.kernel import ConfigService
 from sans.common.enums import SANSInstrument
-from sans.gui_logic.gui_common import GENERIC_SETTINGS, load_property, SANSGuiPropertiesHandler, set_setting
+from sans.gui_logic.gui_common import SANSGuiPropertiesHandler
 
 
 class AddRunsFilenameManager(object):
@@ -74,7 +74,7 @@ class AddRunsPagePresenter(object):
         self._connect_to_view(view)
 
         self.gui_properties_handler = SANSGuiPropertiesHandler({"add_runs_output_directory": (self.set_output_directory,
-                                                                                            str)})
+                                                                                              str)})
 
     def _get_filename_manager(self):
         # Separate call so AddRunsFilesnameManager can be mocked out.
