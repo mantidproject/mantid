@@ -61,8 +61,6 @@ private:
   void setPlotSpectrumIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
 
-  QStringList m_sampleFBExtensions;
-  QStringList m_sampleWSExtensions;
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces

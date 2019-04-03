@@ -61,8 +61,6 @@ protected slots:
 private:
   void setFileExtensionsByName(bool filter) override;
 
-  QStringList m_inputFBExtensions;
-  QStringList m_inputWSExtensions;
   Ui::IndirectMoments m_uiForm;
 };
 } // namespace CustomInterfaces

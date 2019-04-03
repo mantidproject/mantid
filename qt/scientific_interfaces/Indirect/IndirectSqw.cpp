@@ -41,8 +41,7 @@ namespace CustomInterfaces {
 /** Constructor
  */
 IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent),
-      m_sampleFBExtensions({"_red.nxs"}), m_sampleWSExtensions({"_red"}) {
+    : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
@@ -208,9 +207,9 @@ void IndirectSqw::plotRqwContour() {
 
 void IndirectSqw::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? m_sampleFBExtensions
-                                               : getAllowedExtensions());
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? m_sampleWSExtensions
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes("sqw")
+                                               : getExtensions("sqw"));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes("sqw")
                                                : noSuffixes);
 }
 

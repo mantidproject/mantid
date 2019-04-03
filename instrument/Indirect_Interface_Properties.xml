@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface-properties-file>
+	
+	<!--Allowed suffixes for Input data on Indirect Data Reduction-->
+	<isis-energy-transfer calib-extensions=".nxs" calib-file-suffixes="_calib.nxs" calib-workspace-suffixes="_calib"/>
+	<isis-diagnostics calib-extensions=".nxs" calib-file-suffixes="_calib.nxs" calib-workspace-suffixes="_calib"/>
+	<symmetrise extensions=".nxs" sample-file-suffixes="_red.nxs" sample-workspace-suffixes="_red"/>
+	<sqw extensions=".nxs" sample-file-suffixes="_red.nxs" sample-workspace-suffixes="_red"/>
+	<moments extensions=".nxs" sample-file-suffixes="_sqw.nxs" sample-workspace-suffixes="_sqw"/>
+	
+	<!--Allowed suffixes for Input data on Indirect Data Analysis-->
+	<elwin extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" />
+	<msdfit extensions=".nxs" sample-file-suffixes="_eq.nxs" sample-workspace-suffixes="_eq"/>
+	<iqt extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs" resolution-workspace-suffixes="_res,_red,_sqw"/>
+	<iqtfit extensions=".nxs" sample-file-suffixes="_iqt.nxs" sample-workspace-suffixes="_iqt"/>
+	<convfit extensions=".nxs,.dave" sample-file-suffixes="_red.nxs,_sqw.nxs,_sqw.dave" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs,_sqw.dave" resolution-workspace-suffixes="_res,_red,_sqw"/>
+	<fqfit extensions=".nxs" sample-file-suffixes="_Result.nxs" sample-workspace-suffixes="_Result"/>
+	
+</interface-properties-file>

@@ -218,9 +218,21 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
 std::string
 IndirectTab::getInterfaceProperty(std::string const &interfaceName,
                                   std::string const &propertyName) const {
-  auto const filepath =
-      "C:/Users/mlc47243/Documents/Work-Work/Reading-xml-files/AATESTDOC.xml";
+  auto const directory =
+      ConfigService::Instance().getString("instrumentDefinition.directory");
+  auto const filepath = directory + "Indirect_Interface_Properties.xml";
   return getAttributeFromFile(filepath, interfaceName, propertyName);
+}
+
+QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {
+  return convertToQStringList(getInterfaceProperty(interfaceName, "extensions"),
+                              ",");
+}
+
+QStringList
+IndirectTab::getCalibrationExtensions(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "calib-extensions"), ",");
 }
 
 QStringList
@@ -235,11 +247,6 @@ IndirectTab::getSampleWSSuffixes(std::string const &interfaceName) const {
       getInterfaceProperty(interfaceName, "sample-workspace-suffixes"), ",");
 }
 
-QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "extensions"),
-                              ",");
-}
-
 QStringList
 IndirectTab::getResolutionFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
@@ -251,6 +258,18 @@ IndirectTab::getResolutionWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
       getInterfaceProperty(interfaceName, "resolution-workspace-suffixes"),
       ",");
+}
+
+QStringList
+IndirectTab::getCalibrationFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "calib-file-suffixes"), ",");
+}
+
+QStringList
+IndirectTab::getCalibrationWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "calib-workspace-suffixes"), ",");
 }
 
 /**

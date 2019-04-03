@@ -25,8 +25,7 @@ namespace CustomInterfaces {
 /** Constructor
  */
 ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent),
-      m_calibFBExtensions({"_calib.nxs"}), m_calibWSExtensions({"_calib"}) {
+    : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
   // Property Tree
@@ -463,10 +462,11 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
 
 void ISISDiagnostics::setFileExtensionsByName(bool filter) {
   QStringList const noSuffices{""};
-  m_uiForm.dsCalibration->setFBSuffixes(filter ? m_calibFBExtensions
-                                               : getAllowedExtensions());
-  m_uiForm.dsCalibration->setWSSuffixes(filter ? m_calibWSExtensions
-                                               : noSuffices);
+  m_uiForm.dsCalibration->setFBSuffixes(
+      filter ? getCalibrationFBSuffixes("isis-diagnostics")
+             : getCalibrationExtensions("isis-diagnostics"));
+  m_uiForm.dsCalibration->setWSSuffixes(
+      filter ? getCalibrationWSSuffixes("isis-diagnostics") : noSuffices);
 }
 
 /**

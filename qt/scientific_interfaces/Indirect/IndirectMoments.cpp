@@ -21,8 +21,7 @@ namespace CustomInterfaces {
 /** Constructor
  */
 IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent),
-      m_inputFBExtensions({"_sqw.nxs"}), m_inputWSExtensions({"_sqw"}) {
+    : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
   const unsigned int NUM_DECIMALS = 6;
@@ -217,9 +216,10 @@ void IndirectMoments::momentsAlgComplete(bool error) {
 
 void IndirectMoments::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsInput->setFBSuffixes(filter ? m_inputFBExtensions
-                                         : getAllowedExtensions());
-  m_uiForm.dsInput->setWSSuffixes(filter ? m_inputWSExtensions : noSuffixes);
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes("moments")
+                                         : getExtensions("moments"));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes("moments")
+                                         : noSuffixes);
 }
 
 /**

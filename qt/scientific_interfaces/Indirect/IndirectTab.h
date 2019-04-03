@@ -66,10 +66,13 @@ public:
   QStringList getAllowedExtensions() const;
 
   QStringList getExtensions(std::string const &interfaceName) const;
+  QStringList getCalibrationExtensions(std::string const &interfaceName) const;
   QStringList getSampleFBSuffixes(std::string const &interfaceName) const;
   QStringList getSampleWSSuffixes(std::string const &interfaceName) const;
   QStringList getResolutionFBSuffixes(std::string const &interfaceName) const;
   QStringList getResolutionWSSuffixes(std::string const &interfaceName) const;
+  QStringList getCalibrationFBSuffixes(std::string const &interfaceName) const;
+  QStringList getCalibrationWSSuffixes(std::string const &interfaceName) const;
 
   /// Allows the user to turn the plotting of error bars off and on
   void setPlotErrorBars(bool errorBars);

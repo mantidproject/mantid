@@ -102,8 +102,7 @@ namespace CustomInterfaces {
  */
 ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
                                        QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent),
-      m_calibFBExtensions({"_calib.nxs"}), m_calibWSExtensions({"_calib"}) {
+    : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
   // SIGNAL/SLOT CONNECTIONS
@@ -314,6 +313,7 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
         m_uiForm.leCustomGroups->text().toStdString();
     if (customString.empty())
       return "Please supply a custom grouping for detectors.";
+
     else
       return checkCustomGroupingNumbersInRange(
           getCustomGroupingNumbers(customString));
@@ -804,10 +804,11 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
 
 void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  m_uiForm.dsCalibrationFile->setFBSuffixes(filter ? m_calibFBExtensions
-                                                   : getAllowedExtensions());
-  m_uiForm.dsCalibrationFile->setWSSuffixes(filter ? m_calibWSExtensions
-                                                   : noSuffixes);
+  m_uiForm.dsCalibrationFile->setFBSuffixes(
+      filter ? getCalibrationFBSuffixes("isis-energy-transfer")
+             : getCalibrationExtensions("isis-energy-transfer"));
+  m_uiForm.dsCalibrationFile->setWSSuffixes(
+      filter ? getCalibrationWSSuffixes("isis-energy-transfer") : noSuffixes);
 }
 
 /**
