@@ -16,6 +16,7 @@ from qtpy.QtGui import QColor, QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 from mantidqt.io import open_a_file_dialog
+from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
@@ -134,6 +135,7 @@ class PythonFileInterpreter(QWidget):
         self._setup_editor(content, filename)
 
         self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
+        self.code_commenter = CodeCommenter(self.editor)
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
@@ -223,34 +225,7 @@ class PythonFileInterpreter(QWidget):
         self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
 
     def toggle_comment(self):
-        if self.editor.selectedText() == '':  # If nothing selected, do nothing
-            return
-
-        # Note selection indices to restore highlighting later
-        selection_idxs = list(self.editor.getSelection())
-
-        # Expand selection from first character on start line to end char on last line
-        line_end_pos = len(self.editor.text().split('\n')[selection_idxs[2]].rstrip())
-        line_selection_idxs = [selection_idxs[0], 0,
-                               selection_idxs[2], line_end_pos]
-        self.editor.setSelection(*line_selection_idxs)
-        selected_lines = self.editor.selectedText().split('\n')
-
-        if self._are_comments(selected_lines) is True:
-            toggled_lines = self._uncomment_lines(selected_lines)
-            # Track deleted characters to keep highlighting consistent
-            selection_idxs[1] -= 2
-            selection_idxs[-1] -= 2
-        else:
-            toggled_lines = self._comment_lines(selected_lines)
-            selection_idxs[1] += 2
-            selection_idxs[-1] += 2
-
-        # Replace lines with commented/uncommented lines
-        self.editor.replaceSelectedText('\n'.join(toggled_lines))
-
-        # Restore highlighting
-        self.editor.setSelection(*selection_idxs)
+        self.code_commenter.toggle_comment()
 
     def _setup_editor(self, default_content, filename):
         editor = self.editor
@@ -285,27 +260,6 @@ class PythonFileInterpreter(QWidget):
     def clear_key_binding(self, key_str):
         """Clear a keyboard shortcut bound to a Scintilla command"""
         self.editor.clearKeyBinding(key_str)
-
-    # "private" api
-    def _comment_lines(self, lines):
-        for i in range(len(lines)):
-            lines[i] = '# ' + lines[i]
-        return lines
-
-    def _uncomment_lines(self, lines):
-        for i in range(len(lines)):
-            uncommented_line = lines[i].replace('# ', '', 1)
-            if uncommented_line == lines[i]:
-                uncommented_line = lines[i].replace('#', '', 1)
-            lines[i] = uncommented_line
-        return lines
-
-    def _are_comments(self, code_lines):
-        for line in code_lines:
-            if line.strip():
-                if not line.strip().startswith('#'):
-                    return False
-        return True
 
 
 class PythonFileInterpreterPresenter(QObject):

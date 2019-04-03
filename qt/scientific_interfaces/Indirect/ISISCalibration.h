@@ -37,7 +37,7 @@ public:
 
   QString peakRangeString() const;
   QString backgroundRangeString() const;
-  QString instrumentDetectorRangeString() const;
+  QString instrumentDetectorRangeString();
   QString outputWorkspaceName() const;
   QString resolutionDetectorRangeString() const;
   QString rebinString() const;
@@ -89,8 +89,7 @@ private:
                       const double &minimum, const double &maximum,
                       const QString &minPropertyName,
                       const QString &maxPropertyName);
-  Mantid::API::IAlgorithm_sptr
-  calibrationAlgorithm(const QString &inputFiles) const;
+  Mantid::API::IAlgorithm_sptr calibrationAlgorithm(const QString &inputFiles);
   Mantid::API::IAlgorithm_sptr
   resolutionAlgorithm(const QString &inputFiles) const;
   Mantid::API::IAlgorithm_sptr
