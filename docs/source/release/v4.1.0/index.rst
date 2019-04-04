@@ -16,6 +16,8 @@ Mantid 4.1.0 Release Notes
 
 We are proud to announce version 4.1.0 of Mantid.
 
+**This is the last release to support Windows 7**
+
 **TODO: Add paragraph summarizing big changes**
 
 This is just one of many improvements in this release, so please take a
