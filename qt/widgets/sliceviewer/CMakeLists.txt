@@ -195,10 +195,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsSliceViewerTest
 
 # Python unit tests
 set ( TEST_PY_FILES
-	test/SliceViewerPythonInterfaceTest.py
-	test/QwtTypesPythonInterfaceTest.py
+  test/SliceViewerPythonInterfaceTest.py
+  test/QwtTypesPythonInterfaceTest.py
 )
 
-if ( PYUNITTEST_FOUND )
-  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR} python.test ${TEST_PY_FILES} )
-endif ()
+pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR} python.test ${TEST_PY_FILES} )

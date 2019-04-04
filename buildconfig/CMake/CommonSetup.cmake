@@ -330,9 +330,7 @@ endif()
 ###########################################################################
 # External Data for testing
 ###########################################################################
-if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
-  include( SetupDataTargets )
-endif()
+include( SetupDataTargets )
 
 ###########################################################################
 # Visibility Setting

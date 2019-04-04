@@ -4,7 +4,7 @@ add_subdirectory(Interface/ui)
 add_subdirectory(ErrorReporter)
 
 # Chain all required interface custom targets into CompilePyUI
-add_custom_target(CompilePyUI 
+add_custom_target(CompilePyUI
 		  DEPENDS CompileUIUI
 		          CompileUIErrorReporter)
 
@@ -145,15 +145,13 @@ add_subdirectory(test/SANS)
 add_subdirectory(test/TOFTOF)
 
 # python unit tests
-if(PYUNITTEST_FOUND)
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts
-                      ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts
+  ${TEST_PY_FILES})
 
-  set(PYUNITTEST_QT_API pyqt) # force to use qt4
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scriptsQt4
+set(PYUNITTEST_QT_API pyqt) # force to use qt4
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scriptsQt4
                       ${TEST_PYQT4_FILES})
-  unset(PYUNITTEST_QT_API)
-endif()
+unset(PYUNITTEST_QT_API)
 
 # Ensure we don't get stale pyc files around
 clean_orphaned_pyc_files(${CMAKE_CURRENT_SOURCE_DIR})

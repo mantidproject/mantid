@@ -31,7 +31,5 @@ if(CXXTEST_FOUND)
 endif()
 
 # python unit tests
-if(PYUNITTEST_FOUND)
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms
-                      ${TEST_PY_FILES})
-endif()
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms
+  ${TEST_PY_FILES})
