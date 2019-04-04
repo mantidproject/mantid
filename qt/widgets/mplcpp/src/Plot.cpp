@@ -128,9 +128,9 @@ Python::Object plot(std::vector<std::string> workspaces,
                     boost::optional<QHash<QString, QVariant>> ax_properties,
                     boost::optional<std::string> window_title, bool errors,
                     bool overplot) {
+  GlobalInterpreterLock lock;
   Python::Object funcs{
       Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"))};
-  GlobalInterpreterLock lock;
   auto args = constructArgs(workspaces);
   auto kwargs = constructKwargs(spectrum_nums, wksp_indices, fig, plot_kwargs,
                                 ax_properties, window_title, errors, overplot);
