@@ -318,7 +318,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
   // be treated as a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
-  outputWS->setYUnitLabel("Attenuation Factor");
+  outputWS->setYUnitLabel("Attenuation factor");
   return outputWS;
 }
 

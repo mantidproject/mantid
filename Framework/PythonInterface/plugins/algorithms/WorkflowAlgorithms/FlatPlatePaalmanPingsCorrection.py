@@ -309,7 +309,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                         NSpec=num_angles,
                         UnitX='Wavelength',
                         VerticalAxisUnit='SpectraNumber',
-                        YUnitLabel='Attenuation Factor',
                         ParentWorkspace=self._sample_ws_name,
                         EnableLogging=False)
         log_prog.report('Adding sample logs')
@@ -330,7 +329,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             NSpec=num_angles,
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
-                            YUnitLabel='Attenuation Factor',
                             ParentWorkspace=self._sample_ws_name,
                             EnableLogging=False)
             log_prog.report('Adding assc sample logs')
@@ -346,7 +344,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             NSpec=num_angles,
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
-                            YUnitLabel='Attenuation Factor',
                             ParentWorkspace=self._sample_ws_name,
                             EnableLogging=False)
             log_prog.report('Adding acsc sample logs')
@@ -362,7 +359,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                             NSpec=num_angles,
                             UnitX='Wavelength',
                             VerticalAxisUnit='SpectraNumber',
-                            YUnitLabel='Attenuation Factor',
                             ParentWorkspace=self._sample_ws_name,
                             EnableLogging=False)
             log_prog.report('Adding acc sample logs')
