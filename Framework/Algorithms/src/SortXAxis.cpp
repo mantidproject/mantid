@@ -60,15 +60,32 @@ void SortXAxis::init() {
                   "in indirect .");
 }
 
-void SortXAxis::exec() {
+std::map<std::string, std::string> SortXAxis::validateInputs() {
+  std::map<std::string, std::string> errors;
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
   const bool ignoreHistogramValidation =
       getProperty("IgnoreHistogramValidation");
 
-  if (!ignoreHistogramValidation)
-    determineIfHistogramIsValid(*inputWorkspace);
+  const auto ySize = inputWorkspace->y(0).size();
+  const auto xSize = inputWorkspace->x(0).size();
+
+  if (ySize != xSize && ySize != xSize - 1)
+    errors["InputWorkspace"] =
+        "The workspace provided is not a point data or histogram workspace.";
+
+  if (!ignoreHistogramValidation && ySize == xSize - 1) {
+    const auto message = determineIfHistogramIsValid(inputWorkspace);
+    if (!message.empty())
+      errors["InputWorkspace"] = message;
+  }
+
+  return errors;
+}
+
+void SortXAxis::exec() {
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWorkspace = inputWorkspace->clone();
 
   // Define everything you can outside of the for loop
   // Assume that all spec are the same size
@@ -232,8 +249,8 @@ void SortXAxis::copyToOutputWorkspace(
  * @return false if it is not sorted
  */
 template <typename Comparator>
-bool isItSorted(Comparator const &compare,
-                const Mantid::API::MatrixWorkspace &inputWorkspace) {
+bool SortXAxis::isItSorted(Comparator const &compare,
+                           MatrixWorkspace_const_sptr inputWorkspace) const {
   for (auto specNum = 0u; specNum < inputWorkspace.getNumberHistograms();
        specNum++) {
     if (!std::is_sorted(inputWorkspace.x(specNum).begin(),
@@ -252,30 +269,16 @@ bool isItSorted(Comparator const &compare,
  * and x spectra are the same size
  *
  * @param inputWorkspace the unsorted input workspace
- * @throws if the inputWorkspace data is unordered (i.e. not ascending or
- * descending)
+ * @returns an error message if the data is unordered
  */
-void SortXAxis::determineIfHistogramIsValid(
-    const Mantid::API::MatrixWorkspace &inputWorkspace) {
-  const auto ySize = inputWorkspace.y(0).size();
-  const auto xSize = inputWorkspace.x(0).size();
-
-  if (ySize != xSize && ySize != xSize - 1)
-    throw std::runtime_error(
-        "The workspace provided is not a point data or histogram workspace.");
-
-  // If it is a histogram, check the data is ordered
-  if (ySize == xSize - 1) {
-    // The only way to guarantee that a histogram is a proper histogram, is to
-    // check whether each data value is in the correct order.
-    if (!isItSorted(std::greater<double>(), inputWorkspace)) {
-      if (!isItSorted(std::less<double>(), inputWorkspace)) {
-        throw std::runtime_error(
-            "The data entered contains an invalid histogram: histogram has an "
-            "unordered x-axis.");
-      }
-    }
-  }
+std::string SortXAxis::determineIfHistogramIsValid(
+    MatrixWorkspace_const_sptr inputWorkspace) const {
+  // The only way to guarantee that a histogram is a proper histogram, is to
+  // check whether each data value is in the correct order.
+  if (!isItSorted(std::greater<double>(), inputWorkspace) &&
+      !isItSorted(std::less<double>(), inputWorkspace))
+    return "The data entered contains an invalid histogram: histogram has "
+           "an unordered x-axis.";
 }
 
 } // namespace Algorithms

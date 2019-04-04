@@ -30,6 +30,7 @@ public:
 
 private:
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   std::vector<std::size_t> createIndices(const size_t);
 
@@ -54,8 +55,11 @@ private:
                              Mantid::API::MatrixWorkspace &outputWorkspace,
                              unsigned int specNum);
 
-  void determineIfHistogramIsValid(
-      const Mantid::API::MatrixWorkspace &inputWorkspace);
+  template <typename Comparator>
+  bool isItSorted(Comparator const &compare,
+                  Mantid::API::MatrixWorkspace_const_sptr inputWorkspace) const;
+  std::string determineIfHistogramIsValid(
+      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace) const;
 };
 
 } // namespace Algorithms
