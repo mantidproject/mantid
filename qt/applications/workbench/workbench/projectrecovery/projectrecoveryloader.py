@@ -33,25 +33,21 @@ class ProjectRecoveryLoader(object):
         occurs.
         """
 
-        # Make sure to disable and re-enable the algorithm progress bar whilst recovery is running to avoid any race
-        # conditions, using long call to avoid adding extra functions to a bloated mainwindow.py.
-        self.main_window.algorithm_selector.algorithm_selector.algorithm_progress_widget.blockUpdates(True)
+        # Block updates to the algorithm progress bar whilst recovery is running to avoid queueing Qt updates
+        # to the Workbench's progress bar
+        with self.main_window.algorithm_selector.block_progress_widget_updates():
+            self.recovery_presenter = ProjectRecoveryPresenter(self.pr)
 
-        self.recovery_presenter = ProjectRecoveryPresenter(self.pr)
+            success = self.recovery_presenter.start_recovery_view(parent=self.main_window)
 
-        success = self.recovery_presenter.start_recovery_view(parent=self.main_window)
+            if not success:
+                while not success:
+                    success = self.recovery_presenter.start_recovery_failure(parent=self.main_window)
 
-        if not success:
-            while not success:
-                success = self.recovery_presenter.start_recovery_failure(parent=self.main_window)
-
-        pid_dir = self.pr.get_pid_folder_to_load_a_checkpoint_from()
-        # Restart project recovery as we stay synchronous
-        self.pr.clear_all_unused_checkpoints(pid_dir)
-        self.pr.start_recovery_thread()
-
-        # Re-enable the algorithm progress bar after recovery has finished etc.
-        self.main_window.algorithm_selector.algorithm_selector.algorithm_progress_widget.blockUpdates(False)
+            pid_dir = self.pr.get_pid_folder_to_load_a_checkpoint_from()
+            # Restart project recovery as we stay synchronous
+            self.pr.clear_all_unused_checkpoints(pid_dir)
+            self.pr.start_recovery_thread()
 
     def load_checkpoint(self, directory):
         """
