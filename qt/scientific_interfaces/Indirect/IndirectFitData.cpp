@@ -61,7 +61,8 @@ private:
 };
 
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
-  bool operator()(const std::pair<std::size_t, std::size_t> &) const {
+  bool
+  operator()(const std::pair<std::size_t, std::size_t> & /*unused*/) const {
     return false;
   }
   bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {

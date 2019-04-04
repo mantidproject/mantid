@@ -147,7 +147,7 @@ protected:
   /// Called in non-picking drawSimpleToImage to draw something other than
   /// detectors
   /// Useful for debuging
-  virtual void drawCustom(QPainter *) const {}
+  virtual void drawCustom(QPainter * /*unused*/) const {}
   //@}
 
   /** @name Protected methods */

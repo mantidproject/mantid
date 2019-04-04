@@ -317,9 +317,11 @@ API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
 /** Method to create any MDBox type with 0 number of dimensions. As it is wrong,
  * just throws */
 API::IMDNode *MDEventFactory::createMDBoxWrong(
-    API::BoxController *,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &,
-    const uint32_t, const size_t, const size_t) {
+    API::BoxController * /*unused*/,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        & /*unused*/,
+    const uint32_t /*unused*/, const size_t /*unused*/,
+    const size_t /*unused*/) {
   throw std::invalid_argument("MDBox/MDGridBox can not have 0 dimensions");
 }
 /**Method to create MDBox for lean events (Constructor wrapper) with given

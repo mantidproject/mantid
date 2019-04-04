@@ -9,7 +9,6 @@
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 #include <stdexcept>
 
 #include "MantidKernel/Atom.h"

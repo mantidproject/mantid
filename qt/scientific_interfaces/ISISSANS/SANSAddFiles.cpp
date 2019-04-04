@@ -403,7 +403,7 @@ void SANSAddFiles::new2AddBrowse() {
 /** Normally in responce to an edit this sets data associated with the cell
  *  to the cells text and removes the tooltip
  */
-void SANSAddFiles::setCellData(QListWidgetItem *) {
+void SANSAddFiles::setCellData(QListWidgetItem * /*unused*/) {
   QListWidgetItem *editting = m_SANSForm->toAdd_List->currentItem();
   if (editting) {
     editting->setData(Qt::WhatsThisRole, QVariant(editting->text()));

@@ -220,8 +220,8 @@ void IntegrateEllipsoidsTwoStep::exec() {
   std::vector<std::pair<int, V3D>> weakPeaks, strongPeaks;
 
   // Compute signal to noise ratio for all peaks
-  int index = 0;
-  for (const auto &item : qList) {
+  for (int index = 0; static_cast<size_t>(index) < qList.size(); ++index) {
+    const auto &item = qList[index];
     const auto center = item.second;
     IntegrationParameters params = makeIntegrationParameters(center);
     auto sig2noise = integrator.estimateSignalToNoiseRatio(params, center);
@@ -242,7 +242,6 @@ void IntegrateEllipsoidsTwoStep::exec() {
                      << "\n";
       strongPeaks.push_back(result);
     }
-    ++index;
   }
 
   std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>,
@@ -252,7 +251,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   // Integrate strong peaks
   for (const auto &item : strongPeaks) {
     const auto index = item.first;
-    const auto q = item.second;
+    const auto &q = item.second;
     double inti, sigi;
 
     IntegrationParameters params = makeIntegrationParameters(q);
@@ -283,7 +282,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   for (const auto &item : weakPeaks) {
     double inti, sigi;
     const auto index = item.first;
-    const auto q = item.second;
+    const auto &q = item.second;
 
     const auto result = kdTree.findNearest(Eigen::Vector3d(q[0], q[1], q[2]));
     const auto strongIndex = static_cast<int>(std::get<1>(result[0]));

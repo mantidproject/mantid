@@ -152,7 +152,7 @@ void DerivMinimizer::initialize(API::ICostFunction_sptr function,
  * Perform one iteration.
  * @return :: true to continue, false to stop.
  */
-bool DerivMinimizer::iterate(size_t) {
+bool DerivMinimizer::iterate(size_t /*iteration*/) {
   if (m_gslSolver == nullptr) {
     throw std::runtime_error("Minimizer " + this->name() +
                              " was not initialized.");

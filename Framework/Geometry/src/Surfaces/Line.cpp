@@ -10,13 +10,16 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <iostream>
 
 namespace Mantid {
-
 namespace Geometry {
+namespace {
+Kernel::Logger logger("Line");
+}
+
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -28,13 +31,11 @@ Constructor
 {}
 
 Line::Line(const Kernel::V3D &O, const Kernel::V3D &D)
-    : Origin(O), Direct(D)
+    : Origin(O), Direct(normalize(D))
 /**
 Constructor
 */
-{
-  Direct.normalize();
-}
+{}
 
 Line *Line::clone() const
 /**
@@ -272,8 +273,7 @@ sets the line given the Origne and direction
   if (D.nullVector())
     return 0;
   Origin = O;
-  Direct = D;
-  Direct.normalize();
+  Direct = normalize(D);
   return 1;
 }
 
@@ -282,7 +282,7 @@ void Line::print() const
 Print statement for debugging
 */
 {
-  std::cout << "Line == " << Origin << " :: " << Direct << '\n';
+  logger.debug() << "Line == " << Origin << " :: " << Direct << '\n';
 }
 
 } // namespace Geometry

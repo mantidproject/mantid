@@ -61,7 +61,7 @@ struct FunctionData {
  * @return A value for the constraint
  */
 double evaluateConstraint(const DblMatrix &cmatrix, const size_t index,
-                          const size_t, const double *x) {
+                          const size_t /*unused*/, const double *x) {
   assert(index < cmatrix.numRows());
   const double *row = cmatrix[index];
 

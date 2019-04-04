@@ -19,7 +19,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"

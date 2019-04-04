@@ -400,3 +400,14 @@ class RowState(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+
+# ------------------------------
+# Binning Types for AddRuns
+# -------------------------------
+@string_convertible
+@serializable_enum("SaveAsEventData", "Custom", "FromMonitors")
+class BinningType(object):
+    """
+    Defines the types of binning when adding runs together
+    """

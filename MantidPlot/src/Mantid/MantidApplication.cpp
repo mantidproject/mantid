@@ -18,8 +18,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#include <iostream>
-
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidApplication");

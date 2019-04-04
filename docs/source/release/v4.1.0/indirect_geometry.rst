@@ -18,3 +18,31 @@ Improvements
 ############
 
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` resolves between run with old and new DAS.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` permits now flux normalization by proton charge and run duration.
+- :ref:`BASISReduction <algm-BASISReduction>` permits now flux normalization by proton charge and run duration.
+- :ref:`BASISReduction <algm-BASISReduction>` permits now retaining events only within a time window.
+- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
+
+
+Data Analysis Interface
+-----------------------
+
+Improvements
+############
+- Improved the output options of MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit so that Chi_squared can now be plotted.
+- Improved the I(Q, t) tab by adding more validation checks for the input data.
+
+Bug Fixes
+#########
+- Fixed an error caused by loading a Sample into ConvFit which does not have a resolution parameter for the analyser.
+- Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
+
+
+Data Reduction Interface
+------------------------
+
+Bug Fixes
+#########
+- Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
+- Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.

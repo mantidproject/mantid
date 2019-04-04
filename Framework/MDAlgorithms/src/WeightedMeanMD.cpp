@@ -74,8 +74,8 @@ void WeightedMeanMD::execHistoHisto(
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void WeightedMeanMD::execHistoScalar(
-    Mantid::DataObjects::MDHistoWorkspace_sptr,
-    Mantid::DataObjects::WorkspaceSingleValue_const_sptr) {
+    Mantid::DataObjects::MDHistoWorkspace_sptr /*out*/,
+    Mantid::DataObjects::WorkspaceSingleValue_const_sptr /*scalar*/) {
   throw std::runtime_error(
       this->name() + " can only be run with two MDHistoWorkspaces as inputs");
 }

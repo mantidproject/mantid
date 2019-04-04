@@ -14,7 +14,6 @@ FRONTMATTER = """// If you get the message  "This application has failed to star
 // when running to run this main.cpp in debug mode then try to uncomment the line below (see also http://blogs.msdn.com/dsvc/archive/2008/08/07/part-2-troubleshooting-vc-side-by-side-problems.aspx for more details)
 //#pragma comment(linker, "\"/manifestdependency:type='Win32' name='Microsoft.VC80.CRT' version='8.0.50608.0' processorArchitecture='X86' publicKeyToken='1fc8b3b9a1e18e3b' \"")
 
-#include <iostream>
 #include <iomanip>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -23,16 +22,21 @@ FRONTMATTER = """// If you get the message  "This application has failed to star
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
+namespace {
+Logger logger("generatedTest")
+}
+
 void printMem(MemoryStats &mem, Timer &timer)
 {
   mem.update();
-  std::cout << "*** at " << timer << ": mem "<< mem << std::endl;
+  logger.information() << "*** at " << timer << ": mem "<< mem << std::endl;
 }
 
 int main()
@@ -49,7 +53,7 @@ int main()
 
 BACKMATTER = """
   printMem(mem, k_timer);
-  std::cout << "total time ";
+  logger.information() << "total time ";
   fm.clear();
   exit(0);
 

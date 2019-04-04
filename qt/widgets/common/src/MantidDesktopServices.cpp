@@ -18,8 +18,6 @@ constexpr const char *LDPRELOAD_ENV = "LD_PRELOAD";
 } // namespace
 #endif
 
-#include <iostream>
-
 namespace MantidQt {
 namespace API {
 

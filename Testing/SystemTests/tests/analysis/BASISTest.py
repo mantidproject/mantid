@@ -8,14 +8,14 @@ from __future__ import (absolute_import, division, print_function)
 
 import systemtesting
 from mantid import config
-from mantid.simpleapi import (BASISCrystalDiffraction, Load, GroupWorkspaces,
-                              ElasticWindowMultiple, MSDFit,
-                              BASISPowderDiffraction)
+from mantid.simpleapi import (BASISCrystalDiffraction, GroupWorkspaces,
+                              ElasticWindowMultiple, MSDFit, BASISReduction,
+                              BASISPowderDiffraction, Load, Divide,
+                              ReplaceSpecialValues)
 
 
 class PreppingMixin(object):
-    r"""Common code for tests classes
-    """
+    r"""Common code for tests classes"""
     def prepset(self, subdir):
         self.config = {p: config[p] for p in ('default.facility',
                                               'default.instrument',
@@ -30,8 +30,7 @@ class PreppingMixin(object):
 
 
 class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
-    r"""ELWIN tab of the Indirect Inelastic Interface
-    """
+    r"""ELWIN tab of the Indirect Inelastic Interface"""
 
     def __init__(self):
         super(ElwinTest, self).__init__()
@@ -78,8 +77,7 @@ class ElwinTest(systemtesting.MantidSystemTest, PreppingMixin):
 
 
 class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
-    r"""MSD tab of the Indirect Inelastic Interface
-    """
+    r"""MSD tab of the Indirect Inelastic Interface"""
 
     def __init__(self):
         super(GaussianMSDTest, self).__init__()
@@ -113,14 +111,154 @@ class GaussianMSDTest(systemtesting.MantidSystemTest, PreppingMixin):
         return 'outMSD', 'BASIS_63652_63720_Gaussian_msd.nxs'
 
 
+class BASISReduction1Test(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Reduce in the old DAS using: (1)silicon 111 analyzers, (2) monitor
+    normalization, (3) vanadium normalization"""
+
+    def __init__(self):
+        super(BASISReduction1Test, self).__init__()
+        self.config = None
+        self.prepset('BASISReduction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_111.xml',
+                'BSS_79827_event.nxs',
+                'BSS_64642_event.nxs',
+                'BASIS_79827_divided_sqw.nxs']
+
+    def runTest(self):
+        try:
+            BASISReduction(RunNumbers='79827',
+                           DoFluxNormalization=True,
+                           FluxNormalizationType='Monitor',
+                           ReflectionType='silicon_111',
+                           MaskFile='BASIS_Mask_default_111.xml',
+                           EnergyBins=[-100, 0.4, 100],
+                           MomentumTransferBins=[1.1, 1.8, 1.1],
+                           DivideByVanadium=True,
+                           NormRunNumbers='64642')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'BSS_79827_divided_sqw', 'BASIS_79827_divided_sqw.nxs'
+
+
+class BASISReduction2Test(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Reduce in the old DAS using: (1)silicon 311 analyzers, (2) proton
+    chaarge normalization, (3) vanadium normalization"""
+
+    def __init__(self):
+        super(BASISReduction2Test, self).__init__()
+        self.config = None
+        self.prepset('BASISReduction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_311.xml',
+                'BSS_56748_event.nxs',
+                'BSS_78379_event.nxs',
+                'BASIS_56748_divided_sqw.nxs']
+
+    def runTest(self):
+        try:
+            BASISReduction(RunNumbers='56748',
+                           DoFluxNormalization=True,
+                           FluxNormalizationType='Proton Charge',
+                           ReflectionType='silicon_311',
+                           MaskFile='BASIS_Mask_default_311.xml',
+                           EnergyBins=[-740.0, 1.6, 740.0],
+                           MomentumTransferBins=[2.1, 3.4, 2.1],
+                           DivideByVanadium=True,
+                           NormRunNumbers='78379')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'BSS_56748_divided_sqw', 'BASIS_56748_divided_sqw.nxs'
+
+
+class BASISReduction3Test(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Reduce in the new DAS using: (1)silicon 111 analyzers, (2) monitor
+    normalization, (3) vanadium normalization"""
+
+    def __init__(self):
+        super(BASISReduction3Test, self).__init__()
+        self.config = None
+        self.prepset('BASISReduction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_111.xml',
+                'BSS_90177.nxs.h5',
+                'BSS_90176.nxs.h5',
+                'BASIS_90177_divided_sqw.nxs']
+
+    def runTest(self):
+        try:
+            BASISReduction(RunNumbers='90177',
+                           DoFluxNormalization=True,
+                           FluxNormalizationType='Monitor',
+                           ReflectionType='silicon_111',
+                           MaskFile='BASIS_Mask_default_111.xml',
+                           EnergyBins=[-100, 0.4, 100],
+                           MomentumTransferBins=[1.1, 1.8, 1.1],
+                           DivideByVanadium=True,
+                           NormRunNumbers='90176')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'BSS_90177_divided_sqw', 'BASIS_90177_divided_sqw.nxs'
+
+
+class BASISReduction4Test(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Reduce in the new DAS using: (1)silicon 311 analyzers, (2) monitor
+    normalization, (3) vanadium normalization"""
+
+    def __init__(self):
+        super(BASISReduction4Test, self).__init__()
+        self.config = None
+        self.prepset('BASISReduction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_311.xml',
+                'BSS_90178.nxs.h5',
+                'BSS_90176.nxs.h5',
+                'BASIS_90178_divided_sqw.nxs']
+
+    def runTest(self):
+        try:
+            BASISReduction(RunNumbers='90178',
+                           DoFluxNormalization=True,
+                           FluxNormalizationType='Monitor',
+                           MaskFile='BASIS_Mask_default_311.xml',
+                           ReflectionType='silicon_311',
+                           EnergyBins=[-740.0, 1.6, 740.0],
+                           MomentumTransferBins=[2.1, 3.4, 2.1],
+                           DivideByVanadium=True,
+                           NormRunNumbers='90176')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'BSS_90178_divided_sqw', 'BASIS_90178_divided_sqw.nxs'
+
+
 class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
-    r"""Reduction for a scan of runs probing different orientations of a crystal.
-    """
+    r"""Reduction for a scan of runs probing different orientations of a
+    crystal."""
 
     def __init__(self):
         super(CrystalDiffractionTest, self).__init__()
         self.config = None
-        self.prepset('BASISCrystalDiffraction')
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -131,9 +269,6 @@ class CrystalDiffractionTest(systemtesting.MantidSystemTest, PreppingMixin):
                 'BASISOrientedSample.nxs']
 
     def runTest(self):
-        """
-        Override parent method, does the work of running the test
-        """
         try:
             BASISCrystalDiffraction(RunNumbers='74799-74800',
                                     MaskFile='BASIS_Mask_default_diff.xml',
@@ -170,7 +305,7 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
     def __init__(self):
         super(PowderSampleTest, self).__init__()
         self.config = None
-        self.prepset('BASISPowderDiffraction')
+        self.prepset('BASISDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -182,8 +317,10 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         Override parent method, does the work of running the test
         """
         try:
+            # run with old DAS
             BASISPowderDiffraction(RunNumbers='74799',
                                    OutputWorkspace='powder',
+                                   MaskFile='BASIS_Mask_default_diff.xml',
                                    BackgroundRuns='75527',
                                    VanadiumRuns='64642')
         finally:
@@ -198,3 +335,77 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'
+
+
+class PowderFluxNormalizationTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample with two flux
+    normalizations"""
+
+    def __init__(self):
+        super(PowderFluxNormalizationTest, self).__init__()
+        self.config = None
+        self.prepset('BASISDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_74799_event.nxs', 'BASISPowderFluxNorm.nxs']
+
+    def runTest(self):
+        try:
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   FluxNormalizationType='Monitor',
+                                   OutputWorkspace='powder_Mon',
+                                   MaskFile='BASIS_Mask_default_diff.xml')
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   FluxNormalizationType='Proton Charge',
+                                   OutputWorkspace='powder_Pro',
+                                   MaskFile='BASIS_Mask_default_diff.xml')
+            Divide(LHSWorkspace='powder_Pro', RHSWorkspace='powder_Mon',
+                   OutputWorkspace='powder_ratio')
+            ReplaceSpecialValues(InputWorkspace='powder_ratio',
+                                 NANValue=1.0, NANError=1.0,
+                                 OutputWorkspace='powder_ratio')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'powder_ratio', 'BASISPowderFluxNorm.nxs'
+
+
+class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample in the newer DAS"""
+
+    def __init__(self):
+        super(PowderSampleNewDASTest, self).__init__()
+        self.config = None
+        self.prepset('BASISDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_90176.nxs.h5', 'BSS_90177.nxs.h5',
+                'BASIS_powder_90177.nxs']
+
+    def runTest(self):
+        r"""
+        Override parent method, does the work of running the test
+        """
+        try:
+            # run with new DAS
+            BASISPowderDiffraction(RunNumbers='90177',
+                                   OutputWorkspace='powder',
+                                   MaskFile='BASIS_Mask_default_diff.xml',
+                                   VanadiumRuns='90176')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        r"""
+        Inform of workspace output after runTest(), and associated file to
+        compare to.
+        :return: strings for workspace and file name
+        """
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'powder', 'BASIS_powder_90177.nxs'
