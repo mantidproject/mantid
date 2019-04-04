@@ -31,10 +31,13 @@ public:
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
   /// @return The name of can
-  inline const std::string containerID() const { return container()->id(); }
+  inline const std::string containerID() const { return container().id(); }
   /// @return A const ptr to the can instance
-  inline Container_const_sptr container() const {
-    return boost::static_pointer_cast<const Container>(m_components.front());
+  inline const Container& container() const {
+    if (m_components.empty())
+      throw std::runtime_error("Cannot get container from empty environment");
+    Container_const_sptr can = boost::static_pointer_cast<const Container>(m_components.front());
+    return *can;
   }
   /// @return The number of elements the environment is composed of
   inline size_t nelements() const { return m_components.size(); }
