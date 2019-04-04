@@ -44,8 +44,18 @@ MANTID_GEOMETRY_DLL Raster calculateCylinder(const Kernel::V3D &beamDirection,
                                              const size_t numSlices,
                                              const size_t numAnnuli);
 
+MANTID_GEOMETRY_DLL Raster calculateHollowCylinder(const Kernel::V3D &beamDirection,
+                                             const Geometry::CSGObject &shape,
+                                             const size_t numSlices,
+                                             const size_t numAnnuli);
+
 MANTID_GEOMETRY_DLL Raster
 calculateCylinder(const Kernel::V3D &beamDirection,
+                  const boost::shared_ptr<const IObject> shape,
+                  const size_t numSlices, const size_t numAnnuli);
+
+MANTID_GEOMETRY_DLL Raster
+calculateHollowCylinder(const Kernel::V3D &beamDirection,
                   const boost::shared_ptr<const IObject> shape,
                   const size_t numSlices, const size_t numAnnuli);
 
