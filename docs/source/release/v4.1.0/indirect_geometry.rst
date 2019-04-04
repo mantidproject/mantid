@@ -45,6 +45,11 @@ Improvements
   alternative to a chemical formula. The cross sections can be entered in the Calculate Paalman Pings tab and
   Calculate Monte Carlo Absorption tab. This uses the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
 
+Bug Fixes
+#########
+- Fixed a bug where the output plots on the Calculate Paalman Pings and Calculate Monte Carlo Absorption tabs had
+  the wrong axis labels and units.
+
 
 Data Reduction Interface
 ------------------------
