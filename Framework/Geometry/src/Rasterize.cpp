@@ -38,6 +38,7 @@ struct CylinderParameters {
 struct HollowCylinderParameters {
   double radius;
   double innerRadius;
+  double height;
   V3D centerBottomBase;
   V3D symmetryaxis;
 };
@@ -146,7 +147,8 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     const size_t numSlice = std::max<size_t>(
         1, static_cast<size_t>(params.height / cubeSizeInMetre));
     const size_t numAnnuli = std::max<size_t>(
-        1, static_cast<size_t>((params.radius - params.innerRadius) / cubeSizeInMetre));
+        1, static_cast<size_t>((params.radius - params.innerRadius) /
+                               cubeSizeInMetre));
     return calculateHollowCylinder(beamDirection, shape, numSlice, numAnnuli);
   } else { // arbitrary shape code
     const auto bbox = shape.getBoundingBox();
@@ -323,7 +325,8 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
       (params.axis * .5 * params.height) + params.centreOfBottomBase;
 
   const double sliceThickness{params.height / static_cast<double>(numSlices)};
-  const double deltaR{(params.radius - params.innerRadius) / static_cast<double>(numAnnuli)};
+  const double deltaR{(params.radius - params.innerRadius) /
+                      static_cast<double>(numAnnuli)};
 
   /* The number of volume elements is
    * numslices*(1+2+3+.....+numAnnuli)*6
@@ -356,9 +359,11 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
     // loop over annuli
     for (size_t j = 0; j < numAnnuli; ++j) {
       Ni += 6;
-      const double R = (static_cast<double>(j) * params.radius /
-                        static_cast<double>(numAnnuli)) +
-                       (0.5 * deltaR);
+      const double R =
+          params.innerRadius +
+          (static_cast<double>(j) * (params.radius - params.innerRadius) /
+           static_cast<double>(numAnnuli)) +
+          (0.5 * deltaR);
 
       // all the volume elements in the ring/slice are the same
       const double outerR = R + (deltaR / 2.0);
