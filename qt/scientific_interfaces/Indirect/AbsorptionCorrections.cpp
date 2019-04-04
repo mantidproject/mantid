@@ -7,8 +7,6 @@
 #include "AbsorptionCorrections.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
@@ -49,6 +47,27 @@ std::string extractFirstOf(std::string const &str,
   return str;
 }
 
+void setYAxisLabels(WorkspaceGroup_sptr group, std::string const &unit,
+                    std::string const &axisLabel) {
+  for (auto const &workspace : *group) {
+    auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    matrixWs->setYUnit(unit);
+    matrixWs->setYUnitLabel(axisLabel);
+  }
+}
+
+void convertSpectrumAxis(MatrixWorkspace_sptr workspace, double eFixed = 0.0) {
+  auto convertAlg = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+  convertAlg->initialize();
+  convertAlg->setProperty("InputWorkspace", workspace);
+  convertAlg->setProperty("OutputWorkspace", workspace->getName());
+  convertAlg->setProperty("Target", "ElasticQ");
+  convertAlg->setProperty("EMode", "Indirect");
+  if (eFixed != 0.0)
+    convertAlg->setProperty("EFixed", eFixed);
+  convertAlg->execute();
+}
+
 MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
                                   std::string const &target) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
@@ -82,7 +101,7 @@ WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
   convertedNames.reserve(workspaceGroup->size());
 
   for (auto const &workspace : *workspaceGroup) {
-    auto const name = "__" + workspace->getName() + "_" + target;
+    auto const name = workspace->getName();
     auto const wavelengthWorkspace = convertUnits(
         boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
     addWorkspaceToADS(name, wavelengthWorkspace);
@@ -143,10 +162,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
 }
 
-AbsorptionCorrections::~AbsorptionCorrections() {
-  if (doesExistInADS("__mc_corrections_wavelength"))
-    AnalysisDataService::Instance().remove("__mc_corrections_wavelength");
-}
+AbsorptionCorrections::~AbsorptionCorrections() {}
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
@@ -423,10 +439,40 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto const correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
+  auto correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
   if (correctionsWs) {
-    auto const wavelengthWorkspace = convertUnits(correctionsWs, "Wavelength");
-    addWorkspaceToADS("__mc_corrections_wavelength", wavelengthWorkspace);
+    correctionsWs = convertUnits(correctionsWs, "Wavelength");
+    addWorkspaceToADS(m_pythonExportWsName, correctionsWs);
+  }
+
+  convertSpectrumAxes(correctionsWs);
+}
+
+void AbsorptionCorrections::convertSpectrumAxes(
+    WorkspaceGroup_sptr correctionsWs) {
+  auto const sampleWsName =
+      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+  convertSpectrumAxes(correctionsWs, getADSMatrixWorkspace(sampleWsName));
+  setYAxisLabels(correctionsWs, "", "Attenuation Factor");
+}
+
+void AbsorptionCorrections::convertSpectrumAxes(
+    WorkspaceGroup_sptr correctionsGroup, MatrixWorkspace_sptr sample) {
+  for (auto const &workspace : *correctionsGroup) {
+    auto const correction =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    convertSpectrumAxes(correction, sample);
+  }
+}
+
+void AbsorptionCorrections::convertSpectrumAxes(MatrixWorkspace_sptr correction,
+                                                MatrixWorkspace_sptr sample) {
+  if (correction && sample && getEMode(sample) == "Indirect") {
+    try {
+      convertSpectrumAxis(correction, getEFixed(correction));
+    } catch (std::runtime_error const &) {
+      convertSpectrumAxis(correction);
+    }
   }
 }
 
@@ -437,9 +483,9 @@ void AbsorptionCorrections::processWavelengthWorkspace() {
  */
 void AbsorptionCorrections::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error)
+  if (!error) {
     processWavelengthWorkspace();
-  else {
+  } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox(
@@ -548,12 +594,12 @@ void AbsorptionCorrections::plotClicked() {
   setPlotResultIsPlotting(true);
   auto const plotType = m_uiForm.cbPlotOutput->currentText();
 
-  if (checkADSForPlotSaveWorkspace("__mc_corrections_wavelength", false)) {
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false)) {
     if (plotType == "All" || plotType == "Wavelength")
-      plotSpectrum(QString::fromStdString("__mc_corrections_wavelength"));
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
     if (plotType == "All" || plotType == "Angle")
-      plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
   setPlotResultIsPlotting(false);
 }

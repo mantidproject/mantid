@@ -10,6 +10,9 @@
 #include "CorrectionsTab.h"
 #include "ui_AbsorptionCorrections.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+
 #include "../General/UserInputValidator.h"
 
 namespace MantidQt {
@@ -55,6 +58,11 @@ private:
                                   QString const &shape);
 
   void processWavelengthWorkspace();
+  void convertSpectrumAxes(Mantid::API::WorkspaceGroup_sptr correctionsWs);
+  void convertSpectrumAxes(Mantid::API::WorkspaceGroup_sptr correctionsGroup,
+                           Mantid::API::MatrixWorkspace_sptr sample);
+  void convertSpectrumAxes(Mantid::API::MatrixWorkspace_sptr correction,
+                           Mantid::API::MatrixWorkspace_sptr sample);
 
   void getParameterDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
   void setBeamWidthValue(Mantid::Geometry::Instrument_const_sptr instrument,

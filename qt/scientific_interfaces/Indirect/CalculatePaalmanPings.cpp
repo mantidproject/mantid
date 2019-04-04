@@ -384,8 +384,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
         continue;
 
       if (getEMode(sampleWs) == "Indirect") {
-        API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
-        IAlgorithm_sptr convertSpecAlgo =
+        auto convertSpecAlgo =
             AlgorithmManager::Instance().create("ConvertSpectrumAxis");
         convertSpecAlgo->initialize();
         convertSpecAlgo->setProperty("InputWorkspace", factorWs);
