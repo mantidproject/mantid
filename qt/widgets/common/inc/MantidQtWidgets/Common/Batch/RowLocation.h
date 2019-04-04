@@ -23,7 +23,7 @@ using RowPath = std::vector<int>;
 class EXPORT_OPT_MANTIDQT_COMMON RowLocation {
 public:
   RowLocation() = default;
-  RowLocation(RowPath path);
+  RowLocation(RowPath path) : m_path(path) {}
   RowPath const &path() const;
   int rowRelativeToParent() const;
   bool isRoot() const;

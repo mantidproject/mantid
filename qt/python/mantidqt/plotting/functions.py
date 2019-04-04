@@ -15,6 +15,7 @@ our custom window.
 import collections
 import math
 import numpy as np
+import six
 
 # 3rd party imports
 try:
@@ -177,7 +178,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     line plot to the new axes. show() is called before returning the figure instance. A legend
     is added.
 
-    :param workspaces: A list of workspace handles
+    :param workspaces: A list of workspace handles or strings
     :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
     :param wksp_indices: A list of workspace indexes (starts from 0)
     :param errors: If true then error bars are added for each plot
@@ -188,6 +189,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param window_title: A string denoting name of the GUI window which holds the graph
     :return: The figure containing the plots
     """
+    # This allows easy passing from C++ to Python for calls from the python C API
+    if workspaces != [] and isinstance(workspaces[0], six.string_types):
+        new_workspaces = []
+        for workspace in workspaces:
+            new_workspaces.append(AnalysisDataService.retrieveWS(workspace))
+
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)

@@ -18,15 +18,6 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-RowLocation::RowLocation(RowPath path) {
-  const auto pathSize = path.size();
-  if (pathSize == 1 || pathSize == 2) {
-    m_path = std::move(path);
-  } else {
-    throw std::invalid_argument("Cannot have a RowPath object with an empty "
-                                "row path or too long of a path");
-  }
-}
 RowPath const &RowLocation::path() const { return m_path; }
 int RowLocation::rowRelativeToParent() const { return m_path.back(); }
 bool RowLocation::isRoot() const { return m_path.empty(); }

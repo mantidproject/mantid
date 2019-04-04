@@ -171,6 +171,10 @@ private:
   FilteredTreeModel m_filteredModel;
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  int m_selectionChangedCalled;
+#endif
 };
 } // namespace Batch
 } // namespace MantidWidgets

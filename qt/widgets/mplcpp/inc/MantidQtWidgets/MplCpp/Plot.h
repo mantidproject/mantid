@@ -26,9 +26,9 @@ namespace Widgets {
 namespace MplCpp {
 
 MANTID_MPLCPP_DLL Python::Object
-plot(std::vector<MatrixWorkspace_sptr> workspaces,
-     boost::optional<std::vector<std::size_t>> spectrum_nums,
-     boost::optional<std::vector<std::size_t>> wksp_indices,
+plot(std::vector<std::string> workspaces,
+     boost::optional<std::vector<int>> spectrum_nums,
+     boost::optional<std::vector<int>> wksp_indices,
      boost::optional<Python::Object> fig,
      boost::optional<QHash<QString, QVariant>> plot_kwargs,
      boost::optional<QHash<QString, QVariant>> ax_properties,

@@ -315,19 +315,11 @@ class MainWindow(QMainWindow):
         executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
 
-    def populate_cpp_interfaces_list(self, blacklist):
+    def launch_custom_cpp_gui(self, interface_name):
         interface_manager = InterfaceManager()
-
-        interface_names = interface_manager.getUserSubWindowKeys()
-
-        interfaces = {}
-        for interface_name in interface_names:
-            if interface_name not in blacklist:
-                interfaces[interface_name] = lambda: interface_manager.createSubWindow(interface_name, self)
-            else:
-                logger.information('Not adding gui "{}"'.format(interface_name))
-
-        return interfaces
+        interface = interface_manager.createSubWindow(interface_name)
+        interface.setAttribute(Qt.WA_DeleteOnClose, True)
+        interface.show()
 
     def populate_python_interfaces_list(self, blacklist, interface_dir):
         items = ConfigService['mantidqt.python_interfaces'].split()
@@ -350,7 +342,6 @@ class MainWindow(QMainWindow):
 
     def populate_interfaces_menu_with_interfaces(self, interfaces, interface_dir):
         # add the interfaces to the menu
-        interface_manager = InterfaceManager()
         keys = list(interfaces.keys())
         keys.sort()
         for key in keys:
@@ -364,8 +355,7 @@ class MainWindow(QMainWindow):
                     action.triggered.connect(lambda checked_py, script=script: self.launch_custom_python_gui(script))
                 else:
                     action = submenu.addAction(name)
-                    action.triggered.connect(lambda checked_cpp, name=name:
-                                             interface_manager.createSubWindow(name, self))
+                    action.triggered.connect(lambda checked_cpp, name=name: self.launch_custom_cpp_gui(name))
 
     def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
@@ -376,7 +366,8 @@ class MainWindow(QMainWindow):
                          'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
-        # Dictionary of custom interfaces that are qt5 and C++
+        # Dictionary of custom interfaces that are qt5 and C++ prefer this over generating the list as generating isn't
+        # possible till later in the load order of mainwindow.
         CPP_GUI = {u'Reflectometry': ['ISIS Reflectometry']}
 
         interfaces = self.populate_python_interfaces_list(GUI_BLACKLIST, interface_dir)
