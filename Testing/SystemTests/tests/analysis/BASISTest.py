@@ -238,7 +238,6 @@ class BASISReduction4Test(systemtesting.MantidSystemTest, PreppingMixin):
                            FluxNormalizationType='Monitor',
                            MaskFile='BASIS_Mask_default_311.xml',
                            ReflectionType='silicon_311',
-                           MaskFile='BASIS_Mask_default_311.xml',
                            EnergyBins=[-740.0, 1.6, 740.0],
                            MomentumTransferBins=[2.1, 3.4, 2.1],
                            DivideByVanadium=True,
