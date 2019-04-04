@@ -397,7 +397,6 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
           convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
         } catch (std::runtime_error &) {
         }
-
         m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
       }
     }
@@ -423,7 +422,18 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
   setRunIsRunning(false);
-  if (error) {
+
+  if (!error) {
+    auto const group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            m_pythonExportWsName);
+    for (auto const &workspace : *group) {
+      auto correctionsWorkspace =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+      correctionsWorkspace->setYUnit("");
+      correctionsWorkspace->setYUnitLabel("Attenuation Factor");
+    }
+  } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox("Correction factor post processing failed.\nSee "

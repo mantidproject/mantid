@@ -272,6 +272,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                         DataY=dataA1,
                         NSpec=len(self._angles),
                         UnitX='Wavelength',
+                        YUnitLabel='Attenuation Factor',
                         ParentWorkspace=self._sample_ws_name,
                         EnableLogging=False)
         workspaces = [ass_ws]
@@ -285,6 +286,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             DataY=dataA2,
                             NSpec=len(self._angles),
                             UnitX='Wavelength',
+                            YUnitLabel='Attenuation Factor',
                             ParentWorkspace=self._sample_ws_name,
                             EnableLogging=False)
 
@@ -296,6 +298,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             DataY=dataA3,
                             NSpec=len(self._angles),
                             UnitX='Wavelength',
+                            YUnitLabel='Attenuation Factor',
                             ParentWorkspace=self._sample_ws_name,
                             EnableLogging=False)
 
@@ -307,6 +310,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                             DataY=dataA4,
                             NSpec=len(self._angles),
                             UnitX='Wavelength',
+                            YUnitLabel='Attenuation Factor',
                             ParentWorkspace=self._sample_ws_name,
                             EnableLogging=False)
 
