@@ -60,13 +60,13 @@
 #                 binary tree from "foo_test.h" in the current source directory.
 #              2. Create an executable and test called unittest_foo.
 #              3. Files specified in TESTHELPER_SRCS will also be compiled and linked in.
-#               
+#
 #      #=============
 #      Example foo_test.h:
 #
 #          #include <cxxtest/TestSuite.h>
-#          
-#          class MyTestSuite : public CxxTest::TestSuite 
+#
+#          class MyTestSuite : public CxxTest::TestSuite
 #          {
 #          public:
 #             void testAddition( void )
@@ -132,7 +132,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
-        DEPENDS ${PATH_FILES}
+        DEPENDS ${CXXTEST_PYTHON_FILES} ${CXXTEST_TESTGEN_EXECUTABLE}
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
          ${_printer} --world ${_cxxtest_testname} ${_cxxtest_include} -o ${_cxxtest_real_outfname}
     )
@@ -149,22 +149,22 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 
       add_custom_command(
         OUTPUT  ${_cxxtest_cpp}
-        DEPENDS ${_cxxtest_h}
+        DEPENDS ${_cxxtest_h} ${CXXTEST_PYTHON_FILES} ${CXXTEST_TESTGEN_EXECUTABLE}
         COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --part
         --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
 	)
-    
+
       set_source_files_properties(${_cxxtest_cpp} PROPERTIES GENERATED true)
 
       set (_cxxtest_cpp_files ${_cxxtest_cpp} ${_cxxtest_cpp_files})
       set (_cxxtest_h_files ${part} ${_cxxtest_h_files})
     endforeach (part ${ARGN})
-    
+
     set ( _test_dir ${CMAKE_CURRENT_SOURCE_DIR} )
     if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
       ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.cpp _cxxtest_cpp_files _cxxtest_h_files)
-    ENDIF ()     
-    
+    ENDIF ()
+
     # define the test executable and exclude it from the all target
     # The TESTHELPER_SRCS variable can be set outside the macro and used to pass in test helper classes
     add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS} )
@@ -192,7 +192,6 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # Is that suite defined in there at all?
     STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
     if (NOT "${_search_res}" STREQUAL "")
-      #MESSAGE( "${_performance_suite_name} Found:                 ${_search_res}" )
       set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
       add_test ( NAME ${_cxxtest_separate_name}
                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
@@ -204,25 +203,24 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     endforeach ( part ${ARGN} )
 endmacro(CXXTEST_ADD_TEST)
 
-
-
-
-
 #=============================================================
 # main()
 #=============================================================
 
 find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h
           PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/cxxtest
-	        ${PROJECT_SOURCE_DIR}/../Testing/Tools/cxxtest 
+	        ${PROJECT_SOURCE_DIR}/../Testing/Tools/cxxtest
                 NO_DEFAULT_PATH )
 
 find_program(CXXTEST_TESTGEN_EXECUTABLE python/scripts/cxxtestgen
              PATHS ${CXXTEST_INCLUDE_DIR})
+
+file(GLOB_RECURSE CXXTEST_PYTHON_FILES
+     ${PROJECT_SOURCE_DIR}/Testing/Tools/cxxtest/python/*.py)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
 
 set(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
 
-mark_as_advanced ( CXXTEST_INCLUDE_DIR CXXTEST_TESTGEN_EXECUTABLE )
+mark_as_advanced ( CXXTEST_INCLUDE_DIR CXXTEST_TESTGEN_EXECUTABLE CXXTEST_PYTHON_FILES )
