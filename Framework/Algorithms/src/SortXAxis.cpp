@@ -74,10 +74,10 @@ void SortXAxis::exec() {
   // Assume that all spec are the same size
   const auto sizeOfX = inputWorkspace->x(0).size();
 
-  // PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms();
        specNum++) {
-    // PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
     auto workspaceIndices = createIndices(sizeOfX);
 
     sortIndicesByX(workspaceIndices, getProperty("Ordering"), *inputWorkspace,
@@ -85,9 +85,9 @@ void SortXAxis::exec() {
 
     copyToOutputWorkspace(workspaceIndices, *inputWorkspace, *outputWorkspace,
                           specNum);
-    // PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-  // PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", outputWorkspace);
 }
