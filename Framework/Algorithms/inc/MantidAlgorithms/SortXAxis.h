@@ -31,7 +31,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::vector<std::size_t> createIndexes(const size_t);
+  std::vector<std::size_t> createIndices(const size_t);
 
   void sortIndicesByX(std::vector<std::size_t> &workspaceIndices,
                       std::string order,

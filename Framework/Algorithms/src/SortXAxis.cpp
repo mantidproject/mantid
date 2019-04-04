@@ -19,17 +19,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace {
-
-template <typename T, typename Predicate>
-void removeElementsIf(std::vector<T> &vector, Predicate const &predicate) {
-  const auto iter = std::remove_if(vector.begin(), vector.end(), predicate);
-  if (iter != vector.end())
-    vector.erase(iter);
-}
-
-} // namespace
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -85,20 +74,20 @@ void SortXAxis::exec() {
   // Assume that all spec are the same size
   const auto sizeOfX = inputWorkspace->x(0).size();
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
+  // PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int specNum = 0u; specNum < (int)inputWorkspace->getNumberHistograms();
        specNum++) {
-    PARALLEL_START_INTERUPT_REGION
-    auto workspaceIndices = createIndexes(sizeOfX);
+    // PARALLEL_START_INTERUPT_REGION
+    auto workspaceIndices = createIndices(sizeOfX);
 
     sortIndicesByX(workspaceIndices, getProperty("Ordering"), *inputWorkspace,
                    specNum);
 
     copyToOutputWorkspace(workspaceIndices, *inputWorkspace, *outputWorkspace,
                           specNum);
-    PARALLEL_END_INTERUPT_REGION
+    // PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  // PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", outputWorkspace);
 }
@@ -109,7 +98,7 @@ void SortXAxis::exec() {
  * @param sizeOfX The size of the Spectrum's X axis
  * @return std::vector<std::size_t>
  */
-std::vector<std::size_t> SortXAxis::createIndexes(const size_t sizeOfX) {
+std::vector<std::size_t> SortXAxis::createIndices(const size_t sizeOfX) {
   std::vector<std::size_t> workspaceIndices;
   workspaceIndices.reserve(sizeOfX);
   for (auto workspaceIndex = 0u; workspaceIndex < sizeOfX; workspaceIndex++) {
@@ -200,13 +189,15 @@ void SortXAxis::copyYandEToOutputWorkspace(
   auto &inSpaceY = inputWorkspace.y(specNum);
   const auto ySize = inSpaceY.size();
 
-  // Remove workspace indices which are out of index range for y space
-  removeElementsIf(workspaceIndices, [&ySize](const std::size_t &index) {
-    return index >= ySize;
-  });
+  // If the input workspace is a histogram, remove the largest index
+  if (ySize == workspaceIndices.size() - 1) {
+    const auto iter =
+        std::find(workspaceIndices.begin(), workspaceIndices.end(), ySize);
+    if (iter != workspaceIndices.end())
+      workspaceIndices.erase(iter);
+  }
 
-  for (auto workspaceIndex = 0u;
-       workspaceIndex < inputWorkspace.y(specNum).size(); workspaceIndex++) {
+  for (auto workspaceIndex = 0u; workspaceIndex < ySize; workspaceIndex++) {
     outputWorkspace.mutableY(specNum)[workspaceIndex] =
         inSpaceY[workspaceIndices[workspaceIndex]];
   }
@@ -257,7 +248,8 @@ bool isItSorted(Comparator const &compare,
 }
 
 /**
- * @brief Determines whether it is a valid histogram or not.
+ * @brief Determines whether it is a valid histogram or not. Assumes that the y
+ * and x spectra are the same size
  *
  * @param inputWorkspace the unsorted input workspace
  * @throws if the inputWorkspace data is unordered (i.e. not ascending or
@@ -265,9 +257,15 @@ bool isItSorted(Comparator const &compare,
  */
 void SortXAxis::determineIfHistogramIsValid(
     const Mantid::API::MatrixWorkspace &inputWorkspace) {
-  // Assuming all X and Ys are the same, if X is not the same size as y, assume
-  // it is a histogram
-  if (inputWorkspace.x(0).size() != inputWorkspace.y(0).size()) {
+  const auto ySize = inputWorkspace.y(0).size();
+  const auto xSize = inputWorkspace.x(0).size();
+
+  if (ySize != xSize && ySize != xSize - 1)
+    throw std::runtime_error(
+        "The workspace provided is not a point data or histogram workspace.");
+
+  // If it is a histogram, check the data is ordered
+  if (ySize == xSize - 1) {
     // The only way to guarantee that a histogram is a proper histogram, is to
     // check whether each data value is in the correct order.
     if (!isItSorted(std::greater<double>(), inputWorkspace)) {
