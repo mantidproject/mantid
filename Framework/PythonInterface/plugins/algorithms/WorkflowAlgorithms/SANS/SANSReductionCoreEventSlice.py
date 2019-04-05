@@ -285,7 +285,7 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
             state = self._get_state()
             state.validate()
         except ValueError as err:
-            errors.update({"SANSSingleReduction": str(err)})
+            errors.update({"SANSSingleReductionEventSlice": str(err)})
         return errors
 
     def _get_state(self):

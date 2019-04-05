@@ -64,10 +64,63 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
 
     # ------------------------------------------------------------------------------------------------------------------
     # Get reduction settings
-    # Split into individual bundles which can be reduced individually. We split here if we have multiple periods or
-    # sliced times for example.
+    # Split into individual bundles which can be reduced individually. We split here if we have multiple periods.
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
+    if reduction_packages_require_splitting_for_event_slices(reduction_packages):
+        reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
+        # TODO change function order so we don't have to pass in lots of the same parameters to the two functions
+        return single_reduction_for_event_slices(reduction_packages, workspace_to_name, workspace_to_monitor,
+                                                 use_optimizations, save_can)
+    else:
+        return single_reduction_for_non_event_slices(reduction_packages, workspaces, monitors, workspace_to_name,
+                                                     workspace_to_monitor, use_optimizations, output_mode, plot_results,
+                                                     output_graph, save_can)
+
+
+def single_reduction_for_event_slices(reduction_packages, workspace_to_name, workspace_to_monitor,
+                                      use_optimizations, save_can):
+    # ------------------------------------------------------------------------------------------------------------------
+    # Run reductions (one at a time)
+    # ------------------------------------------------------------------------------------------------------------------
+    single_reduction_name = "SANSSingleReductionEventSlice"
+    single_reduction_options = {"UseOptimizations": use_optimizations,
+                                "SaveCan": save_can}
+    reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
+    reduction_alg.setChild(False)
+    # Perform the data reduction
+    for reduction_package in reduction_packages:
+        # -----------------------------------
+        # Set the properties on the algorithm
+        # -----------------------------------
+        set_properties_for_reduction_algorithm(reduction_alg, reduction_package,
+                                               workspace_to_name, workspace_to_monitor)
+
+        # -----------------------------------
+        #  Run the reduction
+        # -----------------------------------
+        reduction_alg.execute()
+
+
+def single_reduction_for_non_event_slices(reduction_packages, workspaces, monitors, workspace_to_name,
+                                          workspace_to_monitor, use_optimizations, output_mode,
+                                          plot_results, output_graph, save_can=False):
+    """
+        Runs a single reduction for non-event sliced data.
+
+        This function creates reduction packages which essentially contain information for a single valid reduction,
+        run it and store the results according to the user specified setting (output_mode).
+        :param reduction_packages: a list of ReductionPackage objects, which contain information for a single reduction.
+        :param workspaces: loaded workspaces which need to be deleted if not use_optimizations
+        :param monitors: loaded monitor workspaces which need to be deleted if not use_optimizations
+        :param workspace_to_name: a dict of SANSDataType vs output workspace names
+        :param workspace_to_monitor: a dict of SANSDataType vs output monitor workspace names
+        :param use_optimizations: if true then the optimizations of child algorithms are enabled.
+        :param output_mode: the output mode
+        :param plot_results: a bool. If true then plot the reduced workspaces as they are created
+        :param output_graph: a graph onto which new plots should be added.
+        :param save_can: bool. whether or not to save out can workspaces
+        """
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -481,7 +534,9 @@ def get_reduction_packages(state, workspaces, monitors):
 
     There are several reasons why a state can (and should) split up:
     1. Multi-period files were loaded. This means that we need to perform one reduction per (loaded) period
-    2. Event slices were specified. This means that we need to perform one reduction per event slice.
+    2. Event slices were specified. We event slice after initial reduction has taken place, as some operations can
+            be performed before event slicing. We do this for more efficient reduction, as we are not performing the
+            same operations multiple times needlessly.
 
     :param state: A single state which potentially needs to be split up into several states
     :param workspaces: The workspaces contributing to the reduction
@@ -490,12 +545,6 @@ def get_reduction_packages(state, workspaces, monitors):
     """
     # First: Split the state on a per-period basis
     reduction_packages = create_initial_reduction_packages(state, workspaces, monitors)
-
-    # Second: Split resulting reduction packages on a per-event-slice basis
-    # Note that at this point all reduction packages will have the same state information. They only differ in the
-    # workspaces that they use.
-    if reduction_packages_require_splitting_for_event_slices(reduction_packages):
-        reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
 
     if reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
         reduction_packages = split_reduction_packages_for_wavelength_range(reduction_packages)

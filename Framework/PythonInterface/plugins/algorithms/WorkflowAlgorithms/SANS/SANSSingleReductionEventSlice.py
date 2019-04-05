@@ -10,6 +10,8 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+from copy import deepcopy
+
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
@@ -207,8 +209,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         # Setup sliced reduction
         # --------------------------------------------------------------------------------------------------------------
-        # TODO do we use this state or get the state from the intermediate bundles
-        slice_reduction_setting_bundles = self._get_slice_reduction_setting_bundles(state, intermediate_bundles)
+        slice_reduction_setting_bundles = self._get_slice_reduction_setting_bundles(intermediate_bundles)
 
         # Run core reductions
         use_optimizations = self.getProperty("UseOptimizations").value
@@ -349,21 +350,6 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 reduction_setting_bundles.append(can_bundle)
         return reduction_setting_bundles
 
-    def _get_slice_reduction_setting_bundles(self, intermediate_bundles):
-        """
-        For each workspace bundle we have from the initial reduction (one for each component),
-        create a separate bundle for each event slice.
-
-        :param intermediate_bundles: a list of ReductionSettingBundle objects,
-                                     the output from the initial reduction.
-        :return: a list of ReductionSettingBundle objects, one for each component and event slice.
-        """
-        sliced_bundles = []
-        for bundle in intermediate_bundles:
-            # TODO use batch executions function for getting event slice bundles
-            sliced_bundles.extend(get_slice_bundles(bundle))
-        return sliced_bundles
-
     def _create_initial_reduction_bundles_for_data_type(self, state, data_type, reduction_modes, output_parts,
                                                         scatter_name, scatter_monitor_name,
                                                         transmission_name, direct_name):
@@ -388,8 +374,54 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             reduction_setting_bundles.append(reduction_setting_bundle)
         return reduction_setting_bundles
 
-    def _create_slice_reduction_bundles_for_data_type(self):
-        pass
+    @staticmethod
+    def _get_slice_bundles(bundle):
+        """
+            Splits a reduction package object into several reduction package objects if it
+            contains several event slice settings
+
+            :param bundle: a ReductionSettingBundle tuple
+            :return: a list of ReductionSettingBundle tuples where each tuple contains only one event slice.
+        """
+        slice_bundles = []
+        state = bundle.state
+        slice_event_info = state.slice
+        start_time = slice_event_info.start_time
+        end_time = slice_event_info.end_time
+
+        states = []
+        for start, end in zip(start_time, end_time):
+            state_copy = deepcopy(state)
+            slice_event_info = state_copy.slice
+            slice_event_info.start_time = [start]
+            slice_event_info.end_time = [end]
+            states.append(state_copy)
+
+        for state in states:
+            new_state = deepcopy(state)
+            slice_bundles.append(ReductionSettingBundle(state=new_state,
+                                                        data_type=bundle.data_type,
+                                                        reduction_mode=bundle.reduction_mode,
+                                                        output_parts=bundle.output_parts,
+                                                        scatter_workspace=bundle.scatter_workspace,
+                                                        scatter_monitor_workspace=bundle.scatter_monitor_workspace,
+                                                        transmission_workspace=bundle.transmission_workspace,
+                                                        direct_workspace=bundle.direct_workspace))
+        return slice_bundles
+
+    def _get_slice_reduction_setting_bundles(self, intermediate_bundles):
+        """
+        For each workspace bundle we have from the initial reduction (one for each component),
+        create a separate bundle for each event slice.
+
+        :param intermediate_bundles: a list of ReductionSettingBundle objects,
+                                     the output from the initial reduction.
+        :return: a list of ReductionSettingBundle objects, one for each component and event slice.
+        """
+        sliced_bundles = []
+        for bundle in intermediate_bundles:
+            sliced_bundles.extend(self._get_slice_bundles(bundle))
+        return sliced_bundles
 
     def set_shift_and_scale_output(self, merge_bundle):
         self.setProperty("OutScaleFactor", merge_bundle.scale)
@@ -416,8 +448,8 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             elif reduction_mode is ISISReductionMode.HAB:
                 self.setProperty("OutputWorkspaceHAB", output_workspace)
             else:
-                raise RuntimeError("SANSSingleReduction: Cannot set the output workspace. The selected reduction "
-                                   "mode {0} is unknown.".format(reduction_mode))
+                raise RuntimeError("SANSSingleReductionEventSlice: Cannot set the output workspace. "
+                                   "The selected reduction mode {0} is unknown.".format(reduction_mode))
 
     def set_reduced_can_workspace_on_output(self, output_bundles, output_bundles_part):
         """
@@ -446,7 +478,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     elif reduction_mode is ISISReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                        raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a can.".format(reduction_mode))
 
         # Find the partial output bundles fo LAB Can and HAB Can if they exist
@@ -467,7 +499,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                         self.setProperty("OutputWorkspaceHABCanCount", output_workspace_count)
                         self.setProperty("OutputWorkspaceHABCanNorm", output_workspace_norm)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                        raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a partial can.".format(reduction_mode))
 
     def set_can_and_sam_on_output(self, output_bundles):
@@ -493,7 +525,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     elif reduction_mode is ISISReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                        raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a can.".format(reduction_mode))
 
             elif output_bundle.data_type is DataType.Sample:
@@ -506,7 +538,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     elif reduction_mode is ISISReductionMode.HAB:
                         self.setProperty("OutputWorkspaceHABSample", output_bundle.output_workspace)
                     else:
-                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                        raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a sample.".format(reduction_mode))
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
@@ -529,7 +561,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
                 self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
             else:
-                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
+                raise RuntimeError("SANSSingleReductionEventSlice: The data type {0} should be"
                                    " sample or can.".format(transmission_bundle.data_type))
 
     def _get_progress(self, number_of_reductions, overall_reduction_mode):
