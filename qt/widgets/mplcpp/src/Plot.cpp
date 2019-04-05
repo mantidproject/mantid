@@ -102,7 +102,8 @@ constructKwargs(boost::optional<std::vector<int>> spectrum_nums,
     pythonAxProperties = Python::qHashToDict(ax_properties.get());
   }
   if (window_title) {
-    pythonWindowTitle = Python::NewRef(Py_BuildValue("s", window_title.get()));
+    pythonWindowTitle =
+        Python::NewRef(Py_BuildValue("s", window_title.get().c_str()));
   }
   if (fig) {
     pythonFig = fig.get();
