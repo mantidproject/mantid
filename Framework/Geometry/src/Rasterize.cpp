@@ -122,6 +122,25 @@ calculateHollowCylinder(const V3D &beamDirection,
                                  numAnnuli);
 }
 
+const V3D calculatePos(const double phi, const double R, const double z,
+                       const std::array<V3D, 3> coords) {
+  const auto x_prime = coords[0];
+  const auto y_prime = coords[1];
+  const auto z_prime = coords[2];
+
+  double rSinPhi = -R * sin(phi);
+  const double rCosPhi = -R * cos(phi);
+
+  // Calculate the current position in the shape in Cartesian coordinates
+  const double xcomp =
+      rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
+  const double ycomp =
+      rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
+  const double zcomp =
+      rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
+  return V3D(xcomp, ycomp, zcomp);
+}
+
 // -------------------
 // actual calculations
 
@@ -254,6 +273,7 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
   const V3D z_prime = normalize(params.axis);
   const V3D x_prime = createPerpendicular(z_prime);
   const V3D y_prime = z_prime.cross_prod(x_prime);
+  const auto coords = std::array<V3D, 3>{x_prime, y_prime, z_prime};
 
   // loop over the elements of the shape and create everything
   // loop over slices
@@ -280,17 +300,7 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
       for (size_t k = 0; k < Ni; ++k) {
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const double rSinPhi = -R * sin(phi);
-        const double rCosPhi = -R * cos(phi);
-
-        // Calculate the current position in the shape in Cartesian coordinates
-        const double xcomp =
-            rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
-        const double ycomp =
-            rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
-        const double zcomp =
-            rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
-        const auto position = center + V3D(xcomp, ycomp, zcomp);
+        const auto position = center + calculatePos(phi, R, z, coords);
 
         assert(shape.isValid(position));
 
@@ -347,6 +357,7 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
   z_prime.normalize();
   const V3D x_prime = createPerpendicular(z_prime);
   const V3D y_prime = z_prime.cross_prod(x_prime);
+  const auto coords = std::array<V3D, 3>{x_prime, y_prime, z_prime};
 
   // loop over the elements of the shape and create everything
   // loop over slices
@@ -375,17 +386,8 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
       for (size_t k = 0; k < Ni; ++k) {
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const double rSinPhi = -R * sin(phi);
-        const double rCosPhi = -R * cos(phi);
 
-        // Calculate the current position in the shape in Cartesian coordinates
-        const double xcomp =
-            rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
-        const double ycomp =
-            rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
-        const double zcomp =
-            rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
-        const auto position = center + V3D(xcomp, ycomp, zcomp);
+        const auto position = center + calculatePos(phi, R, z, coords);
 
         assert(shape.isValid(position));
 
