@@ -35,17 +35,31 @@ PyObject *constructPythonListFromVectorOfTypeT(T vector,
   const auto vectorSize = vector.size();
   PyObject *pythonList = PyList_New(vectorSize);
   for (auto i = 0u; i < vectorSize; ++i) {
-    PyObject *pythonVectorItem = Py_BuildValue(pythonType.c_str(), vector[i]);
+    PyObject *pythonVectorItem;
+    pythonVectorItem = Py_BuildValue(pythonType.c_str(), vector[i]);
     PyList_SetItem(pythonList, i, pythonVectorItem);
   }
   return pythonList;
 }
+PyObject *
+constructPythonListFromVectorOfStrings(std::vector<std::string> vector) {
+  const auto vectorSize = vector.size();
+  PyObject *pythonList = PyList_New(vectorSize);
+  for (auto i = 0u; i < vectorSize; ++i) {
+    PyObject *pythonVectorItem;
+    pythonVectorItem = Py_BuildValue("s", vector[i].c_str());
+
+    PyList_SetItem(pythonList, i, pythonVectorItem);
+  }
+  return pythonList;
+}
+} // namespace
 
 Python::Object constructArgs(std::vector<std::string> workspaces) {
-  Python::Object workspaceNames = Python::NewRef(
-      constructPythonListFromVectorOfTypeT<std::vector<std::string>>(workspaces,
-                                                                     "s"));
-  return Python::NewRef(Py_BuildValue("[O]", workspaceNames.ptr()));
+  auto workspaceNames = constructPythonListFromVectorOfStrings(workspaces);
+  auto listObj = Py_BuildValue("(O)", workspaceNames);
+  auto newRef = Python::NewRef(listObj);
+  return newRef;
 }
 
 Python::Object
@@ -118,7 +132,6 @@ constructKwargs(boost::optional<std::vector<int>> spectrum_nums,
         pythonAxProperties.ptr(), "window_title", pythonWindowTitle.ptr()));
   }
 }
-} // namespace
 
 Python::Object plot(std::vector<std::string> workspaces,
                     boost::optional<std::vector<int>> spectrum_nums,
@@ -129,13 +142,15 @@ Python::Object plot(std::vector<std::string> workspaces,
                     boost::optional<std::string> window_title, bool errors,
                     bool overplot) {
   GlobalInterpreterLock lock;
-  Python::Object funcs{
-      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"))};
+  PyObject *functionsString =
+      PyString_FromString("mantidqt.plotting.functions");
+  PyObject *funcsModule = PyImport_Import(functionsString);
+  PyObject *plotFunc = PyObject_GetAttrString(funcsModule, "plot");
   auto args = constructArgs(workspaces);
   auto kwargs = constructKwargs(spectrum_nums, wksp_indices, fig, plot_kwargs,
                                 ax_properties, window_title, errors, overplot);
-  Python::Object attr{funcs.attr("plot")};
-  return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
+  PyObject *returnedFig = PyObject_Call(plotFunc, args.ptr(), kwargs.ptr());
+  return Python::NewRef(returnedFig);
 }
 } // namespace MplCpp
 } // namespace Widgets

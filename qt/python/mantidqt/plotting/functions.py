@@ -169,7 +169,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None):
     return fig, ax
 
 
-@manage_workspace_names
+# @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
          window_title=None):
@@ -193,7 +193,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if workspaces != [] and isinstance(workspaces[0], six.string_types):
         new_workspaces = []
         for workspace in workspaces:
-            new_workspaces.append(AnalysisDataService.retrieveWS(workspace))
+            new_workspaces.append(AnalysisDataService.retrieve(workspace))
+        workspaces = new_workspaces
 
     if plot_kwargs is None:
         plot_kwargs = {}

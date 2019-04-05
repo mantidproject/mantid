@@ -50,9 +50,14 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 
   // plot(workspaces, spectrum_nums, wksp_indices, fig, plot_kwargs,
   // ax_properties, windows_title, errors, overplot)
+  std::string window_title = "ISIS Reflectometry Plot";
+  if (!workspaces.empty()) {
+    window_title = workspaces[0];
+  }
+
   std::vector<int> wksp_indices = {0};
   plot(workspaces, boost::none, wksp_indices, boost::none, boost::none,
-       ax_properties, boost::none, false, true);
+       ax_properties, workspaces[0], false, true);
 #endif
 }
 

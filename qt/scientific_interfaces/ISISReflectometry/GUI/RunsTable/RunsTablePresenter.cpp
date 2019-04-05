@@ -595,7 +595,9 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   const auto groups = m_model.selectedGroups();
 
   for (const auto &group : groups) {
-    workspaces.emplace_back(group.postprocessedWorkspaceName());
+    const auto workspaceName = group.postprocessedWorkspaceName();
+    if (workspaceName != "")
+      workspaces.emplace_back(workspaceName);
   }
 
   if (workspaces.empty())
