@@ -104,13 +104,13 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the low-angle bank.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the high-angle bank.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceMerged', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
         self.setPropertyGroup("OutScaleFactor", 'Output')
         self.setPropertyGroup("OutShiftFactor", 'Output')
@@ -120,35 +120,35 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
 
         # CAN output
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can output workspace group for the low-angle bank, provided there is one. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can output workspace group for the high-angle bank, provided there is one. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceLABSample', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample output workspace group for the low-angle bank, provided there is one. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceHABSample', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample output workspace group for the high-angle bank, provided there is one. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace group. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmission', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace group. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace group for the can. '
                                  'Each workspace in the group is one event slice.')
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmissionCan', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                                                    optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace group for the can. '
                                  'Each workspace in the group is one event slice.')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
@@ -190,8 +190,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # Setup initial reduction
         # --------------------------------------------------------------------------------------------------------------
         # TODO progress bar
-        # TODO put in the correct algorithm name
-        initial_reduction_alg = create_child_algorithm(self, "", **{})
+        initial_reduction_alg = create_child_algorithm(self, "SANSReductionCoreInitial", **{})
         # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
         # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
         # might have more detectors though (or different types)
@@ -216,8 +215,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         save_can = self.getProperty("SaveCan").value
 
         # Create the reduction core algorithm
-        # TODO fill in this algorithm
-        reduction_alg = create_child_algorithm(self, "", **{})
+        reduction_alg = create_child_algorithm(self, "SANSReductionCoreEventSlice", **{})
 
         # Set up progress
         progress = self._get_progress(len(reduction_setting_bundles), overall_reduction_mode)
