@@ -285,8 +285,8 @@ PyObject *row(ITableWorkspace &self, int row) {
 
   PyObject *result = PyDict_New();
 
-  for (int colIndex = 0; colIndex < numCols; colIndex++) {
-    Mantid::API::Column_const_sptr col = self.getColumn(colIndex);
+  for (int columnIndex = 0; columnIndex < numCols; columnIndex++) {
+    Mantid::API::Column_const_sptr col = self.getColumn(columnIndex);
     const std::type_info &typeID = col->get_type_info();
 
     if (PyDict_SetItemString(result, col->name().c_str(),
