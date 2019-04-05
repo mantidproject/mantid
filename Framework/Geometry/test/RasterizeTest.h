@@ -29,7 +29,7 @@ private:
       (CYLINDER_RADIUS * CYLINDER_RADIUS -
        CYLINDER_INNER_RADIUS * CYLINDER_INNER_RADIUS);
 
-          static constexpr double SPHERE_RADIUS = 3.2;
+  static constexpr double SPHERE_RADIUS = 3.2;
   static constexpr double SPHERE_VOLUME =
       (4. / 3.) * M_PI * SPHERE_RADIUS * SPHERE_RADIUS * SPHERE_RADIUS;
 
@@ -144,7 +144,8 @@ public:
     // all the vector lengths should match
     constexpr size_t NUM_ELEMENTS =
         NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
-    simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
+    simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS,
+                       HOLLOW_CYLINDER_VOLUME);
   }
 
   void test_calculateOffsetCylinder() {
@@ -174,7 +175,8 @@ public:
     // all the vector lengths should match
     constexpr size_t NUM_ELEMENTS =
         NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
-    simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
+    simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS,
+                       HOLLOW_CYLINDER_VOLUME);
   }
 
   void test_calculateCylinderOnSphere() {
