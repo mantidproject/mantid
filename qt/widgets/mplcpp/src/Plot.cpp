@@ -56,10 +56,8 @@ constructPythonListFromVectorOfStrings(std::vector<std::string> vector) {
 } // namespace
 
 Python::Object constructArgs(std::vector<std::string> workspaces) {
-  auto workspaceNames = constructPythonListFromVectorOfStrings(workspaces);
-  auto listObj = Py_BuildValue("(O)", workspaceNames);
-  auto newRef = Python::NewRef(listObj);
-  return newRef;
+  return Python::NewRef(
+      Py_BuildValue("(O)", constructPythonListFromVectorOfStrings(workspaces)));
 }
 
 Python::Object
