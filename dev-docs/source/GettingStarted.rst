@@ -91,6 +91,17 @@ OSX
 ---
 The build environment on OS X is described here :ref:`BuildingOnOSX`.
 
+Docker
+------
+
+On Docker supported systems you may use the `mantid-development
+<https://github.com/mantidproject/dockerfiles/tree/master/mantid-development>`_
+images to develop Mantid without having to configure your system as a suitable
+build environment. This will give you an out of the box working build
+environment, including ParaView/VATES, Python 3 (where available) and ccache.
+
+More details and instructions can be found at the GitHub link above.
+
 Getting the Mantid code
 #######################
 We use `Git`_ as our version control system (VCS). The master copies of our repositories are located at `GitHub <http://github.com/mantidproject>`_. We have a number of repositories, of which the main one (the one containing all the source code for Mantid itself) is called simply `mantid <http://github.com/mantidproject/mantid>`_.

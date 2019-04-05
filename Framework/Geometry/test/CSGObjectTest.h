@@ -906,30 +906,30 @@ public:
     // approx WISH cylinder
     // We intentionally exclude the cylinder end caps so they this should
     // produce 0
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
                     satol);
     // Other end
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.0,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.497, 0.0, 0.0)),
+                    0.0, satol);
 
     // Side values
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0.1)), 0.00301186,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -0.1)), 0.00301186,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0.1)),
+                    0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -0.1)),
+                    0.00301186, satol);
     // Sweep in the axis of the cylinder angle to see if the solid angle
     // decreases (as we are excluding the end caps)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0.1, 0.0, 0.1)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0.1, 0.0, 0.1)),
                     0.00100267, satol);
 
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.999, 0.0, 0.0)),
                     4 * M_PI, satol);
 
     // surface points
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0.0, 0.0)), 2 * M_PI,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0.0, 0.0)),
+                    2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.997, 0.0, 0.0)),
                     2 * M_PI, satol);
   }
 
@@ -946,17 +946,17 @@ public:
     //
     // tests for Triangulated cube
     //
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(1.0, 0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(1.0, 0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 1.0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 1.0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, -1.0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, -1.0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 1.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 1.0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -1.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -1.0)),
                     M_PI * 2.0 / 3.0, satol);
   }
 
@@ -967,8 +967,9 @@ public:
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     double expected = M_PI * 2.0 / 3.0;
     V3D scaleFactor(2.0, 2.0, 2.0);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2.0, 0, 0), scaleFactor),
-                    expected, satol);
+    TS_ASSERT_DELTA(
+        geom_obj->triangulatedSolidAngle(V3D(2.0, 0, 0), scaleFactor), expected,
+        satol);
   }
 
   void testExactVolumeCuboid() {
@@ -1176,51 +1177,29 @@ public:
 
     double satol = 1e-3; // typical result tolerance
 
-    //    if(timeTest)
-    //    {
-    //      // block to test time of solid angle methods
-    //      // change false to true to include
-    //      int iter=4000;
-    //      int starttime=clock();
-    //      for (int i=0;i<iter;i++)
-    //        saTri=geom_obj->triangleSolidAngle(observer);
-    //      int endtime=clock();
-    //      std::cout << std::endl << "Cyl tri time=" <<
-    //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      '\n';
-    //      iter=50;
-    //      starttime=clock();
-    //      for (int i=0;i<iter;i++)
-    //        saRay=geom_obj->rayTraceSolidAngle(observer);
-    //      endtime=clock();
-    //      std::cout << "Cyl ray time=" <<
-    //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      '\n';
-    //    }
-
-    saTri = geom_obj->triangleSolidAngle(observer);
+    saTri = geom_obj->triangulatedSolidAngle(observer);
     saRay = geom_obj->rayTraceSolidAngle(observer);
     TS_ASSERT_DELTA(saTri, 1.840302, 0.001);
     TS_ASSERT_DELTA(saRay, 1.840302, 0.01);
 
     observer = V3D(-7.2, 0, 0);
-    saTri = geom_obj->triangleSolidAngle(observer);
+    saTri = geom_obj->triangulatedSolidAngle(observer);
     saRay = geom_obj->rayTraceSolidAngle(observer);
 
     TS_ASSERT_DELTA(saTri, 1.25663708, 0.001);
     TS_ASSERT_DELTA(saRay, 1.25663708, 0.001);
 
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 7)), 0.7531,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 7)), 0.7531,
                     0.753 * satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 7, 0)), 0.7531,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 7, 0)), 0.7531,
                     0.753 * satol);
 
-    saTri = geom_obj->triangleSolidAngle(V3D(20, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(20, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.07850147, satol * 0.0785);
-    saTri = geom_obj->triangleSolidAngle(V3D(200, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(200, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.000715295, satol * 0.000715);
-    saTri = geom_obj->triangleSolidAngle(V3D(2000, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(2000, 0, 0));
     TS_ASSERT_DELTA(saTri, 7.08131e-6, satol * 7.08e-6);
   }
   void testSolidAngleSphereTri()
@@ -1236,13 +1215,13 @@ public:
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(8.1, 0, 0)), 0.864364,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(8.1, 0, 0)), 0.864364,
                     satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
                     satol);
     // surface point
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
                     satol);
   }
 

@@ -204,9 +204,9 @@ void Torus::setNorm(const Kernel::V3D &A)
   @param A :: New Normal direction
 */
 {
-  if (A.norm() > Tolerance) {
-    Normal = A;
-    Normal.normalize();
+  const auto length = A.norm();
+  if (length > Tolerance) {
+    Normal = A / length;
   }
 }
 

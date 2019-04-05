@@ -39,12 +39,6 @@ Kernel::Logger logger("Cylinder");
 using Kernel::Tolerance;
 using Kernel::V3D;
 
-// The number of slices to use to approximate a cylinder
-int Cylinder::g_nslices = 10;
-
-// The number of slices to use to approximate a cylinder
-int Cylinder::g_nstacks = 1;
-
 Cylinder::Cylinder()
     : Quadratic(), Centre(), Normal(1, 0, 0), Nvec(0), Radius(0.0)
 /**
@@ -169,9 +163,8 @@ int Cylinder::onSurface(const Kernel::V3D &Pt) const
     double x = Pt[Nvec % 3] - Centre[Nvec % 3];
     x *= x;
     double y = Pt[(Nvec + 1) % 3] - Centre[(Nvec + 1) % 3];
-    ;
     y *= y;
-    return (fabs((x + y) - Radius * Radius) > Tolerance) ? 0 : 1;
+    return (std::abs((x + y) - Radius * Radius) > Tolerance) ? 0 : 1;
   }
   return Quadratic::onSurface(Pt);
 }
@@ -237,8 +230,7 @@ void Cylinder::setNorm(const Kernel::V3D &A)
  @param A :: Vector along the centre line
  */
 {
-  Normal = A;
-  Normal.normalize();
+  Normal = normalize(A);
   setBaseEqn();
   setNvec();
 }
