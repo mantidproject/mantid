@@ -169,7 +169,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None):
     return fig, ax
 
 
-# @manage_workspace_names
+@manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
          window_title=None):
@@ -189,13 +189,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param window_title: A string denoting name of the GUI window which holds the graph
     :return: The figure containing the plots
     """
-    # This allows easy passing from C++ to Python for calls from the python C API
-    if workspaces != [] and isinstance(workspaces[0], six.string_types):
-        new_workspaces = []
-        for workspace in workspaces:
-            new_workspaces.append(AnalysisDataService.retrieve(workspace))
-        workspaces = new_workspaces
-
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)
