@@ -5,16 +5,57 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import (create_child_algorithm,
-                                           write_hash_into_reduced_can_workspace,
-                                           get_reduced_can_workspace_from_ads, get_transmission_workspaces_from_ads)
-from sans.common.enums import (ISISReductionMode, DetectorType, DataType, OutputParts, TransmissionType)
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
-from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle, OutputTransmissionBundle)
-from mantid.kernel import mpisetup
+
 import sys
+
+from mantid.kernel import mpisetup
+from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle, OutputTransmissionBundle,
+                                           ReductionSettingBundle)
+from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DataType, DetectorType, ISISReductionMode, OutputParts, TransmissionType)
+from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
+                                           get_transmission_workspaces_from_ads, write_hash_into_reduced_can_workspace)
+
+
+def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
+    """
+    This function runs the initial core reduction for event slice data. This is essentially half
+    a reduction (either sample or can), and is run before event slicing has been performed.
+
+    :param reduction_alg: a handle to the initial event slice reduction algorithm.
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple
+    :return: a ReductionSettingBundle tuple
+    """
+    # Get component to reduce
+    component = get_component_to_reduce(reduction_setting_bundle)
+    # Set the properties on the reduction algorithms
+    serialized_state = reduction_setting_bundle.state.property_manager
+    reduction_alg.setProperty("SANSState", serialized_state)
+    reduction_alg.setProperty("Component", component)
+    reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
+    reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
+    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+
+    reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+    reduction_alg.setProperty("OutputMonitorWorkspace", EMPTY_NAME)
+
+    # Run the reduction core
+    reduction_alg.execute()
+
+    # Get the results
+    output_workspace = reduction_alg.getProperty("OutputWorkspace").value
+    output_monitor_workspace = reduction_alg.getProperty("OutputMonitorWorkspace").value
+
+    return ReductionSettingBundle(state=reduction_setting_bundle.state,
+                                  data_type=reduction_setting_bundle.data_type,
+                                  reduction_mode=reduction_setting_bundle.reduction_mode,
+                                  output_parts=reduction_setting_bundle.output_parts,
+                                  scatter_workspace=output_workspace,
+                                  scatter_monitor_workspace=output_monitor_workspace,
+                                  transmission_workspace=reduction_setting_bundle.transmission_workspace,
+                                  direct_workspace=reduction_setting_bundle.direct_workspace)
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
