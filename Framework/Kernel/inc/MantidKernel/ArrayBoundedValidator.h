@@ -8,9 +8,6 @@
 #define MANTID_KERNEL_ARRAYBOUNDEDVALIDATOR_H_
 
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/DllConfig.h"
-#include <string>
-#include <vector>
 
 namespace Mantid {
 namespace Kernel {

@@ -8,6 +8,7 @@
 #define ARRAYBOUNDEDVALIDATORTEST_H_
 
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include <array>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
