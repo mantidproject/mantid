@@ -144,6 +144,29 @@ class MantidAxes(Axes):
         self.creation_args = []
 
     @staticmethod
+    def from_mpl_axes(ax):
+        """
+        Transfers all transferable artists from a Matplotlib.Axes
+        instance to a MantidAxes instance on the same figure. Then
+        removes the Matplotlib.Axes instance from the figure.
+
+        :param ax: An Axes object
+        :returns: A MantidAxes object
+        """
+        fig = ax.figure
+        artists = ax.get_children()
+        mantid_axes = fig.add_subplot(111, projection='mantid', label='mantid')
+        for artist in artists:
+            try:
+                artist.set_transform(mantid_axes.transData)
+                artist.remove()
+                mantid_axes.add_artist(artist)
+            except NotImplementedError:
+                pass
+        ax.remove()
+        return mantid_axes
+
+    @staticmethod
     def get_spec_num_from_wksp_index(workspace, wksp_index):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 

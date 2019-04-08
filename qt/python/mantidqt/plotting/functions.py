@@ -27,6 +27,7 @@ from matplotlib.gridspec import GridSpec
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
+from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 
@@ -201,6 +202,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         fig, ax = get_plot_fig(overplot, ax_properties, window_title)
     else:
         ax = fig.gca()
+
+    if not isinstance(ax, MantidAxes):
+        ax = MantidAxes.from_mpl_axes(ax)
 
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
