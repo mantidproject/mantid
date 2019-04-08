@@ -166,6 +166,14 @@ class FunctionsTest(TestCase):
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
 
+    def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig)
+        ax = plt.gca()
+        self.assertEqual(len(ax.lines), 2)
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
