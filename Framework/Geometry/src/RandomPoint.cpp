@@ -23,7 +23,7 @@ namespace RandomPoint {
  * @return a local point inside the cylinder
  */
 Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
-                                 const Kernel::V3D alongAxis, double polarAngle,
+                                 const Kernel::V3D &alongAxis, double polarAngle,
                                  double radialLength) {
   using boost::math::pow;
   Mantid::Kernel::V3D basis2{1., 0., 0.};
@@ -67,7 +67,6 @@ Kernel::V3D inCuboid(const detail::ShapeInfo &shapeInfo,
  */
 Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
                        Kernel::PseudoRandomNumberGenerator &rng) {
-  using boost::math::pow;
   const auto geometry = shapeInfo.cylinderGeometry();
   const double r1{rng.nextValue()};
   const double r2{rng.nextValue()};
