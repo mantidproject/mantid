@@ -7,10 +7,10 @@
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, AnalysisDataService, ITableWorkspaceProperty, MatrixWorkspaceProperty,
-                        PropertyMode, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty)
+from mantid.api import (AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, TextAxis,
+                        WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator,
-                           StringListValidator, StringMandatoryValidator)
+                           StringMandatoryValidator)
 from mantid.simpleapi import (AppendSpectra, Divide, ExtractSingleSpectrum, ExtractSpectra, Integration, SumSpectra,
                               VesuvioTOFFit)
 from functools import reduce
@@ -63,11 +63,18 @@ def normalise_by_integral(workspace):
                   EnableLogging=False)
 
 
-def construct_workspace_group(workspaces):
-    group = WorkspaceGroup()
-    for workspace in workspaces:
-        group.addWorkspace(workspace)
-    return group
+def conjoin_workspaces(workspaces):
+    conjoined = workspaces[0]
+    for workspace in workspaces[1:]:
+        conjoined = append(conjoined, workspace)
+    return conjoined
+
+
+def set_axis_labels(workspace, labels, axis_index):
+    axis = TextAxis.create(len(labels))
+    for index, label in enumerate(labels):
+        axis.setLabel(index, label)
+    workspace.replaceAxis(axis_index, axis)
 
 
 class VesuvioCAAD(PythonAlgorithm):
@@ -105,6 +112,8 @@ class VesuvioCAAD(PythonAlgorithm):
                                  'function=Function1Name,param1=val1,param2=val2;function=Function2Name,param3=val3,'
                                  'param4=val4')
 
+        self.declareProperty(name="MaxIterations", defaultValue=0, validator=IntBoundedValidator(lower=0),
+                             doc="Maximum number of fitting iterations.")
         self.declareProperty(name='Background', defaultValue='',
                              doc='The function used to fit the background. The format is function=FunctionName,'
                                  'param1=val1,param2=val2')
@@ -116,11 +125,11 @@ class VesuvioCAAD(PythonAlgorithm):
                              doc='String defining the minimizer')
 
         # Output properties
-        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
-                                                    optional=PropertyMode.Mandatory, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='',
+                                                     optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc='The name of the output workspace containing the sum of the normalised fit data.')
-        self.declareProperty(WorkspaceGroupProperty(name='DataSum', defaultValue='',
-                                                    optional=PropertyMode.Mandatory, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty(name='OutputCAAD', defaultValue='',
+                                                     optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc='The name of the output workspace containing the sum of the normalised input data.')
         self.declareProperty(name='Chi_squared', defaultValue=0.0, direction=Direction.Output,
                              doc='The value of the Chi-Squared.')
@@ -130,6 +139,7 @@ class VesuvioCAAD(PythonAlgorithm):
         self._masses = self.getPropertyValue('Masses')
         self._mass_profiles = self.getPropertyValue('MassProfiles')
 
+        self._max_iterations = self.getPropertyValue('MaxIterations')
         self._background = self.getPropertyValue('Background')
         self._intensity_constraints = self.getPropertyValue('IntensityConstraints')
         self._minimizer = self.getPropertyValue('Minimizer')
@@ -142,16 +152,12 @@ class VesuvioCAAD(PythonAlgorithm):
         fit_workspaces = [self._vesuvio_tof_fit(self._input_workspace, index) for index in range(number_of_spectra)]
         input_workspaces = [extract_single_spectra(self._input_workspace, index) for index in range(number_of_spectra)]
 
-        self.setProperty('OutputWorkspace', construct_workspace_group(self._compute_caad(fit_workspaces)))
-        self.setProperty('DataSum', construct_workspace_group(self._compute_caad(input_workspaces)))
+        fit_caad = conjoin_workspaces(self._compute_caad(fit_workspaces))
+        set_axis_labels(fit_caad, self._get_caad_axis_labels(fit_workspaces[0]), 1)
+
+        self.setProperty('OutputWorkspace', fit_caad)
+        self.setProperty('OutputCAAD', self._compute_caad(input_workspaces)[0])
         self.setProperty('Chi_squared', 5.5)
-
-        #error_sq = norm((data-fit)**2)
-        #return fit, data, error_sq
-
-        #normalised_workspaces, _, _ = self._compute_caad([fit_data])
-        #for workspace in normalised_workspaces:
-        #    workspace.setYUnitLabel(workspace.getAxis(1).label(0))
 
     def _vesuvio_tof_fit(self, workspace, index):
         fitted_workspace, _, _ = VesuvioTOFFit(InputWorkspace=workspace,
@@ -160,7 +166,7 @@ class VesuvioCAAD(PythonAlgorithm):
                                                Background=self._background,
                                                IntensityConstraints=self._intensity_constraints,
                                                Minimizer=self._minimizer,
-                                               MaxIterations=0,
+                                               MaxIterations=self._max_iterations,
                                                WorkspaceIndex=index,
                                                StoreInADS=False,
                                                EnableLogging=True)
@@ -183,21 +189,13 @@ class VesuvioCAAD(PythonAlgorithm):
         axis_labels = fit_workspace.getAxis(1).extractValues()
         return [index for index, label in enumerate(axis_labels) if self._is_valid_for_caad(label)]
 
+    def _get_caad_axis_labels(self, fit_workspace):
+        axis_labels = fit_workspace.getAxis(1).extractValues()
+        return [label for label in axis_labels if self._is_valid_for_caad(label)]
+
     @staticmethod
     def _is_valid_for_caad(label):
         return label != "Data" and label != "Diff"
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 AlgorithmFactory.subscribe(VesuvioCAAD)
