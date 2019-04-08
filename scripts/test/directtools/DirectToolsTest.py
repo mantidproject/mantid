@@ -204,6 +204,16 @@ class DirectToolsTest(unittest.TestCase):
         self.assertEquals(axes.get_xscale(), 'log')
         self.assertEquals(axes.get_yscale(), 'log')
 
+    def test_plotconstE_legendLabels(self):
+        kwargs = {
+            'workspaces': self._sqw,
+            'E' : -1.,
+            'dE' : [0.5, 1.0],
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
+        hangles, labels = axes.get_legend_handles_labels()
+        self.assertEquals(labels, [u' $E$ = -1.00 $\\pm$ 0.57 meV', u' $E$ = -1.01 $\\pm$ 1.02 meV'])
+
     def test_plotconstQ_nonListArgsExecutes(self):
         kwargs = {
             'workspaces': self._sqw,
@@ -250,6 +260,50 @@ class DirectToolsTest(unittest.TestCase):
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
         self.assertEquals(axes.get_xscale(), 'log')
         self.assertEquals(axes.get_yscale(), 'log')
+
+    def test_plotconstQ_legendLabels(self):
+        kwargs = {
+            'workspaces': self._sqw,
+            'Q' : 1.9,
+            'dQ' : [0.2, 0.4],
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        handles, labels = axes.get_legend_handles_labels()
+        self.assertEquals(labels, [u' $Q$ = 1.91 $\\pm$ 0.21 \xc5$^{-1}$', u' $Q$ = 1.91 $\\pm$ 0.41 \xc5$^{-1}$'])
+
+    def test_plotconstQ_titles(self):
+        kwargs = {
+            'workspaces': self._sqw,
+            'Q' : 1.9,
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEquals(len(titleLines), 4)
+        kwargs = {
+            'workspaces': self._sqw,
+            'Q' : [0.9, 1.9],
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEquals(len(titleLines), 3)
+        kwargs = {
+            'workspaces': [self._sqw, self._sqw],
+            'Q' : 0.9,
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEquals(len(titleLines), 1)
+        kwargs = {
+            'workspaces': [self._sqw, self._sqw],
+            'Q' : [0.9, 1.9],
+            'dQ' : 0.2,
+        }
+        figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
+        titleLines = axes.get_title().split('\n')
+        self.assertEquals(len(titleLines), 1)
 
     def test_plotconstE_and_plotconstQ_plot_equal_value_at_crossing(self):
         Q = 2.512
