@@ -306,19 +306,19 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         wsInADS = mtd.getObjectNames()
         self.assertEquals(len(wsInADS), 13)
         self.assertEquals(wsInADS, [
-            'outWS_cloned_for_flat_bkg_',
-            'outWS_detectors_',
-            'outWS_detectors_moved_',
-            'outWS_flat_background_',
-            'outWS_flat_background_subtracted_',
-            'outWS_in_wavelength_',
-            'outWS_monitors_',
-            'outWS_peak_',
-            'outWS_transposed_clone_',
-            'outWS_transposed_flat_background_',
-            'outWS_water_calibrated_',
-            'outWS_water_detectors_',
-            'outWS_water_rebinned_']
+            'outWS_cloned_for_flat_bkg',
+            'outWS_detectors',
+            'outWS_detectors_moved',
+            'outWS_flat_background',
+            'outWS_flat_background_subtracted',
+            'outWS_in_wavelength',
+            'outWS_monitors',
+            'outWS_peak',
+            'outWS_transposed_clone',
+            'outWS_transposed_flat_background',
+            'outWS_water_calibrated',
+            'outWS_water_detectors',
+            'outWS_water_rebinned']
                           )
         mtd.clear()
 

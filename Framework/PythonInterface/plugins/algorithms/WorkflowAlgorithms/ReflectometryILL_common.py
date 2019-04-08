@@ -164,4 +164,4 @@ class WSNameSource:
 
     def withSuffix(self, suffix):
         """Returns a workspace name with given suffix applied."""
-        return self._prefix + '_' + suffix + '_'
+        return self._prefix + '_' + suffix

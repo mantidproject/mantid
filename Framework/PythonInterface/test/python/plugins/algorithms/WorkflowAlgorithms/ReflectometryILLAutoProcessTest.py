@@ -28,8 +28,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
+                                                 '__outWS_direct-317369-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -44,8 +44,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
+                                                 '__outWS_direct-317369-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -71,8 +71,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369317370-angle-0',
-                                                 'direct-317369317370-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369317370-angle-0',
+                                                 '__outWS_direct-317369317370-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -86,8 +86,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
+                                                 '__outWS_direct-317369-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -101,10 +101,10 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
-                                                 'direct-317369-angle-0-foreground',
-                                                 'direct-317370-angle-1',
-                                                 'direct-317370-angle-1-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
+                                                 '__outWS_direct-317369-angle-0-foreground',
+                                                 '__outWS_direct-317370-angle-1',
+                                                 '__outWS_direct-317370-angle-1-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -154,13 +154,13 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         from ReflectometryILLPreprocess import Prop
         self.assertEquals(algH.getPropertyValue('AngleOption'), 'Detector angle')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET_DIRECT), '7')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET_REFLECTED), '7')
+        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_OFFSET), '7')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH_DIRECT), '5')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH_REFLECTED), '5')
+        self.assertEquals(algH.getPropertyValue(PropAutoProcess.LOW_BKG_WIDTH), '5')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET_DIRECT), '7')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET_REFLECTED), '7')
+        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_OFFSET), '7')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH_DIRECT), '5')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH_REFLECTED), '5')
+        self.assertEquals(algH.getPropertyValue(PropAutoProcess.HIGH_BKG_WIDTH), '5')
         self.assertEquals(algH.getPropertyValue(Prop.SUBALG_LOGGING), 'Logging OFF')
         self.assertEquals(algH.getPropertyValue(Prop.CLEANUP), 'Cleanup ON')
         self.assertEquals(algH.getPropertyValue(Prop.SLIT_NORM), 'Slit Normalisation OFF')
@@ -168,9 +168,9 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.BKG_METHOD_DIRECT), 'Background Constant Fit')
         self.assertEquals(algH.getPropertyValue(Prop.BKG_METHOD), 'Background Constant Fit')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX_DIRECT), '0')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX_REFLECTED), '0')
+        self.assertEquals(algH.getPropertyValue(PropAutoProcess.START_WS_INDEX), '0')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX_DIRECT), '255')
-        self.assertEquals(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX_REFLECTED), '255')
+        self.assertEquals(algH.getPropertyValue(PropAutoProcess.END_WS_INDEX), '255')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.SUM_TYPE), 'SumInLambda')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.WAVELENGTH_LOWER), '0')
         self.assertEquals(algH.getPropertyValue(PropAutoProcess.WAVELENGTH_UPPER), '35')

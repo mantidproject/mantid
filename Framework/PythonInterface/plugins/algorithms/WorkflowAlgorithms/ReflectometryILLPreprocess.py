@@ -440,7 +440,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'InputWorkspace': ws,
             'OutputWorkspace': detectorMovedWSName,
             'TwoTheta': twoTheta,
-            'EnableLogging': self._subalgLogging,
             'DetectorComponentName': 'detector',
             'PixelSize': common.pixelSize(self._instrumentName),
             'DetectorCorrectionType': 'RotateAroundSample',
