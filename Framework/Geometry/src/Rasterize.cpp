@@ -122,11 +122,12 @@ calculateHollowCylinder(const V3D &beamDirection,
                                  numAnnuli);
 }
 
-const V3D CalculatePosInCylinder(const double phi, const double R, const double z,
-                       const std::array<V3D, 3> coords) {
-  const auto & x_prime = coords[0];
-  const auto & y_prime = coords[1];
-  const auto & z_prime = coords[2];
+const V3D CalculatePosInCylinder(const double phi, const double R,
+                                 const double z,
+                                 const std::array<V3D, 3> coords) {
+  const auto &x_prime = coords[0];
+  const auto &y_prime = coords[1];
+  const auto &z_prime = coords[2];
 
   double rSinPhi = -R * sin(phi);
   const double rCosPhi = -R * cos(phi);
@@ -300,7 +301,8 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
       for (size_t k = 0; k < Ni; ++k) {
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const auto position = center + CalculatePosInCylinder(phi, R, z, coords);
+        const auto position =
+            center + CalculatePosInCylinder(phi, R, z, coords);
 
         assert(shape.isValid(position));
 
@@ -387,7 +389,8 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
 
-        const auto position = center + CalculatePosInCylinder(phi, R, z, coords);
+        const auto position =
+            center + CalculatePosInCylinder(phi, R, z, coords);
 
         assert(shape.isValid(position));
 
