@@ -508,7 +508,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
         qMakePair(userSubWindowName, userSubWindowName));
 
     const QSet<QString> categories =
-        UserSubWindowFactory::Instance().getInterfaceCategories(
+        UserSubWindowFactory::Instance().categories(
             userSubWindowName);
 
     m_interfaceCategories[userSubWindowName] = categories;

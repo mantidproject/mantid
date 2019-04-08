@@ -51,6 +51,7 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
+from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
 
 # Pre-application setup
@@ -171,6 +172,8 @@ class MainWindow(QMainWindow):
         self.project = None
         self.project_recovery = None
 
+        self.interface_manager = None
+
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -219,6 +222,9 @@ class MainWindow(QMainWindow):
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
                                                 multifileinterpreter=self.editor.editors,
                                                 main_window=self)
+
+        # Assign interface manager variable
+        self.interface_manager = InterfaceManager()
 
         # uses default configuration as necessary
         self.readSettings(CONF)
@@ -315,9 +321,10 @@ class MainWindow(QMainWindow):
         executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
 
-    def launch_custom_cpp_gui(self, interface_name):
-        interface_manager = InterfaceManager()
-        interface = interface_manager.createSubWindow(interface_name)
+    def launch_custom_cpp_gui(self, interface_name, user_sub_window_factory):
+        interface = user_sub_window_factory.createUnwrapped(interface_name)
+        interface.setInterfaceName(interface_name)
+        interface.initializeLayout()
         interface.setAttribute(Qt.WA_DeleteOnClose, True)
         interface.show()
 
@@ -340,7 +347,35 @@ class MainWindow(QMainWindow):
 
         return interfaces
 
-    def populate_interfaces_menu_with_interfaces(self, interfaces, interface_dir):
+    def add_category_and_interface_to_dictionary(self, interface_dict, used_category, interface):
+        if used_category not in interface_dict:
+            interface_dict[used_category] = [interface]
+        else:
+            interface_dict[used_category].append(interface)
+        return interface_dict
+
+    def populate_cpp_interfaces_list(self, user_sub_window_factory):
+        interface_dict = {}
+        list_of_interfaces = user_sub_window_factory.keys()
+        for interface in list_of_interfaces:
+            interface_categories = user_sub_window_factory.categories(interface)
+
+            # Decide the interface Category
+            if len(interface_categories) == 0:
+                interface_dict = self.add_category_and_interface_to_dictionary(interface_dict,
+                                                                               "General", interface)
+            elif len(interface_categories) > 1:
+                # Do some group stuff
+                for category in interface_categories:
+                    interface_dict = self.add_category_and_interface_to_dictionary(interface_dict, category, interface)
+            else:
+                # Only one category
+                interface_dict = self.add_category_and_interface_to_dictionary(interface_dict,
+                                                                               list(interface_categories)[0], interface)
+
+        return interface_dict
+
+    def populate_interfaces_menu_with_interfaces(self, interfaces, interface_dir, user_sub_window_factory):
         # add the interfaces to the menu
         keys = list(interfaces.keys())
         keys.sort()
@@ -355,10 +390,12 @@ class MainWindow(QMainWindow):
                     action.triggered.connect(lambda checked_py, script=script: self.launch_custom_python_gui(script))
                 else:
                     action = submenu.addAction(name)
-                    action.triggered.connect(lambda checked_cpp, name=name: self.launch_custom_cpp_gui(name))
+                    action.triggered.connect(lambda checked_cpp, name=name:
+                                             self.launch_custom_cpp_gui(name, user_sub_window_factory))
 
     def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+        user_sub_window_factory = UserSubWindowFactory.Instance()
 
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
@@ -366,14 +403,10 @@ class MainWindow(QMainWindow):
                          'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
-        # Dictionary of custom interfaces that are qt5 and C++ prefer this over generating the list as generating isn't
-        # possible till later in the load order of mainwindow.
-        CPP_GUI = {u'Reflectometry': ['ISIS Reflectometry']}
-
         interfaces = self.populate_python_interfaces_list(GUI_BLACKLIST, interface_dir)
-        interfaces.update(CPP_GUI)
+        interfaces.update(self.populate_cpp_interfaces_list(user_sub_window_factory))
 
-        self.populate_interfaces_menu_with_interfaces(interfaces, interface_dir)
+        self.populate_interfaces_menu_with_interfaces(interfaces, interface_dir, user_sub_window_factory)
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""

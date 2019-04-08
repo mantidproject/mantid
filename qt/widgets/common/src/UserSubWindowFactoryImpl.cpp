@@ -68,7 +68,7 @@ UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
  *been registered,
  *          else an empty set.
  */
-QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(
+QSet<QString> UserSubWindowFactoryImpl::categories(
     const QString &interfaceName) const {
   if (!m_categoryLookup.contains(interfaceName))
     return QSet<QString>();
@@ -87,8 +87,8 @@ UserSubWindowFactoryImpl::UserSubWindowFactoryImpl()
 /**
  * Create a user sub window by searching for an alias name
  * @param name :: The alias name to use to try and create an interface
- * @returns A pointer to a created interface pointer if this alias exists and is
- * not multiply defined
+ * @returns A pointer to a created interface pointer if this alias
+ * exists and is not multiply defined
  */
 UserSubWindow *
 UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
@@ -114,53 +114,12 @@ UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
   }
 }
 
-template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
-  std::string realName = TYPE::name();
-  Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
-  saveAliasNames<TYPE>(realName);
-
-  // Make a record of each interface's categories.
-  const QStringList categories =
-      TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
-  QSet<QString> result;
-  foreach (const QString category, categories) {
-    result.insert(category.trimmed());
-  }
-  m_categoryLookup[QString::fromStdString(realName)] = result;
-}
-
-/**
- * Save the alias names of an interface
- * @param realName :: The real name of the interface
- */
-template <typename TYPE>
-void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
-  std::set<std::string> aliases = TYPE::aliases();
-  for (const auto &alias_std_str : aliases) {
-    QString alias = QString::fromStdString(alias_std_str);
-    if (m_aliasLookup.contains(alias)) {
-      if (m_badAliases.contains(alias)) {
-        QList<std::string> names = m_badAliases.value(alias);
-        names.append(realName);
-        m_badAliases[alias] = names;
-      } else {
-        QList<std::string> names;
-        names.append(m_aliasLookup.value(alias));
-        names.append(realName);
-        m_badAliases.insert(alias, names);
-      }
-      continue;
-    }
-    m_aliasLookup.insert(alias, realName);
-  }
-}
-
 /**
  * The keys associated with UserSubWindow classes
  * @returns A QStringList containing the keys from the UserSubWindowFactory that
  * refer to UserSubWindow classes
  */
-QStringList UserSubWindowFactoryImpl::getUserSubWindowKeys() const {
+QStringList UserSubWindowFactoryImpl::keys() const {
   QStringList key_list;
   const auto keys = getKeys();
   for (const auto &key : keys) {

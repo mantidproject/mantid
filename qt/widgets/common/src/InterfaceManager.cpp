@@ -174,7 +174,7 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
  * refer to UserSubWindow classes
  */
 QStringList InterfaceManager::getUserSubWindowKeys() const {
-  return UserSubWindowFactory::Instance().getUserSubWindowKeys();
+  return UserSubWindowFactory::Instance().keys();
 }
 
 //----------------------------------

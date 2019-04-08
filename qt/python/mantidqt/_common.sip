@@ -231,6 +231,8 @@ using namespace MantidQt::API;
 %End
 public:
   UserSubWindow(QWidget *parent = nullptr);
+  void setInterfaceName(const QString &iface_name);
+  void initializeLayout();
 protected:
   virtual void initLayout() = 0;
 };
@@ -252,8 +254,28 @@ public:
   UserSubWindow *createSubWindow(
       const QString &interface_name,
       QWidget *parent = nullptr);
+  QStringList getUserSubWindowKeys() const;
 };
 
+class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/UserSubWindowFactoryImpl.h"
+%End
+public:
+    static SIP_PYOBJECT Instance() const;
+    %MethodCode
+        auto &cppInstance = MantidQt::API::UserSubWindowFactory::Instance();
+        return sipConvertFromType(&cppInstance, sipType_UserSubWindowFactoryImpl, nullptr);
+    %End
+    UserSubWindow *createUnwrapped(const std::string &name) const;
+    QSet<QString> categories(const QString &interfaceName) const;
+    QStringList keys() const;
+
+private:
+  UserSubWindowFactoryImpl();
+  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &);
+  ~UserSubWindowFactoryImpl();
+};
 // ---------------------------------
 // WorkspaceWidget and dependencies
 // ---------------------------------
