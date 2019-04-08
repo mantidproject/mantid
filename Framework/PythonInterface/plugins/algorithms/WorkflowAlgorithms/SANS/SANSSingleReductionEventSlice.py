@@ -11,8 +11,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 from copy import deepcopy
+import random
 
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+from mantid.api import (AnalysisDataService, DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress, WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from mantid.simpleapi import CloneWorkspace
@@ -22,7 +23,8 @@ from sans.algorithm_detail.single_execution import (run_initial_event_slice_redu
                                                     get_merge_bundle_for_merge_request, run_optimized_for_can)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.enums import (ReductionMode, DataType, ISISReductionMode, FitType)
-from sans.common.general_functions import (create_child_algorithm, does_can_workspace_exist_on_ads)
+from sans.common.general_functions import (create_child_algorithm, create_unmanaged_algorithm,
+                                           does_can_workspace_exist_on_ads)
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
@@ -286,6 +288,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
 
         self.set_transmission_workspaces_on_output(output_transmission_bundles,
                                                    state.adjustment.calculate_transmission.fit)
+        print("Exec done...")
 
     def validateInputs(self):
         errors = dict()
@@ -294,7 +297,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             state = self._get_state()
             state.validate()
         except ValueError as err:
-            errors.update({"SANSSingleReduction": str(err)})
+            errors.update({"SANSSingleReductionEventSlice": str(err)})
         return errors
 
     def _get_state(self):
@@ -438,7 +441,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         workspace_group_merged = WorkspaceGroup()
         workspace_group_lab = WorkspaceGroup()
         workspace_group_hab = WorkspaceGroup()
-
+        print("set output workspaces")
         # Note that this breaks the flexibility that we have established with the reduction mode. We have not hardcoded
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
@@ -446,6 +449,9 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             # In an MPI reduction output_workspace is produced on the master rank, skip others.
             if output_workspace is None:
                 continue
+            else:
+                nme = "TEST{}".format(random.randint(0, 100))
+                AnalysisDataService.addOrReplace(nme, output_workspace)
             if reduction_mode is ReductionMode.Merged:
                 workspace_group_merged.addWorkspace(output_workspace)
             elif reduction_mode is ISISReductionMode.LAB:
@@ -455,9 +461,13 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             else:
                 raise RuntimeError("SANSSingleReductionEventSlice: Cannot set the output workspace. "
                                    "The selected reduction mode {0} is unknown.".format(reduction_mode))
-        self.setProperty("OutputWorkspaceMerged", workspace_group_merged)
-        self.setProperty("OutputWorkspaceLAB", workspace_group_lab)
-        self.setProperty("OutputWorkspaceHAB", workspace_group_hab)
+        if reduction_mode is ReductionMode.Merged:
+            self.setProperty("OutputWorkspaceMerged", workspace_group_merged)
+        elif reduction_mode is ISISReductionMode.LAB:
+            self.setProperty("OutputWorkspaceLAB", workspace_group_lab)
+        elif reduction_mode is ISISReductionMode.HAB:
+            self.setProperty("OutputWorkspaceHAB", workspace_group_hab)
+        print("output workspaces done")
 
     def set_reduced_can_workspace_on_output(self, output_bundles, output_bundles_part):
         """
@@ -483,6 +493,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 # Make sure that the output workspace is not None which can be the case if there has never been a
                 # can set for the reduction.
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
+                    AnalysisDataService.addOrReplace("CAN{}".format(random.randint(0, 100)), output_workspace)
                     if reduction_mode is ISISReductionMode.LAB:
                         workspace_group_lab_can.addWorkspace(output_workspace)
                     elif reduction_mode is ISISReductionMode.HAB:
@@ -490,8 +501,10 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     else:
                         raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a can.".format(reduction_mode))
-        self.setProperty("OutputWorkspaceLABCan", workspace_group_lab_can)
-        self.setProperty("OutputWorkspaceHABCan", workspace_group_hab_can)
+        if reduction_mode is ISISReductionMode.LAB:
+            self.setProperty("OutputWorkspaceLABCan", workspace_group_lab_can)
+        elif reduction_mode is ISISReductionMode.HAB:
+            self.setProperty("OutputWorkspaceHABCan", workspace_group_hab_can)
 
         workspace_group_lab_can_count = WorkspaceGroup()
         workspace_group_lab_can_norm = WorkspaceGroup()
@@ -508,6 +521,8 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 if output_workspace_norm is not None and output_workspace_count is not None and \
                         not does_can_workspace_exist_on_ads(output_workspace_norm) and \
                         not does_can_workspace_exist_on_ads(output_workspace_count):
+                    AnalysisDataService.addOrReplace("COUNT{}".format(random.randint(0, 100)), output_workspace_count)
+                    AnalysisDataService.addOrReplace("NORM{}".format(random.randint(0, 100)), output_workspace_norm)
                     if reduction_mode is ISISReductionMode.LAB:
                         workspace_group_lab_can_count.addWorkspace(output_workspace_count)
                         workspace_group_lab_can_norm.addWorkspace(output_workspace_norm)
@@ -517,10 +532,12 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     else:
                         raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a partial can.".format(reduction_mode))
-        self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)
-        self.setProperty("OutputWorkspaceLABCanNorm", workspace_group_lab_can_norm)
-        self.setProperty("OutputWorkspaceHABCanCount", workspace_group_hab_can_count)
-        self.setProperty("OutputWorkspaceHABCanNorm", workspace_group_hab_can_norm)
+        if reduction_mode is ISISReductionMode.LAB:
+            self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)
+            self.setProperty("OutputWorkspaceLABCanNorm", workspace_group_lab_can_norm)
+        elif reduction_mode is ISISReductionMode.HAB:
+            self.setProperty("OutputWorkspaceHABCanCount", workspace_group_hab_can_count)
+            self.setProperty("OutputWorkspaceHABCanNorm", workspace_group_hab_can_norm)
 
     def set_can_and_sam_on_output(self, output_bundles):
         """
@@ -544,6 +561,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 output_workspace = output_bundle.output_workspace
 
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
+                    AnalysisDataService.addOrReplace("CAN{}".format(random.randint(0, 100)), output_workspace)
                     if reduction_mode is ISISReductionMode.LAB:
                         workspace_group_lab_can.addWorkspace(output_workspace)
                     elif reduction_mode is ISISReductionMode.HAB:
@@ -556,6 +574,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 output_workspace = output_bundle.output_workspace
 
                 if output_workspace is not None:
+                    AnalysisDataService.addOrReplace("SAMPLE{}".format(random.randint(0, 100)), output_workspace)
                     if reduction_mode is ISISReductionMode.LAB:
                         workspace_group_lab_sample.addWorkspace(output_workspace)
                     elif reduction_mode is ISISReductionMode.HAB:
@@ -564,10 +583,15 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                         raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                            " be set with a sample.".format(reduction_mode))
 
-        self.setProperty("OutputWorkspaceLABCan", workspace_group_lab_can)
-        self.setProperty("OutputWorkspaceHABCan", workspace_group_hab_can)
-        self.setProperty("OutputWorkspaceLABSample", workspace_group_lab_sample)
-        self.setProperty("OutputWorkspaceHABSample", workspace_group_hab_sample)
+        if workspace_group_hab_sample.size() > 0:
+            print("HAB greater than 0")
+            self.setProperty("OutputWorkspaceHABCan", workspace_group_hab_can)
+            self.setProperty("OutputWorkspaceHABSample", workspace_group_hab_sample)
+        if workspace_group_lab_sample.size() > 0:
+            print("LAB greater than 0")
+            self.setProperty("OutputWorkspaceLABCan", workspace_group_lab_can)
+            self.setProperty("OutputWorkspaceLABSample", workspace_group_lab_sample)
+        print("can and sam done....")
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
         workspace_group_calculated_transmission_can = WorkspaceGroup()
@@ -584,22 +608,30 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     # The workspace is cloned here because the transmission runs are diagnostic output so even though
                     # the values already exist they need to be labelled separately for each reduction.
                     calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace, StoreInADS=False)
+                else:
+                    AnalysisDataService.addOrReplace("CALCTRANS{}".format(random.randint(0, 100)), calculated_transmission_workspace)
                 if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
                     unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
+                else:
+                    AnalysisDataService.addOrReplace("UNFITTRANS{}".format(random.randint(0, 100)), unfitted_transmission_workspace)
                 if fit_performed:
                     workspace_group_calculated_transmission_can.addWorkspace(calculated_transmission_workspace)
                 workspace_group_unfitted_transmission_can.addWorkspace(unfitted_transmission_workspace)
             elif transmission_bundle.data_type is DataType.Sample:
                 if fit_performed:
+                    AnalysisDataService.addOrReplace("CALCTRANSSAMPLE{}".format(random.randint(0, 100)), calculated_transmission_workspace)
                     workspace_group_calculated_transmission.addWorkspace(calculated_transmission_workspace)
+                AnalysisDataService.addOrReplace("UNFITTRANSSAMPLE{}".format(random.randint(0, 100)), unfitted_transmission_workspace)
                 workspace_group_unfitted_transmission.addWorkspace(unfitted_transmission_workspace)
             else:
                 raise RuntimeError("SANSSingleReductionEventSlice: The data type {0} should be"
                                    " sample or can.".format(transmission_bundle.data_type))
-        self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
-        self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
-        self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
-        self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
+
+        self.setProperty("OutputWorkspaceCalculatedTransmissionCan", workspace_group_calculated_transmission_can)
+        self.setProperty("OutputWorkspaceUnfittedTransmissionCan", workspace_group_unfitted_transmission_can)
+        self.setProperty("OutputWorkspaceCalculatedTransmission", workspace_group_calculated_transmission)
+        self.setProperty("OutputWorkspaceUnfittedTransmission", workspace_group_unfitted_transmission)
+        print("transmissions done...")
 
     def _get_progress(self, number_of_reductions, overall_reduction_mode):
         number_from_merge = 1 if overall_reduction_mode is ReductionMode.Merged else 0

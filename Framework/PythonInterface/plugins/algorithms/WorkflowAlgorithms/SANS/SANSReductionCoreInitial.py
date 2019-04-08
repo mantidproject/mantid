@@ -67,8 +67,8 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
                              doc='The output workspace.')
 
-        self.declarProperty(MatrixWorkspaceProperty("OutputMonitorWorkspace", '', direction=Direction.Output),
-                            doc='The output monitor workspace.')
+        self.declareProperty(MatrixWorkspaceProperty("OutputMonitorWorkspace", '', direction=Direction.Output),
+                             doc='The output monitor workspace.')
 
     def PyExec(self):
         # Get the input
