@@ -23,8 +23,8 @@ namespace RandomPoint {
  * @return a local point inside the cylinder
  */
 Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
-                                 const Kernel::V3D &alongAxis, double polarAngle,
-                                 double radialLength) {
+                                 const Kernel::V3D &alongAxis,
+                                 double polarAngle, double radialLength) {
   using boost::math::pow;
   Mantid::Kernel::V3D basis2{1., 0., 0.};
   if (basis.X() != 0. && basis.Z() != 0) {
