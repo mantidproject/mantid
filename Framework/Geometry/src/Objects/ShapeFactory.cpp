@@ -80,7 +80,7 @@ boost::shared_ptr<CSGObject> ShapeFactory::createShape(std::string shapeXML,
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
-
+  auto thing = createShape(pRootElem);
   // convert into a Geometry object
   return createShape(pRootElem);
 }
@@ -170,6 +170,7 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
             numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
+            lastElement = pE;
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
             numPrimitives++;
           } else if (primitiveName == "cuboid") {
@@ -1443,6 +1444,19 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     shapeInfo.setCylinder(parsePosition(pElemCentre), normVec,
                           std::stod(pElemRadius->getAttribute("val")),
                           std::stod(pElemHeight->getAttribute("val")));
+  } else if (pElem->tagName() == "hollow-cylinder") {
+    Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
+    Element *pElemAxis = getShapeElement(pElem, "axis");
+    Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
+    Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
+    Element *pElemHeight = getShapeElement(pElem, "height");
+    V3D normVec = parsePosition(pElemAxis);
+    normVec.normalize();
+    shapeInfo.setHollowCylinder(
+        parsePosition(pElemCentre), normVec,
+        std::stod(pElemInnerRadius->getAttribute("val")),
+        std::stod(pElemOuterRadius->getAttribute("val")),
+        std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
