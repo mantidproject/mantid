@@ -1748,8 +1748,8 @@ class DirectEnergyConversion(object):
         """
         if not bkg_range_min or not bkg_range_max:
             bkg_range_min,bkg_range_max = self.bkgd_range
-        bkg_range_min += time_shift
-        bkg_range_max += time_shift
+            bkg_range_min += time_shift
+            bkg_range_max += time_shift
         run = self.get_run_descriptor(run)
         result_ws = run.get_workspace()
 
