@@ -24,6 +24,11 @@ Improvements
 - Support has been added for negative indexing of :ref:`WorkspaceGroups <WorkspaceGroup>`. 
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
 
+Removed
+#######
+
+- The deprecated version 1 of the `FindEPP` algorithm has been removed. Use :ref:`FindEPP-v2 <algm-FindEPP>` instead.
+
 Data Objects
 ------------
 
