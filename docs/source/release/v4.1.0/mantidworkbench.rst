@@ -11,6 +11,8 @@ Improvements
 - The log level of help page notices has been reduced to declutter your message window.
 - Single line commenting in the script editor is now enabled without needing to highlight any text.
 - You can now import from local python files that are in the same directory as the script you're executing.
+- You can now plot workspaces on top of figures you've created using scripts. Simply create a matplotlib figure in the
+  script window, then drag and drop a workspace on top of it.
 
 Bugfixes
 ########

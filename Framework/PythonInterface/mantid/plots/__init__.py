@@ -22,9 +22,14 @@ from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
 from matplotlib import cbook
 from matplotlib.axes import Axes
-from matplotlib.container import Container
-from matplotlib.projections import register_projection
+from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
+from matplotlib.container import Container
+from matplotlib.image import AxesImage
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from matplotlib.projections import register_projection
+from matplotlib.table import Table
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -143,6 +148,32 @@ class MantidAxes(Axes):
         self.tracked_workspaces = dict()
         self.creation_args = []
 
+    def add_artist_correctly(self, artist):
+        """
+        Add an artist to to an axes via the correct function. MantidAxes
+        will not correctly track artists added via :code:`add_artist`.
+        They must be added via the correct function for autoscaling to
+        work.
+
+        :param artist: A Matplotlib Artist object
+        """
+        artist.set_transform(self.transData)
+        artist.remove()
+        if isinstance(artist, Line2D):
+            self.add_line(artist)
+        elif isinstance(artist, Collection):
+            self.add_collection(artist)
+        elif isinstance(artist, Container):
+            self.add_container(artist)
+        elif isinstance(artist, AxesImage):
+            self.add_image(artist)
+        elif isinstance(artist, Patch):
+            self.add_patch(artist)
+        elif isinstance(artist, Table):
+            self.add_table(artist)
+        else:
+            self.add_artist(artist)
+
     @staticmethod
     def from_mpl_axes(ax):
         """
@@ -158,11 +189,10 @@ class MantidAxes(Axes):
         mantid_axes = fig.add_subplot(111, projection='mantid', label='mantid')
         for artist in artists:
             try:
-                artist.set_transform(mantid_axes.transData)
-                artist.remove()
-                mantid_axes.add_artist(artist)
+                mantid_axes.add_artist_correctly(artist)
             except NotImplementedError:
                 pass
+
         ax.remove()
         return mantid_axes
 
