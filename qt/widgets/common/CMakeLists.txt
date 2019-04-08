@@ -25,7 +25,6 @@ set ( QT5_SRC_FILES
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
   src/InputController.cpp
-  src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
   src/LineEditWithClear.cpp
   src/ListPropertyWidget.cpp
@@ -62,6 +61,7 @@ set ( QT5_SRC_FILES
   src/TSVSerialiser.cpp
   src/UserFunctionDialog.cpp
   src/UserSubWindow.cpp
+  src/UserSubWindowFactoryImpl.cpp
   src/VatesViewerInterface.cpp
   src/WidgetScrollbarDecorator.cpp
   src/WorkspaceIcons.cpp
@@ -198,6 +198,7 @@ set ( QT5_INC_FILES
   ${QT5_MOC_FILES}
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
+  inc/MantidQtWidgets/Common/AlgorithmDialogFactoryImpl.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/DropEventHelper.h
@@ -206,7 +207,6 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
-  inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
@@ -273,7 +273,6 @@ set ( SRC_FILES
   src/HelpWindow.cpp
   src/FlowLayout.cpp
   src/Hint.cpp
-  src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
   src/ListPropertyWidget.cpp
   src/ManageUserDirectories.cpp
@@ -303,6 +302,7 @@ set ( SRC_FILES
   src/TextPropertyWidget.cpp
   src/TSVSerialiser.cpp
   src/UserSubWindow.cpp
+  src/UserSubWindowFactoryImpl.cpp
   src/VatesViewerInterface.cpp
   src/WidgetScrollbarDecorator.cpp
   src/WindowIcons.cpp
@@ -539,6 +539,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
+  inc/MantidQtWidgets/Common/AlgorithmDialogFactoryImpl.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
   inc/MantidQtWidgets/Common/DllOption.h
@@ -549,7 +550,6 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/DistributionOptions.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
-  inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -566,6 +566,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/SignalBlocker.h
+  inc/MantidQtWidgets/Common/UserSubWindowFactoryImpl.h
   inc/MantidQtWidgets/Common/TSVSerialiser.h
   inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   inc/MantidQtWidgets/Common/WindowIcons.h
