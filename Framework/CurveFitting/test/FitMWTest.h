@@ -1311,11 +1311,11 @@ public:
     fit.setProperty("Normalise", true);
     fit.execute();
     auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out_Workspace");
-    auto const &y0 = out_ws->readY(0);
+    auto const &y1 = out_ws->readY(1);
     auto const &y3 = out_ws->readY(3);
     auto const &y4 = out_ws->readY(4);
-    for (size_t i = 0; i < y0.size(); ++i) {
-      TS_ASSERT_DELTA(y0[i], y3[i] + y4[i], 1e-10);
+    for (size_t i = 0; i < y1.size(); ++i) {
+      TS_ASSERT_DELTA(y1[i], y3[i] + y4[i], 1e-10);
     }
     AnalysisDataService::Instance().clear();
   }
