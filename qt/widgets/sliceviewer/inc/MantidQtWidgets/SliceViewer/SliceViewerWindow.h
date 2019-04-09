@@ -67,15 +67,16 @@ protected slots:
   void closeWindow();
   void updateWorkspace();
   void slicerWorkspaceChanged();
-  void changedSlicePoint(Mantid::Kernel::VMD);
+  void changedSlicePoint(Mantid::Kernel::VMD /*slice*/);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
-  void changeStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
-  void changePlanarWidth(double);
+  void changeStartOrEnd(Mantid::Kernel::VMD /*start*/,
+                        Mantid::Kernel::VMD /*end*/);
+  void changePlanarWidth(double /*width*/);
   void resizeWindow();
   void lineViewer_changedFixedBinWidth(bool fixed, double binWidth);
-  void showLineViewer(bool);
-  void showPeaksViewer(bool);
+  void showLineViewer(bool /*visible*/);
+  void showPeaksViewer(bool /*visible*/);
 
 protected:
   void

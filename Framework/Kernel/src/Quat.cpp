@@ -36,11 +36,9 @@ Quat::Quat() : w(1), a(0), b(0), c(0) {}
  * @param des :: the destination position
  */
 Quat::Quat(const V3D &src, const V3D &des) {
+  const V3D v = Kernel::normalize(src + des);
 
-  V3D v = (src + des);
-  v.normalize();
-
-  V3D cross = v.cross_prod(des);
+  const V3D cross = v.cross_prod(des);
 
   if (cross.nullVector()) {
     w = 1.;
@@ -120,8 +118,7 @@ void Quat::setAngleAxis(const double _deg, const V3D &_axis) {
   double deg2rad = M_PI / 180.0;
   w = cos(0.5 * _deg * deg2rad);
   double s = sin(0.5 * _deg * deg2rad);
-  V3D temp(_axis);
-  temp.normalize();
+  const V3D temp = Kernel::normalize(_axis);
   a = s * temp[0];
   b = s * temp[1];
   c = s * temp[2];

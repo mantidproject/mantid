@@ -114,8 +114,7 @@ private:
     auto instrument = integratedPeaksWS->getInstrument();
     const V3D samplePos = instrument->getComponentByName("sample")->getPos();
     const V3D sourcePos = instrument->getComponentByName("source")->getPos();
-    V3D beamDir = samplePos - sourcePos;
-    beamDir.normalize();
+    const V3D beamDir = normalize(samplePos - sourcePos);
 
     // Just test the first few peaks
     for (int i = 0; i < nPeaks; ++i) {
@@ -132,10 +131,8 @@ private:
 
       // Calculate the q direction based on geometry
       const V3D detPos = peak.getDetectorPosition();
-      V3D detDir = detPos - samplePos;
-      detDir.normalize();
-      V3D qDir = detDir - beamDir;
-      qDir.normalize();
+      const V3D detDir = normalize(detPos - samplePos);
+      const V3D qDir = normalize(detDir - beamDir);
 
       // Get the q-direction off the ellipsoid
       PeakShapeEllipsoid const *const ellipsoid =

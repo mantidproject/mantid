@@ -35,7 +35,7 @@ private slots:
 
   /// Setup the function and close dialog
   void accept() override;
-  void cellChanged(int, int);
+  void cellChanged(int /*row*/, int /*col*/);
 
 private:
   /// The form generated with Qt Designer

@@ -36,11 +36,11 @@ public:
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
                              bool showPlotAll = true, bool showTiledOpt = true,
                              bool isAdvanced = false) const;
-  void setSortScheme(MantidItemSortScheme);
-  void setSortOrder(Qt::SortOrder);
+  void setSortScheme(MantidItemSortScheme /*sortScheme*/);
+  void setSortOrder(Qt::SortOrder /*sortOrder*/);
   MantidItemSortScheme getSortScheme() const;
   Qt::SortOrder getSortOrder() const;
-  void logWarningMessage(const std::string &);
+  void logWarningMessage(const std::string & /*msg*/);
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de) override;

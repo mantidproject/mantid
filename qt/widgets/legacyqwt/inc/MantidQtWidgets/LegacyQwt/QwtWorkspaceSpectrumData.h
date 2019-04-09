@@ -70,7 +70,7 @@ public:
 protected:
   // Assignment operator (virtualized). MSVC not happy with compiler generated
   // one
-  QwtWorkspaceSpectrumData &operator=(const QwtWorkspaceSpectrumData &);
+  QwtWorkspaceSpectrumData &operator=(const QwtWorkspaceSpectrumData & /*rhs*/);
 
 private:
   friend class MantidMatrixCurve;

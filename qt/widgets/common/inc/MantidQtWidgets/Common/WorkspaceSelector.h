@@ -101,9 +101,9 @@ private:
 
 protected:
   // Method for handling drop events
-  void dropEvent(QDropEvent *) override;
+  void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent *) override;
+  void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
 
 private:
   /// Poco Observers for ADS Notifications

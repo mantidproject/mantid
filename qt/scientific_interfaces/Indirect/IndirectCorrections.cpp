@@ -54,7 +54,7 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
 /**
  * @param :: the detected close event
  */
-void IndirectCorrections::closeEvent(QCloseEvent *) {
+void IndirectCorrections::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 

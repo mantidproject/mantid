@@ -212,7 +212,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                const Spectra &) {
+                                const Spectra & /*spectra*/) {
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addJumpFitParameters(workspace.get(), name);
 

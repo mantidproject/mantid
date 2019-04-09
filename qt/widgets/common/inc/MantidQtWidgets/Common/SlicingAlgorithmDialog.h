@@ -55,7 +55,7 @@ protected:
   Ui::SlicingAlgorithmDialog ui;
 
   /// Common slice md setup
-  void commonSliceMDSetup(const bool);
+  void commonSliceMDSetup(const bool /*isSliceMD*/);
 
   /// Build dimension inputs.
   void buildDimensionInputs(const bool bForceForget = false);
@@ -64,11 +64,11 @@ protected slots:
 
   void onWorkspaceChanged();
 
-  void onAxisAlignedChanged(bool);
+  void onAxisAlignedChanged(bool /*unused*/);
 
   void onBrowse();
 
-  void onMaxFromInput(bool);
+  void onMaxFromInput(bool /*unused*/);
 
   void onRebuildDimensions();
 

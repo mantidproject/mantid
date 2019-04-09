@@ -34,7 +34,7 @@ void CustomPicker::widgetMouseMoveEvent(QMouseEvent *e) {
   QwtPlotPicker::widgetMouseMoveEvent(e);
 }
 
-void CustomPicker::widgetLeaveEvent(QEvent *) { end(); }
+void CustomPicker::widgetLeaveEvent(QEvent * /*unused*/) { end(); }
 
 void CustomMagnifier::rescale(double factor) {
   if (factor != 0.0) {

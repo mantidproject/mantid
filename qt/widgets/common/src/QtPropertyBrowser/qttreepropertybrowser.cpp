@@ -257,7 +257,7 @@ void QtPropertyEditorDelegate::closeEditor(QtProperty *property) {
 
 QWidget *
 QtPropertyEditorDelegate::createEditor(QWidget *parent,
-                                       const QStyleOptionViewItem &,
+                                       const QStyleOptionViewItem & /*option*/,
                                        const QModelIndex &index) const {
   if (index.column() == 1 && m_editorPrivate) {
     QtProperty *property = m_editorPrivate->indexToProperty(index);
@@ -677,7 +677,7 @@ void QtTreePropertyBrowserPrivate::slotCurrentBrowserItemChanged(
 }
 
 void QtTreePropertyBrowserPrivate::slotCurrentTreeItemChanged(
-    QTreeWidgetItem *newItem, QTreeWidgetItem *) {
+    QTreeWidgetItem *newItem, QTreeWidgetItem * /*unused*/) {
   QtBrowserItem *browserItem = newItem ? m_itemToIndex.value(newItem) : 0;
   m_browserChangedBlocked = true;
   q_ptr->setCurrentItem(browserItem);

@@ -1,0 +1,54 @@
+#!/bin/bash -ex
+#
+# Run the Performance tests and create the plots
+#
+DB_DIR=$HOME/JenkinsData/PerformanceDb
+mkdir -p $DB_DIR
+export DB_FILENAME=$DB_DIR/MantidPerformanceTests_master_$NODE_NAME.db
+
+# Clean database if requested
+if [[ $CLEAN_DB == true ]]; then
+  echo "Removing performance result database"
+  rm -f $DB_FILENAME
+fi
+
+# Clean buld if required
+BUILD_DIR=$WORKSPACE/build
+
+if [[ $CLEAN_BUILD == true ]]; then
+  rm -fr $BUILD_DIR
+else
+  # Clean up old .xml files
+  rm -f $BUILD_DIR/bin/Testing/TEST-*.xml
+  # Clean up old libraries and data files
+  rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData $BUILD_DIR/Testing
+fi
+
+# Make the build directory if it does not exist (first time or clean)
+mkdir -p $BUILD_DIR
+
+# Clean up old configuration files
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+mkdir -p $userconfig_dir
+touch $userconfig_dir/Mantid.user.properties
+
+cd $BUILD_DIR
+cmake -G 'Ninja' -DCMAKE_BUILD_TYPE=Release -DTESTING_TIMEOUT=600 -DCXXTEST_ADD_PERFORMANCE=TRUE -DMAKE_VATES=TRUE -DParaView_DIR=$PARAVIEW_DIR $WORKSPACE
+ninja -j$BUILD_THREADS
+ninja -j$BUILD_THREADS AllTests
+
+# ------------------ Setup -----------------------------
+mkdir -p $WORKSPACE/Report
+
+# ------------- Run the C++ performance tests -----------
+cd $BUILD_DIR
+ctest -R Performance --output-on-failure --force-new-ctest-process
+
+# ------------ Convert the C++ Perf Test output from XML to SQL ---------------
+# Find the performance test directory
+PERFORMANCE_TEST_DIR=$WORKSPACE/Testing/PerformanceTests
+python $PERFORMANCE_TEST_DIR/xunit_to_sql.py $WORKSPACE/build/bin/Testing/TEST-*.xml --db $DB_FILENAME --commit $GIT_COMMIT
+
+# ------------ Launch report generator ---------------------
+python $PERFORMANCE_TEST_DIR/make_report.py --path=$WORKSPACE/Report --plotting=matplotlib $DB_FILENAME
