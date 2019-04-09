@@ -128,7 +128,6 @@ if EXIST %BUILD_DIR% (
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
-    rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
   )
 ) else (
   md %BUILD_DIR%

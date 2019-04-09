@@ -950,10 +950,8 @@ else()
   set(SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots")
 endif()
 
-# Add an environment property MANTID_SOURCE so that the script can find the
-# source of xmlrunner
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-  set(_python_path $ENV{PYTHONPATH};${PYTHON_XMLRUNNER_DIR})
+  set(_python_path $ENV{PYTHONPATH})
   # cmake list separator and Windows environment separator are the same so
   # escape the cmake one
   string(REPLACE ";"
@@ -961,10 +959,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
                  _python_path
                  "${_python_path}")
 else()
-  set(_python_path $ENV{PYTHONPATH}:${PYTHON_XMLRUNNER_DIR})
+  set(_python_path $ENV{PYTHONPATH})
 endif()
 list(APPEND _test_environment "PYTHONPATH=${_python_path}")
-list(APPEND _test_environment "MANTID_SOURCE=${CMAKE_SOURCE_DIR}")
 list(APPEND _test_environment "MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}")
 # Make a ctest target for each file
 foreach(PYFILE ${MANTIDPLOT_TEST_PY_FILES})
