@@ -8,6 +8,17 @@ set ( QT5_DIST_DLLS
     Qt5PrintSupport.dll
     Qt5Svg.dll
     Qt5OpenGL.dll
+    Qt5Help.dll
+    Qt5Network.dll
+    Qt5Positioning.dll
+    Qt5Qml.dll
+    Qt5Quick.dll
+    Qt5QuickWidgets.dll
+    Qt5Sql.dll
+    Qt5WebChannel.dll
+    Qt5WebEngine.dll
+    Qt5WebEngineCore.dll
+    Qt5WebEngineWidgets.dll
 )
 
 set ( QT5_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt5 )
@@ -35,5 +46,5 @@ install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )
 ###########################################################################
 install ( FILES ${QT5_INSTALL_PREFIX}/bin/QtWebEngineProcess.exe DESTINATION lib/qt5/bin )
 install ( DIRECTORY ${QT5_INSTALL_PREFIX}/resources DESTINATION lib/qt5 )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/qt/applications/workbench/workbench/app/resources.py.install
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/qt/applications/workbench/resources.py.install
           DESTINATION bin/workbench/app RENAME resources.py)

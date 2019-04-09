@@ -100,12 +100,7 @@ build/
 *.egg-info/
 qt/python/mantidqt/utils/qt/plugins.py
 qt/python/mantidqt/resources.py
-qt/applications/workbench/resources.qrc.build
-qt/applications/workbench/resources.qrc.install
-qt/applications/workbench/qt.conf.build
-qt/applications/workbench/qt.conf.install
 qt/applications/workbench/workbench/app/resources.py
-qt/applications/workbench/workbench/app/resources.py.install
 
 # Visual C++ cache files
 ipch/
