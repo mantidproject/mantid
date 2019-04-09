@@ -10,6 +10,8 @@ from mantid.api import (AlgorithmFactory, AnalysisDataService, MatrixWorkspace, 
                         PythonAlgorithm, PropertyMode, WorkspaceGroup)
 from mantid.kernel import Direction
 
+from mantid import config, logger
+
 
 def string_ends_with(string, delimiter):
     delimiter_length = len(delimiter)
@@ -60,6 +62,12 @@ def get_x_insertion_index(input_workspace, single_fit_workspace):
     single_fit_x_axis = single_fit_workspace.getAxis(0)
     bin_value = float(single_fit_x_axis.label(0))
     return get_bin_index_of_value(input_workspace, bin_value)
+
+
+def get_workspace_indices_of_matching_labels(workspace1, workspace2):
+    axis_labels1 = workspace1.getAxis(1).extractValues()
+    axis_labels2 = workspace2.getAxis(1).extractValues()
+    return [index for index, label in enumerate(axis_labels2) if label in axis_labels1]
 
 
 class IndirectReplaceFitResult(PythonAlgorithm):
@@ -160,6 +168,12 @@ class IndirectReplaceFitResult(PythonAlgorithm):
 
     def PyExec(self):
         self._setup()
+        indices = get_workspace_indices_of_matching_labels(get_ads_workspace(self._input_workspace),
+                                                           get_ads_workspace(self._single_fit_workspace))
+        logger.warning(str(indices))
+        consequtive_indices = getConsequtiveIndices(indices)
+        logger.warning(str(consequtive_indices))
+
         self._copy_data()
 
         self.setProperty('OutputWorkspace', self._output_workspace)
