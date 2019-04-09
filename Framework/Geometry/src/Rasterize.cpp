@@ -274,7 +274,7 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
   const V3D z_prime = normalize(params.axis);
   const V3D x_prime = createPerpendicular(z_prime);
   const V3D y_prime = z_prime.cross_prod(x_prime);
-  const auto coords = std::array<V3D, 3>{x_prime, y_prime, z_prime};
+  const auto coords = std::array<V3D, 3>{{x_prime, y_prime, z_prime}};
 
   // loop over the elements of the shape and create everything
   // loop over slices
@@ -359,7 +359,7 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
   z_prime.normalize();
   const V3D x_prime = createPerpendicular(z_prime);
   const V3D y_prime = z_prime.cross_prod(x_prime);
-  const auto coords = std::array<V3D, 3>{x_prime, y_prime, z_prime};
+  const auto coords = std::array<V3D, 3>{{x_prime, y_prime, z_prime}};
 
   // loop over the elements of the shape and create everything
   // loop over slices
