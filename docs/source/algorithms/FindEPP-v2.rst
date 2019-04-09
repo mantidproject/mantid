@@ -9,8 +9,6 @@
 Description
 -----------
 
-This is the rewrite of :ref:`algm-FindEPP-v1` python algorithm in C++, that offers significant performance gain when running over large workspaces.
-
 This utility algorithm attempts to search for the elastic peak position (EPP) in each spectrum of the given workspace. The algorithm estimates the starting parameters and performs Gaussian fit using the :ref:`algm-Fit` algorithm.
 
 .. note::

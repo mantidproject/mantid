@@ -57,6 +57,7 @@ add_custom_target(PythonInterface
                           PythonDataObjectsModule
                           PythonCurveFittingModule
                           PythonPlotsModule
+                          PythonPlotsModestImageModule
                           PythonPy3CompatModule)
 set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
 

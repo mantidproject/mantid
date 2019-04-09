@@ -350,11 +350,12 @@ public:
   void test_GetObjGeom_not_implemented() {
     auto mesh = makeSimpleTriangleMesh();
     std::vector<V3D> vectors;
-    double radius, height;
+    double radius, height, innerRadius;
     Mantid::Geometry::detail::ShapeInfo::GeometryShape shape;
 
-    TS_ASSERT_THROWS(mesh.GetObjectGeom(shape, vectors, radius, height),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(
+        mesh.GetObjectGeom(shape, vectors, innerRadius, radius, height),
+        std::runtime_error &);
   }
 
   void test_get_material() {

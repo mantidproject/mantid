@@ -43,7 +43,6 @@ set(TEST_PY_FILES
     ExportSampleLogsToHDF5Test.py
     ExportSpectraMaskTest.py
     FilterLogByTimeTest.py
-    FindEPPTest.py
     FindReflectometryLinesTest.py
     FitGaussianTest.py
     FractionalIndexingTest.py

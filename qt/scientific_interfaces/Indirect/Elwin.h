@@ -24,7 +24,7 @@ private slots:
   void newInputFiles();
   void newPreviewFileSelected(int index);
   void plotInput();
-  void twoRanges(QtProperty *prop, bool);
+  void twoRanges(QtProperty *prop, bool /*val*/);
   void minChanged(double val);
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
@@ -33,6 +33,7 @@ private slots:
   void runClicked();
   void saveClicked();
   void plotClicked();
+  void updateIntegrationRange();
 
 private:
   void run() override;
@@ -44,6 +45,9 @@ private:
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
+  void checkForELTWorkspace();
+
+  std::vector<std::string> getOutputWorkspaceNames();
   QString getOutputBasename();
 
   void updatePlotSpectrumOptions();

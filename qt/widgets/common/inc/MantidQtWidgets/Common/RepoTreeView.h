@@ -28,7 +28,7 @@ public:
   ~RepoTreeView() override{};
 
 signals:
-  void currentCell(const QModelIndex &);
+  void currentCell(const QModelIndex & /*_t1*/);
 
 protected slots:
 

@@ -40,7 +40,7 @@ public:
   virtual void setUserInput(const QVariant &value) { Q_UNUSED(value); }
 
 signals:
-  void runAsPythonScript(const QString &code, bool);
+  void runAsPythonScript(const QString &code, bool /*_t2*/);
 
 protected:
   /// Default constructor

@@ -537,7 +537,7 @@ void InstrumentWidget::setupColorMap() { emit colorMapChanged(); }
 /**
  * Connected to QTabWidget::currentChanged signal
  */
-void InstrumentWidget::tabChanged(int) { updateInfoText(); }
+void InstrumentWidget::tabChanged(int /*unused*/) { updateInfoText(); }
 
 /**
  * Change color map button slot. This provides the file dialog box to select
@@ -865,7 +865,8 @@ void InstrumentWidget::componentSelected(size_t componentIndex) {
   }
 }
 
-void InstrumentWidget::executeAlgorithm(const QString &, const QString &) {
+void InstrumentWidget::executeAlgorithm(const QString & /*unused*/,
+                                        const QString & /*unused*/) {
   // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 

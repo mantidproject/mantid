@@ -141,8 +141,8 @@ public:
 
     detail::ShapeInfo::GeometryShape otype;
     std::vector<V3D> vectors;
-    double radius, height;
-    shape->GetObjectGeom(otype, vectors, radius, height);
+    double radius, height, innerRadius;
+    shape->GetObjectGeom(otype, vectors, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(radius, 0.1);

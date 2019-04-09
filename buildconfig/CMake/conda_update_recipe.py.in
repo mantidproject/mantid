@@ -39,7 +39,7 @@ def update_meta_yaml(repo_path, recipe_path=None):
 
 def commit(repo_path):
     # commit
-    cmd = 'git commit -m "update version and git_rev" framework/meta.yaml'
+    cmd = 'git commit -m "update version and git_rev" .'
     sp.check_call(shlex.split(cmd), cwd=repo_path)
     return
 
@@ -54,7 +54,11 @@ def push(repo_path):
 def main():
     repo_path = 'conda-recipes'
     checkout(repo_path)
-    if update_meta_yaml(repo_path):
+    pkgs = ['framework', 'workbench']
+    updated = False
+    for pkg in pkgs:
+        updated = updated or update_meta_yaml(repo_path, pkg)
+    if updated:
         commit(repo_path)
         push(repo_path)
     return

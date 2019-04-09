@@ -580,7 +580,7 @@ void InstrumentWidgetRenderTab::enableGL(bool on) {
   enable3DSurface(on);
 }
 
-void InstrumentWidgetRenderTab::showEvent(QShowEvent *) {
+void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
   auto surface = getSurface();
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);

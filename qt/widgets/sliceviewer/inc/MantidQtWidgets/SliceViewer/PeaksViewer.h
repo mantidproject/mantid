@@ -57,13 +57,17 @@ public:
   std::string saveToProject() const;
 
 public slots:
-  void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
-                          PeakViewColor);
-  void onBackgroundColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
-                                PeakViewColor);
-  void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
-  void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
-  void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool);
+  void onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
+                          PeakViewColor /*newColor*/);
+  void onBackgroundColorChanged(
+      Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
+      PeakViewColor /*newColor*/);
+  void
+  onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
+                          bool /*show*/);
+  void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/);
+  void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
+                    bool /*hide*/);
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                     int peakIndex);
   void showPeaksTableColumnOptions();

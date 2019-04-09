@@ -216,8 +216,7 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
 
   // Assume that z' = axis. Then select whatever has the smallest dot product
   // with axis to be the x' direction
-  V3D z_prime = params.axis;
-  z_prime.normalize();
+  const V3D z_prime = normalize(params.axis);
   const V3D x_prime = createPerpendicular(z_prime);
   const V3D y_prime = z_prime.cross_prod(x_prime);
 

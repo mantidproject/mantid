@@ -969,6 +969,52 @@ class RunTabPresenterTest(unittest.TestCase):
                              "Expected enable buttons to be called once, "
                              "was called {} times.".format(presenter._view.enable_buttons.call_count))
 
+    def test_that_verify_output_types_disables_canSAS_if_2D_reduction(self):
+        """This test checks that if you are running a 2D reduction and have canSAS output mode checked,
+        the GUI will automatically uncheck canSAS to avoid data dimension errors."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+
+        view = mock.MagicMock()
+        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
+        view.can_sas_checkbox.setChecked = mock.Mock()
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+
+        presenter.set_view(view)
+        presenter.verify_output_modes(False)
+
+        setchecked_calls = presenter._view.can_sas_checkbox.setChecked.call_args_list
+        self.assertEqual(len(setchecked_calls), 1, "We expected canSAS setChecked to only be called once, was called "
+                                                   "{} times instead.".format(len(setchecked_calls)))
+
+        args, _ = setchecked_calls[-1]  # The last call to can_sas_checkbox.setEnabled is from _verify_output_types
+        self.assertFalse(args[0], "Can SAS checkbox should have been turned off, since we were in 2D reduction mode.")
+
+        setenabled_calls = presenter._view.can_sas_checkbox.setEnabled.call_args_list
+        self.assertEqual(len(setenabled_calls), 1, "We expected canSAS setEnabled to only be called once, was called "
+                                                   "{} times instead.".format(len(setenabled_calls)))
+
+        args, _ = setenabled_calls[-1]  # The last call to can_sas_checkbox.setEnabled is from _verify_output_types
+        self.assertFalse(args[0], "Can SAS checkbox should have been disabled, since we were in 2D reduction mode.")
+
+    def test_that_verify_output_types_does_not_disable_canSAS_if_1D_reduction(self):
+        """This test checks that you can still run a 1D reduction with canSAS output."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+
+        view = mock.MagicMock()
+        view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
+        view.can_sas_checkbox.setChecked = mock.Mock()
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+
+        presenter.set_view(view)
+        presenter.verify_output_modes(True)
+
+        self.assertEqual(presenter._view.can_sas_checkbox.setChecked.call_count, 0,
+                         "Did not expect can_sas_checkbox.setChecked to be called. "
+                         "It was called {} times".format(presenter._view.can_sas_checkbox.setChecked.call_count))
+
+        args, _ = presenter._view.can_sas_checkbox.setEnabled.call_args_list[-1]
+        self.assertTrue(args[0], "Can SAS checkbox should have been enabled, since we switched to 1D reduction mode.")
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():
