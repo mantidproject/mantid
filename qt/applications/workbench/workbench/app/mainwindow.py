@@ -606,10 +606,6 @@ def start_workbench(app, command_line_options):
     if main_window.splash:
         main_window.splash.hide()
 
-    sys.path.append("c:\\users\\qbr77747\\apps\\miniconda3\\lib\\site-packages")
-    import pydevd
-    pydevd.settrace('localhost', port=44445, stdoutToServer=True, stderrToServer=True)
-
     if command_line_options.script is not None:
         main_window.editor.open_file_in_new_tab(command_line_options.script)
         editor_task = None
@@ -621,8 +617,8 @@ def start_workbench(app, command_line_options):
         if command_line_options.quit:
             # wait for the code interpreter thread to finish executing the script
             editor_task.join()
-
             main_window.close()
+
             # for task exit code descriptions see the classes AsyncTask and TaskExitCode
             return int(editor_task.exit_code) if editor_task else 0
 
