@@ -45,19 +45,6 @@ add_subdirectory(_plugins)
 add_subdirectory(plots)
 add_subdirectory(py3compat)
 
-# Create an overall target
-add_custom_target(PythonInterface
-                  DEPENDS PythonInterfaceCore
-                          PythonKernelModule
-                          PythonGeometryModule
-                          PythonAPIModule
-                          PythonDataObjectsModule
-                          PythonCurveFittingModule
-                          PythonPlotsModule
-                          PythonPlotsModestImageModule
-                          PythonPy3CompatModule)
-set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
-
 # Defines the target the will cause the Python bundle to be copied
 set(PYBUNDLE_POST_TARGET PythonModule)
 include(${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake)

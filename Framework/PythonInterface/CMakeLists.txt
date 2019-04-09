@@ -120,7 +120,7 @@ add_python_package ( PythonInterface EGGLINKNAME mantid )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
   PythonGeometryModule PythonAPIModule PythonDataObjectsModule
-  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule )
+  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule PythonPlotsModestImageModule )
 
 # Clear any leftover bin/$(Configuration)/mantid/ folder, from when
 # PythonInterface was being copied over.
