@@ -71,6 +71,11 @@ void ReductionJobs::resetState() {
     group.resetState();
 }
 
+void ReductionJobs::resetSkippedItems() {
+  for (auto &group : m_groups)
+    group.resetSkipped();
+}
+
 std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }

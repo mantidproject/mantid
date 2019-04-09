@@ -37,6 +37,7 @@ public:
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle) const;
   void resetState();
+  void resetSkippedItems();
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 

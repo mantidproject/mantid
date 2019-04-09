@@ -37,6 +37,7 @@ public:
       std::vector<MantidWidgets::Batch::RowLocation> selected);
   template <typename T> bool isSelected(T const &item);
   void resetState();
+  void resetSkippedItems();
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 

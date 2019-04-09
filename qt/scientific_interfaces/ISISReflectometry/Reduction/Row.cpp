@@ -57,40 +57,10 @@ void Row::setOutputNames(std::vector<std::string> const &outputNames) {
                                          outputNames[2]);
 }
 
-Row Row::withExtraRunNumbers(
-    std::vector<std::string> const &extraRunNumbers) const {
-  auto newRunNumbers = std::vector<std::string>();
-  newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
-  boost::range::set_union(m_runNumbers, extraRunNumbers,
-                          std::back_inserter(newRunNumbers));
-  auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
-  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
-             scaleFactor(), reductionOptions(), wsNames);
-}
+void Row::resetOutputNames() { m_reducedWorkspaceNames.resetOutputNames(); }
 
 Row mergedRow(Row const &rowA, Row const &rowB) {
   return rowA.withExtraRunNumbers(rowB.runNumbers());
-}
-
-void Row::algorithmStarted() {
-  m_reducedWorkspaceNames.resetOutputNames();
-  Item::algorithmStarted();
-}
-
-void Row::algorithmComplete(
-    std::vector<std::string> const &outputWorkspaceNames) {
-  if (outputWorkspaceNames.size() != 3)
-    throw std::runtime_error("Incorrect number of output workspaces");
-
-  m_reducedWorkspaceNames.setOutputNames(outputWorkspaceNames[0],
-                                         outputWorkspaceNames[1],
-                                         outputWorkspaceNames[2]);
-  Item::algorithmComplete(outputWorkspaceNames);
-}
-
-void Row::algorithmError(std::string const &msg) {
-  m_reducedWorkspaceNames.resetOutputNames();
-  Item::algorithmError(msg);
 }
 
 bool Row::hasOutputWorkspace(std::string const &wsName) const {
@@ -100,6 +70,17 @@ bool Row::hasOutputWorkspace(std::string const &wsName) const {
 void Row::renameOutputWorkspace(std::string const &oldName,
                                 std::string const &newName) {
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
+}
+
+Row Row::withExtraRunNumbers(
+    std::vector<std::string> const &extraRunNumbers) const {
+  auto newRunNumbers = std::vector<std::string>();
+  newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
+  boost::range::set_union(m_runNumbers, extraRunNumbers,
+                          std::back_inserter(newRunNumbers));
+  auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
+  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
+             scaleFactor(), reductionOptions(), wsNames);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
