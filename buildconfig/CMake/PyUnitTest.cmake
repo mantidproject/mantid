@@ -5,9 +5,9 @@
 #   The variable PYUNITTEST_PYTHONPATH_EXTRA can be defined with
 #   extra paths to add to PYTHONPATH during the tests
 #   Parameters:
-#       _test_src_dir_base :: A base directory when added to the relative test paths gives
-#                             an absolute path to that test. This directory is added to the
-#                             PYTHONPATH when tests are executed
+#       _test_src_dir :: A base directory when added to the relative test paths gives
+#                        an absolute path to that test. This directory is added to the
+#                        PYTHONPATH when tests are executed
 #       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
 #                           ${_testname_prefix}_TestName
 #       ${ARGN} :: List of test files
