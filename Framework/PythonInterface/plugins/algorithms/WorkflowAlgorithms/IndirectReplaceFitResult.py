@@ -147,10 +147,10 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             if len(single_fit_workspace.readY(0)) > 1:
                 issues['SingleFitWorkspace'] = 'The single fit workspace must contain data from a single fit.'
 
-        if isinstance(input_workspace, MatrixWorkspace) and isinstance(single_fit_workspace, MatrixWorkspace):
-            if input_workspace.getNumberHistograms() != single_fit_workspace.getNumberHistograms():
-                issues['InputWorkspace'] = 'The input workspace and single fit workspace must have the same number ' \
-                                           'of histograms.'
+        #if isinstance(input_workspace, MatrixWorkspace) and isinstance(single_fit_workspace, MatrixWorkspace):
+        #    if input_workspace.getNumberHistograms() != single_fit_workspace.getNumberHistograms():
+        #        issues['InputWorkspace'] = 'The input workspace and single fit workspace must have the same number ' \
+        #                                   'of histograms.'
 
         return issues
 
@@ -168,26 +168,27 @@ class IndirectReplaceFitResult(PythonAlgorithm):
 
     def PyExec(self):
         self._setup()
-        indices = get_workspace_indices_of_matching_labels(get_ads_workspace(self._input_workspace),
-                                                           get_ads_workspace(self._single_fit_workspace))
-        logger.warning(str(indices))
-        consequtive_indices = getConsequtiveIndices(indices)
-        logger.warning(str(consequtive_indices))
+        row_indices = get_workspace_indices_of_matching_labels(get_ads_workspace(self._input_workspace),
+                                                               get_ads_workspace(self._single_fit_workspace))
+        insertion_indices = get_workspace_indices_of_matching_labels(get_ads_workspace(self._single_fit_workspace),
+                                                                     get_ads_workspace(self._input_workspace))
 
-        self._copy_data()
+        self._copy_data(row_indices[0], insertion_indices[0], self._input_workspace)
+        for from_index, to_index in zip(row_indices[1:], insertion_indices[1:]):
+            self._copy_data(from_index, to_index, self._output_workspace)
 
         self.setProperty('OutputWorkspace', self._output_workspace)
 
         self._add_workspace_to_group()
 
-    def _copy_data(self):
+    def _copy_data(self, row_index, insertion_index, destination_workspace):
         copy_algorithm = self.createChildAlgorithm(name='CopyDataRange', startProgress=0.1,
                                                    endProgress=1.0, enableLogging=True)
         copy_algorithm.setAlwaysStoreInADS(True)
 
-        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": self._input_workspace,
-                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMin": self._bin_value,
-                "XMax": self._bin_value, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
+        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": destination_workspace,
+                "StartWorkspaceIndex": row_index, "EndWorkspaceIndex": row_index, "XMin": self._bin_value,
+                "XMax": self._bin_value, "InsertionYIndex": insertion_index, "InsertionXIndex": self._insertion_x_index,
                 "OutputWorkspace": self._output_workspace}
 
         for key, value in args.items():
