@@ -38,7 +38,7 @@ public:
     SampleEnvironment kit("TestKit", can);
     TS_ASSERT_EQUALS(kit.name(), "TestKit");
     TS_ASSERT_EQUALS(kit.containerID(), "8mm");
-    TS_ASSERT_EQUALS(kit.container(), can);
+    TS_ASSERT_EQUALS(kit.getContainer(), can);
     TS_ASSERT_EQUALS(1, kit.nelements());
   }
 
@@ -158,7 +158,8 @@ public:
         .WillOnce(Return(0.5))
         .WillOnce(Return(0.5));
     // Restrict region to can
-    TS_ASSERT_THROWS(kit->generatePoint(rng, kit->container()->getBoundingBox(),
+    TS_ASSERT_THROWS(kit->generatePoint(rng,
+                                        kit->getContainer()->getBoundingBox(),
                                         maxAttempts),
                      std::runtime_error);
     Mock::VerifyAndClearExpectations(&rng);

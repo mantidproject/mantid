@@ -271,7 +271,7 @@ void LoadSampleEnvironment::exec() {
   }
   // get the material name and number density for debug
   const auto outMaterial =
-      outputWS->sample().getEnvironment().container().material();
+      outputWS->sample().getEnvironment().getContainer().material();
   debugString += "\n"
                  "Environment Material: " +
                  outMaterial.name();

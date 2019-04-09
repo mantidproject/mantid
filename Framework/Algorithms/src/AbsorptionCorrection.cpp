@@ -134,6 +134,41 @@ void AbsorptionCorrection::init() {
   defineProperties();
 }
 
+std::map<std::string, std::string> AbsorptionCorrection::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // verify that the container/environment information is there if requested
+  const std::string scatterFrom = getProperty("ScatterFrom");
+  if (scatterFrom != CALC_SAMPLE) {
+    API::MatrixWorkspace_const_sptr wksp = getProperty("InputWorkspace");
+    const auto &sample = wksp->sample();
+    if (sample.hasEnvironment()) {
+      const auto numComponents = sample.getEnvironment().nelements();
+      // first element is assumed to be the container
+      if (scatterFrom == CALC_CONTAINER && numComponents == 0) {
+        result["ScatterFrom"] = "Sample does not have a container defined";
+      } else if (scatterFrom == CALC_ENVIRONMENT) {
+        if (numComponents < 2) {
+          result["ScatterFrom"] = "Sample does not have an environment defined";
+        } else if (numComponents > 2) {
+          std::stringstream msg;
+          msg << "Do not know how to calculate absorption from multiple "
+                 "component sample environment. Encountered " << numComponents
+              << " components";
+          result["ScatterFrom"] = msg.str();
+        }
+      }
+    } else { // customize error message based on selection
+      if (scatterFrom == CALC_CONTAINER)
+        result["ScatterFrom"] = "Sample does not have a container defined";
+      else if (scatterFrom == CALC_ENVIRONMENT)
+        result["ScatterFrom"] = "Sample does not have an environment defined";
+    }
+  }
+
+  return result;
+}
+
 void AbsorptionCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -273,14 +308,13 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   bool createMaterial =
       !(isEmpty(rho) && isEmpty(sigma_s) && isEmpty(sigma_atten));
   // get the material from the correct component
+  const auto &sampleObj = m_inputWS->sample();
   if (scatterFrom == CALC_SAMPLE) {
-    m_material = m_inputWS->sample().getShape().material();
+    m_material = sampleObj.getShape().material();
   } else if (scatterFrom == CALC_CONTAINER) {
-    m_material = m_inputWS->sample().getEnvironment().container().getShape().material();
+    m_material = sampleObj.getEnvironment().getContainer().material();
   } else if (scatterFrom == CALC_ENVIRONMENT) {
-    // TODO get the second element
-    // TODO throw an exception if there is more than one element (past the container) or no other elements
-    m_material = m_inputWS->sample().getEnvironment().container().getShape().material();
+    m_material = sampleObj.getEnvironment().getComponent(1).material();
   }
 
   if (createMaterial) {
@@ -346,9 +380,18 @@ void AbsorptionCorrection::retrieveBaseProperties() {
 /// Create the sample object using the Geometry classes, or use the existing one
 void AbsorptionCorrection::constructSample(API::Sample &sample) {
   const std::string xmlstring = sampleXML();
+  const std::string scatterFrom = getProperty("ScatterFrom");
   if (xmlstring.empty()) {
-    // This means that we should use the shape already defined on the sample.
-    m_sampleObject = &sample.getShape();
+    // Get the shape from the proper object
+    if (scatterFrom == CALC_SAMPLE)
+      m_sampleObject = &sample.getShape();
+    else if (scatterFrom == CALC_CONTAINER)
+      m_sampleObject = &(sample.getEnvironment().getContainer());
+    else if (scatterFrom == CALC_ENVIRONMENT)
+      m_sampleObject = &(sample.getEnvironment().getComponent(1));
+    else
+      throw std::runtime_error("Somebody forgot to fill in an if/else tree");
+
     // Check there is one, and fail if not
     if (!m_sampleObject->hasValidShape()) {
       const std::string mess(
@@ -356,7 +399,11 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
       g_log.error(mess);
       throw std::invalid_argument(mess);
     }
-  } else {
+  } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
+    std::stringstream msg;
+    msg << "Cannot use geometry xml for ScatterFrom=" << scatterFrom;
+    throw std::runtime_error(msg.str());
+  } else { // create a geometry from the sample object
     boost::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
     sample.setShape(shape);
     m_sampleObject = &sample.getShape();

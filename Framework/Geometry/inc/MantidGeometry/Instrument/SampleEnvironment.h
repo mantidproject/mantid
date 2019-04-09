@@ -26,14 +26,14 @@ class Track;
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  SampleEnvironment(std::string name, Container_const_sptr container);
+  SampleEnvironment(std::string name, Container_const_sptr getContainer);
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
   /// @return The name of can
-  inline const std::string containerID() const { return container().id(); }
+  inline const std::string containerID() const { return getContainer().id(); }
   /// @return A const ptr to the can instance
-  inline const Container& container() const {
+  inline const Container &getContainer() const {
     if (m_components.empty())
       throw std::runtime_error("Cannot get container from empty environment");
     Container_const_sptr can = boost::static_pointer_cast<const Container>(m_components.front());
@@ -41,6 +41,13 @@ public:
   }
   /// @return The number of elements the environment is composed of
   inline size_t nelements() const { return m_components.size(); }
+
+  /**
+   * Returns the requested IObject. The zero-th index is considered the
+   * container
+   * @throws std::out_of_range
+   */
+  const IObject &getComponent(const size_t index) const;
 
   Geometry::BoundingBox boundingBox() const;
   /// Select a random point within a component
