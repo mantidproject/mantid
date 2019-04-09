@@ -602,21 +602,32 @@ def start_workbench(app, command_line_options):
     main_window.set_splash('Initializing mantid framework')
     FrameworkManagerImpl.Instance()
     main_window.post_mantid_init()
-    main_window.show()
-    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
     if main_window.splash:
         main_window.splash.hide()
 
+    sys.path.append("c:\\users\\qbr77747\\apps\\miniconda3\\lib\\site-packages")
+    import pydevd
+    pydevd.settrace('localhost', port=44445, stdoutToServer=True, stderrToServer=True)
+
     if command_line_options.script is not None:
         main_window.editor.open_file_in_new_tab(command_line_options.script)
+        editor_task = None
         if command_line_options.execute:
-            main_window.editor.execute_current_async()  # TODO use the result as an exit code
+            # if the quit flag is not specified, this task reference will be
+            # GC'ed, and the task will be finished alongside the GUI startup
+            editor_task = main_window.editor.execute_current_async()
 
         if command_line_options.quit:
-            main_window.close()
-            return 0
+            # wait for the code interpreter thread to finish executing the script
+            editor_task.join()
 
+            main_window.close()
+            # for task exit code descriptions see the classes AsyncTask and TaskExitCode
+            return int(editor_task.exit_code) if editor_task else 0
+
+    main_window.show()
+    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
     # Project Recovey on startup
     main_window.project_recovery.repair_checkpoints()
     if main_window.project_recovery.check_for_recover_checkpoint():

@@ -16,12 +16,20 @@ import threading
 import time
 from traceback import extract_tb
 
+from mantid.py3compat.enum import Enum
+
+
+class TaskExitCode(Enum):
+    OK = 0
+    ERROR = 1
+    SYNTAX_ERROR = 2
 
 class AsyncTask(threading.Thread):
     def __init__(self, target, args=(), kwargs=None,
                  success_cb=None, error_cb=None,
                  finished_cb=None):
         """
+        Runs a task asynchronously. Exit code is set on task finish/error.
 
         :param target: A Python callable object
         :param args: Arguments to pass to the callable
@@ -42,20 +50,29 @@ class AsyncTask(threading.Thread):
         self.error_cb = error_cb if error_cb is not None else lambda x: None
         self.finished_cb = finished_cb if finished_cb is not None else lambda: None
 
+        self.exit_code = None
+
+    @staticmethod
+    def _elapsed(start):
+        return time.time() - start
+
     def run(self):
-        def elapsed(start):
-            return time.time() - start
+
+        time_start = time.time()
+
         try:
-            time_start = time.time()
             out = self.target(*self.args, **self.kwargs)
         except SyntaxError as exc:
+            self.exit_code = TaskExitCode.SYNTAX_ERROR
             # treat SyntaxErrors as special as the traceback makes no sense
             # and the lineno is part of the exception instance
-            self.error_cb(AsyncTaskFailure(elapsed(time_start), SyntaxError, exc, None))
+            self.error_cb(AsyncTaskFailure(self._elapsed(time_start), SyntaxError, exc, None))
         except:  # noqa
-            self.error_cb(AsyncTaskFailure.from_excinfo(elapsed(time_start)))
+            self.exit_code = TaskExitCode.ERROR
+            self.error_cb(AsyncTaskFailure.from_excinfo(self._elapsed(time_start)))
         else:
-            self.success_cb(AsyncTaskSuccess(elapsed(time_start), out))
+            self.exit_code = TaskExitCode.OK
+            self.success_cb(AsyncTaskSuccess(self._elapsed(time_start), out))
 
         self.finished_cb()
 
