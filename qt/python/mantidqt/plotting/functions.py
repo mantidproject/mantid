@@ -21,14 +21,16 @@ try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
-from mantid.py3compat import is_text_string
 from matplotlib.gridspec import GridSpec
+from matplotlib.legend import Legend
+from matplotlib.lines import Line2D
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
 from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantid.py3compat import is_text_string
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 
 # -----------------------------------------------------------------------------
@@ -204,7 +206,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         ax = fig.gca()
 
     if not isinstance(ax, MantidAxes):
-        ax = MantidAxes.from_mpl_axes(ax)
+        # Convert to a MantidAxes if it isn't already. Ignore legend since
+        # a new one will be drawn later
+        ax = MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
 
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot

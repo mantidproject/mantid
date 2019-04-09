@@ -170,9 +170,18 @@ class FunctionsTest(TestCase):
         fig = plt.figure()
         plt.plot([0, 1], [0, 1])
         ws = self._test_ws
-        plot([ws], wksp_indices=[1], fig=fig)
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
         ax = plt.gca()
         self.assertEqual(len(ax.lines), 2)
+
+    def test_title_preserved_when_workspace_plotted_on_scripted_plot(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.title("My Title")
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual("My Title", ax.get_title())
 
     # ------------- Failure tests -------------
 

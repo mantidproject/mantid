@@ -26,6 +26,7 @@ from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
 from matplotlib.container import Container
 from matplotlib.image import AxesImage
+from matplotlib.legend import Legend
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
@@ -175,24 +176,28 @@ class MantidAxes(Axes):
             self.add_artist(artist)
 
     @staticmethod
-    def from_mpl_axes(ax):
+    def from_mpl_axes(ax, ignore_artists=None):
         """
+        Returns a MantidAxes from an Axes object.
         Transfers all transferable artists from a Matplotlib.Axes
         instance to a MantidAxes instance on the same figure. Then
         removes the Matplotlib.Axes instance from the figure.
 
         :param ax: An Axes object
+        :param ignore_artists: List of Artist types to ignore
         :returns: A MantidAxes object
         """
         fig = ax.figure
         artists = ax.get_children()
         mantid_axes = fig.add_subplot(111, projection='mantid', label='mantid')
         for artist in artists:
-            try:
-                mantid_axes.add_artist_correctly(artist)
-            except NotImplementedError:
-                pass
-
+            if not any(isinstance(artist, artist_type) for artist_type in
+                       ignore_artists):
+                try:
+                    mantid_axes.add_artist_correctly(artist)
+                except NotImplementedError:
+                    pass
+        mantid_axes.set_title(ax.get_title())
         ax.remove()
         return mantid_axes
 
