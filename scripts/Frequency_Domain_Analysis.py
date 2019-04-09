@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.FrequencyDomainAnalysis.frequency_domain_analysis_2 import FrequencyAnalysisGui
+from Muon.GUI.FrequencyDomainAnalysisNew.frequency_domain_analysis_2 import FrequencyAnalysisGui
 import PyQt4.QtCore as QtCore
 from save_python import getWidgetIfOpen
 
