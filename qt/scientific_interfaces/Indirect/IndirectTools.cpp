@@ -61,7 +61,7 @@ void IndirectTools::initLayout() {
  *
  * @param :: the detected close event
  */
-void IndirectTools::closeEvent(QCloseEvent *) {
+void IndirectTools::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 

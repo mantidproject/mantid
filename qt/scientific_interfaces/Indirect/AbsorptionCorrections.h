@@ -29,8 +29,8 @@ private slots:
   void plotClicked();
   void runClicked();
   void getParameterDefaults(QString const &dataName);
-  void changeSampleDensityUnit(int);
-  void changeCanDensityUnit(int);
+  void changeSampleDensityUnit(int /*index*/);
+  void changeCanDensityUnit(int /*index*/);
   UserInputValidator doValidation();
 
 private:

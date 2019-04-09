@@ -30,6 +30,7 @@ class IN4(systemtesting.MantidSystemTest):
         DirectILLDiagnostics(
             InputWorkspace='vanadium-raw',
             OutputWorkspace='diagnostics',
+            SubalgorithmLogging='Logging ON',
             EPPWorkspace='vanadium-epps',)
         # Samples
         DirectILLCollectData(

@@ -180,7 +180,7 @@ private:
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
-  bool isWorkspaceValid(Mantid::API::Workspace_sptr) const override;
+  bool isWorkspaceValid(Mantid::API::Workspace_sptr /*unused*/) const override;
   /// After a simultaneous fit, add information to results table and group
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,

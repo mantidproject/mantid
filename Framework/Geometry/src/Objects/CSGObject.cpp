@@ -43,6 +43,346 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace {
+/**
+ * Find the solid angle of a triangle defined by vectors a,b,c from point
+ *"observer"
+ *
+ * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+ *
+ * @param a :: first point of triangle
+ * @param b :: second point of triangle
+ * @param c :: third point of triangle
+ * @param observer :: point from which solid angle is required
+ * @return :: solid angle of triangle in Steradians.
+ */
+double triangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
+                          const V3D &observer) {
+  const V3D ao = a - observer;
+  const V3D bo = b - observer;
+  const V3D co = c - observer;
+  const double modao = ao.norm();
+  const double modbo = bo.norm();
+  const double modco = co.norm();
+  const double aobo = ao.scalar_prod(bo);
+  const double aoco = ao.scalar_prod(co);
+  const double boco = bo.scalar_prod(co);
+  const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
+  const double denom =
+      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
+  if (denom != 0.0)
+    return 2.0 * atan2(scalTripProd, denom);
+  else
+    return 0.0; // not certain this is correct
+}
+
+/**
+ * Calculate the solid angle for a cone using triangulation.
+ * @param observer :: The observer's point
+ * @param centre :: The centre vector
+ * @param axis :: The axis vector
+ * @param radius :: The radius
+ * @param height :: The height
+ * @returns The solid angle value
+ */
+double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
+                      const Mantid::Kernel::V3D &axis, const double radius,
+                      const double height) {
+  // The cone is broken down into three pieces and then in turn broken down into
+  // triangles. Any triangle that has a normal facing away from the observer
+  // gives a negative solid angle and is excluded
+  // For simplicity the triangulation points are constructed such that the cone
+  // axis points up the +Z axis and then rotated into their final position
+
+  const V3D axis_direction = normalize(axis);
+  // Required rotation
+  constexpr V3D initial_axis(0., 0., 1.0);
+  const Quat transform(initial_axis, axis_direction);
+
+  // Do the base cap which is a point at the centre and nslices points around it
+  constexpr double angle_step = 2 * M_PI / Mantid::Geometry::Cone::g_nslices;
+  // Store the (x,y) points as they are used quite frequently
+  std::array<double, Mantid::Geometry::Cone::g_nslices> cos_table;
+  std::array<double, Mantid::Geometry::Cone::g_nslices> sin_table;
+
+  double solid_angle(0.0);
+  for (int sl = 0; sl < Mantid::Geometry::Cone::g_nslices; ++sl) {
+    int vertex = sl;
+    cos_table[vertex] = std::cos(angle_step * vertex);
+    sin_table[vertex] = std::sin(angle_step * vertex);
+    V3D pt2 = V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
+
+    if (sl < Mantid::Geometry::Cone::g_nslices - 1) {
+      vertex = sl + 1;
+      cos_table[vertex] = std::cos(angle_step * vertex);
+      sin_table[vertex] = std::sin(angle_step * vertex);
+    } else
+      vertex = 0;
+
+    V3D pt3 = V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
+
+    transform.rotate(pt2);
+    transform.rotate(pt3);
+    pt2 += centre;
+    pt3 += centre;
+
+    double sa = triangleSolidAngle(centre, pt2, pt3, observer);
+    if (sa > 0.0) {
+      solid_angle += sa;
+    }
+  }
+
+  // Now the main section
+  const double z_step = height / Cone::g_nstacks;
+  const double r_step = height / Cone::g_nstacks;
+  double z0(0.0), z1(z_step);
+  double r0(radius), r1(r0 - r_step);
+
+  for (int st = 1; st < Cone::g_nstacks; ++st) {
+    if (st == Cone::g_nstacks)
+      z1 = height;
+
+    for (int sl = 0; sl < Cone::g_nslices; ++sl) {
+      int vertex = sl;
+      V3D pt1 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
+      if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+        vertex = sl + 1;
+      else
+        vertex = 0;
+      V3D pt3 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
+
+      vertex = sl;
+      V3D pt2 = V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
+      if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+        vertex = sl + 1;
+      else
+        vertex = 0;
+      V3D pt4 = V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
+      // Rotations
+      transform.rotate(pt1);
+      transform.rotate(pt3);
+      transform.rotate(pt2);
+      transform.rotate(pt4);
+
+      pt1 += centre;
+      pt2 += centre;
+      pt3 += centre;
+      pt4 += centre;
+      double sa = triangleSolidAngle(pt1, pt4, pt3, observer);
+      if (sa > 0.0) {
+        solid_angle += sa;
+      }
+      sa = triangleSolidAngle(pt1, pt2, pt4, observer);
+      if (sa > 0.0) {
+        solid_angle += sa;
+      }
+    }
+
+    z0 = z1;
+    r0 = r1;
+    z1 += z_step;
+    r1 -= r_step;
+  }
+
+  // Top section
+  V3D top_centre = V3D(0.0, 0.0, height) + centre;
+  transform.rotate(top_centre);
+  top_centre += centre;
+
+  for (int sl = 0; sl < Cone::g_nslices; ++sl) {
+    int vertex = sl;
+    V3D pt2 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
+
+    if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+      vertex = sl + 1;
+    else
+      vertex = 0;
+    V3D pt3 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
+
+    // Rotate them to the correct axis orientation
+    transform.rotate(pt2);
+    transform.rotate(pt3);
+
+    pt2 += centre;
+    pt3 += centre;
+
+    double sa = triangleSolidAngle(top_centre, pt3, pt2, observer);
+    if (sa > 0.0) {
+      solid_angle += sa;
+    }
+  }
+  return solid_angle;
+}
+
+/**
+ * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle
+ * based soild angle
+ * calculation. Should work for parallel-piped as well.
+ * @param observer :: point from which solid angle required
+ * @param vectors :: vector of V3D - the values are the 4 points used to defined
+ * the cuboid
+ * @return :: solid angle of cuboid - good accuracy
+ */
+double cuboidSolidAngle(const V3D &observer, const std::vector<V3D> &vectors) {
+  // Build bounding points, then set up map of 12 bounding
+  // triangles defining the 6 surfaces of the bounding box. Using a consistent
+  // ordering of points the "away facing" triangles give -ve contributions to
+  // the solid angle and hence are ignored.
+  std::vector<V3D> pts;
+  pts.reserve(8);
+  const V3D dx = vectors[1] - vectors[0];
+  const V3D dz = vectors[3] - vectors[0];
+  pts.emplace_back(vectors[2]);
+  pts.emplace_back(vectors[2] + dx);
+  pts.emplace_back(vectors[1]);
+  pts.emplace_back(vectors[0]);
+  pts.emplace_back(vectors[2] + dz);
+  pts.emplace_back(vectors[2] + dz + dx);
+  pts.emplace_back(vectors[1] + dz);
+  pts.emplace_back(vectors[0] + dz);
+
+  constexpr unsigned int ntriangles(12);
+  std::vector<std::vector<int>> triMap(ntriangles, std::vector<int>(3, 0));
+  triMap[0][0] = 1;
+  triMap[0][1] = 4;
+  triMap[0][2] = 3;
+  triMap[1][0] = 3;
+  triMap[1][1] = 2;
+  triMap[1][2] = 1;
+  triMap[2][0] = 5;
+  triMap[2][1] = 6;
+  triMap[2][2] = 7;
+  triMap[3][0] = 7;
+  triMap[3][1] = 8;
+  triMap[3][2] = 5;
+  triMap[4][0] = 1;
+  triMap[4][1] = 2;
+  triMap[4][2] = 6;
+  triMap[5][0] = 6;
+  triMap[5][1] = 5;
+  triMap[5][2] = 1;
+  triMap[6][0] = 2;
+  triMap[6][1] = 3;
+  triMap[6][2] = 7;
+  triMap[7][0] = 7;
+  triMap[7][1] = 6;
+  triMap[7][2] = 2;
+  triMap[8][0] = 3;
+  triMap[8][1] = 4;
+  triMap[8][2] = 8;
+  triMap[9][0] = 8;
+  triMap[9][1] = 7;
+  triMap[9][2] = 3;
+  triMap[10][0] = 1;
+  triMap[10][1] = 5;
+  triMap[10][2] = 8;
+  triMap[11][0] = 8;
+  triMap[11][1] = 4;
+  triMap[11][2] = 1;
+  double sangle = 0.0;
+  for (unsigned int i = 0; i < ntriangles; i++) {
+    const double sa =
+        triangleSolidAngle(pts[triMap[i][0] - 1], pts[triMap[i][1] - 1],
+                           pts[triMap[i][2] - 1], observer);
+    if (sa > 0)
+      sangle += sa;
+  }
+  return sangle;
+}
+
+/**
+ * Calculate the solid angle for a cylinder using triangulation EXCLUDING the
+ * end caps.
+ * @param observer :: The observer's point
+ * @param centre :: The centre vector
+ * @param axis :: The axis vector
+ * @param radius :: The radius
+ * @param height :: The height
+ * @returns The solid angle value
+ */
+double cylinderSolidAngle(const V3D &observer, const V3D &centre,
+                          const V3D &axis, const double radius,
+                          const double height) {
+  // The cylinder is triangulated along its axis EXCLUDING the end caps so that
+  // stacked cylinders give the correct value of solid angle (i.e shadowing is
+  // loosely taken into account by this method) Any triangle that has a normal
+  // facing away from the observer gives a negative solid angle and is excluded
+  // For simplicity the triangulation points are constructed such that the cone
+  // axis points up the +Z axis and then rotated into their final position
+
+  // Required rotation
+  constexpr V3D initial_axis(0., 0., 1.0);
+  const Quat transform(initial_axis, axis);
+
+  // Do the base cap which is a point at the centre and nslices points around it
+  constexpr double angle_step =
+      2 * M_PI / static_cast<double>(Cylinder::g_nslices);
+
+  const double z_step = height / Cylinder::g_nstacks;
+  double z0(0.0), z1(z_step);
+  double solid_angle(0.0);
+  for (int st = 1; st <= Cylinder::g_nstacks; ++st) {
+    if (st == Cylinder::g_nstacks)
+      z1 = height;
+
+    for (int sl = 0; sl < Cylinder::g_nslices; ++sl) {
+      double x = radius * std::cos(angle_step * sl);
+      double y = radius * std::sin(angle_step * sl);
+      V3D pt1 = V3D(x, y, z0);
+      V3D pt2 = V3D(x, y, z1);
+      int vertex = (sl + 1) % Cylinder::g_nslices;
+      x = radius * std::cos(angle_step * vertex);
+      y = radius * std::sin(angle_step * vertex);
+      V3D pt3 = V3D(x, y, z0);
+      V3D pt4 = V3D(x, y, z1);
+      // Rotations
+      transform.rotate(pt1);
+      transform.rotate(pt3);
+      transform.rotate(pt2);
+      transform.rotate(pt4);
+
+      pt1 += centre;
+      pt2 += centre;
+      pt3 += centre;
+      pt4 += centre;
+
+      double sa = triangleSolidAngle(pt1, pt4, pt3, observer);
+      if (sa > 0.0) {
+        solid_angle += sa;
+      }
+      sa = triangleSolidAngle(pt1, pt2, pt4, observer);
+      if (sa > 0.0) {
+        solid_angle += sa;
+      }
+    }
+    z0 = z1;
+    z1 += z_step;
+  }
+
+  return solid_angle;
+}
+
+/**
+ * Get the solid angle of a sphere defined by centre and radius using an
+ * analytic formula
+ * @param observer :: point from which solid angle required
+ * @param vectors :: vector of V3D - the only value is the sphere centre
+ * @param radius :: sphere radius
+ * @return :: solid angle of sphere
+ */
+double sphereSolidAngle(const V3D &observer, const std::vector<V3D> &vectors,
+                        const double radius) {
+  const double distance = (observer - vectors[0]).norm();
+  if (distance > radius + Tolerance) {
+    const double sa = 2.0 * M_PI * (1.0 - cos(asin(radius / distance)));
+    return sa;
+  } else if (distance < radius - Tolerance)
+    return 4.0 * M_PI; // internal point
+  else
+    return 2.0 * M_PI; // surface point
+}
+} // namespace
+
 namespace Mantid {
 namespace Geometry {
 
@@ -418,31 +758,33 @@ CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
 * to get a correct normal test.
 
 * @param point :: Point to check
-* @returns 1 if the point is on the surface
+* @returns true if the point is on the surface
 */
 bool CSGObject::isOnSide(const Kernel::V3D &point) const {
-  std::list<Kernel::V3D> Snorms; // Normals from the constact surface.
+  std::vector<Kernel::V3D> Snorms; // Normals from the contact surface.
+  Snorms.reserve(m_SurList.size());
 
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+  for (auto vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
     if ((*vc)->onSurface(point)) {
-      Snorms.push_back((*vc)->surfaceNormal(point));
+      Snorms.emplace_back((*vc)->surfaceNormal(point));
       // can check direct normal here since one success
-      // means that we can return 1 and finish
+      // means that we can return true and finish
       if (!checkSurfaceValid(point, Snorms.back()))
         return true;
     }
   }
-  std::list<Kernel::V3D>::const_iterator xs, ys;
   Kernel::V3D NormPair;
-  for (xs = Snorms.begin(); xs != Snorms.end(); ++xs)
-    for (ys = xs, ++ys; ys != Snorms.end(); ++ys) {
+  for (auto xs = Snorms.begin(); xs != Snorms.end(); ++xs)
+    for (auto ys = std::next(xs); ys != Snorms.end(); ++ys) {
       NormPair = (*ys) + (*xs);
-      NormPair.normalize();
-      if (!checkSurfaceValid(point, NormPair))
-        return true;
+      try {
+        NormPair.normalize();
+        if (!checkSurfaceValid(point, NormPair))
+          return true;
+      } catch (std::runtime_error &) {
+      }
     }
-  // Ok everthing failed return 0;
+  // Ok everthing failed
   return false;
 }
 
@@ -821,7 +1163,7 @@ TrackDirection CSGObject::calcValidType(const Kernel::V3D &point,
 double CSGObject::solidAngle(const Kernel::V3D &observer) const {
   if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(observer);
-  return triangleSolidAngle(observer);
+  return triangulatedSolidAngle(observer);
 }
 
 /**
@@ -833,10 +1175,8 @@ double CSGObject::solidAngle(const Kernel::V3D &observer) const {
  * triangulation quality.
  */
 double CSGObject::solidAngle(const Kernel::V3D &observer,
-                             const Kernel::V3D &scaleFactor) const
-
-{
-  return triangleSolidAngle(observer, scaleFactor);
+                             const Kernel::V3D &scaleFactor) const {
+  return triangulatedSolidAngle(observer, scaleFactor);
 }
 
 /**
@@ -845,19 +1185,16 @@ double CSGObject::solidAngle(const Kernel::V3D &observer,
  * @return Solid angle in steradians (+/- 1% if accurate bounding box available)
  */
 double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
-  // Calculation of solid angle as numerical double integral over all
-  // angles. This could be optimised further e.g. by
-  // using a light weight version of the interceptSurface method - this does
-  // more work
-  // than is necessary in this application.
+  // Calculation of solid angle as numerical double integral over all angles.
+  // This could be optimised further e.g. by using a light weight version of
+  // the interceptSurface method - this does more work than is necessary in this
+  // application.
   // Accuracy is of the order of 1% for objects with an accurate bounding box,
-  // though
-  // less in the case of high aspect ratios.
+  // though less in the case of high aspect ratios.
   //
   // resBB controls accuracy and cost - linear accuracy improvement with
-  // increasing res,
-  // but quadratic increase in run time. If no bounding box found, resNoBB used
-  // instead.
+  // increasing res, but quadratic increase in run time. If no bounding box
+  // found, resNoBB used instead.
   const int resNoBB = 200, resPhiMin = 10;
   int res = resNoBB, itheta, jphi, resPhi;
   double theta, phi, sum, dphi, dtheta;
@@ -960,52 +1297,18 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
 }
 
 /**
- * Find the solid angle of a triangle defined by vectors a,b,c from point
- *"observer"
- *
- * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
- *
- * @param a :: first point of triangle
- * @param b :: second point of triangle
- * @param c :: third point of triangle
- * @param observer :: point from which solid angle is required
- * @return :: solid angle of triangle in Steradians.
- */
-double CSGObject::getTriangleSolidAngle(const V3D &a, const V3D &b,
-                                        const V3D &c,
-                                        const V3D &observer) const {
-  const V3D ao = a - observer;
-  const V3D bo = b - observer;
-  const V3D co = c - observer;
-  const double modao = ao.norm();
-  const double modbo = bo.norm();
-  const double modco = co.norm();
-  const double aobo = ao.scalar_prod(bo);
-  const double aoco = ao.scalar_prod(co);
-  const double boco = bo.scalar_prod(co);
-  const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
-  const double denom =
-      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
-  if (denom != 0.0)
-    return 2.0 * atan2(scalTripProd, denom);
-  else
-    return 0.0; // not certain this is correct
-}
-
-/**
  * Find solid angle of object from point "observer" using the
  * OC triangluation of the object, if it exists
  *
  * @param observer :: Point from which solid angle is required
  * @return the solid angle
  */
-double CSGObject::triangleSolidAngle(const V3D &observer) const {
+double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
-  // outward normal
-  // internal points give incorrect solid angle. Surface points are difficult to
-  // get right
-  // with the triangle based method. Hence catch these two (unlikely) cases.
+  // outward normal internal points give incorrect solid angle. Surface
+  // points are difficult to get right with the triangle based method.
+  // Hence catch these two (unlikely) cases.
   const BoundingBox &boundingBox = this->getBoundingBox();
   if (boundingBox.isNonNull() && boundingBox.isPointInside(observer)) {
     if (isValid(observer)) {
@@ -1017,27 +1320,27 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
   }
 
   // If the object is a simple shape use the special methods
-  double height(0.0), radius(0.0);
+  double height(0.0), radius(0.0), innerRadius(0.0);
   detail::ShapeInfo::GeometryShape type;
   std::vector<Mantid::Kernel::V3D> geometry_vectors;
   // Maximum of 4 vectors depending on the type
   geometry_vectors.reserve(4);
-  this->GetObjectGeom(type, geometry_vectors, radius, height);
+  this->GetObjectGeom(type, geometry_vectors, innerRadius, radius, height);
   auto nTri = this->numberOfTriangles();
   // Cylinders are by far the most frequently used
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID:
-    return CuboidSolidAngle(observer, geometry_vectors);
+    return cuboidSolidAngle(observer, geometry_vectors);
     break;
   case detail::ShapeInfo::GeometryShape::SPHERE:
-    return SphereSolidAngle(observer, geometry_vectors, radius);
+    return sphereSolidAngle(observer, geometry_vectors, radius);
     break;
   case detail::ShapeInfo::GeometryShape::CYLINDER:
-    return CylinderSolidAngle(observer, geometry_vectors[0],
+    return cylinderSolidAngle(observer, geometry_vectors[0],
                               geometry_vectors[1], radius, height);
     break;
   case detail::ShapeInfo::GeometryShape::CONE:
-    return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
+    return coneSolidAngle(observer, geometry_vectors[0], geometry_vectors[1],
                           radius, height);
     break;
   default:
@@ -1056,7 +1359,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
             V3D(vertices[3 * p2], vertices[3 * p2 + 1], vertices[3 * p2 + 2]);
         V3D vp3 =
             V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
-        double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
+        double sa = triangleSolidAngle(vp1, vp2, vp3, observer);
         if (sa > 0.0) {
           sangle += sa;
         } else {
@@ -1089,17 +1392,16 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
  *only (not observer)
  * @return the solid angle
  */
-double CSGObject::triangleSolidAngle(const V3D &observer,
-                                     const V3D &scaleFactor) const {
+double CSGObject::triangulatedSolidAngle(const V3D &observer,
+                                         const V3D &scaleFactor) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
-  // outward normal
-  // internal points give incorrect solid angle. Surface points are difficult to
-  // get right
-  // with the triangle based method. Hence catch these two (unlikely) cases.
+  // outward normal internal points give incorrect solid angle. Surface
+  // points are difficult to get right with the triangle based method.
+  // Hence catch these two (unlikely) cases.
   const BoundingBox &boundingBox = this->getBoundingBox();
   double sx = scaleFactor[0], sy = scaleFactor[1], sz = scaleFactor[2];
-  V3D sObserver = observer;
+  const V3D sObserver = observer;
   if (boundingBox.isNonNull() && boundingBox.isPointInside(sObserver)) {
     if (isValid(sObserver)) {
       if (isOnSide(sObserver))
@@ -1116,18 +1418,18 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
   // and Cone cases as well.
   //
   if (nTri == 0) {
-    double height = 0.0, radius(0.0);
+    double height = 0.0, radius(0.0), innerRadius;
     detail::ShapeInfo::GeometryShape type;
     std::vector<Kernel::V3D> vectors;
-    this->GetObjectGeom(type, vectors, radius, height);
+    this->GetObjectGeom(type, vectors, innerRadius, radius, height);
     switch (type) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
-      return CuboidSolidAngle(observer, vectors);
+      return cuboidSolidAngle(observer, vectors);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
-      return SphereSolidAngle(observer, vectors, radius);
+      return sphereSolidAngle(observer, vectors, radius);
       break;
     default:
       break;
@@ -1151,353 +1453,13 @@ double CSGObject::triangleSolidAngle(const V3D &observer,
                   sz * vertices[3 * p2 + 2]);
     V3D vp3 = V3D(sx * vertices[3 * p3], sy * vertices[3 * p3 + 1],
                   sz * vertices[3 * p3 + 2]);
-    double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
+    double sa = triangleSolidAngle(vp1, vp2, vp3, observer);
     if (sa > 0.0)
       sangle += sa;
     else
       sneg += sa;
   }
   return (0.5 * (sangle - sneg));
-}
-/**
- * Get the solid angle of a sphere defined by centre and radius using an
- * analytic formula
- * @param observer :: point from which solid angle required
- * @param vectors :: vector of V3D - the only value is the sphere centre
- * @param radius :: sphere radius
- * @return :: solid angle of sphere
- */
-double CSGObject::SphereSolidAngle(const V3D observer,
-                                   const std::vector<Kernel::V3D> vectors,
-                                   const double radius) const {
-  const double distance = (observer - vectors[0]).norm();
-  const double tol = Kernel::Tolerance;
-  if (distance > radius + tol) {
-    const double sa = 2.0 * M_PI * (1.0 - cos(asin(radius / distance)));
-    return sa;
-  } else if (distance < radius - tol)
-    return 4.0 * M_PI; // internal point
-  else
-    return 2.0 * M_PI; // surface point
-}
-
-/**
- * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle
- * based soild angle
- * calculation. Should work for parallel-piped as well.
- * @param observer :: point from which solid angle required
- * @param vectors :: vector of V3D - the values are the 4 points used to defined
- * the cuboid
- * @return :: solid angle of cuboid - good accuracy
- */
-double
-CSGObject::CuboidSolidAngle(const V3D observer,
-                            const std::vector<Kernel::V3D> vectors) const {
-  // Build bounding points, then set up map of 12 bounding
-  // triangles defining the 6 surfaces of the bounding box. Using a consistent
-  // ordering of points the "away facing" triangles give -ve contributions to
-  // the
-  // solid angle and hence are ignored.
-  std::vector<V3D> pts;
-  pts.reserve(8);
-  Kernel::V3D dx = vectors[1] - vectors[0];
-  Kernel::V3D dz = vectors[3] - vectors[0];
-  pts.push_back(vectors[2]);
-  pts.push_back(vectors[2] + dx);
-  pts.push_back(vectors[1]);
-  pts.push_back(vectors[0]);
-  pts.push_back(vectors[2] + dz);
-  pts.push_back(vectors[2] + dz + dx);
-  pts.push_back(vectors[1] + dz);
-  pts.push_back(vectors[0] + dz);
-
-  const unsigned int ntriangles(12);
-  std::vector<std::vector<int>> triMap(ntriangles, std::vector<int>(3, 0));
-  triMap[0][0] = 1;
-  triMap[0][1] = 4;
-  triMap[0][2] = 3;
-  triMap[1][0] = 3;
-  triMap[1][1] = 2;
-  triMap[1][2] = 1;
-  triMap[2][0] = 5;
-  triMap[2][1] = 6;
-  triMap[2][2] = 7;
-  triMap[3][0] = 7;
-  triMap[3][1] = 8;
-  triMap[3][2] = 5;
-  triMap[4][0] = 1;
-  triMap[4][1] = 2;
-  triMap[4][2] = 6;
-  triMap[5][0] = 6;
-  triMap[5][1] = 5;
-  triMap[5][2] = 1;
-  triMap[6][0] = 2;
-  triMap[6][1] = 3;
-  triMap[6][2] = 7;
-  triMap[7][0] = 7;
-  triMap[7][1] = 6;
-  triMap[7][2] = 2;
-  triMap[8][0] = 3;
-  triMap[8][1] = 4;
-  triMap[8][2] = 8;
-  triMap[9][0] = 8;
-  triMap[9][1] = 7;
-  triMap[9][2] = 3;
-  triMap[10][0] = 1;
-  triMap[10][1] = 5;
-  triMap[10][2] = 8;
-  triMap[11][0] = 8;
-  triMap[11][1] = 4;
-  triMap[11][2] = 1;
-  double sangle = 0.0;
-  for (unsigned int i = 0; i < ntriangles; i++) {
-    double sa =
-        getTriangleSolidAngle(pts[triMap[i][0] - 1], pts[triMap[i][1] - 1],
-                              pts[triMap[i][2] - 1], observer);
-    if (sa > 0)
-      sangle += sa;
-  }
-  return (sangle);
-}
-
-/**
- * Calculate the solid angle for a cylinder using triangulation EXCLUDING the
- * end caps.
- * @param observer :: The observer's point
- * @param centre :: The centre vector
- * @param axis :: The axis vector
- * @param radius :: The radius
- * @param height :: The height
- * @returns The solid angle value
- */
-double CSGObject::CylinderSolidAngle(const V3D &observer,
-                                     const Mantid::Kernel::V3D &centre,
-                                     const Mantid::Kernel::V3D &axis,
-                                     const double radius,
-                                     const double height) const {
-  // The cylinder is triangulated along its axis EXCLUDING the end caps so that
-  // stacked cylinders
-  // give the correct value of solid angle (i.e shadowing is losely taken into
-  // account by this
-  // method)
-  // Any triangle that has a normal facing away from the observer gives a
-  // negative solid
-  // angle and is excluded
-  // For simplicity the triangulation points are constructed such that the cone
-  // axis
-  // points up the +Z axis and then rotated into their final position
-  Kernel::V3D axis_direction = axis;
-  axis_direction.normalize();
-  // Required rotation
-  Kernel::V3D initial_axis = Kernel::V3D(0., 0., 1.0);
-  Kernel::V3D final_axis = axis_direction;
-  Kernel::Quat transform(initial_axis, final_axis);
-
-  // Do the base cap which is a point at the centre and nslices points around it
-  const int nslices(Mantid::Geometry::Cylinder::g_nslices);
-  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
-
-  const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
-  const double z_step = height / nstacks;
-  double z0(0.0), z1(z_step);
-  double solid_angle(0.0);
-  for (int st = 1; st <= nstacks; ++st) {
-    if (st == nstacks)
-      z1 = height;
-
-    for (int sl = 0; sl < nslices; ++sl) {
-      double x = radius * std::cos(angle_step * sl);
-      double y = radius * std::sin(angle_step * sl);
-      Kernel::V3D pt1 = Kernel::V3D(x, y, z0);
-      Kernel::V3D pt2 = Kernel::V3D(x, y, z1);
-      int vertex = (sl + 1) % nslices;
-      x = radius * std::cos(angle_step * vertex);
-      y = radius * std::sin(angle_step * vertex);
-      Kernel::V3D pt3 = Kernel::V3D(x, y, z0);
-      Kernel::V3D pt4 = Kernel::V3D(x, y, z1);
-      // Rotations
-      transform.rotate(pt1);
-      transform.rotate(pt3);
-      transform.rotate(pt2);
-      transform.rotate(pt4);
-
-      pt1 += centre;
-      pt2 += centre;
-      pt3 += centre;
-      pt4 += centre;
-
-      double sa = getTriangleSolidAngle(pt1, pt4, pt3, observer);
-      if (sa > 0.0) {
-        solid_angle += sa;
-      }
-      sa = getTriangleSolidAngle(pt1, pt2, pt4, observer);
-      if (sa > 0.0) {
-        solid_angle += sa;
-      }
-    }
-    z0 = z1;
-    z1 += z_step;
-  }
-
-  return solid_angle;
-}
-
-/**
- * Calculate the solid angle for a cone using triangulation.
- * @param observer :: The observer's point
- * @param centre :: The centre vector
- * @param axis :: The axis vector
- * @param radius :: The radius
- * @param height :: The height
- * @returns The solid angle value
- */
-double CSGObject::ConeSolidAngle(const V3D &observer,
-                                 const Mantid::Kernel::V3D &centre,
-                                 const Mantid::Kernel::V3D &axis,
-                                 const double radius,
-                                 const double height) const {
-  // The cone is broken down into three pieces and then in turn broken down into
-  // triangles. Any triangle
-  // that has a normal facing away from the observer gives a negative solid
-  // angle and is excluded
-  // For simplicity the triangulation points are constructed such that the cone
-  // axis points up the +Z axis
-  // and then rotated into their final position
-
-  Kernel::V3D axis_direction = axis;
-  axis_direction.normalize();
-  // Required rotation
-  Kernel::V3D initial_axis = Kernel::V3D(0., 0., 1.0);
-  Kernel::V3D final_axis = axis_direction;
-  Kernel::Quat transform(initial_axis, final_axis);
-
-  // Do the base cap which is a point at the centre and nslices points around it
-  const int nslices(Mantid::Geometry::Cone::g_nslices);
-  const double angle_step = 2 * M_PI / static_cast<double>(nslices);
-  // Store the (x,y) points as they are used quite frequently
-  auto cos_table = new double[nslices];
-  auto sin_table = new double[nslices];
-
-  double solid_angle(0.0);
-  for (int sl = 0; sl < nslices; ++sl) {
-    int vertex = sl;
-    cos_table[vertex] = std::cos(angle_step * vertex);
-    sin_table[vertex] = std::sin(angle_step * vertex);
-    Kernel::V3D pt2 = Kernel::V3D(radius * cos_table[vertex],
-                                  radius * sin_table[vertex], 0.0);
-
-    if (sl < nslices - 1) {
-      vertex = sl + 1;
-      cos_table[vertex] = std::cos(angle_step * vertex);
-      sin_table[vertex] = std::sin(angle_step * vertex);
-    } else
-      vertex = 0;
-
-    Kernel::V3D pt3 = Kernel::V3D(radius * cos_table[vertex],
-                                  radius * sin_table[vertex], 0.0);
-
-    transform.rotate(pt2);
-    transform.rotate(pt3);
-    pt2 += centre;
-    pt3 += centre;
-
-    double sa = getTriangleSolidAngle(centre, pt2, pt3, observer);
-    if (sa > 0.0) {
-      solid_angle += sa;
-    }
-  }
-
-  // Now the main section
-  const int nstacks(Mantid::Geometry::Cone::g_nstacks);
-  const double z_step = height / nstacks;
-  const double r_step = height / nstacks;
-  double z0(0.0), z1(z_step);
-  double r0(radius), r1(r0 - r_step);
-
-  for (int st = 1; st < nstacks; ++st) {
-    if (st == nstacks)
-      z1 = height;
-
-    for (int sl = 0; sl < nslices; ++sl) {
-      int vertex = sl;
-      Kernel::V3D pt1 =
-          Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
-      if (sl < nslices - 1)
-        vertex = sl + 1;
-      else
-        vertex = 0;
-      Kernel::V3D pt3 =
-          Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
-
-      vertex = sl;
-      Kernel::V3D pt2 =
-          Kernel::V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
-      if (sl < nslices - 1)
-        vertex = sl + 1;
-      else
-        vertex = 0;
-      Kernel::V3D pt4 =
-          Kernel::V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
-      // Rotations
-      transform.rotate(pt1);
-      transform.rotate(pt3);
-      transform.rotate(pt2);
-      transform.rotate(pt4);
-
-      pt1 += centre;
-      pt2 += centre;
-      pt3 += centre;
-      pt4 += centre;
-      double sa = getTriangleSolidAngle(pt1, pt4, pt3, observer);
-      if (sa > 0.0) {
-        solid_angle += sa;
-      }
-      sa = getTriangleSolidAngle(pt1, pt2, pt4, observer);
-      if (sa > 0.0) {
-        solid_angle += sa;
-      }
-    }
-
-    z0 = z1;
-    r0 = r1;
-    z1 += z_step;
-    r1 -= r_step;
-  }
-
-  // Top section
-  Kernel::V3D top_centre = Kernel::V3D(0.0, 0.0, height) + centre;
-  transform.rotate(top_centre);
-  top_centre += centre;
-
-  for (int sl = 0; sl < nslices; ++sl) {
-    int vertex = sl;
-    Kernel::V3D pt2 =
-        Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
-
-    if (sl < nslices - 1)
-      vertex = sl + 1;
-    else
-      vertex = 0;
-    Kernel::V3D pt3 =
-        Kernel::V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
-
-    // Rotate them to the correct axis orientation
-    transform.rotate(pt2);
-    transform.rotate(pt3);
-
-    pt2 += centre;
-    pt3 += centre;
-
-    double sa = getTriangleSolidAngle(top_centre, pt3, pt2, observer);
-    if (sa > 0.0) {
-      solid_angle += sa;
-    }
-  }
-
-  delete[] cos_table;
-  delete[] sin_table;
-
-  return solid_angle;
 }
 
 /**
@@ -1509,8 +1471,9 @@ double CSGObject::volume() const {
   detail::ShapeInfo::GeometryShape type;
   double height;
   double radius;
+  double innerRadius;
   std::vector<Kernel::V3D> vectors;
-  this->GetObjectGeom(type, vectors, radius, height);
+  this->GetObjectGeom(type, vectors, innerRadius, radius, height);
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Here, the volume is calculated by the triangular method.
@@ -1546,6 +1509,8 @@ double CSGObject::volume() const {
     return 4.0 / 3.0 * M_PI * radius * radius * radius;
   case detail::ShapeInfo::GeometryShape::CYLINDER:
     return M_PI * radius * radius * height;
+  case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+    return M_PI * height * (radius * radius - innerRadius * innerRadius);
   default:
     // Fall back to Monte Carlo method.
     return monteCarloVolume();
@@ -1777,9 +1742,10 @@ void CSGObject::calcBoundingBoxByGeometry() {
   std::vector<Kernel::V3D> vectors;
   double radius;
   double height;
+  double innerRadius;
 
   // Will only work for shapes with ShapeInfo
-  m_handler->GetObjectGeom(type, vectors, radius, height);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
   // Type of shape is given as a simple integer
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
@@ -1993,7 +1959,7 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * For certain simple shapes, the point is generated directly inside the
  * shape. In the general case, the method simply generates a
  * point within the bounding box and tests if this is a valid point within
- * the object: if so the point is return otherwise a new point is selected.
+ * the object: if so the point is returned otherwise a new point is selected.
  * @param rng  A reference to a PseudoRandomNumberGenerator where
  * nextValue should return a flat random number between 0.0 & 1.0
  * @param maxAttempts The maximum number of attempts at generating a point
@@ -2022,6 +1988,9 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
       point = RandomPoint::inCylinder(m_handler->shapeInfo(), rng);
+      break;
+    case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+      point = RandomPoint::inHollowCylinder(m_handler->shapeInfo(), rng);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
       point = RandomPoint::inSphere(m_handler->shapeInfo(), rng);
@@ -2068,7 +2037,8 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
     std::vector<Kernel::V3D> shapeVectors;
     double radius;
     double height;
-    GetObjectGeom(shape, shapeVectors, radius, height);
+    double innerRadius;
+    GetObjectGeom(shape, shapeVectors, innerRadius, radius, height);
     switch (shape) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       point = RandomPoint::bounded<RandomPoint::inCuboid>(
@@ -2076,6 +2046,10 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
       point = RandomPoint::bounded<RandomPoint::inCylinder>(
+          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+      break;
+    case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+      point = RandomPoint::bounded<RandomPoint::inHollowCylinder>(
           m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
@@ -2121,13 +2095,11 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
 
 /**
  * Set the geometry handler for Object
- * @param[in] h is pointer to the geometry handler. don't delete this pointer in
- * the calling function.
+ * @param[in] h is pointer to the geometry handler.
  */
 void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
-  if (h == nullptr)
-    return;
-  m_handler = h;
+  if (h)
+    m_handler = h;
 }
 
 /**
@@ -2254,11 +2226,12 @@ const detail::ShapeInfo &CSGObject::shapeInfo() const {
  */
 void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                               std::vector<Kernel::V3D> &vectors,
-                              double &myradius, double &myheight) const {
+                              double &innerRadius, double &radius,
+                              double &height) const {
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
-  m_handler->GetObjectGeom(type, vectors, myradius, myheight);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
 }
 
 /** Getter for the shape xml

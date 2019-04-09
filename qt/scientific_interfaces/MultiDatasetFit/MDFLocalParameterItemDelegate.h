@@ -38,12 +38,12 @@ public:
   void prepareForPastedData();
 
 signals:
-  void setAllValues(double);
-  void fixParameter(int, bool);
-  void setAllFixed(bool);
-  void setTie(int, QString);
-  void setTieAll(QString);
-  void setValueToLog(int);
+  void setAllValues(double /*_t1*/);
+  void fixParameter(int /*_t1*/, bool /*_t2*/);
+  void setAllFixed(bool /*_t1*/);
+  void setTie(int /*_t1*/, QString /*_t2*/);
+  void setTieAll(QString /*_t1*/);
+  void setValueToLog(int /*_t1*/);
   void setAllValuesToLog();
 
 protected:
@@ -51,7 +51,7 @@ protected:
              const QModelIndex &index) const override;
 
 private slots:
-  void doSetValueToLog(int);
+  void doSetValueToLog(int /*i*/);
   void doSetAllValuesToLog();
 
 private:

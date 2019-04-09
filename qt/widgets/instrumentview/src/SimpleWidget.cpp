@@ -59,13 +59,13 @@ void SimpleWidget::saveToFile(const QString &filename) {
   image.save(filename);
 }
 
-void SimpleWidget::paintEvent(QPaintEvent *) {
+void SimpleWidget::paintEvent(QPaintEvent * /*unused*/) {
   if (m_surface) {
     m_surface->drawSimple(this);
   }
 }
 
-void SimpleWidget::resizeEvent(QResizeEvent *) {
+void SimpleWidget::resizeEvent(QResizeEvent * /*unused*/) {
   if (m_surface) {
     m_surface->updateView();
   }

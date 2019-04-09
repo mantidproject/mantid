@@ -67,7 +67,7 @@ public:
   SelectedAlgorithm getSelectedAlgorithm();
   void setSelectedAlgorithm(QString &algName);
   bool showExecuteButton() const;
-  void showExecuteButton(const bool);
+  void showExecuteButton(const bool /*val*/);
 
 public slots:
   void update();
@@ -77,8 +77,8 @@ public slots:
 
 signals:
   void algorithmFactoryUpdateReceived();
-  void executeAlgorithm(const QString &, int);
-  void algorithmSelectionChanged(const QString &, int);
+  void executeAlgorithm(const QString & /*_t1*/, int /*_t2*/);
+  void algorithmSelectionChanged(const QString & /*_t1*/, int /*_t2*/);
 
 protected:
   AlgorithmTreeWidget *m_tree;
@@ -88,7 +88,7 @@ protected:
 private:
   /// Callback for AlgorithmFactory update notifications
   void handleAlgorithmFactoryUpdate(
-      Mantid::API::AlgorithmFactoryUpdateNotification_ptr);
+      Mantid::API::AlgorithmFactoryUpdateNotification_ptr /*unused*/);
   /// Observes algorithm factory update notifications
   Poco::NObserver<AlgorithmSelectorWidget,
                   Mantid::API::AlgorithmFactoryUpdateNotification>
@@ -116,7 +116,7 @@ public slots:
 
 signals:
   /// Signal emitted when the widget requests that we execute that algorithm
-  void executeAlgorithm(const QString &, int);
+  void executeAlgorithm(const QString & /*_t1*/, int /*_t2*/);
 
 private:
   QPoint m_dragStartPosition;

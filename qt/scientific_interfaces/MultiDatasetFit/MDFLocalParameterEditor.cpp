@@ -198,7 +198,7 @@ void LocalParameterEditor::removeAllTies() {
 void LocalParameterEditor::setToLog() { emit setValueToLog(m_index); }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
-bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn) {
+bool LocalParameterEditor::eventFilter(QObject * /*unused*/, QEvent *evn) {
   if (evn->type() == QEvent::KeyPress) {
     auto keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_F &&

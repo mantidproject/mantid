@@ -87,7 +87,7 @@ public slots:
   void importBoxDataTable() override;
   void showListData() override;
   void importTransposed() override;
-  void renameWorkspace(QStringList = QStringList()) override;
+  void renameWorkspace(QStringList /*unused*/ = QStringList()) override;
 
   // Algorithm Display and Execution Methods
   void showAlgorithmDialog(const QString &algName, int version = -1) override;
@@ -136,7 +136,7 @@ public slots:
       bool showPlotAll, bool showTiledOpt, bool isAdvanced = false) override;
 
   void updateProject() override;
-  void showCritical(const QString &) override;
+  void showCritical(const QString & /*unused*/) override;
 
 #ifdef MAKE_VATES
   bool doesVatesSupportOpenGL() override;

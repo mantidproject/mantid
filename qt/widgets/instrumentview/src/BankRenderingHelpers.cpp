@@ -169,10 +169,9 @@ void drawGridOutlineFace(const Corners &corners, const V3D &basePos,
 
 void setBankNormal(const V3D &pos1, const V3D &pos2, const V3D &basePos) {
   // Set the bank normal to facilitate lighting effects
-  auto vec1 = pos1 - basePos;
-  auto vec2 = pos2 - basePos;
-  auto normal = vec1.cross_prod(vec2);
-  normal.normalize();
+  const auto vec1 = pos1 - basePos;
+  const auto vec2 = pos2 - basePos;
+  const auto normal = normalize(vec1.cross_prod(vec2));
   glNormal3f(static_cast<GLfloat>(normal.X()), static_cast<GLfloat>(normal.Y()),
              static_cast<GLfloat>(normal.Z()));
 }

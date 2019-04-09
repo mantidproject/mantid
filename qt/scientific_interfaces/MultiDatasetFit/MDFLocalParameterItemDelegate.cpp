@@ -21,10 +21,9 @@ LocalParameterItemDelegate::LocalParameterItemDelegate(
     : QStyledItemDelegate(parent), m_currentEditor(nullptr) {}
 
 /// Create a custom editor LocalParameterEditor.
-QWidget *
-LocalParameterItemDelegate::createEditor(QWidget *parent,
-                                         const QStyleOptionViewItem &,
-                                         const QModelIndex &index) const {
+QWidget *LocalParameterItemDelegate::createEditor(
+    QWidget *parent, const QStyleOptionViewItem & /*option*/,
+    const QModelIndex &index) const {
   auto row = index.row();
   m_currentEditor = new LocalParameterEditor(
       parent, row, owner()->getValue(row), owner()->isFixed(row),
@@ -53,8 +52,8 @@ LocalParameterItemDelegate::createEditor(QWidget *parent,
 }
 
 /// Initialize the editor with the current data in the cell.
-void LocalParameterItemDelegate::setEditorData(QWidget *,
-                                               const QModelIndex &) const {
+void LocalParameterItemDelegate::setEditorData(
+    QWidget * /*editor*/, const QModelIndex & /*index*/) const {
   // Needs to be empty to prevent Qt's default behaviour.
 }
 

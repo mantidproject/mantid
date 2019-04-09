@@ -26,7 +26,7 @@ class EXPORT_OPT_MANTIDQT_LEGACYQWT MantidQwtWorkspaceData : public QwtData {
 public:
   MantidQwtWorkspaceData(bool logScaleY);
   MantidQwtWorkspaceData(const MantidQwtWorkspaceData &data);
-  MantidQwtWorkspaceData &operator=(const MantidQwtWorkspaceData &);
+  MantidQwtWorkspaceData &operator=(const MantidQwtWorkspaceData & /*data*/);
 
   virtual QString getXAxisLabel() const = 0;
   virtual QString getYAxisLabel() const = 0;

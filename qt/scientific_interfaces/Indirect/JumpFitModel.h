@@ -25,7 +25,7 @@ public:
   using IndirectFittingModel::addWorkspace;
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &) override;
+                    const Spectra & /*spectra*/) override;
   void removeWorkspace(std::size_t index) override;
   void setFitType(const std::string &fitType);
 

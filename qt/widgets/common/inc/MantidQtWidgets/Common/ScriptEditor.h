@@ -71,7 +71,7 @@ public:
   void writeSettings();
 
   /// Set a new code lexer for this object
-  void setLexer(QsciLexer *) override;
+  void setLexer(QsciLexer * /*codelexer*/) override;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
   /// Enable the auto complete. Default is for backwards compatability
@@ -136,9 +136,9 @@ public slots:
 
 signals:
   /// Inform observers that undo information is available
-  void undoAvailable(bool);
+  void undoAvailable(bool /*_t1*/);
   /// Inform observers that redo information is available
-  void redoAvailable(bool);
+  void redoAvailable(bool /*_t1*/);
   /// Emitted when a zoom in is requested
   void textZoomedIn();
   /// Emitted when a zoom out is requested

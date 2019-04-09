@@ -271,28 +271,28 @@ void ISISDiagnostics::setDefaultInstDetails() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {
-    g_log.warning(ex.what());
+    showMessageBox(ex.what());
   }
 }
 
 void ISISDiagnostics::setDefaultInstDetails(
     QMap<QString, QString> const &instrumentDetails) {
-  // Set the search instrument for runs
-  m_uiForm.dsInputFiles->setInstrumentOverride(
-      getInstrumentDetail(instrumentDetails, "instrument"));
-
-  auto const specMin =
+  auto const instrument = getInstrumentDetail(instrumentDetails, "instrument");
+  auto const spectraMin =
       getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
-  auto const specMax =
+  auto const spectraMax =
       getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
 
-  // Set spectra range
-  m_dblManager->setMaximum(m_properties["SpecMin"], specMax);
-  m_dblManager->setMinimum(m_properties["SpecMax"], specMin);
+  // Set the search instrument for runs
+  m_uiForm.dsInputFiles->setInstrumentOverride(instrument);
 
-  m_dblManager->setValue(m_properties["SpecMin"], specMin);
-  m_dblManager->setValue(m_properties["SpecMax"], specMax);
-  m_dblManager->setValue(m_properties["PreviewSpec"], specMin);
+  // Set spectra range
+  m_dblManager->setMaximum(m_properties["SpecMin"], spectraMax);
+  m_dblManager->setMinimum(m_properties["SpecMax"], spectraMin);
+
+  m_dblManager->setValue(m_properties["SpecMin"], spectraMin);
+  m_dblManager->setValue(m_properties["SpecMax"], spectraMax);
+  m_dblManager->setValue(m_properties["PreviewSpec"], spectraMin);
 
   // Set peak and background ranges
   if (instrumentDetails.size() >= 8) {
@@ -360,7 +360,7 @@ void ISISDiagnostics::handleNewFile() {
  *
  * @param state :: True to show the second range selectors, false to hide
  */
-void ISISDiagnostics::sliceTwoRanges(QtProperty *, bool state) {
+void ISISDiagnostics::sliceTwoRanges(QtProperty * /*unused*/, bool state) {
   m_uiForm.ppRawPlot->getRangeSelector("SliceBackground")->setVisible(state);
 }
 

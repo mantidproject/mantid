@@ -35,7 +35,8 @@ public:
       bool isDistribution = false);
 
   MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData &data);
-  MantidQwtIMDWorkspaceData &operator=(const MantidQwtIMDWorkspaceData &);
+  MantidQwtIMDWorkspaceData &
+  operator=(const MantidQwtIMDWorkspaceData & /*data*/);
   ~MantidQwtIMDWorkspaceData() override;
 
   QwtData *copy() const override;
