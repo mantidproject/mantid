@@ -34,7 +34,7 @@ Container Subtraction
 
 The Container Subtraction Tab is used to remove the container's contribution to a run.
 
-Once run the corrected output and can correction is shown in the preview plot. Note 
+Once run the corrected output and container correction is shown in the preview plot. Note 
 that when this plot shows the result of a calculation the X axis is always in wavelength, 
 however when data is initially selected the X axis unit matches that of the sample workspace.
 
@@ -83,7 +83,7 @@ Calculate Paalman Pings
 
 Calculates absorption corrections in the Paalman & Pings absorption factors that
 could be applied to the data when given information about the sample (and
-optionally can) geometry.
+optionally the container) geometry.
 
 .. interface:: Corrections
   :widget: tabCalculatePaalmanPings
@@ -91,11 +91,11 @@ optionally can) geometry.
 Options
 ~~~~~~~
 
-Sample
+Sample Input
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
-Use Can
+Use Container
   If checked allows you to select a workspace for the container in the format of
   either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
@@ -108,13 +108,23 @@ Sample Shape
   Sets the shape of the sample, this affects the options for the shape details
   (see below).
 
-Sample/Can Mass/Number Density
-  Density of the sample or container.
+Sample Details Method
+  Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
+  the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
 
-Sample/Can Chemical Formula
-  Chemical formula of the sample or can material. This must be provided in the
+Sample/Container Mass density, Atom Number Density or Formula Number Density
+  Density of the sample or container. This is used in the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm. If Atom Number Density is used, the NumberDensityUnit property is set to *Atoms* and if
+  Formula Number Density is used then NumberDensityUnit is set to *Formula Units*.
+
+Sample/Container Chemical Formula
+  Chemical formula of the sample or container material. This must be provided in the
   format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
   algorithm.
+
+Cross Sections
+  Selecting the Cross Sections option in the Sample Details combobox will allow you to enter coherent,
+  incoherent and attenuation cross sections for the Sample and Container (units in barns).
 
 Run
   Runs the processing configured on the current tab.
@@ -166,12 +176,12 @@ Sample Thickness
   Thickness of sample in :math:`cm`.
 
 Sample Angle
-  Sample angle in degrees.
+  Angle of the sample to the beam in degrees.
 
-Can Front Thickness
+Container Front Thickness
   Thickness of front container in :math:`cm`.
 
-Can Back Thickness
+Container Back Thickness
   Thickness of back container in :math:`cm`.
 
 Cylinder
@@ -182,8 +192,7 @@ Cylinder
 
 The calculation for a cylindrical geometry is performed by the
 :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
-algorithm, this algorithm is currently only available on Windows as it uses
-FORTRAN code dependent of F2Py.
+algorithm.
 
 Sample Inner Radius
   Radius of the inner wall of the sample in :math:`cm`.
@@ -201,7 +210,7 @@ Beam Width
   Width of incident beam in :math:`cm`.
 
 Step Size
-  Step size used in calculation.
+  Step size used in calculation in :math:`cm`.
 
 Annulus
 #######
@@ -211,8 +220,7 @@ Annulus
 
 The calculation for an annular geometry is performed by the
 :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
-algorithm, this algorithm is currently only available on Windows as it uses
-FORTRAN code dependent of F2Py.
+algorithm.
 
 The options here are the same as for Cylinder.
 
@@ -289,13 +297,23 @@ Beam Width
 Shape Details
   Select the shape of the sample (see specific geometry options below).
 
-Sample/Can Mass/Number Density
-  Density of the sample or container.
+Sample Details Method
+  Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
+  the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
 
-Sample/Can Chemical Formula
-  Chemical formula of the sample or can material. This must be provided in the
+Sample/Container Mass density, Atom Number Density or Formula Number Density
+  Density of the sample or container. This is used in the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm. If Atom Number Density is used, the NumberDensityUnit property is set to *Atoms* and if
+  Formula Number Density is used then NumberDensityUnit is set to *Formula Units*.
+
+Sample/Container Chemical Formula
+  Chemical formula of the sample or container material. This must be provided in the
   format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
   algorithm.
+
+Cross Sections
+  Selecting the Cross Sections option in the Sample Details combobox will allow you to enter coherent,
+  incoherent and attenuation cross sections for the Sample and Container (units in barns).
 
 Run
   Runs the processing configured on the current tab.
@@ -389,12 +407,12 @@ Pings or Calculate Monte Carlo Absorption tabs of the Indirect Data Corrections 
 
 This uses the :ref:`ApplyPaalmanPingsCorrection
 <algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
-the form of the Paalman & Pings correction factors. When *Use Can* is disabled
+the form of the Paalman & Pings correction factors. When *Use Container* is disabled
 only the :math:`A_{s,s}` factor must be provided, when using a container the
 additional factors must be provided: :math:`A_{c,sc}`, :math:`A_{s,sc}` and
 :math:`A_{c,c}`.
 
-Once run the corrected output and can correction is shown in the preview plot. Note 
+Once run the corrected output and container correction is shown in the preview plot. Note 
 that when this plot shows the result of a calculation the X axis is always in
 wavelength, however when data is initially selected the X axis unit matches that
 of the sample workspace.
