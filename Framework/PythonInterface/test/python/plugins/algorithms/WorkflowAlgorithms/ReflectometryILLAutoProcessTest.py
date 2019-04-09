@@ -28,8 +28,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
-                                                 '__outWS_direct-317369-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -44,8 +44,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
-                                                 '__outWS_direct-317369-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -71,8 +71,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369317370-angle-0',
-                                                 '__outWS_direct-317369317370-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369317370-angle-0',
+                                                 'direct-317369317370-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -86,8 +86,8 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
-                                                 '__outWS_direct-317369-angle-0-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
                                                  'outWS'])
         mtd.clear()
 
@@ -101,10 +101,10 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
         }
         alg = create_algorithm('ReflectometryILLAutoProcess', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.getObjectNames(), ['__outWS_direct-317369-angle-0',
-                                                 '__outWS_direct-317369-angle-0-foreground',
-                                                 '__outWS_direct-317370-angle-1',
-                                                 '__outWS_direct-317370-angle-1-foreground',
+        self.assertEquals(mtd.getObjectNames(), ['direct-317369-angle-0',
+                                                 'direct-317369-angle-0-foreground',
+                                                 'direct-317370-angle-1',
+                                                 'direct-317370-angle-1-foreground',
                                                  'outWS'])
         mtd.clear()
 

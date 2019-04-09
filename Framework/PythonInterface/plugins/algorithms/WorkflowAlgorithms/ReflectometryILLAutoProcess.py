@@ -596,7 +596,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                            float(self._getValue(PropAutoProcess.WAVELENGTH_UPPER, angle))]
         runDB = self._mtdName(self._db[angle])
         if directForegroundName is not '':
-            directBeamName = self._names.withSuffix('direct-{}-angle-{}'.format(runDB, angle))
+            directBeamName = 'direct-{}-angle-{}'.format(runDB, angle)
         else:
             directBeamName = ''
         ReflectometryILLSumForeground(
@@ -712,7 +712,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         toStitch = []
         for angle in range(len(self._db)):
             runDB = self._mtdName(self._db[angle])
-            directBeamName = self._names.withSuffix('direct-{}-angle-{}'.format(runDB, angle))
+            directBeamName = 'direct-{}-angle-{}'.format(runDB, angle)
             directForegroundName = '{}-foreground'.format(directBeamName)
             # Direct beam already in ADS?
             if directBeamName not in mtd.getObjectNames():
