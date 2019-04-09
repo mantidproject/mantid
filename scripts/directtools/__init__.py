@@ -41,9 +41,9 @@ def _choosemarker(markers, index):
 
 def _clearmath(s):
     """Return string s with special math characters removed."""
+    s = s.replace(r'\AA', 'A')
     for c in ['%', '_', '$', '&',  '\\', '^', '{', '}',]:
         s = s.replace(c, '')
-    s = s.replace(u'\u00c5', 'A')
     return s
 
 
@@ -125,7 +125,7 @@ def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     if axes.get_xscale() == 'linear':
         axes.set_xlim(xmin=0.)
-    axes.set_xlabel(u'$Q$ (\u00c5$^{-1}$)')
+    axes.set_xlabel(r'$Q$ ($\mathrm{\AA}^{-1}$)')
     if axes.get_yscale() == 'linear':
         axes.set_ylim(0.)
 
@@ -544,9 +544,9 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != qID:
             raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
-    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', u'\u00c5$^{-1}$', style, keepCutWorkspaces,
+    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, r'$Q$', u'\u00c5$^{-1}$', axes)
+    _profiletitle(workspaces, cutWSList, r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileQ(workspaces, axes)
@@ -759,7 +759,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         yLimits = {'bottom': EMin}
         if EMax is not None:
             yLimits['top'] = EMax
-        xLabel = u'$Q$ (\u00c5$^{-1}$)'
+        xLabel = r'$Q$ ($\mathrm{\AA}^{-1}$)'
         yLabel = 'Energy (meV)'
     else:
         xLimits = {'left': EMin}
@@ -767,7 +767,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
             xLimits['right'] = EMax
         yLimits = {'bottom': QMin, 'top': QMax}
         xLabel = 'Energy (meV)'
-        yLabel = u'$Q$ (\u00c5$^{-1}$)'
+        yLabel = r'$Q$ ($\mathrm{\AA}^{-1}$)'
     axes.set_xlim(**xLimits)
     axes.set_ylim(**yLimits)
     axes.set_xlabel(xLabel)

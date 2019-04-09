@@ -212,7 +212,7 @@ class DirectToolsTest(unittest.TestCase):
         }
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstE, **kwargs)
         hangles, labels = axes.get_legend_handles_labels()
-        self.assertEquals(labels, [u' $E$ = -1.00 $\\pm$ 0.57 meV', u' $E$ = -1.01 $\\pm$ 1.02 meV'])
+        self.assertEquals(labels, [r' $E$ = -1.00 $\pm$ 0.57 meV', u' $E$ = -1.01 $\pm$ 1.02 meV'])
 
     def test_plotconstQ_nonListArgsExecutes(self):
         kwargs = {
@@ -269,7 +269,8 @@ class DirectToolsTest(unittest.TestCase):
         }
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
         handles, labels = axes.get_legend_handles_labels()
-        self.assertEquals(labels, [u' $Q$ = 1.91 $\\pm$ 0.21 \xc5$^{-1}$', u' $Q$ = 1.91 $\\pm$ 0.41 \xc5$^{-1}$'])
+        self.assertEquals(labels, [r' $Q$ = 1.91 $\pm$ 0.21 $\mathrm{\AA}^{-1}$',
+                                   r' $Q$ = 1.91 $\pm$ 0.41 $\mathrm{\AA}^{-1}$'])
 
     def test_plotconstQ_titles(self):
         kwargs = {
@@ -390,7 +391,7 @@ class DirectToolsTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'$Q$ (\u00c5$^{-1}$)')
+        self.assertEquals(axes.get_xlabel(), r'$Q$ ($\mathrm{\AA}^{-1}$)')
         self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
@@ -413,8 +414,8 @@ class DirectToolsTest(unittest.TestCase):
         stw = ComputeIncoherentDOS(ws, StoreInADS=False)
         kwargs = {'workspaces': stw}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotDOS, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'Energy transfer ($meV$)')
-        self.assertEquals(axes.get_ylabel(), u'$g(E)$')
+        self.assertEquals(axes.get_xlabel(), 'Energy transfer ($meV$)')
+        self.assertEquals(axes.get_ylabel(), '$g(E)$')
 
     def test_plotDOS_PlotMultiple(self):
         ws = CreateSampleWorkspace(NumBanks=1, XUnit='DeltaE', XMin=-12., XMax=12., BinWidth=0.2, StoreInADS=False)
@@ -425,8 +426,8 @@ class DirectToolsTest(unittest.TestCase):
         stw = ComputeIncoherentDOS(ws)
         kwargs = {'workspaces': [stw, 'stw']}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotDOS, **kwargs)
-        self.assertEquals(axes.get_xlabel(), u'Energy transfer ($meV$)')
-        self.assertEquals(axes.get_ylabel(), u'$g(E)$')
+        self.assertEquals(axes.get_xlabel(), 'Energy transfer ($meV$)')
+        self.assertEquals(axes.get_ylabel(), '$g(E)$')
 
     def test_plotSofQW(self):
         wsName = 'ws'
