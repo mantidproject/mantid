@@ -998,7 +998,7 @@ void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
 
   m_outOptionsPresenter->setPlotEnabled(
-      enable && m_outOptionsPresenter->isResultGroupPlottable());
+      enable && m_outOptionsPresenter->isSelectedGroupPlottable());
   m_outOptionsPresenter->setEditResultEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
 }
