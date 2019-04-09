@@ -24,6 +24,7 @@ class TaskExitCode(Enum):
     ERROR = 1
     SYNTAX_ERROR = 2
 
+
 class AsyncTask(threading.Thread):
     def __init__(self, target, args=(), kwargs=None,
                  success_cb=None, error_cb=None,
