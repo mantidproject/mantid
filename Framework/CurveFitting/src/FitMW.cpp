@@ -441,7 +441,8 @@ FitMW::createOutputWorkspace(const std::string &baseName,
     std::adjacent_difference(X.begin(), X.end(), binWidths.begin());
     for (size_t ispec = 1; ispec < mws.getNumberHistograms(); ++ispec) {
       auto &Y = mws.mutableY(ispec);
-      std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(), Y.begin(), std::multiplies<double>());
+      std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(),
+                     Y.begin(), std::multiplies<double>());
     }
   }
   return ws;
