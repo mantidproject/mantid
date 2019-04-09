@@ -1,4 +1,3 @@
-#
 # PYUNITTEST_ADD_TEST (public macro to add unit tests)
 #   Adds a set of python tests based upon the unittest module
 #
@@ -33,12 +32,12 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
 
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH} )
+    set ( _python_path ${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH} )
     # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
     string ( REPLACE ";" ":" _python_path "${PYUNITTEST_PYTHONPATH_EXTRA}" )
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH} )
+    set ( _python_path ${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH} )
   endif()
   # Define the environment
   list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
@@ -66,20 +65,25 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   endforeach ( part ${ARGN} )
 endfunction ()
 
-#=============================================================
-# main()
-#=============================================================
-
-# find the driver script
-find_program ( PYUNITTEST_GEN_EXEC pyunit_gen.py
-               PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/pyunit_gen
-                     ${PROJECT_SOURCE_DIR}/../Testing/Tools/pyunit_gen )
-
-# let people know whether or not it was found
-if (PYUNITTEST_GEN_EXEC)
-  set ( PYUNITTEST_FOUND TRUE )
-else ()
-  set ( PYUNITTEST_FOUND FALSE )
-endif ()
-
-mark_as_advanced ( PYUNITTEST_GEN_EXEC )
+# Defines a macro to check that each file contains a call to unittest.main()
+# The arguments should be the source directory followed by the test files as
+# list, e.g. check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_FILES} )
+#
+function(CHECK_TESTS_VALID _source_dir)
+  set(_invalid_files)
+  foreach(_test ${ARGN})
+    file(STRINGS "${_source_dir}/${_test}" matches REGEX "unittest.main\(\)")
+    if(NOT matches)
+      set(_invalid_files "${_invalid_files}:${_test}")
+    endif()
+  endforeach()
+  if(_invalid_files)
+    set(
+      _error
+      "The following Python unit tests in ${_source_dir} do not contain a call to 'unittest.main()':
+${_invalid_files}
+Add the following line to end of the test files:
+if __name__ == '__main__':  unittest.main()")
+    message(FATAL_ERROR ${_error})
+  endif()
+endfunction()
