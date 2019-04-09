@@ -10,8 +10,6 @@ from mantid.api import (AlgorithmFactory, AnalysisDataService, MatrixWorkspace, 
                         PythonAlgorithm, PropertyMode, WorkspaceGroup)
 from mantid.kernel import Direction
 
-from mantid import config, logger
-
 
 def string_ends_with(string, delimiter):
     delimiter_length = len(delimiter)
