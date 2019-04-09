@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidHistogramData/Interpolate.h"
@@ -42,6 +43,10 @@ using PhysicalConstants::E_mev_toNeutronWavenumberSq;
 namespace {
 // the maximum number of elements to combine at once in the pairwise summation
 constexpr size_t MAX_INTEGRATION_LENGTH{1000};
+
+const std::string CALC_SAMPLE="Sample";
+const std::string CALC_CONTAINER="Container";
+const std::string CALC_ENVIRONMENT="Environment";
 
 inline size_t findMiddle(const size_t start, const size_t stop) {
   size_t half =
@@ -77,6 +82,14 @@ void AbsorptionCorrection::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Output workspace name");
+
+  // AbsorbedBy
+  std::vector<std::string> scatter_options{CALC_SAMPLE, CALC_CONTAINER, CALC_ENVIRONMENT};
+  declareProperty(
+                  "ScatterFrom", CALC_SAMPLE,
+      boost::make_shared<StringListValidator>(scatter_options),
+      "Select the method to use to calculate exponentials, normal or a\n"
+      "fast approximation (default: Normal)");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -255,10 +268,20 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection");      // in barns
   double rho = getProperty("SampleNumberDensity");         // in Angstroms-3
+  const std::string scatterFrom = getProperty("ScatterFrom");
 
   bool createMaterial =
       !(isEmpty(rho) && isEmpty(sigma_s) && isEmpty(sigma_atten));
-  m_material = m_inputWS->sample().getShape().material();
+  // get the material from the correct component
+  if (scatterFrom == CALC_SAMPLE) {
+    m_material = m_inputWS->sample().getShape().material();
+  } else if (scatterFrom == CALC_CONTAINER) {
+    m_material = m_inputWS->sample().getEnvironment().container().getShape().material();
+  } else if (scatterFrom == CALC_ENVIRONMENT) {
+    // TODO get the second element
+    // TODO throw an exception if there is more than one element (past the container) or no other elements
+    m_material = m_inputWS->sample().getEnvironment().container().getShape().material();
+  }
 
   if (createMaterial) {
     // get values from the existing material
