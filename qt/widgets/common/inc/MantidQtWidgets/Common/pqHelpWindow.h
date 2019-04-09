@@ -57,8 +57,8 @@ public:
                                bool) override {
     if (type == QWebEnginePage::NavigationTypeLinkClicked) {
       emit linkClicked(url);
-      if (url.scheme() == "http" || url.scheme() == "https") {
-        // We don't want to open web links in the help window
+      if (url.scheme().startsWith("http") || url.toString().endsWith(".png")) {
+        // We don't want to open web links or image hex within the help window
         return false;
       }
     }

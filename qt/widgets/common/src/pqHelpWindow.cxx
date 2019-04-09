@@ -333,14 +333,10 @@ void pqHelpWindow::showPage(const QString &url, bool linkClicked) {
 void pqHelpWindow::showPage(const QUrl &url, bool linkClicked) {
   if (url.scheme() == "qthelp") {
     if (this->m_helpEngine->findFile(url).isValid()) {
-      if (linkClicked) {
-        m_backward->setEnabled(true);
-      } else {
+      if (!linkClicked)
         this->m_browser->setUrl(url);
-        if (m_browser->history()->count() > 0) {
-          m_backward->setEnabled(true);
-        }
-      }
+      if (m_browser->history()->count() > 0)
+        m_backward->setEnabled(true);
       m_forward->setEnabled(false);
     } else {
       errorMissingPage(url);
