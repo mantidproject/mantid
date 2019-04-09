@@ -13,6 +13,8 @@
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 
+#include <vector>
+
 namespace Mantid {
 namespace LiveData {
 
@@ -42,14 +44,26 @@ public:
   ///@}
 
 private:
+  struct BufferGroup {
+    std::vector<uint32_t> tof;
+    std::vector<uint32_t> detID;
+    Types::Core::DateAndTime pulseTime;
+    DataObjects::EventWorkspace_sptr periodBuffer;
+  };
+
   void captureImplExcept() override;
+  /// Populate cache workspaces with data from messages
+  std::vector<size_t> getSpectrumIndices(const uint32_t *detIds,
+                                         size_t nEvents);
+  std::vector<size_t>
+  getSortedSpectraPermutation(const std::vector<size_t> &specindices);
+  void eventDataFromMessage(const std::string &buffer, size_t &eventCount,
+                            int64_t &pulseTimeRet);
+  void populateEventDataWorkspace();
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
   void initLocalCaches(const std::string &rawMsgBuffer,
                        const RunStartStruct &runStartData) override;
-
-  /// Populate cache workspaces with data from messages
-  void eventDataFromMessage(const std::string &buffer);
 
   void sampleDataFromMessage(const std::string &buffer) override;
 
@@ -58,6 +72,8 @@ private:
 
   /// Local event workspace buffers
   std::vector<DataObjects::EventWorkspace_sptr> m_localEvents;
+
+  std::vector<BufferGroup> m_buffer;
 };
 
 } // namespace LiveData

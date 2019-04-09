@@ -26,6 +26,13 @@
       <connection name="histo" address="NDXALF:6789" listener="ISISHistoDataListener" />
     </livedata>
   </instrument>
+  
+  <instrument name="LOKI">
+    <technique>Small Angle Scattering</technique>
+    <livedata>
+      <connection name="histo" address="localhost:9092" listener="KafkaEventListener" />
+    </livedata>
+  </instrument>
 
   <instrument name="CRISP" shortname="CSP">
     <zeropadding size="8" startRunNumber="99778" prefix="CRISP" />

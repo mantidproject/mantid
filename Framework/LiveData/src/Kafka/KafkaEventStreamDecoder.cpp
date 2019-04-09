@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
@@ -25,8 +26,19 @@ GNU_DIAG_OFF("conversion")
 #include "private/Schema/is84_isis_events_generated.h"
 GNU_DIAG_ON("conversion")
 
+#include <chrono>
+#include <numeric>
+#include <tbb/parallel_sort.h>
+
 using namespace Mantid::Types;
 using namespace LogSchema;
+size_t totalNumEventsSinceStart = 0;
+size_t totalNumEventsBeforeLastTimeout = 0;
+double totalPopulateWorkspaceDuration = 0;
+double numPopulateWorkspaceCalls = 0;
+double totalEventFromMessageDuration = 0;
+double numEventFromMessageCalls = 0;
+const size_t MAX_BUFFERGROUP_EVENTS = 20000;
 
 namespace {
 /// Logger
@@ -128,6 +140,11 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
 
 API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
   std::lock_guard<std::mutex> lock(m_mutex);
+  g_log.notice() << "Events since last timeout "
+                 << totalNumEventsSinceStart - totalNumEventsBeforeLastTimeout
+                 << std::endl;
+  totalNumEventsBeforeLastTimeout = totalNumEventsSinceStart;
+
   if (m_localEvents.size() == 1) {
     auto temp = createBufferWorkspace<DataObjects::EventWorkspace>(
         "EventWorkspace", m_localEvents.front());
@@ -175,6 +192,20 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   std::unordered_map<std::string, std::vector<bool>> reachedEnd;
   bool checkOffsets = false;
 
+  size_t nEvents = 0;
+  size_t recentEvents = 0;
+  size_t nMessages = 0;
+  size_t totalMessages = 0;
+  size_t eventsPerMessage = 0;
+  size_t lastMessageEvents = 0;
+  int64_t currentPulseTime;
+  int64_t lastPulseTime = -1;
+  size_t messagesPerPulse = 0;
+  size_t numMessagesForSinglePulse = 0;
+  size_t pulseTimeCount = 0;
+  auto globstart = std::chrono::system_clock::now();
+  auto start = std::chrono::system_clock::now();
+
   while (!m_interrupt) {
     if (m_endRun) {
       waitForRunEndObservation();
@@ -186,8 +217,33 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     m_dataStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
     if (buffer.empty()) {
+      start = std::chrono::system_clock::now();
+      globstart = std::chrono::system_clock::now();
+      g_log.notice() << "Waiting to start..." << std::endl;
       m_cbIterationEnd();
       continue;
+    }
+
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> dur = end - start;
+    if (dur.count() >= 60) {
+      auto rate = static_cast<double>(nMessages) / dur.count();
+      g_log.notice() << "Consuming " << rate << "Hz" << std::endl;
+      nMessages = 0;
+      g_log.notice() << eventsPerMessage << " events per message" << std::endl;
+      auto mpp =
+          numMessagesForSinglePulse / static_cast<double>(pulseTimeCount);
+      g_log.notice() << mpp << " event messages per pulse" << std::endl;
+      g_log.notice() << "Acheivable pulse rate is " << rate / mpp << "Hz"
+                     << std::endl;
+      g_log.notice() << "Average time taken to convert event messages "
+                     << totalEventFromMessageDuration / numEventFromMessageCalls
+                     << " seconds" << std::endl;
+      g_log.notice() << "Average time taken to populate workspace "
+                     << totalPopulateWorkspaceDuration /
+                            numPopulateWorkspaceCalls
+                     << " seconds" << std::endl;
+      start = std::chrono::system_clock::now();
     }
 
     if (checkOffsets) {
@@ -206,7 +262,28 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     if (flatbuffers::BufferHasIdentifier(
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
             EVENT_MESSAGE_ID.c_str())) {
-      eventDataFromMessage(buffer);
+      eventDataFromMessage(buffer, nEvents, currentPulseTime);
+
+      if (lastPulseTime == -1)
+        lastPulseTime = currentPulseTime;
+      else if (lastPulseTime != currentPulseTime) {
+        ++pulseTimeCount;
+        lastPulseTime = currentPulseTime;
+        numMessagesForSinglePulse += messagesPerPulse;
+        messagesPerPulse = 0;
+      }
+
+      ++messagesPerPulse;
+
+      eventsPerMessage = nEvents - lastMessageEvents;
+      lastMessageEvents = nEvents;
+      if ((nEvents - recentEvents) > 300000) {
+        populateEventDataWorkspace();
+        recentEvents = nEvents;
+      }
+      totalNumEventsSinceStart = nEvents;
+      ++nMessages;
+      ++totalMessages;
     }
     // Check if we have a sample environment log message
     else if (flatbuffers::BufferHasIdentifier(
@@ -219,17 +296,69 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       checkRunMessage(buffer, checkOffsets, stopOffsets, reachedEnd);
     m_cbIterationEnd();
   }
+  auto globend = std::chrono::system_clock::now();
+  std::chrono::duration<double> dur = globend - globstart;
+  g_log.notice() << "Consumed at a rate of "
+                 << static_cast<double>(totalMessages) / dur.count() << "Hz"
+                 << std::endl;
   g_log.debug("Event capture finished");
+  totalNumEventsBeforeLastTimeout = totalNumEventsSinceStart =
+      totalNumEventsSinceStart = totalNumEventsBeforeLastTimeout =
+          totalPopulateWorkspaceDuration = numPopulateWorkspaceCalls =
+              totalEventFromMessageDuration = numEventFromMessageCalls = 0;
 }
 
-void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
+std::vector<size_t>
+KafkaEventStreamDecoder::getSpectrumIndices(const uint32_t *detIds,
+                                            size_t nEvents) {
+  std::vector<size_t> specindices(nEvents);
+  std::transform(detIds, detIds + nEvents, specindices.begin(),
+                 [this](const uint32_t detid) -> size_t {
+                   return this->m_specToIdx[static_cast<int32_t>(detid)];
+                 });
+
+  return specindices;
+}
+
+std::vector<size_t> KafkaEventStreamDecoder::getSortedSpectraPermutation(
+    const std::vector<size_t> &specindices) {
+  std::vector<size_t> perm(specindices.size());
+  std::iota(perm.begin(), perm.end(), 0);
+  tbb::parallel_sort(perm.begin(), perm.end(),
+                     [&specindices](size_t i, size_t j) {
+                       return specindices[i] < specindices[j];
+                     });
+  return perm;
+}
+
+std::vector<std::pair<size_t, size_t>>
+getRanges(const std::vector<size_t> &perm,
+          const std::vector<size_t> &specindices) {
+  std::vector<std::pair<size_t, size_t>> ranges;
+  size_t first = 0;
+  for (size_t i = 1; i < perm.size(); ++i) {
+    if (specindices[perm[i]] != specindices[perm[first]]) {
+      ranges.emplace_back(first, i);
+      first = i;
+    }
+  }
+
+  ranges.emplace_back(first, perm.size());
+  return ranges;
+}
+
+void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
+                                                   size_t &eventCount,
+                                                   int64_t &pulseTimeRet) {
   auto eventMsg =
       GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
-  DateAndTime pulseTime = static_cast<int64_t>(eventMsg->pulse_time());
+  pulseTimeRet = static_cast<int64_t>(eventMsg->pulse_time());
+  DateAndTime pulseTime(pulseTimeRet);
   const auto &tofData = *(eventMsg->time_of_flight());
   const auto &detData = *(eventMsg->detector_id());
   auto nEvents = tofData.size();
+  eventCount += nEvents;
 
   DataObjects::EventWorkspace_sptr periodBuffer;
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -243,13 +372,71 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
   } else {
     periodBuffer = m_localEvents[0];
   }
-  for (decltype(nEvents) i = 0; i < nEvents; ++i) {
-    auto &spectrum = periodBuffer->getSpectrum(
-        m_specToIdx[static_cast<int32_t>(detData[i])]);
-    spectrum.addEventQuickly(TofEvent(static_cast<double>(tofData[i]) *
-                                          1e-3, // nanoseconds to microseconds
-                                      pulseTime));
+
+  auto numGroups = tofData.size() / MAX_BUFFERGROUP_EVENTS;
+  std::vector<size_t> sizes(numGroups + 1, MAX_BUFFERGROUP_EVENTS);
+  sizes[numGroups] = tofData.size() % MAX_BUFFERGROUP_EVENTS;
+  size_t start = 0;
+
+  auto starttime = std::chrono::system_clock::now();
+  for (auto &grpSize : sizes) {
+    if (grpSize == 0)
+      continue;
+
+    BufferGroup buffGrp;
+    buffGrp.tof.resize(grpSize);
+    buffGrp.detID.resize(grpSize);
+
+    auto end = start + grpSize;
+    std::copy(tofData.data() + start, tofData.data() + end,
+              buffGrp.tof.begin());
+    std::copy(detData.data() + start, detData.data() + end,
+              buffGrp.detID.begin());
+
+    buffGrp.pulseTime = pulseTime;
+
+    buffGrp.periodBuffer = periodBuffer;
+    m_buffer.emplace_back(buffGrp);
+    start += grpSize;
   }
+
+  auto endTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> dur = endTime - starttime;
+  totalEventFromMessageDuration += dur.count();
+  numEventFromMessageCalls += 1;
+}
+
+void KafkaEventStreamDecoder::populateEventDataWorkspace() {
+  auto startTime = std::chrono::system_clock::now();
+  for (auto &grp : m_buffer) {
+    auto nEvents = grp.tof.size();
+
+    if (nEvents == 0)
+      continue;
+
+    auto specindices = getSpectrumIndices(grp.detID.data(), nEvents);
+    auto perm = getSortedSpectraPermutation(specindices);
+    auto ranges = getRanges(perm, specindices);
+    PARALLEL_SET_NUM_THREADS(16)
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int r = 0; r < ranges.size(); r++) {
+      auto &range = ranges[r];
+      for (int j = range.first; j < range.second; j++) {
+        auto i = perm[j];
+        auto &spectrum = grp.periodBuffer->getSpectrum(specindices[i]);
+        spectrum.addEventQuickly(
+            TofEvent(static_cast<double>(grp.tof[static_cast<uint32_t>(i)]) *
+                         1e-3, // nanoseconds to microseconds
+                     grp.pulseTime));
+      }
+    }
+  }
+  m_buffer.clear();
+  auto endTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> dur = endTime - startTime;
+
+  totalPopulateWorkspaceDuration += dur.count();
+  numPopulateWorkspaceCalls += 1;
 }
 
 /**
