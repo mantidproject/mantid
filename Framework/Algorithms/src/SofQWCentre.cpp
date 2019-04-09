@@ -51,9 +51,9 @@ void SofQWCentre::exec() {
 
   const auto &detectorInfo = inputWorkspace->detectorInfo();
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
-  V3D beamDir = detectorInfo.samplePosition() - detectorInfo.sourcePosition();
-  beamDir.normalize();
-  double l1 = detectorInfo.l1();
+  const V3D beamDir =
+      normalize(detectorInfo.samplePosition() - detectorInfo.sourcePosition());
+  const double l1 = detectorInfo.l1();
   g_log.debug() << "Source-sample distance: " << l1 << '\n';
 
   // Loop over input workspace bins, reassigning data to correct bin in output
@@ -85,9 +85,8 @@ void SofQWCentre::exec() {
       try {
         size_t idet = detectorInfo.indexOf(detID);
         // Calculate kf vector direction and then Q for each energy bin
-        V3D scatterDir =
-            (detectorInfo.position(idet) - detectorInfo.samplePosition());
-        scatterDir.normalize();
+        const V3D scatterDir = normalize(detectorInfo.position(idet) -
+                                         detectorInfo.samplePosition());
         for (size_t j = 0; j < numBins; ++j) {
           if (X[j] < xAxis.front() || X[j + 1] > xAxis.back())
             continue;

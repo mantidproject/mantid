@@ -419,10 +419,8 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("current-calib-filename",
               m_uiTabCalib.lineEdit_current_calib_filename->text());
 
-  qs.setValue("user-params-new-vanadium-num",
-              m_uiTabCalib.MWRunFiles_new_vanadium_num->getText());
-  qs.setValue("user-params-new-ceria-num",
-              m_uiTabCalib.MWRunFiles_new_ceria_num->getText());
+  qs.setValue("user-params-new-vanadium-num", "");
+  qs.setValue("user-params-new-ceria-num", "");
 
   qs.setValue("user-params-calib-cropped-group-checkbox",
               m_uiTabCalib.groupBox_calib_cropped->isChecked());

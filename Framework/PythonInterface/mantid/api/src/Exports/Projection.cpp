@@ -47,7 +47,7 @@ object createWorkspace() {
   object main = import("__main__");
   object global(main.attr("__dict__"));
   // Add a function to the namespace
-  object result = exec(
+  exec(
       "def createWorkspace(proj, OutputWorkspace=None):\n"
       "  '''Create a TableWorkspace using this projection'''\n"
       "  import inspect\n"

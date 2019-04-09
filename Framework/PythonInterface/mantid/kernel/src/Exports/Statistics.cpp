@@ -299,8 +299,6 @@ void export_Statistics() {
                    [ReturnNumpyArray()])
           .staticmethod("getMomentsAboutMean");
 
-  //------------------------------ Statistics
-  // values--------------------------------
   // Want this in the same scope as above so must be here
   class_<Statistics>("Statistics")
       .add_property("minimum", &Statistics::minimum,

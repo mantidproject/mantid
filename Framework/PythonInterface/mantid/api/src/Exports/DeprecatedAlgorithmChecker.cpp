@@ -34,9 +34,8 @@ public:
    * @param algName The name of the algorithm
    * @param version The algorithm version
    */
-  DeprecatedAlgorithmChecker(const std::string &algName, int version) {
-    m_alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
-  }
+  DeprecatedAlgorithmChecker(const std::string &algName, int version)
+      : m_alg(AlgorithmManager::Instance().createUnmanaged(algName, version)) {}
 
   /// Check if the algorithm is deprecated
   /// @returns A string containing a deprecation message if the algorithm is

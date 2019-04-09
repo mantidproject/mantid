@@ -10,7 +10,8 @@ import systemtesting
 from mantid import config
 from mantid.simpleapi import (BASISCrystalDiffraction, GroupWorkspaces,
                               ElasticWindowMultiple, MSDFit, BASISReduction,
-                              BASISPowderDiffraction, Load)
+                              BASISPowderDiffraction, Load, Divide,
+                              ReplaceSpecialValues)
 
 
 class PreppingMixin(object):
@@ -235,8 +236,8 @@ class BASISReduction4Test(systemtesting.MantidSystemTest, PreppingMixin):
             BASISReduction(RunNumbers='90178',
                            DoFluxNormalization=True,
                            FluxNormalizationType='Monitor',
-                           ReflectionType='silicon_311',
                            MaskFile='BASIS_Mask_default_311.xml',
+                           ReflectionType='silicon_311',
                            EnergyBins=[-740.0, 1.6, 740.0],
                            MomentumTransferBins=[2.1, 3.4, 2.1],
                            DivideByVanadium=True,
@@ -334,6 +335,43 @@ class PowderSampleTest(systemtesting.MantidSystemTest, PreppingMixin):
         self.tolerance = 0.1
         self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'
+
+
+class PowderFluxNormalizationTest(systemtesting.MantidSystemTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample with two flux
+    normalizations"""
+
+    def __init__(self):
+        super(PowderFluxNormalizationTest, self).__init__()
+        self.config = None
+        self.prepset('BASISDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_74799_event.nxs', 'BASISPowderFluxNorm.nxs']
+
+    def runTest(self):
+        try:
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   FluxNormalizationType='Monitor',
+                                   OutputWorkspace='powder_Mon',
+                                   MaskFile='BASIS_Mask_default_diff.xml')
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   FluxNormalizationType='Proton Charge',
+                                   OutputWorkspace='powder_Pro',
+                                   MaskFile='BASIS_Mask_default_diff.xml')
+            Divide(LHSWorkspace='powder_Pro', RHSWorkspace='powder_Mon',
+                   OutputWorkspace='powder_ratio')
+            ReplaceSpecialValues(InputWorkspace='powder_ratio',
+                                 NANValue=1.0, NANError=1.0,
+                                 OutputWorkspace='powder_ratio')
+        finally:
+            self.preptear()
+
+    def validate(self):
+        self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
+        return 'powder_ratio', 'BASISPowderFluxNorm.nxs'
 
 
 class PowderSampleNewDASTest(systemtesting.MantidSystemTest, PreppingMixin):
