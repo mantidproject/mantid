@@ -52,7 +52,7 @@ import numpy
 class PropAutoProcess(object):
     ANGLE_OPTION = 'AngleOption'
     BKG_METHOD_DIRECT = 'DirectFlatBackground'
-    BRAGG_ANGLE = 'BraggAngle'
+    TWO_THETA = 'TwoTheta'
     DB = 'DirectRun'
     EFFICIENCY_FILE = 'EfficiencyFile'
     END_WS_INDEX_DIRECT = 'DirectFitEndWorkspaceIndex'
@@ -177,12 +177,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         preProcessGen = 'ReflectometryILLPreprocess, common properties'
         self.declareProperty(
             FloatArrayProperty(
-                PropAutoProcess.BRAGG_ANGLE,
+                PropAutoProcess.TWO_THETA,
                 values=[Property.EMPTY_DBL]
             ),
-            doc='A user-defined Bragg angle in degree{}'.format(listOrSingleNumber)
+            doc='A user-defined angle two theta in degree{}'.format(listOrSingleNumber)
         )
-        self.setPropertyGroup(PropAutoProcess.BRAGG_ANGLE, preProcessGen)
+        self.setPropertyGroup(PropAutoProcess.TWO_THETA, preProcessGen)
         self.declareProperty(
             FloatArrayProperty(
                 Prop.LINE_POSITION,
@@ -525,19 +525,19 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def _twoTheta(self, run, angle):
         """Return the TwoTheta scattering angle depending on user input options."""
-        if numpy.isclose(self._getValue(PropAutoProcess.BRAGG_ANGLE, angle), Property.EMPTY_DBL):
+        if numpy.isclose(self._getValue(PropAutoProcess.TWO_THETA, angle), Property.EMPTY_DBL):
             if self._getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.DAN:
                 self.log().notice('Using DAN angle')
                 return Property.EMPTY_DBL
             elif self._getValue(PropAutoProcess.ANGLE_OPTION, angle) == Angle.SAN:
                 twoT = self._twoThetaFromSampleAngle(run)
-                self.log().notice('Using SAN angle: {} degree'.format(twoT / 2.))
+                self.log().notice('Using SAN angle : {} degree'.format(twoT / 2.))
                 return twoT
             else:
                 raise RuntimeError('{} must be {} or {}.'.format(PropAutoProcess.ANGLE_OPTION, Angle.SAN, Angle.DAN))
         else:
-            twoT = 2. * self._getValue(PropAutoProcess.BRAGG_ANGLE, angle)
-            self.log().notice('Using Bragg angle : {} degree'.format(twoT / 2.))
+            twoT = self._getValue(PropAutoProcess.TWO_THETA, angle)
+            self.log().notice('Using TwoTheta angle : {} degree'.format(twoT))
             return twoT
 
     def _linePosition(self, angle):

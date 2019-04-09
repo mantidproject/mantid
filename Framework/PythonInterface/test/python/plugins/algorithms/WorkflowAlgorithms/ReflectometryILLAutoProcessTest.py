@@ -127,7 +127,7 @@ class ReflectometryILLAutoProcessTest(unittest.TestCase):
             'Run': 'ILL/D17/317370.nxs',
             'DirectRun': 'ILL/D17/317369.nxs',
             'OutputWorkspace': 'outWS',
-            'BraggAngle': 30.2,
+            'TwoTheta': 30.2,
             'rethrow': True,
             'child': True
         }
