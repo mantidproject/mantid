@@ -308,7 +308,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertEquals(out.run().getProperty(common.SampleLogs.TWO_THETA).value, 40.2)
         self.assertEquals(out.run().getProperty(common.SampleLogs.LINE_POSITION).value, 120.4)
         self.assertEquals(out.spectrumInfo().size(), 1)
-        self.assertEquals(out.spectrumInfo().l2(0), 3.0992766423566103)
+        self.assertEquals(out.spectrumInfo().l2(0), 3.0992766423566)
         self.assertEquals(numpy.degrees(out.spectrumInfo().twoTheta(0)), 40.356848517834038)
         self.assertTrue(alg.isExecuted())
 
