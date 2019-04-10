@@ -266,12 +266,16 @@ set ( UI_FILES
    ISISDiagnostics.ui
    ISISEnergyTransfer.ui)
 
+set ( RES_FILES
+   IndirectInterfaceResources.qrc)
+
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                    QT_VERSION 4
                    SRC ${SRC_FILES}
                    MOC ${MOC_FILES}
                    NOMOC ${INC_FILES}
                    UI ${UI_FILES}
+                   RES ${RES_FILES}
                    DEFS IN_MANTIDQT_INDIRECT
                    PRECOMPILED PrecompiledHeader.h
                    INCLUDE_DIRS
