@@ -10,6 +10,7 @@ import unittest
 from mantid.simpleapi import (CompareWorkspaces, ConvolutionFitSequential, ConvolutionFitSimultaneous, LoadNexus,
                               IndirectReplaceFitResult, RenameWorkspace)
 from mantid.api import (AnalysisDataService, MatrixWorkspace, WorkspaceGroup)
+import platform
 
 
 def get_ads_workspace(workspace_name):
@@ -27,10 +28,15 @@ def execute_algorithm(input_workspace, single_fit_workspace, output_name):
 
 
 def get_sequential_input_string(workspace_name, number_of_histograms):
-    string = ''
+    input_string = ''
     for i in range(number_of_histograms):
-        string += '{0},i{1};'.format(workspace_name, i)
-    return string
+        input_string += '{0},i{1};'.format(workspace_name, i)
+    return input_string
+
+
+def current_os_has_gslv2():
+    """ Check whether the current OS is using GSLv2 """
+    return platform.linux_distribution()[0].lower() == 'ubuntu' or platform.mac_ver()[0] != ''
 
 
 class IndirectReplaceFitResultTest(unittest.TestCase):
@@ -127,10 +133,11 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._output_name)
 
         output = get_ads_workspace(self._output_name)
-        expected_output = LoadNexus(Filename=self._output_name + '.nxs')
+        expected_name = self._output_name + '_gslv2' if current_os_has_gslv2() else self._output_name
+        expected_output = LoadNexus(Filename=expected_name + '.nxs')
 
-        (result, messages) = CompareWorkspaces(output, expected_output, Tolerance=0.0000001)
-        self.assertEqual(result, True)
+        result, _ = CompareWorkspaces(output, expected_output, Tolerance=0.00001)
+        self.assertTrue(result)
 
 
 if __name__ == '__main__':
