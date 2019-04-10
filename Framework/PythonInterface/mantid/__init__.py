@@ -132,18 +132,23 @@ import sys
 import logging
 logging.critical("Working with PYTHONPATH\n{}".format("\n".join(sys.path)))
 
-from mantid.api import _workspaceops
+from mantid.api._workspaceops import *
 
-_workspaceops.attach_binary_operators_to_workspace()
-_workspaceops.attach_unary_operators_to_workspace()
-_workspaceops.attach_tableworkspaceiterator()
+attach_binary_operators_to_workspace()
+del attach_binary_operators_to_workspace
+attach_unary_operators_to_workspace()
+del attach_unary_operators_to_workspace
+attach_tableworkspaceiterator()
+del attach_tableworkspaceiterator
 ###############################################################################
 # Add importAll member to ADS.
 #
 # Must be imported AFTER all the api members
 # have been added to the mantid.api namespace above!
 ###############################################################################
-from mantid.api import _adsimports
+from mantid.api._adsimports import *
+del is_valid_identifier
+
 
 # Make the aliases from each module accessible in the mantid namespace
 from mantid.kernel._aliases import *
