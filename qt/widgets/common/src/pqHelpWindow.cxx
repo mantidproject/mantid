@@ -325,22 +325,23 @@ void pqHelpWindow::errorMissingPage(const QUrl &url) {
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QString &url, bool linkClicked) {
+void pqHelpWindow::showPage(const QString &url,
+                            bool linkClicked /* = false */) {
   this->showPage(QUrl::fromUserInput(url), linkClicked);
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QUrl &url, bool linkClicked) {
+void pqHelpWindow::showPage(const QUrl &url, bool linkClicked /* = false */) {
   if (url.scheme() == "qthelp") {
     if (this->m_helpEngine->findFile(url).isValid()) {
       if (!linkClicked)
         this->m_browser->setUrl(url);
-      if (m_browser->history()->count() > 0)
-        m_backward->setEnabled(true);
-      m_forward->setEnabled(false);
     } else {
       errorMissingPage(url);
     }
+    if (m_browser->history()->count() > 0)
+      m_backward->setEnabled(true);
+    m_forward->setEnabled(false);
   } else {
     using MantidQt::API::MantidDesktopServices;
     MantidDesktopServices::openUrl(url);

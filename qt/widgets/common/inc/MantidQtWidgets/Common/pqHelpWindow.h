@@ -71,7 +71,7 @@ signals:
 
 #endif
 
-/// pqHelpWindow provides a assistant-like window  for showing help provided by
+/// pqHelpWindow provides an assistant-like window for showing help provided by
 /// a QHelpEngine.
 class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   Q_OBJECT

@@ -3,38 +3,47 @@ add_python_package(workbench EXECUTABLE)
 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
-function ( CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
-  # Set path and file content variables
-  set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
-  set(_qt_conf_file ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.${BUILD_TYPE})
-  set(_qrc_file_contents "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n")
+if (WIN32)
 
-  # Write qt.conf.BUILD_TYPE file and get resources file name
-  if ( ${BUILD_TYPE} STREQUAL "build" )
-    file ( WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n" ) 
-    set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
-  elseif( ${BUILD_TYPE} STREQUAL "install" )
-    file ( WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n")
-    set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
-  endif()
+  function (CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
+    # Set path and file content variables
+    set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
+    set(_qt_conf_file ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.${BUILD_TYPE})
+    set(_qrc_file_contents "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n")
 
-  # Write resources.qrc.BUILD_TYPE
-  file ( WRITE ${_paths_qrc_file} ${_qrc_file_contents})
+    # Write qt.conf.BUILD_TYPE file and get resources file name
+    if (${BUILD_TYPE} STREQUAL "build")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n") 
+      set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+    elseif(${BUILD_TYPE} STREQUAL "install")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n")
+      set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
+    endif()
 
-  # Add command to generate resources.py file
+    # Write resources.qrc.BUILD_TYPE
+    file (WRITE ${_paths_qrc_file} ${_qrc_file_contents})
+  
+    # Add command to generate resources.py file
+    add_custom_command(OUTPUT ${_output_res_py}
+                      COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
+                      COMMENT "Generating workbench resources module for ${BUILD_TYPE}: ${_output_res_py}"
+                      DEPENDS ${_images_qrc_file} ${_paths_qrc_file})
+  endfunction()
+
+  # Run function for each build type
+  foreach(BUILD_TYPE "build" "install")
+    CREATE_QRC_FILE_TEMPLATE(${BUILD_TYPE})
+  endforeach()
+  add_custom_target(workbench_resources ALL
+                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+else()
+  set (_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
   add_custom_command(OUTPUT ${_output_res_py}
-                     COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
-                     COMMENT "Generating workbench resources module for ${BUILD_TYPE}: ${_output_res_py}"
-                     DEPENDS ${_paths_qrc_file} ${_images_qrc_file})
-endfunction()
-
-# Create PyQt resource files (qt.conf and resources.qrc) and link to
-# workbench_resources target to produce resources.py on build
-foreach(BUILD_TYPE "build" "install")
-  CREATE_QRC_FILE_TEMPLATE(${BUILD_TYPE})
-endforeach()
-add_custom_target(workbench_resources ALL
-                  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+                     COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file}
+                     COMMENT "Generating workbench resources module"
+                     DEPENDS ${_images_qrc_file})
+  add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
+endif()     
 
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)
