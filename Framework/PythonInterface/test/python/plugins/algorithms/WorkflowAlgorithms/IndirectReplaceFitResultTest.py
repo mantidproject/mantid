@@ -7,8 +7,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import CompareWorkspaces, LoadNexus, IndirectReplaceFitResult
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
+from mantid.simpleapi import (CompareWorkspaces, ConvolutionFitSequential, ConvolutionFitSimultaneous, LoadNexus,
+                              IndirectReplaceFitResult, RenameWorkspace)
+from mantid.api import (AnalysisDataService, MatrixWorkspace, WorkspaceGroup)
 
 
 def get_ads_workspace(workspace_name):
@@ -32,8 +33,39 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         self._result_group_name = 'iris26176_graphite002_conv_1L_s0_to_17_Results'
         self._output_name = 'iris26176_graphite002_conv_1L_s0_to_17_Result_Edit'
 
-        LoadNexus(Filename=self._input_name + '.nxs', OutputWorkspace=self._input_name)
-        LoadNexus(Filename=self._single_fit_name + '.nxs', OutputWorkspace=self._single_fit_name)
+        LoadNexus(Filename='conv_fit_resolution.nxs', OutputWorkspace='__ConvFitResolution0')
+        LoadNexus(Filename='iris26176_graphite002_red.nxs', OutputWorkspace='iris26176_graphite002_red')
+        LoadNexus(Filename='iris26173_graphite002_res.nxs', OutputWorkspace='iris26173_graphite002_res')
+        ConvolutionFitSequential(Input='iris26176_graphite002_red,i0;iris26176_graphite002_red,i1;iris26176_graphite'
+                                       '002_red,i2;iris26176_graphite002_red,i3;iris26176_graphite002_red,i4;iris26176'
+                                       '_graphite002_red,i5;iris26176_graphite002_red,i6;iris26176_graphite002_red,i7;'
+                                       'iris26176_graphite002_red,i8;iris26176_graphite002_red,i9;iris26176_graphite'
+                                       '002_red,i10;iris26176_graphite002_red,i11;iris26176_graphite002_red,i12;'
+                                       'iris26176_graphite002_red,i13;iris26176_graphite002_red,i14;iris26176_graphite'
+                                       '002_red,i15;iris26176_graphite002_red,i16;iris26176_graphite002_red,i17;',
+                                 OutputWorkspace='iris26176_graphite002_conv_1L_s0_to_17_Results',
+                                 OutputParameterWorkspace='iris26176_graphite002_conv_1L_s0_to_17_Parameters',
+                                 OutputWorkspaceGroup='iris26176_graphite002_conv_1L_s0_to_17_Workspaces',
+                                 Function='composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,'
+                                          'Workspace=__ConvFitResolution0,WorkspaceIndex=0,X=(),Y=();name=Lorentzian,'
+                                          'Amplitude=1,PeakCentre=0,FWHM=0.0175',
+                                 StartX='-0.54761329492537092', EndX='0.54325428563315703',  PassWSIndexToFunction='1',
+                                 MaxIterations='5000', ConvolveMembers='1')
+        RenameWorkspace(InputWorkspace='iris26176_graphite002_conv_1L_s0_to_17_Results_1',
+                        OutputWorkspace=self._input_name)
+        ConvolutionFitSimultaneous(Function='composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,'
+                                            'Workspace=__ConvFitResolution0,WorkspaceIndex=0,X=(),Y=();name=Lorentzian,'
+                                            'Amplitude=4.96922,PeakCentre=-0.000735068,FWHM=0.0671319',
+                                   InputWorkspace='iris26176_graphite002_red',  MaxIterations='5000',
+                                   ConvolveMembers='1',  OutputWorkspace='iris26176_graphite002_conv_1L_s1_Results',
+                                   OutputParameterWorkspace='iris26176_graphite002_conv_1L_s1_Parameters',
+                                   OutputWorkspaceGroup='iris26176_graphite002_conv_1L_s1_Workspaces',
+                                   WorkspaceIndex='1', StartX='-0.54761329492537092', EndX='0.54325428563315703')
+        RenameWorkspace(InputWorkspace='iris26176_graphite002_conv_1L_s1_Results_1',
+                        OutputWorkspace=self._single_fit_name)
+
+        #LoadNexus(Filename=self._input_name + '.nxs', OutputWorkspace=self._input_name)
+        #LoadNexus(Filename=self._single_fit_name + '.nxs', OutputWorkspace=self._single_fit_name)
 
         result_group = WorkspaceGroup()
         result_group.addWorkspace(get_ads_workspace(self._input_name))
