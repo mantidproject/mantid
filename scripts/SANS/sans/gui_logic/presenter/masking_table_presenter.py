@@ -162,7 +162,6 @@ class MaskingTablePresenter(object):
             self._presenter.on_processing_error_masking_display(error)
 
     def __init__(self, parent_presenter):
-        super(MaskingTablePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()

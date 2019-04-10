@@ -260,6 +260,17 @@ public:
   }
 
   void
+  test_that_isSelectedGroupSelected_returns_true_when_passed_the_result_group_string_with_a_result_group_set() {
+    m_model->setResultWorkspace(m_groupWorkspace);
+    TS_ASSERT(m_model->isSelectedGroupPlottable("Result Group"));
+  }
+
+  void
+  test_that_isSelectedGroupSelected_returns_false_when_passed_the_pdf_group_string_when_a_pdf_group_is_not_set() {
+    TS_ASSERT(!m_model->isSelectedGroupPlottable("PDF Group"));
+  }
+
+  void
   test_that_isResultGroupSelected_returns_true_when_passed_the_result_group_string() {
     TS_ASSERT(m_model->isResultGroupSelected("Result Group"));
   }

@@ -43,6 +43,7 @@ from mantid.simpleapi import (
     Scale,
     Stitch1DMany
 )
+import ILL_utilities as utils
 import ReflectometryILL_common as common
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
 from ReflectometryILLSumForeground import SumType
@@ -662,9 +663,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
     def _setup(self):
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value
         self._cleanup = self.getProperty(Prop.CLEANUP).value
-        self._autoCleanup = common.WSCleanup(self._cleanup, self._subalgLogging == SubalgLogging.ON)
+        self._autoCleanup = utils.Cleanup(self._cleanup, self._subalgLogging == SubalgLogging.ON)
         self._wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = common.WSNameSource(self._wsPrefix, self._cleanup)
+        self._names = utils.NameSource(self._wsPrefix, self._cleanup)
         self._db = self.getProperty(PropAutoProcess.DB).value
         self._workflowProgress = Progress(self, start=0.0, end=1.0, nreports=len(self._db)*2)
         self._slitNorm = self.getProperty(Prop.SLIT_NORM).value
