@@ -31,15 +31,21 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
     set ( _test_runner_module ${PYUNITTEST_RUNNER} )
   endif()
 
+  # get the absolute path to the PythonInterface directory
+  # this is the root of the source for the mantid package
+  get_filename_component(_pythoninterface_dir
+                        "${CMAKE_SOURCE_DIR}/Framework/PythonInterface/"
+                        ABSOLUTE
+                        DIRECTORY)
 
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA}$ENV{PYTHONPATH} )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${_pythoninterface_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH} )
     # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
     string ( REPLACE ";" ":" _python_path "${PYUNITTEST_PYTHONPATH_EXTRA}" )
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH} )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:${_python_path}:${_pythoninterface_dir}:$ENV{PYTHONPATH} )
   endif()
   # Define the environment
   list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
