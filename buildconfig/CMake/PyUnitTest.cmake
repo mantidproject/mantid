@@ -12,7 +12,6 @@
 #       ${ARGN} :: List of test files
 function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   # Property for the module directory
-  set ( _working_dir ${CMAKE_BINARY_DIR}/bin/Testing )
   if ( CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode" )
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin/$<CONFIG> )
   else()
@@ -52,10 +51,10 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
     # We duplicate the suitename so that it matches the junit output name
     set ( _pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}" )
     add_test ( NAME ${_pyunit_separate_name}
-               COMMAND ${_test_runner} --classic ${_test_runner_module} ${_test_src_dir}/${_filename} )
+               COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
+               ${_test_runner} --classic ${_test_runner_module} ${_test_src_dir}/${_filename} )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                           WORKING_DIRECTORY ${_working_dir}
                            ENVIRONMENT "${_test_environment}"
                            TIMEOUT ${TESTING_TIMEOUT} )
     if ( PYUNITTEST_RUN_SERIAL )
