@@ -22,14 +22,6 @@ from mantid.utils import import_mantid_cext
 _api = import_mantid_cext('._api', 'mantid.api', globals())
 
 ###############################################################################
-# Add importAll member to ADS.
-#
-# Must be imported AFTER all the api members
-# have been added to the mantid.api namespace above!
-###############################################################################
-from mantid.api import _adsimports
-
-###############################################################################
 # Make aliases accessible in this namespace
 ###############################################################################
 from mantid.api._aliases import *
@@ -42,3 +34,10 @@ from mantid.api import _workspaceops
 _workspaceops.attach_binary_operators_to_workspace()
 _workspaceops.attach_unary_operators_to_workspace()
 _workspaceops.attach_tableworkspaceiterator()
+###############################################################################
+# Add importAll member to ADS.
+#
+# Must be imported AFTER all the api members
+# have been added to the mantid.api namespace above!
+###############################################################################
+from mantid.api import _adsimports
