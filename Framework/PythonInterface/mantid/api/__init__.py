@@ -40,4 +40,6 @@ _workspaceops.attach_tableworkspaceiterator()
 # Must be imported AFTER all the api members
 # have been added to the mantid.api namespace above!
 ###############################################################################
+import sys
+print("Working with PYTHONPATH\n", "\n".join(sys.path))
 from mantid.api import _adsimports
