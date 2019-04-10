@@ -13,20 +13,6 @@ from save_python import getWidgetIfOpen
 
 
 Name = "Frequency_Domain_Analysis_2"
-"""
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setMovable is only available in Qt4. Use setSectionsMovable instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-setMovable is only available in Qt4. Use setSectionsMovable instead.
-setResizeMode is only available in Qt4. Use setSectionResizeMode instead.
-"""
 
 
 def main():
