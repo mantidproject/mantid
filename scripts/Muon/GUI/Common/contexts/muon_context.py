@@ -166,9 +166,17 @@ class MuonContext(object):
 
         return [det for det in range(1, self.data_context.num_detectors) if det not in detectors_in_group]
 
+    # Get the groups/pairs for active WS
+    def getGroupedWorkspaceNames(self):
+        run_numbers = self.data_context.current_runs
+        runs = [
+            wsName.get_raw_data_workspace_name(self, run_list_to_string(run_number), period=str(period + 1))
+            for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
+        return runs
+
     @property
     def first_good_data(self):
         if self.gui_context['FirstGoodDataFromFile']:
-            return self.data_context.get_loaded_data_for_run(self.current_runs[-1])["FirstGoodData"]
+            return self.data_context.get_loaded_data_for_run(self.data_context.current_runs[-1])["FirstGoodData"]
         else:
             return self.gui_context['FirstGoodData']

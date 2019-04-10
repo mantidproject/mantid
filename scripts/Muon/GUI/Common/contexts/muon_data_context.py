@@ -193,6 +193,15 @@ class MuonDataContext(object):
             n_det = 1
         return n_det
 
+    @property
+    def num_points(self):
+        workspace_lengths = [len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0]
+                        .workspace.readX(0)) for run in self.current_runs]
+        if workspace_lengths:
+            return max(workspace_lengths)
+        else:
+            return 1
+
     def num_periods(self, run):
         return len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'])
 

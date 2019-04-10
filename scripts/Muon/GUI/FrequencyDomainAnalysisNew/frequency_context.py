@@ -38,16 +38,7 @@ class FrequencyContext(object):
 
     # get methods
     def getNPoints(self):
-        run_numbers = self.context.data_context.current_runs
-        ws = [wsName.get_raw_data_workspace_name(self.context, run_list_to_string(run_number)) for run_number in
-              run_numbers]
-        self.N_points = 1
-        for name in ws:
-            data = mantid.AnalysisDataService.retrieve(name)
-            if self.N_points < len(data.readX(0)):
-                self.N_points = len(data.readX(0))
-
-        return self.N_points
+        return self.context.data_context.num_points
 
     def getCurrentWS(self):
         return self.runName, self.options

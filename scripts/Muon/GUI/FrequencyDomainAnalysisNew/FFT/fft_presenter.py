@@ -18,10 +18,10 @@ class FFTPresenter(object):
     This class links the FFT model to the GUI
     """
 
-    def __init__(self, view, alg, context):
+    def __init__(self, view, alg, load):
         self.view = view
         self.alg = alg
-        self.context = context
+        self.load = load
         self.thread = None
         # set data
         self.getWorkspaceNames()
@@ -53,16 +53,16 @@ class FFTPresenter(object):
 
     def getWorkspaceNames(self):
         name = self.view.getInputWS()
-        final_options = self.context.get_workspace_names_for_FFT_analysis(self.view.isRaw())
+        final_options = self.load.get_workspace_names_for_FFT_analysis(self.view.isRaw())
 
         self.view.addItems(final_options)
-
+        self.view.removeRe('PhaseQuad')
         self.removePhaseFromIM(final_options)
 
         self.view.setReTo(name)
 
     def handle_use_raw_data_changed(self):
-        if not self.view.isRaw() and not self.context._do_rebin():
+        if not self.view.isRaw() and not self.load._do_rebin():
             self.view.set_raw_checkbox_state(True)
             self.view.warning_popup('No rebin options specified')
             return
@@ -73,6 +73,7 @@ class FFTPresenter(object):
         for option in final_options:
             if "PhaseQuad" in option:
                 self.view.removeIm(option)
+
 
     # functions
     def phaseCheck(self):
@@ -154,10 +155,10 @@ class FFTPresenter(object):
         phaseTable["newTable"] = self.view.isNewPhaseTable()
         phaseTable["FirstGoodData"] = self.view.getFirstGoodData()
         phaseTable["LastGoodData"] = self.view.getLastGoodData()
-        phaseTable["Instrument"] = self.context.data_context.instrument()
+        phaseTable["Instrument"] = self.load.data_context.instrument
         phaseTable["InputWorkspace"] = self.clean(
             self.view.getInputWS())
-        phaseTable['MaskedDetectors'] = self.context.get_detectors_excluded_from_default_grouping_tables()
+        phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
 
         return phaseTable
 

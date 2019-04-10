@@ -20,7 +20,7 @@ class TransformWidget(QtGui.QWidget):
 
     def __init__(self, load, parent=None):
         super(TransformWidget, self).__init__(parent)
-        self._fft = FFTWidget(context=load, parent=self)
+        self._fft = FFTWidget(load=load, parent=self)
         self._maxent = MaxEntWidget(load=load, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
