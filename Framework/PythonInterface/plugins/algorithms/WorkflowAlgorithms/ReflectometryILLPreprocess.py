@@ -528,7 +528,19 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if slit2width is None or slit3width is None:
             self.log().warning('Slit information not found in sample logs. Slit normalisation disabled.')
             return ws
-        f = slit2width.value * slit3width.value
+        slit3w = slit3width.value
+        if self._instrumentName != 'D17':
+            bgs3 = float(run.getProperty('BGS3.value').value)
+            if bgs3 >= 150.:
+                slit3w += 0.08
+            elif 150. > bgs3 >= 50.:
+                slit3w += 0.06
+            elif -50. > bgs3 >= -150.:
+                slit3w -= 0.12
+            elif bgs3 < -150.:
+                slit3w -= 0.24
+        slit2w = slit2width.value
+        f = slit2w * slit3w
         normalisedWSName = self._names.withSuffix('normalised_to_slits')
         normalisedWS = Scale(
             InputWorkspace=ws,
