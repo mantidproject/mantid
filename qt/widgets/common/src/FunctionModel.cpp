@@ -47,7 +47,7 @@ FunctionModel::FunctionModel(const QString & funStr, int nDomains)
 
 bool FunctionModel::isMultiDomain() const
 {
-  return getNumberDomains() > 0;
+  return getNumberDomains() > 1;
 }
 
 int FunctionModel::getNumberDomains() const
