@@ -18,10 +18,10 @@ class FFTPresenter(object):
     This class links the FFT model to the GUI
     """
 
-    def __init__(self, view, alg, load):
+    def __init__(self, view, alg, context):
         self.view = view
         self.alg = alg
-        self.load = load
+        self.context = context
         self.thread = None
         # set data
         self.getWorkspaceNames()
@@ -30,8 +30,7 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
 
-        if self.load.version == 2:
-            self.view.setup_raw_checkbox_changed(self.handle_use_raw_data_changed)
+        self.view.setup_raw_checkbox_changed(self.handle_use_raw_data_changed)
 
     def cancel(self):
         if self.thread is not None:
@@ -54,20 +53,16 @@ class FFTPresenter(object):
 
     def getWorkspaceNames(self):
         name = self.view.getInputWS()
-        if self.load.version == 2:
-            final_options = self.load.getWorkspaceNames(self.view.isRaw())
-        else:
-            final_options = self.load.getWorkspaceNames()
+        final_options = self.context.get_workspace_names_for_FFT_analysis(self.view.isRaw())
+
         self.view.addItems(final_options)
 
-        if self.load.version == 2:
-            self.view.removeRe("PhaseQuad")
-            self.removePhaseFromIM(final_options)
+        self.removePhaseFromIM(final_options)
 
-            self.view.setReTo(name)
+        self.view.setReTo(name)
 
     def handle_use_raw_data_changed(self):
-        if not self.view.isRaw() and not self.load.context._do_rebin():
+        if not self.view.isRaw() and not self.context._do_rebin():
             self.view.set_raw_checkbox_state(True)
             self.view.warning_popup('No rebin options specified')
             return
@@ -103,83 +98,91 @@ class FFTPresenter(object):
     # then executes them (see fft_model to see the order
     # of execution
     def handleButton(self):
-        if self.load.hasDataChanged():
-            self.getWorkspaceNames()
-            return
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
         self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished)
 
-        # make some inputs
-        inputs = {}
-        inputs["Run"] = self.load.getRunName()
+        inputs = self.create_algorithm_inputs()
 
-        # for new version 2 of FDA
-        if self.load.version == 2:
-            inputs["Run"] = self.getRun(
-                self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
-        # do apodization and padding to real data
-
-        preInputs = self.view.initAdvanced()
-
-        if "PhaseQuad" in self.view.getWS():
-            phaseTable = {}
-            phaseTable["newTable"] = self.view.isNewPhaseTable()
-            phaseTable["FirstGoodData"] = self.view.getFirstGoodData()
-            phaseTable["LastGoodData"] = self.view.getLastGoodData()
-            phaseTable["Instrument"] = self.load.getInstrument()
-            phaseTable["InputWorkspace"] = "MuonAnalysis"
-            if self.load.version == 2:
-                phaseTable["InputWorkspace"] = self.clean(
-                    self.view.getInputWS())
-                phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
-
-            inputs["phaseTable"] = phaseTable
-            self.view.RePhaseAdvanced(preInputs)
-        else:
-            self.view.ReAdvanced(preInputs)
-            if self.view.isRaw() and self.load.version == 1:
-                self.view.addRaw(preInputs, "InputWorkspace")
-            if self.load.version == 2:
-                preInputs["InputWorkspace"] = self.clean(
-                    self.view.getInputWS())
-        inputs["preRe"] = preInputs
-
-        # do apodization and padding to complex data
-        if self.view.isComplex() and "PhaseQuad" not in self.view.getWS():
-            ImPreInputs = self.view.initAdvanced()
-            self.view.ImAdvanced(ImPreInputs)
-            if self.view.isRaw() and self.load.version == 1:
-                self.view.addRaw(ImPreInputs, "InputWorkspace")
-
-            if self.load.version == 2:
-                ImPreInputs["InputWorkspace"] = self.clean(
-                    self.view.getInputImWS())
-
-            inputs["preIm"] = ImPreInputs
-
-        # do FFT to transformed data
-        FFTInputs = self.get_FFT_input()
-        if "PhaseQuad" in self.view.getWS():
-            self.view.getFFTRePhase(FFTInputs)
-            if self.view.isComplex():
-                self.view.getFFTImPhase(FFTInputs)
-            if self.load.version == 2:
-                FFTInputs["OutputWorkspace"] = self.getRun(
-                    self.view.getInputWS()) + ";PhaseQuad;FFT"
-        else:
-            if self.load.version == 2:
-                FFTInputs["OutputWorkspace"] = self.getRun(
-                    self.view.getInputWS()) + ";FFT"
-            if self.view.isRaw() and self.load.version == 1:
-                self.view.addRaw(FFTInputs, "OutputWorkspace")
-        inputs["FFT"] = FFTInputs
         try:
             self.thread.loadData(inputs)
             self.thread.start()
             self.view.setPhaseBox()
         except:
             pass
+
+    def create_algorithm_inputs(self):
+        # make some inputs
+        inputs = {}
+
+        inputs["Run"] = self.get_input_run()
+        # do apodization and padding to real data
+
+        inputs["preRe"] = self.get_pre_inputs()
+
+        if "PhaseQuad" in self.view.getWS():
+            inputs['phaseTable'] = self.get_phase_table_inputs()
+
+        # do apodization and padding to complex data
+        if self.view.isComplex() and "PhaseQuad" not in self.view.getWS():
+            inputs['preIm'] = self.get_imaginary_inputs()
+
+        # do FFT to transformed data
+        inputs['FFT'] = self.get_fft_inputs()
+
+        return inputs
+
+    def get_input_run(self):
+        return self.getRun(
+            self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
+
+    def get_pre_inputs(self):
+        preInputs = self.view.initAdvanced()
+
+        if "PhaseQuad" in self.view.getWS():
+            preInputs['InputWorkspace'] = "__phaseQuad__"
+            preInputs['OutputWorkspace'] = "__ReTmp__"
+        else:
+            preInputs['OutputWorkspace'] = "__ReTmp__"
+            preInputs["InputWorkspace"] = self.clean(
+                self.view.getInputWS())
+
+        return preInputs
+
+    def get_phase_table_inputs(self):
+        phaseTable = {}
+        phaseTable["newTable"] = self.view.isNewPhaseTable()
+        phaseTable["FirstGoodData"] = self.view.getFirstGoodData()
+        phaseTable["LastGoodData"] = self.view.getLastGoodData()
+        phaseTable["Instrument"] = self.context.data_context.instrument()
+        phaseTable["InputWorkspace"] = self.clean(
+            self.view.getInputWS())
+        phaseTable['MaskedDetectors'] = self.context.get_detectors_excluded_from_default_grouping_tables()
+
+        return phaseTable
+
+    def get_imaginary_inputs(self):
+        ImPreInputs = self.view.initAdvanced()
+        ImPreInputs['OutputWorkspace'] = "__ImTmp__"
+        ImPreInputs["InputWorkspace"] = self.clean(
+            self.view.getInputImWS())
+
+        return ImPreInputs
+
+    def get_fft_inputs(self):
+        FFTInputs = self.get_FFT_input()
+        if "PhaseQuad" in self.view.getWS():
+            self.view.getFFTRePhase(FFTInputs)
+            if self.view.isComplex():
+                self.view.getFFTImPhase(FFTInputs)
+
+            FFTInputs["OutputWorkspace"] = self.getRun(
+                self.view.getInputWS()) + ";PhaseQuad;FFT"
+        else:
+            FFTInputs["OutputWorkspace"] = self.getRun(
+                self.view.getInputWS()) + ";FFT"
+
+        return FFTInputs
 
     # kills the thread at end of execution
     def handleFinished(self):
@@ -188,12 +191,8 @@ class FFTPresenter(object):
         self.thread = None
 
     def get_FFT_input(self):
-        FFTInputs = {}
-        if self.load.version == 2:
-            FFTInputs = self.view.initFFTInput(
-                self.clean(self.view.getInputWS()))
-        else:
-            FFTInputs = self.view.initFFTInput()
+        FFTInputs = self.view.initFFTInput(
+            self.clean(self.view.getInputWS()))
 
         if self.view.isAutoShift():
             FFTInputs["AutoShift"] = True
@@ -204,9 +203,7 @@ class FFTPresenter(object):
         return FFTInputs
 
     def clean(self, name):
-        if "PhaseQuad" in name and not self.load.version == 2:
-            return self.getRun(name) + "_raw_data"
-        elif "PhaseQuad" in name:
+        if "PhaseQuad" in name:
             return self.getRun(name)
         return name
 

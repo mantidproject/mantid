@@ -15,14 +15,14 @@ from PyQt4 import QtGui
 
 class FFTWidget(QtGui.QWidget):
 
-    def __init__(self, load, parent=None):
+    def __init__(self, context, parent=None):
         super(FFTWidget, self).__init__(parent)
         view = FFTView(parent)
 
         fft = FFTModel()
         model = FFTWrapper(fft)
 
-        self._presenter = FFTPresenter(view=view, alg=model, load=load)
+        self._presenter = FFTPresenter(view=view, alg=model, context=context)
 
     @property
     def presenter(self):

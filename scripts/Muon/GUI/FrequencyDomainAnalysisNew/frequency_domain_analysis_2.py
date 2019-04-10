@@ -74,7 +74,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
         freq_context = FrequencyContext(self.context)
-        self.transform = TransformWidget(load=freq_context, parent=self)
+        self.transform = TransformWidget(self.context, parent=self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget()
