@@ -89,9 +89,9 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         self.assertEquals(self._result_group.getNames()[0], self._input_name)
 
     def test_that_the_workspaces_set_up_have_the_correct_names(self):
-        self.assertEqual(self._input_workspace.getName(), self._input_name)
-        self.assertEqual(self._single_fit_workspace.getName(), self._single_fit_name)
-        self.assertEqual(self._result_group.getName(), self._result_group_name)
+        self.assertEqual(self._input_workspace.name(), self._input_name)
+        self.assertEqual(self._single_fit_workspace.name(), self._single_fit_name)
+        self.assertEqual(self._result_group.name(), self._result_group_name)
 
     def test_that_the_algorithm_does_not_throw_when_given_valid_properties(self):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._output_name)
