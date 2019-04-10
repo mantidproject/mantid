@@ -1,4 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
+	<file alias="interface-properties.xml">Indirect_Interface_Properties.xml</file>
 </qresource>
 </RCC>

@@ -18,7 +18,10 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#include <QDomDocument>
+#include <QFile>
 #include <QMessageBox>
+#include <QtXml>
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -212,10 +215,20 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
 std::string
 IndirectTab::getInterfaceProperty(std::string const &interfaceName,
                                   std::string const &propertyName) const {
-  auto const directory =
-      ConfigService::Instance().getString("instrumentDefinition.directory");
-  auto const filepath = directory + "Indirect_Interface_Properties.xml";
-  return getAttributeFromFile(filepath, interfaceName, propertyName);
+  // auto const directory =
+  //    ConfigService::Instance().getString("instrumentDefinition.directory");
+  // auto const filepath = directory + "Indirect_Interface_Properties.xml";
+  // return getAttributeFromFile(filepath, interfaceName, propertyName);
+
+  // QDomDocument xmlBOM;
+  QFile file(":/interface-properties.xml");
+  // if (!file.open(QIODevice::ReadOnly)) {
+  //  g_log.warning("Error while loading file.");
+  //  return "";
+  //}
+  // Set data into the QDomDocument before processing
+  // xmlBOM.setContent(&file);
+  return "";
 }
 
 QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {

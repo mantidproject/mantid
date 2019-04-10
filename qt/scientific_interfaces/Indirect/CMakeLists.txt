@@ -301,6 +301,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                      @loader_path/../../plugins/qt4
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
-
+    
 # Testing target
 add_subdirectory(test)
