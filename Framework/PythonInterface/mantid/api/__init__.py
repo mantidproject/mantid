@@ -26,21 +26,3 @@ _api = import_mantid_cext('._api', 'mantid.api', globals())
 ###############################################################################
 from mantid.api._aliases import *
 
-###############################################################################
-# Attach additional operators to workspaces
-###############################################################################
-from mantid.api import _workspaceops
-
-_workspaceops.attach_binary_operators_to_workspace()
-_workspaceops.attach_unary_operators_to_workspace()
-_workspaceops.attach_tableworkspaceiterator()
-###############################################################################
-# Add importAll member to ADS.
-#
-# Must be imported AFTER all the api members
-# have been added to the mantid.api namespace above!
-###############################################################################
-import sys
-import logging
-logging.critical("Working with PYTHONPATH\n", "\n".join(sys.path))
-from mantid.api import _adsimports
