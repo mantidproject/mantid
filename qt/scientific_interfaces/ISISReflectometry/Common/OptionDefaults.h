@@ -20,7 +20,7 @@ namespace CustomInterfaces {
 */
 class OptionDefaults {
 public:
-  OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
+  explicit OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
 
   template <typename T>
   T getValueOrDefault(std::string const &propertyName,
