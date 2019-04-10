@@ -133,6 +133,10 @@ def plot_from_names(names, errors, overplot, fig=None):
     :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
+    if fig and len(fig.axes) > 1:
+        LOGGER.warning("Cannot plot workspace on top of Matplotlib subplots.")
+        return None
+
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
         selection = get_spectra_selection(workspaces)
