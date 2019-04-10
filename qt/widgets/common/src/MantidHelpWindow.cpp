@@ -380,7 +380,8 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
     m_collectionFile = path.toStdString();
     return;
   } else {
-    g_log.debug() << "QHelp Collection file " << path.toStdString() << " not found\n";
+    g_log.debug() << "QHelp Collection file " << path.toStdString()
+                  << " not found\n";
   }
 
   // try where the builds will put it for a single configuration build
