@@ -12,14 +12,15 @@ import unittest
 # from mantid.kernel import DateAndTime
 # from mantid.api import EventType
 from mantid.api import CompositeFunction, FunctionFactory
-from mantid._plugins import _curvefitting
+from mantid._plugins import ProductFunction
+
 
 class ProductFunctionTest(unittest.TestCase):
 
     def test_type(self):
         p = FunctionFactory.createFunction("ProductFunction")
-        self.assertTrue( isinstance(p,_curvefitting.ProductFunction) )
-        self.assertTrue( isinstance(p,CompositeFunction) )
+        self.assertTrue(isinstance(p, ProductFunction))
+        self.assertTrue(isinstance(p, CompositeFunction))
 
     def test_length(self):
         p = FunctionFactory.createFunction("ProductFunction")
@@ -31,6 +32,7 @@ class ProductFunctionTest(unittest.TestCase):
         p.add(g)
         p.add(g)
         self.assertEquals(len(p), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

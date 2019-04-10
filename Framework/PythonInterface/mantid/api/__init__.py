@@ -19,7 +19,28 @@ from __future__ import absolute_import
 from mantid.utils import import_mantid_cext
 
 # insert all the classes from _api in the mantid.api namespace
-_api = import_mantid_cext('._api', 'mantid.api', globals())
+import_mantid_cext('._api', 'mantid.api', globals())
+
+###############################################################################
+# Attach additional operators to workspaces
+###############################################################################
+import sys
+import logging
+logging.critical("Working with PYTHONPATH\n{}".format("\n".join(sys.path)))
+
+from mantid.api import _workspaceops
+
+_workspaceops.attach_binary_operators_to_workspace()
+_workspaceops.attach_unary_operators_to_workspace()
+_workspaceops.attach_tableworkspaceiterator()
+###############################################################################
+# Add importAll member to ADS.
+#
+# Must be imported AFTER all the api members
+# have been added to the mantid.api namespace above!
+###############################################################################
+from mantid.api import _adsimports
+
 
 ###############################################################################
 # Make aliases accessible in this namespace

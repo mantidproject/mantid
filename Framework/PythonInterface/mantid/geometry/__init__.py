@@ -18,7 +18,7 @@ from __future__ import absolute_import
 ###############################################################################
 from mantid.utils import import_mantid_cext
 
-_geometry = import_mantid_cext('._geometry', 'mantid.geometry', globals())
+import_mantid_cext('._geometry', 'mantid.geometry', globals())
 
 ###############################################################################
 # Make aliases accessible in this namespace

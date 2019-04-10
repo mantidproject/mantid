@@ -26,4 +26,4 @@ from __future__ import absolute_import
 ###############################################################################
 from mantid.utils import import_mantid_cext
 
-_dataobjects = import_mantid_cext('._dataobjects', 'mantid.dataobjects', globals())
+import_mantid_cext('._dataobjects', 'mantid.dataobjects', globals())

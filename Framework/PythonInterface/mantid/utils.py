@@ -25,22 +25,24 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
             try:
                 # import from PACKAGE.MODULE, this is used for mantid packages, where the .pyd files
                 # are placed at e.g. `from mantid.kernel import _kernel`
-                lib = import_module(modulename, package)
+                # lib = import_module(modulename, package)
+                exec "from {}{} import *".format(package, modulename) in caller_globals
             except ImportError as e1:
                 # import relative to current working directory, this is essentially doing `import _kernel`
                 try:
-                    lib = import_module(modulename.lstrip('.'))
+                    exec "from {} import *".format(modulename.lstrip('.')) in caller_globals
                 except ImportError as e2:
                     msg = 'import of "{}" failed with "{}"'
                     msg = 'First ' + msg.format(modulename, e1) \
                         + '. Second ' + msg.format(modulename.lstrip('.'), e2)
                     raise ImportError(msg)
         else:
-            lib = import_module(modulename)
+            pass
+            # lib = import_module(modulename)
 
-        if caller_globals:
-            caller_globals.update(lib.__dict__)
-        return lib
+        # if caller_globals:
+        #     caller_globals.update(lib.__dict__)
+        return None
 
 
 @contextmanager

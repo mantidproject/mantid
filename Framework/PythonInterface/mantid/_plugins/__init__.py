@@ -27,4 +27,4 @@ from __future__ import (absolute_import, division,
 ###############################################################################
 from mantid.utils import import_mantid_cext
 
-_curvefitting = import_mantid_cext('._curvefitting', 'mantid._plugins', globals())
+import_mantid_cext('._curvefitting', 'mantid._plugins', globals())

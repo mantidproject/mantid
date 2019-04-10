@@ -35,9 +35,6 @@ _mantidsite.set_NEXUSLIB_var()
 from mantid.utils import import_mantid_cext
 
 # insert all the classes from _kernel in the mantid.kernel namespace
-_kernel = import_mantid_cext('._kernel', 'mantid.kernel', globals())
+import_mantid_cext('._kernel', 'mantid.kernel', globals())
 
 from mantid.kernel._aliases import *
-
-# make the version_str function available to importers
-version_str = _kernel.version_str
