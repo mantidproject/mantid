@@ -183,6 +183,23 @@ class FunctionsTest(TestCase):
         ax = plt.gca()
         self.assertEqual("My Title", ax.get_title())
 
+    def test_different_line_colors_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        line_colors = [line.get_color() for line in ax.get_lines()]
+        self.assertNotEqual(line_colors[0], line_colors[1])
+
+    def test_workspace_tracked_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertIn(ws.name(), ax.tracked_workspaces)
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):

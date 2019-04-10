@@ -23,7 +23,6 @@ except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
 from matplotlib.gridspec import GridSpec
 from matplotlib.legend import Legend
-from matplotlib.lines import Line2D
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace

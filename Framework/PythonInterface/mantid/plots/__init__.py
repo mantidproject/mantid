@@ -26,7 +26,6 @@ from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
 from matplotlib.container import Container
 from matplotlib.image import AxesImage
-from matplotlib.legend import Legend
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
@@ -151,15 +150,16 @@ class MantidAxes(Axes):
 
     def add_artist_correctly(self, artist):
         """
-        Add an artist to to an axes via the correct function. MantidAxes
-        will not correctly track artists added via :code:`add_artist`.
-        They must be added via the correct function for autoscaling to
-        work.
+        Add an artist via the correct function.
+        MantidAxes will not correctly track artists added via :code:`add_artist`.
+        They must be added via the correct function for features like
+        autoscaling to work.
 
         :param artist: A Matplotlib Artist object
         """
         artist.set_transform(self.transData)
-        artist.remove()
+        if artist.axes:
+            artist.remove()
         if isinstance(artist, Line2D):
             self.add_line(artist)
         elif isinstance(artist, Collection):
@@ -181,15 +181,16 @@ class MantidAxes(Axes):
         Returns a MantidAxes from an Axes object.
         Transfers all transferable artists from a Matplotlib.Axes
         instance to a MantidAxes instance on the same figure. Then
-        removes the Matplotlib.Axes instance from the figure.
+        removes the Matplotlib.Axes.
 
         :param ax: An Axes object
         :param ignore_artists: List of Artist types to ignore
         :returns: A MantidAxes object
         """
-        fig = ax.figure
+        prop_cycler = ax._get_lines.prop_cycler  # tracks line color cycle
         artists = ax.get_children()
-        mantid_axes = fig.add_subplot(111, projection='mantid', label='mantid')
+        mantid_axes = ax.figure.add_subplot(111, projection='mantid',
+                                            label='mantid')
         for artist in artists:
             if not any(isinstance(artist, artist_type) for artist_type in
                        ignore_artists):
@@ -198,6 +199,7 @@ class MantidAxes(Axes):
                 except NotImplementedError:
                     pass
         mantid_axes.set_title(ax.get_title())
+        mantid_axes._get_lines.prop_cycler = prop_cycler
         ax.remove()
         return mantid_axes
 
