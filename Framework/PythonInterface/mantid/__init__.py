@@ -128,6 +128,9 @@ from mantid import dataobjects as _dataobjects
 ###############################################################################
 # Attach additional operators to workspaces
 ###############################################################################
+import sys
+import logging
+logging.critical("Working with PYTHONPATH\n{}".format("\n".join(sys.path)))
 
 from mantid.api import _workspaceops
 
@@ -140,9 +143,6 @@ _workspaceops.attach_tableworkspaceiterator()
 # Must be imported AFTER all the api members
 # have been added to the mantid.api namespace above!
 ###############################################################################
-import sys
-import logging
-logging.critical("Working with PYTHONPATH\n{}".format("\n".join(sys.path)))
 from mantid.api import _adsimports
 
 # Make the aliases from each module accessible in the mantid namespace
