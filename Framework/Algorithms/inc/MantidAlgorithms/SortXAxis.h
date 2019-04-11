@@ -30,36 +30,32 @@ public:
 
 private:
   void init() override;
-  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  std::vector<std::size_t> createIndices(const size_t);
+  std::vector<std::size_t> createIndexes(const size_t);
 
-  void sortIndicesByX(std::vector<std::size_t> &workspaceIndices,
+  void sortIndicesByX(std::vector<std::size_t> &workspaceIndecies,
                       std::string order,
                       const Mantid::API::MatrixWorkspace &inputWorkspace,
                       unsigned int specNum);
 
   void
-  copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndices,
+  copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
                              const Mantid::API::MatrixWorkspace &inputWorkspace,
                              Mantid::API::MatrixWorkspace &outputWorkspace,
-                             unsigned int SpecNum);
+                             unsigned int SpecNum, bool isAProperHistogram);
 
   void copyXandDxToOutputWorkspace(
-      std::vector<std::size_t> &workspaceIndices,
+      std::vector<std::size_t> &workspaceIndecies,
       const Mantid::API::MatrixWorkspace &inputWorkspace,
       Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum);
 
-  void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndices,
+  void copyToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
                              const Mantid::API::MatrixWorkspace &inputWorkspace,
                              Mantid::API::MatrixWorkspace &outputWorkspace,
-                             unsigned int specNum);
+                             unsigned int specNum, bool isAProperHistogram);
 
-  template <typename Comparator>
-  bool isItSorted(Comparator const &compare,
-                  Mantid::API::MatrixWorkspace_const_sptr inputWorkspace) const;
-  std::string determineIfHistogramIsValid(
-      Mantid::API::MatrixWorkspace_const_sptr inputWorkspace) const;
+  bool determineIfHistogramIsValid(
+      const Mantid::API::MatrixWorkspace &inputWorkspace);
 };
 
 } // namespace Algorithms
