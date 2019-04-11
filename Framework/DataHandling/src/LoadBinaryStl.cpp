@@ -107,7 +107,8 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,
     streamReader >> xVal;
     streamReader >> yVal;
     streamReader >> zVal;
-    Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
+    // mesh objects are stored in metres, so convert to that
+    auto vec = createScaledV3D(xVal,yVal,zVal);
     auto vertexPair = std::pair<Kernel::V3D, uint32_t>(vec, vertexCount);
     auto emplacementResult = vertexSet.insert(vertexPair);
     // check if the value was new to the map and increase the value to assign to
