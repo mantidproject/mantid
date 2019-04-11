@@ -212,8 +212,9 @@ void LoadSampleShape::exec() {
       scaleType = centimetres;
     } else if (scaleProperty == "mm") {
       scaleType = milimetres;
-    }else {
-      throw std::invalid_argument(scaleProperty +" is not an accepted scale of stl file.");
+    } else {
+      throw std::invalid_argument(scaleProperty +
+                                  " is not an accepted scale of stl file.");
     }
     auto asciiStlReader = LoadAsciiStl(filename, scaleType);
     auto binaryStlReader = LoadBinaryStl(filename, scaleType);

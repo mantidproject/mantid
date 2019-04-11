@@ -76,8 +76,8 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
 bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
                                    Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
-    readSTLVertex(file, v1) ;
-    readSTLVertex(file, v2) ;
+    readSTLVertex(file, v1);
+    readSTLVertex(file, v2);
     readSTLVertex(file, v3);
   } else {
     return false; // End of file
@@ -104,7 +104,7 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
     }
   }
   throw Kernel::Exception::ParseError("Error on reading STL triangle",
-                                          m_filename, m_lineNumber);
+                                      m_filename, m_lineNumber);
 }
 
 // Read, check and ignore line in STL file. Return true if line is read

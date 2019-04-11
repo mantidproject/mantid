@@ -43,9 +43,12 @@ enum ScaleUnits { metres, centimetres, milimetres };
 
 class DLLExport LoadStl {
 public:
-  LoadStl(std::string filename, ScaleUnits scaleType) : m_filename(filename),  m_scaleType(scaleType), m_setMaterial(false){}
-  LoadStl(std::string filename, ScaleUnits scaleType, ReadMaterial::MaterialParameters params)
-      : m_filename(filename),  m_scaleType(scaleType), m_setMaterial(true), m_params(params) {}
+  LoadStl(std::string filename, ScaleUnits scaleType)
+      : m_filename(filename), m_scaleType(scaleType), m_setMaterial(false) {}
+  LoadStl(std::string filename, ScaleUnits scaleType,
+          ReadMaterial::MaterialParameters params)
+      : m_filename(filename), m_scaleType(scaleType), m_setMaterial(true),
+        m_params(params) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
   virtual ~LoadStl() = default;
 
@@ -62,10 +65,7 @@ protected:
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,
                      V3DTrueComparator>
       vertexSet;
-  
 };
-
-
 
 } // namespace DataHandling
 } // namespace Mantid
