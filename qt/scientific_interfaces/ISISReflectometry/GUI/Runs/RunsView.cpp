@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "SearchModel.h"
+#include <QMenu>
 #include <QMessageBox>
 
 namespace MantidQt {
@@ -107,10 +108,7 @@ void RunsView::missingRunsToTransfer() {
  * @param isProcessing: Whether processing is running
  */
 void RunsView::updateMenuEnabledState(bool isProcessing) {
-
-  for (auto &command : m_commands) {
-    command->updateEnabledState(isProcessing);
-  }
+  UNUSED_ARG(isProcessing)
 }
 
 /**

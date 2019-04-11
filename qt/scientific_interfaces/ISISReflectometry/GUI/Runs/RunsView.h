@@ -11,7 +11,6 @@
 #include "GUI/RunsTable/RunsTableView.h"
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include "ui_RunsWidget.h"
@@ -117,9 +116,8 @@ private:
   RunsViewSubscriber *m_notifyee;
 
   boost::shared_ptr<SearchModel> m_searchModel;
-  std::vector<std::unique_ptr<DataProcessor::QtCommandAdapter>> m_commands;
 
-  // the interface (uses actions owned by m_commands)
+  // the interface
   Ui::RunsWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;

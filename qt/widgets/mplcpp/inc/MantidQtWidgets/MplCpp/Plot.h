@@ -7,7 +7,6 @@
 #ifndef MPLCPP_PLOT_H
 #define MPLCPP_PLOT_H
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
 
@@ -18,7 +17,6 @@
 #include <boost/optional.hpp>
 #include <vector>
 
-using namespace Mantid::API;
 using namespace boost;
 
 namespace MantidQt {

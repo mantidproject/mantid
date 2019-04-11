@@ -6,12 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/MplCpp/Plot.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/Python/QHashToDict.h"
 
-using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 
 namespace MantidQt {
