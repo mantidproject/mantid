@@ -227,7 +227,7 @@ void SaveISISNexus::exec() {
   selog();
 
   NXclosegroup(handle); // raw_data_1
-  status = NXclose(&handle);
+  NXclose(&handle);
 
   delete m_isisRaw;
 }

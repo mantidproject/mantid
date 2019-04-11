@@ -254,7 +254,6 @@ void PatchBBY::exec() {
 
         float tmp_float;
         int32_t tmp_int32 = 0;
-        std::string tmp_str;
 
         if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
           logContentNewBuffer << "Bm1Counts = " << tmp_int32 << '\n';
