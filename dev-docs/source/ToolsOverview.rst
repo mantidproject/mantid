@@ -301,7 +301,7 @@ This will format the file using the config file in the mantid directory.
 
 There is an official visual studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
 
-To format on all the CMakeLists run the following from within the mantid directory:
+To format on all the CMakeLists run the following from within the mantid source folder:
 
 .. code::
 
@@ -311,7 +311,7 @@ To format on all the CMakeLists run the following from within the mantid directo
 	for path, subdirs, files in os.walk(dir):
 		for file in files:
 			if file.endswith("CMakeLists.txt"):
-				cmakefile = path + "\\" + file
+				cmakefile = os.path.join(path, file)
 				print("Formatting " + cmakefile)
-				os.system('python -m cmake_format -c ' + dir +'\.cmake-format.json -i ' + cmakefile)
+				os.system('python -m cmake_format -c ' + os.path.join(dir, '.cmake-format.json') +' -i ' + cmakefile)
 
