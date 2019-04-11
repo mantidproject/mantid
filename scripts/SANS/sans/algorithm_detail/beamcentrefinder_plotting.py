@@ -4,29 +4,27 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import sys
 
-PYQT4 = False
+PYQT5 = False
 IN_MANTIDPLOT = False
-WITHOUT_GUI = False
+
 try:
-    from qtpy import PYQT4
-except ImportError:
-    pass  # it is already false
-if PYQT4:
-    try:
-        import mantidplot
-        IN_MANTIDPLOT = True
-    except (Exception, Warning):
-        pass
+    import mantidplot
+    IN_MANTIDPLOT = True
+except (Exception, Warning):
+    pass
 else:
-    try:
-        from mantidqt.plotting.functions import plot
-    except ImportError:
-        WITHOUT_GUI = True
+    if "workbench.app.mainwindow" in sys.modules:
+        PYQT5 = True
+        try:
+            from mantidqt.plotting.functions import plot
+        except ImportError:
+            pass
 
 
 def can_plot_beamcentrefinder():
-    return not PYQT4 or IN_MANTIDPLOT
+    return PYQT5 or IN_MANTIDPLOT
 
 
 def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
@@ -40,9 +38,8 @@ def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
     if not isinstance(output_workspaces, list):
         output_workspaces = [output_workspaces]
 
-    if not WITHOUT_GUI:
-        plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
-             plot_kwargs=plot_kwargs, window_title=title)
+    plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
+         plot_kwargs=plot_kwargs, window_title=title)
 
 
 def _plot_quartiles(output_workspaces, sample_scatter):
@@ -55,7 +52,7 @@ def _plot_quartiles(output_workspaces, sample_scatter):
 
 
 def plot_workspace_quartiles(output_workspaces, sample_scatter):
-    if not PYQT4:
+    if PYQT5:
         _plot_quartiles_matplotlib(output_workspaces, sample_scatter)
     elif IN_MANTIDPLOT:
         _plot_quartiles(output_workspaces, sample_scatter)
