@@ -34,7 +34,7 @@
 #include <QClipboard>
 //#include <QFileInfo>
 //#include <QGridLayout>
-//#include <QHBoxLayout>
+#include <QHBoxLayout>
 //#include <QInputDialog>
 //#include <QMenu>
 #include <QMessageBox>
@@ -67,6 +67,9 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<
 
 {
   m_view = new FunctionTreeView(this, multi, categories);
+  QHBoxLayout *layout = new QHBoxLayout(this);
+  layout->setMargin(0);
+  layout->addWidget(m_view);
 }
 
 /**
@@ -389,40 +392,6 @@ double FunctionBrowser::getLocalParameterError(const QString &parName,
   //return m_localParameterValues[parName][i].error;
   return 0.0;
 }
-
-///**
-// * Init a local parameter. Define initial values for all datasets.
-// * @param parName :: Name of parametere to init.
-// */
-//void FunctionBrowser::initLocalParameter(const QString &parName) const {
-//  auto nData = getNumberOfDatasets();
-//  if (nData == 0) {
-//    nData = 1;
-//  }
-//  auto oldValues = m_localParameterValues.find(parName);
-//  if (oldValues != m_localParameterValues.end() && !oldValues->isEmpty()) {
-//    auto nOldData = oldValues->size();
-//    if (nOldData > nData) {
-//      oldValues->erase(oldValues->begin() + nData, oldValues->end());
-//    } else if (nOldData < nData) {
-//      oldValues->insert(oldValues->end(), nData - nOldData, oldValues->back());
-//    }
-//  } else {
-//    double value = getParameter(parName);
-//    QVector<LocalParameterData> values(nData, LocalParameterData(value));
-//    m_localParameterValues[parName] = values;
-//  }
-//}
-
-///// Make sure that the parameter is initialized
-///// @param parName :: Name of a parameter to check
-//void FunctionBrowser::checkLocalParameter(const QString &parName) const {
-//  if (!m_localParameterValues.contains(parName) ||
-//      m_localParameterValues[parName].size() != getNumberOfDatasets()) {
-//    initLocalParameter(parName);
-//  }
-//}
-
 
 void FunctionBrowser::resetLocalParameters() {}
 
@@ -804,6 +773,8 @@ void FunctionBrowser::setGlobalParameters(QStringList &globals) {}
 boost::optional<QString> FunctionBrowser::currentFunctionIndex() { return boost::optional<QString>(); }
 
 QString FunctionBrowser::getUserFunctionFromDialog() { return ""; }
+
+FunctionTreeView *FunctionBrowser::view() const { return m_view; }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

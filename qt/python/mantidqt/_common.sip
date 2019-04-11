@@ -293,3 +293,33 @@ signals:
     void endXChanged(double);
     void fittingDone(const QString &);
 };
+
+// ---------------------------------
+// Function Browser
+// ---------------------------------
+class FunctionBrowser : public QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
+%End
+public:
+    FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
+    FunctionTreeView *view() const;
+    void setFunction(const QString &funStr);
+    QString getFunctionString();
+};
+
+// ---------------------------------
+// FunctionTreeView
+// ---------------------------------
+class FunctionTreeView : public QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
+%End
+public:
+    FunctionTreeView(QWidget *parent, bool multi);
+    int getNumberOfQtProperties() const;
+    int getNumberOfTieProperties() const;
+    int getNumberOfConstraintProperties() const;
+    QRect getVisualRectFunctionProperty(const QString &index) const;
+    QTreeWidget *treeWidget() const;
+};

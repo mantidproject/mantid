@@ -161,6 +161,9 @@ public:
   void editItem(QtBrowserItem *item);
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
+  QTreeWidgetItem *getItemWidget(QtBrowserItem *item);
+  QTreeWidget *treeWidget();
+
 Q_SIGNALS:
 
   void collapsed(QtBrowserItem *item);
@@ -284,6 +287,7 @@ public:
   QtBrowserItem *currentItem() const;
   void setCurrentItem(QtBrowserItem *browserItem, bool block);
   void editItem(QtBrowserItem *browserItem);
+  QTreeWidgetItem *getItemWidget(QtBrowserItem *browserItem);
   void disableItem(QtBrowserItem *item);
 
   void slotCurrentBrowserItemChanged(QtBrowserItem *item);

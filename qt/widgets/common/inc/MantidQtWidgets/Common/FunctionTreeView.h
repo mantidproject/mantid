@@ -14,6 +14,7 @@
 
 #include <QMap>
 #include <QWidget>
+#include <QRect>
 
 #include <boost/optional.hpp>
 
@@ -38,6 +39,7 @@ class QSignalMapper;
 class QMenu;
 class QAction;
 class QTreeWidget;
+class QTreeWidgetItem;
 
 namespace Mantid {
 namespace API {
@@ -81,7 +83,7 @@ public:
   };
 
   /// Constructor
-  FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories);
+  FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories = std::vector<std::string>());
   /// Destructor
   virtual ~FunctionTreeView() override;
   /// Clear the contents
@@ -347,6 +349,19 @@ protected:
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;
+
+private:
+  // Intended for testing only
+  QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;
+  QRect visualItemRect(QtProperty *prop) const;
+
+public:
+  // Intended for testing only
+  int getNumberOfQtProperties() const { return m_properties.size(); }
+  int getNumberOfTieProperties() const { return m_ties.size(); }
+  int getNumberOfConstraintProperties() const { return m_constraints.size(); }
+  QRect getVisualRectFunctionProperty(const QString &index) const;
+  QTreeWidget *treeWidget() const;
 };
 
 } // namespace MantidWidgets

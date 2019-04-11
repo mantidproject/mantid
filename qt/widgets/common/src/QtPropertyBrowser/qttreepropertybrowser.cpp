@@ -701,6 +701,10 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem) {
   }
 }
 
+QTreeWidgetItem *QtTreePropertyBrowserPrivate::getItemWidget(QtBrowserItem *browserItem) {
+  return m_indexToItem.value(browserItem, 0);
+}
+
 void QtTreePropertyBrowserPrivate::disableItem(QtBrowserItem *browserItem) {
   if (QTreeWidgetItem *treeItem = m_indexToItem.value(browserItem, 0)) {
     disableItem(treeItem);
@@ -1084,6 +1088,14 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item) {
 
 void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) {
   d_ptr->setColumnSizes(s0, s1, s2);
+}
+
+QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) {
+  return d_ptr->getItemWidget(item);
+}
+
+QTreeWidget *QtTreePropertyBrowser::treeWidget() {
+  return d_ptr->treeWidget();
 }
 
 void QtTreePropertyBrowser::closeEditor() { d_ptr->closeEditor(); }

@@ -70,8 +70,8 @@ FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vecto
   createActions();
 
   QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->addWidget(m_browser);
   layout->setContentsMargins(0, 0, 0, 0);
+  layout->addWidget(m_browser);
 }
 
 /**
@@ -87,7 +87,7 @@ void FunctionTreeView::createBrowser() {
   if (m_multiDataset) {
     options << globalOptionName;
   }
-  m_browser = new QtTreePropertyBrowser(nullptr, options);
+  m_browser = new QtTreePropertyBrowser(this, options);
 
   /* Create property managers: they create, own properties, get and set values
    */
@@ -201,6 +201,7 @@ void FunctionTreeView::createActions() {
   connect(m_actionAddFunction, SIGNAL(triggered()), this, SLOT(addFunction()));
 
   m_actionRemoveFunction = new QAction("Remove function", this);
+  m_actionRemoveFunction->setObjectName("remove_function");
   connect(m_actionRemoveFunction, SIGNAL(triggered()), this,
           SLOT(removeFunction()));
 
@@ -1795,6 +1796,31 @@ void FunctionTreeView::setErrorsEnabled(bool enabled) {
  * Clear all errors, if they are set
  */
 void FunctionTreeView::clearErrors() { m_parameterManager->clearErrors(); }
+
+QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const
+{
+  return m_browser->getItemWidget(m_properties.find(prop)->item);
+}
+
+QRect FunctionTreeView::visualItemRect(QtProperty *prop) const {
+  auto item = getPropertyWidgetItem(prop);
+  return item->treeWidget()->visualItemRect(item);
+}
+
+QRect FunctionTreeView::getVisualRectFunctionProperty(const QString &index) const {
+  QRect rect;
+  QtProperty *prop{nullptr};
+  try {
+    prop = getFunctionProperty(index);
+    rect = visualItemRect(prop);
+  } catch (std::exception &) {
+  }
+  return rect;
+}
+
+QTreeWidget *FunctionTreeView::treeWidget() const {
+  return m_browser->treeWidget();
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt
