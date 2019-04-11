@@ -23,6 +23,7 @@ Improvements
 - Improved support for thin-walled hollow cylinder shapes in :ref:`algm-MonteCarloAbsorption`
 - Support has been added for negative indexing of :ref:`WorkspaceGroups <WorkspaceGroup>`. 
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` and :ref:`LoadSampleShape <algm-LoadSampleShape>` now support setting the scale of the stl to milimetres, centimetres, or metres.
 
 Removed
 #######
