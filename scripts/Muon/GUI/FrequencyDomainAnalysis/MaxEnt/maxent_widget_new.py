@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.FrequencyDomainAnalysisNew.MaxEnt.maxent_view import MaxEntView
-from Muon.GUI.FrequencyDomainAnalysisNew.MaxEnt.maxent_presenter import MaxEntPresenter
-from Muon.GUI.FrequencyDomainAnalysisNew.MaxEnt.maxent_model import MaxEntModel, MaxEntWrapper
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_view import MaxEntView
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter_new import MaxEntPresenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_model import MaxEntModel, MaxEntWrapper
 
 from PyQt4 import QtGui
 

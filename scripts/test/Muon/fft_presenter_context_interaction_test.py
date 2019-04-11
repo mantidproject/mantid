@@ -10,10 +10,10 @@ from qtpy import QtWidgets
 from mantid.py3compat import mock
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import thread_model
-from Muon.GUI.FrequencyDomainAnalysisNew.FFT import fft_presenter
-from Muon.GUI.FrequencyDomainAnalysisNew.FFT import fft_view
-from Muon.GUI.FrequencyDomainAnalysisNew.FFT import fft_model
-from Muon.GUI.FrequencyDomainAnalysisNew.frequency_context import FrequencyContext
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 from Muon.GUI.Common.muon_pair import MuonPair
 from mantid.api import FileFinder
@@ -35,7 +35,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.model1 = fft_model.FFTModel()
         self.model = fft_model.FFTWrapper
 
-        self.presenter = fft_presenter.FFTPresenter(
+        self.presenter = fft_presenter_new.FFTPresenter(
             self.view, self.model, self.context)
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]

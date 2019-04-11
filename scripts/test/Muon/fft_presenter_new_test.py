@@ -9,9 +9,9 @@ import unittest
 from mantid.py3compat import mock
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import thread_model
-from Muon.GUI.FrequencyDomainAnalysisNew.FFT import fft_presenter
-from Muon.GUI.FrequencyDomainAnalysisNew.FFT import fft_view
-from Muon.GUI.FrequencyDomainAnalysisNew.FFT import fft_model
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 
 
@@ -57,7 +57,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.model = mock.create_autospec(fft_model.FFTWrapper, spec_set=False)
 
         # set presenter
-        self.presenter = fft_presenter.FFTPresenter(
+        self.presenter = fft_presenter_new.FFTPresenter(
             self.view, self.model, self.load)
 
         # mock thread

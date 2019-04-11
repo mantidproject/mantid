@@ -8,9 +8,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from Muon.GUI.FrequencyDomainAnalysisNew.MaxEnt import maxent_presenter
-from Muon.GUI.FrequencyDomainAnalysisNew.MaxEnt import maxent_view
-from Muon.GUI.FrequencyDomainAnalysisNew.MaxEnt import maxent_model
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 from mantid.py3compat import mock
 from qtpy import QtWidgets
 from Muon.GUI.Common import mock_widget
@@ -18,7 +18,6 @@ from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common.muon_pair import MuonPair
 from mantid.api import FileFinder
 from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
-from Muon.GUI.FrequencyDomainAnalysisNew.frequency_context import FrequencyContext
 
 def retrieve_combobox_info(combo_box):
     output_list = []
@@ -36,14 +35,13 @@ class MaxEntPresenterTest(unittest.TestCase):
         setup_context_for_tests(self)
 
         self.data_context.instrument = 'MUSR'
-        self.frequency_context = FrequencyContext(self.context)
 
         self.gui_context.update({'RebinType': 'None'})
         self.model = maxent_model.MaxEntModel()
 
         self.view = maxent_view.MaxEntView(self.obj)
 
-        self.presenter = maxent_presenter.MaxEntPresenter(self.view, self.model, self.frequency_context)
+        self.presenter = maxent_presenter_new.MaxEntPresenter(self.view, self.model, self.context)
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
@@ -63,6 +61,29 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEquals(retrieve_combobox_info(self.view.ws), ['MUSR22725_raw_data'])
         self.assertEquals(retrieve_combobox_info(self.view.N_points), ['2048', '4096', '8192', '16384', '32768', '65536',
                                                                        '131072', '262144', '524288', '1048576'])
+
+    def test_get_phase_table_inputs_returns_correctly(self):
+        self.presenter.getWorkspaceNames()
+
+        self.assertEquals(self.presenter.get_phase_table_inputs(), {'DataFitted': 'fits', 'DetectorTable': 'PhaseTable',
+                                                                    'FirstGoodData': 0.1, 'InputWorkspace': 'MUSR22725_raw_data',
+                                                                    'LastGoodData': 15.0})
+
+    def test_get_input_run_returns_correctly(self):
+        self.presenter.getWorkspaceNames()
+
+        self.assertEquals(self.presenter.get_input_run(), 'MUSR22725')
+
+    def test_get_max_ent_inputs_return_correctly(self):
+        self.presenter.getWorkspaceNames()
+
+        self.assertEquals(self.presenter.getMaxEntInput(), {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04,
+                                                            'FirstGoodTime': 0.1, 'FitDeadTime': True, 'InnerIterations': 10,
+                                                            'InputWorkspace': 'MUSR22725_raw_data', 'LastGoodTime': 15.0,
+                                                            'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10,
+                                                            'OutputWorkspace': 'MUSR22725_raw_data;FrequencyDomain;MaxEnt'})
+
+
 
 
 if __name__ == '__main__':
