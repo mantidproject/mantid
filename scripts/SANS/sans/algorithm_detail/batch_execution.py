@@ -70,7 +70,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     if reduction_packages_require_splitting_for_event_slices(reduction_packages):
         # TODO change function order so we don't have to pass in lots of the same parameters to the two functions
         return single_reduction_for_event_slices(reduction_packages, workspace_to_name, workspace_to_monitor,
-                                                 use_optimizations, save_can)
+                                                 use_optimizations, output_mode, save_can)
     else:
         return single_reduction_for_non_event_slices(reduction_packages, workspaces, monitors, workspace_to_name,
                                                      workspace_to_monitor, use_optimizations, output_mode, plot_results,
@@ -78,7 +78,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
 
 
 def single_reduction_for_event_slices(reduction_packages, workspace_to_name, workspace_to_monitor,
-                                      use_optimizations, save_can):
+                                      use_optimizations, output_mode, save_can):
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -131,6 +131,11 @@ def single_reduction_for_event_slices(reduction_packages, workspace_to_name, wor
 
         reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
         reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
+
+        # -----------------------------------
+        # The workspaces are already on the ADS, but should potentially be grouped
+        # -----------------------------------
+        group_event_sliced_workspaces_if_required(reduction_package, output_mode, save_can)
 
     # --------------------------------
     # Perform output of all workspaces
@@ -834,7 +839,7 @@ def set_properties_for_event_slice_reduction_algorithm(reduction_alg, reduction_
 
     def _set_output_name_from_string(reduction_alg, reduction_package, algorithm_property_name, workspace_name,
                                      workspace_name_base, package_attribute_name, package_attribute_name_base):
-        reduction_alg.setProperty(algorithm_property_name, workspace_name_base)
+        reduction_alg.setProperty(algorithm_property_name, workspace_name)
         setattr(reduction_package, package_attribute_name, workspace_name)
         setattr(reduction_package, package_attribute_name_base, workspace_name_base)
 
@@ -1265,11 +1270,65 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can):
     add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
 
 
+def group_event_sliced_workspaces_if_required(reduction_package, output_mode, save_can):
+    """
+    Group the output workspaces from an event sliced reduction. These workspaces are already placed into group
+    workspaces (split by the event time), however we may need to change this group if:
+    * They are reduced LAB and HAB workspaces of a Merged reduction
+    * They are can workspaces - they are all grouped into a single group
+    :param reduction_package: a list of reduction packages
+    :param output_mode: one of OutputMode. SaveToFile, PublishToADS, Both.
+    :param save_can: a bool. If true save out can and sample workspaces.
+    """
+    reduced_lab = reduction_package.reduced_lab
+    reduced_hab = reduction_package.reduced_hab
+    reduced_merged = reduction_package.reduced_merged
+
+    is_merged_reduction = reduced_merged is not None
+
+    # Add the reduced workspaces to groups if they require this
+    if is_merged_reduction:
+        add_to_group(reduced_lab, REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION)
+        add_to_group(reduced_hab, REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION)
+
+    # Can group workspace depends on if save_can is checked and output_mode
+    # Logic table for which group to save CAN into
+    # CAN | FILE | In OPTIMIZATION group
+    # ----------------------------------
+    #  Y  |   Y  | YES
+    #  N  |   Y  | YES
+    #  Y  |   N  | NO
+    #  N  |   N  | YES
+
+    if save_can and output_mode is not OutputMode.SaveToFile:
+        CAN_WORKSPACE_GROUP = CAN_AND_SAMPLE_WORKSPACE
+    else:
+        CAN_WORKSPACE_GROUP = CAN_COUNT_AND_NORM_FOR_OPTIMIZATION
+
+    # Add the can workspaces (used for optimizations) to a Workspace Group (if they exist)
+    add_to_group(reduction_package.reduced_lab_can, CAN_WORKSPACE_GROUP)
+    add_to_group(reduction_package.reduced_lab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+    add_to_group(reduction_package.reduced_lab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+
+    add_to_group(reduction_package.reduced_hab_can, CAN_WORKSPACE_GROUP)
+    add_to_group(reduction_package.reduced_hab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+    add_to_group(reduction_package.reduced_hab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+
+    add_to_group(reduction_package.reduced_lab_sample, CAN_AND_SAMPLE_WORKSPACE)
+    add_to_group(reduction_package.reduced_hab_sample, CAN_AND_SAMPLE_WORKSPACE)
+
+    add_to_group(reduction_package.calculated_transmission, reduction_package.calculated_transmission_base_name)
+    add_to_group(reduction_package.calculated_transmission_can,
+                 reduction_package.calculated_transmission_can_base_name)
+    add_to_group(reduction_package.unfitted_transmission, reduction_package.unfitted_transmission_base_name)
+    add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
+
+
 def add_to_group(workspace, name_of_group_workspace):
     """
     Creates a group workspace with the base name for the workspace
 
-    :param workspace: the workspace to add to the WorkspaceGroup
+    :param workspace: the workspace to add to the WorkspaceGroup. This can be a group workspace
     :param name_of_group_workspace: the name of the WorkspaceGroup
     """
     if workspace is None:
@@ -1278,7 +1337,14 @@ def add_to_group(workspace, name_of_group_workspace):
     if AnalysisDataService.doesExist(name_of_group_workspace):
         group_workspace = AnalysisDataService.retrieve(name_of_group_workspace)
         if type(group_workspace) is WorkspaceGroup:
-            if not group_workspace.contains(name_of_workspace):
+            if type(workspace) is WorkspaceGroup:
+                group_name = "GroupWorkspaces"
+                group_options = {"InputWorkspaces": [name_of_group_workspace, name_of_workspace],
+                                 "OutputWorkspace": name_of_group_workspace}
+                group_alg = create_unmanaged_algorithm(group_name, **group_options)
+                group_alg.setAlwaysStoreInADS(True)
+                group_alg.execute()
+            elif not group_workspace.contains(name_of_workspace):
                 group_workspace.add(name_of_workspace)
         else:
             group_name = "GroupWorkspaces"
