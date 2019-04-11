@@ -53,6 +53,9 @@ void LoadSampleEnvironment::init() {
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The path name of the file containing the Environment");
 
+  // scale to use for stl
+  declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
+
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -200,6 +203,18 @@ void LoadSampleEnvironment::exec() {
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
+  ScaleUnits scaleType;
+  std::string scaleProperty = getPropertyValue("Scale");
+
+  if (scaleProperty == "m") {
+    scaleType = metres;
+  } else if (scaleProperty == "cm") {
+    scaleType = centimetres;
+  } else if (scaleProperty == "mm") {
+    scaleType = milimetres;
+  }else {
+    throw std::invalid_argument(scaleProperty +" is not an accepted scale of stl file.");
+  }
 
   if (getProperty("SetMaterial")) {
     ReadMaterial::MaterialParameters params;
@@ -221,11 +236,11 @@ void LoadSampleEnvironment::exec() {
       params.numberDensityUnit =
           MaterialBuilder::NumberDensityUnit::FormulaUnits;
     }
-    binaryStlReader = std::make_unique<LoadBinaryStl>(filename, params);
-    asciiStlReader = std::make_unique<LoadAsciiStl>(filename, params);
+    binaryStlReader = std::make_unique<LoadBinaryStl>(filename, scaleType, params);
+    asciiStlReader = std::make_unique<LoadAsciiStl>(filename, scaleType, params);
   } else {
-    binaryStlReader = std::make_unique<LoadBinaryStl>(filename);
-    asciiStlReader = std::make_unique<LoadAsciiStl>(filename);
+    binaryStlReader = std::make_unique<LoadBinaryStl>(filename, scaleType);
+    asciiStlReader = std::make_unique<LoadAsciiStl>(filename, scaleType);
   }
 
   if (binaryStlReader->isBinarySTL(filename)) {

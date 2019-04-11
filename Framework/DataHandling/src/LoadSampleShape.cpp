@@ -136,9 +136,9 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
   readOFFTriangles(file, nTriangles, triangleIndices);
 
   // Use efficient constructor of MeshObject
-  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
-      new MeshObject(std::move(triangleIndices), std::move(vertices),
-                     Mantid::Kernel::Material()));
+  std::unique_ptr<MeshObject> retVal = std::make_unique<MeshObject>(
+      std::move(triangleIndices), std::move(vertices),
+      Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -172,6 +172,9 @@ void LoadSampleShape::init() {
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The path name of the file containing the shape");
 
+  // scale to use for stl
+  declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
+
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -201,8 +204,19 @@ void LoadSampleShape::exec() {
   if (filetype == "off") {
     shape = readOFFshape(file);
   } else /* stl */ {
-    auto asciiStlReader = LoadAsciiStl(filename);
-    auto binaryStlReader = LoadBinaryStl(filename);
+    ScaleUnits scaleType;
+    std::string scaleProperty = getPropertyValue("Scale");
+    if (scaleProperty == "m") {
+      scaleType = metres;
+    } else if (scaleProperty == "cm") {
+      scaleType = centimetres;
+    } else if (scaleProperty == "mm") {
+      scaleType = milimetres;
+    }else {
+      throw std::invalid_argument(scaleProperty +" is not an accepted scale of stl file.");
+    }
+    auto asciiStlReader = LoadAsciiStl(filename, scaleType);
+    auto binaryStlReader = LoadBinaryStl(filename, scaleType);
     if (binaryStlReader.isBinarySTL(filename)) {
       shape = binaryStlReader.readStl();
     } else if (asciiStlReader.isAsciiSTL(filename)) {
