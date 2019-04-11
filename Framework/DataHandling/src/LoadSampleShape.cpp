@@ -14,6 +14,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include "MantidGeometry/Instrument.h"
 
@@ -47,6 +48,11 @@ void LoadSampleShape::init() {
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
+  
+  // Matrix to rotate mesh
+  declareProperty(make_unique<ArrayProperty<double>>(
+                      "RotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
+                  "Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
 
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -88,6 +94,8 @@ void LoadSampleShape::exec() {
           "Could not read file, did not match either STL Format", filename, 0);
     }
   }
+  //rotate shape
+  shape = rotate(shape);
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();

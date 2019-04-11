@@ -10,6 +10,9 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+namespace Geometry {
+class MeshObject;
+}
 namespace DataHandling {
 /**  Load Shape into an instrument of a workspace
 
@@ -48,6 +51,8 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
+
+  boost::shared_ptr<Geometry::MeshObject> rotate(boost::shared_ptr<Geometry::MeshObject> sampleMesh);
 };
 
 } // end namespace DataHandling
