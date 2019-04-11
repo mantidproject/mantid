@@ -80,6 +80,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
+	${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp
