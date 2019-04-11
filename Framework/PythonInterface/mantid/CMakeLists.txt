@@ -10,7 +10,7 @@ set(PYTHON_PKG_ROOT
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT})
 
 # Select the pure Python files to be included in the distribution
-set(PY_FILES __init__.py simpleapi.py fitfunctions.py)
+set(PY_FILES __init__.py simpleapi.py fitfunctions.py utils.py)
 
 # Generate the version module Build version
 set(VERSION_PY pyversion)

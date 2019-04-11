@@ -45,7 +45,7 @@ Output
 
 .. testoutput::
 
-  Workspace's type is <class 'mantid.api._api.WorkspaceGroup'>
+  Workspace's type is <class '_api.WorkspaceGroup'>
   It has 2 entries
   Its first  item is ws1
   Its second item is ws2
