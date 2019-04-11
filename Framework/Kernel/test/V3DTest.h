@@ -561,6 +561,20 @@ public:
     TS_ASSERT_DELTA(acos(3.0 / modv2) * 180 / M_PI, angles[1], 1e-6);
     TS_ASSERT_DELTA(acos(4.0 / modv2) * 180 / M_PI, angles[2], 1e-6);
   }
+
+  void test_normalize() {
+    constexpr V3D v(-2.3, 5.0, -7.1);
+    const V3D normalized = normalize(v);
+    TS_ASSERT_DELTA(normalized.norm(), 1., 1e-12)
+    TS_ASSERT_DELTA(v.scalar_prod(normalized) / v.norm(), 1., 1e-12)
+  }
+
+  void test_normalize_nullVector_throws() {
+    constexpr V3D nullVector;
+    TS_ASSERT_THROWS_EQUALS(
+        normalize(nullVector), const std::runtime_error &e, e.what(),
+        std::string("Unable to normalize a zero length vector."))
+  }
 };
 
 //---------------------------------------------------------------------------

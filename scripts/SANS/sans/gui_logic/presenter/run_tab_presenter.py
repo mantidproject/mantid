@@ -163,7 +163,6 @@ class RunTabPresenter(object):
             self._presenter.on_processing_error(error)
 
     def __init__(self, facility, view=None):
-        super(RunTabPresenter, self).__init__()
         self._facility = facility
         # Logger
         self.sans_logger = Logger("SANS")
@@ -630,6 +629,21 @@ class RunTabPresenter(object):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box("Warning", "Process halted", str(e) + error_msg)
 
+    @staticmethod
+    def _get_filename_to_save(filename):
+        if filename in (None, ''):
+            return None
+
+        if isinstance(filename, tuple):
+            # Filenames returned as tuple of (filename, file ending) in qt5
+            filename = filename[0]
+            if filename in (None, ''):
+                return None
+
+        if filename[-4:] != '.csv':
+            filename += '.csv'
+        return filename
+
     def on_export_table_clicked(self):
         non_empty_rows = self.get_row_indices()
         if len(non_empty_rows) == 0:
@@ -641,17 +655,14 @@ class RunTabPresenter(object):
 
             default_filename = self._table_model.batch_file
             filename = self.display_save_file_box("Save table as", default_filename, "*.csv")
-
-            if filename:
-                self.sans_logger.notice("Starting export of table.")
-                if filename[-4:] != '.csv':
-                    filename += '.csv'
-
+            filename = self._get_filename_to_save(filename)
+            if filename is not None:
+                self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
                 with open(filename, csv_open_type) as outfile:
                     # Pass filewriting object rather than filename to make testing easier
                     writer = csv.writer(outfile)
                     self._export_table(writer, non_empty_rows)
-                    self.sans_logger.notice("Table exporting finished.")
+                    self.sans_logger.information("Table exporting finished.")
 
             self._view.enable_buttons()
         except Exception as e:
@@ -915,7 +926,7 @@ class RunTabPresenter(object):
                 "There does not seem to be data for a row {}.".format(row_index))
             return None
 
-        if row_index in list(states.keys()):
+        if row_index in states:
             if states:
                 return states[row_index]
         return None

@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import random
 import os
+import string
 import numpy as np
 from collections import namedtuple
 from contextlib import contextmanager
@@ -24,7 +26,8 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               Scale, Divide, Rebin, MedianDetectorTest,
                               SumSpectra, Integration, CreateWorkspace,
                               ScaleX, Plus)
-from mantid.kernel import (FloatArrayProperty, Direction, logger)
+from mantid.kernel import (FloatArrayProperty, Direction, EnabledWhenProperty,
+                           PropertyCriterion, StringListValidator, logger)
 debug_flag = False  # set to True to prevent erasing temporary workspaces
 
 
@@ -32,6 +35,54 @@ class VDAS(Enum):
     """Specifices the version of the Data Acquisition System (DAS)"""
     v1900_2018 = 0  # Up to Dec 31 2018
     v2019_2100 = 1  # From Jan 01 2018
+
+
+def unique_workspace_name(n=5, prefix='', suffix=''):
+    r"""
+    Create a random sequence of `n` lowercase characters that is guaranteed
+    not to collide with the name of any existing Mantid workspace registered
+    in the analysis data service.
+
+    uws stands for Unique Workspace Name
+
+    Parameters
+    ----------
+    n: int
+        Size of the sequence
+    prefix: str
+        String to prefix the randon sequence
+    suffix: str
+        String to suffix the randon sequence
+
+    Returns
+    -------
+    str
+    """
+
+    ws_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(n))
+    ws_name = '{}{}{}'.format(str(prefix), ws_name, str(suffix))
+    while ws_name in AnalysisDataService.getObjectNames():
+        characters = [random.choice(string.ascii_lowercase) for _ in range(n)]
+        ws_name = ''.join(characters)
+        ws_name = '{}{}{}'.format(str(prefix), ws_name, str(suffix))
+    return ws_name
+
+
+def tws(marker=''):
+    r"""
+    String starting with '_t_' and guaranteed not to collide with the name of
+    any existing Mantid workspace in the analysis data service
+
+    Parameters
+    ----------
+    marker: str
+        String to identify the data contained in the workspace. Used as suffix
+
+    Returns
+    -------
+    str
+    """
+    return unique_workspace_name(prefix='_t_', suffix='_'+marker)
 
 
 @contextmanager
@@ -85,7 +136,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     _mask_file = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/'\
                  'BASIS_Mask_default_diff.xml'
     # Consider only events with these wavelengths
-    _wavelength_bands = {'311': [3.07, 3.60], '111': [6.05, 6.60]}
+    _wavelength_bands = {'311': [3.07, 3.60],
+                         '111': [6.05, 6.60],
+                         '333': [2.02, 2.20]}
     _diff_bank_numbers = list(range(5, 14))
     _tzero = dict(gradient=11.967, intercept=-5.0)
 
@@ -102,6 +155,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self._v_mask = None  # mask pixels with low-counts in vanadium runs
         self._t_mask = None  # mask workspace
         self._das_version = None  # version of the Data Acquisition System
+        self._flux_normalization_type = None  # default to no flux normalizat.
 
     @staticmethod
     def category():
@@ -157,7 +211,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Mantid.EventsWorkspace
         """
         pulse_width = 1.e6/60  # in micro-seconds
-        _t_w = ScaleX(w, Factor=-pulse_width, Operation='Add')
+        local_name = tws('previous_pulse')
+        _t_w = ScaleX(w, Factor=-pulse_width, Operation='Add',
+                      OutputWorkspace=local_name)
         _t_w = Plus(w, _t_w, OutputWorkspace=w.name())
         return _t_w
 
@@ -166,6 +222,27 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         # Properties
         #
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
+
+        #
+        #  Normalization selector
+        #
+        title_flux_normalization = 'Flux Normalization'
+        self.declareProperty('DoFluxNormalization', True,
+                             direction=Direction.Input,
+                             doc='Do we normalize data by incoming flux?')
+        self.setPropertyGroup('DoFluxNormalization', title_flux_normalization)
+        if_flux_normalization = EnabledWhenProperty('DoFluxNormalization',
+                                                    PropertyCriterion.IsDefault)
+        flux_normalization_types = ['Monitor', 'Proton Charge', 'Duration']
+        default_flux_normalization = flux_normalization_types[0]
+        self.declareProperty('FluxNormalizationType',
+                             default_flux_normalization,
+                             StringListValidator(flux_normalization_types),
+                             'Flux Normalization Type')
+        self.setPropertySettings('FluxNormalizationType',
+                                 if_flux_normalization)
+        self.setPropertyGroup('FluxNormalizationType',
+                              title_flux_normalization)
 
         self.declareProperty(FloatArrayProperty('MomentumTransferBins',
                                                 [0.1, 0.0025, 2.5],  # invers A
@@ -176,22 +253,12 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
                              doc='Output reduced workspace')
-        #
-        # Common Properties
-        #
-        required_title = 'Required Properties'
 
         self.declareProperty(FileProperty(name='MaskFile',
                                           defaultValue=self._mask_file,
                                           action=FileAction.OptionalLoad,
                                           extensions=['.xml']),
                              doc='See documentation for latest mask files.')
-
-        self.declareProperty('MonitorNormalization', True,
-                             'Normalization with wavelength-dependent '
-                             'monitor counts')
-        for a_property in ('MaskFile', 'MonitorNormalization'):
-            self.setPropertyGroup(a_property, required_title)
         #
         # Background for the sample runs
         #
@@ -219,6 +286,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         config_new_options = {'default.facility': 'SNS',
                               'default.instrument': 'BASIS',
                               'datasearch.searcharchive': 'On'}
+        if self.getProperty('DoFluxNormalization').value is True:
+            self._flux_normalization_type = \
+                self.getProperty('FluxNormalizationType').value
         #
         # Find desired Q-binning
         #
@@ -233,7 +303,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             self._t_mask = LoadMask(Instrument='BASIS',
                                     InputFile=self.getProperty('MaskFile').
                                     value,
-                                    OutputWorkspace='_t_mask')
+                                    OutputWorkspace=tws('mask'))
             #
             # Find the version of the Data Acquisition System
             #
@@ -256,12 +326,14 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             if self.getProperty('BackgroundRuns').value != '':
                 _t_sample, _t_bkg = self._subtract_background(_t_sample)
                 if self.getPropertyValue('OutputBackground') != '':
-                    _t_bkg_angle = self._convert_to_angle(_t_bkg)
+                    _t_bkg_angle = self._convert_to_angle(_t_bkg,
+                                                          '_t_bkg_angle')
                     self._output_workspace(_t_bkg_angle, 'OutputBackground',
                                            suffix='_angle')
                     _t_bkg = self._convert_to_q(_t_bkg)
                     self._output_workspace(_t_bkg, 'OutputBackground')
-            _t_sample_angle = self._convert_to_angle(_t_sample)
+            _t_sample_angle = self._convert_to_angle(_t_sample,
+                                                     '_t_sample_angle')
             self._output_workspace(_t_sample_angle, 'OutputWorkspace',
                                    suffix='_angle')
             _t_sample = self._convert_to_q(_t_sample)
@@ -289,12 +361,14 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         # Load files together
         #
         _t_all_w = None
+        _t_all_w_name = tws('aggregate_load_run')
+        _t_w_name = tws('load_run')
         for run in rl:
-            _t_w = self._load_single_run(run, '_t_w')
+            _t_w = self._load_single_run(run, _t_w_name)
             if _t_all_w is None:
-                _t_all_w = CloneWorkspace(_t_w)
+                _t_all_w = CloneWorkspace(_t_w, OutputWorkspace=_t_all_w_name)
             else:
-                _t_all_w += _t_w
+                _t_all_w = Plus(_t_all_w, _t_w, OutputWorkspace=_t_all_w_name)
         RenameWorkspace(_t_all_w, OutputWorkspace=w_name)
         return _t_all_w
 
@@ -315,11 +389,11 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         -------
         Mantid.EventsWorkspace
         """
-        _t_corr_van = self._apply_corrections(w, target=target)
+
+        w_corr_van = self._apply_corrections(w, target=target)
         if self.getProperty('VanadiumRuns').value != '':
-            _t_corr_van = self._sensitivity_correction(_t_corr_van)
-        RenameWorkspace(_t_corr_van, OutputWorkspace=w.name())
-        return _t_corr_van
+            w_corr_van = self._sensitivity_correction(w_corr_van)
+        return w_corr_van
 
     def _apply_corrections(self, w, target='sample'):
         """
@@ -339,57 +413,31 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Mantid.EventsWorkspace
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
+        local_name = tws('corr')
         _t_corr = ModeratorTzeroLinear(w,
                                        Gradient=self._tzero['gradient'],
-                                       Intercept=self._tzero['intercept'])
+                                       Intercept=self._tzero['intercept'],
+                                       OutputWorkspace=local_name)
         # Correct old DAS shift of fast neutrons. See GitHub issue 23855
         if self._das_version == VDAS.v1900_2018:
             _t_corr = self.add_previous_pulse(_t_corr)
-        _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic')
+
+        _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic',
+                               OutputWorkspace=local_name)
         l_s, l_e = self._wavelength_band[0], self._wavelength_band[1]
-        _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e)
+        _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e,
+                                OutputWorkspace=local_name)
         _t_corr = Rebin(_t_corr, Params=[l_s, self._wavelength_dl, l_e],
-                        PreserveEvents=False)
-        if self.getProperty('MonitorNormalization').value is True:
-            _t_corr = self._monitor_normalization(_t_corr, target)
+                        PreserveEvents=False, OutputWorkspace=local_name)
+
+        if self.getProperty('DoFluxNormalization').value is True:
+            _t_corr = self._flux_normalization(_t_corr, target)
+        RenameWorkspace(_t_corr, OutputWorkspace=w.name())
         return _t_corr
 
-    def _load_monitors(self, target):
+    def _flux_normalization(self, w, target):
         """
-        Load monitor data for all target runs into a single workspace
-
-        Parameters
-        ----------
-        target: str
-            Specify the entity the workspace refers to. Valid options are
-            'sample', 'background', and 'vanadium'
-
-        Returns
-        -------
-        Mantid.EventWorkspace
-        """
-        valid_targets = ('sample', 'background', 'vanadium')
-        if target not in valid_targets:
-            raise KeyError('Target must be one of ' + ', '.join(valid_targets))
-        target_to_runs = dict(sample='RunNumbers', background='BackgroundRuns',
-                              vanadium='VanadiumRuns')
-        #
-        # Load monitors files together
-        #
-        rl = self._run_list(self.getProperty(target_to_runs[target]).value)
-        _t_all_w = None
-        for run in rl:
-            file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
-            _t_w = LoadNexusMonitors(file_name)
-            if _t_all_w is None:
-                _t_all_w = CloneWorkspace(_t_w)
-            else:
-                _t_all_w += _t_w
-        return _t_all_w
-
-    def _monitor_normalization(self, w, target):
-        """
-        Divide data by integrated monitor intensity
+        Divide data by integrated flux intensity
 
         Parameters
         ----------
@@ -403,16 +451,56 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         -------
         Mantid.EventWorkspace
         """
-        _t_mon = self._load_monitors(target)
-        _t_mon = ConvertUnits(_t_mon, Target='Wavelength', Emode='Elastic')
-        _t_mon = CropWorkspace(_t_mon, XMin=self._wavelength_band[0],
-                               XMax=self._wavelength_band[1])
-        _t_mon = OneMinusExponentialCor(_t_mon, C='0.20749999999999999',
-                                        C1='0.001276')
-        _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply')
-        _t_mon = Integration(_t_mon)  # total monitor count
-        _t_w = Divide(w, _t_mon, OutputWorkspace=w.name())
-        return _t_w
+        valid_targets = ('sample', 'background', 'vanadium')
+        if target not in valid_targets:
+            raise KeyError('Target must be one of ' + ', '.join(valid_targets))
+        w_nor = None
+        if self._flux_normalization_type == 'Monitor':
+            _t_flux = None
+            _t_flux_name = tws('monitor_aggregate')
+            target_to_runs = dict(sample='RunNumbers',
+                                  background='BackgroundRuns',
+                                  vanadium='VanadiumRuns')
+            rl = self._run_list(self.getProperty(target_to_runs[target]).value)
+
+            _t_w_name = tws('monitor')
+            for run in rl:
+                run_name = '{0}_{1}'.format(self._short_inst, str(run))
+                _t_w = LoadNexusMonitors(run_name, OutputWorkspace=_t_w_name)
+                if _t_flux is None:
+                    _t_flux = CloneWorkspace(_t_w,
+                                             OutputWorkspace=_t_flux_name)
+                else:
+                    _t_flux = Plus(_t_flux, _t_w, OutputWorkspace=_t_flux_name)
+
+            _t_flux = ConvertUnits(_t_flux,
+                                   Target='Wavelength',
+                                   Emode='Elastic',
+                                   OutputWorkspace=_t_flux_name)
+            _t_flux = CropWorkspace(_t_flux,
+                                    XMin=self._wavelength_band[0],
+                                    XMax=self._wavelength_band[1],
+                                    OutputWorkspace=_t_flux_name)
+            _t_flux = OneMinusExponentialCor(_t_flux,
+                                             C='0.20749999999999999',
+                                             C1='0.001276',
+                                             OutputWorkspace=_t_flux_name)
+            _t_flux = Scale(_t_flux, Factor='1e-06', Operation='Multiply',
+                            OutputWorkspace=_t_flux_name)
+            _t_flux = Integration(_t_flux,
+                                  RangeLower=self._wavelength_band[0],
+                                  RangeUpper=self._wavelength_band[1],
+                                  OutputWorkspace=_t_flux_name)
+            w_nor = Divide(w, _t_flux, OutputWorkspace=w.name())
+        else:
+            aggregate_flux = None
+            if self._flux_normalization_type == 'Proton Charge':
+                aggregate_flux = w.getRun().getProtonCharge()
+            elif self._flux_normalization_type == 'Duration':
+                aggregate_flux = w.getRun().getProperty('duration').value
+            w_nor = Scale(w, Operation='Multiply', Factor=1.0/aggregate_flux,
+                          OutputWorkspace=w.name())
+        return w_nor
 
     def _load_vanadium_runs(self):
         """
@@ -420,13 +508,15 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         pixels with low-counts.
         """
         runs = self.getProperty('VanadiumRuns').value
-        _t_van = self._load_runs(runs, '_t_van')
+        _t_van_name = tws('vanadium')
+        _t_van = self._load_runs(runs, _t_van_name)
         _t_van = self._apply_corrections(_t_van, target='vanadium')
-        RenameWorkspace(_t_van, OutputWorkspace='_t_van')
-        wave_band = self._wavelength_band[1] - self._wavelength_band[0]
-        _t_van = Rebin(_t_van, Params=[self._wavelength_band[0], wave_band,
-                                       self._wavelength_band[1]])
-        output = MedianDetectorTest(_t_van, OutputWorkspace='_t_v_mask')
+        _t_van = Integration(_t_van,
+                             RangeLower=self._wavelength_band[0],
+                             RangeUpper=self._wavelength_band[1],
+                             OutputWorkspace=_t_van_name)
+        _t_v_mask_name = tws('vanadium_mask')
+        output = MedianDetectorTest(_t_van, OutputWorkspace=_t_v_mask_name)
         self._v_mask = output.OutputWorkspace
         MaskDetectors(_t_van, MaskedWorkspace=self._v_mask)
         self._van = _t_van
@@ -479,12 +569,15 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         -------
         Mantid.MatrixWorkspace2D
         """
-        _t_w = ConvertUnits(w, Target='MomentumTransfer', Emode='Elastic')
-        _t_w = Rebin(_t_w, Params=self._qbins, PreserveEvents=False)
+        _t_w_name = tws('convert_to_q')
+        _t_w = ConvertUnits(w, Target='MomentumTransfer', Emode='Elastic',
+                            OutputWorkspace=_t_w_name)
+        _t_w = Rebin(_t_w, Params=self._qbins, PreserveEvents=False,
+                     OutputWorkspace=_t_w_name)
         _t_w = SumSpectra(_t_w, OutputWorkspace=w.name())
         return _t_w
 
-    def _convert_to_angle(self, w):
+    def _convert_to_angle(self, w, name):
         """
         Output the integrated intensity for each elastic detector versus
         detector angle with the neutron beam.
@@ -494,13 +587,15 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Parameters
         ----------
         w: Mantid.MatrixWorkspace2D
-
+        name: str
+            Name of output workspace
         Returns
         -------
         Mantid.MatrixWorkspace2D
         """
         id_s, id_e = 16386, 17534  # start and end for elastic detector ID's
-        _t_w = Integration(w)
+        _t_w_name = tws('convert_to_angle')
+        _t_w = Integration(w, OutputWorkspace=_t_w_name)
         sp = _t_w.spectrumInfo()
         x, y, e = [list(), list(), list()]
         for i in range(_t_w.getNumberHistograms()):
@@ -520,7 +615,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         title = 'Angle between detector and incoming neutron beam'
         _t_w = CreateWorkspace(DataX=x[od], DataY=y[od], DataE=e[od],
                                NSpec=1, UnitX='Degrees',
-                               WorkspaceTitle=title)
+                               WorkspaceTitle=title,
+                               OutputWorkspace=_t_w_name)
+        RenameWorkspace(_t_w, OutputWorkspace=name)
         return _t_w
 
     def _output_workspace(self, w, prop, suffix=''):
@@ -553,7 +650,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         runs = self.getProperty('RunNumbers').value
         run = self._run_list(runs)[0]
-        _t_w = self._load_single_run(run, '_t_w')
+        _t_w = self._load_single_run(run, tws('cal_wav_band'))
         wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest').value)
         for reflection, band in self._wavelength_bands.items():
             if band[0] <= wavelength <= band[1]:

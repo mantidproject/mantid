@@ -7,6 +7,8 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import
 
+import unittest
+
 from mantid.py3compat.mock import Mock, PropertyMock
 
 
@@ -15,8 +17,6 @@ class StrictMock(Mock):
     This mock automatically sets "spec_set={}", which will cause errors when methods
     that have NOT been declared on the mock are called. This prevents spelling errors
     and captures any unexpected calls to the mock.
-
-    To declare an expected call, the attribute
     """
 
     def __init__(self, *args, **kwargs):
@@ -26,6 +26,36 @@ class StrictMock(Mock):
             kwargs["spec_set"] = {}
 
         super(StrictMock, self).__init__(*args, **kwargs)
+
+
+class StrictContextManagerMock(unittest.TestCase):
+    """
+    This mock adds the methods needed for a ContextManager.
+    It inherits from TestCase for the assert methods, but does NOT call the constructor of the TestCase class!
+
+    The TestCase assertions methods are not extracted into a base class,
+    so there is no other way to gain access to them
+    """
+
+    def __init__(self):
+        # does not call the super constructor class - this prevents an error for missing test cases, as
+        # none are declared in the class
+        self.context_entered = False
+        self.context_exited = False
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def __enter__(self):
+        self.context_entered = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.context_exited = True
+
+    def assert_context_triggered(self):
+        self.assertTrue(self.context_entered)
+        self.assertTrue(self.context_exited)
 
 
 class StrictPropertyMock(PropertyMock):

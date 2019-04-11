@@ -89,6 +89,8 @@ public:
 
   MOCK_METHOD0(removePDFWorkspace, void());
 
+  MOCK_CONST_METHOD1(isSelectedGroupPlottable,
+                     bool(std::string const &selectedGroup));
   MOCK_CONST_METHOD0(isResultGroupPlottable, bool());
   MOCK_CONST_METHOD0(isPDFGroupPlottable, bool());
 
@@ -191,12 +193,12 @@ public:
     std::string const selectedGroup("Result Group");
     auto const isPlottable(true);
 
-    ON_CALL(*m_model, isResultGroupSelected(selectedGroup))
-        .WillByDefault(Return(true));
-    ON_CALL(*m_model, isResultGroupPlottable())
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
+    ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
         .WillByDefault(Return(isPlottable));
 
-    EXPECT_CALL(*m_model, isResultGroupPlottable())
+    EXPECT_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
         .Times(1)
         .WillOnce(Return(isPlottable));
     EXPECT_CALL(*m_view, setPlotEnabled(isPlottable)).Times(1);
@@ -209,11 +211,14 @@ public:
     std::string const selectedGroup("PDF Group");
     auto const isPlottable(true);
 
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
     ON_CALL(*m_model, isResultGroupSelected(selectedGroup))
         .WillByDefault(Return(false));
-    ON_CALL(*m_model, isPDFGroupPlottable()).WillByDefault(Return(isPlottable));
+    ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
+        .WillByDefault(Return(isPlottable));
 
-    EXPECT_CALL(*m_model, isPDFGroupPlottable())
+    EXPECT_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
         .Times(1)
         .WillOnce(Return(isPlottable));
     EXPECT_CALL(*m_view, setPlotEnabled(isPlottable)).Times(1);
@@ -288,6 +293,13 @@ public:
 
   void
   test_that_the_saveClicked_signal_will_try_to_disable_and_then_enable_the_save_and_plot_buttons() {
+    auto const selectedGroup("Result Group");
+
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
+    ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
+        .WillByDefault(Return(true));
+
     ExpectationSet buttonEnabling =
         EXPECT_CALL(*m_view, setSaveText(QString("Saving..."))).Times(1);
     buttonEnabling += EXPECT_CALL(*m_view, setPlotEnabled(false)).Times(1);
@@ -373,15 +385,14 @@ public:
   }
 
   void
-  test_that_isResultGroupPlottable_will_invoke_isResultGroupPlottable_in_the_model() {
-    EXPECT_CALL(*m_model, isResultGroupPlottable()).Times(1);
-    m_presenter->isResultGroupPlottable();
-  }
+  test_that_isSelectedGroupPlottable_will_invoke_isSelectedGroupPlottable_in_the_model() {
+    std::string const selectedGroup("Result Group");
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
 
-  void
-  test_that_isPDFGroupPlottable_will_invoke_isPDFGroupPlottable_in_the_model() {
-    EXPECT_CALL(*m_model, isPDFGroupPlottable()).Times(1);
-    m_presenter->isPDFGroupPlottable();
+    EXPECT_CALL(*m_model, isSelectedGroupPlottable(selectedGroup)).Times(1);
+
+    m_presenter->isSelectedGroupPlottable();
   }
 
   void
@@ -399,6 +410,12 @@ public:
   void
   test_that_setPlotting_will_attempt_to_set_the_plot_button_text_and_enable_all_buttons_when_passed_false() {
     auto const isPlotting(false);
+    auto const selectedGroup("Result Group");
+
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
+    ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
+        .WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, setPlotText(QString("Plot"))).Times(1);
     EXPECT_CALL(*m_view, setPlotEnabled(!isPlotting)).Times(1);
@@ -409,7 +426,25 @@ public:
   }
 
   void test_that_setPlotEnabled_will_invoke_setPlotEnabled_in_the_view() {
+    auto const selectedGroup("Result Group");
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
+    ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
+        .WillByDefault(Return(true));
+
     EXPECT_CALL(*m_view, setPlotEnabled(true)).Times(1);
+    m_presenter->setPlotEnabled(true);
+  }
+
+  void
+  test_that_setPlotEnabled_will_disable_the_plot_options_if_the_selected_workspace_is_not_plottable() {
+    auto const selectedGroup("Result Group");
+    ON_CALL(*m_view, getSelectedGroupWorkspace())
+        .WillByDefault(Return(selectedGroup));
+    ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup))
+        .WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, setPlotEnabled(false)).Times(1);
     m_presenter->setPlotEnabled(true);
   }
 

@@ -172,6 +172,29 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         DeleteWorkspace(ill_red_ws)
 
+    def test_that_the_output_workspace_is_valid_when_using_cross_sections_for_sample(self):
+        """
+        Test simple run with sample workspace using cross sections.
+        """
+
+        output_workspace = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                           Shape='FlatPlate',
+                                                           Width=2.0,
+                                                           Thickness=2.0,
+                                                           MaxScatterPtAttempts=3000,
+                                                           DensityType='Number Density',
+                                                           Density=0.1,
+                                                           EventsPerPoint=50,
+                                                           BeamHeight=3.5,
+                                                           BeamWidth=4.0,
+                                                           Height=2.0,
+                                                           CoherentXSection=0.039,
+                                                           IncoherentXSection=56.052,
+                                                           AttenuationXSection=0.222)
+
+        self.assertTrue(CompareWorkspaces(
+            self._corrected_flat_plate, output_workspace, Tolerance=1e-2)[0])
+
     def test_max_scatter_point_attempts_similar(self):
         """
         Tests that an almost identical workspace is yielded when MaxScatterPtAttempts is non-default and not too small.
@@ -193,7 +216,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
     # ------------------------------------- Failure Cases --------------------
 
-    def test_no_chemical_formula(self):
+    def test_no_chemical_formula_or_cross_sections_causes_an_error(self):
         kwargs = {'InputWorkspace': self._red_ws,
                   'MaterialAlreadyDefined': False,
                   'DensityType': 'Mass Density',

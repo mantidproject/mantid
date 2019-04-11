@@ -220,7 +220,7 @@ void V3D::rotate(const Kernel::Matrix<double> &A) noexcept {
 }
 
 /**
-  Determines if this,B,C are collinear
+  Determines if this,B,C are colinear
   @param Bv :: Vector to test
   @param Cv :: Vector to test
   @return false if no colinear and true if they are (within Tolerance)
@@ -298,14 +298,12 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
     throw std::invalid_argument(
         "makeVectorsOrthogonal() only works with 2 vectors");
 
-  V3D v0 = vectors[0];
-  v0.normalize();
-  V3D v1 = vectors[1];
-  v1.normalize();
+  const V3D v0 = Kernel::normalize(vectors[0]);
+  V3D v1 = Kernel::normalize(vectors[1]);
 
   std::vector<V3D> out;
   out.reserve(3);
-  out.push_back(v0);
+  out.emplace_back(v0);
 
   // Make a rotation 90 degrees from 0 to 1
   Quat q(v0, v1);
@@ -313,11 +311,11 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(const std::vector<V3D> &vectors) {
   // Rotate v1 so it is 90 deg
   v1 = v0;
   q.rotate(v1);
-  out.push_back(v1);
+  out.emplace_back(v1);
 
   // Finally, the 3rd vector = cross product of 0 and 1
   V3D v2 = v0.cross_prod(v1);
-  out.push_back(v2);
+  out.emplace_back(v2);
   return out;
 }
 

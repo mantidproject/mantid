@@ -309,10 +309,11 @@ class CondaInstaller(MantidInstaller):
         filepattern = "mantid-framework*.tar.bz2"
         MantidInstaller.__init__(self, package_dir, filepattern, do_install)
         package = os.path.basename(self.mantidInstaller)
-        self.conda_prefix = os.path.expanduser('~/jenkins-systemtests-opt/miniconda2')
-        self.conda_mantid_env_prefix = install_prefix = os.path.join(self.conda_prefix, 'envs', 'mantid')
+        bindir = os.path.dirname(sys.executable)
+        prefix = os.path.dirname(bindir)
+        self.conda_mantid_env_prefix = prefix
         self.mantidPlotPath = None # conda mantid-framework does not include mantidplot
-        self.python_cmd = install_prefix + '/bin/python'
+        self.python_cmd = sys.executable
 
     def do_install(self):
         """Uses gdebi to run the install
