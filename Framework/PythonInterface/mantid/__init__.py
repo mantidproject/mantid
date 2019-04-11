@@ -130,6 +130,6 @@ from mantid.kernel._aliases import *
 from mantid.api._aliases import *
 
 # Make the version string accessible in the standard way
-from .kernel import version_str as _version_str
+from mantid.kernel import version_str as _version_str
 
 __version__ = _version_str()
