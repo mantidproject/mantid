@@ -13,10 +13,10 @@ from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
 from Muon.GUI.Common.observer_pattern import Observer
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class TransformWidget(QtGui.QWidget):
+class TransformWidget(QtWidgets.QWidget):
 
     def __init__(self, load, parent=None):
         super(TransformWidget, self).__init__(parent)
