@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 20 properties here", 20,
+    TSM_ASSERT_EQUALS("should be 21 properties here", 21,
                       (size_t)(alg.getProperties().size()));
   }
 
@@ -162,7 +162,8 @@ private:
   // load a cube into a meshobject
   std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path);
+    ScaleUnits unit = metres;
+    auto loader = LoadBinaryStl(path, unit);
     auto cube = loader.readStl();
     return cube;
   }
