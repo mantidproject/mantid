@@ -14,7 +14,7 @@ from platform import system
 from shutil import copy2
 from six import u
 
-import mantid.plots # noqa
+import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
 
@@ -380,7 +380,7 @@ def create_difc_zero_workspace(difc, tzero, crop_on, name):
 
     # loop through used banks
     for i in banks:
-        actual_i = correction+i
+        actual_i = correction + i
         # retrieve required workspace
         if not plot_spec_num:
             bank_ws = simple.AnalysisDataService.retrieve("engg_calibration_bank_{}".format(actual_i))
@@ -609,7 +609,7 @@ def _prepare_focus(run_number, van_curves, van_int, do_pre_process, params, time
     return van_curves_ws, van_integrated_ws, ws_to_focus
 
 
-def _save_out(run_number, focus_directory, focus_general, output, join_string, bank_id):
+def _save_out(run_number, focus_directory, focus_general, output, enginx_file_name_format, bank_id):
     """
     save out the files required for the focus
 
@@ -617,13 +617,14 @@ def _save_out(run_number, focus_directory, focus_general, output, join_string, b
     @param focus_directory :: the user directory to save to
     @param focus_general :: the general folder to copy the saved out files to
     @param output :: the workspace to save
-    @param join_string :: the nameing scheme of the files
+    @param enginx_file_name_format :: the nameing scheme of the files
     @param bank_id :: the bank being saved
 
     """
     # work out where to save the files
     dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
-                                                                                       join_string, run_number)
+                                                                                        enginx_file_name_format,
+                                                                                        run_number)
     if not u(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
@@ -644,9 +645,9 @@ def _save_out(run_number, focus_directory, focus_general, output, join_string, b
         copy2(hdf5_name, focus_general)
 
 
-def _find_focus_file_location(bank_id, focus_directory, join_string, run_number):
-
-    run_and_bank = join_string.format(run_number, bank_id, "{}")
+def _find_focus_file_location(bank_id, focus_directory, enginx_file_name_format, run_number):
+    # Leave final {} in string so that file extension can be set.
+    run_and_bank = enginx_file_name_format.format(run_number, bank_id, "{}")
     filename = os.path.join(focus_directory, run_and_bank)
     genie_filename = os.path.join(focus_directory, run_and_bank.replace("_", "", 1).format(".his"))
 
