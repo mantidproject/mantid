@@ -45,6 +45,16 @@ tests.
 */
 
 //----------------------------------------------------------------------------------------------
+
+/// Add a spherical sample at samplePos to given instrument.
+void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &samplePos);
+
+/// Add a source with given name and sourcePos to given instrument
+void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
+                           const Mantid::Kernel::V3D &sourcePos,
+                           const std::string &name = "moderator");
+
 /**
  * Return the appropriate XML for the requested cylinder
  */
@@ -60,16 +70,21 @@ boost::shared_ptr<Mantid::Geometry::CSGObject>
 createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &baseCentre,
                      const Mantid::Kernel::V3D &axis, const std::string &id);
-
-/// Add a spherical sample at samplePos to given instrument.
-void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
-                           const Mantid::Kernel::V3D &samplePos);
-
-/// Add a source with given name and sourcePos to given instrument
-void addSourceToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
-                           const Mantid::Kernel::V3D &sourcePos,
-                           const std::string &name = "moderator");
-
+/**
+ * Return the XML for a hollow cylinder
+ */
+std::string hollowCylinderXML(double innerRadius, double outerRadius,
+                              double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id);
+/**
+ * Create a hollow cylinder object
+ */
+boost::shared_ptr<Mantid::Geometry::CSGObject>
+createHollowCylinder(double innerRadius, double outerRadius, double height,
+                     const Mantid::Kernel::V3D &baseCentre,
+                     const Mantid::Kernel::V3D &axis, const std::string &id);
 /**
  * Return the XML for a sphere.
  */

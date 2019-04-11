@@ -22,7 +22,6 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 class GuiStateDirector(object):
     def __init__(self, table_model, state_gui_model, facility):
-        super(GuiStateDirector, self).__init__()
         self._table_model = table_model
         self._state_gui_model = state_gui_model
         self._facility = facility

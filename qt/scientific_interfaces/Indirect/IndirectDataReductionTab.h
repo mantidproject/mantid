@@ -85,6 +85,10 @@ protected:
   QString getInstrumentDetail(QString const &key) const;
   QString getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
                               QString const &key) const;
+  void validateInstrumentDetail(QString const &key) const;
+  bool hasInstrumentDetail(QString const &key) const;
+  bool hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                           QString const &key) const;
   MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
   QString getInstrumentName() const;
   QString getAnalyserName() const;

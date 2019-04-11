@@ -22,8 +22,8 @@ class MantidTreeWidget;
  */
 class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidgetItem : public QTreeWidgetItem {
 public:
-  explicit MantidTreeWidgetItem(MantidTreeWidget *);
-  MantidTreeWidgetItem(QStringList, MantidTreeWidget *);
+  explicit MantidTreeWidgetItem(MantidTreeWidget * /*parent*/);
+  MantidTreeWidgetItem(QStringList /*list*/, MantidTreeWidget * /*parent*/);
   void disableIfNode(bool);
   void setSortPos(int o) { m_sortPos = o; }
   int getSortPos() const { return m_sortPos; }
@@ -32,7 +32,7 @@ private:
   bool operator<(const QTreeWidgetItem &other) const override;
   MantidTreeWidget *m_parent;
   static Mantid::Types::Core::DateAndTime
-  getLastModified(const QTreeWidgetItem *);
+  getLastModified(const QTreeWidgetItem * /*item*/);
   std::size_t getMemorySize() const;
   int m_sortPos;
 };

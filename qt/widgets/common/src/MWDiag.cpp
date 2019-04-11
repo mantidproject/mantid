@@ -541,7 +541,7 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts) {
  *  @return this method catches most exceptions and this return is main way that
  * errors are reported
  */
-QString MWDiag::run(const QString &, const bool) {
+QString MWDiag::run(const QString & /*unused*/, const bool /*unused*/) {
   // close any result window that is still there from a previous run, there
   // might be nothing
   closeDialog();

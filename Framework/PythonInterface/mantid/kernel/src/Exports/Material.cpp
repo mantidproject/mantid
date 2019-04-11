@@ -14,6 +14,7 @@
 #include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/tuple.hpp>
+#include <numeric>
 
 using Mantid::Kernel::Material;
 using Mantid::PhysicalConstants::NeutronAtom;
@@ -57,11 +58,12 @@ bool toBool(Material &self) {
  * @return the relative molecular mass
  */
 double relativeMolecularMass(Material &self) {
-  double retval = 0.;
-  for (const auto &formulaUnit : self.chemicalFormula()) {
-    retval += formulaUnit.atom->mass * formulaUnit.multiplicity;
-  }
-  return retval;
+  const auto &formula = self.chemicalFormula();
+  return std::accumulate(formula.cbegin(), formula.cend(), 0.,
+                         [](double sum, const auto &formulaUnit) {
+                           return sum + formulaUnit.atom->mass *
+                                            formulaUnit.multiplicity;
+                         });
 }
 } // namespace
 

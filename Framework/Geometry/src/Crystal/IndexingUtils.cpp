@@ -1834,8 +1834,7 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
   V3D c_dir;
   bool c_found = false;
 
-  V3D perp = a_dir.cross_prod(b_dir);
-  perp.normalize();
+  const V3D perp = normalize(a_dir.cross_prod(b_dir));
   double perp_ang;
   double alpha;
   double beta;
@@ -2749,8 +2748,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
   V3D second_vec(0, 0, 0);
   second_vec[min_index] = 1;
 
-  V3D perp_vec = second_vec.cross_prod(axis);
-  perp_vec.normalize();
+  const V3D perp_vec = normalize(second_vec.cross_prod(axis));
 
   // next get a vector that is the specified
   // number of degrees away from the axis

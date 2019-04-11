@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, FloatBoundedValidator, Property,
@@ -45,20 +46,20 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
     def PyExec(self):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 4)
-        subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
+        self._subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
 
         progress.report('Loading inputs')
-        mainWS = self._inputWS(wsCleanup)
+        mainWS = self._inputWS()
 
         progress.report('Integrating')
-        mainWS = self._integrate(mainWS, wsCleanup, subalgLogging)
+        mainWS = self._integrate(mainWS)
 
         progress.report('Masking zeros')
-        mainWS = self._maskZeros(mainWS, subalgLogging)
+        mainWS = self._maskZeros(mainWS)
 
-        self._finalize(mainWS, wsCleanup)
+        self._finalize(mainWS)
         progress.report('Done')
 
     def PyInit(self):
@@ -79,10 +80,10 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='The integrated workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=common.CLEANUP_ON,
+                             defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([
-                                 common.CLEANUP_ON,
-                                 common.CLEANUP_OFF]),
+                                 utils.Cleanup.ON,
+                                 utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
@@ -115,19 +116,19 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         self.setPropertySettings(common.PROP_TEMPERATURE, EnabledWhenProperty(common.PROP_DWF_CORRECTION,
                                                                               PropertyCriterion.IsDefault))
 
-    def _inputWS(self, wsCleanup):
+    def _inputWS(self):
         """Return the raw input workspace."""
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
-        wsCleanup.protect(mainWS)
+        self._cleanup.protect(mainWS)
         return mainWS
 
-    def _finalize(self, outWS, wsCleanup):
+    def _finalize(self, outWS):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
-        wsCleanup.cleanup(outWS)
-        wsCleanup.finalCleanup()
+        self._cleanup.cleanup(outWS)
+        self._cleanup.finalCleanup()
 
-    def _integrate(self, mainWS, wsCleanup, subalgLogging):
+    def _integrate(self, mainWS):
         """Integrate mainWS applying Debye-Waller correction, if requested."""
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         calibrationWS = self.getProperty(common.PROP_OUTPUT_WS).value
@@ -138,18 +139,18 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                                                   OutputWorkspace=calibrationWS,
                                                   Temperature=temperature,
                                                   EnableDWF=dwfEnabled,
-                                                  EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                                  EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return calibrationWS
 
-    def _maskZeros(self, mainWS, subalgLogging):
+    def _maskZeros(self, mainWS):
         """Mask zero integrals in mainWS."""
         mainWS = MaskDetectorsIf(InputWorkspace=mainWS,
                                  OutputWorkspace=mainWS,
                                  Mode='SelectIf',
                                  Operator='Equal',
                                  Value=0.,
-                                 EnableLogging=subalgLogging)
+                                 EnableLogging=self._subalgLogging)
         return mainWS
 
 

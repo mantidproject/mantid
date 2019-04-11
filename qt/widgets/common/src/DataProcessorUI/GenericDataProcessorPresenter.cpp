@@ -697,10 +697,10 @@ void GenericDataProcessorPresenter::processNextItem() {
 }
 
 void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
-    GroupData const &, std::string const &) {}
+    GroupData const & /*unused*/, std::string const & /*unused*/) {}
 
 void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
-    GroupData const &, std::string const &) {}
+    GroupData const & /*unused*/, std::string const & /*unused*/) {}
 
 /*
 Reduce the current row asynchronously

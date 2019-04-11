@@ -29,7 +29,7 @@ PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
 
 PeakView::~PeakView() {}
 
-void PeakView::doPaintPeaks(QPaintEvent *) {
+void PeakView::doPaintPeaks(QPaintEvent * /*event*/) {
   const auto windowHeight = height();
   const auto windowWidth = width();
   const auto viewHeight =

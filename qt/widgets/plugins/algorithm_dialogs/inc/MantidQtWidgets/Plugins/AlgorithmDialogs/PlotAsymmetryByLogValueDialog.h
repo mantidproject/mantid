@@ -55,7 +55,7 @@ private slots:
   /// Opens a file dialog. Updates the QLineEdit provided when the dialog is
   /// closed.
   void openFileDialog(const QString &filePropName);
-  void fillLogBox(const QString &);
+  void fillLogBox(const QString & /*unused*/);
 
   /// Show or hide Dead Time file widget depending on which Dead Time type is
   /// selected.

@@ -864,10 +864,10 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // get exception from the read_json parser
       std::string server_reply_str;
       server_reply_str = server_reply.str();
-      size_t pos = server_reply_str.rfind('}');
-      if (pos != std::string::npos)
+      const size_t lastBrace = server_reply_str.rfind('}');
+      if (lastBrace != std::string::npos)
         answer << std::string(server_reply_str.begin(),
-                              server_reply_str.begin() + pos + 1);
+                              server_reply_str.begin() + lastBrace + 1);
       else
         answer << server_reply_str;
     }
@@ -1311,31 +1311,28 @@ std::string ScriptRepositoryImpl::ignorePatterns() {
 int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
                                         bool option) {
   ensureValidRepository();
-  std::string path = convertPath(input_path);
-  std::vector<std::string> files_to_update;
+  const std::string path = convertPath(input_path);
+  std::vector<std::string> filesToUpdate;
   for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
-    std::string entry_path = it->first;
+    std::string entryPath = it->first;
     RepositoryEntry &entry = it->second;
-    if (entry_path.compare(0, path.size(), path) == 0 &&
+    if (entryPath.compare(0, path.size(), path) == 0 &&
         entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
-      files_to_update.push_back(entry_path);
+      filesToUpdate.push_back(entryPath);
   }
 
-  // g_log.debug() << "SetAutoUpdate... begin\n";
   try {
-    for (auto &path : files_to_update) {
-      RepositoryEntry &entry = repo.at(path);
+    for (const auto &fileToUpdate : filesToUpdate) {
+      RepositoryEntry &entry = repo.at(fileToUpdate);
       entry.auto_update = option;
-      updateLocalJson(path, entry); // TODO: update local json without opening
-                                    // and close file many times
+      updateLocalJson(fileToUpdate, entry);
     }
   } catch (const std::out_of_range &ex) {
     // fixme: readable exception
     throw ScriptRepoException(ex.what());
   }
-  // g_log.debug() << "SetAutoUpdate... end\n";
-  return static_cast<int>(files_to_update.size());
+  return static_cast<int>(filesToUpdate.size());
 }
 
 /** Download a url and fetch it inside the local path given.

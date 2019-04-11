@@ -28,7 +28,7 @@ namespace detail {
     template <class RandomAccessIterator1, class RandomAccessIterator2, class BinaryPredicate>
     bool equal ( RandomAccessIterator1 first1, RandomAccessIterator1 last1,
                  RandomAccessIterator2 first2, RandomAccessIterator2 last2, BinaryPredicate pred,
-                 std::random_access_iterator_tag, std::random_access_iterator_tag )
+                 std::random_access_iterator_tag /*unused*/, std::random_access_iterator_tag  /*unused*/)
     {
     //  Random-access iterators let is check the sizes in constant time
         if ( std::distance ( first1, last1 ) != std::distance ( first2, last2 ))
@@ -40,7 +40,7 @@ namespace detail {
     template <class InputIterator1, class InputIterator2, class BinaryPredicate>
     bool equal ( InputIterator1 first1, InputIterator1 last1,
                  InputIterator2 first2, InputIterator2 last2, BinaryPredicate pred,
-                 std::input_iterator_tag, std::input_iterator_tag )
+                 std::input_iterator_tag /*unused*/, std::input_iterator_tag  /*unused*/)
     {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2 )
         if ( !pred(*first1, *first2 ))

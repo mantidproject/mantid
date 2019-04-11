@@ -36,7 +36,7 @@ public:
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
-  virtual void notifyADSChanged(const QSet<QString> &) {}
+  virtual void notifyADSChanged(const QSet<QString> & /*unused*/) {}
 
   /// Return global options for pre-processing
   virtual ColumnOptionsQMap getPreprocessingOptions() const {
@@ -57,9 +57,8 @@ public:
   /// Return true if there are per-angle transmission runs set
   virtual bool hasPerAngleOptions() const { return false; }
 
-  /// Return true if autoreduction is in progress for any group
+  /// Return true if autoreduction is in progress
   virtual bool isAutoreducing() const { return false; }
-  /// Return true if autoreduction is in progress for a specific group
 
   /// Handle data reduction paused/resumed
   virtual void pause() {}
@@ -69,10 +68,10 @@ public:
   virtual void confirmReductionCompleted() {}
   virtual void confirmReductionPaused(){};
   virtual void confirmReductionResumed(){};
-  virtual void completedGroupReductionSuccessfully(GroupData const &,
-                                                   std::string const &){};
-  virtual void completedRowReductionSuccessfully(GroupData const &,
-                                                 std::string const &){};
+  virtual void completedGroupReductionSuccessfully(GroupData const & /*unused*/,
+                                                   std::string const & /*unused*/){};
+  virtual void completedRowReductionSuccessfully(GroupData const & /*unused*/,
+                                                 std::string const & /*unused*/){};
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets
