@@ -134,6 +134,35 @@ bool ShapeInfo::operator==(const ShapeInfo &other) {
          m_points == other.m_points;
 }
 
+std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape) {
+  switch (shape) {
+  case ShapeInfo::GeometryShape::NOSHAPE:
+    os << "NOSHAPE";
+    break;
+  case ShapeInfo::GeometryShape::CUBOID:
+    os << "CUBOID";
+    break;
+  case ShapeInfo::GeometryShape::HEXAHEDRON:
+    os << "HEXAHEDRON";
+    break;
+  case ShapeInfo::GeometryShape::SPHERE:
+    os << "SPHERE";
+    break;
+  case ShapeInfo::GeometryShape::CYLINDER:
+    os << "CYLINDER";
+    break;
+  case ShapeInfo::GeometryShape::CONE:
+    os << "CONE";
+    break;
+  case ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+    os << "HOLLOWCYLINDER";
+    break;
+  default:
+    os.setstate(std::ios_base::failbit);
+  }
+  return os;
+}
+
 } // namespace detail
 } // namespace Geometry
 } // namespace Mantid
