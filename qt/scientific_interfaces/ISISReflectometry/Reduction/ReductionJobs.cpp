@@ -8,6 +8,7 @@
 #include "Common/IndexOf.h"
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include "RowLocation.h"
 #include <iostream>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -233,9 +234,10 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
 }
 
 Group ReductionJobs::getGroupFromPath(
-    const MantidWidgets::Batch::RowPath path) const {
-  if (path.size() == 1) {
+    const MantidWidgets::Batch::RowLocation rowLocation) const {
+  if (isGroupLocation(rowLocation)) {
     // Is group
+    const auto path = rowLocation.path();
     return m_groups[path[0]];
   } else {
     throw std::invalid_argument("Path given does not point to a group.");
@@ -243,9 +245,10 @@ Group ReductionJobs::getGroupFromPath(
 }
 
 Row ReductionJobs::getRowFromPath(
-    const MantidWidgets::Batch::RowPath path) const {
-  if (path.size() == 2) {
+    const MantidWidgets::Batch::RowLocation rowLocation) const {
+  if (!isGroupLocation(rowLocation)) {
     // Is Row
+    const auto path = rowLocation.path();
     const auto group = m_groups[path[0]];
     const auto row = group[path[1]];
     if (row.is_initialized())

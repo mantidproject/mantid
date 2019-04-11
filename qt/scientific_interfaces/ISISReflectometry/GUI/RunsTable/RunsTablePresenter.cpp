@@ -571,9 +571,8 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   const auto rows = m_model.selectedRows();
 
   for (const auto &row : rows) {
-    const auto workspaceName = row.reducedWorkspaceNames().iVsQBinned();
-    if (workspaceName != "")
-      workspaces.emplace_back(workspaceName);
+    if (row.state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
   }
 
   if (workspaces.empty())
@@ -587,7 +586,8 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   const auto groups = m_model.selectedGroups();
 
   for (const auto &group : groups) {
-    workspaces.emplace_back(group.postprocessedWorkspaceName());
+    if (group.state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(group.postprocessedWorkspaceName());
   }
 
   if (workspaces.empty())
