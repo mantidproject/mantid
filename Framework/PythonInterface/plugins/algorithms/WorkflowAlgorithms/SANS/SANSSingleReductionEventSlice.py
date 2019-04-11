@@ -233,9 +233,10 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         output_parts_bundles = []
         output_transmission_bundles = []
         for event_slice_bundles in slice_reduction_setting_bundles:
-            # Output bundles need to be grouped by a event slices
+            # Output bundles and parts bundles need to be grouped by a event slices
             # e.g. [[workspaces for slice1], [workspaces for slice2]]
             slice_bundles = []
+            slice_parts_bundles = []
             for slice_bundle in event_slice_bundles:
                 progress.report("Running a single reduction ...")
                 # We want to make use of optimizations here.
@@ -249,9 +250,10 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                     output_bundle, output_parts_bundle, \
                         output_transmission_bundle = run_core_reduction(reduction_alg, slice_bundle)
                 slice_bundles.append(output_bundle)
-                output_parts_bundles.append(output_parts_bundle)
+                slice_parts_bundles.append(output_parts_bundle)
                 output_transmission_bundles.append(output_transmission_bundle)
             output_bundles.append(slice_bundles)
+            output_parts_bundles.append(slice_parts_bundles)
 
         # TODO fix the output!
         reduction_mode_vs_output_workspaces = defaultdict(list)
@@ -275,15 +277,24 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # Deal with merging
         # --------------------------------------------------------------------------------------------------------------
         # Merge if required with stitching etc.
-        # TODO make these event slice compatible and get their names
         if overall_reduction_mode is ReductionMode.Merged:
             progress.report("Merging reductions ...")
-            merge_bundle = get_merge_bundle_for_merge_request(output_parts_bundles, self)
-            self.set_shift_and_scale_output(merge_bundle)
-            reduction_mode_vs_output_workspaces.update({ReductionMode.Merged: merge_bundle.merged_workspace})
-            scaled_HAB = strip_end_nans(merge_bundle.scaled_hab_workspace, self)
-            reduction_mode_vs_output_workspaces.update({ISISReductionMode.HAB: scaled_HAB})
-        # TODO the above
+            for i, event_slice_part_bundle in enumerate(output_parts_bundles):
+                merge_bundle = get_merge_bundle_for_merge_request(event_slice_part_bundle, self)
+                if i == 0:
+                    # We only need to set this once. It's the same for each slice??? TODO check that it is
+                    self.set_shift_and_scale_output(merge_bundle)
+                reduction_mode_vs_output_workspaces[ReductionMode.Merged].append(merge_bundle.merged_workspace)
+                merged_name = self._get_merged_workspace_name(event_slice_part_bundle)
+                reduction_mode_vs_workspace_names[ReductionMode.Merged].append(merged_name)
+
+                scaled_HAB = strip_end_nans(merge_bundle.scaled_hab_workspace, self)
+                reduction_mode_vs_output_workspaces[ISISReductionMode.HAB].append(scaled_HAB)
+                # Get HAB workspace name
+                state = event_slice_part_bundle[0].state
+                hab_name = self._get_output_workspace_name(state, reduction_mode=ISISReductionMode.HAB)
+                reduction_mode_vs_workspace_names[ISISReductionMode.HAB].append(hab_name)
+                # TODO we need to overwrite the previous HAB and Merged before adding them?
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the output workspaces
@@ -486,11 +497,11 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 else:
                     raise RuntimeError("SANSSingleReductionEventSlice: Cannot set the output workspace. "
                                        "The selected reduction mode {0} is unknown.".format(reduction_mode))
-        if reduction_mode is ReductionMode.Merged:
+        if workspace_group_merged.size() > 0:
             self.setProperty("OutputWorkspaceMerged", workspace_group_merged)
-        elif reduction_mode is ISISReductionMode.LAB:
+        if workspace_group_lab.size() > 0:
             self.setProperty("OutputWorkspaceLAB", workspace_group_lab)
-        elif reduction_mode is ISISReductionMode.HAB:
+        if workspace_group_hab.size() > 0:
             self.setProperty("OutputWorkspaceHAB", workspace_group_hab)
 
     def set_reduced_can_workspace_on_output(self, output_bundles):
@@ -545,30 +556,31 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         workspace_group_hab_can_count = WorkspaceGroup()
         workspace_group_hab_can_norm = WorkspaceGroup()
         # Find the partial output bundles fo LAB Can and HAB Can if they exist
-        for output_bundle_part in output_bundles_parts:
-            if output_bundle_part.data_type is DataType.Can:
-                reduction_mode = output_bundle_part.reduction_mode
-                output_workspace_count = output_bundle_part.output_workspace_count
-                output_workspace_norm = output_bundle_part.output_workspace_norm
-                # Make sure that the output workspace is not None which can be the case if there has never been a
-                # can set for the reduction.
-                if output_workspace_norm is not None and output_workspace_count is not None and \
-                        not does_can_workspace_exist_on_ads(output_workspace_norm) and \
-                        not does_can_workspace_exist_on_ads(output_workspace_count):
-                    name = self._get_output_workspace_name(output_bundle_part.state, output_bundle_part.reduction_mode)
-                    count_name = name + "_hab_can_count"
-                    norm_name = name + "_hab_can_norm"
-                    AnalysisDataService.addOrReplace(count_name, output_workspace_count)
-                    AnalysisDataService.addOrReplace(norm_name, output_workspace_norm)
-                    if reduction_mode is ISISReductionMode.LAB:
-                        workspace_group_lab_can_count.addWorkspace(output_workspace_count)
-                        workspace_group_lab_can_norm.addWorkspace(output_workspace_norm)
-                    elif reduction_mode is ISISReductionMode.HAB:
-                        workspace_group_hab_can_count.addWorkspace(output_workspace_count)
-                        workspace_group_hab_can_norm.addWorkspace(output_workspace_norm)
-                    else:
-                        raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
-                                           " be set with a partial can.".format(reduction_mode))
+        for event_slice_bundles in output_bundles_parts:
+            for output_bundle_part in event_slice_bundles:
+                if output_bundle_part.data_type is DataType.Can:
+                    reduction_mode = output_bundle_part.reduction_mode
+                    output_workspace_count = output_bundle_part.output_workspace_count
+                    output_workspace_norm = output_bundle_part.output_workspace_norm
+                    # Make sure that the output workspace is not None which can be the case if there has never been a
+                    # can set for the reduction.
+                    if output_workspace_norm is not None and output_workspace_count is not None and \
+                            not does_can_workspace_exist_on_ads(output_workspace_norm) and \
+                            not does_can_workspace_exist_on_ads(output_workspace_count):
+                        name = self._get_output_workspace_name(output_bundle_part.state, output_bundle_part.reduction_mode)
+                        count_name = name + "_hab_can_count"
+                        norm_name = name + "_hab_can_norm"
+                        AnalysisDataService.addOrReplace(count_name, output_workspace_count)
+                        AnalysisDataService.addOrReplace(norm_name, output_workspace_norm)
+                        if reduction_mode is ISISReductionMode.LAB:
+                            workspace_group_lab_can_count.addWorkspace(output_workspace_count)
+                            workspace_group_lab_can_norm.addWorkspace(output_workspace_norm)
+                        elif reduction_mode is ISISReductionMode.HAB:
+                            workspace_group_hab_can_count.addWorkspace(output_workspace_count)
+                            workspace_group_hab_can_norm.addWorkspace(output_workspace_norm)
+                        else:
+                            raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
+                                               " be set with a partial can.".format(reduction_mode))
         if workspace_group_lab_can_count.size() > 0:
             # Both LAB count and norm are non-empty
             self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)
@@ -699,6 +711,15 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             final_output_workspace_names.update({reduction_mode: name})
 
         return final_output_workspace_names
+
+    def _get_merged_workspace_name(self, output_parts_bundle):
+        """This method gets the output workspace names for a merged bundle. This only occurs
+         if the reduction mode is Merged.
+         :param output_parts_bundle: a list of OutputBundles containing workspaces for a single event slice.
+         :return: a workspace name
+         """
+        state = output_parts_bundle[0].state
+        return self._get_output_workspace_name(state, reduction_mode=ReductionMode.Merged)
 
     def _get_output_workspace_name(self, state, reduction_mode=None, data_type=None,
                                    can=False, sample=False, transmission=False, fitted=False):

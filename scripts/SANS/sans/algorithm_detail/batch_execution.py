@@ -135,7 +135,7 @@ def single_reduction_for_event_slices(reduction_packages, workspace_to_name, wor
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
-        group_event_sliced_workspaces_if_required(reduction_package, output_mode, save_can)
+        group_workspaces_if_required(reduction_package, output_mode, save_can)
 
     # --------------------------------
     # Perform output of all workspaces
@@ -1203,7 +1203,7 @@ def get_workspace_from_algorithm(alg, output_property_name, add_logs=False, user
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for outputs to the ADS and saving the file
 # ----------------------------------------------------------------------------------------------------------------------
-def group_workspaces_if_required(reduction_package, output_mode, save_can):
+def group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice=False):
     """
     The output workspaces have already been published to the ADS by the algorithm. Now we might have to
     bundle them into a group if:
@@ -1213,9 +1213,10 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can):
     :param reduction_package: a list of reduction packages
     :param output_mode: one of OutputMode. SaveToFile, PublishToADS, Both.
     :param save_can: a bool. If true save out can and sample workspaces.
+    :param event_slice: an optional bool. If true group_workspaces is being called on event sliced data.
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-    is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
+    is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction or event_slice
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
     requires_grouping = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction\
         or is_part_of_wavelength_range_reduction
@@ -1236,60 +1237,6 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can):
         if requires_grouping:
             add_to_group(reduced_lab, reduction_package.reduced_lab_base_name)
             add_to_group(reduced_hab, reduction_package.reduced_hab_base_name)
-
-    # Can group workspace depends on if save_can is checked and output_mode
-    # Logic table for which group to save CAN into
-    # CAN | FILE | In OPTIMIZATION group
-    # ----------------------------------
-    #  Y  |   Y  | YES
-    #  N  |   Y  | YES
-    #  Y  |   N  | NO
-    #  N  |   N  | YES
-
-    if save_can and output_mode is not OutputMode.SaveToFile:
-        CAN_WORKSPACE_GROUP = CAN_AND_SAMPLE_WORKSPACE
-    else:
-        CAN_WORKSPACE_GROUP = CAN_COUNT_AND_NORM_FOR_OPTIMIZATION
-
-    # Add the can workspaces (used for optimizations) to a Workspace Group (if they exist)
-    add_to_group(reduction_package.reduced_lab_can, CAN_WORKSPACE_GROUP)
-    add_to_group(reduction_package.reduced_lab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
-    add_to_group(reduction_package.reduced_lab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
-
-    add_to_group(reduction_package.reduced_hab_can, CAN_WORKSPACE_GROUP)
-    add_to_group(reduction_package.reduced_hab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
-    add_to_group(reduction_package.reduced_hab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
-
-    add_to_group(reduction_package.reduced_lab_sample, CAN_AND_SAMPLE_WORKSPACE)
-    add_to_group(reduction_package.reduced_hab_sample, CAN_AND_SAMPLE_WORKSPACE)
-
-    add_to_group(reduction_package.calculated_transmission, reduction_package.calculated_transmission_base_name)
-    add_to_group(reduction_package.calculated_transmission_can,
-                 reduction_package.calculated_transmission_can_base_name)
-    add_to_group(reduction_package.unfitted_transmission, reduction_package.unfitted_transmission_base_name)
-    add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
-
-
-def group_event_sliced_workspaces_if_required(reduction_package, output_mode, save_can):
-    """
-    Group the output workspaces from an event sliced reduction. These workspaces are already placed into group
-    workspaces (split by the event time), however we may need to change this group if:
-    * They are reduced LAB and HAB workspaces of a Merged reduction
-    * They are can workspaces - they are all grouped into a single group
-    :param reduction_package: a list of reduction packages
-    :param output_mode: one of OutputMode. SaveToFile, PublishToADS, Both.
-    :param save_can: a bool. If true save out can and sample workspaces.
-    """
-    reduced_lab = reduction_package.reduced_lab
-    reduced_hab = reduction_package.reduced_hab
-    reduced_merged = reduction_package.reduced_merged
-
-    is_merged_reduction = reduced_merged is not None
-
-    # Add the reduced workspaces to groups if they require this
-    if is_merged_reduction:
-        add_to_group(reduced_lab, REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION)
-        add_to_group(reduced_hab, REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION)
 
     # Can group workspace depends on if save_can is checked and output_mode
     # Logic table for which group to save CAN into
