@@ -7,6 +7,7 @@
 #include "MainWindowView.h"
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
+#include "GUI/Plotting/Plotter.h"
 #include "MantidKernel/make_unique.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -34,7 +35,7 @@ MainWindowView::MainWindowView(QWidget *parent)
 
 IBatchView *MainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
-  auto *newTab = new BatchView(this, this);
+  auto *newTab = new BatchView(this);
   m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
   m_batchViews.emplace_back(newTab);
   return newTab;
@@ -64,8 +65,14 @@ void MainWindowView::initLayout() {
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
-  auto makeRunsTablePresenter =
-      RunsTablePresenterFactory(instruments, thetaTolerance);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  auto plotter = std::make_unique<Plotter>(this);
+#else
+  auto plotter = std::make_unique<Plotter>();
+#endif
+  auto makeRunsTablePresenter = RunsTablePresenterFactory(
+      instruments, thetaTolerance, std::move(plotter));
+
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto autoreduction = boost::shared_ptr<IAutoreduction>();
   auto searcher = boost::shared_ptr<ISearcher>();

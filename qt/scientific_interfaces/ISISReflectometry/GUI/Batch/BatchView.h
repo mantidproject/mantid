@@ -28,7 +28,7 @@ class MainWindowView;
 class BatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
-  explicit BatchView(QWidget *parent, MainWindowView *mainView);
+  explicit BatchView(QWidget *parent);
   void subscribe(BatchViewSubscriber *notifyee) override;
 
   IRunsView *runs() const override;
@@ -67,7 +67,6 @@ private:
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
-  MainWindowView *m_mainView;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

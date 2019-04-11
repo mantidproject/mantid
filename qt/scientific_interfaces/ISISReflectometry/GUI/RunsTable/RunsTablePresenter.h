@@ -9,6 +9,7 @@
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "../Runs/IRunsPresenter.h"
 #include "Common/DllConfig.h"
+#include "GUI/Plotting/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"
@@ -25,7 +26,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter
 public:
   RunsTablePresenter(IRunsTableView *view,
                      std::vector<std::string> const &instruments,
-                     double thetaTolerance, ReductionJobs reductionJobs);
+                     double thetaTolerance, ReductionJobs reductionJobs,
+                     IPlotter *plotter);
 
   void notifyRemoveAllRowsAndGroupsRequested();
 
@@ -141,6 +143,7 @@ private:
       m_clipboard;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
+  IPlotter *m_plotter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

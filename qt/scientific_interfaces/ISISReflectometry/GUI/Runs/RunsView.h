@@ -48,8 +48,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsView
       public IRunsView {
   Q_OBJECT
 public:
-  RunsView(QWidget *parent, RunsTableViewFactory makeView,
-           BatchView *batchView);
+  RunsView(QWidget *parent, RunsTableViewFactory makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   IRunsTableView *table() const override;
@@ -100,8 +99,6 @@ public:
   // Live data monitor
   void startMonitor() override;
   void stopMonitor() override;
-
-  void executePythonCode(const std::string &pythonCode);
 
 private:
   /// initialise the interface

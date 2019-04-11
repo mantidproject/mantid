@@ -8,6 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
 
 #include "Common/IMessageHandler.h"
+#include "GUI/Plotting/IPlotter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MainWindowPresenter.h"

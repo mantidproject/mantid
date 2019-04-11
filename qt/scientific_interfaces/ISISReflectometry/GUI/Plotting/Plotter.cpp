@@ -8,15 +8,16 @@
 #include "Plotter.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "RunsTableView.h"
+#include "../MainWindow/IMainWindowView.h"
+#include "../MainWindow/MainWindowView.h"
 #endif
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-Plotter::Plotter(RunsTableView *runsTableView)
-    : m_runsTableView(runsTableView) {}
+Plotter::Plotter(MantidQt::CustomInterfaces::IMainWindowView *MainWindowView)
+    : m_mainWindowView(MainWindowView) {}
 #endif
 
 void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
@@ -42,7 +43,7 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 // workbench.
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 void Plotter::runPython(const std::string &pythonCode) {
-  m_runsTableView->executePythonCode(pythonCode);
+  m_mainWindowView->runPythonAlgorithm(pythonCode);
 }
 #endif
 

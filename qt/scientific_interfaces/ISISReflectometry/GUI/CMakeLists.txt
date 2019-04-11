@@ -6,6 +6,7 @@ add_subdirectory(MainWindow)
 add_subdirectory(Runs)
 add_subdirectory(RunsTable)
 add_subdirectory(Save)
+add_subdirectory(Plotting)
 
 
 set (GUI_SRC_FILES
@@ -17,6 +18,7 @@ set (GUI_SRC_FILES
     ${RUNS_SRC_FILES}
     ${RUNS_TABLE_SRC_FILES}
     ${SAVE_SRC_FILES}
+    ${PLOTTING_SRC_FILES}
     PARENT_SCOPE
 )
 
@@ -29,6 +31,7 @@ set (GUI_INC_FILES
     ${RUNS_INC_FILES}
     ${RUNS_TABLE_INC_FILES}
     ${SAVE_INC_FILES}
+    ${PLOTTING_INC_FILES}
     PARENT_SCOPE
 )
 

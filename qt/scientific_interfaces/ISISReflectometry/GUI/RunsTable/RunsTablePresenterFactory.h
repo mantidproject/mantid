@@ -8,6 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #include "Common/DllConfig.h"
+#include "GUI/Plotting/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include <memory>
 #include <string>
@@ -21,13 +22,15 @@ class IRunsTableView;
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
   RunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                            double thetaTolerance);
+                            double thetaTolerance,
+                            std::unique_ptr<IPlotter> plotter);
   virtual std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const;
 
 protected:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
+  std::unique_ptr<IPlotter> m_plotter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -36,7 +36,7 @@ public:
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(
-        view, view, m_runsTablePresenterFactory, m_thetaTolerance,
+        view, view, &m_runsTablePresenterFactory, m_thetaTolerance,
         m_instruments, m_defaultInstrumentIndex, m_messageHandler,
         m_autoreduction, m_searcher);
   }

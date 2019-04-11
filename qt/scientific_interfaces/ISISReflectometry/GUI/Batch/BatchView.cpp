@@ -23,8 +23,8 @@ namespace CustomInterfaces {
 using API::BatchAlgorithmRunner;
 using Mantid::API::IAlgorithm_sptr;
 
-BatchView::BatchView(QWidget *parent, MainWindowView *mainView)
-    : QWidget(parent), m_batchAlgoRunner(this), m_mainView(mainView) {
+BatchView::BatchView(QWidget *parent)
+    : QWidget(parent), m_batchAlgoRunner(this) {
   qRegisterMetaType<API::IConfiguredAlgorithm_sptr>(
       "MantidQt::API::IConfiguredAlgorithm_sptr");
   initLayout();
@@ -120,7 +120,7 @@ std::unique_ptr<RunsView> BatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
   return Mantid::Kernel::make_unique<RunsView>(
-      this, RunsTableViewFactory(instruments), this);
+      this, RunsTableViewFactory(instruments));
 }
 
 std::unique_ptr<EventView> BatchView::createEventTab() {
@@ -134,10 +134,6 @@ IAlgorithm_sptr BatchView::createReductionAlg() {
 
 std::unique_ptr<SaveView> BatchView::createSaveTab() {
   return Mantid::Kernel::make_unique<SaveView>(this);
-}
-
-void BatchView::executePythonCode(const std::string &pythonCode) {
-  m_mainView->runPythonAlgorithm(pythonCode);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

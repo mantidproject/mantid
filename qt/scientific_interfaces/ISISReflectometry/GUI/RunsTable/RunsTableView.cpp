@@ -15,10 +15,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-RunsTableView::RunsTableView(RunsView *parent,
-                             std::vector<std::string> const &instruments,
+RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex)
-    : m_jobs(), m_instruments(instruments), m_runsView(parent) {
+    : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
   m_jobs =
       Mantid::Kernel::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
@@ -263,17 +262,12 @@ void RunsTableView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-void RunsTableView::executePythonCode(std::string pythonCode) {
-  return m_runsView->executePythonCode(pythonCode);
-}
-
 RunsTableViewFactory::RunsTableViewFactory(
     std::vector<std::string> const &instruments)
     : m_instruments(instruments) {}
 
-RunsTableView *RunsTableViewFactory::operator()(RunsView *parent) const {
-  return new RunsTableView(parent, m_instruments,
-                           defaultInstrumentFromConfig());
+RunsTableView *RunsTableViewFactory::operator()() const {
+  return new RunsTableView(m_instruments, defaultInstrumentFromConfig());
 }
 
 int RunsTableViewFactory::indexOfElseFirst(

@@ -12,13 +12,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 RunsTablePresenterFactory::RunsTablePresenterFactory(
-    std::vector<std::string> const &instruments, double thetaTolerance)
-    : m_instruments(instruments), m_thetaTolerance(thetaTolerance) {}
+    std::vector<std::string> const &instruments, double thetaTolerance,
+    std::unique_ptr<IPlotter> plotter)
+    : m_instruments(instruments), m_thetaTolerance(thetaTolerance),
+      m_plotter(std::move(plotter)) {}
 
 std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::
 operator()(IRunsTableView *view) const {
   return Mantid::Kernel::make_unique<RunsTablePresenter>(
-      view, m_instruments, m_thetaTolerance, ReductionJobs());
+      view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter.get());
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

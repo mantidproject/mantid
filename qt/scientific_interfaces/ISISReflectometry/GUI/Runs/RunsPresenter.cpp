@@ -60,7 +60,7 @@ namespace CustomInterfaces {
  */
 RunsPresenter::RunsPresenter(IRunsView *mainView,
                              ProgressableView *progressableView,
-                             RunsTablePresenterFactory makeRunsTablePresenter,
+                             RunsTablePresenterFactory *makeRunsTablePresenter,
                              double thetaTolerance,
                              std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex,
@@ -69,7 +69,7 @@ RunsPresenter::RunsPresenter(IRunsView *mainView,
                              boost::shared_ptr<ISearcher> searcher)
     : m_autoreduction(autoreduction), m_view(mainView),
       m_progressView(progressableView),
-      m_makeRunsTablePresenter(std::move(makeRunsTablePresenter)),
+      m_makeRunsTablePresenter(makeRunsTablePresenter),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_searcher(searcher), m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
@@ -77,7 +77,7 @@ RunsPresenter::RunsPresenter(IRunsView *mainView,
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
-  m_tablePresenter = m_makeRunsTablePresenter(m_view->table());
+  m_tablePresenter = (*m_makeRunsTablePresenter)(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
 
   if (!m_autoreduction)
