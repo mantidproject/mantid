@@ -694,12 +694,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
-        # save S(2theta, w):
-        suf = "'_Ei_{}'.format(round(Ei,2))"
-        #nxspe only if self.binEon
-        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
-        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
-
         if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
             self.l("# calculate momentum transfer Q for sample data")
@@ -711,11 +705,20 @@ class TOFTOFScriptElement(BaseScriptElement):
                 self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
 
-            # save S(Q, w)
+        self.rename_workspaces(gData)
+        self.l()
+
+        # save S(2theta, w), has to be done after renaming
+        suf = "'_Ei_{}'.format(round(Ei,2))"
+        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
+        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
+        self.l()
+
+        # save S(Q, w), has to be done after renaming
+        if self.binQon and self.binEon:
             saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofQWNexus, self.saveSofQWAscii]))
             self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
 
-        self.rename_workspaces(gData)
 
         return self.script[0]
 
