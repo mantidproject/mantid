@@ -45,7 +45,7 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
             # update the caller's global dictionary with references
             # to all attributes of the imported library
             # essentially doing a from X import *
-            all_attrs = dir(lib)
+            all_attrs = filter(lambda x: not x.startswith("__"), dir(lib))
             for attr in all_attrs:
                 caller_globals[attr] = getattr(lib, attr)
         return None
