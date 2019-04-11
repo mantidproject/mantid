@@ -207,7 +207,7 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
-  // Calculate the cached values of L1 and element volumes.
+  // Calculate the cached values of L1, element volumes, and geometry size
   initialiseCachedDistances();
   if (m_L1s.empty()) {
     throw std::runtime_error(
@@ -220,17 +220,18 @@ void AbsorptionCorrection::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-
     // Copy over bins
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
-    if (!spectrumInfo.hasDetectors(i))
+    if (!spectrumInfo.hasDetectors(i)) {
+      g_log.information() << "Spectrum " << i << " does not have a detector defined for it\n";
       continue;
-
+    }
     const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
+
 
     // If an indirect instrument, see if there's an efixed in the parameter map
     double lambdaFixed = m_lambdaFixed;
@@ -265,8 +266,10 @@ void AbsorptionCorrection::exec() {
       } else if (m_emode == DeltaEMode::Indirect) {
         Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
                                    0, L2s.size());
+      } else { // should never happen
+        throw std::runtime_error("AbsorptionCorrection doesn't have a known DeltaEMode defined");
       }
-      Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
+      Y[j] /= m_sampleVolume; // Divide by total volume of the shape
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
