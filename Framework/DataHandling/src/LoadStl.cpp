@@ -26,5 +26,20 @@ void LoadStl::changeToVector() {
     m_verticies[mapValue.second] = mapValue.first;
   }
 }
+
+Kernel::V3D LoadStl::createScaledV3D(double xVal, double yVal, double zVal){
+  switch(m_scaleType){
+      case centimetres : xVal = xVal/100;
+                         yVal = yVal/100;
+                         zVal = zVal/100;
+                         break;
+      case milimetres  : xVal = xVal/1000;
+                         yVal = yVal/1000;
+                         zVal = zVal/1000;
+                         break;
+      case metres : break;
+    }
+    return Kernel::V3D(double(xVal), double(yVal), double(zVal));
+}
 } // namespace DataHandling
 } // namespace Mantid

@@ -39,19 +39,22 @@ struct V3DTrueComparator {
     return diff.norm() < nanoMetre;
   }
 };
+enum ScaleUnits { metres, centimetres, milimetres };
 
 class DLLExport LoadStl {
 public:
-  LoadStl(std::string filename) : m_filename(filename), m_setMaterial(false) {}
-  LoadStl(std::string filename, ReadMaterial::MaterialParameters params)
-      : m_filename(filename), m_setMaterial(true), m_params(params) {}
+  LoadStl(std::string filename, ScaleUnits scaleType) : m_filename(filename),  m_scaleType(scaleType), m_setMaterial(false){}
+  LoadStl(std::string filename, ScaleUnits scaleType, ReadMaterial::MaterialParameters params)
+      : m_filename(filename),  m_scaleType(scaleType), m_setMaterial(true), m_params(params) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
   virtual ~LoadStl() = default;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
   void changeToVector();
+  Kernel::V3D createScaledV3D(double x, double y, double z);
   const std::string m_filename;
+  const ScaleUnits m_scaleType;
   bool m_setMaterial;
   ReadMaterial::MaterialParameters m_params;
   std::vector<uint32_t> m_triangle;
@@ -59,7 +62,10 @@ protected:
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,
                      V3DTrueComparator>
       vertexSet;
+  
 };
+
+
 
 } // namespace DataHandling
 } // namespace Mantid
