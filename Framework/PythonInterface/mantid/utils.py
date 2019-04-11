@@ -35,14 +35,19 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
                 except ImportError as e2:
                     msg = 'import of "{}" failed with "{}"'
                     msg = 'First ' + msg.format(modulename, e1) \
-                        + '. Second ' + msg.format(modulename.lstrip('.'), e2)
+                          + '. Second ' + msg.format(modulename.lstrip('.'), e2)
                     raise ImportError(msg)
         else:
             # exec("from {} import *".format(modulename), caller_globals)
             lib = import_module(modulename)
 
         if caller_globals:
-            caller_globals.update(dir(lib))
+            # update the caller's global dictionary with references
+            # to all attributes of the imported library
+            # essentially doing a from X import *
+            all_attrs = dir(lib)
+            for attr in all_attrs:
+                caller_globals[attr] = getattr(lib, attr)
         return None
 
 
