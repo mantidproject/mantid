@@ -319,8 +319,8 @@ void IndirectFitAnalysisTab::setSampleSuffixes(std::string const &tab,
 void IndirectFitAnalysisTab::setResolutionSuffixes(std::string const &tab,
                                                    bool filter) {
   QStringList const noSuffixes{""};
-  setResolutionWSSuffixes(filter ? getResolutionFBSuffixes(tab) : noSuffixes);
-  setResolutionFBSuffixes(filter ? getResolutionWSSuffixes(tab)
+  setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab) : noSuffixes);
+  setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab)
                                  : getExtensions(tab));
   m_dataPresenter->setMultiInputResolutionWSSuffixes();
   m_dataPresenter->setMultiInputResolutionFBSuffixes();

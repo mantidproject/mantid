@@ -533,7 +533,7 @@ void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
 void Iqt::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("iqt");
+  auto const tabName("Iqt");
   m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                          : getExtensions(tabName));
   m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

@@ -99,7 +99,7 @@ Stretch::Stretch(QWidget *parent)
 
 void Stretch::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("stretch");
+  auto const tabName("Stretch");
   m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                           : getExtensions(tabName));
   m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

@@ -444,7 +444,7 @@ void Elwin::loadSettings(const QSettings &settings) {
 }
 
 void Elwin::setFileExtensionsByName(bool filter) {
-  auto const tabName("elwin");
+  auto const tabName("Elwin");
   m_uiForm.dsInputFiles->setFileExtensions(filter ? getSampleFBSuffixes(tabName)
                                                   : getExtensions(tabName));
 }

@@ -23,13 +23,9 @@
 #include <QMessageBox>
 #include <QtXml>
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
 #include <boost/algorithm/string/find.hpp>
 #include <boost/pointer_cast.hpp>
 
-using namespace Poco::XML;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -50,32 +46,55 @@ void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
     algorithm->setPropertyValue(propName, value);
 }
 
-std::string findXMLAttribute(Document const *document, XMLString const &tag,
-                             XMLString const &attribute) {
-  auto const root = document->documentElement();
-  for (auto *node = root->firstChild(); node != 0; node = node->nextSibling()) {
-    auto const element = dynamic_cast<Poco::XML::Element *>(node);
-    if (element && element->tagName() == tag)
-      return std::string(element->getAttribute(attribute));
-  }
-  throw std::runtime_error("The tag " + tag + " was not found in the file: ");
+std::string getAttributeFromTag(QDomElement const &tag,
+                                QString const &attribute,
+                                QString const &defaultValue) {
+  if (tag.hasAttribute(attribute))
+    return tag.attribute(attribute, defaultValue).toStdString();
+  return defaultValue.toStdString();
 }
 
-std::string getAttributeFromFile(std::string const &filepath,
-                                 XMLString const &tag,
-                                 XMLString const &attribute) {
-  std::string attributeValue;
-  try {
-    DOMParser parser;
-    auto const *document = parser.parseString(Strings::loadFile(filepath));
-    if (document)
-      attributeValue = findXMLAttribute(document, tag, attribute);
-  } catch (Poco::Exception const &ex) {
-    g_log.warning(ex.displayText() + ". Unable to parse File:" + filepath);
-  } catch (std::exception const &ex) {
-    g_log.warning(ex.what() + filepath);
+bool hasCorrectAttribute(QDomElement const &child,
+                         std::string const &attributeName,
+                         std::string const &searchValue) {
+  auto const name = QString::fromStdString(attributeName);
+  return child.hasAttribute(name) &&
+         child.attribute(name).toStdString() == searchValue;
+}
+
+std::string getInterfaceAttribute(QDomElement const &root,
+                                  std::string const &interfaceName,
+                                  std::string const &propertyName,
+                                  std::string const &attribute) {
+  // Loop through interfaces
+  auto interfaceChild = root.firstChild().toElement();
+  while (!interfaceChild.isNull()) {
+    if (hasCorrectAttribute(interfaceChild, "id", interfaceName)) {
+
+      // Loop through interface properties
+      auto propertyChild = interfaceChild.firstChild().toElement();
+      while (!propertyChild.isNull()) {
+
+        // Return value of an attribute of the property if it is found
+        if (propertyChild.tagName().toStdString() == propertyName)
+          return getAttributeFromTag(propertyChild,
+                                     QString::fromStdString(attribute), "");
+
+        propertyChild = propertyChild.nextSibling().toElement();
+      }
+    }
+    interfaceChild = interfaceChild.nextSibling().toElement();
   }
-  return attributeValue;
+  return "";
+}
+
+std::string getInterfaceAttribute(QFile &file, std::string const &interfaceName,
+                                  std::string const &propertyName,
+                                  std::string const &attribute) {
+  QDomDocument xmlBOM;
+  xmlBOM.setContent(&file);
+  return getInterfaceAttribute(xmlBOM.documentElement(), interfaceName,
+                               propertyName, attribute);
 }
 
 QStringList convertToQStringList(std::vector<std::string> const &strings) {
@@ -214,105 +233,101 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
 
 std::string
 IndirectTab::getInterfaceProperty(std::string const &interfaceName,
-                                  std::string const &propertyName) const {
-  // auto const directory =
-  //    ConfigService::Instance().getString("instrumentDefinition.directory");
-  // auto const filepath = directory + "Indirect_Interface_Properties.xml";
-  // return getAttributeFromFile(filepath, interfaceName, propertyName);
-
-  // QDomDocument xmlBOM;
+                                  std::string const &propertyName,
+                                  std::string const &attribute) const {
   QFile file(":/interface-properties.xml");
-  // if (!file.open(QIODevice::ReadOnly)) {
-  //  g_log.warning("Error while loading file.");
-  //  return "";
-  //}
-  // Set data into the QDomDocument before processing
-  // xmlBOM.setContent(&file);
+  if (file.open(QIODevice::ReadOnly))
+    return getInterfaceAttribute(file, interfaceName, propertyName, attribute);
+
+  g_log.warning("There was an error while loading interface-properties.xml.");
   return "";
 }
 
 QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {
-  return convertToQStringList(getInterfaceProperty(interfaceName, "extensions"),
-                              ",");
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "EXTENSIONS", "all"), ",");
 }
 
 QStringList
 IndirectTab::getCalibrationExtensions(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "calib-extensions"), ",");
+      getInterfaceProperty(interfaceName, "EXTENSIONS", "calibration"), ",");
 }
 
 QStringList
 IndirectTab::getSampleFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "sample-file-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "sample"), ",");
 }
 
 QStringList
 IndirectTab::getSampleWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "sample-workspace-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "sample"), ",");
 }
 
 QStringList
 IndirectTab::getVanadiumFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "vanadium-file-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "vanadium"), ",");
 }
 
 QStringList
 IndirectTab::getVanadiumWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "vanadium-workspace-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "vanadium"),
+      ",");
 }
 
 QStringList
 IndirectTab::getResolutionFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "resolution-file-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "resolution"), ",");
 }
 
 QStringList
 IndirectTab::getResolutionWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "resolution-workspace-suffixes"),
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "resolution"),
       ",");
 }
 
 QStringList
 IndirectTab::getCalibrationFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "calib-file-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "calibration"), ",");
 }
 
 QStringList
 IndirectTab::getCalibrationWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "calib-workspace-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "calibration"),
+      ",");
 }
 
 QStringList
 IndirectTab::getContainerFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "container-file-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "container"), ",");
 }
 
 QStringList
 IndirectTab::getContainerWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "container-workspace-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "container"),
+      ",");
 }
 
 QStringList
 IndirectTab::getCorrectionsFBSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "corrections-file-suffixes"), ",");
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "corrections"), ",");
 }
 
 QStringList
 IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceName) const {
   return convertToQStringList(
-      getInterfaceProperty(interfaceName, "corrections-workspace-suffixes"),
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "corrections"),
       ",");
 }
 

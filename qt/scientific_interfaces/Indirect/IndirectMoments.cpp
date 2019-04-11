@@ -216,7 +216,7 @@ void IndirectMoments::momentsAlgComplete(bool error) {
 
 void IndirectMoments::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("moments");
+  auto const tabName("Moments");
   m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                          : getExtensions(tabName));
   m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

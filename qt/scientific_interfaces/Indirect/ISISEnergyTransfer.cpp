@@ -804,7 +804,7 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
 
 void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("isis-energy-transfer");
+  auto const tabName("ISISEnergyTransfer");
   m_uiForm.dsCalibrationFile->setFBSuffixes(
       filter ? getCalibrationFBSuffixes(tabName)
              : getCalibrationExtensions(tabName));

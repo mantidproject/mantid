@@ -215,7 +215,7 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
 
 void ContainerSubtraction::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("container-subtraction");
+  auto const tabName("ContainerSubtraction");
   m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                           : getExtensions(tabName));
   m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

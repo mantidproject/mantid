@@ -249,7 +249,8 @@ protected:
 
 private:
   std::string getInterfaceProperty(std::string const &interfaceName,
-                                   std::string const &propertyName) const;
+                                   std::string const &propertyName,
+                                   std::string const &attribute) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

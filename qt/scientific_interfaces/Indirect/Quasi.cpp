@@ -98,7 +98,7 @@ void Quasi::loadSettings(const QSettings &settings) {
 
 void Quasi::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("quasi");
+  auto const tabName("Quasi");
   m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                           : getExtensions(tabName));
   m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

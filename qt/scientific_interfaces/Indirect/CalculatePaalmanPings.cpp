@@ -447,7 +447,7 @@ void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
 
 void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("paalman-pings");
+  auto const tabName("CalculatePaalmanPings");
   m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                           : getExtensions(tabName));
   m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

@@ -1,30 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface-properties-file>
-	
-	<!--Allowed suffixes for Input data on Indirect Data Reduction-->
-	<isis-energy-transfer calib-extensions=".nxs" calib-file-suffixes="_calib.nxs" calib-workspace-suffixes="_calib"/>
-	<isis-diagnostics calib-extensions=".nxs" calib-file-suffixes="_calib.nxs" calib-workspace-suffixes="_calib"/>
-	<symmetrise extensions=".nxs" sample-file-suffixes="_red.nxs" sample-workspace-suffixes="_red"/>
-	<sqw extensions=".nxs" sample-file-suffixes="_red.nxs" sample-workspace-suffixes="_red"/>
-	<moments extensions=".nxs" sample-file-suffixes="_sqw.nxs" sample-workspace-suffixes="_sqw"/>
-	
-	<!--Allowed suffixes for Input data on Indirect Data Corrections-->
-	<container-subtraction extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs,_elf.nxs" sample-workspace-suffixes="_red,_sqw,_elf" container-file-suffixes="_red.nxs,_sqw.nxs,_elf.nxs" container-workspace-suffixes="_red,_sqw,_elf"/>
-	<paalman-pings extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" container-file-suffixes="_red.nxs,_sqw.nxs" container-workspace-suffixes="_red,_sqw"/>
-	<monte-carlo extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" container-file-suffixes="_red.nxs,_sqw.nxs" container-workspace-suffixes="_red,_sqw"/>
-	<apply-corrections extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" container-file-suffixes="_red.nxs,_sqw.nxs" container-workspace-suffixes="_red,_sqw" corrections-file-suffixes="_Corrections.nxs" corrections-workspace-suffixes="_Corrections"/>
-		
-	<!--Allowed suffixes for Input data on Indirect Data Analysis-->
-	<elwin extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" />
-	<msdfit extensions=".nxs" sample-file-suffixes="_eq.nxs" sample-workspace-suffixes="_eq"/>
-	<iqt extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs" resolution-workspace-suffixes="_res,_red,_sqw"/>
-	<iqtfit extensions=".nxs" sample-file-suffixes="_iqt.nxs" sample-workspace-suffixes="_iqt"/>
-	<convfit extensions=".nxs,.dave" sample-file-suffixes="_red.nxs,_sqw.nxs,_sqw.dave" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs,_sqw.dave" resolution-workspace-suffixes="_res,_red,_sqw"/>
-	<fqfit extensions=".nxs" sample-file-suffixes="_Result.nxs" sample-workspace-suffixes="_Result"/>
-	
-	<!--Allowed suffixes for Input data on Indirect Bayes-->
-	<resnorm extensions=".nxs" vanadium-file-suffixes="_red.nxs,_sqw.nxs" vanadium-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs" resolution-workspace-suffixes="_res"/>
-	<quasi extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs,_red.nxs,_sqw.nxs" resolution-workspace-suffixes="_res,_red,_sqw"/>
-	<stretch extensions=".nxs" sample-file-suffixes="_red.nxs,_sqw.nxs" sample-workspace-suffixes="_red,_sqw" resolution-file-suffixes="_res.nxs" resolution-workspace-suffixes="_res"/>
+<INTERFACE-PROPERTIES>
 
-</interface-properties-file>
+	<INTERFACE id="ISISEnergyTransfer">
+		<EXTENSIONS calibration=".nxs"/>
+		<FILE-SUFFIXES calibration="_calib.nxs"/>
+		<WORKSPACE-SUFFIXES calibration="_calib"/>
+	</INTERFACE>
+	
+	<INTERFACE id="ISISDiagnostics">
+		<EXTENSIONS calibration=".nxs"/>
+		<FILE-SUFFIXES calibration="_calib.nxs"/>
+		<WORKSPACE-SUFFIXES calibration="_calib"/>
+	</INTERFACE>
+	
+	<INTERFACE id="Symmetrise">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red"/>
+	</INTERFACE>
+
+	<INTERFACE id="Sqw">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red"/>
+	</INTERFACE>
+	
+	<INTERFACE id="Moments">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_sqw.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_sqw"/>
+	</INTERFACE>
+	
+	<INTERFACE id="ContainerSubtraction">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs,_elf.nxs" container="_red.nxs,_sqw.nxs,_elf.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw,_elf" container="_red,_sqw,_elf"/>
+	</INTERFACE>
+	
+	<INTERFACE id="CalculatePaalmanPings">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw"/>
+	</INTERFACE>
+	
+	<INTERFACE id="CalculateMonteCarlo">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw"/>
+	</INTERFACE>
+	
+	<INTERFACE id="ApplyCorrections">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs" corrections="_Corrections.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw" corrections="_Corrections"/>
+	</INTERFACE>
+	
+	<INTERFACE id="Elwin">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw"/>
+	</INTERFACE>
+	
+	<INTERFACE id="MSDFit">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_eq.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_eq"/>
+	</INTERFACE>
+	
+	<INTERFACE id="Iqt">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" resolution="_res.nxs,_red.nxs,_sqw.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
+	</INTERFACE>
+		
+	<INTERFACE id="IqtFit">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_iqt.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_iqt"/>
+	</INTERFACE>
+	
+	<INTERFACE id="ConvFit">
+		<EXTENSIONS all=".nxs,.dave"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs,_sqw.dave" resolution="_res.nxs,_red.nxs,_sqw.nxs,_sqw.dave"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
+	</INTERFACE>
+	
+	<INTERFACE id="FQFit">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_Result.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_Result"/>
+	</INTERFACE>
+	
+	<INTERFACE id="ResNorm">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES vanadium="_red.nxs,_sqw.nxs" resolution="_res.nxs"/>
+		<WORKSPACE-SUFFIXES vanadium="_red,_sqw" resolution="_res"/>
+	</INTERFACE>
+
+	<INTERFACE id="Quasi">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" resolution="_res.nxs,_red.nxs,_sqw.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
+	</INTERFACE>
+	
+	<INTERFACE id="Stretch">
+		<EXTENSIONS all=".nxs"/>
+		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" resolution="_res.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res"/>
+	</INTERFACE>
+	
+</INTERFACE-PROPERTIES>

@@ -440,7 +440,7 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("monte-carlo");
+  auto const tabName("CalculateMonteCarlo");
   m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                                : getExtensions(tabName));
   m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)

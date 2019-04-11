@@ -33,7 +33,7 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
-  std::string tabName() const override { return "iqtfit"; }
+  std::string tabName() const override { return "IqtFit"; }
 
   bool hasResolution() const override { return false; }
 

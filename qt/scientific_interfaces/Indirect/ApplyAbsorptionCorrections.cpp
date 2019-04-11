@@ -521,7 +521,7 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 
 void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
-  auto const tabName("apply-corrections");
+  auto const tabName("ApplyCorrections");
   m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
                                           : getExtensions(tabName));
   m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
