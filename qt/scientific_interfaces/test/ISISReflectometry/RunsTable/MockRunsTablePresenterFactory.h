@@ -21,7 +21,7 @@ class MockRunsTablePresenterFactory : public RunsTablePresenterFactory {
 public:
   MockRunsTablePresenterFactory(std::vector<std::string> const &instruments,
                                 double thetaTolerance)
-      : RunsTablePresenterFactory(instruments, thetaTolerance) {}
+      : RunsTablePresenterFactory(instruments, thetaTolerance, nullptr) {}
   std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const override {
     return Mantid::Kernel::make_unique<MockRunsTablePresenter>(

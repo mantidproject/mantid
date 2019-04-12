@@ -68,10 +68,12 @@ public:
   virtual void confirmReductionCompleted() {}
   virtual void confirmReductionPaused(){};
   virtual void confirmReductionResumed(){};
-  virtual void completedGroupReductionSuccessfully(GroupData const & /*unused*/,
-                                                   std::string const & /*unused*/){};
-  virtual void completedRowReductionSuccessfully(GroupData const & /*unused*/,
-                                                 std::string const & /*unused*/){};
+  virtual void
+  completedGroupReductionSuccessfully(GroupData const & /*unused*/,
+                                      std::string const & /*unused*/){};
+  virtual void
+  completedRowReductionSuccessfully(GroupData const & /*unused*/,
+                                    std::string const & /*unused*/){};
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets

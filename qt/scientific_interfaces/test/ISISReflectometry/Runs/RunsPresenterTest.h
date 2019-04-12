@@ -21,11 +21,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 //=====================================================================================
 // Functional tests
@@ -41,7 +41,8 @@ public:
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher) {
+        m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher),
+        m_runsTablePresenterFactory(m_instruments, m_thetaTolerance) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -267,9 +268,9 @@ private:
   public:
     RunsPresenterFriend(
         IRunsView *mainView, ProgressableView *progressView,
-        RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
-        std::vector<std::string> const &instruments, int defaultInstrumentIndex,
-        IMessageHandler *messageHandler,
+        RunsTablePresenterFactory *makeRunsTablePresenter,
+        double thetaTolerance, std::vector<std::string> const &instruments,
+        int defaultInstrumentIndex, IMessageHandler *messageHandler,
         boost::shared_ptr<IAutoreduction> autoreduction =
             boost::shared_ptr<IAutoreduction>(),
         boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>())
@@ -280,9 +281,10 @@ private:
 
   RunsPresenterFriend makePresenter() {
     auto const defaultInstrumentIndex = 0;
+    m_runsTablePresenterFactory =
+        MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance);
     auto presenter = RunsPresenterFriend(
-        &m_view, &m_progressView,
-        MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance),
+        &m_view, &m_progressView, &m_runsTablePresenterFactory,
         m_thetaTolerance, m_instruments, defaultInstrumentIndex,
         &m_messageHandler, m_autoreduction, m_searcher);
 
@@ -429,6 +431,7 @@ private:
   boost::shared_ptr<MockAutoreduction> m_autoreduction;
   boost::shared_ptr<MockSearcher> m_searcher;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
+  MockRunsTablePresenterFactory m_runsTablePresenterFactory;
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H */

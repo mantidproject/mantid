@@ -21,7 +21,8 @@ public:
   MockRunsTablePresenter(IRunsTableView *view,
                          std::vector<std::string> const &instruments,
                          double thetaTolerance, ReductionJobs reductionJobs)
-      : RunsTablePresenter(view, instruments, thetaTolerance, reductionJobs){};
+      : RunsTablePresenter(view, instruments, thetaTolerance, reductionJobs,
+                           nullptr){};
   MOCK_METHOD0(notifyProcessRequested, void());
   MOCK_METHOD0(notifyPauseRequested, void());
   MOCK_METHOD0(notifyInsertRowRequested, void());
