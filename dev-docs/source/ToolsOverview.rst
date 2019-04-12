@@ -299,7 +299,7 @@ To use cmake-format on a specific ``CMakeLists.txt`` file in the command line ru
 	
 This will format the file using the config file in the mantid directory.
 
-There is an official visual studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
+There is an official Visual Studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
 
 To format on all the CMakeLists run the following from within the mantid source folder:
 
