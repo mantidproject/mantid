@@ -1,0 +1,156 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+
+#include "MantidMDAlgorithms/FlippingRatioCorrectionMD.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include <muParser.h>
+
+namespace Mantid {
+namespace MDAlgorithms {
+using Mantid::Kernel::Direction;
+using Mantid::API::WorkspaceProperty;
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(FlippingRatioCorrectionMD)
+
+//----------------------------------------------------------------------------------------------
+
+/// Algorithms name for identification. @see Algorithm::name
+const std::string FlippingRatioCorrectionMD::name() const { return "FlippingRatioCorrectionMD"; }
+
+/// Algorithm's version for identification. @see Algorithm::version
+int FlippingRatioCorrectionMD::version() const { return 1; }
+
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string FlippingRatioCorrectionMD::category() const {
+  return "MDAlgorithms\\Transforms";
+}
+
+/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+const std::string FlippingRatioCorrectionMD::summary() const {
+  return "Creates MDEvent workspaces with polarization flipping ratio corrections."
+         "The polarization might be angle dependent.";
+}
+
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void FlippingRatioCorrectionMD::init() {
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
+                                                   "InputWorkspace", "", Kernel::Direction::Input),
+                                               "An input MDEventWorkspace. Must be in Q_sample frame.");
+  declareProperty(Kernel::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
+                      "FlippingRatio", "", Direction::Input),
+                  "Formula to define the flipping ratio. It can depend on the variables in the list "
+                  "of sample logs defined below");
+  declareProperty(Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>("SampleLogs", Direction::Input),
+                  "Comma separated list of sample logs that can appear in the formula for flipping ratio");
+  //declareProperty(
+  //    Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
+  //                                                           Direction::Output),
+  //    "An output workspace.");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void FlippingRatioCorrectionMD::exec() {
+  Mantid::API::IMDEventWorkspace_sptr inWS;
+  inWS = getProperty("InputWorkspace");
+  std::string inputFormula = getProperty("FlippingRatio");
+  std::vector<std::string> sampleLogStrings = getProperty("SampleLogs");
+
+
+  std::vector<double> flippingRatio;
+
+  for(uint16_t i=0; i < inWS->getNumExperimentInfo(); i++) {
+      const auto &currentRun=inWS->getExperimentInfo(i)->run();
+      std::vector<double> sampleLogs(sampleLogStrings.size());
+      mu::Parser muParser;
+      for(size_t j=0;j<sampleLogStrings.size();j++) {
+        std::string s=sampleLogStrings[j];
+        double val=currentRun.getLogAsSingleValue(s,Kernel::Math::TimeAveragedMean);
+        sampleLogs[j]=val;
+        muParser.DefineVar(s, &sampleLogs[j]);
+      }
+      muParser.SetExpr(inputFormula);
+      auto variables = muParser.GetVar();
+      auto item = variables.begin();
+      for (; item!=variables.end(); ++item)
+      {
+        std::cout << "Name: " << item->first << "Val: " << *(item->second) << "\n";
+      }
+      try {
+        flippingRatio.push_back(muParser.Eval());
+      }
+      catch (mu::Parser::exception_type &e)
+      {
+        g_log.error()<<"Parsing error in experiment info "<<i<<"\n"<< e.GetMsg() << std::endl;
+        throw std::runtime_error("Parsing error");
+      }
+  }
+  std::vector<double> C1,C2; //C1=FR/(FR-1.), C2=1./(FR-1.)
+  for(auto &fr:flippingRatio) {
+    C1.push_back(fr/(fr-1.));
+    C2.push_back(1./(fr-1.));
+  }
+
+}
+
+template<typename MDE, size_t nd>
+void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
+                                                    std::vector<double> factor)
+{
+  // Get all the MDBoxes contained
+  DataObjects::MDBoxBase<MDE, nd> *parentBox = ws->getBox();
+  std::vector<API::IMDNode *> boxes;
+  parentBox->getBoxes(boxes, 1000, true);
+
+  bool fileBackedTarget(false);
+  Kernel::DiskBuffer *dbuff(nullptr);
+  if (ws->isFileBacked()) {
+    fileBackedTarget = true;
+    dbuff = ws->getBoxController()->getFileIO();
+  }
+
+  for (auto &boxe : boxes) {
+    DataObjects::MDBox<MDE, nd> *box = dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
+    if (box) {
+      typename std::vector<MDE> &events = box->getEvents();
+      size_t ic(events.size());
+      auto it = events.begin();
+      auto it_end = events.end();
+      for (; it != it_end; it++) {
+        float scalar=static_cast<float>(factor[0]);
+        float scalarSquared=static_cast<float>(factor[0]*factor[0]);
+        // Multiply weight by a scalar, propagating error
+        float oldSignal = it->getSignal();
+        float signal = oldSignal * scalar;
+        float errorSquared = scalarSquared * it->getErrorSquared();
+        it->setSignal(signal);
+        it->setErrorSquared(errorSquared);
+      }
+      box->releaseEvents();
+      if (fileBackedTarget && ic > 0) {
+        Kernel::ISaveable *const pSaver(box->getISaveable());
+        dbuff->toWrite(pSaver);
+      }
+    }
+  }
+  // Recalculate the totals
+  ws->refreshCache();
+  // Mark file-backed workspace as dirty
+  ws->setFileNeedsUpdating(true);
+}
+
+} // namespace MDAlgorithms
+} // namespace Mantid
