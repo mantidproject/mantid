@@ -297,7 +297,7 @@ To use cmake-format on a specific ``CMakeLists.txt`` file in the command line ru
 
 	python -m cmake_format -c /path/to/mantid/.cmake-format.json -i /path/to/CMakeLists.txt
 	
-This will format the file using the config file in the mantid directory.
+This will format the file using the config file ``.cmake-format.json`` which can be found in the root of the mantid directory.
 
 There is an official Visual Studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
 
