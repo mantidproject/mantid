@@ -157,8 +157,6 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         chopperOpening = common.chopperOpeningAngle(logs, instrumentName)
         chopperRadius = 0.36 if instrumentName == 'D17' else 0.305
         chopperPairDist = common.chopperPairDistance(logs, instrumentName)
-        slit1SizeLog = common.slitSizeLogEntry(instrumentName, 1)
-        slit2SizeLog = common.slitSizeLogEntry(instrumentName, 2)
         tofBinWidth = self._TOFChannelWidth(logs)
         qWSName = self._names.withSuffix('in_momentum_transfer')
         qWS = ReflectometryMomentumTransfer(
@@ -173,9 +171,9 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             ChopperRadius=chopperRadius,
             ChopperPairDistance=chopperPairDist,
             FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=slit1SizeLog,
+            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
             SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=slit2SizeLog,
+            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
             TOFChannelWidth=tofBinWidth,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)

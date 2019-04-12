@@ -188,8 +188,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         instrumentName = common.instrumentName(ws)
         pixelSize = common.pixelSize(instrumentName)
         detResolution = common.detectorResolution()
-        firstSlitSizeLog = common.slitSizeLogEntry(instrumentName, 1)
-        secondSlitSizeLog = common.slitSizeLogEntry(instrumentName, 2)
         ReflectometryBeamStatistics(
             ReflectedBeamWorkspace=ws,
             ReflectedForeground=reflectedForeground,
@@ -198,9 +196,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             PixelSize=pixelSize,
             DetectorResolution=detResolution,
             FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=firstSlitSizeLog,
+            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
             SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=secondSlitSizeLog,
+            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
             EnableLogging=self._subalgLogging)
 
     def _applyWavelengthRange(self, ws):

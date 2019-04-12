@@ -480,6 +480,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             issues[PropAutoProcess.RB] = "The same number of direct runs and reflected runs must be given."
         return issues
 
+    def _directBeamName(self, string1, string2):
+        return self._wsPrefix + '_direct_{}_angle_{}'.format(string1, string2)
+
     def _getValue(self, propertyName, angle):
         """Return the value of the property at given angle."""
         value = self.getProperty(propertyName).value
@@ -555,17 +558,14 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         else:
             return True
 
-    def _runReflectometryILLPreprocess(self,
-                                       run,
-                                       outputWorkspaceName, angle,
-                                       linePosition = Property.EMPTY_DBL,
+    def _runReflectometryILLPreprocess(self, run, outputWorkspaceName, angle, linePosition = Property.EMPTY_DBL,
                                        twoTheta = Property.EMPTY_DBL):
         """Run the ReflectometryILLPreprocess, linePosition decides, if reflected beam is present."""
         halfWidths = [int(self._getValue(PropAutoProcess.LOW_FOREGROUND_HALF_WIDTH, angle)),
                       int(self._getValue(PropAutoProcess.HIGH_FOREGROUND_HALF_WIDTH, angle))]
         runDB = self._mtdName(self._db[angle])
         if linePosition != Property.EMPTY_DBL:
-            directBeamName = self._names.withSuffix('direct-{}-angle-{}'.format(runDB, angle))
+            directBeamName = self._directBeamName(runDB, angle)
             direct = '_DIRECT'
         else:
             directBeamName = ''
@@ -597,7 +597,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                            float(self._getValue(PropAutoProcess.WAVELENGTH_UPPER, angle))]
         runDB = self._mtdName(self._db[angle])
         if directForegroundName is not '':
-            directBeamName = 'direct-{}-angle-{}'.format(runDB, angle)
+            directBeamName = self._directBeamName(runDB, angle)
         else:
             directBeamName = ''
         ReflectometryILLSumForeground(
@@ -684,7 +684,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                                                angle)
         self._autoCleanup.protect(directForegroundName)
         if self._isPolarized():
-            self._polCorDirectName = self._names.withSuffix('{}-polcor'.format(directBeamName))
+            self._polCorDirectName = self._names.withSuffix('{}_polcor'.format(directBeamName))
             self._runReflectometryILLPolarizationCor(directForegroundName,
                                                      self._polCorDirectName)
 
@@ -692,20 +692,20 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         """Combine all algorithm runs of the reflected beam processing for an angle."""
         twoTheta = self._twoTheta(self._rb[angle], angle)
         linePosition = self._linePosition(angle)
-        reflectedWSName = self._names.withSuffix('reflected-{}'.format(reflectedBeamName))
         self._runReflectometryILLPreprocess(reflectedInput,
-                                            reflectedWSName,
+                                            reflectedBeamName,
                                             angle,
                                             linePosition,
                                             twoTheta)
-        workspaceNamesForQConversion = self._names.withSuffix('{}-foreground'.format(reflectedBeamName))
-        self._runReflectometryILLSumForeground(reflectedWSName,
-                                               workspaceNamesForQConversion,
+        foregroundName = '{}foreground'.format(reflectedBeamName)
+        self._runReflectometryILLSumForeground(reflectedBeamName,
+                                               foregroundName,
                                                self._getValue(PropAutoProcess.SUM_TYPE, angle),
                                                angle,
                                                directForegroundName)
-        self._autoCleanup.cleanupLater(reflectedWSName)
-        self._autoCleanup.cleanupLater(workspaceNamesForQConversion)
+        self._autoCleanup.cleanupLater(reflectedBeamName)
+        self._autoCleanup.cleanupLater(foregroundName)
+        return foregroundName
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -713,8 +713,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         toStitch = []
         for angle in range(len(self._db)):
             runDB = self._mtdName(self._db[angle])
-            directBeamName = 'direct-{}-angle-{}'.format(runDB, angle)
-            directForegroundName = '{}-foreground'.format(directBeamName)
+            directBeamName = self._directBeamName(runDB, angle)
+            directForegroundName = '{}_foreground'.format(directBeamName)
             # Direct beam already in ADS?
             if directBeamName not in mtd.getObjectNames():
                 self._processDirectBeam(directBeamName, directForegroundName, angle)
@@ -723,29 +723,27 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             reflectedBeamInput = self._angleOrMergeRuns(self._rb[angle])
             if not self._isPolarized():
                 runRB = self._mtdName(self._rb[angle])
-                reflectedBeamName = self._names.withSuffix('reflected-{}'.format(runRB))
-                workspaceNamesForQConversion = self._names.withSuffix('{}-foreground'.format(reflectedBeamName))
-                self._processReflectedBeam(reflectedBeamInput,
-                                           reflectedBeamName,
-                                           directForegroundName,
-                                           angle)
+                reflectedBeamName = self._names.withSuffix('reflected_{}'.format(runRB))
+                workspaceNamesForQConversion = self._processReflectedBeam(reflectedBeamInput,
+                                                                          reflectedBeamName,
+                                                                          directForegroundName,
+                                                                          angle)
             else:
                 self._forPolCor = self._polCorDirectName
                 for run in reflectedBeamInput:
-                    reflectedPolWSName = self._names.withSuffix('reflected-{}'.format(run))
-                    reflectedPolForegroundWSName = '{}-foreground'.format(reflectedPolWSName)
-                    self._processReflectedBeam(run,
-                                               reflectedPolWSName,
-                                               directForegroundName,
-                                               angle)
+                    reflectedPolWSName = self._names.withSuffix('reflected_{}'.format(run))
+                    reflectedPolForegroundWSName = self._processReflectedBeam(run,
+                                                                              reflectedPolWSName,
+                                                                              directForegroundName,
+                                                                              angle)
                     self._forPolCor.append(reflectedPolForegroundWSName)
-                polCorWSName = self._names.withSuffix('reflected-polcor')
+                polCorWSName = self._names.withSuffix('reflected_polcor')
                 self._runReflectometryILLPolarizationCor(','.join(self._forPolCor),
                                                          polCorWSName)
                 workspaceNamesForQConversion = mtd[polCorWSName].getNames()
                 for workspace in workspaceNamesForQConversion:
                     self._autoCleanup.cleanupLater(workspace)
-            convertedToQName = self._names.withSuffix('angle-{}'.format(angle))
+            convertedToQName = self._names.withSuffix('angle_{}'.format(angle))
             self._runReflectometryILLConvertToQ(workspaceNamesForQConversion,
                                                 convertedToQName,
                                                 directForegroundName,
