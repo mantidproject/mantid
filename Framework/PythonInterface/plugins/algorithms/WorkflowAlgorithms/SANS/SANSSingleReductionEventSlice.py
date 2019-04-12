@@ -16,6 +16,7 @@ import random
 
 from mantid.api import (AnalysisDataService, DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress, WorkspaceGroup, WorkspaceGroupProperty)
+from mantid.simpleapi import CloneWorkspace
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
 from sans.algorithm_detail.bundles import ReductionSettingBundle
 from sans.algorithm_detail.single_execution import (run_initial_event_slice_reduction, run_core_reduction,
@@ -141,22 +142,18 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample output workspace group for the high-angle bank, provided there is one. '
                                  'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmission', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The calculated transmission workspace group. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmission', '',
+                             doc='The calculated transmission workspace.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmission', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The unfitted transmission workspace group. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceCalculatedTransmissionCan', '',
+                             doc='The unfitted transmission workspace.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmissionCan', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The calculated transmission workspace group for the can. '
-                                 'Each workspace in the group is one event slice.')
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceUnfittedTransmissionCan', '',
+                             doc='The calculated transmission workspace for the can.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceUnfittedTransmissionCan', '',
                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The unfitted transmission workspace group for the can. '
-                                 'Each workspace in the group is one event slice.')
+                             doc='The unfitted transmission workspace for the can.')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceLABSample", 'Can Output')
@@ -317,8 +314,8 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         if save_can:
             self.set_can_and_sam_on_output(output_bundles)
 
-        """self.set_transmission_workspaces_on_output(output_transmission_bundles,
-                                                   state.adjustment.calculate_transmission.fit)"""
+        self.set_transmission_workspaces_on_output(output_transmission_bundles,
+                                                   state.adjustment.calculate_transmission.fit)
 
     def validateInputs(self):
         errors = dict()
@@ -646,51 +643,28 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             self.setProperty("OutputWorkspaceLABSample", workspace_group_lab_sample)
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
-        workspace_group_calculated_transmission_can = WorkspaceGroup()
-        workspace_group_unfitted_transmission_can = WorkspaceGroup()
-        workspace_group_calculated_transmission = WorkspaceGroup()
-        workspace_group_unfitted_transmission = WorkspaceGroup()
-
         for transmission_bundle in transmission_bundles:
             fit_performed = fit_state[DataType.to_string(transmission_bundle.data_type)].fit_type != FitType.NoFit
             calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
             unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
             if transmission_bundle.data_type is DataType.Can:
-                calc_can_trans_name = self._get_output_workspace_name(transmission_bundle.state,
-                                                                      data_type=DataType.Can,
-                                                                      transmission=True, fitted=True)
-                unfit_can_trans_name = self._get_output_workspace_name(transmission_bundle.state,
-                                                                       data_type=DataType.Can,
-                                                                       transmission=True, fitted=False)
-                if not does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
-                    AnalysisDataService.addOrReplace(unfit_can_trans_name, unfitted_transmission_workspace)
-                    workspace_group_unfitted_transmission_can.addWorkspace(unfitted_transmission_workspace)
-                if fit_performed and not workspace_group_calculated_transmission_can.contains(calc_can_trans_name):
-                    AnalysisDataService.addOrReplace(calc_can_trans_name, calculated_transmission_workspace)
-                    workspace_group_calculated_transmission_can.addWorkspace(calculated_transmission_workspace)
+                if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
+                    # The workspace is cloned here because the transmission runs are diagnostic output so even though
+                    # the values already exist they need to be labelled seperately for each reduction.
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
+                                                                       StoreInADS=False)
+                if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
+                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace, StoreInADS=False)
+                if fit_performed:
+                    self.setProperty("OutputWorkspaceCalculatedTransmissionCan", calculated_transmission_workspace)
+                self.setProperty("OutputWorkspaceUnfittedTransmissionCan", unfitted_transmission_workspace)
             elif transmission_bundle.data_type is DataType.Sample:
                 if fit_performed:
-                    calc_trans_name = self._get_output_workspace_name(transmission_bundle.state,
-                                                                      data_type=DataType.Sample,
-                                                                      transmission=True, fitted=True)
-                    AnalysisDataService.addOrReplace(calc_trans_name, calculated_transmission_workspace)
-                    workspace_group_calculated_transmission.addWorkspace(calculated_transmission_workspace)
-                unfit_trans_name = self._get_output_workspace_name(transmission_bundle.state,
-                                                                   data_type=DataType.Sample,
-                                                                   transmission=True, fitted=False)
-                AnalysisDataService.addOrReplace(unfit_trans_name, unfitted_transmission_workspace)
-                workspace_group_unfitted_transmission.addWorkspace(unfitted_transmission_workspace)
+                    self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
+                self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
             else:
-                raise RuntimeError("SANSSingleReductionEventSlice: The data type {0} should be"
+                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
                                    " sample or can.".format(transmission_bundle.data_type))
-        if workspace_group_calculated_transmission_can.size() > 0:
-            self.setProperty("OutputWorkspaceCalculatedTransmissionCan", workspace_group_calculated_transmission_can)
-        if workspace_group_unfitted_transmission_can.size() > 0:
-            self.setProperty("OutputWorkspaceUnfittedTransmissionCan", workspace_group_unfitted_transmission_can)
-        if workspace_group_calculated_transmission.size() > 0:
-            self.setProperty("OutputWorkspaceCalculatedTransmission", workspace_group_calculated_transmission)
-        if workspace_group_unfitted_transmission.size() > 0:
-            self.setProperty("OutputWorkspaceUnfittedTransmission", workspace_group_unfitted_transmission)
 
     def _get_final_workspace_names(self, output_bundles):
         """This method retrieves the workspace names for event sliced final output workspaces.

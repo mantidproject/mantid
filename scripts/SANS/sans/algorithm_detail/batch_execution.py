@@ -5,7 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 from copy import deepcopy
+import time
+
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (add_to_sample_log, create_managed_non_child_algorithm, create_unmanaged_algorithm,
                                            get_output_name, get_base_name_from_multi_period_name, get_transmission_output_name)
@@ -136,7 +139,6 @@ def single_reduction_for_event_slices(reduction_packages, workspace_to_name, wor
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can)
-
     # --------------------------------
     # Perform output of all workspaces
     # --------------------------------
@@ -151,7 +153,6 @@ def single_reduction_for_event_slices(reduction_packages, workspace_to_name, wor
     #    * The data is already on the ADS, so do nothing
     out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]
     out_shift_factors = [reduction_package.out_shift_factor for reduction_package in reduction_packages]
-
     return out_scale_factors, out_shift_factors
 
 
@@ -904,7 +905,7 @@ def set_properties_for_event_slice_reduction_algorithm(reduction_alg, reduction_
     # Set the output workspaces for LAB, HAB and Merged
     # ------------------------------------------------------------------------------------------------------------------
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-    is_part_of_event_slice_reduction = True
+    is_part_of_event_slice_reduction = False
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
     is_group = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or \
         is_part_of_wavelength_range_reduction
@@ -1170,9 +1171,9 @@ def get_group_workspace_from_algorithm(alg, output_property_name):
     """
     ws = get_workspace_from_algorithm(alg, output_property_name)
     if ws is None:
-        return (ws, 0)
+        return ws, 0
     else:
-        return (ws, ws.size)
+        return ws, ws.size
 
 
 def get_workspace_from_algorithm(alg, output_property_name, add_logs=False, user_file=""):
