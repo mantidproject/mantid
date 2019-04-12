@@ -74,6 +74,16 @@ def run_MuonGroupingAsymmetry(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
+def run_CalMuonDetectorPhases(parameter_dict):
+    alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("DataFitted", "__NotUsed")
+    alg.setProperties(parameter_dict)
+    return alg.getProperty("DetectorTable").value
+
+
 def run_AppendSpectra(ws1, ws2):
     """
     Apply the AppendSpectra algorithm to two given workspaces (no checks made).

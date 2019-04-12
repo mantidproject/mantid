@@ -1,0 +1,2 @@
+from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
+from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
