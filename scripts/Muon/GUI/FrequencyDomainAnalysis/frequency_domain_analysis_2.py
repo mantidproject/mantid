@@ -25,6 +25,7 @@ from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import Transfor
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
@@ -74,6 +75,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
+        self.phase_tab = PhaseTabWidget(self.context, self)
         self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
 
         self.setup_tabs()
@@ -118,6 +120,7 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
 
     def setup_load_observers(self):
@@ -129,6 +132,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.transform.LoadObserver)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.phase_tab.phase_table_presenter.run_change_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -144,6 +149,9 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.transform.GroupPairObserver)
+
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.group_change_observer)
 
     def setup_instrument_changed_notifier(self):
         self.context.data_context.instrumentNotifier.add_subscriber(

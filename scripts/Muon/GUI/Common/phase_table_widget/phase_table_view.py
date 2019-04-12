@@ -1,46 +1,131 @@
-from PyQt4 import QtGui
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, print_function)
 
+from qtpy import QtWidgets, QtCore
+from Muon.GUI.Common.utilities import table_utils
+from Muon.GUI.Common.message_box import warning
 
-class PhaseTableView(QtGui.QWidget):
+class PhaseTableView(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(PhaseTableView, self).__init__(parent)
+        self.setup_phase_table_options_table()
 
     @property
     def first_good_time(self):
-        return self._first_good_time
+        return float(self.first_good_data_item.text())
 
     @first_good_time.setter
     def first_good_time(self, value):
-        self._first_good_time = value
+        self.first_good_data_item.setText(str(value))
 
     @property
     def last_good_time(self):
-        return self._last_good_time
+        return float(self.last_good_data_item.text())
 
     @last_good_time.setter
     def last_good_time(self, value):
-        self._last_good_time = value
+        self.last_good_data_item.setText(str(value))
 
     @property
     def input_workspace(self):
-        return self._input_workspace
+        return str(self.input_workspace_combo_box.currentText())
 
     @input_workspace.setter
     def input_workspace(self, value):
-        self._input_workspace = value
+        index = self.input_workspace_combo_box.findText(value)
+        if index != -1:
+            self.input_workspace_combo_box.setCurrentIndex(index)
+
 
     @property
     def forward_group(self):
-        return self._forward_group
+        return str(self.forward_group_combo.currentText())
 
     @forward_group.setter
     def forward_group(self, value):
-        self._forward_group = value
+        index = self.forward_group_combo.findText(value)
+        if index != -1:
+            self.forward_group_combo.setCurrentIndex(index)
 
     @property
     def backward_group(self):
-        return self._backward_group
+        return str(self.backward_group_combo.currentText())
 
     @backward_group.setter
     def backward_group(self, value):
-        self._backward_group = value
+        index = self.backward_group_combo.findText(value)
+        if index != -1:
+            self.backward_group_combo.setCurrentIndex(index)
+
+    def set_input_combo_box(self, input_list):
+        self.input_workspace_combo_box.clear()
+        self.input_workspace_combo_box.addItems(input_list)
+        self.input_workspace_combo_box.setCurrentIndex(0)
+
+    def set_group_combo_boxes(self, group_list):
+        self.forward_group_combo.clear()
+        self.backward_group_combo.clear()
+
+        self.forward_group_combo.addItems(group_list)
+        self.backward_group_combo.addItems(group_list)
+
+        self.forward_group_combo.setCurrentIndex(0)
+        self.backward_group_combo.setCurrentIndex(1)
+
+    def set_calculate_phase_table_action(self, action):
+        self.calculate_phase_table_button.clicked.connect(action)
+
+    def warning_popup(self, message):
+        warning(message)
+
+    def setup_phase_table_options_table(self):
+        self.grid = QtWidgets.QGridLayout(self)
+
+        # add splitter for resizing
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        # make table
+        self.phase_table_options_table = QtWidgets.QTableWidget(self)
+        # self.phase_table_options_table.resize(800, 800)
+        self.phase_table_options_table.setRowCount(5)
+        self.phase_table_options_table.setColumnCount(2)
+        self.phase_table_options_table.setColumnWidth(0, 300)
+        self.phase_table_options_table.setColumnWidth(1, 300)
+        self.phase_table_options_table.verticalHeader().setVisible(False)
+        self.phase_table_options_table.horizontalHeader().setStretchLastSection(True)
+        self.phase_table_options_table.setHorizontalHeaderLabels(
+            ("Property;Value").split(";"))
+        # populate table
+        options = []
+
+        table_utils.setRowName(self.phase_table_options_table, 0, "Workspace")
+        self.input_workspace_combo_box = table_utils.addComboToTable(self.phase_table_options_table, 0, options)
+
+        table_utils.setRowName(self.phase_table_options_table, 1, "Forward group")
+        self.forward_group_combo = table_utils.addComboToTable(self.phase_table_options_table, 1, options)
+
+        table_utils.setRowName(self.phase_table_options_table, 2, "Backward group")
+        self.backward_group_combo = table_utils.addComboToTable(self.phase_table_options_table, 2, options)
+
+        table_utils.setRowName(self.phase_table_options_table, 3, "First Good Data")
+        self.first_good_data_item = table_utils.addDoubleToTable(self.phase_table_options_table, 0.1, 3)
+
+        table_utils.setRowName(self.phase_table_options_table, 4, "Last Good Data")
+        self.last_good_data_item = table_utils.addDoubleToTable(self.phase_table_options_table, 15.0, 4)
+
+        self.phase_table_options_table.resizeRowsToContents()
+
+        # add to layout
+        # self.phase_table_options_table.setMinimumSize(40, 158)
+        table_utils.setTableHeaders(self.phase_table_options_table)
+
+        self.calculate_phase_table_button = QtWidgets.QPushButton('Calculate Phase Table', self)
+
+        # add to layout
+        splitter.addWidget(self.phase_table_options_table)
+        self.grid.addWidget(splitter)
+        self.grid.addWidget(self.calculate_phase_table_button)

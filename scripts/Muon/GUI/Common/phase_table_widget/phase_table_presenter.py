@@ -2,7 +2,6 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_base_data_directory
 from mantid.api import AnalysisDataService
 import re
 
@@ -66,7 +65,7 @@ class PhaseTablePresenter(object):
     def add_phase_table_to_ADS(self, parameters, detector_table):
         AnalysisDataService.addOrReplace(parameters['DetectorTable'], detector_table)
         run = re.search('[0-9]+', parameters['DetectorTable']).group()
-        AnalysisDataService.addToGroup(get_base_data_directory(self.context, run), parameters['DetectorTable'])
+        AnalysisDataService.addToGroup(self.context.data_context._base_run_name(run), parameters['DetectorTable'])
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
 
@@ -89,6 +88,7 @@ class PhaseTablePresenter(object):
 
     def update_current_run_list(self):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
+        self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
 
     def update_current_groups_list(self):
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
