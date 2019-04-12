@@ -26,7 +26,6 @@ using namespace MantidQt::MantidWidgets;
 /** Constructor
  * @param parent :: The parent of this view
  * @param makeRunsTableView :: The factory for the RunsTableView.
- * @param batchView :: The owner of this object
  */
 RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr),
