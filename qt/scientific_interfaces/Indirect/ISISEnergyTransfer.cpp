@@ -428,7 +428,8 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
-      ungroupWorkspace(outputGroup->getName());
+      if (!m_uiForm.ckGroupOutput->isChecked())
+        ungroupWorkspace(outputGroup->getName());
 
       // Enable plotting and saving
       m_uiForm.pbPlot->setEnabled(true);
