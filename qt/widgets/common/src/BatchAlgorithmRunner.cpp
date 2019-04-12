@@ -163,8 +163,8 @@ bool BatchAlgorithmRunner::cancelRequested() {
 /**
  * Implementation of sequential algorithm scheduler.
  */
-bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void &) {
-  resetState();
+bool BatchAlgorithmRunner::executeBatchAsyncImpl(
+    const Poco::Void & /*unused*/) {
   bool errorFlag = false;
 
   for (auto &it : m_algorithms) {

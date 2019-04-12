@@ -67,7 +67,7 @@ public:
 signals:
   /// Signal emitted after the search is finished, regardless of whether
   /// any file was found.
-  void finished(const FindFilesSearchResults &);
+  void finished(const FindFilesSearchResults & /*_t1*/);
 
 public slots:
   void disconnectWorker();

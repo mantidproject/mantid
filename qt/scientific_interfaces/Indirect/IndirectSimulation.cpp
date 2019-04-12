@@ -67,7 +67,7 @@ void IndirectSimulation::initLayout() {
  *
  * @param :: the detected close event
  */
-void IndirectSimulation::closeEvent(QCloseEvent *) {
+void IndirectSimulation::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 

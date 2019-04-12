@@ -65,6 +65,8 @@ Stretch::Stretch(QWidget *parent)
   m_propTree->addProperty(m_properties["Sigma"]);
   m_propTree->addProperty(m_properties["Beta"]);
 
+  formatTreeWidget(m_propTree, m_properties);
+
   // default values
   m_dblManager->setValue(m_properties["Sigma"], 50);
   m_dblManager->setMinimum(m_properties["Sigma"], 1);

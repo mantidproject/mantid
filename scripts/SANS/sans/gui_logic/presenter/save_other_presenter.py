@@ -11,7 +11,7 @@ import os
 from mantid.api import WorkspaceGroup
 
 
-class SaveOtherPresenter():
+class SaveOtherPresenter(object):
     def __init__(self, parent_presenter=None):
         self._parent_presenter = parent_presenter
         self._view = None

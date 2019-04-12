@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import sys
+
+from sans.common.enums import BinningType
 from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.models.binning_type import BinningType
 
 
 class SummationSettingsTestCase(unittest.TestCase):
@@ -130,5 +131,6 @@ class SummationSettingsOverlayEventWorkspace(SummationSettingsTestCase, \
         self.summation_settings.enable_overlay_event_workspaces()
         self.summation_settings.disable_overlay_event_workspaces()
         self.assertOverlayEventWorkspacesDisabled()
+
 
 if __name__ == '__main__': unittest.main()

@@ -47,8 +47,8 @@ signals:
 
   /// This signal is fired from finishHandle running in the algorithm's thread
   /// and caught by showPlot slot in the GUI thread
-  void needShowPlot(Ui::SequentialFitDialog *,
-                    MantidQt::MantidWidgets::FitPropertyBrowser *);
+  void needShowPlot(Ui::SequentialFitDialog * /*_t1*/,
+                    MantidQt::MantidWidgets::FitPropertyBrowser * /*_t2*/);
 
 private slots:
 
@@ -74,7 +74,7 @@ private slots:
   /// called when selection in the workspace table changes
   void selectionChanged();
 
-  void plotAgainstLog(bool);
+  void plotAgainstLog(bool /*yes*/);
 
 private:
   /// Checks that the logs in workspace wsName are consistent

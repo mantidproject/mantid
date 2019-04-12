@@ -1,6 +1,6 @@
-<!-- TEMPLATE FOR BUG REPORTS -->
-
-**Original reporter:** [username facility]/[nobody]. <!--If the issue was raised by a user they should be named here.-->
+<!-- If the issue was raised by a user they should be named here.
+**Original reporter:** [username facility]/[nobody]
+-->
 
 ### Expected behavior
 

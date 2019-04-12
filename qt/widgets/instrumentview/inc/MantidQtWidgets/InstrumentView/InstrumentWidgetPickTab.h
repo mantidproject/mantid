@@ -87,7 +87,7 @@ public:
   void initSurface() override;
   void saveSettings(QSettings &settings) const override;
   void loadSettings(const QSettings &settings) override;
-  bool addToDisplayContextMenu(QMenu &) const override;
+  bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void selectTool(const ToolType tool);
   boost::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
@@ -98,7 +98,7 @@ public:
 
 public slots:
   void setTubeXUnits(int units);
-  void changedIntegrationRange(double, double);
+  void changedIntegrationRange(double /*unused*/, double /*unused*/);
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -106,7 +106,7 @@ private slots:
   void setPlotCaption();
   void setSelectionType();
   void storeCurve();
-  void removeCurve(const QString &);
+  void removeCurve(const QString & /*label*/);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
   void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
@@ -120,7 +120,7 @@ private slots:
   void savePlotToWorkspace();
 
 private:
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */

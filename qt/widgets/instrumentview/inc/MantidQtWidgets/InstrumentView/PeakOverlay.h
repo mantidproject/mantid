@@ -127,7 +127,7 @@ public:
   ~PeakOverlay() override {}
   /// Override the drawing method
   void draw(QPainter &painter) const override;
-  void removeShapes(const QList<Shape2D *> &) override;
+  void removeShapes(const QList<Shape2D *> & /*unused*/) override;
   void clear() override;
 
   /// Create the markers
@@ -135,7 +135,7 @@ public:
   void addMarker(PeakMarker2D *m);
   QList<PeakMarker2D *> getMarkersWithID(int detID) const;
   int getNumberPeaks() const;
-  Mantid::Geometry::IPeak &getPeak(int);
+  Mantid::Geometry::IPeak &getPeak(int /*i*/);
   QList<PeakMarker2D *> getSelectedPeakMarkers();
   /// Return PeaksWorkspace associated with this overlay.
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {
@@ -150,7 +150,7 @@ public:
   void setPeakVisibility(double xmin, double xmax, QString units);
 
 signals:
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*_t1*/);
 
 private:
   /// A WorkspaceObserver handle implemented.

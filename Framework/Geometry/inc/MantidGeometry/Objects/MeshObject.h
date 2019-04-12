@@ -126,8 +126,8 @@ public:
 
   detail::ShapeInfo::GeometryShape shape() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const override;
+                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+                     double &radius, double &height) const override;
 
   /// Read access to mesh object for rendering
   size_t numberOfVertices() const;

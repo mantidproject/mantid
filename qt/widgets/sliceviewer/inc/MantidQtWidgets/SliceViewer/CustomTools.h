@@ -27,7 +27,7 @@ namespace SliceViewer {
 //========================================================================
 class PickerMachine : public QwtPickerMachine {
 public:
-  QwtPickerMachine::CommandList transition(const QwtEventPattern &,
+  QwtPickerMachine::CommandList transition(const QwtEventPattern & /*unused*/,
                                            const QEvent *e) override {
     QwtPickerMachine::CommandList cmdList;
     if (e->type() == QEvent::MouseMove)
@@ -59,9 +59,9 @@ class CustomPicker : public QwtPlotPicker {
 public:
   CustomPicker(int xAxis, int yAxis, QwtPlotCanvas *canvas);
   void widgetMouseMoveEvent(QMouseEvent *e) override;
-  void widgetLeaveEvent(QEvent *) override;
+  void widgetLeaveEvent(QEvent * /*unused*/) override;
 
-  QwtPickerMachine *stateMachine(int) const override {
+  QwtPickerMachine *stateMachine(int /*unused*/) const override {
     return new PickerMachine;
   }
 

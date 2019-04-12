@@ -32,7 +32,7 @@ public slots:
   void selectComponentByName(const QString &name);
 
 private:
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
   /// Widget to display instrument tree
   InstrumentTreeWidget *m_instrumentTree;
   friend class InstrumentWidgetEncoder;

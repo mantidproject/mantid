@@ -737,7 +737,7 @@ void EQSANSLoad::exec() {
   // Modify TOF
   const bool correct_for_flight_path = getProperty("CorrectForFlightPath");
   double wl_min = 0.0;
-  double wl_max = 0.0;
+  double wl_max;
   double wl_combined_max = 0.0;
   if (skipTOFCorrection) {
     m_output_message +=
@@ -764,7 +764,7 @@ void EQSANSLoad::exec() {
     tofAlg->executeAsChildAlg();
     wl_min = tofAlg->getProperty("WavelengthMin");
     wl_max = tofAlg->getProperty("WavelengthMax");
-    if (wl_min != wl_min || wl_max != wl_max) {
+    if (wl_min >= wl_max) {
       g_log.error() << "Bad wavelength range\n";
       g_log.error() << m_output_message << '\n';
     }

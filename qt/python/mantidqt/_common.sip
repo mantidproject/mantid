@@ -99,6 +99,7 @@ class AlgorithmProgressWidget : QWidget {
 
 public:
     AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+    void blockUpdates(bool block = true);
 };
 %End
 

@@ -58,9 +58,11 @@ public:
   /// Clears the 'List of Logged Parameters' widget
   void clearParametersList() const override;
   /// Sets the 'List of workspaces' widget
-  void setWorkspaceList(const std::vector<std::string> &) const override;
+  void
+  setWorkspaceList(const std::vector<std::string> & /*unused*/) const override;
   /// Sets the 'List of logged parameters' widget
-  void setParametersList(const std::vector<std::string> &) const override;
+  void
+  setParametersList(const std::vector<std::string> & /*unused*/) const override;
 
   void disallowAutosave() override;
 
