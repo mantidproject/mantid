@@ -13,6 +13,7 @@
 #include "IndirectFittingModel.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
@@ -21,15 +22,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
+    : public QObject,
+      public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
                            IIndirectFitDataView *view);
-
   IndirectFitDataPresenter(
       IndirectFittingModel *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+  ~IndirectFitDataPresenter() { observeReplace(false); }
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
@@ -43,6 +46,9 @@ public:
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
+
+  void replaceHandle(const std::string &workspaceName,
+                     const Workspace_sptr &workspace) override;
 
 public slots:
   void updateSpectraInTable(std::size_t dataIndex);

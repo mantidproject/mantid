@@ -330,16 +330,14 @@ PrivateFittingData::PrivateFittingData(
     std::vector<std::unique_ptr<IndirectFitData>> &&data)
     : m_data(std::move(data)) {}
 
-PrivateFittingData &PrivateFittingData::
-operator=(PrivateFittingData &&fittingData) {
+PrivateFittingData &
+PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
   m_data = std::move(fittingData.m_data);
   return *this;
 }
 
 IndirectFittingModel::IndirectFittingModel()
-    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {
-  observeReplace(true);
-}
+    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
 
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
@@ -350,9 +348,9 @@ IndirectFittingModel::getWorkspace(std::size_t index) const {
 
 std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
   std::vector<std::string> names;
-  for (auto i = 0u; i < m_fittingData.size(); ++i) {
+  names.reserve(m_fittingData.size());
+  for (auto i = 0u; i < m_fittingData.size(); ++i)
     names.emplace_back(m_fittingData[i]->workspace()->getName());
-  }
   return names;
 }
 
@@ -455,18 +453,6 @@ std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
 
 Mantid::API::IFunction_sptr IndirectFittingModel::getFittingFunction() const {
   return m_activeFunction;
-}
-
-void IndirectFittingModel::replaceHandle(const std::string &workspaceName,
-                                         const Workspace_sptr &workspace) {
-  UNUSED_ARG(workspace)
-  const auto names = getWorkspaceNames();
-  const auto location = std::find(names.begin(), names.end(), workspaceName);
-  if (location != names.end()) {
-    const std::size_t index = std::distance(names.begin(), location);
-    removeWorkspace(index);
-    addWorkspace(workspaceName);
-  }
 }
 
 void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {

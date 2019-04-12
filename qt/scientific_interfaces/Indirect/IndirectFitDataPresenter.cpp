@@ -25,6 +25,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
     std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
     : m_model(model), m_view(view),
       m_tablePresenter(std::move(tablePresenter)) {
+  observeReplace(true);
+
   connect(m_view, SIGNAL(singleDataViewSelected()), this,
           SLOT(setModelFromSingleData()));
   connect(m_view, SIGNAL(multipleDataViewSelected()), this,
@@ -139,6 +141,29 @@ void IndirectFitDataPresenter::loadSettings(const QSettings &settings) {
   m_view->readSettings(settings);
 }
 
+void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
+                                             const Workspace_sptr &workspace) {
+  UNUSED_ARG(workspace)
+  const auto names = m_model->getWorkspaceNames();
+  const auto iter = std::find(names.begin(), names.end(), workspaceName);
+  if (iter != names.end()) {
+    setModelWorkspace(QString::fromStdString(workspaceName));
+
+    //if (m_view->isMultipleDataTabSelected()) {
+    //  setModelFromSingleData();
+    //  setModelWorkspace(QString::fromStdString(workspaceName));
+    //  setModelFromMultipleData();
+    //  setModelWorkspace(QString::fromStdString(workspaceName));
+    //} else {
+    //  setModelFromMultipleData();
+    //  setModelWorkspace(QString::fromStdString(workspaceName));
+    //  setModelFromSingleData();
+    //  setModelWorkspace(QString::fromStdString(workspaceName));
+    //}
+    emit dataChanged();
+  }
+}
+
 UserInputValidator &
 IndirectFitDataPresenter::validate(UserInputValidator &validator) {
   return m_view->validate(validator);
@@ -149,6 +174,7 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
     m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
   m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
   m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
+  m_addWorkspaceDialog->updateSelectedSpectra();
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
   connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,

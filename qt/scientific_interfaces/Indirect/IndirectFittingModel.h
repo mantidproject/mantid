@@ -11,7 +11,6 @@
 #include "IndirectFitOutput.h"
 
 #include "DllConfig.h"
-#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -43,11 +42,10 @@ private:
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFittingModel
-    : public AnalysisDataServiceObserver {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel {
 public:
   IndirectFittingModel();
-  virtual ~IndirectFittingModel() { observeReplace(false); }
+  virtual ~IndirectFittingModel() = default;
 
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(std::size_t index) const;
@@ -72,8 +70,7 @@ public:
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
   virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
-  void replaceHandle(const std::string &workspaceName,
-                     const Workspace_sptr &workspace) override;
+
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
