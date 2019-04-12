@@ -217,8 +217,6 @@ background: transparent;
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../../resources/icons/SliceViewerIcons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
