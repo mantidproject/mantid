@@ -25,12 +25,10 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
             try:
                 # import from PACKAGE.MODULE, this is used for mantid packages, where the .pyd files
                 # are placed at e.g. `from mantid.kernel import _kernel`
-                # exec("from {}{} import *".format(package, modulename), caller_globals)
                 lib = import_module(modulename, package)
             except ImportError as e1:
-                # import relative to current working directory, this is essentially doing `import _kernel`
+                # import relative to current working directory, this simulates doing `import _kernel`
                 try:
-                    # exec("from {} import *".format(modulename.lstrip('.')), caller_globals)
                     lib = import_module(modulename.lstrip('.'))
                 except ImportError as e2:
                     msg = 'import of "{}" failed with "{}"'
@@ -38,7 +36,6 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
                           + '. Second ' + msg.format(modulename.lstrip('.'), e2)
                     raise ImportError(msg)
         else:
-            # exec("from {} import *".format(modulename), caller_globals)
             lib = import_module(modulename)
 
         if caller_globals:
@@ -48,7 +45,6 @@ def import_mantid_cext(modulename, package="", caller_globals=None):
             all_attrs = filter(lambda x: not x.startswith("__"), dir(lib))
             for attr in all_attrs:
                 caller_globals[attr] = getattr(lib, attr)
-        return None
 
 
 @contextmanager

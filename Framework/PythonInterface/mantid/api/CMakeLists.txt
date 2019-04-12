@@ -2,10 +2,9 @@
 
 set(MODULE_TEMPLATE src/api.cpp.in)
 
-# Files containing export definitions, these are automatically processed -- Do
-# NOT sort this list. The order defines the order in which the export
+# Files containing export definitions, these are automatically processed
+# -- Do NOT sort this list. The order defines the order in which the export
 # definitions occur and some depend on their base classes being exported first
-# --
 set(EXPORT_FILES
     src/Exports/IAlgorithm.cpp
     src/Exports/AlgorithmObserver.cpp

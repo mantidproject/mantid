@@ -59,7 +59,7 @@ private:
       auto code = "from mantid.api import PythonAlgorithm\n"
                   "class PyAlg(PythonAlgorithm):\n"
                   "    def category(self):\n"
-                  "        return 'system';\n";
+                  "        return 'system'\n";
       PyRun_SimpleString(code);
       PyObject *main = PyImport_AddModule("__main__");
       TS_ASSERT(main);
