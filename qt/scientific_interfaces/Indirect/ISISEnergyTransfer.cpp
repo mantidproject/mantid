@@ -399,13 +399,10 @@ void ISISEnergyTransfer::run() {
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
 
-  std::transform(grouping.first.begin(), grouping.first.end(),
-                 grouping.first.begin(), std::tolower);
   m_outputGroupName = instName.toLower().toStdString() +
                       m_uiForm.dsRunFiles->getText().toStdString() + "_" +
                       getAnalyserName().toStdString() +
-                      getReflectionName().toStdString() + "_" + grouping.first +
-                      "_Reduced";
+                      getReflectionName().toStdString() + "_Reduced";
   reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
@@ -451,17 +448,13 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 }
 
 int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
-  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return i;
-  return 0;
+  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+  return index >= 0 ? index : 0;
 }
 
 bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
-  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return false;
-  return true;
+  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+  return index == -1;
 }
 
 void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {

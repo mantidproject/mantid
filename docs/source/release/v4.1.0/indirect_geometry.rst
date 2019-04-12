@@ -57,6 +57,10 @@ Bug Fixes
 Data Reduction Interface
 ------------------------
 
+Improvements
+############
+- Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
+
 Bug Fixes
 #########
 - Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
