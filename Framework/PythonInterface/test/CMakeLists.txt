@@ -29,7 +29,6 @@ function(set_pythonpath_for_cxxtests test_target_name test_files)
   endif()
   # Define the additional environment that will be added to every test
   list(APPEND _test_environment "PYTHONPATH=${_python_path}")
-  message("Adding env for tests: ${test_files}")
   # for each test that needs PYTHONPATH
   foreach(_the_test ${test_files})
     # make the name PythonInterfaceCppTest_testname
@@ -44,7 +43,6 @@ function(set_pythonpath_for_cxxtests test_target_name test_files)
                                     "${_test_environment}"
                                     TIMEOUT
                                     ${TESTING_TIMEOUT})
-    message("Setting PYTHONPATH for test ${_ctest_test_name} to ${_test_environment}.")
   endforeach(_the_test ${test_files})
 endfunction()
 

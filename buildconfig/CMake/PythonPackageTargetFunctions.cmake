@@ -35,15 +35,12 @@ CustomInstallLib = patch_setuptools_command('install_lib')
 
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
 
-  list(LENGTH ARGN _additional_args_length)
+  # Parses ARGN and adds the expected parameter EGGLINKNAME as a new variable
+  cmake_parse_arguments(_additional_args "" "EGGLINKNAME" "" ${ARGN})
 
-  # If a custom egg-link name is specified use that for the link
-  if ( _additional_args_length EQUAL 2)
-    list(GET ARGN 0 _additional_first_arg)
-    if( "${_additional_first_arg}" STREQUAL "EGGLINKNAME" )
-      list(GET ARGN 1 _egg_link_name)
-      set ( _egg_link ${_egg_link_dir}/${_egg_link_name}.egg-link )
-    endif()
+  # If a custom egg-link name WAs specified use that for the link
+  if (_additional_args_EGGLINKNAME)
+    set ( _egg_link ${_egg_link_dir}/${_egg_link_name}.egg-link )
   else()
     # if no egg-link name is specified, then use the target name
     set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
