@@ -280,35 +280,6 @@ void CostFuncFitting::getParameters(GSLVector &params) const {
   }
 }
 
-/**
-* Copy the parameter values from a GSLVector.
-* @param params :: A vector to copy the parameters from
-*/
-void CostFuncFitting::setParameters(const GSLVector &params) {
-  if (nParams() != params.size()) {
-    throw std::runtime_error(
-      "Parameter vector has wrong size in CostFuncLeastSquares.");
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    setParameter(i, params.get(i));
-  }
-  m_function->applyTies();
-}
-
-/**
-* Copy the parameter values to a GSLVector.
-* @param params :: A vector to copy the parameters to
-*/
-void CostFuncFitting::getParameters(GSLVector &params) const {
-  if (params.size() != nParams()) {
-    params.resize(nParams());
-  }
-  for (size_t i = 0; i < nParams(); ++i) {
-    params.set(i, getParameter(i));
-  }
-}
-
-
 /** Calculate value of cost function
 * @return :: The value of the function
 */

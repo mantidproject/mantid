@@ -121,7 +121,7 @@ void Fit::initConcrete() {
   declareProperty("SurfaceScaling", 0.0, "Scaling factor.");
   declareProperty("SurfaceStart", 0, "Starting index.");
   declareProperty("SurfaceEnd", 0, "Ending index.");
-  declareProperty(new Kernel::ArrayProperty<double>("SurfaceParams"));
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>("SurfaceParams"));
 }
 
 /// Read in the properties specific to Fit.

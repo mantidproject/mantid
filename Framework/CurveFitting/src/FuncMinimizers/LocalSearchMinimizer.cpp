@@ -14,7 +14,6 @@
 #include <numeric>
 #include <tuple>
 
-#include "C:/Users/hqs74821/Work/Mantid_stuff/Testing/class/MyTestDef.h"
 #include <iostream>
 
 namespace Mantid {
@@ -40,8 +39,6 @@ void check_cheb(const Chebfun& cheb) {
   auto x = cheb.linspace();
   auto y = cheb(x);
   auto si = suffix();
-  CHECK_OUT_2("x" + si, x);
-  CHECK_OUT_2("y" + si, y);
 }
 
 typedef boost::optional<GSLVector> OptionalParameters;
@@ -457,8 +454,6 @@ OptionalParameters iterationSingleParameters(API::ICostFunction &function, doubl
                 boost::lexical_cast<std::string>(i);
       auto x = slices[i].linspace();
       auto y = slices[i](x);
-      CHECK_OUT_2("xx" + si, x);
-      CHECK_OUT_2("yy" + si, y);
     }
 
     return OptionalParameters();
