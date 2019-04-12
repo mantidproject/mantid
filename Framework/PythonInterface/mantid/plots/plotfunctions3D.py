@@ -13,15 +13,15 @@ import numpy
 
 from mantid.plots.helperfunctions import (get_axes_labels, get_normalization, get_distribution,
                                           get_md_data2d_bin_centers, get_matrix_2d_data, get_md_data1d,
-                                          get_wksp_index_dist_and_label, get_spectrum)
+                                          get_wksp_index_dist_and_label, get_spectrum, get_indices)
 import mantid.dataobjects
 
 
-def _set_labels_3d(axes, workspace):
+def _set_labels_3d(axes, workspace, indices=None):
     """
     Helper function to automatically set axis labels for 3D plots
     """
-    labels = get_axes_labels(workspace)
+    labels = get_axes_labels(workspace, indices)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
     axes.set_zlabel(labels[0])
@@ -30,12 +30,14 @@ def _set_labels_3d(axes, workspace):
 def _extract_3d_data(workspace, **kwargs):
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         normalization, kwargs = get_normalization(workspace, **kwargs)
-        x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization)
+        indices, kwargs = get_indices(workspace, **kwargs)
+        x_temp, y_temp, z = get_md_data2d_bin_centers(workspace, normalization, indices)
         x, y = numpy.meshgrid(x_temp, y_temp)
     else:
         distribution, kwargs = get_distribution(workspace, **kwargs)
         x, y, z = get_matrix_2d_data(workspace, distribution, histogram2D=False)
-    return x, y, z
+        indices = None
+    return x, y, z, indices
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -49,7 +51,8 @@ def plot(axes, workspace, *args, **kwargs):
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
-        (x, y, z) = get_md_data1d(workspace, normalization)
+        indices, kwargs = get_indices(workspace, **kwargs)
+        (x, y, z) = get_md_data1d(workspace, normalization, indices)
     else:
         (wksp_index, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
         (x, z, _, _) = get_spectrum(workspace, wksp_index, distribution, withDy=False, withDx=False)
@@ -78,8 +81,8 @@ def scatter(axes, workspace, *args, **kwargs):
     :param depthshade:	Whether or not to shade the scatter markers to give the appearance
                         of depth. Default is True.
     '''
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
+    x, y, z, indices = _extract_3d_data(workspace, **kwargs)
+    _set_labels_3d(axes, workspace, indices)
     return axes.scatter(x, y, z, *args, **kwargs)
 
 
@@ -95,8 +98,8 @@ def plot_wireframe(axes, workspace, *args, **kwargs):
     :param rcount:	Use at most this many rows, defaults to 50
     :param ccount:	Use at most this many columns, defaults to 50
     '''
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
+    x, y, z, indices = _extract_3d_data(workspace, **kwargs)
+    _set_labels_3d(axes, workspace, indices)
     return axes.plot_wireframe(x, y, z, *args, **kwargs)
 
 
@@ -119,8 +122,8 @@ def plot_surface(axes, workspace, *args, **kwargs):
     :param shade:	Whether to shade the facecolors
     :param facecolors:	Face colors for the individual patches
     '''
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
+    x, y, z, indices = _extract_3d_data(workspace, **kwargs)
+    _set_labels_3d(axes, workspace, indices)
     return axes.plot_surface(x, y, z, *args, **kwargs)
 
 
@@ -137,8 +140,8 @@ def contour(axes, workspace, *args, **kwargs):
     :param offset:	If specified plot a projection of the contour lines
                     on this position in plane normal to zdir
     '''
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
+    x, y, z, indices = _extract_3d_data(workspace, **kwargs)
+    _set_labels_3d(axes, workspace, indices)
     return axes.contour(x, y, z, *args, **kwargs)
 
 
@@ -153,6 +156,6 @@ def contourf(axes, workspace, *args, **kwargs):
     :param offset:	If specified plot a projection of the filled contour on this
                     position in plane normal to zdir
     '''
-    x, y, z = _extract_3d_data(workspace, **kwargs)
-    _set_labels_3d(axes, workspace)
+    x, y, z, indices = _extract_3d_data(workspace, **kwargs)
+    _set_labels_3d(axes, workspace, indices)
     return axes.contourf(x, y, z, *args, **kwargs)

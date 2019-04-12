@@ -19,8 +19,6 @@ from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, Delete
                               CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
 
 
-
-
 class PlotFunctionsTest(unittest.TestCase):
 
     @classmethod
