@@ -171,7 +171,7 @@ void LoadAscii2::parseLine(const std::string &line,
             "associated bins.");
       }
       m_curSpectra->setSpectrumNo(boost::lexical_cast<int>(*(columns.begin())));
-    } else if (cols != 1) {
+    } else {
       inconsistantIDCheck();
 
       checkLineColumns(cols);

@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -436,13 +437,12 @@ FitMW::createOutputWorkspace(const std::string &baseName,
 
   if (m_normalise && m_matrixWorkspace->isHistogramData()) {
     const auto &X = mws.x(0);
-    auto &Ycal = mws.mutableY(1);
-    auto &Diff = mws.mutableY(2);
-    const size_t nData = values->size();
-    for (size_t i = 0; i < nData; ++i) {
-      double binWidth = X[i + 1] - X[i];
-      Ycal[i] *= binWidth;
-      Diff[i] *= binWidth;
+    std::vector<double> binWidths(X.size());
+    std::adjacent_difference(X.begin(), X.end(), binWidths.begin());
+    for (size_t ispec = 1; ispec < mws.getNumberHistograms(); ++ispec) {
+      auto &Y = mws.mutableY(ispec);
+      std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(),
+                     Y.begin(), std::multiplies<double>());
     }
   }
   return ws;
