@@ -56,7 +56,6 @@ protected slots:
   virtual void closeDialog();
 
 signals:
-  void singleSampleLoaded();
   void singleResolutionLoaded();
   void dataAdded();
   void dataRemoved();

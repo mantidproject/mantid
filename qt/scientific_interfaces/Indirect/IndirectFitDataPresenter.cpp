@@ -38,8 +38,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(setModelWorkspace(const QString &)));
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(singleSampleLoaded()));
-  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SIGNAL(dataChanged()));
 
   connect(m_view, SIGNAL(addClicked()), this,
