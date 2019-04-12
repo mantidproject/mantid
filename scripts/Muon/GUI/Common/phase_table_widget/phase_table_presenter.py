@@ -89,6 +89,8 @@ class PhaseTablePresenter(object):
     def update_current_run_list(self):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
+        self.update_model_from_view()
 
     def update_current_groups_list(self):
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
+        self.update_model_from_view()

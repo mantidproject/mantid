@@ -13,7 +13,12 @@ from Muon.GUI.Common.message_box import warning
 class PhaseTableView(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(PhaseTableView, self).__init__(parent)
+        self._old_backward_index = 1
+        self._old_forward_index = 0
         self.setup_phase_table_options_table()
+
+        self.backward_group_combo.currentIndexChanged.connect(self.ensure_groups_different)
+        self.forward_group_combo.currentIndexChanged.connect(self.ensure_groups_different)
 
     @property
     def first_good_time(self):
@@ -77,8 +82,23 @@ class PhaseTableView(QtWidgets.QWidget):
         self.forward_group_combo.setCurrentIndex(0)
         self.backward_group_combo.setCurrentIndex(1)
 
+        self._old_backward_index =  1
+        self._old_forward_index = 0
+
     def set_calculate_phase_table_action(self, action):
         self.calculate_phase_table_button.clicked.connect(action)
+
+    def ensure_groups_different(self):
+        if self.backward_group_combo.currentText() == self.forward_group_combo.currentText():
+            self.backward_group_combo.blockSignals(True)
+            self.forward_group_combo.blockSignals(True)
+            self.backward_group_combo.setCurrentIndex(self._old_forward_index)
+            self.forward_group_combo.setCurrentIndex(self._old_backward_index)
+            self.backward_group_combo.blockSignals(False)
+            self.forward_group_combo.blockSignals(False)
+
+        self._old_backward_index = self.backward_group_combo.currentIndex()
+        self._old_forward_index = self.forward_group_combo.currentIndex()
 
     def warning_popup(self, message):
         warning(message)

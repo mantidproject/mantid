@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 from functools import wraps
-
+import sys
 from PyQt4 import QtCore, QtGui
 
 """
@@ -90,10 +90,11 @@ def addComboToTable(table,row,options,col=1):
     return combo
 
 
-def addDoubleToTable(table,value,row,col=1):
-    numberWidget = QtGui.QTableWidgetItem(str(value))
-    table.setItem(row,col, numberWidget)
-    return numberWidget
+def addDoubleToTable(table,value,row,col=1, minimum=0.0):
+    number_widget = QtGui.QLineEdit(str(value))
+    number_widget.setValidator(QtGui.QDoubleValidator(minimum, sys.float_info.max, 3))
+    table.setCellWidget(row,col, number_widget)
+    return number_widget
 
 
 def addCheckBoxToTable(table,state,row,col=1):
