@@ -22,13 +22,13 @@ class IMainWindowView;
 class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter(MantidQt::CustomInterfaces::IMainWindowView *MainWindowView);
+  Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView);
+  void runPython(const std::string &pythonCode);
 #endif
   void reflectometryPlot(const std::vector<std::string> &workspaces) override;
 
 private:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  void runPython(const std::string &pythonCode);
   // Object only needed for MantidPlot implementation as it requires Python
   // execution
   MantidQt::CustomInterfaces::IMainWindowView *m_mainWindowView;

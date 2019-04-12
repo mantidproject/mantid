@@ -16,8 +16,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-Plotter::Plotter(MantidQt::CustomInterfaces::IMainWindowView *MainWindowView)
-    : m_mainWindowView(MainWindowView) {}
+Plotter::Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView)
+    : m_mainWindowView(mainWindowView) {}
 #endif
 
 void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
