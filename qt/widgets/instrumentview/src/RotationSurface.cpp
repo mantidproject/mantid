@@ -53,8 +53,7 @@ void RotationSurface::findAxes() {
         m_xaxis = Mantid::Kernel::V3D(1, 0, 0);
       }
     } else {
-      m_xaxis = pos - m_zaxis * z;
-      m_xaxis.normalize();
+      m_xaxis = normalize(pos - m_zaxis * z);
     }
     m_yaxis = m_zaxis.cross_prod(m_xaxis);
   }

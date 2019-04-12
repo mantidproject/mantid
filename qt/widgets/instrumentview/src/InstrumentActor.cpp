@@ -865,11 +865,9 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     }
   } else {
     // Rotation R1 of system (X,Y,Z) around Z by alpha
-    Mantid::Kernel::V3D X1;
     Mantid::Kernel::Quat R1;
 
-    X1 = Zfrom.cross_prod(Zto);
-    X1.normalize();
+    const auto X1 = normalize(Zfrom.cross_prod(Zto));
 
     double sX = Xfrom.scalar_prod(Xto);
     if (fabs(sX - 1) < m_tolerance) {
@@ -937,11 +935,9 @@ void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye,
   constexpr Mantid::Kernel::V3D Y(0, 1, 0);
   constexpr Mantid::Kernel::V3D Z(0, 0, 1);
 
-  Mantid::Kernel::V3D x, y, z;
-  z = eye;
-  z.normalize();
-  y = up;
-  x = y.cross_prod(z);
+  const auto z = normalize(eye);
+  auto y = up;
+  auto x = y.cross_prod(z);
   if (x.nullVector()) {
     // up || eye
     if (z.X() != 0.0) {

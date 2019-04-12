@@ -53,7 +53,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
 /**
  * @param :: the detected close event
  */
-void IndirectDataAnalysis::closeEvent(QCloseEvent *) {
+void IndirectDataAnalysis::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 

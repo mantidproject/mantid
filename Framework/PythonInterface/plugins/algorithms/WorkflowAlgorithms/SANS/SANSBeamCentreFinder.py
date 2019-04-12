@@ -16,6 +16,7 @@ from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
+from sans.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentrefinder, plot_workspace_quartiles
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.single_execution import perform_can_subtraction
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
@@ -25,27 +26,6 @@ from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.general_functions import create_child_algorithm
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-
-PYQT4 = False
-IN_MANTIDPLOT = False
-WITHOUT_GUI = False
-try:
-    from qtpy import PYQT4
-except ImportError:
-    pass  # it is already false
-if PYQT4:
-    try:
-        import mantidplot
-        IN_MANTIDPLOT = True
-    except (Exception, Warning):
-        pass
-else:
-    try:
-        from mantidqt.plotting.functions import plot
-    except ImportError:
-        WITHOUT_GUI = True
-
-do_plotting = not PYQT4 or IN_MANTIDPLOT
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -183,8 +163,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         residueTB = []
         centre_1_hold = x_start
         centre_2_hold = y_start
+
+        do_plotting = can_plot_beamcentrefinder()
+
         for j in range(0, max_iterations + 1):
-            if(j != 0):
+            if j != 0:
                 centre1 += position_1_step
                 centre2 += position_2_step
 
@@ -210,7 +193,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                        sample_quartiles[MaskingQuadrant.Bottom]))
             if j == 0:
-                self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                self.logger.notice("Itr {0}: ( {1:.3f}, {2:.3f} )  SX={3:.5f}  SY={4:.5f}".
                                    format(j, self.scale_1 * centre1,
                                           self.scale_2 * centre2, residueLR[j], residueTB[j]))
                 if do_plotting:
@@ -226,7 +209,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
-                self.logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
+                self.logger.notice("Itr {0}: ( {1:.3f}, {2:.3f} )  SX={3:.5f}  SY={4:.5f}".
                                    format(j, self.scale_1 * centre1,
                                           self.scale_2 * centre2, residueLR[j], residueTB[j]))
 
@@ -251,16 +234,12 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def _plot_workspaces(self, output_workspaces, sample_scatter):
         try:
             # Check for NaNs in workspaces
-            output_workspaces_matplotlib = self._validate_workspaces(output_workspaces)
+            self._validate_workspaces(output_workspaces)
         except ValueError as e:
             self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
             return True
         else:
-            if not PYQT4:
-                # matplotlib plotting can take a list of workspaces (not names)
-                self._plot_quartiles_matplotlib(output_workspaces_matplotlib, sample_scatter)
-            elif IN_MANTIDPLOT:
-                self._plot_quartiles(output_workspaces, sample_scatter)
+            plot_workspace_quartiles(output_workspaces, sample_scatter)
         return False
 
     def _rename_and_group_workspaces(self, index, output_workspaces):
@@ -277,29 +256,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             AnalysisDataService.addOrReplace(MaskingQuadrant.to_string(key), sample_quartiles[key])
 
         return output_workspaces
-
-    def _plot_quartiles(self, output_workspaces, sample_scatter):
-        title = '{}_beam_centre_finder'.format(sample_scatter)
-        graph_handle = mantidplot.plotSpectrum(output_workspaces, 0)
-        graph_handle.activeLayer().logLogAxes()
-        graph_handle.activeLayer().setTitle(title)
-        graph_handle.setName(title)
-        return graph_handle
-
-    def _plot_quartiles_matplotlib(self, output_workspaces, sample_scatter):
-        title = '{}_beam_centre_finder'.format(sample_scatter)
-        ax_properties = {'xscale': 'log',
-                         'yscale': 'log'}
-
-        plot_kwargs = {"scalex": True,
-                       "scaley": True}
-
-        if not isinstance(output_workspaces, list):
-            output_workspaces = [output_workspaces]
-
-        if not WITHOUT_GUI:
-            plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
-                 plot_kwargs=plot_kwargs, window_title=title)
 
     @staticmethod
     def _validate_workspaces(workspaces):

@@ -342,17 +342,17 @@ void LoadTBL::exec() {
     // we are using the old ReflTBL format
     // where all of the entries are on one line
     // so we must reset the stream to reread the first line.
-    std::ifstream file(filename.c_str());
-    if (!file) {
+    std::ifstream fileReopened(filename.c_str());
+    if (!fileReopened) {
       throw Exception::FileError("Unable to open file: ", filename);
     }
-    std::string line;
+    std::string lineRevisited;
     int stitchID = 1;
-    while (Kernel::Strings::extractToEOL(file, line)) {
-      if (line.empty() || line == ",,,,,,,,,,,,,,,,") {
+    while (Kernel::Strings::extractToEOL(fileReopened, lineRevisited)) {
+      if (lineRevisited.empty() || lineRevisited == ",,,,,,,,,,,,,,,,") {
         continue;
       }
-      getCells(line, rowVec, 16, isOld);
+      getCells(lineRevisited, rowVec, 16, isOld);
       const std::string scaleStr = rowVec.at(16);
       const std::string stitchStr = boost::lexical_cast<std::string>(stitchID);
 

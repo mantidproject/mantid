@@ -7,8 +7,15 @@ MantidWorkbench Changes
 
 Improvements
 ############
+- The log level of help page notices has been reduced to declutter your message window.
+- Single line commenting in the script editor is now enabled without needing to highlight any text.
+- You can now import from local python files that are in the same directory as the script you're executing.
 
 Bugfixes
 ########
+- An error raised when double-clicking an arrow in the algorithm toolbox
+  when no algorithm was selected has been fixed.
+- Help documentation for the manage user directories interface now correctly displays when launched from the interface.
+- A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
 
 :ref:`Release 4.1.0 <v4.1.0>`

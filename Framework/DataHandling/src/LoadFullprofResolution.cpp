@@ -179,8 +179,7 @@ void LoadFullprofResolution::exec() {
 
   // Parse .irf and export profile parameters
   map<int, map<string, double>> bankparammap;
-  for (size_t i = 0; i < vec_bankids.size(); ++i) {
-    int bankid = vec_bankids[i];
+  for (int bankid : vec_bankids) {
     g_log.debug() << "Parse bank " << bankid << " of total "
                   << vec_bankids.size() << ".\n";
     map<string, double> parammap;
@@ -310,7 +309,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
                                        map<int, int> &bankstartindexmap,
                                        map<int, int> &bankendindexmap) {
   int startindex = -1;
-  int endindex = -1;
+  int endindex;
   int bankid = 0;
   for (size_t i = 0; i < lines.size(); ++i) {
     string line = lines[i];
@@ -711,7 +710,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
 
   // add profile parameter rows
   for (size_t i = 0; i < numparams; ++i) {
-    TableRow newrow = tablews->appendRow();
+    newrow = tablews->appendRow();
 
     string parname = vec_parname[i];
     newrow << parname;
@@ -727,7 +726,6 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
       }
 
       // Locate parameter
-      map<string, double>::iterator parmapiter;
       parmapiter = bpmapiter->second.find(parname);
       if (parmapiter == bpmapiter->second.end()) {
         throw runtime_error("Parameter cannot be found in a bank's map.");

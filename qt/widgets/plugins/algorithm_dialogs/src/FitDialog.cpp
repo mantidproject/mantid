@@ -484,7 +484,9 @@ void FitDialog::setWorkspaceName(int i, const QString &wsName) {
     tab->setWorkspaceName(wsName);
 }
 
-void FitDialog::workspaceChanged(const QString &) { this->setPropertyValues(); }
+void FitDialog::workspaceChanged(const QString & /*unused*/) {
+  this->setPropertyValues();
+}
 
 void FitDialog::functionChanged() {
   // this->setPropertyValues();

@@ -1172,7 +1172,7 @@ QString FunctionBrowser::getConstraint(const QString &paramName,
 /**
  * Show a pop up menu.
  */
-void FunctionBrowser::popupMenu(const QPoint &) {
+void FunctionBrowser::popupMenu(const QPoint & /*unused*/) {
   auto item = m_browser->currentItem();
   if (!item) {
     QMenu context(this);
@@ -2433,7 +2433,9 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
 /**
  * Emit a signal when any of the Global options change.
  */
-void FunctionBrowser::globalChanged(QtProperty *, const QString &, bool) {
+void FunctionBrowser::globalChanged(QtProperty * /*unused*/,
+                                    const QString & /*unused*/,
+                                    bool /*unused*/) {
   emit globalsChanged();
 }
 

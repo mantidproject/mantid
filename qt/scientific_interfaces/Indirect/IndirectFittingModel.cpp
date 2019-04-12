@@ -249,7 +249,7 @@ void cleanTemporaries(const std::string &base,
                       const std::unique_ptr<IndirectFitData> &fitData) {
   removeFromADSIfExists(base);
 
-  const auto clean = [&](std::size_t index, std::size_t) {
+  const auto clean = [&](std::size_t index, std::size_t /*unused*/) {
     cleanTemporaries(base + "_" + std::to_string(index));
   };
   fitData->applyEnumeratedSpectra(clean);
@@ -716,7 +716,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t /*unused*/) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 

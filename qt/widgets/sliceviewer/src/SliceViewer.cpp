@@ -2387,7 +2387,7 @@ void SliceViewer::dynamicRebinComplete(bool error) {
 /**
 Event handler for plot panning.
 */
-void SliceViewer::panned(int, int) {
+void SliceViewer::panned(int /*unused*/, int /*unused*/) {
   autoRebinIfRequired();
 
   applyColorScalingForCurrentSliceIfRequired();
@@ -2397,7 +2397,7 @@ void SliceViewer::panned(int, int) {
 /**
 Event handler for changing magnification.
 */
-void SliceViewer::magnifierRescaled(double) {
+void SliceViewer::magnifierRescaled(double /*unused*/) {
   autoRebinIfRequired();
   this->updatePeaksOverlay();
 }

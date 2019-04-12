@@ -25,7 +25,7 @@ class DoubleDialogEditor : public QWidget {
 public:
   DoubleDialogEditor(QtProperty *property, QWidget *parent);
 signals:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected slots:
@@ -38,7 +38,7 @@ protected slots:
   QString getText() const;
 
 private:
-  bool eventFilter(QObject *, QEvent *) override;
+  bool eventFilter(QObject * /*obj*/, QEvent * /*evt*/) override;
   DoubleEditor *m_editor;
   QPushButton *m_button;
   QtProperty *m_property;
@@ -58,7 +58,7 @@ class DoubleDialogEditorFactory
 public:
   DoubleDialogEditorFactory(QObject *parent = nullptr)
       : QtAbstractEditorFactory<ParameterPropertyManager>(parent) {}
-  QWidget *createEditorForManager(ParameterPropertyManager *,
+  QWidget *createEditorForManager(ParameterPropertyManager * /*manager*/,
                                   QtProperty *property,
                                   QWidget *parent) override {
     auto editor = new DoubleDialogEditor(property, parent);
@@ -69,12 +69,14 @@ public:
     return editor;
   }
 signals:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected:
-  void connectPropertyManager(ParameterPropertyManager *) override {}
-  void disconnectPropertyManager(ParameterPropertyManager *) override {}
+  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {
+  }
+  void
+  disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
 };
 
 #endif // DOUBLEDIALOGEDITORFACTORY_H

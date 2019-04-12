@@ -79,7 +79,7 @@ public:
   bool isBackgroundShown() const override;
 
   /// Take settings from another view
-  void takeSettingsFrom(const PeakOverlayView *const) override;
+  void takeSettingsFrom(const PeakOverlayView *const /*source*/) override;
 
   /// Change foreground colour -- overload for PeakViewColor
   void changeForegroundColour(const PeakViewColor peakViewColor) override;
@@ -95,7 +95,7 @@ public:
 
 private:
   /// Draw the peak representations. Pure virtual on base class.
-  void doPaintPeaks(QPaintEvent *) override;
+  void doPaintPeaks(QPaintEvent * /*event*/) override;
 
   /// The actual peak objects
   VecPeakRepresentation m_peaks;

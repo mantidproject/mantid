@@ -49,16 +49,12 @@ MuonNexusReader::~MuonNexusReader() {
  */
 void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
   std::map<string, string> entries = handle.getEntries();
-  bool found = false;
-  for (auto &entrie : entries) {
-    if (entrie.second == NXENTRY) {
-      handle.openGroup(entrie.first, NXENTRY);
-      found = true;
-      break;
-    }
-  }
-  if (!found)
+  const auto entry =
+      std::find_if(entries.cbegin(), entries.cend(),
+                   [](const auto entry) { return entry.second == NXENTRY; });
+  if (entry == entries.cend())
     throw std::runtime_error("Failed to find NXentry");
+  handle.openGroup(entry->first, NXENTRY);
 }
 
 // Basic NeXus Muon file reader - simple version based on contents of test
@@ -135,17 +131,16 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // If not available set as one period.
   entries = handle.getEntries();
   t_nper = 1;
-  for (auto &entrie : entries) {
-    if (entrie.first == "switching_states") {
-      int ssPeriods;
-      handle.readData("switching_states", ssPeriods);
-      t_nper = abs(ssPeriods);
-      t_nsp1 /= t_nper; // assume that number of spectra in multiperiod file
-                        // should be divided by periods
-      break;
-    }
+  if (std::any_of(entries.cbegin(), entries.cend(), [](const auto &entry) {
+        return entry.first == "switching_states";
+      })) {
+    int ssPeriods;
+    handle.readData("switching_states", ssPeriods);
+    t_nper = abs(ssPeriods);
+    // assume that number of spectra in multiperiod file should be divided by
+    // periods
+    t_nsp1 /= t_nper;
   }
-
   // file will close on leaving the function
 }
 

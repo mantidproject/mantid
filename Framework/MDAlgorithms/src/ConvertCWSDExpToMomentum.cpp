@@ -245,20 +245,15 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   // Check whether to add / or \ to m_dataDir
   std::string sep;
   if (!m_dataDir.empty()) {
-// Determine system
-#if _WIN64
-    const bool isWindows = true;
-#elif _WIN32
-    const bool isWindows = true;
-#else
-    const bool isWindows = false;
-#endif
-
-    if (isWindows && *m_dataDir.rbegin() != '\\') {
+#if defined _WIN32 || defined _WIN64
+    if (*m_dataDir.rbegin() != '\\') {
       sep = "\\";
-      // cppcheck-suppress knownConditionTrueFalse
-    } else if (!isWindows && *m_dataDir.rbegin() != '/')
+    }
+#else
+    if (*m_dataDir.rbegin() != '/') {
       sep = "/";
+    }
+#endif
   }
 
   // Init some variables

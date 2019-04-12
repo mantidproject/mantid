@@ -195,7 +195,7 @@ void WorkspaceSelector::handleRemEvent(
 }
 
 void WorkspaceSelector::handleClearEvent(
-    Mantid::API::ClearADSNotification_ptr) {
+    Mantid::API::ClearADSNotification_ptr /*unused*/) {
   this->clear();
   emit emptied();
 }

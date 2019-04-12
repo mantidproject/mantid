@@ -115,11 +115,11 @@ double PeakRepresentationSphere::getEffectiveRadius() const {
   return m_showBackgroundRadius ? m_backgroundOuterRadius : m_peakRadius;
 }
 
-void PeakRepresentationSphere::setOccupancyInView(const double) {
+void PeakRepresentationSphere::setOccupancyInView(const double /*fraction*/) {
   // DO NOTHING
 }
 
-void PeakRepresentationSphere::setOccupancyIntoView(const double) {
+void PeakRepresentationSphere::setOccupancyIntoView(const double /*fraction*/) {
   // DO NOTHING
 }
 

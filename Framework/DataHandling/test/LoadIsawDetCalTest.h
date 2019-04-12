@@ -25,7 +25,6 @@
 #include <Poco/File.h>
 #include <cstring>
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 using namespace Mantid::API;

@@ -15,7 +15,6 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include <iostream>
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1125
@@ -522,7 +521,7 @@ void FitOptionsBrowser::setProperty(const QString &name, const QString &value) {
 /**
  * Get the value of the Minimizer property.
  */
-QString FitOptionsBrowser::getMinimizer(QtProperty *) const {
+QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
   int i = m_enumManager->value(m_minimizer);
   QString minimStr = m_enumManager->enumNames(m_minimizer)[i];
 
@@ -559,7 +558,8 @@ QString FitOptionsBrowser::getMinimizer(QtProperty *) const {
  * Set new value to the Minimizer property.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setMinimizer(QtProperty *, const QString &value) {
+void FitOptionsBrowser::setMinimizer(QtProperty * /*unused*/,
+                                     const QString &value) {
   QStringList terms = value.split(',');
   int i = m_enumManager->enumNames(m_minimizer).indexOf(terms[0]);
   m_enumManager->setValue(m_minimizer, i);

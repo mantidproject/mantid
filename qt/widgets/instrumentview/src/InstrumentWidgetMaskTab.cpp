@@ -535,7 +535,7 @@ void InstrumentWidgetMaskTab::clearShapes() {
   setSelectActivity();
 }
 
-void InstrumentWidgetMaskTab::showEvent(QShowEvent *) {
+void InstrumentWidgetMaskTab::showEvent(QShowEvent * /*unused*/) {
   setActivity();
   m_instrWidget->setMouseTracking(true);
   enableApplyButtons();
@@ -1193,7 +1193,8 @@ void InstrumentWidgetMaskTab::storeMask() {
   }
 }
 
-void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
+void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   enableApplyButtons();
 }
 

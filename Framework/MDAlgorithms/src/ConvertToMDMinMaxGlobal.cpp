@@ -267,9 +267,9 @@ void ConvertToMDMinMaxGlobal::exec() {
       MaxValues.push_back(p->getStatistics().maximum);
     } else // it may be not a time series property but just number property
     {
-      Kernel::PropertyWithValue<double> *p =
+      auto *property =
           dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);
-      if (!p) {
+      if (!property) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
             OtherDimension +
@@ -277,7 +277,7 @@ void ConvertToMDMinMaxGlobal::exec() {
             "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
-      double val = *p;
+      double val = *property;
       MinValues.push_back(val);
       MaxValues.push_back(val);
     }

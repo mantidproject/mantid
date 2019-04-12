@@ -54,7 +54,6 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -849,7 +848,7 @@ FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
   }
 }
 
-void FitPropertyBrowser::popupMenu(const QPoint &) {
+void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
   QtBrowserItem *ci = m_browser->currentItem();
   if (!ci)
     return;

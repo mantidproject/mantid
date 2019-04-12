@@ -48,7 +48,7 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
  * @return Correction struct
  */
 Correction Mantid::Algorithms::TimeAtSampleStrategyDirect::calculate(
-    const size_t &) const {
+    const size_t & /*workspace_index*/) const {
 
   // Correction is L1 and Ei dependent only. Detector positions are not
   // required.

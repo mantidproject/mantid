@@ -20,8 +20,6 @@
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 // 3rd party library headers
 #include <QMessageBox>
-// System headers
-#include <iostream>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -96,7 +94,7 @@ void FourierTransform::extractResidualsHistogram(
                               .retrieveWS<Mantid::API::MatrixWorkspace>(
                                   modelWorkspaceName.toStdString());
     if (!modelWorkspace) {
-      std::cout << "Empty modelWorkspace\n";
+      g_log.debug() << "Empty modelWorkspace\n";
     }
     // use modelWorkspace as template for the residuals workspace
     auto residualsWorkspace =

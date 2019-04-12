@@ -17,8 +17,6 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <iostream>
-
 using namespace Mantid::PhysicalConstants;
 
 namespace Mantid {

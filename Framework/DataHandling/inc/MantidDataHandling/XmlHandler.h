@@ -17,7 +17,6 @@
 #include "MantidKernel/System.h"
 
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <string>
 

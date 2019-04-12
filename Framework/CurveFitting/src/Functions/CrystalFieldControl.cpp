@@ -355,8 +355,9 @@ std::string CrystalFieldSpectrumControl::name() const {
   return "CrystalFieldSpectrumControl";
 }
 
-void CrystalFieldSpectrumControl::function(const API::FunctionDomain &,
-                                           API::FunctionValues &) const {
+void CrystalFieldSpectrumControl::function(
+    const API::FunctionDomain & /*domain*/,
+    API::FunctionValues & /*values*/) const {
   throw Kernel::Exception::NotImplementedError(
       "This method is intentionally not implemented.");
 }
@@ -370,8 +371,9 @@ std::string CrystalFieldPhysPropControl::name() const {
   return "CrystalFieldPhysPropControl";
 }
 
-void CrystalFieldPhysPropControl::function(const API::FunctionDomain &,
-                                           API::FunctionValues &) const {
+void CrystalFieldPhysPropControl::function(
+    const API::FunctionDomain & /*domain*/,
+    API::FunctionValues & /*values*/) const {
   throw Kernel::Exception::NotImplementedError(
       "This method is intentionally not implemented.");
 }

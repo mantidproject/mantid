@@ -44,7 +44,6 @@
 #include <condition_variable>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
 #include <mutex>
 #include <signal.h>
 #include <string>

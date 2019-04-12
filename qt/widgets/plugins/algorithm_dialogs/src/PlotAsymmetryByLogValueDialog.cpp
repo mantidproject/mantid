@@ -141,7 +141,7 @@ void PlotAsymmetryByLogValueDialog::openFileDialog(
  * Fill m_uiForm.logBox with names of the log values read from one of the input
  * files
  */
-void PlotAsymmetryByLogValueDialog::fillLogBox(const QString &) {
+void PlotAsymmetryByLogValueDialog::fillLogBox(const QString & /*unused*/) {
   QString nexusFileName = m_uiForm.firstRunBox->text();
   QFileInfo file(nexusFileName);
   if (!file.exists()) {

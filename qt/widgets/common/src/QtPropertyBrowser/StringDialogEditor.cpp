@@ -17,13 +17,13 @@
  * Do nothing to connect a manager.
  */
 void StringDialogEditorFactory::connectPropertyManager(
-    QtStringPropertyManager *) {}
+    QtStringPropertyManager * /*manager*/) {}
 
 /**
  * Do nothing to disconnect a manager - it was never connected.
  */
 void StringDialogEditorFactory::disconnectPropertyManager(
-    QtStringPropertyManager *) {}
+    QtStringPropertyManager * /*manager*/) {}
 
 /**
  * Constructor.

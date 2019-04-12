@@ -11,7 +11,6 @@ if ( CPPCHECK_EXECUTABLE )
 
   set ( CPPCHECK_INCLUDE_DIRS
         Framework/Algorithms/inc
-        Framework/GPUAlgorithms/inc
         Framework/PythonInterface/inc
         Framework/Nexus/inc
         Framework/MPIAlgorithms/inc

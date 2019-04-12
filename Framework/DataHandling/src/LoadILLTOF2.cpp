@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -17,6 +17,12 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+namespace {
+/// An array containing the supported instrument names
+const std::array<std::string, 4> SUPPORTED_INSTRUMENTS = {
+    {"IN4", "IN5", "IN6", "PANTHER"}};
+} // namespace
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -26,10 +32,6 @@ using namespace NeXus;
 using namespace HistogramData;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
-
-/// A vector containing the supported instrument names
-const std::vector<std::string> LoadILLTOF2::SUPPORTED_INSTRUMENTS = {
-    "IN4", "IN5", "IN6"};
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -272,7 +274,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }
 
@@ -431,16 +433,11 @@ void LoadILLTOF2::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-  // Execute the child algorithm. Catch and log any error, but don't stop.
-  try {
-    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
-    loadInst->execute();
-  } catch (...) {
-    g_log.information("Cannot load the instrument definition.");
-  }
+  loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(false));
+  loadInst->execute();
 }
 
 } // namespace DataHandling

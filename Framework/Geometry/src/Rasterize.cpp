@@ -35,6 +35,14 @@ struct CylinderParameters {
   V3D symmetryaxis;
 };
 
+struct HollowCylinderParameters {
+  double radius;
+  double innerRadius;
+  double height;
+  V3D centerBottomBase;
+  V3D symmetryaxis;
+};
+
 // since cylinders are symmetric around the main axis, choose a random
 // perpendicular to have as the second axis
 V3D createPerpendicular(const V3D &symmetryAxis) {
@@ -96,6 +104,44 @@ Raster calculateCylinder(const V3D &beamDirection,
   return calculateCylinder(beamDirection, *csgshape, numSlices, numAnnuli);
 }
 
+Raster
+calculateHollowCylinder(const V3D &beamDirection,
+                        const boost::shared_ptr<const Geometry::IObject> shape,
+                        const size_t numSlices, const size_t numAnnuli) {
+  // convert to the underlying CSGObject
+  const auto csgshape =
+      boost::dynamic_pointer_cast<const Geometry::CSGObject>(shape);
+  if (!csgshape)
+    throw std::logic_error("Failed to convert IObject to CSGObject");
+  if (!(csgshape->hasValidShape()))
+    throw std::logic_error("Shape[IObject] does not have a valid shape");
+  if (csgshape->shape() != detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
+    throw std::invalid_argument("Given shape is not a hollow cylinder.");
+  }
+  return calculateHollowCylinder(beamDirection, *csgshape, numSlices,
+                                 numAnnuli);
+}
+
+const V3D CalculatePosInCylinder(const double phi, const double R,
+                                 const double z,
+                                 const std::array<V3D, 3> coords) {
+  const auto &x_prime = coords[0];
+  const auto &y_prime = coords[1];
+  const auto &z_prime = coords[2];
+
+  double rSinPhi = -R * sin(phi);
+  const double rCosPhi = -R * cos(phi);
+
+  // Calculate the current position in the shape in Cartesian coordinates
+  const double xcomp =
+      rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
+  const double ycomp =
+      rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
+  const double zcomp =
+      rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
+  return V3D(xcomp, ycomp, zcomp);
+}
+
 // -------------------
 // actual calculations
 
@@ -115,6 +161,15 @@ Raster calculate(const V3D &beamDirection, const CSGObject &shape,
     const size_t numAnnuli = std::max<size_t>(
         1, static_cast<size_t>(params.radius / cubeSizeInMetre));
     return calculateCylinder(beamDirection, shape, numSlice, numAnnuli);
+  } else if (shape.shape() ==
+             Geometry::detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
+    const auto params = shape.shapeInfo().hollowCylinderGeometry();
+    const size_t numSlice = std::max<size_t>(
+        1, static_cast<size_t>(params.height / cubeSizeInMetre));
+    const size_t numAnnuli = std::max<size_t>(
+        1, static_cast<size_t>((params.radius - params.innerRadius) /
+                               cubeSizeInMetre));
+    return calculateHollowCylinder(beamDirection, shape, numSlice, numAnnuli);
   } else { // arbitrary shape code
     const auto bbox = shape.getBoundingBox();
     assert(bbox.xMax() > bbox.xMin());
@@ -216,10 +271,10 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
 
   // Assume that z' = axis. Then select whatever has the smallest dot product
   // with axis to be the x' direction
-  V3D z_prime = params.axis;
-  z_prime.normalize();
+  const V3D z_prime = normalize(params.axis);
   const V3D x_prime = createPerpendicular(z_prime);
   const V3D y_prime = z_prime.cross_prod(x_prime);
+  const auto coords = std::array<V3D, 3>{{x_prime, y_prime, z_prime}};
 
   // loop over the elements of the shape and create everything
   // loop over slices
@@ -246,17 +301,96 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
       for (size_t k = 0; k < Ni; ++k) {
         const double phi =
             2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
-        const double rSinPhi = -R * sin(phi);
-        const double rCosPhi = -R * cos(phi);
+        const auto position =
+            center + CalculatePosInCylinder(phi, R, z, coords);
 
-        // Calculate the current position in the shape in Cartesian coordinates
-        const double xcomp =
-            rCosPhi * x_prime[0] + rSinPhi * y_prime[0] + z * z_prime[0];
-        const double ycomp =
-            rCosPhi * x_prime[1] + rSinPhi * y_prime[1] + z * z_prime[1];
-        const double zcomp =
-            rCosPhi * x_prime[2] + rSinPhi * y_prime[2] + z * z_prime[2];
-        const auto position = center + V3D(xcomp, ycomp, zcomp);
+        assert(shape.isValid(position));
+
+        result.position.emplace_back(position);
+
+        // Create track for distance in cylinder before scattering point
+        Track incoming(position, -beamDirection);
+
+        shape.interceptSurface(incoming);
+        result.l1.emplace_back(incoming.front().distFromStart);
+
+        result.volume.emplace_back(elementVolume);
+      } // loop over k
+    }   // loop over j
+  }     // loop over i
+
+  return result;
+}
+
+Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
+                               const size_t numSlices, const size_t numAnnuli) {
+  if (numSlices == 0)
+    throw std::runtime_error(
+        "Tried to section hollow cylinder into zero slices");
+  if (numAnnuli == 0)
+    throw std::runtime_error(
+        "Tried to section hollow cylinder into zero annuli");
+
+  // get the geometry for the volume elements
+  const auto params = shape.shapeInfo().hollowCylinderGeometry();
+  const V3D center =
+      (params.axis * .5 * params.height) + params.centreOfBottomBase;
+
+  const double sliceThickness{params.height / static_cast<double>(numSlices)};
+  const double deltaR{(params.radius - params.innerRadius) /
+                      static_cast<double>(numAnnuli)};
+
+  /* The number of volume elements is
+   * numslices*(1+2+3+.....+numAnnuli)*6
+   * Since the first annulus is separated in 6 segments, the next one in 12 and
+   * so on.....
+   */
+  const size_t numVolumeElements = numSlices * numAnnuli * (numAnnuli + 1) * 3;
+
+  Raster result;
+  result.reserve(numVolumeElements);
+  result.totalvolume =
+      params.height * M_PI *
+      (params.radius * params.radius - params.innerRadius * params.innerRadius);
+
+  // Assume that z' = axis. Then select whatever has the smallest dot product
+  // with axis to be the x' direction
+  V3D z_prime = params.axis;
+  z_prime.normalize();
+  const V3D x_prime = createPerpendicular(z_prime);
+  const V3D y_prime = z_prime.cross_prod(x_prime);
+  const auto coords = std::array<V3D, 3>{{x_prime, y_prime, z_prime}};
+
+  // loop over the elements of the shape and create everything
+  // loop over slices
+  for (size_t i = 0; i < numSlices; ++i) {
+    const double z =
+        (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
+
+    // Number of elements in 1st annulus
+    size_t Ni = 0;
+    // loop over annuli
+    for (size_t j = 0; j < numAnnuli; ++j) {
+      Ni += 6;
+      const double R =
+          params.innerRadius +
+          (static_cast<double>(j) * (params.radius - params.innerRadius) /
+           static_cast<double>(numAnnuli)) +
+          (0.5 * deltaR);
+
+      // all the volume elements in the ring/slice are the same
+      const double outerR = R + (deltaR / 2.0);
+      const double innerR = outerR - deltaR;
+      const double elementVolume = M_PI * (outerR * outerR - innerR * innerR) *
+                                   sliceThickness / static_cast<double>(Ni);
+
+      // loop over elements in current annulus
+      for (size_t k = 0; k < Ni; ++k) {
+        const double phi =
+            2. * M_PI * static_cast<double>(k) / static_cast<double>(Ni);
+
+        const auto position =
+            center + CalculatePosInCylinder(phi, R, z, coords);
 
         assert(shape.isValid(position));
 

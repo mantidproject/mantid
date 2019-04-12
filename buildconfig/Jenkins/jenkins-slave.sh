@@ -14,7 +14,7 @@
 # User configuration
 #####################################################################
 # Main url for Jenkins
-JENKINS_URL=http://builds.mantidproject.org
+JENKINS_URL=https://builds.mantidproject.org
 # URL for proxy (if required)
 PROXY_HOST=${3}
 # Port for proxy (if required)
@@ -75,7 +75,7 @@ else
   if [ ! -f ${JAR_FILE_TMP} ]; then
     echo "Downloading slave jar file to ${JAR_FILE_TMP}"
     if [ $(command -v curl) ]; then
-      echo "curl -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
+      echo "curl --location -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
       curl -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}
     else
       echo "Need curl to download ${JENKINS_URL}/jnlpJars/${JAR_FILE}"

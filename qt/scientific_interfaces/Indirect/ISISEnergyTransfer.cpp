@@ -284,12 +284,15 @@ bool ISISEnergyTransfer::validate() {
 
 bool ISISEnergyTransfer::numberInCorrectRange(
     std::size_t const &spectraNumber) const {
-  auto const instrumentDetails = getInstrumentDetails();
-  auto const spectraMin =
-      static_cast<std::size_t>(instrumentDetails["spectra-min"].toInt());
-  auto const spectraMax =
-      static_cast<std::size_t>(instrumentDetails["spectra-max"].toInt());
-  return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+  if (hasInstrumentDetail("spectra-min") &&
+      hasInstrumentDetail("spectra-max")) {
+    auto const spectraMin =
+        static_cast<std::size_t>(getInstrumentDetail("spectra-min").toInt());
+    auto const spectraMax =
+        static_cast<std::size_t>(getInstrumentDetail("spectra-max").toInt());
+    return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+  }
+  return false;
 }
 
 QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
@@ -472,36 +475,37 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
     removeGroupingOption(option);
 }
 
+void ISISEnergyTransfer::setInstrumentDefault() {
+  auto const instrumentDetails = getInstrumentDetails();
+  try {
+    setInstrumentDefault(instrumentDetails);
+  } catch (std::exception const &ex) {
+    showMessageBox(ex.what());
+  }
+}
+
 /**
  * Called when the instrument has changed, used to update default values.
  */
-void ISISEnergyTransfer::setInstrumentDefault() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+void ISISEnergyTransfer::setInstrumentDefault(
+    QMap<QString, QString> const &instDetails) {
+  auto const instrumentName = getInstrumentDetail(instDetails, "instrument");
+  auto const specMin = getInstrumentDetail(instDetails, "spectra-min").toInt();
+  auto const specMax = getInstrumentDetail(instDetails, "spectra-max").toInt();
 
   // Set the search instrument for runs
-  m_uiForm.dsRunFiles->setInstrumentOverride(
-      getInstrumentDetail(instDetails, "instrument"));
+  m_uiForm.dsRunFiles->setInstrumentOverride(instrumentName);
 
   QStringList qens;
   qens << "IRIS"
        << "OSIRIS";
-  m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
+  m_uiForm.spEfixed->setEnabled(qens.contains(instrumentName));
 
   QStringList allowDefaultGroupingInstruments;
   allowDefaultGroupingInstruments << "TOSCA";
   includeExtraGroupingOption(
-      allowDefaultGroupingInstruments.contains(instDetails["instrument"]),
-      "Default");
+      allowDefaultGroupingInstruments.contains(instrumentName), "Default");
 
-  if (instDetails["spectra-min"].isEmpty() ||
-      instDetails["spectra-max"].isEmpty()) {
-    emit showMessageBox("Could not gather necessary data from parameter file.");
-    return;
-  }
-
-  // Set spectra min/max for spinners in UI
-  const int specMin = instDetails["spectra-min"].toInt();
-  const int specMax = instDetails["spectra-max"].toInt();
   // Spectra spinners
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
@@ -520,17 +524,17 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMax->setValue(1);
 
-  if (!instDetails["Efixed"].isEmpty())
-    m_uiForm.spEfixed->setValue(instDetails["Efixed"].toDouble());
-  else
-    m_uiForm.spEfixed->setValue(0.0);
+  m_uiForm.spEfixed->setValue(
+      hasInstrumentDetail(instDetails, "Efixed")
+          ? getInstrumentDetail(instDetails, "Efixed").toDouble()
+          : 0.0);
 
   // Default rebinning parameters can be set in instrument parameter file
-  if (!instDetails["rebin-default"].isEmpty()) {
-    m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
+  if (hasInstrumentDetail(instDetails, "rebin-default")) {
+    auto const rebinDefault = getInstrumentDetail(instDetails, "rebin-default");
+    m_uiForm.leRebinString->setText(rebinDefault);
     m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = getInstrumentDetail(instDetails, "rebin-default")
-                         .split(",", QString::SkipEmptyParts);
+    auto const rbp = rebinDefault.split(",", QString::SkipEmptyParts);
     if (rbp.size() == 3) {
       m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
       m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -547,24 +551,22 @@ void ISISEnergyTransfer::setInstrumentDefault() {
     m_uiForm.leRebinString->setText("");
   }
 
-  if (!instDetails["cm-1-convert-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
-    m_uiForm.ckCm1Units->setChecked(defaultOptions);
-  }
+  setInstrumentCheckBoxProperty(m_uiForm.ckCm1Units, instDetails,
+                                "cm-1-convert-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckSaveNexus, instDetails,
+                                "save-nexus-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckSaveASCII, instDetails,
+                                "save-ascii-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckFold, instDetails,
+                                "fold-frames-choice");
+}
 
-  if (!instDetails["save-nexus-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["save-nexus-choice"] == "true";
-    m_uiForm.ckSaveNexus->setChecked(defaultOptions);
-  }
-
-  if (!instDetails["save-ascii-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["save-ascii-choice"] == "true";
-    m_uiForm.ckSaveASCII->setChecked(defaultOptions);
-  }
-
-  if (!instDetails["fold-frames-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["fold-frames-choice"] == "true";
-    m_uiForm.ckFold->setChecked(defaultOptions);
+void ISISEnergyTransfer::setInstrumentCheckBoxProperty(
+    QCheckBox *checkbox, QMap<QString, QString> const &instDetails,
+    QString const &instrumentProperty) {
+  if (hasInstrumentDetail(instDetails, instrumentProperty)) {
+    auto const value = getInstrumentDetail(instDetails, instrumentProperty);
+    checkbox->setChecked(value == "true");
   }
 }
 
@@ -679,6 +681,8 @@ void ISISEnergyTransfer::plotRaw() {
     }
   }
 
+  setPlotTimeIsPlotting(true);
+
   QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
   auto pos = rawFile.lastIndexOf(".");
   auto extension = rawFile.right(rawFile.length() - pos);
@@ -708,12 +712,14 @@ void ISISEnergyTransfer::plotRaw() {
     if (startBack < minBack) {
       emit showMessageBox("The Start of Background Removal is less than the "
                           "minimum of the data range");
+      setPlotTimeIsPlotting(false);
       return;
     }
 
     if (endBack > maxBack) {
       emit showMessageBox("The End of Background Removal is more than the "
                           "maximum of the data range");
+      setPlotTimeIsPlotting(false);
       return;
     }
   }
@@ -791,14 +797,13 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(plotRawComplete(bool)));
 
-  if (error)
-    return;
-
-  QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-  QFileInfo rawFileInfo(rawFile);
-  std::string name = rawFileInfo.baseName().toStdString();
-
-  plotSpectrum(QString::fromStdString(name) + "_grp");
+  if (!error) {
+    auto const filename = m_uiForm.dsRunFiles->getFirstFilename();
+    QFileInfo const fileInfo(filename);
+    auto const name = fileInfo.baseName().toStdString();
+    plotSpectrum(QString::fromStdString(name) + "_grp");
+  }
+  setPlotTimeIsPlotting(false);
 }
 
 /**
@@ -876,25 +881,25 @@ void ISISEnergyTransfer::saveClicked() {
   m_pythonRunner.runPythonCode(pyInput);
 }
 
-void ISISEnergyTransfer::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
+void ISISEnergyTransfer::setRunEnabled(bool enable) {
+  m_uiForm.pbRun->setEnabled(enable);
 }
 
-void ISISEnergyTransfer::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotType->setEnabled(enabled);
+void ISISEnergyTransfer::setPlotEnabled(bool enable) {
+  m_uiForm.pbPlot->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
+  m_uiForm.cbPlotType->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
 }
 
-void ISISEnergyTransfer::setSaveEnabled(bool enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
-  m_uiForm.loSaveFormats->setEnabled(enabled);
+void ISISEnergyTransfer::setPlotTimeEnabled(bool enable) {
+  m_uiForm.pbPlotTime->setEnabled(enable);
+  m_uiForm.spPlotTimeSpecMin->setEnabled(enable);
+  m_uiForm.spPlotTimeSpecMax->setEnabled(enable);
 }
 
-void ISISEnergyTransfer::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
+void ISISEnergyTransfer::setSaveEnabled(bool enable) {
+  m_uiForm.pbSave->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
+  m_uiForm.loSaveFormats->setEnabled(!m_outputWorkspaces.empty() ? enable
+                                                                 : false);
 }
 
 void ISISEnergyTransfer::updateRunButton(bool enabled,
@@ -904,14 +909,26 @@ void ISISEnergyTransfer::updateRunButton(bool enabled,
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
+  if (enableOutputButtons != "unchanged") {
+    setPlotEnabled(enableOutputButtons == "enable");
+    setPlotTimeEnabled(enableOutputButtons == "enable");
+    setSaveEnabled(enableOutputButtons == "enable");
+  }
 }
 
 void ISISEnergyTransfer::setPlotIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotEnabled(!plotting);
   setRunEnabled(!plotting);
+  setPlotEnabled(!plotting);
+  setPlotTimeEnabled(!plotting);
+  setSaveEnabled(!plotting);
+}
+
+void ISISEnergyTransfer::setPlotTimeIsPlotting(bool plotting) {
+  m_uiForm.pbPlotTime->setText(plotting ? "Plotting..." : "Plot");
+  setRunEnabled(!plotting);
+  setPlotEnabled(!plotting);
+  setPlotTimeEnabled(!plotting);
   setSaveEnabled(!plotting);
 }
 
