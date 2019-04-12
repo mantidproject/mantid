@@ -9,13 +9,15 @@
 """ SANSMaskWorkspace algorithm applies the masks of SANSMask state to a workspace."""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
-from sans.algorithm_detail.mask_workspace import MaskFactory
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm,
+                        MatrixWorkspaceProperty, Progress, PropertyMode)
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+
+from sans.algorithm_detail.mask_workspace import create_masker
 from sans.common.enums import DetectorType
 from sans.common.general_functions import append_to_sans_file_tag
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class SANSMaskWorkspace(DistributedDataProcessorAlgorithm):
@@ -51,8 +53,7 @@ class SANSMaskWorkspace(DistributedDataProcessorAlgorithm):
 
         # Get the correct SANS masking strategy from the SANSMaskFactory
         workspace = self.getProperty("Workspace").value
-        mask_factory = MaskFactory()
-        masker = mask_factory.create_masker(state, component)
+        masker = create_masker(state, component)
 
         # Perform the masking
         number_of_masking_options = 7
