@@ -734,12 +734,14 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   // select bin file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  for (const auto &file : files)
-    if (file.rfind(".bin") == file.length() - 4) {
-      tarFile.select(file.c_str());
-      fileSize = tarFile.selected_size();
-      break;
-    }
+  const auto found =
+      std::find_if(files.cbegin(), files.cend(), [](const auto &file) {
+        return file.rfind(".bin") == file.length() - 4;
+      });
+  if (found != files.cend()) {
+    tarFile.select(found->c_str());
+    fileSize = tarFile.selected_size();
+  }
 
   // for progress notifications
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,

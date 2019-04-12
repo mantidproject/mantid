@@ -370,7 +370,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
   // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
 
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
 }
 
 /**

@@ -735,8 +735,6 @@ void DgsReduction::exec() {
 
   const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
 
-  // Get output workspace pointer and name
-  MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
   std::string outputWsName = this->getPropertyValue("OutputWorkspace");
   if (boost::ends_with(outputWsName, "_spe")) {
     boost::erase_all(outputWsName, "_spe");
@@ -840,7 +838,7 @@ void DgsReduction::exec() {
                       getPropertyValue("ReductionProperties"));
   std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
   etConv->executeAsChildAlg();
-  outputWS = etConv->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = etConv->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
 
   if (tibWS && showIntermedWS) {

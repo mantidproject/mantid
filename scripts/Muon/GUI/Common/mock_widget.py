@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import unicode_literals
 
-import PyQt4.QtGui as QtGui
+from qtpy import QtWidgets
 
 _QAPP = None
 
@@ -18,6 +18,6 @@ def mockQapp():
     """
     global _QAPP
     if _QAPP is None:
-        _QAPP = QtGui.QApplication([''])
+        _QAPP = QtWidgets.QApplication([''])
 
     return _QAPP

@@ -38,7 +38,6 @@ class SettingsDiagnosticPresenter(object):
             self._presenter.on_save_state()
 
     def __init__(self, parent_presenter):
-        super(SettingsDiagnosticPresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         # Logger

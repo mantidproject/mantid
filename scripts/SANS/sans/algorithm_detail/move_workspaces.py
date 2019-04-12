@@ -746,29 +746,24 @@ class SANSMoveZOOM(SANSMove):
         return instrument_type is SANSInstrument.ZOOM
 
 
-class SANSMoveFactory(object):
-    def __init__(self):
-        super(SANSMoveFactory, self).__init__()
-
-    @staticmethod
-    def create_mover(workspace):
-        # Get selection
-        run_number = workspace.getRunNumber()
-        instrument = workspace.getInstrument()
-        instrument_name = instrument.getName()
-        instrument_name = sanitise_instrument_name(instrument_name)
-        instrument_type = SANSInstrument.from_string(instrument_name)
-        if SANSMoveLOQ.is_correct(instrument_type, run_number):
-            mover = SANSMoveLOQ()
-        elif SANSMoveSANS2D.is_correct(instrument_type, run_number):
-            mover = SANSMoveSANS2D()
-        elif SANSMoveLARMOROldStyle.is_correct(instrument_type, run_number):
-            mover = SANSMoveLARMOROldStyle()
-        elif SANSMoveLARMORNewStyle.is_correct(instrument_type, run_number):
-            mover = SANSMoveLARMORNewStyle()
-        elif SANSMoveZOOM.is_correct(instrument_type, run_number):
-            mover = SANSMoveZOOM()
-        else:
-            mover = None
-            NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
-        return mover
+def sans_move_factory(workspace):
+    # Get selection
+    run_number = workspace.getRunNumber()
+    instrument = workspace.getInstrument()
+    instrument_name = instrument.getName()
+    instrument_name = sanitise_instrument_name(instrument_name)
+    instrument_type = SANSInstrument.from_string(instrument_name)
+    if SANSMoveLOQ.is_correct(instrument_type, run_number):
+        mover = SANSMoveLOQ()
+    elif SANSMoveSANS2D.is_correct(instrument_type, run_number):
+        mover = SANSMoveSANS2D()
+    elif SANSMoveLARMOROldStyle.is_correct(instrument_type, run_number):
+        mover = SANSMoveLARMOROldStyle()
+    elif SANSMoveLARMORNewStyle.is_correct(instrument_type, run_number):
+        mover = SANSMoveLARMORNewStyle()
+    elif SANSMoveZOOM.is_correct(instrument_type, run_number):
+        mover = SANSMoveZOOM()
+    else:
+        mover = None
+        NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
+    return mover

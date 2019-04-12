@@ -6,29 +6,29 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 
 from mantidqtpython import MantidQt
 
 
-class LoadView(QtGui.QWidget):
-    sig_loading_finished = QtCore.pyqtSignal()
+class LoadView(QtWidgets.QWidget):
+    sig_loading_finished = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(LoadView, self).__init__(parent)
 
-        self.browse_button = QtGui.QPushButton("User Dirs", self)
+        self.browse_button = QtWidgets.QPushButton("User Dirs", self)
         self.browse_button.clicked.connect(self.show_directory_manager)
 
-        self.co_button = QtGui.QPushButton("Co-Add", self)
-        self.load_button = QtGui.QPushButton("Load", self)
+        self.co_button = QtWidgets.QPushButton("Co-Add", self)
+        self.load_button = QtWidgets.QPushButton("Load", self)
 
-        self.spinbox = QtGui.QSpinBox(self)
+        self.spinbox = QtWidgets.QSpinBox(self)
         self.spinbox.setRange(0, 99999)
         self.spinbox.setValue(0)
         self.last_spinbox_val = 0
 
-        self.grid = QtGui.QVBoxLayout()
+        self.grid = QtWidgets.QVBoxLayout()
         self.grid.addWidget(self.spinbox)
         self.grid.addWidget(self.load_button)
         self.grid.addWidget(self.co_button)

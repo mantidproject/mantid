@@ -146,10 +146,10 @@ void LoadCanSAS1D::exec() {
   default:
     auto group = boost::make_shared<WorkspaceGroup>();
     for (unsigned int i = 0; i < numEntries; ++i) {
-      std::string runName;
-      MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), runName);
+      std::string run;
+      MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), run);
       newWork->mutableRun().addProperty("Filename", fileName);
-      appendDataToOutput(newWork, runName, group);
+      appendDataToOutput(newWork, run, group);
     }
     outputWork = group;
   }

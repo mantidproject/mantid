@@ -7,8 +7,8 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import PyQt4.QtCore as QtCore
-import PyQt4.QtGui as QtGui
+from qtpy import QtWidgets, QtCore
+
 from mantid.kernel import ConfigServiceImpl
 
 import Muon.GUI.Common.message_box as message_box
@@ -41,7 +41,7 @@ def check_facility():
                              + "\n - ".join(SUPPORTED_FACILITIES))
 
 
-class FrequencyAnalysisGui(QtGui.QMainWindow):
+class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     """
     The Frequency Domain Analaysis 2.0 interface.
@@ -79,8 +79,8 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.setup_tabs()
         self.help_widget = HelpWidget()
 
-        central_widget = QtGui.QWidget()
-        vertical_layout = QtGui.QVBoxLayout()
+        central_widget = QtWidgets.QWidget()
+        vertical_layout = QtWidgets.QVBoxLayout()
 
         vertical_layout.addWidget(self.load_widget.load_widget_view)
         vertical_layout.addWidget(self.tabs)

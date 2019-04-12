@@ -207,6 +207,12 @@ void Iqt::setup() {
 
   m_iqtTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
+  // Format the tree widget so its easier to read the contents
+  m_iqtTree->setIndentation(0);
+  for (auto const &item : m_properties)
+    m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item),
+                                  QColor(246, 246, 246));
+
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
