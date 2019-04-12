@@ -398,8 +398,15 @@ void ISISEnergyTransfer::run() {
     reductionAlg->setProperty("GroupingString", grouping.second);
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
-  reductionAlg->setProperty("OutputWorkspace",
-                            "IndirectEnergyTransfer_Workspaces");
+
+  std::transform(grouping.first.begin(), grouping.first.end(),
+                 grouping.first.begin(), std::tolower);
+  m_outputGroupName = instName.toLower().toStdString() +
+                      m_uiForm.dsRunFiles->getText().toStdString() + "_" +
+                      getAnalyserName().toStdString() +
+                      getReflectionName().toStdString() + "_" + grouping.first +
+                      "_Reduced";
+  reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
 
@@ -421,10 +428,8 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  auto const outputName("IndirectEnergyTransfer_Workspaces");
-
-  if (!error && doesExistInADS(outputName)) {
-    if (auto const outputGroup = getADSWorkspaceGroup(outputName)) {
+  if (!error && doesExistInADS(m_outputGroupName)) {
+    if (auto const outputGroup = getADSWorkspaceGroup(m_outputGroupName)) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
