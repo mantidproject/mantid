@@ -24,10 +24,6 @@ import_mantid_cext('._api', 'mantid.api', globals())
 ###############################################################################
 # Attach additional operators to workspaces
 ###############################################################################
-import sys
-import logging
-logging.critical("Working with PYTHONPATH\n{}".format("\n".join(sys.path)))
-
 from mantid.api import _workspaceops
 
 _workspaceops.attach_binary_operators_to_workspace()
