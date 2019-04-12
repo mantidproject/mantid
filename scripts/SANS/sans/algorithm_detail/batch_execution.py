@@ -139,6 +139,7 @@ def single_reduction_for_event_slices(reduction_packages, workspace_to_name, wor
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can)
+
     # --------------------------------
     # Perform output of all workspaces
     # --------------------------------
@@ -151,6 +152,12 @@ def single_reduction_for_event_slices(reduction_packages, workspace_to_name, wor
     # 3. Both:
     #    * This means that we need to save out the reduced data
     #    * The data is already on the ADS, so do nothing
+    if output_mode is OutputMode.SaveToFile:
+        save_to_file(reduction_packages, save_can, event_slice=True)
+        delete_reduced_workspaces(reduction_packages)
+    elif output_mode is OutputMode.Both:
+        save_to_file(reduction_packages, save_can, event_slice=True)
+
     out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]
     out_shift_factors = [reduction_package.out_shift_factor for reduction_package in reduction_packages]
     return out_scale_factors, out_shift_factors
@@ -1312,14 +1319,18 @@ def add_to_group(workspace, name_of_group_workspace):
         group_alg.execute()
 
 
-def save_to_file(reduction_packages, save_can):
+def save_to_file(reduction_packages, save_can, event_slice=False):
     """
     Extracts all workspace names which need to be saved and saves them into a file.
 
-    @param reduction_packages: a list of reduction packages which contain all the relevant information for saving
-    @param save_can: a bool. When true save the unsubtracted can and sample workspaces
+    :param reduction_packages: a list of reduction packages which contain all the relevant information for saving
+    :param save_can: a bool. When true save the unsubtracted can and sample workspaces
+    :param event_slice: an optional bool. If true then reduction packages contain event slice data
     """
-    workspaces_names_to_save = get_all_names_to_save(reduction_packages, save_can=save_can)
+    if not event_slice:
+        workspaces_names_to_save = get_all_names_to_save(reduction_packages, save_can=save_can)
+    else:
+        workspaces_names_to_save = get_event_slice_names_to_save(reduction_packages, save_can=save_can)
 
     state = reduction_packages[0].state
     save_info = state.save
@@ -1338,7 +1349,8 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
     """
     Deletes all workspaces which would have been generated from a list of reduction packages.
 
-    @param reduction_packages: a list of reduction package
+    :param reduction_packages: a list of reduction package
+    :param include_non_transmission: an optional bool. If true then also delete reduced hab, lab, merged
     """
     def _delete_workspaces(_delete_alg, _workspaces):
         for _workspace in _workspaces:
@@ -1452,11 +1464,11 @@ def get_transmission_names_to_save(reduction_package, can):
 
 def get_all_names_to_save(reduction_packages, save_can):
     """
-    Extracts all the output names from a list of reduction packages. The main
+    Extracts all the output names from a list of reduction packages.
 
-    @param reduction_packages: a list of reduction packages
-    @param save_can: a bool, whether or not to save unsubtracted can workspace
-    @return: a list of workspace names to save.
+    :param reduction_packages: a list of reduction packages
+    :param save_can: a bool, whether or not to save unsubtracted can workspace
+    :return: a list of workspace names to save.
     """
     names_to_save = []
     for reduction_package in reduction_packages:
@@ -1495,6 +1507,71 @@ def get_all_names_to_save(reduction_packages, save_can):
                 names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
             if reduced_hab:
                 names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
+
+    # We might have some workspaces as duplicates (the group workspaces), so make them unique
+    return set(names_to_save)
+
+
+def get_event_slice_names_to_save(reduction_packages, save_can):
+    """
+        Extracts all the output names from a list of reduction packages which contain event sliced data.
+        The workspaces in these reduction packages are gruop workspaces, except for transmissions.
+
+        :param reduction_packages: a list of reduction packages
+        :param save_can: a bool, whether or not to save unsubtracted can workspace
+        :return: a list of workspace names to save.
+        """
+    names_to_save = []
+    for reduction_package in reduction_packages:
+        reduced_lab = reduction_package.reduced_lab
+        reduced_hab = reduction_package.reduced_hab
+        reduced_merged = reduction_package.reduced_merged
+        reduced_lab_can = reduction_package.reduced_lab_can
+        reduced_hab_can = reduction_package.reduced_hab_can
+        reduced_lab_sample = reduction_package.reduced_lab_sample
+        reduced_hab_sample = reduction_package.reduced_hab_sample
+
+        reduced_lab_names = [] if reduced_lab is None else reduced_lab.getNames()
+        reduced_hab_names = [] if reduced_hab is None else reduced_hab.getNames()
+        reduced_merged_names = [] if reduced_merged is None else reduced_merged.getNames()
+        reduced_lab_can_names = [] if reduced_lab_can is None else reduced_lab_can.getNames()
+        reduced_hab_can_names = [] if reduced_hab_can is None else reduced_hab_can.getNames()
+        reduced_lab_sample_names = [] if reduced_lab_sample is None else reduced_lab_sample.getNames()
+        reduced_hab_sample_names = [] if reduced_hab_sample is None else reduced_hab_sample.getNames()
+
+        transmission = reduction_package.unfitted_transmission
+        transmission_can = reduction_package.unfitted_transmission_can
+        try:
+            # Does not always work for event slice data as transmission
+            # workspaces can get deleted.
+            # This is a temporary fix to allow file saving with
+            # event sliced data.
+            trans_name = '' if not transmission else transmission.name()
+        except RuntimeError:
+            trans_name = ''
+            Logger("SANS").notice("Transmission run not found. Not saving to file.")
+        try:
+            transCan_name = '' if not transmission_can else transmission_can.name()
+        except RuntimeError:
+            transCan_name = ''
+            Logger("SANS").notice("Can transmission run not found. Not saving to file.")
+
+        def _get_names_in_list(_list, _trans_name, _trans_can_name):
+            return ((name, _trans_name, _trans_can_name) for name in _list if name not in (None, ""))
+
+        if save_can:
+            names_to_save.extend(_get_names_in_list(reduced_merged_names, trans_name, transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_lab_can_names, '', transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_hab_can_names, '', transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_lab_sample_names, trans_name, ''))
+            names_to_save.extend(_get_names_in_list(reduced_hab_sample_names, trans_name, ''))
+        elif reduced_merged:
+            names_to_save.extend(_get_names_in_list(reduced_merged_names, trans_name, transCan_name))
+        else:
+            names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, transCan_name))
+            names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, transCan_name))
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)

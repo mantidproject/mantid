@@ -12,7 +12,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from collections import defaultdict
 from copy import deepcopy
-import random
 
 from mantid.api import (AnalysisDataService, DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress, WorkspaceGroup, WorkspaceGroupProperty)
@@ -192,7 +191,6 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         # --------------------------------------------------------------------------------------------------------------
         # Setup initial reduction
         # --------------------------------------------------------------------------------------------------------------
-        # TODO progress bar
         initial_reduction_alg = create_child_algorithm(self, "SANSReductionCoreInitial", **{})
         # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
         # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
@@ -252,7 +250,6 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             output_bundles.append(slice_bundles)
             output_parts_bundles.append(slice_parts_bundles)
 
-        # TODO fix the output!
         reduction_mode_vs_output_workspaces = defaultdict(list)
         reduction_mode_vs_workspace_names = defaultdict(list)
 
