@@ -100,13 +100,13 @@ def slitSizes(ws):
     run = ws.run()
     instrName = instrumentName(ws)
     slit2width = run.get(slitSizeLogEntry(instrName, 1))
-    slit2widthUnit = slit2width.units
     slit3width = run.get(slitSizeLogEntry(instrName, 2))
-    slit3widthUnit = slit3width.units
     if slit2width is None or slit3width is None:
-        run.addProperty(SampleLogs.SLIT2WIDTH, str('-'), slit2widthUnit, True)
-        run.addProperty(SampleLogs.SLIT3WIDTH, str('-'), slit3widthUnit, True)
+        run.addProperty(SampleLogs.SLIT2WIDTH, str('-'), '', True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, str('-'), '', True)
     else:
+        slit2widthUnit = slit2width.units
+        slit3widthUnit = slit3width.units
         slit3w = slit3width.value
         if instrumentName(ws) != 'D17':
             bgs3 = float(run.getProperty('BGS3.value').value)
