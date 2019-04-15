@@ -46,6 +46,29 @@ Usage
 
 .. testcode:: ReflectometryILLAutoReduction1
 
+   angleOffset = 10
+   angleWidth = 20
+   foreground = [5]
+
+   ws = ReflectometryILLAutoProcess(
+       Run='ILL/D17/317370.nxs',
+       DirectRun='ILL/D17/317369.nxs',
+       DirectLowAngleForegroundHalfWidth=foreground,
+       DirectHighAngleForegroundHalfWidth=foreground,
+       DirectLowAngleBkgOffset=angleOffset,
+       DirectLowAngleBkgWidth=angleWidth,
+       DirectHighAngleBkgOffset=angleOffset,
+       DirectHighAngleBkgWidth=angleWidth,
+       LowAngleForegroundHalfWidth=foreground,
+       HighAngleForegroundHalfWidth=foreground,
+       LowAngleBkgOffset=angleOffset,
+       LowAngleBkgWidth=angleWidth,
+       HighAngleBkgOffset=angleOffset,
+       HighAngleBkgWidth=angleWidth,
+       WavelengthLower=0.0,
+       WavelengthUpper=31.0
+   )
+
 .. testoutput:: ReflectometryILLAutoReduction1
 
 .. categories::
