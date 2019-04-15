@@ -67,14 +67,13 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         try:
             if facility == "ISIS":
                 #need to check if this is true!
-                number_of_pixels_y = int(workspace.getNumberHistograms());
+                number_of_pixels_y = int(workspace.getNumberHistograms())
             else:
                 # TODO: revisit this when we update the IDF
                 number_of_pixels_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
                 number_of_pixels_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
         except:
             logger.error("Parameter file doesn't contain either 'number-of-x-pixels' parameter or 'number-of-y-pixels' parameter.")
-
 
         left_bck = None
         if peak_min > bck_min:
