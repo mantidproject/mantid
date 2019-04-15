@@ -120,10 +120,10 @@ public:
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &sample(ws->sample());
     const Geometry::SampleEnvironment environment = sample.getEnvironment();
-    const auto can = environment.getContainer();
-    const auto &material = can->material();
+    const auto &can = environment.getContainer();
+    const auto &material = can.material();
     TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
-    TS_ASSERT(can->hasValidShape());
+    TS_ASSERT(can.hasValidShape());
     TS_ASSERT_EQUALS(environment.name(), "testName");
     TS_ASSERT_EQUALS(material.numberDensity(), 1);
     TS_ASSERT_EQUALS(material.name(), "");
@@ -154,7 +154,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &material =
-        ws->sample().getEnvironment().getContainer()->material();
+        ws->sample().getEnvironment().getContainer().material();
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12);
   }
 
