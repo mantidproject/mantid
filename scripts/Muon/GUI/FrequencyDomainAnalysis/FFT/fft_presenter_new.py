@@ -74,7 +74,6 @@ class FFTPresenter(object):
             if "PhaseQuad" in option:
                 self.view.removeIm(option)
 
-
     # functions
     def phaseCheck(self):
         self.view.phaseQuadChanged()
