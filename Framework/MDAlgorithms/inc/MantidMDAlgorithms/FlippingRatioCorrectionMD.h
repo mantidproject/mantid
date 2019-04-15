@@ -28,8 +28,8 @@ private:
   void exec() override;
   template <typename MDE, size_t nd>
   void executeTemplatedMDE(
-      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws, std::vector<double> factor);
-
+      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  std::vector<double> m_factor;
 };
 
 } // namespace MDAlgorithms

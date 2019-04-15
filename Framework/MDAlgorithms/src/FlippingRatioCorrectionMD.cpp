@@ -11,11 +11,16 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEventFactory.h"
+
 #include <muParser.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
@@ -54,10 +59,14 @@ void FlippingRatioCorrectionMD::init() {
                   "of sample logs defined below");
   declareProperty(Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>("SampleLogs", Direction::Input),
                   "Comma separated list of sample logs that can appear in the formula for flipping ratio");
-  //declareProperty(
-  //    Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
-  //                                                           Direction::Output),
-  //    "An output workspace.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace1", "",
+                                                             Direction::Output),
+      "Output workspace 1. Equal to Input workspace multiplied by FR/(FR-1).");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace2", "",
+                                                             Direction::Output),
+      "Output workspace 2. Equal to Input workspace multiplied by 1/(FR-1).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -87,15 +96,14 @@ void FlippingRatioCorrectionMD::exec() {
       auto item = variables.begin();
       for (; item!=variables.end(); ++item)
       {
-        std::cout << "Name: " << item->first << "Val: " << *(item->second) << "\n";
-      }
-      try {
-        flippingRatio.push_back(muParser.Eval());
-      }
-      catch (mu::Parser::exception_type &e)
-      {
-        g_log.error()<<"Parsing error in experiment info "<<i<<"\n"<< e.GetMsg() << std::endl;
-        throw std::runtime_error("Parsing error");
+        try {
+          flippingRatio.push_back(muParser.Eval());
+        }
+        catch (mu::Parser::exception_type &e)
+        {
+          g_log.error()<<"Parsing error in experiment info "<<i<<"\n"<< e.GetMsg() << std::endl;
+          throw std::runtime_error("Parsing error");
+        }
       }
   }
   std::vector<double> C1,C2; //C1=FR/(FR-1.), C2=1./(FR-1.)
@@ -104,11 +112,38 @@ void FlippingRatioCorrectionMD::exec() {
     C2.push_back(1./(fr-1.));
   }
 
+  // Create workspaces by cloning
+  API::IMDWorkspace_sptr outputWS1, outputWS2;
+  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace",0,0.4,true);
+  cloneMD->setProperty("InputWorkspace",inWS);
+  cloneMD->setProperty("OutputWorkspace",getPropertyValue("OutputWorkspace1"));
+  cloneMD->executeAsChildAlg();
+  outputWS1 = cloneMD->getProperty("OutputWorkspace");
+  API::IMDEventWorkspace_sptr event1 =
+      boost::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS1);
+  cloneMD->setProperty("OutputWorkspace",getPropertyValue("OutputWorkspace2"));
+  cloneMD->executeAsChildAlg();
+  outputWS2 = cloneMD->getProperty("OutputWorkspace");
+  API::IMDEventWorkspace_sptr event2 =
+      boost::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS2);
+  if(event1){
+    m_factor=C1;
+    CALL_MDEVENT_FUNCTION(this->executeTemplatedMDE, event1);
+    this->setProperty("OutputWorkspace1", event1);
+  } else {
+    throw std::runtime_error("Could not clone the workspace for first correction");
+  }
+  if(event2){
+    m_factor=C2;
+    CALL_MDEVENT_FUNCTION(this->executeTemplatedMDE, event2);
+    this->setProperty("OutputWorkspace2", event2);
+  } else {
+    throw std::runtime_error("Could not clone the workspace for first correction");
+  }
 }
 
 template<typename MDE, size_t nd>
-void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
-                                                    std::vector<double> factor)
+void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws)
 {
   // Get all the MDBoxes contained
   DataObjects::MDBoxBase<MDE, nd> *parentBox = ws->getBox();
@@ -121,7 +156,6 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects
     fileBackedTarget = true;
     dbuff = ws->getBoxController()->getFileIO();
   }
-
   for (auto &boxe : boxes) {
     DataObjects::MDBox<MDE, nd> *box = dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
     if (box) {
@@ -130,8 +164,9 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(typename Mantid::DataObjects
       auto it = events.begin();
       auto it_end = events.end();
       for (; it != it_end; it++) {
-        float scalar=static_cast<float>(factor[0]);
-        float scalarSquared=static_cast<float>(factor[0]*factor[0]);
+        size_t ind = static_cast<size_t>(it->getRunIndex());
+        float scalar=static_cast<float>(m_factor[ind]);
+        float scalarSquared=static_cast<float>(m_factor[ind]*m_factor[ind]);
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();
         float signal = oldSignal * scalar;
