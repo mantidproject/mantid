@@ -9,10 +9,14 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
+from mantidqt.utils.qt import load_ui
 
-class PhaseTableView(QtWidgets.QWidget):
+ui_muon_phases_tab, _ = load_ui(__file__, "muon_phases_tab.ui")
+
+class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
     def __init__(self, parent=None):
         super(PhaseTableView, self).__init__(parent)
+        self.setupUi(self)
         self._old_backward_index = 1
         self._old_forward_index = 0
         self.setup_phase_table_options_table()
@@ -137,21 +141,9 @@ class PhaseTableView(QtWidgets.QWidget):
         warning(message)
 
     def setup_phase_table_options_table(self):
-        self.grid = QtWidgets.QGridLayout(self)
-
-        # add splitter for resizing
-        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        # make table
-        self.phase_table_options_table = QtWidgets.QTableWidget(self)
-        # self.phase_table_options_table.resize(800, 800)
-        self.phase_table_options_table.setRowCount(5)
-        self.phase_table_options_table.setColumnCount(2)
         self.phase_table_options_table.setColumnWidth(0, 300)
         self.phase_table_options_table.setColumnWidth(1, 300)
-        self.phase_table_options_table.verticalHeader().setVisible(False)
-        self.phase_table_options_table.horizontalHeader().setStretchLastSection(True)
-        self.phase_table_options_table.setHorizontalHeaderLabels(
-            ("Property;Value").split(";"))
+
         # populate table
         options = []
 
@@ -172,20 +164,19 @@ class PhaseTableView(QtWidgets.QWidget):
 
         self.phase_table_options_table.resizeRowsToContents()
 
-        # add to layout
-        # self.phase_table_options_table.setMinimumSize(40, 158)
         table_utils.setTableHeaders(self.phase_table_options_table)
 
-        self.calculate_phase_table_button = QtWidgets.QPushButton('Calculate Phase Table', self)
+        self.phase_quad_table.setColumnWidth(0, 300)
+        self.phase_quad_table.setColumnWidth(1, 300)
 
-        self.phase_quad_input_workspace_combo = QtWidgets.QComboBox(self)
-        self.phase_quad_phase_table_combo = QtWidgets.QComboBox(self)
-        self.calculate_phase_quad_button = QtWidgets.QPushButton('Calculate Phase Quad', self)
+        # self.calculate_phase_table_button = QtWidgets.QPushButton('Calculate Phase Table', self)
+        table_utils.setRowName(self.phase_quad_table, 0, 'InputWorkspace')
+        self.phase_quad_input_workspace_combo = table_utils.addComboToTable(self.phase_quad_table, 0, options)
+
+        table_utils.setRowName(self.phase_quad_table, 1, 'PhaseTable')
+        self.phase_quad_phase_table_combo = table_utils.addComboToTable(self.phase_quad_table, 1, options)
+
+        self.phase_quad_table.resizeRowsToContents()
 
         # add to layout
-        splitter.addWidget(self.phase_table_options_table)
-        self.grid.addWidget(splitter)
-        self.grid.addWidget(self.calculate_phase_table_button)
-        self.grid.addWidget(self.phase_quad_input_workspace_combo)
-        self.grid.addWidget(self.phase_quad_phase_table_combo)
-        self.grid.addWidget(self.calculate_phase_quad_button)
+        table_utils.setTableHeaders(self.phase_quad_table)
