@@ -339,6 +339,13 @@ PrivateFittingData::operator=(PrivateFittingData &&fittingData) {
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
 
+bool IndirectFittingModel::hasWorkspace(
+    std::string const &workspaceName) const {
+  auto const names = getWorkspaceNames();
+  auto const iter = std::find(names.begin(), names.end(), workspaceName);
+  return iter != names.end();
+}
+
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
   if (index < m_fittingData.size())

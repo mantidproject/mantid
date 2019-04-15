@@ -32,7 +32,7 @@ public:
   IndirectFitDataPresenter(
       IndirectFittingModel *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
-  ~IndirectFitDataPresenter() { observeReplace(false); }
+  ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
@@ -91,6 +91,8 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(std::size_t dataIndex);
+
+  void selectReplacedWorkspace(const QString &workspaceName);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;

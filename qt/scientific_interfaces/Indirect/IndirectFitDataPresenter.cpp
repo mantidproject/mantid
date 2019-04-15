@@ -65,6 +65,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
                                       std::size_t)));
 }
 
+IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
+
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const {
   return m_view;
 }
@@ -144,10 +146,18 @@ void IndirectFitDataPresenter::loadSettings(const QSettings &settings) {
 void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
                                              const Workspace_sptr &workspace) {
   UNUSED_ARG(workspace)
-  const auto names = m_model->getWorkspaceNames();
-  const auto iter = std::find(names.begin(), names.end(), workspaceName);
-  if (iter != names.end() && !m_view->isMultipleDataTabSelected())
-    m_view->setWorkspaceSelectorIndex(QString::fromStdString(workspaceName));
+  if (m_model->hasWorkspace(workspaceName) &&
+      !m_view->isMultipleDataTabSelected())
+    selectReplacedWorkspace(QString::fromStdString(workspaceName));
+}
+
+void IndirectFitDataPresenter::selectReplacedWorkspace(
+    const QString &workspaceName) {
+  if (m_view->isSampleWorkspaceSelectorVisible()) {
+    setModelWorkspace(workspaceName);
+    emit dataChanged();
+  } else
+    m_view->setSampleWorkspaceSelectorIndex(workspaceName);
 }
 
 UserInputValidator &
