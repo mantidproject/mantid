@@ -47,7 +47,7 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  bool hasWorkspace(std::string const &workspaceName) const;
+  virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(std::size_t index) const;
   Spectra getSpectra(std::size_t index) const;
