@@ -31,6 +31,8 @@ private:
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
                                      std::vector<double> spectrumRanges);
   std::vector<double> findSpectrumRanges(std::vector<specnum_t> spectraList);
+  void subtractPixelBackground(API::MatrixWorkspace_sptr inputWS,
+                               std::vector<double> spectrumRanges);
 
   /** Overridden Algorithm methods **/
 
