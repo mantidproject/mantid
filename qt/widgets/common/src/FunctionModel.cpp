@@ -14,94 +14,120 @@ namespace MantidWidgets {
 
 using namespace Mantid::API;
 
-namespace {
+void IFunctionModel::setFunctionStr(const std::string & funStr)
+{
+  setFunction(FunctionFactory::Instance().createInitialized(funStr));
+}
 
-CompositeFunction_sptr initFunction(const QString & funStr, int nDomains) {
-  if (funStr.isEmpty()) {
-    return CompositeFunction_sptr();
+void SingleDomainFunctionModel::setFunction(IFunction_sptr fun)
+{
+  m_function = boost::dynamic_pointer_cast<CompositeFunction>(fun);
+  if (m_function) {
+    return;
   }
-  auto fun = FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  if (nDomains == 0) {
-    auto compositeFun = boost::dynamic_pointer_cast<CompositeFunction>(fun);
-    if (compositeFun) {
-      return compositeFun;
+  m_function = CompositeFunction_sptr(new CompositeFunction);
+  if (fun) {
+    m_function->addFunction(fun);
+  }
+}
+
+IFunction_sptr SingleDomainFunctionModel::getFitFunction() const
+{
+  if (!m_function || m_function->nFunctions() > 1) {
+    return m_function;
+  }
+  if (m_function->nFunctions() == 1) {
+    return m_function->getFunction(0);
+  }
+  return IFunction_sptr();
+}
+
+void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
+  m_function = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+  if (m_function) {
+    return;
+  }
+  m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
+  if (fun) {
+    for (int i = 0; i < m_numberDomains; ++i) {
+      m_function->addFunction(fun);
     }
-    compositeFun = CompositeFunction_sptr(new CompositeFunction);
-    compositeFun->addFunction(fun);
-    return compositeFun;
   }
-  auto multiDomainFun = MultiDomainFunction_sptr(new MultiDomainFunction);
-  for (int i = 0; i < nDomains; ++i) {
-    multiDomainFun->addFunction(fun->clone());
-    multiDomainFun->setDomainIndex(i, i);
+}
+
+IFunction_sptr MultiDomainFunctionModel::getFitFunction() const
+{
+  if (!m_function || m_function->nFunctions() > 1) {
+    return m_function;
   }
-  return multiDomainFun;
+  if (m_function->nFunctions() == 1) {
+    auto fun = m_function->getFunction(0);
+    auto compFun = boost::dynamic_pointer_cast<CompositeFunction>(fun);
+    if (compFun && compFun->nFunctions() == 1) {
+      return compFun->getFunction(0);
+    }
+    return fun;
+  }
+  return IFunction_sptr();
 }
 
-} // namespace
-  
-FunctionModel::FunctionModel(const QString & funStr, int nDomains) 
-  : m_function(initFunction(funStr, nDomains)), m_currentDomainIndex(0)
+IFunction_sptr MultiDomainFunctionModel::getSingleFunction(int index) const
 {
+  checkIndex(index);
+  return m_function->getFunction(index);
 }
 
-bool FunctionModel::isMultiDomain() const
+IFunction_sptr MultiDomainFunctionModel::getCurrentFunction() const
 {
-  return getNumberDomains() > 1;
+  return getSingleFunction(static_cast<int>(m_currentDomainIndex));
 }
 
-int FunctionModel::getNumberDomains() const
+void MultiDomainFunctionModel::setNumberDomains(int nDomains)
 {
-  return m_function ? static_cast<int>(m_function->getNumberDomains()) : 0;
+  auto const nd = static_cast<size_t>(nDomains);
+  if (nd < 1) {
+    throw std::runtime_error("Number of domains shouldn't be less than 1.");
+  }
+  if (nd == m_numberDomains) {
+    return;
+  }
+  if (!m_function) {
+    m_numberDomains = nd;
+    return;
+  }
+  auto const lastIndex = m_numberDomains - 1;
+  if (nd > m_numberDomains) {
+    auto fun = m_function->getFunction(lastIndex);
+    for (size_t i = m_numberDomains; i < nd; ++i) {
+      m_function->addFunction(fun->clone());
+      m_function->setDomainIndex(i, i);
+    }
+  } else {
+    for (size_t i = lastIndex; i >= nd; --i) {
+      m_function->removeFunction(i);
+    }
+  }
+  m_numberDomains = nDomains;
 }
 
-int FunctionModel::currentDomainIndex() const
+int MultiDomainFunctionModel::getNumberDomains() const
+{
+  return static_cast<int>(m_numberDomains);
+}
+
+int MultiDomainFunctionModel::currentDomainIndex() const
 {
   return static_cast<int>(m_currentDomainIndex);
 }
 
-void FunctionModel::setCurrentDomainIndex(int index)
+void MultiDomainFunctionModel::setCurrentDomainIndex(int index)
 {
   checkIndex(index);
   m_currentDomainIndex = static_cast<size_t>(index);
 }
 
-Mantid::API::IFunction_sptr FunctionModel::getSingleFunction(int index) const
-{
-  checkIndex(index);
-  if (isMultiDomain()) {
-    return m_function->getFunction(index);
-  }
-  if (!m_function || m_function->nFunctions() > 1) {
-    return m_function;
-  }
-  if (m_function->nFunctions() == 1) {
-    return m_function->getFunction(0);
-  }
-  return Mantid::API::IFunction_sptr();
-}
-
-Mantid::API::IFunction_sptr FunctionModel::getCurrentFunction() const
-{
-  return getSingleFunction(m_currentDomainIndex);
-}
-
-Mantid::API::IFunction_sptr FunctionModel::getGlobalFunction() const
-{
-  if (isMultiDomain()) {
-    return m_function;
-  }
-  if (!m_function || m_function->nFunctions() > 1) {
-    return m_function;
-  }
-  if (m_function->nFunctions() == 1) {
-    return m_function->getFunction(0);
-  }
-  return Mantid::API::IFunction_sptr();
-}
-
 /// Check a domain/function index to be in range.
-void FunctionModel::checkIndex(int index) const{
+void MultiDomainFunctionModel::checkIndex(int index) const {
   if (index < 0 || index >= getNumberDomains()) {
     throw std::runtime_error("Domain index is out of range: " + std::to_string(index) + " out of " + std::to_string(getNumberDomains()));
   }

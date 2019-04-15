@@ -30,46 +30,23 @@ public:
   }
 
   void test_empty() {
-    FunctionModel model;
-    TS_ASSERT(!model.isMultiDomain());
-    TS_ASSERT_EQUALS(model.getNumberDomains(), 0);
-    TS_ASSERT_EQUALS(model.currentDomainIndex(), 0);
-    TS_ASSERT_THROWS_EQUALS(model.setCurrentDomainIndex(1), std::runtime_error &e, std::string(e.what()),
-      "Domain index is out of range: 1 out of 0");
+    SingleDomainFunctionModel model;
+    TS_ASSERT(!model.getFitFunction());
   }
 
   void test_simple() {
-    FunctionModel model("name=LinearBackground,A0=1,A1=2");
-    TS_ASSERT(!model.isMultiDomain());
-    TS_ASSERT_EQUALS(model.getNumberDomains(), 1);
-    TS_ASSERT_EQUALS(model.currentDomainIndex(), 0);
-    TS_ASSERT_THROWS_EQUALS(model.setCurrentDomainIndex(1), std::runtime_error &e, std::string(e.what()),
-      "Domain index is out of range: 1 out of 1");
-    {
-      auto fun = model.getCurrentFunction();
-      TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
-      TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
-      TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
-    }
-    {
-      auto fun = model.getSingleFunction(0);
-      TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
-      TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
-      TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
-    }
-    TS_ASSERT_THROWS_EQUALS(model.getSingleFunction(1), std::runtime_error &e, std::string(e.what()),
-      "Domain index is out of range: 1 out of 1");
-    {
-      auto fun = model.getGlobalFunction();
-      TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
-      TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
-      TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
-    }
+    SingleDomainFunctionModel model;
+    model.setFunctionStr("name=LinearBackground,A0=1,A1=2");
+    auto fun = model.getFitFunction();
+    TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+    TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
+    TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
   }
 
   void test_simple_multidomain() {
-    FunctionModel model("name=LinearBackground,A0=1,A1=2", 2);
-    TS_ASSERT(model.isMultiDomain());
+    MultiDomainFunctionModel model;
+    model.setFunctionStr("name=LinearBackground,A0=1,A1=2");
+    model.setNumberDomains(2);
     TS_ASSERT_EQUALS(model.getNumberDomains(), 2);
     TS_ASSERT_EQUALS(model.currentDomainIndex(), 0);
     model.setCurrentDomainIndex(1);
@@ -97,7 +74,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(model.getSingleFunction(2), std::runtime_error &e, std::string(e.what()),
       "Domain index is out of range: 2 out of 2");
     {
-      auto fun = model.getGlobalFunction();
+      auto fun = model.getFitFunction();
       TS_ASSERT_EQUALS(fun->name(), "MultiDomainFunction");
       TS_ASSERT_EQUALS(fun->getParameter("f0.A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("f0.A1"), 2.0);

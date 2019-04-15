@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
+#include "MantidQtWidgets/Common/FunctionModel.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -15,6 +16,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/make_unique.h"
 
 //#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 //#include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
@@ -56,6 +58,8 @@ Mantid::Kernel::Logger g_log("Function Browser");
 namespace MantidQt {
 namespace MantidWidgets {
 
+  using namespace Mantid::Kernel;
+
 /**
  * Constructor
  * @param parent :: The parent widget.
@@ -66,6 +70,11 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<
       m_currentDataset(0)
 
 {
+  if (multi) {
+    m_model = make_unique<MultiDomainFunctionModel>();
+  } else {
+    m_model = make_unique<SingleDomainFunctionModel>();
+  }
   m_view = new FunctionTreeView(this, multi, categories);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
@@ -107,6 +116,7 @@ void FunctionBrowser::setFunction(const QString &funStr) {
  * @param fun :: A function
  */
 void FunctionBrowser::setFunction(Mantid::API::IFunction_sptr fun) {
+  m_model->setFunction(fun);
   m_view->setFunction(fun);
 }
 

@@ -26,25 +26,13 @@ class TestFunctionBrowser(GuiWindowTest):
         browser = self.widget
         self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
         view = browser.view()
-        discover_children(view, QAction)
+        # discover_children(view, QAction)
         self.assertEqual(view.getNumberOfQtProperties(), 8)
         print(':', browser.getFunctionString())
         pos = view.getVisualRectFunctionProperty('f1.').center()
         tree = view.treeWidget().viewport()
-        QTest.mouseMove(tree, pos)
-        QTest.mouseClick(tree, Qt.RightButton, Qt.NoModifier, pos)
-        yield 1
-        yield self.show_context_menu(tree, pos)
-        menu = self.get_active_popup_widget()
-        a = self.get_action('remove_function')
-        pos = menu.actionGeometry(a).center()
-        QTest.mouseMove(menu, pos)
-        self.hover_action('remove_function')
-        yield 1
-        QTest.mousePress(menu, Qt.LeftButton, Qt.NoModifier, pos)
-        yield 1
-        QTest.mouseRelease(menu, Qt.LeftButton, Qt.NoModifier, pos)
-        # self.trigger_action('remove_function')
+        yield self.show_context_menu(tree, pos, pause=0)
+        yield self.mouse_trigger_action('remove_function', pause=0)
         self.assertEqual(view.getNumberOfQtProperties(), 2)
 
         yield 100

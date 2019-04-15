@@ -16,21 +16,41 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON FunctionModel {
-public:
-  explicit FunctionModel(const QString &funStr = "", int nDomains = 0);
-  bool isMultiDomain() const;
-  int getNumberDomains() const;
-  int currentDomainIndex() const;
-  void setCurrentDomainIndex(int);
-  Mantid::API::IFunction_sptr getSingleFunction(int index) const;
-  Mantid::API::IFunction_sptr getCurrentFunction() const;
-  Mantid::API::IFunction_sptr getGlobalFunction() const;
-private:
-  void checkIndex(int) const;
-  Mantid::API::CompositeFunction_sptr m_function;
-  size_t m_currentDomainIndex;
-};
+  using namespace Mantid::API;
+
+  class EXPORT_OPT_MANTIDQT_COMMON IFunctionModel {
+  public:
+    virtual ~IFunctionModel() {}
+    virtual void setFunction(IFunction_sptr fun) = 0;
+    virtual IFunction_sptr getFitFunction() const = 0;
+    void setFunctionStr(const std::string &funStr);
+  private:
+  };
+
+  class EXPORT_OPT_MANTIDQT_COMMON SingleDomainFunctionModel: public IFunctionModel {
+  public:
+    void setFunction(IFunction_sptr fun) override;
+    IFunction_sptr getFitFunction() const override;
+  private:
+    CompositeFunction_sptr m_function;
+  };
+
+  class EXPORT_OPT_MANTIDQT_COMMON MultiDomainFunctionModel : public IFunctionModel {
+  public:
+    void setFunction(IFunction_sptr) override;
+    IFunction_sptr getFitFunction() const override;
+    IFunction_sptr getSingleFunction(int index) const;
+    IFunction_sptr getCurrentFunction() const;
+    void setNumberDomains(int);
+    int getNumberDomains() const;
+    int currentDomainIndex() const;
+    void setCurrentDomainIndex(int);
+  private:
+    void checkIndex(int) const;
+    MultiDomainFunction_sptr m_function;
+    size_t m_currentDomainIndex = 0;
+    size_t m_numberDomains = 1;
+  };
 
 } // namespace MantidWidgets
 } // namespace MantidQt

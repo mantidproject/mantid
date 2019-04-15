@@ -163,10 +163,25 @@ class GuiTestBase(object):
         button = self.get_button(name)
         QMetaObject.invokeMethod(button, 'click', Qt.QueuedConnection)
 
-    def show_context_menu(self, widget, pos):
+    def show_context_menu(self, widget, pos, pause=0):
+        QTest.mouseMove(widget, pos)
+        yield pause
+        QTest.mouseClick(widget, Qt.RightButton, Qt.NoModifier, pos)
+        yield pause
         ev = QMouseEvent(QEvent.ContextMenu, pos, Qt.RightButton, Qt.NoButton, Qt.NoModifier)
         QApplication.postEvent(widget, ev)
-        return self.wait_for_popup()
+        yield self.wait_for_popup()
+
+    def mouse_trigger_action(self, name, pause=0):
+        menu = self.get_active_popup_widget()
+        a, m = self.get_action(name, get_menu=True)
+        pos = menu.actionGeometry(a).center()
+        QTest.mouseMove(menu, pos)
+        yield pause
+        self.hover_action(name)
+        QTest.mousePress(menu, Qt.LeftButton, Qt.NoModifier, pos)
+        yield pause
+        QTest.mouseRelease(menu, Qt.LeftButton, Qt.NoModifier, pos)
 
 
 def is_test_method(value):

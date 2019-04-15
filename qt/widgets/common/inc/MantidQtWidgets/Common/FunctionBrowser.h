@@ -11,7 +11,6 @@
 
 #include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
-#include "MantidQtWidgets/Common/FunctionModel.h"
 
 #include <QMap>
 #include <QWidget>
@@ -30,7 +29,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class  FunctionTreeView;
-//class CreateAttributePropertyForFunctionBrowser;
+class IFunctionModel;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
@@ -186,6 +185,7 @@ protected slots:
   /// Update current function index depending on currently selected item
   void updateCurrentFunctionIndex();
 protected:
+  std::unique_ptr<IFunctionModel> m_model;
   FunctionTreeView *m_view;
 
   /// Set true if the constructed function is intended to be used in a
