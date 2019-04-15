@@ -66,12 +66,12 @@ void MainWindowView::initLayout() {
 
   auto thetaTolerance = 0.01;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  auto plotter = std::make_unique<Plotter>(this);
+  Plotter plotter(this);
 #else
-  auto plotter = std::make_unique<Plotter>();
+  Plotter plotter;
 #endif
-  auto makeRunsTablePresenter = RunsTablePresenterFactory(
-      instruments, thetaTolerance, std::move(plotter));
+  auto makeRunsTablePresenter =
+      RunsTablePresenterFactory(instruments, thetaTolerance, &plotter);
 
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto autoreduction = boost::shared_ptr<IAutoreduction>();

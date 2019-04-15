@@ -23,9 +23,10 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView);
-  void runPython(const std::string &pythonCode);
+  void runPython(const std::string &pythonCode) const;
 #endif
-  void reflectometryPlot(const std::vector<std::string> &workspaces) override;
+  void
+  reflectometryPlot(const std::vector<std::string> &workspaces) const override;
 
 private:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

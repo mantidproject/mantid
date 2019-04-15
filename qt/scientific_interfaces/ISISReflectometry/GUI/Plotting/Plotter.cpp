@@ -20,7 +20,8 @@ Plotter::Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView)
     : m_mainWindowView(mainWindowView) {}
 #endif
 
-void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
+void Plotter::reflectometryPlot(
+    const std::vector<std::string> &workspaces) const {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   if (!workspaces.empty()) {
     std::string pythonSrc;
@@ -42,7 +43,7 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) {
 // This should never be implemented for Qt 5 or above because that is
 // workbench.
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-void Plotter::runPython(const std::string &pythonCode) {
+void Plotter::runPython(const std::string &pythonCode) const {
   m_mainWindowView->runPythonAlgorithm(pythonCode);
 }
 #endif

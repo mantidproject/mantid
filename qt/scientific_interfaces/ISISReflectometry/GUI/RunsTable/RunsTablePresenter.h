@@ -27,7 +27,7 @@ public:
   RunsTablePresenter(IRunsTableView *view,
                      std::vector<std::string> const &instruments,
                      double thetaTolerance, ReductionJobs reductionJobs,
-                     IPlotter *plotter);
+                     const IPlotter *plotter);
 
   void notifyRemoveAllRowsAndGroupsRequested();
 
@@ -143,7 +143,7 @@ private:
       m_clipboard;
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
-  IPlotter *m_plotter;
+  const IPlotter *m_plotter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

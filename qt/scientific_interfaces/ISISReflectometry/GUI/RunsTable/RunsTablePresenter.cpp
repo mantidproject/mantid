@@ -65,7 +65,7 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
-    double thetaTolerance, ReductionJobs jobs, IPlotter *plotter)
+    double thetaTolerance, ReductionJobs jobs, const IPlotter *plotter)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
       m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);

@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlotter {
 public:
   virtual void
-  reflectometryPlot(const std::vector<std::string> &workspaces) = 0;
+  reflectometryPlot(const std::vector<std::string> &workspaces) const = 0;
 };
 
 } // namespace CustomInterfaces
