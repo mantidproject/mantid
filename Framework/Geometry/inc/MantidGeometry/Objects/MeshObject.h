@@ -125,6 +125,8 @@ public:
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
   detail::ShapeInfo::GeometryShape shape() const override;
+  const detail::ShapeInfo &shapeInfo() const override;
+
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &innerRadius,
                      double &radius, double &height) const override;

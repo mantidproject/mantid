@@ -515,6 +515,10 @@ detail::ShapeInfo::GeometryShape MeshObject::shape() const {
   return detail::ShapeInfo::GeometryShape::NOSHAPE;
 }
 
+const detail::ShapeInfo &MeshObject::shapeInfo() const {
+  throw std::runtime_error("MeshObject::shapeInfo() is not implemented");
+}
+
 /**
  * get info on standard shapes (none for Mesh Object)
  */

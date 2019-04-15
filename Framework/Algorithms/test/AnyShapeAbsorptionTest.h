@@ -268,26 +268,23 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     AnalysisDataService::Instance().addOrReplace("bobby", inputWS); // TODO rename this nonsense
 
-    std::cout << inputWS->getNumberHistograms() << " XVALUES: ";
-    for (const auto &value: inputWS->readX(0))
-      std::cout << value << " ";
-    std::cout << std::endl;
-
     // set the sample/can geometry
     auto setSampleAlg = FrameworkManager::Instance().createAlgorithm("SetSample");
     setSampleAlg->setRethrows(true);
     setSampleAlg->initialize();
     setSampleAlg->setPropertyValue("InputWorkspace", "bobby");
     setSampleAlg->setPropertyValue("Environment", R"({"Name": "CRYO-01", "Container": "8mm"})");
-    setSampleAlg->setPropertyValue("Material", R"({"ChemicalFormula": "(Li7)2-C-H4-N-Cl6", "SampleNumberDensity": 0.1})");
-//    setSampleAlg->setPropertyValue("Material", R"({"ChemicalFormula": "V", "SampleNumberDensity": 0.07192})");
+    setSampleAlg->setPropertyValue("Material",
+                                   R "({" ChemicalFormula ": " Cd
+                                     ", " SampleNumberDensity ": 0.1})");
+
     TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
 
     Mantid::Algorithms::AnyShapeAbsorption absAlg;
     absAlg.setRethrows(true);
     absAlg.initialize();
 
-    std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<< SAMPLE" << std::endl;
+    std::cout << "SAMPLE" << std::endl;
     // run the actual algorithm on the sample
     const std::string SAM_WS{"AbsorptionCorrection_Sample"};
     absAlg.setProperty("InputWorkspace", inputWS);
@@ -297,7 +294,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(absAlg.execute());
     TS_ASSERT(absAlg.isExecuted());
 
-    std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<< CONTAINER" << std::endl;
+    std::cout << "CONTAINER" << std::endl;
     // run the algorithm on the container
     const std::string CAN_WS{"AbsorptionCorrection_Container"};
     absAlg.setProperty("InputWorkspace", inputWS);
@@ -305,9 +302,9 @@ public:
     absAlg.setProperty("ScatterFrom", "Container");
     absAlg.setProperty("EMode", "Elastic");
     TS_ASSERT_THROWS_NOTHING(absAlg.execute());
-    TS_ASSERT(absAlg.isExecuted());
+    TS_ASSERT(absAlg.isExecuted()); // REMOVE
 
-    std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENVIRONMENT" << std::endl;
+    std::cout << "ENVIRONMENT" << std::endl;
     // run the algorithm on the environment - which doesn't exist in the xml
     const std::string ENV_WS{"AbsorptionCorrection_Environment"};
     absAlg.setProperty("InputWorkspace", inputWS);
@@ -315,7 +312,6 @@ public:
     absAlg.setProperty("ScatterFrom", "Environment");
     absAlg.setProperty("EMode", "Elastic");
     TS_ASSERT_THROWS(absAlg.execute(), std::runtime_error);
-    TS_ASSERT(!absAlg.isExecuted());
 
     // verify the sample term is bigger than the container term because the material contains Li7
     Mantid::API::MatrixWorkspace_sptr samWS;
@@ -332,7 +328,7 @@ public:
     // the actual compare - sample should absorb more
     for (size_t i = 0; i < NUM_VALS; ++i) {
       std::cout << "values[" << i << "] " << samWS->readX(0)[i] << " : " << samValues[i] << " and " << canValues[i] << '\n';
-      TS_ASSERT(samValues[i] > canValues[i])
+      TS_ASSERT(samValues[i] < canValues[i])
     }
 
     // cleanup - ENV_WS should never have been created
