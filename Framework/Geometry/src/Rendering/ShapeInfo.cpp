@@ -134,7 +134,8 @@ bool ShapeInfo::operator==(const ShapeInfo &other) {
          m_points == other.m_points;
 }
 
-std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape) {
+std::ostream &operator<<(std::ostream &os,
+                         const ShapeInfo::GeometryShape shape) {
   switch (shape) {
   case ShapeInfo::GeometryShape::NOSHAPE:
     os << "NOSHAPE";

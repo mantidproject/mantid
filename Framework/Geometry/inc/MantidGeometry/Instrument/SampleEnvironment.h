@@ -36,7 +36,8 @@ public:
   inline const Container &getContainer() const {
     if (m_components.empty())
       throw std::runtime_error("Cannot get container from empty environment");
-    Container_const_sptr can = boost::static_pointer_cast<const Container>(m_components.front());
+    Container_const_sptr can =
+        boost::static_pointer_cast<const Container>(m_components.front());
     return *can;
   }
   /// @return The number of elements the environment is composed of

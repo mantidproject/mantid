@@ -127,7 +127,8 @@ public:
   bool operator==(const ShapeInfo &other);
 };
 
-MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
+MANTID_GEOMETRY_DLL std::ostream &
+operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
 
 } // namespace detail
 } // namespace Geometry

@@ -134,8 +134,7 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
   Raster result;
   try {
     result.reserve(numVolumeElements);
-  }
-  catch (...) {
+  } catch (...) {
     // Typically get here if the number of volume elements is too large
     // Provide a bit more information
     throw std::logic_error(

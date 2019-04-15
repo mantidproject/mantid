@@ -10,17 +10,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::FrameworkManager;
+using Mantid::API::MatrixWorkspace_sptr;
 
 class AnyShapeAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -251,29 +251,35 @@ public:
     AnalysisDataService::Instance().remove(flatWS);
   }
 
-  void  testScatterBy() {
+  void testScatterBy() {
     // these numbers are the default wl settings for NOMAD
     constexpr double WL_MIN = .1;
-    constexpr size_t NUM_VALS = 10;  // arbitrary
+    constexpr size_t NUM_VALS = 10; // arbitrary
     constexpr double WL_DELTA = (2.9 - WL_MIN) / static_cast<double>(NUM_VALS);
 
     // create the input workspace
     const std::string IN_WS{"AbsorptionCorrection_Input"};
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, NUM_VALS, WL_MIN, WL_DELTA);
-    auto testInst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions({2.}, {90.}, {0.});
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        1, NUM_VALS, WL_MIN, WL_DELTA);
+    auto testInst =
+        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
+            {2.}, {90.}, {0.});
     testInst->setName("ISIS_Histogram");
     inputWS->setInstrument(testInst);
     inputWS->rebuildSpectraMapping();
     inputWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-    AnalysisDataService::Instance().addOrReplace("bobby", inputWS); // TODO rename this nonsense
+    AnalysisDataService::Instance().addOrReplace(
+        "bobby", inputWS); // TODO rename this nonsense
 
     // set the sample/can geometry
-    auto setSampleAlg = FrameworkManager::Instance().createAlgorithm("SetSample");
+    auto setSampleAlg =
+        FrameworkManager::Instance().createAlgorithm("SetSample");
     setSampleAlg->setRethrows(true);
     setSampleAlg->initialize();
     setSampleAlg->setPropertyValue("InputWorkspace", "bobby");
-    setSampleAlg->setPropertyValue("Environment", R"({"Name": "CRYO-01", "Container": "8mm"})");
+    setSampleAlg->setPropertyValue(
+        "Environment", R"({"Name": "CRYO-01", "Container": "8mm"})");
     setSampleAlg->setPropertyValue("Material",
                                    R "({" ChemicalFormula ": " Cd
                                      ", " SampleNumberDensity ": 0.1})");
@@ -313,7 +319,8 @@ public:
     absAlg.setProperty("EMode", "Elastic");
     TS_ASSERT_THROWS(absAlg.execute(), std::runtime_error);
 
-    // verify the sample term is bigger than the container term because the material contains Li7
+    // verify the sample term is bigger than the container term because the
+    // material contains Li7
     Mantid::API::MatrixWorkspace_sptr samWS;
     TS_ASSERT_THROWS_NOTHING(
         samWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -327,7 +334,8 @@ public:
     TS_ASSERT_EQUALS(samValues.size(), canValues.size());
     // the actual compare - sample should absorb more
     for (size_t i = 0; i < NUM_VALS; ++i) {
-      std::cout << "values[" << i << "] " << samWS->readX(0)[i] << " : " << samValues[i] << " and " << canValues[i] << '\n';
+      std::cout << "values[" << i << "] " << samWS->readX(0)[i] << " : "
+                << samValues[i] << " and " << canValues[i] << '\n';
       TS_ASSERT(samValues[i] < canValues[i])
     }
 

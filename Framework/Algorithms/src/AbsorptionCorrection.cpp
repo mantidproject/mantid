@@ -44,9 +44,9 @@ namespace {
 // the maximum number of elements to combine at once in the pairwise summation
 constexpr size_t MAX_INTEGRATION_LENGTH{1000};
 
-const std::string CALC_SAMPLE="Sample";
-const std::string CALC_CONTAINER="Container";
-const std::string CALC_ENVIRONMENT="Environment";
+const std::string CALC_SAMPLE = "Sample";
+const std::string CALC_CONTAINER = "Container";
+const std::string CALC_ENVIRONMENT = "Environment";
 
 inline size_t findMiddle(const size_t start, const size_t stop) {
   size_t half =
@@ -84,9 +84,10 @@ void AbsorptionCorrection::init() {
                   "Output workspace name");
 
   // AbsorbedBy
-  std::vector<std::string> scatter_options{CALC_SAMPLE, CALC_CONTAINER, CALC_ENVIRONMENT};
+  std::vector<std::string> scatter_options{CALC_SAMPLE, CALC_CONTAINER,
+                                           CALC_ENVIRONMENT};
   declareProperty(
-                  "ScatterFrom", CALC_SAMPLE,
+      "ScatterFrom", CALC_SAMPLE,
       boost::make_shared<StringListValidator>(scatter_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
@@ -153,8 +154,8 @@ std::map<std::string, std::string> AbsorptionCorrection::validateInputs() {
         } else if (numComponents > 2) {
           std::stringstream msg;
           msg << "Do not know how to calculate absorption from multiple "
-                 "component sample environment. Encountered " << numComponents
-              << " components";
+                 "component sample environment. Encountered "
+              << numComponents << " components";
           result["ScatterFrom"] = msg.str();
         }
       }
@@ -224,14 +225,14 @@ void AbsorptionCorrection::exec() {
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     if (!spectrumInfo.hasDetectors(i)) {
-      g_log.information() << "Spectrum " << i << " does not have a detector defined for it\n";
+      g_log.information() << "Spectrum " << i
+                          << " does not have a detector defined for it\n";
       continue;
     }
     const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det, L2s);
-
 
     // If an indirect instrument, see if there's an efixed in the parameter map
     double lambdaFixed = m_lambdaFixed;
@@ -267,7 +268,8 @@ void AbsorptionCorrection::exec() {
         Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
                                    0, L2s.size());
       } else { // should never happen
-        throw std::runtime_error("AbsorptionCorrection doesn't have a known DeltaEMode defined");
+        throw std::runtime_error(
+            "AbsorptionCorrection doesn't have a known DeltaEMode defined");
       }
       Y[j] /= m_sampleVolume; // Divide by total volume of the shape
 
