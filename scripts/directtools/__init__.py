@@ -178,6 +178,16 @@ def _instrumentname(logs):
         return None
 
 
+def _singlecutinfo(cuts, widths):
+    """Return False if there are more than one cut and width."""
+    isSingleCutInfo = True
+    if isinstance(cuts, collections.Iterable):
+        isSingleCutInfo = len(cuts) == 1
+    if isinstance(widths, collections.Iterable):
+        isSingleCutInfo = len(widths) == 1
+    return isSingleCutInfo
+
+
 def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     """Return a line label for a line profile."""
     ws = _normws(ws)
@@ -243,21 +253,21 @@ def _mantidsubplotsetup():
     return {'projection': 'mantid'}
 
 
-def _profiletitle(workspaces, cuts, scan, units, axes):
+def _profiletitle(workspaces, cuts, isSingleCutInfo, scan, units, axes):
     """Add title to line profile axes."""
     workspaces = _normwslist(workspaces)
     cuts = _normwslist(cuts)
     if len(workspaces) == 1:
         title = _singledatatitle(workspaces[0])
-        centre, width = _cutcentreandwidth(cuts[0])
-        if len(cuts) == 1:
-            title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
     else:
         title = _plottingtime()
         logs = workspaces[0].run()
         instrument = _instrumentname(logs)
         if instrument is not None:
             title = instrument + ' ' + title
+    if isSingleCutInfo:
+        centre, width = _cutcentreandwidth(cuts[0])
+        title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
     axes.set_title(title)
 
 
@@ -500,7 +510,7 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
             raise RuntimeError("Cannot cut in const E. The workspace '{}' is not in units of energy transfer.".format(str(ws)))
     figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, r'$E$', 'meV', axes)
+    _profiletitle(workspaces, cutWSList, _singlecutinfo(E, dE), r'$E$', 'meV', axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileE(axes)
@@ -546,7 +556,7 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
             raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
     figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
+    _profiletitle(workspaces, cutWSList, _singlecutinfo(Q, dQ), r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileQ(workspaces, axes)

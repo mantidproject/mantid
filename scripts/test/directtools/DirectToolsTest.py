@@ -296,7 +296,7 @@ class DirectToolsTest(unittest.TestCase):
         }
         figure, axes, cuts = testhelpers.assertRaisesNothing(self, directtools.plotconstQ, **kwargs)
         titleLines = axes.get_title().split('\n')
-        self.assertEquals(len(titleLines), 1)
+        self.assertEquals(len(titleLines), 2)
         kwargs = {
             'workspaces': [self._sqw, self._sqw],
             'Q' : [0.9, 1.9],
