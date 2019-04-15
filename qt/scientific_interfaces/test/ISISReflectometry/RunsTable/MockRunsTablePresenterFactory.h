@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTERFACTORY_H_
+#include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenterFactory.h"
+#include "../ReflMockObjects.h"
 #include "DllConfig.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MockRunsTablePresenter.h"
@@ -20,8 +22,8 @@ namespace CustomInterfaces {
 class MockRunsTablePresenterFactory : public RunsTablePresenterFactory {
 public:
   MockRunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                                double thetaTolerance)
-      : RunsTablePresenterFactory(instruments, thetaTolerance, nullptr) {}
+                                double thetaTolerance, Plotter *plotter)
+      : RunsTablePresenterFactory(instruments, thetaTolerance, plotter) {}
   std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const override {
     return Mantid::Kernel::make_unique<MockRunsTablePresenter>(

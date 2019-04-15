@@ -34,15 +34,19 @@ class RunsPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RunsPresenterTest *createSuite() { return new RunsPresenterTest(); }
+  static RunsPresenterTest *createSuite() {
+    IMainWindowView *mainWindowMock = new MockMainWindowView();
+    Plotter *plotter = new Plotter(mainWindowMock);
+    return new RunsPresenterTest(plotter);
+  }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
-  RunsPresenterTest()
+  RunsPresenterTest(Plotter *plotter)
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher),
-        m_runsTablePresenterFactory(m_instruments, m_thetaTolerance) {
+        m_runsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -281,8 +285,10 @@ private:
 
   RunsPresenterFriend makePresenter() {
     auto const defaultInstrumentIndex = 0;
+    IMainWindowView *mainWindowMock = new MockMainWindowView();
+    Plotter *plotter = new Plotter(mainWindowMock);
     m_runsTablePresenterFactory =
-        MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance);
+        MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter);
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, &m_runsTablePresenterFactory,
         m_thetaTolerance, m_instruments, defaultInstrumentIndex,
