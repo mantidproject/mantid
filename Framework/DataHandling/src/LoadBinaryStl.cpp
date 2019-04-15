@@ -67,7 +67,7 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
       HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
   // now read in all the triangles
   m_triangle.reserve(3 * numberTrianglesLong);
-  m_verticies.reserve(3 * numberTrianglesLong);
+  m_vertices.reserve(3 * numberTrianglesLong);
   g_logstl.debug("Began reading " + std::to_string(numberTrianglesLong) +
                  " triangles.");
   uint32_t vertexCount = 0;
@@ -79,7 +79,7 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
     nextToRead += TRIANGLE_DATA_SIZE;
   }
   changeToVector();
-  m_verticies.shrink_to_fit();
+  m_vertices.shrink_to_fit();
   m_triangle.shrink_to_fit();
   g_logstl.debug("Read All");
   myFile.close();
@@ -93,7 +93,7 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
     material = Mantid::Kernel::Material();
   }
   auto retVal = std::make_unique<Geometry::MeshObject>(
-      std::move(m_triangle), std::move(m_verticies), material);
+      std::move(m_triangle), std::move(m_vertices), material);
   return retVal;
 }
 
