@@ -36,12 +36,12 @@ public:
 
     // A multi detector ws with a peak in the 3rd spectra (values equal to 5)
     // and background of 2.0
-    m_multiDetectorWSWithPeak = Mantid::TestHelpers::createREFL_WS(3, 0.0, 30.0, {2, 2, 2, 2, 2, 2, 2});
+    m_multiDetectorWSWithPeak =
+        Mantid::TestHelpers::createREFL_WS(3, 0.0, 30.0, {2, 2, 2, 2, 2, 2, 2});
     const std::vector<double> yValues = {5, 5, 5, 5, 5, 5, 5};
     for (size_t i = 0; i < m_multiDetectorWSWithPeak->y(5).size(); ++i) {
       m_multiDetectorWSWithPeak->mutableY(3)[i] = yValues[i];
     }
-
   }
   void test_executionPerSpectraAverage() {
     auto alg = setupAlgorithm();
@@ -67,7 +67,8 @@ public:
         alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("BackgroundCalculationMethod", "Average Pixel Fit"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6"))
     TS_ASSERT(alg->execute())
   }
 

@@ -158,7 +158,8 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
     MatrixWorkspace_sptr inputWS, std::vector<double> spectrumRanges) {
 
   MatrixWorkspace_sptr outputWS = inputWS->clone();
-  AnalysisDataService::Instance().addOrReplace(getPropertyValue("OutputWorkspace"), outputWS);
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), outputWS);
 
   auto LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
