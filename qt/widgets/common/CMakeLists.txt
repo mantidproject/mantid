@@ -169,7 +169,8 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
-
+  
+  inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
 
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
@@ -223,7 +224,6 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/Batch/Cell.h
   inc/MantidQtWidgets/Common/Batch/CellStandardItem.h
   inc/MantidQtWidgets/Common/Batch/CellDelegate.h
-  inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
