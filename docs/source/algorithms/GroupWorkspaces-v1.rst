@@ -26,7 +26,8 @@ Usage
   group = GroupWorkspaces( [ws1,ws2] )
 
   # Check the result
-  print("Workspace's type is {}".format(type(group)))
+  from mantid.api import WorkspaceGroup
+  print("Workspace's type is WorkspaceGroup: {}".format(isinstance(group, WorkspaceGroup)))
   print('It has {} entries'.format(group.getNumberOfEntries()))
   print('Its first  item is {}'.format(group.getItem(0)))
   print('Its second item is {}'.format(group.getItem(1)))
@@ -45,7 +46,7 @@ Output
 
 .. testoutput::
 
-  Workspace's type is <class '_api.WorkspaceGroup'>
+  Workspace's type is WorkspaceGroup: True
   It has 2 entries
   Its first  item is ws1
   Its second item is ws2

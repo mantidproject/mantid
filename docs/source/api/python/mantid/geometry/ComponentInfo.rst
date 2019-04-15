@@ -42,13 +42,14 @@ The return value is a ``ComponentInfo`` object.
 
 	# Get the ComponentInfo object
 	info = ws.componentInfo()
-	print(type(info))
+	from mantid.geometry import ComponentInfo
+	print("The type is ComponentInfo: {}".format(isinstance(info, ComponentInfo)))
 
 Output:
 
 .. testoutput:: CreateComponentInfoObject
 
-	<class '_geometry.ComponentInfo'>
+	The type is ComponentInfo: True
 
 
 **Example 2 - Calling Some Methods on the ComponentInfo Object:**

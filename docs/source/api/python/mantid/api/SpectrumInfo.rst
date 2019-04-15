@@ -36,13 +36,14 @@ The return value is a ``SpectrumInfo`` object.
 
 	# Get the SpectrumInfo object
 	info = ws.spectrumInfo()
-	print(type(info))
+	from mantid.api import SpectrumInfo
+	print("The type is SpectrumInfo: {}".format(isinstance(info, SpectrumInfo)))
 
 Output:
 
 .. testoutput:: CreateSpectrumInfoObject
 
-	<class '_api.SpectrumInfo'>
+	The type is SpectrumInfo: True
 
 
 **Example 2 - Calling the hasDetectors Method on the SpectrumInfo Object:**

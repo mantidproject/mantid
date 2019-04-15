@@ -36,18 +36,19 @@ The return value is a ``DetectorInfo`` object.
 
 .. testcode:: CreateDetectorInfoObject
 
+        from mantid.geometry import DetectorInfo
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
 
 	# Get the DetectorInfo object
 	info = ws.detectorInfo()
-	print(type(info))
+	print("The type is DetectorInfo: {}".format(isinstance(info, DetectorInfo)))
 
 Output:
 
 .. testoutput:: CreateDetectorInfoObject
 
-	<class '_geometry.DetectorInfo'>
+	The type is DetectorInfo: True
 
 
 **Example 2 - Calling Some Methods on the DetectorInfo Object:**
