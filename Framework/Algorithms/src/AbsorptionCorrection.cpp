@@ -88,9 +88,8 @@ void AbsorptionCorrection::init() {
                                            CALC_ENVIRONMENT};
   declareProperty(
       "ScatterFrom", CALC_SAMPLE,
-      boost::make_shared<StringListValidator>(scatter_options),
-      "Select the method to use to calculate exponentials, normal or a\n"
-      "fast approximation (default: Normal)");
+      boost::make_shared<StringListValidator>(std::move(scatter_options)),
+      "The component to calculate the absorption for (default: Sample)");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
