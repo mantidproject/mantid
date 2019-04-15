@@ -386,11 +386,7 @@ AbstractSymmetryElementGenerator_sptr SymmetryElementFactoryImpl::getGenerator(
                                   [&operation](const auto &generator) {
                                     return generator->canProcess(operation);
                                   });
-  if (found == m_generators.end()) {
-    return nullptr;
-  } else {
-    return *found;
-  }
+  return found != m_generators.end() ? *found : nullptr;
 }
 
 /// Inserts the provided prototype into the factory.
