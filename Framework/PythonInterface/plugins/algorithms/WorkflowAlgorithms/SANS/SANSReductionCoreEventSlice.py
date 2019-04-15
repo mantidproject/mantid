@@ -42,21 +42,24 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('ScatterMonitorWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The scatter monitor workspace. This workspace only contains monitors.')
-
-        # Transmission Workspace
-        self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
+        # Wavelength Adjustment
+        self.declareProperty(MatrixWorkspaceProperty('WavelengthAdjustmentWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
-                             doc='The transmission workspace.')
-
-        # Direct Workspace
-        self.declareProperty(MatrixWorkspaceProperty('DirectWorkspace', '',
+                             doc='The direct workspace.')
+        # Pixel Adjustment
+        self.declareProperty(MatrixWorkspaceProperty('PixelAdjustmentWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The direct workspace.')
+        # Wavelength and Pixel Adjustment
+        self.declareProperty(MatrixWorkspaceProperty('WavelengthAndPixelAdjustmentWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The direct workspace.')
 
         self.setPropertyGroup("ScatterWorkspace", 'Data')
         self.setPropertyGroup("ScatterMonitorWorkspace", 'Data')
-        self.setPropertyGroup("TransmissionWorkspace", 'Data')
-        self.setPropertyGroup("DirectWorkspace", 'Data')
+        self.setPropertyGroup("WavelengthAdjustmentWorkspace", 'Data')
+        self.setPropertyGroup("PixelAdjustmentWorkspace", 'Data')
+        self.setPropertyGroup("WavelengthAndPixelAdjustmentWorkspace", 'Data')
 
         # The component
         allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
@@ -86,19 +89,10 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('CalculatedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='The calculated transmission workspace')
-
-        self.declareProperty(MatrixWorkspaceProperty('UnfittedTransmissionWorkspace', '', optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc='The unfitted transmission workspace')
-
     def PyExec(self):
         # Get the input
         state = self._get_state()
         state_serialized = state.property_manager
-        component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
 
         # --------------------------------------------------------------------------------------------------------------
@@ -113,31 +107,13 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         workspace, monitor_workspace, slice_event_factor = self._slice(state_serialized, workspace, monitor_workspace,
                                                                        data_type_as_string)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # 2. Create adjustment workspaces, those are
-        #     1. pixel-based adjustments
-        #     2. wavelength-based adjustments
-        #     3. pixel-and-wavelength-based adjustments
-        # Note that steps 4 to 7 could run in parallel if we don't use wide angle correction. If we do then the
-        # creation of the adjustment workspaces requires the sample workspace itself and we have to run it sequentially.
-        # We could consider to have a serial and a parallel strategy here, depending on the wide angle correction
-        # settings. On the other hand it is not clear that this would be an advantage with the GIL.
-        # --------------------------------------------------------------------------------------------------------------
-        progress.report("Creating adjustment workspaces ...")
-        wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
-            calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
-
-        # ------------------------------------------------------------
-        # 3. Convert event workspaces to histogram workspaces
-        # ------------------------------------------------------------
-        progress.report("Converting to histogram mode ...")
-        workspace = self._convert_to_histogram(workspace)
-
         # ------------------------------------------------------------
         # 4. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
+        wavelength_adjustment_workspace = self.getProperty("WavelengthAdjustmentWorkspace").value
+        pixel_adjustment_workspace = self.getProperty("PixelAdjustmentWorkspace").value
+        wavelength_and_pixel_adjustment_workspace = self.getProperty("WavelengthAndPixelAdjustmentWorkspace").value
         workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
                                                                     workspace,
                                                                     wavelength_adjustment_workspace,
@@ -157,9 +133,6 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
             self.setProperty("SumOfCounts", sum_of_counts)
         if sum_of_norms:
             self.setProperty("SumOfNormFactors", sum_of_norms)
-
-        self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
-        self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
 
     def _slice(self, state_serialized, workspace, monitor_workspace, data_type_as_string):
         slice_name = "SANSSliceEvent"
@@ -196,54 +169,6 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
         move_alg.execute()
         return move_alg.getProperty("Workspace").value
-
-    def _adjustment(self, state_serialized, workspace, monitor_workspace, component_as_string, data_type):
-        transmission_workspace = self._get_transmission_workspace()
-        direct_workspace = self._get_direct_workspace()
-
-        adjustment_name = "SANSCreateAdjustmentWorkspaces"
-        adjustment_options = {"SANSState": state_serialized,
-                              "Component": component_as_string,
-                              "DataType": data_type,
-                              "MonitorWorkspace": monitor_workspace,
-                              "SampleData": workspace,
-                              "OutputWorkspaceWavelengthAdjustment": EMPTY_NAME,
-                              "OutputWorkspacePixelAdjustment": EMPTY_NAME,
-                              "OutputWorkspaceWavelengthAndPixelAdjustment": EMPTY_NAME}
-        if transmission_workspace:
-            transmission_workspace = self._move(state_serialized, transmission_workspace, component_as_string,
-                                                is_transmission=True)
-            adjustment_options.update({"TransmissionWorkspace": transmission_workspace})
-
-        if direct_workspace:
-            direct_workspace = self._move(state_serialized, direct_workspace, component_as_string, is_transmission=True)
-            adjustment_options.update({"DirectWorkspace": direct_workspace})
-
-        adjustment_alg = create_child_algorithm(self, adjustment_name, **adjustment_options)
-        adjustment_alg.execute()
-
-        wavelength_adjustment = adjustment_alg.getProperty("OutputWorkspaceWavelengthAdjustment").value
-        pixel_adjustment = adjustment_alg.getProperty("OutputWorkspacePixelAdjustment").value
-        wavelength_and_pixel_adjustment = adjustment_alg.getProperty(
-                                           "OutputWorkspaceWavelengthAndPixelAdjustment").value
-        calculated_transmission_workspace = adjustment_alg.getProperty("CalculatedTransmissionWorkspace").value
-        unfitted_transmission_workspace = adjustment_alg.getProperty("UnfittedTransmissionWorkspace").value
-        return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
-            calculated_transmission_workspace, unfitted_transmission_workspace
-
-    def _convert_to_histogram(self, workspace):
-        if isinstance(workspace, IEventWorkspace):
-            convert_name = "RebinToWorkspace"
-            convert_options = {"WorkspaceToRebin": workspace,
-                               "WorkspaceToMatch": workspace,
-                               "OutputWorkspace": "OutputWorkspace",
-                               "PreserveEvents": False}
-            convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-            convert_alg.execute()
-            workspace = convert_alg.getProperty("OutputWorkspace").value
-            append_to_sans_file_tag(workspace, "_histogram")
-
-        return workspace
 
     def _convert_to_q(self, state_serialized, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
                       wavelength_and_pixel_adjustment_workspace):
@@ -293,14 +218,6 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
         state.property_manager = state_property_manager
         return state
-
-    def _get_transmission_workspace(self):
-        transmission_workspace = self.getProperty("TransmissionWorkspace").value
-        return self._get_cloned_workspace(transmission_workspace) if transmission_workspace else None
-
-    def _get_direct_workspace(self):
-        direct_workspace = self.getProperty("DirectWorkspace").value
-        return self._get_cloned_workspace(direct_workspace) if direct_workspace else None
 
     def _get_monitor_workspace(self):
         monitor_workspace = self.getProperty("ScatterMonitorWorkspace").value

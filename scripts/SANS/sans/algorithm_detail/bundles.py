@@ -49,3 +49,14 @@ OutputPartsBundle = namedtuple('OutputPartsBundle', 'state, data_type, reduction
 
 OutputTransmissionBundle = namedtuple('OutputTransmissionBundle', 'state, data_type, calculated_transmission_workspace,'
                                                                   ' unfitted_transmission_workspace')
+
+# Bundles for event slice data
+EventSliceSettingBundle = namedtuple('EventSliceSettingBundle', 'state, data_type, reduction_mode, '
+                                                                'output_parts, scatter_workspace, '
+                                                                'scatter_monitor_workspace, '
+                                                                'calculated_transmission_workspace, '
+                                                                'unfitted_transmission_workspace, '
+                                                                'wavelength_adjustment_workspace, '
+                                                                'pixel_adjustment_workspace, '
+                                                                'wavelength_and_pixel_adjustment_workspace, '
+                                                                'direct_workspace')

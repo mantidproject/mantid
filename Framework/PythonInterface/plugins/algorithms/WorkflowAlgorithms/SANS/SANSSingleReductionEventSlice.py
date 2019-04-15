@@ -17,8 +17,8 @@ from mantid.api import (AnalysisDataService, DistributedDataProcessorAlgorithm, 
                         Progress, WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.simpleapi import CloneWorkspace
 from mantid.kernel import (Direction, PropertyManagerProperty, Property)
-from sans.algorithm_detail.bundles import ReductionSettingBundle
-from sans.algorithm_detail.single_execution import (run_initial_event_slice_reduction, run_core_reduction,
+from sans.algorithm_detail.bundles import EventSliceSettingBundle, ReductionSettingBundle
+from sans.algorithm_detail.single_execution import (run_initial_event_slice_reduction, run_core_event_slice_reduction,
                                                     get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request,
                                                     get_reduction_mode_vs_output_bundles, run_optimized_for_can)
@@ -240,10 +240,11 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                 # (provided the user has optimizations enabled).
                 if use_optimizations and slice_bundle.data_type is DataType.Can:
                     output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_optimized_for_can(reduction_alg, slice_bundle)
+                        output_transmission_bundle = run_optimized_for_can(reduction_alg,
+                                                                           slice_bundle, event_slice=True)
                 else:
                     output_bundle, output_parts_bundle, \
-                        output_transmission_bundle = run_core_reduction(reduction_alg, slice_bundle)
+                        output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, slice_bundle)
                 slice_bundles.append(output_bundle)
                 slice_parts_bundles.append(output_parts_bundle)
                 output_transmission_bundles.append(output_transmission_bundle)
@@ -408,8 +409,8 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             Splits a reduction package object into several reduction package objects if it
             contains several event slice settings
 
-            :param bundle: a ReductionSettingBundle tuple
-            :return: a list of ReductionSettingBundle tuples where each tuple contains only one event slice.
+            :param bundle: a EventSliceSettingBundle tuple
+            :return: a list of EventSliceSettingBundle tuples where each tuple contains only one event slice.
         """
         slice_bundles = []
         state = bundle.state
@@ -427,14 +428,23 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
 
         for state in states:
             new_state = deepcopy(state)
-            slice_bundles.append(ReductionSettingBundle(state=new_state,
-                                                        data_type=bundle.data_type,
-                                                        reduction_mode=bundle.reduction_mode,
-                                                        output_parts=bundle.output_parts,
-                                                        scatter_workspace=bundle.scatter_workspace,
-                                                        scatter_monitor_workspace=bundle.scatter_monitor_workspace,
-                                                        transmission_workspace=bundle.transmission_workspace,
-                                                        direct_workspace=bundle.direct_workspace))
+            slice_bundles.append(EventSliceSettingBundle(state=new_state,
+                                                         data_type=bundle.data_type,
+                                                         reduction_mode=bundle.reduction_mode,
+                                                         output_parts=bundle.output_parts,
+                                                         scatter_workspace=bundle.scatter_workspace,
+                                                         scatter_monitor_workspace=bundle.scatter_monitor_workspace,
+                                                         calculated_transmission_workspace=
+                                                         bundle.calculated_transmission_workspace,
+                                                         unfitted_transmission_workspace=
+                                                         bundle.unfitted_transmission_workspace,
+                                                         wavelength_adjustment_workspace=
+                                                         bundle.wavelength_adjustment_workspace,
+                                                         pixel_adjustment_workspace=
+                                                         bundle.pixel_adjustment_workspace,
+                                                         wavelength_and_pixel_adjustment_workspace=
+                                                         bundle.wavelength_and_pixel_adjustment_workspace,
+                                                         direct_workspace=bundle.direct_workspace))
         return slice_bundles
 
     def _get_slice_reduction_setting_bundles(self, intermediate_bundles):
@@ -444,9 +454,9 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         We group these as a list of lists, with the structure:
         [[component1 for event slice1, c2 for es1,..], [c1 for es2, c2 for es2, ..], ..]
 
-        :param intermediate_bundles: a list of ReductionSettingBundle objects,
+        :param intermediate_bundles: a list of EventSliceSettingBundle objects,
                                      the output from the initial reduction.
-        :return: a list of lists of ReductionSettingBundle objects, one for each component and event slice.
+        :return: a list of lists of EventSliceSettingBundle objects, one for each component and event slice.
         """
         sliced_bundles = []
         for bundle in intermediate_bundles:

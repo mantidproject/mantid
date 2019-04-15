@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 
 from mantid.kernel import mpisetup
-from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle, OutputTransmissionBundle,
+from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle, OutputPartsBundle, OutputTransmissionBundle,
                                            ReductionSettingBundle)
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
@@ -27,7 +27,7 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
 
     :param reduction_alg: a handle to the initial event slice reduction algorithm.
     :param reduction_setting_bundle: a ReductionSettingBundle tuple
-    :return: a ReductionSettingBundle tuple
+    :return: a EventSliceReductionSettingBundle tuple
     """
     # Get component to reduce
     component = get_component_to_reduce(reduction_setting_bundle)
@@ -39,6 +39,12 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
     reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
 
+    if reduction_setting_bundle.direct_workspace is not None:
+        reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direct_workspace)
+
+    if reduction_setting_bundle.transmission_workspace is not None:
+        reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
+
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("OutputMonitorWorkspace", EMPTY_NAME)
 
@@ -49,14 +55,91 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     output_workspace = reduction_alg.getProperty("OutputWorkspace").value
     output_monitor_workspace = reduction_alg.getProperty("OutputMonitorWorkspace").value
 
-    return ReductionSettingBundle(state=reduction_setting_bundle.state,
-                                  data_type=reduction_setting_bundle.data_type,
-                                  reduction_mode=reduction_setting_bundle.reduction_mode,
-                                  output_parts=reduction_setting_bundle.output_parts,
-                                  scatter_workspace=output_workspace,
-                                  scatter_monitor_workspace=output_monitor_workspace,
-                                  transmission_workspace=reduction_setting_bundle.transmission_workspace,
-                                  direct_workspace=reduction_setting_bundle.direct_workspace)
+    calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
+    unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
+
+    wavelength_adjustment_workspace = reduction_alg.getProperty("WavelengthAdjustmentWorkspace").value
+    pixel_adjustment_workspace = reduction_alg.getProperty("PixelAdjustmentWorkspace").value
+    wavelength_and_pixel_adjustment_workspace = reduction_alg.getProperty("WavelengthAndPixelAdjustmentWorkspace").value
+
+    return EventSliceSettingBundle(state=reduction_setting_bundle.state,
+                                   data_type=reduction_setting_bundle.data_type,
+                                   reduction_mode=reduction_setting_bundle.reduction_mode,
+                                   output_parts=reduction_setting_bundle.output_parts,
+                                   scatter_workspace=output_workspace,
+                                   scatter_monitor_workspace=output_monitor_workspace,
+                                   calculated_transmission_workspace=calculated_transmission_workspace,
+                                   unfitted_transmission_workspace=unfitted_transmission_workspace,
+                                   wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                                   pixel_adjustment_workspace=pixel_adjustment_workspace,
+                                   wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace,
+                                   direct_workspace=reduction_setting_bundle.direct_workspace)
+
+
+def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
+    """
+    This function runs a core reduction for event slice data. This reduction slices by event time and converts to q.
+    All other operations, such as moving and converting to histogram, have been performed before the event slicing.
+
+    :param reduction_alg: a handle to the reduction algorithm.
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple
+    :return: an OutputBundle and an OutputPartsBundle
+    """
+
+    # Get component to reduce
+    component = get_component_to_reduce(reduction_setting_bundle)
+    # Set the properties on the reduction algorithms
+    serialized_state = reduction_setting_bundle.state.property_manager
+    reduction_alg.setProperty("SANSState", serialized_state)
+    reduction_alg.setProperty("Component", component)
+    reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
+    reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
+
+    reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
+
+    if reduction_setting_bundle.wavelength_adjustment_workspace is not None:
+        reduction_alg.setProperty("WavelengthAdjustmentWorkspace",
+                                  reduction_setting_bundle.wavelength_adjustment_workspace)
+
+    if reduction_setting_bundle.pixel_adjustment_workspace is not None:
+        reduction_alg.setProperty("PixelAdjustmentWorkspace", reduction_setting_bundle.pixel_adjustment_workspace)
+
+    if reduction_setting_bundle.wavelength_and_pixel_adjustment_workspace is not None:
+        reduction_alg.setProperty("WavelengthAndPixelAdjustmentWorkspace",
+                                  reduction_setting_bundle.wavelength_and_pixel_adjustment_workspace)
+
+    reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+    reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
+    reduction_alg.setProperty("SumOfNormFactors", EMPTY_NAME)
+
+    # Run the reduction core
+    reduction_alg.execute()
+
+    # Get the results
+    output_workspace = reduction_alg.getProperty("OutputWorkspace").value
+    output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
+    output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
+
+    # Pull the result out of the workspace
+    output_bundle = OutputBundle(state=reduction_setting_bundle.state,
+                                 data_type=reduction_setting_bundle.data_type,
+                                 reduction_mode=reduction_setting_bundle.reduction_mode,
+                                 output_workspace=output_workspace)
+
+    output_parts_bundle = OutputPartsBundle(state=reduction_setting_bundle.state,
+                                            data_type=reduction_setting_bundle.data_type,
+                                            reduction_mode=reduction_setting_bundle.reduction_mode,
+                                            output_workspace_count=output_workspace_count,
+                                            output_workspace_norm=output_workspace_norm)
+
+    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
+                                                          data_type=reduction_setting_bundle.data_type,
+                                                          calculated_transmission_workspace=
+                                                          reduction_setting_bundle.calculated_transmission_workspace,
+                                                          unfitted_transmission_workspace=
+                                                          reduction_setting_bundle.unfitted_transmission_workspace,
+                                                          )
+    return output_bundle, output_parts_bundle, output_transmission_bundle
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
@@ -250,13 +333,14 @@ def get_component_to_reduce(reduction_setting_bundle):
     return reduction_mode_setting
 
 
-def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
+def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice=False):
     """
     Check if the state can reduction already exists, and if so, use it else reduce it and add it to the ADS.
 
-    @param reduction_alg: a handle to the SANSReductionCore algorithm
-    @param reduction_setting_bundle: a ReductionSettingBundle tuple.
-    @return: a reduced workspace, a partial output workspace for the counts, a partial workspace for the normalization.
+    :param reduction_alg: a handle to the SANSReductionCore algorithm
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple.
+    :param event_slice: An optional bool. If true then run run_core_event_slice_reduction, else run_core_reduction.
+    :return: a reduced workspace, a partial output workspace for the counts, a partial workspace for the normalization.
     """
     state = reduction_setting_bundle.state
     output_parts = reduction_setting_bundle.output_parts
@@ -304,8 +388,12 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle):
 
     if must_reload:
         # if output_bundle.output_workspace is None or partial_output_require_reload:
-        output_bundle, output_parts_bundle, output_transmission_bundle = run_core_reduction(reduction_alg,
-                                                                                            reduction_setting_bundle)
+        if not event_slice:
+            output_bundle, output_parts_bundle, \
+                output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
+        else:
+            output_bundle, output_parts_bundle, \
+                output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
 
         # Now we need to tag the workspaces and add it to the ADS
         if output_bundle.output_workspace is not None:
