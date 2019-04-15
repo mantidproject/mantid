@@ -436,7 +436,10 @@ class DirectToolsTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
         DeleteWorkspace(wsName)
         kwargs = {'workspace': self._sqw}
-        testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        self.assertEquals(len(figure.axes), 2)
+        colorbar_axes = figure.axes[-1]
+        self.assertEquals(colorbar_axes.get_ylabel(), r'$S(Q,E)$ (arb. units)')
 
     def test_plotSofQW_transposed(self):
         wsName = 'ws'
@@ -447,6 +450,20 @@ class DirectToolsTest(unittest.TestCase):
         DeleteWorkspace(wsName)
         kwargs = {'workspace': self._sqw}
         testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+
+    def test_plotSofQW_dynamicsusceptibility(self):
+        xs = numpy.array([-2, -1, 0, 1, 2])
+        ys = numpy.tile(numpy.array([1, 1, 1 ,1 , 1]), 10)
+        vertX = numpy.array([-4, -3, -2, -1, 0, 1, 2, 3, 4, 5])
+        ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=10, UnitX='MomentumTransfer', VerticalAxisUnit='DeltaE', VerticalAxisValues=vertX,
+                             StoreInADS=False)
+        wsOut = directtools.dynamicsusceptibility(ws, 100.)
+        kwargs = {'workspace': wsOut}
+        figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotSofQW, **kwargs)
+        self.assertEquals(len(figure.axes), 2)
+        colorbar_axes = figure.axes[-1]
+        self.assertEquals(colorbar_axes.get_ylabel(), r"$\chi''(Q,E)$ (arb. units)")
+        self.assertEquals(axes.get_ylim()[0], 0.)
 
     def test_subplots(self):
         testhelpers.assertRaisesNothing(self, directtools.subplots)

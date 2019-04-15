@@ -715,7 +715,8 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     if not _validate._isSofQW(workspace):
         logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
     qHorizontal = workspace.getAxis(0).getUnit().name() == 'q'
-    isSusceptibility = workspace.YUnit() == 'Dynamic susceptibility'
+    isSusceptibility = workspace.YUnitLabel() == 'Dynamic susceptibility'
+    print(workspace.YUnit())
     figure, axes = subplots()
     if QMin is None:
         QMin = 0.
