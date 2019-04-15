@@ -281,7 +281,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
         beamPosIndex = foreground[1]
-        foregroundWSName = self._names.withSuffix('foreground_grouped')
+        foregroundWSName = self._names.withSuffix('grouped')
         foregroundWS = ExtractSingleSpectrum(
             InputWorkspace=ws,
             OutputWorkspace=foregroundWSName,
@@ -296,7 +296,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 continue
             if i < 0 or i > maxIndex:
                 self.log().warning('Foreground partially out of the workspace.')
-            addeeWSName = self._names.withSuffix('foreground_addee')
+            addeeWSName = self._names.withSuffix('addee')
             addeeWS = ExtractSingleSpectrum(
                 InputWorkspace=ws,
                 OutputWorkspace=addeeWSName,
