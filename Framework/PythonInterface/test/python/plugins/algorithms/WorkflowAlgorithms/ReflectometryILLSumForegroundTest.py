@@ -259,7 +259,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 51)
         self.assertEquals(dirForeground.spectrumInfo().size(), 1)
         self.assertEquals(dirForeground.spectrumInfo().l2(0), dirWS.spectrumInfo().l2(51))
-        self.assertEquals(dirForeground.spectrumInfo().twoTheta(0) * 180. / numpy.pi, 8.389135285788)
+        self.assertEquals(dirForeground.spectrumInfo().twoTheta(0) * 180. / numpy.pi, 8.389135285788196)
 
     def testReflectedBeamSumInLambdaDetectorMovingAndRotation(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
@@ -282,7 +282,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
         self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 50.9)
         self.assertEquals(dirForeground.spectrumInfo().size(), 1)
-        self.assertEquals(dirForeground.spectrumInfo().l2(0), 3.1012343711225)
+        self.assertEquals(dirForeground.spectrumInfo().l2(0), 3.101234371122588)
         self.assertEquals(numpy.degrees(dirForeground.spectrumInfo().twoTheta(0)), 8.3914043569830)
 
         reflWS = illhelpers.create_poor_mans_d17_workspace()
