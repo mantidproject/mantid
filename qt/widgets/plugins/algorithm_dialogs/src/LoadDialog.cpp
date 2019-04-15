@@ -293,8 +293,7 @@ void LoadDialog::createDynamicLayout() {
   // Add the new ones
   const std::vector<Property *> &inputProps = loadAlg->getProperties();
   int dialogHeight = m_initialHeight;
-  for (size_t i = 0; i < inputProps.size(); ++i) {
-    const Property *prop = inputProps[i];
+  for (auto prop : inputProps) {
     const QString propName = QString::fromStdString(prop->name());
     if (propName == "OutputWorkspace" || propName == "Filename")
       continue;

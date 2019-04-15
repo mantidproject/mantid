@@ -410,13 +410,13 @@ void StepScan::expandPlotVarCombobox(
   // SumEventsByLogValue::getNumberSeriesLogs
   // but I want to populate the box before running the algorithm
   const auto &logs = ws->run().getLogData();
-  for (auto log = logs.begin(); log != logs.end(); ++log) {
-    const QString logName = QString::fromStdString((*log)->name());
+  for (auto log : logs) {
+    const QString logName = QString::fromStdString(log->name());
     // Don't add scan_index - that's already there
     if (logName == "scan_index")
       continue;
     // Try to cast to an ITimeSeriesProperty
-    auto tsp = dynamic_cast<const ITimeSeriesProperty *>(*log);
+    auto tsp = dynamic_cast<const ITimeSeriesProperty *>(log);
     // Move on to the next one if this is not a TSP
     if (tsp == nullptr)
       continue;
@@ -424,8 +424,8 @@ void StepScan::expandPlotVarCombobox(
     if (tsp->realSize() < 2)
       continue;
     // Now make sure it's either an int or double tsp
-    if (dynamic_cast<TimeSeriesProperty<double> *>(*log) ||
-        dynamic_cast<TimeSeriesProperty<int> *>(*log)) {
+    if (dynamic_cast<TimeSeriesProperty<double> *>(log) ||
+        dynamic_cast<TimeSeriesProperty<int> *>(log)) {
       // Add it to the list if it isn't already there
       if (m_uiForm.plotVariable->findText(logName) == -1) {
         m_uiForm.plotVariable->addItem(logName);
