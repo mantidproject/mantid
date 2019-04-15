@@ -161,7 +161,6 @@ set(SRC_FILES
     src/GetDetectorOffsets.cpp
     src/GetEi.cpp
     src/GetEi2.cpp
-    src/GetEiMonDet2.cpp
     src/GetEiMonDet3.cpp
     src/GetQsInQENSData.cpp
     src/GetTimeSeriesLogInformation.cpp
@@ -508,7 +507,6 @@ set(INC_FILES
     inc/MantidAlgorithms/GetDetectorOffsets.h
     inc/MantidAlgorithms/GetEi.h
     inc/MantidAlgorithms/GetEi2.h
-    inc/MantidAlgorithms/GetEiMonDet2.h
     inc/MantidAlgorithms/GetEiMonDet3.h
     inc/MantidAlgorithms/GetQsInQENSData.h
     inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
