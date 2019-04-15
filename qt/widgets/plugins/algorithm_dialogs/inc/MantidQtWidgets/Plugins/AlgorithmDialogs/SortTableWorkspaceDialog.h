@@ -44,7 +44,7 @@ private slots:
   /// Add GUI elements to set a new column as a sorting key
   void addColumn();
   /// Sync the GUI after a sorting column name changes
-  void changedColumnName(int);
+  void changedColumnName(int /*unused*/);
   /// Remove a column to sort by.
   void removeColumn();
   /// Clear the GUI form the workspace specific data/elements

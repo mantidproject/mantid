@@ -91,11 +91,10 @@ void DoubleSpinBox::interpretText(bool notify) {
         emit valueChanged(d_value);
     } else {
       // Check for any registered test strings that map to a given value
-      for (auto it = m_specialTextMappings.begin();
-           it != m_specialTextMappings.end(); ++it) {
-        if (it->first == text()) {
+      for (auto &specialTextMapping : m_specialTextMappings) {
+        if (specialTextMapping.first == text()) {
           // Found a matching string, try to set the value
-          if (setValue(it->second)) {
+          if (setValue(specialTextMapping.second)) {
             lineEdit()->setText(text());
             if (notify)
               emit valueChanged(d_value);
@@ -169,7 +168,8 @@ QString DoubleSpinBox::textFromValue(double value) const {
   return locale().toString(value, d_format, 6);
 }
 
-QValidator::State DoubleSpinBox::validate(QString &, int &) const {
+QValidator::State DoubleSpinBox::validate(QString & /*input*/,
+                                          int & /*pos*/) const {
   return QValidator::Acceptable;
 }
 

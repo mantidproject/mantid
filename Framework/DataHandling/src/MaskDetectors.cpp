@@ -34,11 +34,11 @@ void constrainIndexInRange(std::vector<size_t> &sourceList,
                            size_t maxIndex) {
   targetList.reserve(sourceList.size());
   std::sort(sourceList.begin(), sourceList.end());
-  for (auto memb : sourceList) {
-    if (memb >= minIndex && memb <= maxIndex) {
-      targetList.push_back(memb);
-    }
-  }
+  std::copy_if(sourceList.cbegin(), sourceList.cend(),
+               std::back_inserter(targetList),
+               [minIndex, maxIndex](auto sourceValue) {
+                 return sourceValue >= minIndex && sourceValue <= maxIndex;
+               });
 }
 } // namespace
 
@@ -221,13 +221,13 @@ void MaskDetectors::exec() {
 
   if (isMaskWS) {
     // When input is a MaskWorkspace, some special handling is needed.
-    auto &spectrumInfo = inputAsMaskWS->mutableSpectrumInfo();
+    auto &maskWsSpectrumInfo = inputAsMaskWS->mutableSpectrumInfo();
     for (size_t i = 0; i < inputAsMaskWS->getNumberHistograms(); ++i) {
       const bool mask =
-          inputAsMaskWS->isMaskedIndex(i) || spectrumInfo.isMasked(i);
+          inputAsMaskWS->isMaskedIndex(i) || maskWsSpectrumInfo.isMasked(i);
       inputAsMaskWS->setMaskedIndex(i, mask);
       // Always clear the mask flag from MaskWorkspace
-      spectrumInfo.setMasked(i, false);
+      maskWsSpectrumInfo.setMasked(i, false);
     }
   }
 }
@@ -382,18 +382,11 @@ void MaskDetectors::extractMaskedWSDetIDs(
     std::vector<detid_t> &detectorList,
     const DataObjects::MaskWorkspace_const_sptr &maskWS) {
 
-  int64_t nHist = maskWS->getNumberHistograms();
-  for (int64_t i = 0; i < nHist; ++i) {
-    if (maskWS->y(i)[0] > 0.5) {
-
-      try {
-        const auto dets = maskWS->getSpectrum(i).getDetectorIDs();
-        for (auto det : dets) {
-          detectorList.push_back(det);
-        }
-      } catch (Exception::NotFoundError &) {
-        continue;
-      }
+  size_t nHist = maskWS->getNumberHistograms();
+  for (size_t i = 0; i < nHist; ++i) {
+    if (maskWS->y(i).front() > 0.5) {
+      const auto &dets = maskWS->getSpectrum(i).getDetectorIDs();
+      std::copy(dets.cbegin(), dets.cend(), std::back_inserter(detectorList));
     }
   }
 }

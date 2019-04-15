@@ -64,7 +64,7 @@ std::vector<int32_t> bankOffsetsSpectrumNumbers(
   // *Global* vector of spectrum numbers.
   const auto &specNums = ws.indexInfo().spectrumNumbers();
   int32_t spectrumIndex{0}; // *global* index
-  std::vector<int32_t> bankOffsets(bankNames.size(), 0);
+  std::vector<int32_t> offsets(bankNames.size(), 0);
   for (auto i : specNums) {
     // In contrast to the case of event ID = detector ID we know that any
     // spectrum number has a corresponding event ID, i.e., we do not need
@@ -73,11 +73,11 @@ std::vector<int32_t> bankOffsetsSpectrumNumbers(
     // See comment in bankOffsets regarding this offset computation.
     if (idToBank.count(specNum) == 1) {
       size_t bank = idToBank.at(specNum);
-      bankOffsets[bank] = specNum - spectrumIndex;
+      offsets[bank] = specNum - spectrumIndex;
     }
     spectrumIndex++;
   }
-  return bankOffsets;
+  return offsets;
 }
 
 std::vector<std::vector<Types::Event::TofEvent> *>

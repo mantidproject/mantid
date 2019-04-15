@@ -2034,9 +2034,10 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
 
   // vector from facing object to component we want to rotate
   Kernel::V3D facingDirection = pos - facingPoint;
-  if (facingDirection.norm() == 0.0)
+  const auto facingDirLength = facingDirection.norm();
+  if (facingDirLength == 0.0)
     return;
-  facingDirection.normalize();
+  facingDirection /= facingDirLength;
 
   // now aim to rotate shape such that the z-axis of of the object we want to
   // rotate points in the direction of facingDirection. That way the XY plane
@@ -2047,10 +2048,12 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
   R.rotate(facingDirection);
 
   Kernel::V3D normal = facingDirection.cross_prod(z);
-  if (normal.norm() == 0.) {
-    normal = -facingDirection;
+  const auto normalLength = normal.norm();
+  if (normalLength == 0.) {
+    normal = normalize(-facingDirection);
+  } else {
+    normal /= normalLength;
   }
-  normal.normalize();
   double theta = (180.0 / M_PI) * facingDirection.angle(z);
 
   if (normal.norm() > 0.0)

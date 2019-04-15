@@ -37,14 +37,16 @@ public:
   AlgorithmProgressPresenterBase(QObject *parent);
 
   /// Signals to the presenters that an algorithm has started.
-  void algorithmStarted(Mantid::API::AlgorithmID);
+  void algorithmStarted(Mantid::API::AlgorithmID /*alg*/);
   /// Signals to the presenters that an algorithm has ended.
-  void algorithmEnded(Mantid::API::AlgorithmID);
+  void algorithmEnded(Mantid::API::AlgorithmID /*alg*/);
   /// Signals to the presenters that there has been progress in one of the
   /// algorithms
-  void updateProgressBar(Mantid::API::AlgorithmID, double, const std::string &);
+  void updateProgressBar(Mantid::API::AlgorithmID /*alg*/, double /*progress*/,
+                         const std::string & /*msg*/);
   /// Sets the parameter progress bar to show the progress and message
-  void setProgressBar(QProgressBar *, double, const QString &);
+  void setProgressBar(QProgressBar * /*progressBar*/, double /*progress*/,
+                      const QString & /*message*/);
 
 public slots:
   virtual void algorithmStartedSlot(Mantid::API::AlgorithmID) = 0;
@@ -53,9 +55,10 @@ public slots:
   virtual void algorithmEndedSlot(Mantid::API::AlgorithmID) = 0;
 
 signals:
-  void algorithmStartedSignal(Mantid::API::AlgorithmID);
-  void updateProgressBarSignal(Mantid::API::AlgorithmID, double, QString);
-  void algorithmEndedSignal(Mantid::API::AlgorithmID);
+  void algorithmStartedSignal(Mantid::API::AlgorithmID /*_t1*/);
+  void updateProgressBarSignal(Mantid::API::AlgorithmID /*_t1*/, double /*_t2*/,
+                               QString /*_t3*/);
+  void algorithmEndedSignal(Mantid::API::AlgorithmID /*_t1*/);
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

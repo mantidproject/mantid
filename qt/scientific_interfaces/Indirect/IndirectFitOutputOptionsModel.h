@@ -35,6 +35,8 @@ public:
 
   void removePDFWorkspace() override;
 
+  bool
+  isSelectedGroupPlottable(std::string const &selectedGroup) const override;
   bool isResultGroupPlottable() const override;
   bool isPDFGroupPlottable() const override;
 

@@ -199,14 +199,14 @@ void SANSAddFiles::add2Runs2Add() {
       "unusedName", m_SANSForm->new2Add_edit->text().toStdString());
   const std::vector<std::string> &nam = commaSep;
 
-  for (std::vector<std::string>::const_iterator i = nam.begin(); i != nam.end();
-       ++i) { // each comma separated item could be a range of run numbers
+  for (const auto &i :
+       nam) { // each comma separated item could be a range of run numbers
               // specified with a ':' or '-'
     QStringList ranges;
     std::vector<int> runNumRanges;
     try { // if the entry is in the form 454:456, runNumRanges will be filled
           // with the integers ({454, 455, 456}) otherwise it will throw
-      appendValue(*i, runNumRanges);
+      appendValue(i, runNumRanges);
       std::vector<int>::const_iterator num = runNumRanges.begin();
       for (; num != runNumRanges.end(); ++num) {
         ranges.append(QString::number(*num));
@@ -214,7 +214,7 @@ void SANSAddFiles::add2Runs2Add() {
     } catch (boost::bad_lexical_cast &) { // this means that we don't have a
                                           // list of integers, treat it as full
                                           // (and valid) filename
-      ranges.append(QString::fromStdString(*i));
+      ranges.append(QString::fromStdString(i));
     }
 
     for (QStringList::const_iterator k = ranges.begin(); k != ranges.end();
@@ -403,7 +403,7 @@ void SANSAddFiles::new2AddBrowse() {
 /** Normally in responce to an edit this sets data associated with the cell
  *  to the cells text and removes the tooltip
  */
-void SANSAddFiles::setCellData(QListWidgetItem *) {
+void SANSAddFiles::setCellData(QListWidgetItem * /*unused*/) {
   QListWidgetItem *editting = m_SANSForm->toAdd_List->currentItem();
   if (editting) {
     editting->setData(Qt::WhatsThisRole, QVariant(editting->text()));
@@ -564,9 +564,9 @@ QString SANSAddFiles::createPythonStringList(QString inputString) {
   inputString.replace(" ", "");
   auto inputStringList = inputString.split(delimiter);
 
-  for (auto it = inputStringList.begin(); it != inputStringList.end(); ++it) {
+  for (auto &inputString : inputStringList) {
 
-    formattedString += quotationMark + *it + quotationMark + delimiter;
+    formattedString += quotationMark + inputString + quotationMark + delimiter;
   }
 
   formattedString.remove(formattedString.length() - delimiter.length(),

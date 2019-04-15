@@ -76,8 +76,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
             << "Zoom";
   QList<QAction *> plotToolActions =
       addOptionsToMenus("Plot Tools", m_plotToolGroup, plotTools, "None");
-  for (auto it = plotToolActions.begin(); it != plotToolActions.end(); ++it)
-    connect(*it, SIGNAL(triggered()), this, SLOT(handleViewToolSelect()));
+  for (auto &plotToolAction : plotToolActions)
+    connect(plotToolAction, SIGNAL(triggered()), this,
+            SLOT(handleViewToolSelect()));
 
   // Create the reset plot view option
   QAction *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
@@ -96,8 +97,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
              << "Squared";
   QList<QAction *> xAxisTypeActions =
       addOptionsToMenus("X Axis", m_xAxisTypeGroup, xAxisTypes, "Linear");
-  for (auto it = xAxisTypeActions.begin(); it != xAxisTypeActions.end(); ++it)
-    connect(*it, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
+  for (auto &xAxisTypeAction : xAxisTypeActions)
+    connect(xAxisTypeAction, SIGNAL(triggered()), this,
+            SLOT(handleAxisTypeSelect()));
 
   // Create the X axis type list for context menu
   m_yAxisTypeGroup = new QActionGroup(m_contextMenu);
@@ -108,8 +110,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
              << "Logarithmic";
   QList<QAction *> yAxisTypeActions =
       addOptionsToMenus("Y Axis", m_yAxisTypeGroup, yAxisTypes, "Linear");
-  for (auto it = yAxisTypeActions.begin(); it != yAxisTypeActions.end(); ++it)
-    connect(*it, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
+  for (auto &yAxisTypeAction : yAxisTypeActions)
+    connect(yAxisTypeAction, SIGNAL(triggered()), this,
+            SLOT(handleAxisTypeSelect()));
 
   m_contextMenu->addSeparator();
 
@@ -335,8 +338,8 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws) {
 
   QStringList curveNames = getCurvesForWorkspace(ws);
 
-  for (auto it = curveNames.begin(); it != curveNames.end(); ++it)
-    removeSpectrum(*it);
+  for (auto &curveName : curveNames)
+    removeSpectrum(curveName);
 }
 
 /**
@@ -459,11 +462,11 @@ void PreviewPlot::showLegend(bool show) {
  * @param curveNames List of curve names to show error bars of
  */
 void PreviewPlot::setDefaultShownErrorBars(const QStringList &curveNames) {
-  for (auto it = curveNames.begin(); it != curveNames.end(); ++it) {
-    m_errorBarOptionCache[*it] = true;
+  for (const auto &curveName : curveNames) {
+    m_errorBarOptionCache[curveName] = true;
 
-    if (m_curves.contains(*it))
-      m_curves[*it].showErrorsAction->setChecked(true);
+    if (m_curves.contains(curveName))
+      m_curves[curveName].showErrorsAction->setChecked(true);
   }
 
   emit needToHardReplot();
@@ -560,11 +563,11 @@ void PreviewPlot::replot() { m_uiForm.plot->replot(); }
 void PreviewPlot::hardReplot() {
   QStringList keys = m_curves.keys();
 
-  for (auto it = keys.begin(); it != keys.end(); ++it) {
-    removeCurve(m_curves[*it].curve);
-    removeCurve(m_curves[*it].errorCurve);
-    addCurve(m_curves[*it], m_curves[*it].ws, m_curves[*it].wsIndex,
-             m_curves[*it].colour);
+  for (auto &key : keys) {
+    removeCurve(m_curves[key].curve);
+    removeCurve(m_curves[key].errorCurve);
+    addCurve(m_curves[key], m_curves[key].ws, m_curves[key].wsIndex,
+             m_curves[key].colour);
   }
 
   emit needToReplot();
@@ -723,8 +726,8 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
                                                 QString defaultItem) {
   QMenu *menu = new QMenu(m_contextMenu);
 
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    QAction *action = new QAction(*it, menu);
+  for (auto &item : items) {
+    QAction *action = new QAction(item, menu);
     action->setCheckable(true);
 
     // Add to the menu and action group
@@ -732,7 +735,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
     menu->addAction(action);
 
     // Select default
-    action->setChecked(*it == defaultItem);
+    action->setChecked(item == defaultItem);
   }
 
   QAction *menuAction = new QAction(menuName, menu);

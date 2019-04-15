@@ -153,14 +153,13 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString &algName) {
     m_algorithm->initialize();
     std::vector<Mantid::Kernel::Property *> props =
         m_algorithm->getProperties();
-    for (std::vector<Mantid::Kernel::Property *>::iterator it = props.begin();
-         it != props.end(); ++it) {
-      if ((*it)->direction() == Mantid::Kernel::Direction::Input) {
+    for (auto &prop : props) {
+      if (prop->direction() == Mantid::Kernel::Direction::Input) {
         // try to cast property to WorkspaceProperty
         Mantid::API::WorkspaceProperty<> *wsProp =
-            dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
+            dynamic_cast<Mantid::API::WorkspaceProperty<> *>(prop);
         if (wsProp != nullptr) {
-          m_algPropName = QString::fromStdString((*it)->name());
+          m_algPropName = QString::fromStdString(prop->name());
           break;
         }
       }
@@ -196,7 +195,7 @@ void WorkspaceSelector::handleRemEvent(
 }
 
 void WorkspaceSelector::handleClearEvent(
-    Mantid::API::ClearADSNotification_ptr) {
+    Mantid::API::ClearADSNotification_ptr /*unused*/) {
   this->clear();
   emit emptied();
 }
@@ -316,9 +315,9 @@ void WorkspaceSelector::refresh() {
   }
 
   QStringList namesToAdd;
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    QString name = QString::fromStdString(*it);
-    if (checkEligibility(name, ads.retrieve(*it))) {
+  for (auto &item : items) {
+    QString name = QString::fromStdString(item);
+    if (checkEligibility(name, ads.retrieve(item))) {
       namesToAdd << name;
     }
   }

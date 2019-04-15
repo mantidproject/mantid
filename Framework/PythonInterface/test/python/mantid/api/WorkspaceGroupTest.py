@@ -155,6 +155,23 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove('grouped_1')
         mtd.remove('grouped_2')
 
+    def test_negative_indices_return_correct_ws_from_group(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        self.assertEqual(group[-1].name(), "Second")
+        self.assertEqual(group[-2].name(), "First")
+
+    def test_out_of_bounds_negative_index_returns_IndexError(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        with self.assertRaises(IndexError):
+            group[-400]
+
+    def test_getItem_negative_int_index_values(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        self.assertEqual(group.getItem(-1).name(), "Second")
+        self.assertEqual(group.getItem(-2).name(), "First")
+        with self.assertRaises(IndexError):
+            group.getItem(-400)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,7 +19,6 @@ public:
     TS_ASSERT(shapeInfo.height() == 0);
     TS_ASSERT(shapeInfo.radius() == 0);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT(shapeInfo.shape() == ShapeInfo::GeometryShape::NOSHAPE);
   }
 
@@ -33,7 +32,6 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 1);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
   }
@@ -51,7 +49,6 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.radius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 4);
     TS_ASSERT_EQUALS(shapeInfo.points(), (std::vector<V3D>{p1, p2, p3, p4}));
   }
@@ -73,7 +70,6 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.radius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), 0);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 8);
     TS_ASSERT_EQUALS(shapeInfo.points(),
                      (std::vector<V3D>{p1, p2, p3, p4, p5, p6, p7, p8}));
@@ -95,8 +91,7 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.points()[0], centerBottomBase);
     TS_ASSERT_EQUALS(shapeInfo.points()[1], symmetryAxis);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), innerRadius);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), outerRadius);
-    TS_ASSERT_EQUALS(shapeInfo.radius(), 0);
+    TS_ASSERT_EQUALS(shapeInfo.radius(), outerRadius);
     TS_ASSERT_EQUALS(shapeInfo.height(), height);
   }
 
@@ -111,7 +106,6 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.shape(), ShapeInfo::GeometryShape::CONE);
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.height(), height);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 2);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
@@ -130,7 +124,6 @@ public:
     TS_ASSERT_EQUALS(shapeInfo.radius(), radius);
     TS_ASSERT_EQUALS(shapeInfo.height(), height);
     TS_ASSERT_EQUALS(shapeInfo.innerRadius(), 0);
-    TS_ASSERT_EQUALS(shapeInfo.outerRadius(), 0);
     TS_ASSERT_EQUALS(shapeInfo.points().size(), 2);
     TS_ASSERT_EQUALS(shapeInfo.points()[0], center);
     TS_ASSERT_EQUALS(shapeInfo.points()[1], axis);
@@ -143,15 +136,18 @@ public:
     shapeInfo.setSphere(center, radius);
 
     ShapeInfo::GeometryShape testShape;
-    std::vector<V3D> testPoint;
+    std::vector<V3D> testPoints;
     double testHeight;
     double testRadius;
+    double testInnerRadius;
 
-    shapeInfo.getObjectGeometry(testShape, testPoint, testRadius, testHeight);
+    shapeInfo.getObjectGeometry(testShape, testPoints, testInnerRadius,
+                                testRadius, testHeight);
     TS_ASSERT_EQUALS(testRadius, radius);
-    TS_ASSERT(testHeight == 0);
-    TS_ASSERT(testPoint.size() == 1);
-    TS_ASSERT_EQUALS(testPoint[0], center);
+    TS_ASSERT_EQUALS(testHeight, 0);
+    TS_ASSERT_EQUALS(testInnerRadius, 0);
+    TS_ASSERT(testPoints.size() == 1);
+    TS_ASSERT_EQUALS(testPoints[0], center);
     TS_ASSERT_EQUALS(testShape, ShapeInfo::GeometryShape::SPHERE);
   }
 
@@ -167,11 +163,13 @@ public:
 
     ShapeInfo::GeometryShape testShape;
     std::vector<V3D> testPoint;
+
     double testHeight;
     double tinnerRadius;
     double touterRadius;
 
     shapeInfo.getObjectGeometry(testShape, testPoint, tinnerRadius,
+
                                 touterRadius, testHeight);
     TS_ASSERT_EQUALS(tinnerRadius, innerRadius);
     TS_ASSERT_EQUALS(touterRadius, outerRadius);
@@ -257,7 +255,7 @@ public:
     TS_ASSERT_EQUALS(geometry.centreOfBottomBase, centerOfBottomBase)
     TS_ASSERT_EQUALS(geometry.axis, symmetryAxis);
     TS_ASSERT_EQUALS(geometry.innerRadius, innerRadius);
-    TS_ASSERT_EQUALS(geometry.outerRadius, outerRadius);
+    TS_ASSERT_EQUALS(geometry.radius, outerRadius);
     TS_ASSERT_EQUALS(geometry.height, height);
   }
 

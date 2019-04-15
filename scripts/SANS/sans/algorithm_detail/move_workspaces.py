@@ -688,6 +688,33 @@ class SANSMoveZOOM(SANSMove):
     def _move_low_angle_bank(move_info, workspace, coordinates):
         move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=False)
 
+    @staticmethod
+    def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
+        monitor_offset = move_info.monitor_n_offset
+        if monitor_offset != 0.0:
+            monitor_spectrum_number_as_string = str(monitor_spectrum_number)
+            monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
+            instrument = workspace.getInstrument()
+            monitor_n = instrument.getComponentByName(monitor_n_name)
+
+            # Get position of monitor n
+            monitor_position = monitor_n.getPos()
+            z_position_monitor = monitor_position.getZ()
+
+            # The location is relative to the rear-detector, get this position
+            lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+            detector_name = lab_detector.detector_name
+            lab_detector_component = instrument.getComponentByName(detector_name)
+            detector_position = lab_detector_component.getPos()
+            z_position_detector = detector_position.getZ()
+
+            monitor_n_offset = monitor_offset
+            z_new = z_position_detector + monitor_n_offset
+            z_move = z_new - z_position_monitor
+            offset = {CanonicalCoordinates.Z: z_move}
+
+            move_component(workspace, offset, monitor_n_name)
+
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For ZOOM we only have to coordinates
         assert len(coordinates) == 2
@@ -700,6 +727,10 @@ class SANSMoveZOOM(SANSMove):
 
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
+
+        # Move the monitor
+        monitor_spectrum = 5  # Only M5 can be moved for ZOOM
+        self._move_monitor_n(workspace, move_info, monitor_spectrum_number=monitor_spectrum)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For ZOOM we only have to coordinates
@@ -715,29 +746,24 @@ class SANSMoveZOOM(SANSMove):
         return instrument_type is SANSInstrument.ZOOM
 
 
-class SANSMoveFactory(object):
-    def __init__(self):
-        super(SANSMoveFactory, self).__init__()
-
-    @staticmethod
-    def create_mover(workspace):
-        # Get selection
-        run_number = workspace.getRunNumber()
-        instrument = workspace.getInstrument()
-        instrument_name = instrument.getName()
-        instrument_name = sanitise_instrument_name(instrument_name)
-        instrument_type = SANSInstrument.from_string(instrument_name)
-        if SANSMoveLOQ.is_correct(instrument_type, run_number):
-            mover = SANSMoveLOQ()
-        elif SANSMoveSANS2D.is_correct(instrument_type, run_number):
-            mover = SANSMoveSANS2D()
-        elif SANSMoveLARMOROldStyle.is_correct(instrument_type, run_number):
-            mover = SANSMoveLARMOROldStyle()
-        elif SANSMoveLARMORNewStyle.is_correct(instrument_type, run_number):
-            mover = SANSMoveLARMORNewStyle()
-        elif SANSMoveZOOM.is_correct(instrument_type, run_number):
-            mover = SANSMoveZOOM()
-        else:
-            mover = None
-            NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
-        return mover
+def sans_move_factory(workspace):
+    # Get selection
+    run_number = workspace.getRunNumber()
+    instrument = workspace.getInstrument()
+    instrument_name = instrument.getName()
+    instrument_name = sanitise_instrument_name(instrument_name)
+    instrument_type = SANSInstrument.from_string(instrument_name)
+    if SANSMoveLOQ.is_correct(instrument_type, run_number):
+        mover = SANSMoveLOQ()
+    elif SANSMoveSANS2D.is_correct(instrument_type, run_number):
+        mover = SANSMoveSANS2D()
+    elif SANSMoveLARMOROldStyle.is_correct(instrument_type, run_number):
+        mover = SANSMoveLARMOROldStyle()
+    elif SANSMoveLARMORNewStyle.is_correct(instrument_type, run_number):
+        mover = SANSMoveLARMORNewStyle()
+    elif SANSMoveZOOM.is_correct(instrument_type, run_number):
+        mover = SANSMoveZOOM()
+    else:
+        mover = None
+        NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")
+    return mover

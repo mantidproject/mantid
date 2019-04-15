@@ -369,8 +369,8 @@ bool SaveWorkspaces::isValid() {
   // Get the dimensionality of the workspaces
   auto is2D = false;
   auto workspacesList = m_workspaces->selectedItems();
-  for (auto it = workspacesList.begin(); it != workspacesList.end(); ++it) {
-    auto wsName = (*it)->text();
+  for (auto &it : workspacesList) {
+    auto wsName = it->text();
     auto workspace =
         AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
@@ -460,8 +460,8 @@ QHash<QString, QString>
 SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
   auto wsList = workspaces->selectedItems();
   QHash<QString, QString> workspaceMap;
-  for (auto it = wsList.begin(); it != wsList.end(); ++it) {
-    auto wsName = (*it)->text();
+  for (auto &it : wsList) {
+    auto wsName = it->text();
     auto cloneName = wsName;
     if (m_saveAsZeroErrorFree) {
       cloneName += "_clone_temp";
@@ -484,9 +484,8 @@ SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
 void SaveWorkspaces::removeZeroFreeWorkspaces(
     QHash<QString, QString> workspaces) {
   auto zeroFreeWorkspaceNames = workspaces.values();
-  for (auto it = zeroFreeWorkspaceNames.begin();
-       it != zeroFreeWorkspaceNames.end(); ++it) {
-    emit deleteZeroErrorFreeWorkspace((*it));
+  for (auto &zeroFreeWorkspaceName : zeroFreeWorkspaceNames) {
+    emit deleteZeroErrorFreeWorkspace(zeroFreeWorkspaceName);
   }
 }
 

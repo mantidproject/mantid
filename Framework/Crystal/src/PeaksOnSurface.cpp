@@ -99,8 +99,7 @@ bool PeaksOnSurface::pointOutsideAnyExtents(const V3D & /*testPoint*/) const {
 bool lineIntersectsSphere(const V3D &line, const V3D &lineStart,
                           const V3D &peakCenter, const double peakRadius) {
   V3D peakToStart = peakCenter - lineStart;
-  V3D unitLine = line;
-  unitLine.normalize();
+  const V3D unitLine = normalize(line);
   double proj = peakToStart.scalar_prod(unitLine); // All we are doing here is
                                                    // projecting the peak to
                                                    // segment start vector onto

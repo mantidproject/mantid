@@ -376,9 +376,6 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
   m_workspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Wavelength");
   m_workspace->setYUnit("");
-  API::Workspace_sptr workspace =
-      boost::static_pointer_cast<API::Workspace>(m_workspace);
-  // setProperty("OutputWorkspace", workspace);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -468,7 +465,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
-    trapDiametersInUse.push_back(trapDiameters[index]);
+    trapDiametersInUse.emplace_back(trapDiameters[index]);
   }
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()

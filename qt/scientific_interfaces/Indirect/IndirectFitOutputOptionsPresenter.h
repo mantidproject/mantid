@@ -37,8 +37,7 @@ public:
 
   void removePDFWorkspace();
 
-  bool isResultGroupPlottable();
-  bool isPDFGroupPlottable();
+  bool isSelectedGroupPlottable() const;
 
   void setPlotting(bool plotting);
   void setPlotEnabled(bool enable);
