@@ -51,6 +51,7 @@ Output:
    Background subtracted peak height: 3.0 
 
 **Example - Subtracting background using Polynomial:**
+
 .. testcode:: ExPoly
 
    import numpy
@@ -72,8 +73,10 @@ Output:
 Output:
 
 .. testoutput:: ExPoly
+
    Peak height with background: 22.0
    Background subtracted peak height: 5.0
+
 .. categories::
 
 .. sourcelink::
