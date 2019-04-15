@@ -46,8 +46,6 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
   endif()
 
-  message(STATUS "Adding egg link: ${_egg_link}")
-
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
     if ( WIN32 )
       # add .exe in the executable name for Windows, otherwise it can't find it during the install step

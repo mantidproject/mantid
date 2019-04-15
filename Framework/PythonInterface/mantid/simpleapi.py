@@ -45,7 +45,7 @@ from mantid.kernel.funcinspect import customise_func as _customise_func, lhs_inf
 from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 
 # register matplotlib projection
-from . import plots  # noqa
+from mantid import plots  # noqa
 from mantid.kernel._aliases import *
 from mantid.api._aliases import *
 from mantid.fitfunctions import *
