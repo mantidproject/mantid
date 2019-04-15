@@ -44,7 +44,6 @@ from mantid.simpleapi import (
     Stitch1DMany
 )
 import ILL_utilities as utils
-import ReflectometryILL_common as common
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
 from ReflectometryILLSumForeground import SumType
 import numpy
