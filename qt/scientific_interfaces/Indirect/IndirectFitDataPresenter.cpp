@@ -146,22 +146,8 @@ void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
   UNUSED_ARG(workspace)
   const auto names = m_model->getWorkspaceNames();
   const auto iter = std::find(names.begin(), names.end(), workspaceName);
-  if (iter != names.end()) {
-    setModelWorkspace(QString::fromStdString(workspaceName));
-
-    //if (m_view->isMultipleDataTabSelected()) {
-    //  setModelFromSingleData();
-    //  setModelWorkspace(QString::fromStdString(workspaceName));
-    //  setModelFromMultipleData();
-    //  setModelWorkspace(QString::fromStdString(workspaceName));
-    //} else {
-    //  setModelFromMultipleData();
-    //  setModelWorkspace(QString::fromStdString(workspaceName));
-    //  setModelFromSingleData();
-    //  setModelWorkspace(QString::fromStdString(workspaceName));
-    //}
-    emit dataChanged();
-  }
+  if (iter != names.end() && !m_view->isMultipleDataTabSelected())
+    m_view->setWorkspaceSelectorIndex(QString::fromStdString(workspaceName));
 }
 
 UserInputValidator &

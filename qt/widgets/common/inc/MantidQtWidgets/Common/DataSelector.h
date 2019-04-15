@@ -84,6 +84,10 @@ public:
   QString getWsNameFromFiles() const;
   /// Get the currently available file or workspace name
   QString getCurrentDataName() const;
+  /// Sets which selector (file or workspace) is visible
+  void setSelectorIndex(int index);
+  /// Set the index of the combobox containing the loaded workspace
+  void setWorkspaceSelectorIndex(QString const &workspaceName);
   /// Get whether the file selector is currently being shown
   bool isFileSelectorVisible() const;
   /// Get whether the workspace selector is currently being shown
@@ -420,8 +424,6 @@ private slots:
 private:
   /// Attempt to automatically load a file
   void autoLoadFile(const QString &filenames);
-  /// Set the index of the combobox containing the loaded workspace
-  void setWorkspaceSelectorIndex(QString const &workspaceName);
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Algorithm Runner used to run the load algorithm

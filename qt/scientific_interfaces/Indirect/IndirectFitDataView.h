@@ -45,6 +45,8 @@ public:
   virtual void setResolutionWSSuffices(const QStringList &suffices) override;
   virtual void setResolutionFBSuffices(const QStringList &suffices) override;
 
+	void setWorkspaceSelectorIndex(const QString &workspaceName);
+
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
 
