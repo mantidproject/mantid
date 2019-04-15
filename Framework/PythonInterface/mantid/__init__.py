@@ -53,26 +53,9 @@ def _bin_dirs():
     # conda layout
     yield os.path.dirname(sys.executable)
 
-    # The correct path for when the working directory is the same as the
-    # build root directory. Used to run from PyCharm
-    yield sys.path[0]
-
-    try:
-        from mantid.buildconfig import BUILD_DIR
-    except ImportError:
-        # The buildconfig file not found, the function returns to stop the execution of following yields
-        # this will make the _bindir empty check fail later
-        return
-
-    # The path for running a development build outside of the working directory
-    yield "{}/bin".format(BUILD_DIR)
-
-    # This path is for when tests are ran. The CMAKE_CONFIG_TYPE is declared from
-    # CTest's -C flag, and it will contain the build type (Debug, Release).
-    # If no config is declared (Linux), then it will be an empty string, and
-    # default to bin/, which is the correct path
-    build_type = os.environ.get('CMAKE_CONFIG_TYPE', '')
-    yield "{}/bin/{}".format(BUILD_DIR, build_type)
+    # iterate over the PYTHONPATH, to scan all possible bin dirs
+    for path in sys.path:
+        yield path
 
 
 # Bail out early if a Mantid.properties files is not found in
