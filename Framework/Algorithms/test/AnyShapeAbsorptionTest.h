@@ -281,7 +281,7 @@ public:
     setSampleAlg->setPropertyValue(
         "Environment", R"({"Name": "CRYO-01", "Container": "8mm"})");
     setSampleAlg->setPropertyValue("Material",
-                                   R "({" ChemicalFormula ": " Cd
+                                   R"({" ChemicalFormula ": " Cd
                                      ", " SampleNumberDensity ": 0.1})");
 
     TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
