@@ -17,9 +17,15 @@ Bug fixes
 #########
 
 - Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
-
+	
 Algorithms
 ----------
+
+Improvements
+############
+
+- An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
+- Changes have been made to the Polynomial method in :ref:`algm-ReflectometryBackgroundSubtraction` to improve fitting for high degree polynomials.
 
 Bug fixes
 #########

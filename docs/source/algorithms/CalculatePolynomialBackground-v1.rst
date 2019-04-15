@@ -14,6 +14,8 @@ This algorithm calculates backgrounds for the histograms in a workspace by fitti
 
 The value of *CostFunction* is passed to :ref:`algm-Fit` as-is. The default option is 'Least squares' which uses the histogram errors as weights. This might not be desirable, e.g. when there are bins with zero counts and zero errors. An 'Unweighted least squares' option is available to deal with such cases.
 
+The property *Minimizer* is passed to :ref:`algm-Fit` as-is. The default for this is 'Levenberg-MarquardtMD'.
+
 Usage
 -----
 

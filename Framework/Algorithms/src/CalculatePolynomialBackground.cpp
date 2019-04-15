@@ -27,6 +27,7 @@ const static std::string INPUT_WS = "InputWorkspace";
 const static std::string OUTPUT_WS = "OutputWorkspace";
 const static std::string POLY_DEGREE = "Degree";
 const static std::string XRANGES = "XRanges";
+const static std::string MINIMIZER = "Minimizer";
 } // namespace Prop
 
 /// String constants for cost function options.
@@ -34,6 +35,12 @@ namespace CostFunc {
 const static std::string UNWEIGHTED_LEAST_SQUARES = "Unweighted least squares";
 const static std::string WEIGHTED_LEAST_SQUARES = "Least squares";
 } // namespace CostFunc
+
+/// String constants for minimizer options.
+namespace Minimizer {
+const static std::string LEVENBERG_MARQUARDT_MD = "Levenberg-MarquardtMD";
+const static std::string LEVENBERG_MARQUARDT = "Levenberg-Marquardt";
+} // namespace Minimizer
 
 /** Filters ranges completely outside the histogram X values.
  *  @param ranges a vector of start-end pairs to filter
@@ -173,7 +180,8 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
 std::vector<double>
 executeFit(Mantid::API::Algorithm &fit, const std::string &function,
            Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
-           const std::vector<double> &ranges, const std::string &costFunction) {
+           const std::vector<double> &ranges, const std::string &costFunction,
+           const std::string &minimizer) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
   const auto excludedRanges = invertRanges(fitRanges);
   fit.setProperty("Function", function);
@@ -182,7 +190,7 @@ executeFit(Mantid::API::Algorithm &fit, const std::string &function,
   fit.setProperty("StartX", fitRanges.front());
   fit.setProperty("EndX", fitRanges.back());
   fit.setProperty("Exclude", excludedRanges);
-  fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+  fit.setProperty("Minimizer", minimizer);
   fit.setProperty(Prop::COST_FUNCTION, costFunction);
   fit.setProperty("CreateOutput", true);
   fit.executeAsChildAlg();
@@ -199,26 +207,39 @@ executeFit(Mantid::API::Algorithm &fit, const std::string &function,
  *  @param parameters a vector containing the polynomial coefficients
  *  @return a function string
  */
-std::string makeFunctionString(const std::vector<double> &parameters) {
+std::string makeFunctionString(const std::string &name,
+                               const std::vector<double> &parameters) {
   const auto degree = parameters.size() - 1;
   std::ostringstream s;
-  switch (degree) {
-  case 0:
-    s << "name=FlatBackground";
-    break;
-  case 1:
-    s << "name=LinearBackground";
-    break;
-  case 2:
-    s << "name=Quadratic";
-    break;
-  default:
-    s << "name=Polynomial,n=" << degree;
-  }
+  s << "name=" << name;
+  if (degree > 2)
+    s << ",n=" << degree;
   for (size_t d = 0; d <= degree; ++d) {
     s << ',' << 'A' << d << '=' << parameters[d];
   }
   return s.str();
+}
+
+/** Return a name of the function used in the fit.
+ *  @param parameters a vector containing the polynomial coefficients
+ *  @return a string containing the name of the polynomial
+ */
+std::string makeNameString(const int degree) {
+  std::ostringstream name;
+  switch (degree) {
+  case 0:
+    name << "FlatBackground";
+    break;
+  case 1:
+    name << "LinearBackground";
+    break;
+  case 2:
+    name << "Quadratic";
+    break;
+  default:
+    name << "Polynomial";
+  }
+  return name.str();
 }
 
 /** Evaluates the given function directly on a histogram
@@ -226,13 +247,24 @@ std::string makeFunctionString(const std::vector<double> &parameters) {
  *  @param ws an output workspace
  *  @param wsIndex a workspace index identifying a histogram
  */
-void evaluateInPlace(const std::string &function,
+void evaluateInPlace(const std::string &name,
+                     const std::vector<double> &parameters,
                      Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
+  const auto degree = parameters.size() - 1;
   auto bkg = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(
-      Mantid::API::FunctionFactory::Instance().createInitialized(function));
-  // We want to write directly to the workspace.
+      Mantid::API::FunctionFactory::Instance().createFunction(name));
+  if (degree > 2) {
+    Mantid::API::IFunction1D::Attribute att = bkg->getAttribute("n");
+    att.fromString(std::to_string(degree));
+    bkg->setAttribute("n", att);
+  }
+  for (auto d = 0; d <= degree; ++d) {
+    std::string param = 'A' + std::to_string(d);
+    bkg->setParameter(param, parameters[d]);
+  }
   double *y = const_cast<double *>(ws.mutableY(wsIndex).rawData().data());
-  bkg->function1D(y, ws.points(wsIndex).rawData().data(), ws.y(wsIndex).size());
+  bkg->function1D(y, ws.points(wsIndex).rawData().data(),
+                   ws.y(wsIndex).size());
 }
 } // namespace
 
@@ -290,6 +322,12 @@ void CalculatePolynomialBackground::init() {
       Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES.c_str(),
       boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
       "The cost function to be passed to the Fit algorithm.");
+  std::array<std::string, 2> minimizerOpts{
+      {Minimizer::LEVENBERG_MARQUARDT_MD, Minimizer::LEVENBERG_MARQUARDT}};
+  declareProperty(
+      Prop::MINIMIZER, Minimizer::LEVENBERG_MARQUARDT_MD.c_str(),
+      boost::make_shared<Kernel::ListValidator<std::string>>(minimizerOpts),
+      "The minimizer to be passed to the Fit algorithm.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -302,10 +340,12 @@ void CalculatePolynomialBackground::exec() {
       DataObjects::create<DataObjects::Workspace2D>(*inWS)};
   const std::vector<double> inputRanges = getProperty(Prop::XRANGES);
   const std::string costFunction = getProperty(Prop::COST_FUNCTION);
+  const std::string minimizer = getProperty(Prop::MINIMIZER);
   const auto polyDegree =
       static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
   const std::vector<double> initialParams(polyDegree + 1, 0.1);
-  const auto fitFunction = makeFunctionString(initialParams);
+  const auto name = makeNameString(polyDegree);
+  const auto fitFunction = makeFunctionString(name, initialParams);
   const auto nHistograms = static_cast<int64_t>(inWS->getNumberHistograms());
   API::Progress progress(this, 0, 1.0, nHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outWS))
@@ -313,10 +353,9 @@ void CalculatePolynomialBackground::exec() {
     PARALLEL_START_INTERUPT_REGION
     const bool logging{false};
     auto fit = createChildAlgorithm("Fit", 0, 0, logging);
-    const auto parameters =
-        executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction);
-    const auto bkgFunction = makeFunctionString(parameters);
-    evaluateInPlace(bkgFunction, *outWS, i);
+    const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges,
+                                       costFunction, minimizer);
+    evaluateInPlace(name, parameters, *outWS, i);
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
