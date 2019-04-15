@@ -222,12 +222,20 @@ void PythonScripting::shutdown() {
 
 void PythonScripting::setupPythonPath() {
   using Mantid::Kernel::ConfigService;
-// The python sys.path is updated as follows:
-//   - the current working directory is inserted as position 0 to mimic the
-//     behaviour of the vanilla python interpreter
-//   - the directory of MantidPlot is added after this to find our bundled
-//   - modules
-//
+  // First add the directory of the executable as a sitedir to process
+  // any .pth files
+  const auto appPath = ConfigService::Instance().getPropertiesDir();
+  PyObject *sitemod = PyImport_ImportModule("site");
+  Py_DECREF(PyObject_CallMethod(sitemod, "addsitedir", STR_LITERAL("(s)"),
+                                appPath.c_str()));
+  Py_DECREF(sitemod);
+
+  // The python sys.path is then updated as follows:
+  //   - the empty string is inserted as position 0 to mimic the
+  //     behaviour of the vanilla python interpreter
+  //   - the directory of MantidPlot is added after this to find any additional
+  //     modules alongside the executable
+
 #if PY_MAJOR_VERSION >= 3
   PyObject *syspath = PySys_GetObject("path");
 #else
@@ -235,8 +243,6 @@ void PythonScripting::setupPythonPath() {
   PyObject *syspath = PySys_GetObject(&path[0]);
 #endif
   PyList_Insert(syspath, 0, FROM_CSTRING(""));
-
-  const auto appPath = ConfigService::Instance().getPropertiesDir();
 
   // These should contain only / separators
   // Python paths required by VTK and ParaView
