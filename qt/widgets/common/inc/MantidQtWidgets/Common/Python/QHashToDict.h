@@ -15,7 +15,7 @@
 
 namespace MantidQt {
 namespace Widgets {
-namespace MplCpp {
+namespace Common {
 namespace Python {
 
 using KwArgs = QHash<QString, QVariant>;
@@ -72,7 +72,7 @@ Python::Object qHashToDict(const KwArgs &hash) {
 }
 
 } // namespace Python
-} // namespace MplCpp
+} // namespace Common
 } // namespace Widgets
 } // namespace MantidQt
 

@@ -18,6 +18,7 @@
 #include <vector>
 
 using namespace boost;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

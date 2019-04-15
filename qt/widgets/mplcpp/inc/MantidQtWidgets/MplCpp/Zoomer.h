@@ -10,6 +10,8 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

@@ -22,8 +22,8 @@
 #include <QVBoxLayout>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
-using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::cycler;
+using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 
 namespace {
 const char *ACTIVE_CURVE_FORMAT = "k-";
@@ -33,8 +33,8 @@ const char *LOG_SCALE_NAME = "symlog";
 Mantid::Kernel::Logger g_log("MiniPlotMpl");
 
 QPushButton *createHomeButton() {
-  using MantidQt::Widgets::MplCpp::Python::NewRef;
-  using MantidQt::Widgets::MplCpp::Python::Object;
+  using MantidQt::Widgets::Common::Python::NewRef;
+  using MantidQt::Widgets::Common::Python::Object;
 
   auto mpl(NewRef(PyImport_ImportModule("matplotlib")));
   QDir dataPath(TO_CSTRING(Object(mpl.attr("get_data_path")()).ptr()));

@@ -10,7 +10,7 @@
 
 namespace MantidQt {
 namespace Widgets {
-namespace MplCpp {
+namespace Common {
 namespace Python {
 
 namespace detail {
@@ -50,6 +50,6 @@ const sipAPIDef *sipAPI() {
 } // namespace detail
 
 } // namespace Python
-} // namespace MplCpp
+} // namespace Common
 } // namespace Widgets
 } // namespace MantidQt

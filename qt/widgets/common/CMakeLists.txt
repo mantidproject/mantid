@@ -22,6 +22,7 @@ set ( QT5_SRC_FILES
   src/HelpWindow.cpp
   src/Hint.cpp
   src/HintingLineEdit.cpp
+  src/Icons.cpp
   # todo: move this to the instrument view library when the slice
   # viewer library is removed
   src/InputController.cpp
@@ -208,6 +209,7 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/Icons.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h

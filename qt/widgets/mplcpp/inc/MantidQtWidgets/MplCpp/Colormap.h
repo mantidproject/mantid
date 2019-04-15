@@ -14,6 +14,8 @@
 #pragma pop_macro("slots")
 #include <QString>
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

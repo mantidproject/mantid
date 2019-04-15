@@ -22,7 +22,7 @@
 
 namespace MantidQt {
 namespace Widgets {
-namespace MplCpp {
+namespace Common {
 namespace Python {
 
 // Alias for boost python object wrapper
@@ -99,7 +99,7 @@ private:
 };
 
 } // namespace Python
-} // namespace MplCpp
+} // namespace Common
 } // namespace Widgets
 } // namespace MantidQt
 

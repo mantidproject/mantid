@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace Widgets {
-namespace MplCpp {
+namespace Common {
 namespace Python {
 
 namespace detail {
@@ -43,7 +43,7 @@ template <typename T> T *extract(const Object &obj) {
 }
 
 } // namespace Python
-} // namespace MplCpp
+} // namespace Common
 } // namespace Widgets
 
 } // namespace MantidQt

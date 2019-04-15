@@ -13,6 +13,8 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #pragma pop_macro("slots")
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

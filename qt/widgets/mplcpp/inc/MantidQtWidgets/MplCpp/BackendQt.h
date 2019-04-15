@@ -31,6 +31,8 @@ constexpr static const char *MPL_QT_BACKEND =
 #error "Unknown Qt version. Cannot determine matplotlib backend."
 #endif
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

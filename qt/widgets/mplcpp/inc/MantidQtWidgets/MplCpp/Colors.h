@@ -17,6 +17,8 @@
  * See https://matplotlib.org/2.2.3/api/colors_api.html
  */
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
