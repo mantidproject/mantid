@@ -44,9 +44,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
         self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
-        self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
-        self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
-        self.TBD = mantidqt.icons.get_icon('fa.question')
 
         item_delegate = QStyledItemDelegate(self)
         item_delegate.setItemEditorFactory(PreciseDoubleFactory())
