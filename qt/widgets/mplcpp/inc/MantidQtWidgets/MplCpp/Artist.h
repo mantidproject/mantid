@@ -7,8 +7,8 @@
 #ifndef MPLCPP_ARTIST_H
 #define MPLCPP_ARTIST_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 namespace MantidQt {
 namespace Widgets {

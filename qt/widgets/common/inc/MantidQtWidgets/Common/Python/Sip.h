@@ -7,7 +7,7 @@
 #ifndef MPLCPP_SIPUTILS_H
 #define MPLCPP_SIPUTILS_H
 
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include <sip.h>
 #include <stdexcept>
 

@@ -7,8 +7,8 @@
 
 #include "MantidQtWidgets/MplCpp/Plot.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
-#include "MantidQtWidgets/MplCpp/Python/QHashToDict.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
+#include "MantidQtWidgets/Common/Python/QHashToDict.h"
 
 using namespace Mantid::PythonInterface;
 

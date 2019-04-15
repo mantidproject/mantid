@@ -8,8 +8,8 @@
 #ifndef MPLCPP_QHASHTODICT_H
 #define MPLCPP_QHASHTODICT_H
 
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
-#include "MantidQtWidgets/MplCpp/Python/Sip.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
 
 #include <QHash>
 

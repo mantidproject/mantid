@@ -7,8 +7,8 @@
 #ifndef MPLCPP_BACKENDQT_H
 #define MPLCPP_BACKENDQT_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 #include <QtGlobal>
 
 /*

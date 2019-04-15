@@ -7,8 +7,8 @@
 #ifndef MPLCPP_PLOT_H
 #define MPLCPP_PLOT_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 #include <QHash>
 #include <QString>

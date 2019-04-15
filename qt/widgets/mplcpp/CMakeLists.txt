@@ -1,6 +1,5 @@
 # Rules for matplotlib cpp library
 set ( LIB_SRCS
-  src/Python/Sip.cpp
   src/Artist.cpp
   src/Axes.cpp
   src/BackendQt.cpp
@@ -24,9 +23,6 @@ set ( MOC_HEADERS
 )
 
 set (NOMOC_HEADERS
-  inc/MantidQtWidgets/MplCpp/Python/Object.h
-  inc/MantidQtWidgets/MplCpp/Python/QHashToDict.h
-  inc/MantidQtWidgets/MplCpp/Python/Sip.h
   inc/MantidQtWidgets/MplCpp/Artist.h
   inc/MantidQtWidgets/MplCpp/Axes.h
   inc/MantidQtWidgets/MplCpp/Colors.h
@@ -62,7 +58,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
     IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS
     inc
-    ../../../Framework/PythonInterface/core/inc
     ${Boost_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_PATH}
     ${PYTHON_NUMPY_INCLUDE_DIR}
@@ -70,7 +65,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
-    PythonInterfaceCore
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
   INSTALL_DIR
     ${LIB_DIR}
     ${WORKBENCH_LIB_DIR}

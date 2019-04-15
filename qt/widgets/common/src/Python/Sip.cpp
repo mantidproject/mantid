@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidQtWidgets/MplCpp/Python/Sip.h"
+#include "MantidQtWidgets/Common/Python/Sip.h"
 #include <sip.h>
 
 namespace MantidQt {

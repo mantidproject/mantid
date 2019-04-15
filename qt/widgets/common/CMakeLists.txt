@@ -112,6 +112,8 @@ set ( QT5_SRC_FILES
   src/QtPropertyBrowser/StringDialogEditor.cpp
   src/QtPropertyBrowser/StringEditorFactory.cpp
   src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
+
+  src/Python/Sip.cpp
 )
 
 set ( QT5_MOC_FILES
@@ -242,6 +244,10 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
 
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
+
+  inc/MantidQtWidgets/Common/Python/Object.h
+  inc/MantidQtWidgets/Common/Python/QHashToDict.h
+  inc/MantidQtWidgets/Common/Python/Sip.h
 )
 
 set ( QT5_UI_FILES
@@ -802,9 +808,11 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     ${_webengine_def}
   INCLUDE_DIRS
     inc
+    ../../../Framework/PythonInterface/core/inc
     ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${TARGET_LIBRARIES}
+    PythonInterfaceCore
   QT5_LINK_LIBS
     Qt5::Concurrent
     Qt5::Help
