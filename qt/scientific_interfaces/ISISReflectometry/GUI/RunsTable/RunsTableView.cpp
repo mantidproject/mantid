@@ -12,6 +12,10 @@
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 
+#if !QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/Icons.h"
+#endif
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -133,61 +137,129 @@ void RunsTableView::setProcessButtonEnabled(bool enable) {
   m_ui.processButton->setEnabled(enable);
 }
 
-QAction *RunsTableView::addToolbarItem(Action action,
-                                       std::string const &iconPath,
+/**
+ * Returns a toolbar item/action
+ * @param action
+ * @param icon For Qt4 The IconPath i.e. Mantidplot. In Qt5 uses it to get the
+ * Icon from the mantidqt.icons library.
+ * @param description
+ * @return QAction*
+ */
+QAction *RunsTableView::addToolbarItem(Action action, std::string const &icon,
                                        std::string const &description) {
-  m_actions[action] =
-      m_ui.toolBar->addAction(QIcon(QString::fromStdString(iconPath)),
-                              QString::fromStdString(description));
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_actions[action] = m_ui.toolBar->addAction(
+      QIcon(QString::fromStdString(icon)), QString::fromStdString(description));
   return m_actions[action];
+#else
+  // Need for this if statement should be temporary for testing
+  QIcon qIcon;
+  if (icon == "") {
+    qIcon = QIcon(QString::fromStdString(""));
+  } else {
+    qIcon = MantidQt::Widgets::Common::getIcon(icon);
+  }
+
+  m_actions[action] =
+      m_ui.toolBar->addAction(qIcon, QString::fromStdString(description));
+  return m_actions[action];
+#endif
 }
 
 void RunsTableView::addToolbarActions() {
-  connect(addToolbarItem(Action::Process, "://stat_rows.png",
-                         "Process selected runs."),
+  std::map<Action, std::string> iconMap;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  // MantidPlot Icons
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Process, "://stat_rows.png"));
+  iconMap.insert(std::pair<Action, std::string>(Action::Pause, "://pause.png"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Expand, "://expand_all.png"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Collapse, "://collapse_all.png"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::PlotSelected, "://graph.png"));
+  iconMap.insert(std::pair<Action, std::string>(
+      Action::PlotSelectedStitchedOutput, "://trajectory.png"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::InsertRow, "://insert_row.png"));
+  iconMap.insert(std::pair<Action, std::string>(Action::InsertGroup,
+                                                "://insert_group.png"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::DeleteRow, "://delete_row.png"));
+  iconMap.insert(std::pair<Action, std::string>(Action::DeleteGroup,
+                                                "://delete_group.png"));
+  iconMap.insert(std::pair<Action, std::string>(Action::Copy, "://copy.png"));
+  iconMap.insert(std::pair<Action, std::string>(Action::Paste, "://paste.png"));
+  iconMap.insert(std::pair<Action, std::string>(Action::Cut, "://cut.png"));
+#else
+  // Workbench Icons
+  iconMap.insert(std::pair<Action, std::string>(Action::Process, "fa.play"));
+  iconMap.insert(std::pair<Action, std::string>(Action::Pause, "fa.pause"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Expand, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Collapse, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::PlotSelected, "fa.fighter-jet"));
+  iconMap.insert(std::pair<Action, std::string>(
+      Action::PlotSelectedStitchedOutput, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::InsertRow, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::InsertGroup, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::DeleteRow, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::DeleteGroup, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Copy, "fa.fighter-jet"));
+  iconMap.insert(
+      std::pair<Action, std::string>(Action::Paste, "fa.fighter-jet"));
+  iconMap.insert(std::pair<Action, std::string>(Action::Cut, "fa.fighter-jet"));
+#endif
+  connect(addToolbarItem(Action::Process, iconMap[Action::Process],
+                         "Process selected runs"),
           SIGNAL(triggered(bool)), this, SLOT(onProcessPressed(bool)));
-  connect(addToolbarItem(Action::Pause, "://pause.png",
-                         "Pause processing of runs."),
+  connect(addToolbarItem(Action::Pause, iconMap[Action::Pause],
+                         "Pause processing of runs"),
           SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
-  connect(
-      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
-      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
-  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
+  connect(addToolbarItem(Action::Expand, iconMap[Action::Expand],
+                         "Expand all groups"),
+          SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
+  connect(addToolbarItem(Action::Collapse, iconMap[Action::Collapse],
                          "Collapse all groups"),
           SIGNAL(triggered(bool)), this,
           SLOT(onCollapseAllGroupsPressed(bool)));
-
-  connect(addToolbarItem(Action::PlotSelected, "://graph.png",
+  connect(addToolbarItem(Action::PlotSelected, iconMap[Action::PlotSelected],
                          "Plot selected rows as graphs"),
           SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed(bool)));
-
   connect(addToolbarItem(Action::PlotSelectedStitchedOutput,
-                         "://trajectory.png",
+                         iconMap[Action::PlotSelectedStitchedOutput],
                          "Plot selected rows with stitched outputs as graphs"),
           SIGNAL(triggered(bool)), this,
           SLOT(onPlotSelectedStitchedOutputPressed(bool)));
-
-  connect(addToolbarItem(Action::InsertRow, "://insert_row.png",
+  connect(addToolbarItem(Action::InsertRow, iconMap[Action::InsertRow],
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
-  connect(addToolbarItem(Action::InsertGroup, "://insert_group.png",
+  connect(addToolbarItem(Action::InsertGroup, iconMap[Action::InsertGroup],
                          "Insert group after first selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
-  connect(addToolbarItem(Action::DeleteRow, "://delete_row.png",
+  connect(addToolbarItem(Action::DeleteRow, iconMap[Action::DeleteRow],
                          "Delete all selected rows"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteRowPressed(bool)));
-  connect(addToolbarItem(Action::DeleteGroup, "://delete_group.png",
+  connect(addToolbarItem(Action::DeleteGroup, iconMap[Action::DeleteGroup],
                          "Delete all selected groups"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteGroupPressed(bool)));
-  connect(
-      addToolbarItem(Action::Copy, "://copy.png", "Copy the current selection"),
-      SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
-  connect(addToolbarItem(Action::Paste, "://paste.png",
+  connect(addToolbarItem(Action::Copy, iconMap[Action::Copy],
+                         "Copy the current selection"),
+          SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
+  connect(addToolbarItem(Action::Paste, iconMap[Action::Paste],
                          "Paste over the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onPastePressed(bool)));
-  connect(
-      addToolbarItem(Action::Cut, "://cut.png", "Cut the current selection"),
-      SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
+  connect(addToolbarItem(Action::Cut, iconMap[Action::Cut],
+                         "Cut the current selection"),
+          SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
 }
 
 MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {

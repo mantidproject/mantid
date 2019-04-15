@@ -13,7 +13,7 @@ namespace Widgets {
 namespace Common {
 namespace Python {
 
-namespace detail {
+namespace Detail {
 /**
  * @return A pointer to the C++ sip api object
  */
@@ -47,7 +47,7 @@ const sipAPIDef *sipAPI() {
 #endif
   return sip_API;
 }
-} // namespace detail
+} // namespace Detail
 
 } // namespace Python
 } // namespace Common

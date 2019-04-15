@@ -17,8 +17,7 @@ namespace Common {
 
 namespace {
 Python::Object constructArgs(const std::string &iconString) {
-  return Python::NewRef(
-      Py_BuildValue("(s)", Py_BuildValue("s", iconString.c_str())));
+  return Python::NewRef(Py_BuildValue("(s)", iconString.c_str()));
 }
 Python::Object constructKwargs() { return Python::NewRef(Py_BuildValue("{}")); }
 } // namespace

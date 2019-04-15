@@ -10,6 +10,13 @@
 #include "DllOption.h"
 #include <QIcon>
 
-EXPORT_OPT_MANTIDQT_COMMON QIcon getIcon(const std::string iconString);
+namespace MantidQt {
+namespace Widgets {
+namespace Common {
+
+EXPORT_OPT_MANTIDQT_COMMON QIcon getIcon(const std::string &iconString);
+}
+} // namespace Widgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_ICONS_H */

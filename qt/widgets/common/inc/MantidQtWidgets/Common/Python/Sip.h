@@ -7,6 +7,7 @@
 #ifndef MPLCPP_SIPUTILS_H
 #define MPLCPP_SIPUTILS_H
 
+#include "../DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include <sip.h>
 #include <stdexcept>
@@ -16,16 +17,16 @@ namespace Widgets {
 namespace Common {
 namespace Python {
 
-namespace detail {
-const sipAPIDef *sipAPI();
-} // namespace detail
+namespace Detail {
+EXPORT_OPT_MANTIDQT_COMMON const sipAPIDef *sipAPI();
+} // namespace Detail
 
 /**
  * Extract a C++ object of type T from the Python object
  * @param obj A sip-wrapped Python object
  */
 template <typename T> T *extract(const Object &obj) {
-  const auto sipapi = detail::sipAPI();
+  const auto sipapi = Detail::sipAPI();
   if (!PyObject_TypeCheck(obj.ptr(), sipapi->api_wrapper_type)) {
     throw std::runtime_error("extract() - Object is not a sip-wrapped type.");
   }

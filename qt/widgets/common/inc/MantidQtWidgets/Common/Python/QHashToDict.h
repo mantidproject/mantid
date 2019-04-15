@@ -28,7 +28,7 @@ Python::Object qHashToDict(const KwArgs &hash) {
 
   auto it = hash.constBegin();
   auto end = hash.constEnd();
-  auto sipAPI = detail::sipAPI();
+  auto sipAPI = Detail::sipAPI();
 
   while (it != end) {
     auto *k = new KwArgs::key_type(it.key());
