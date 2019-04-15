@@ -261,6 +261,10 @@ class RunTabPresenter(object):
         :return:
         """
         self._view.set_out_file_directory(new_directory)
+        # Update add runs save location. We want distinct reduction save/add runs save locations,
+        # but the add runs directory change when the main directory is, to avoid users having to
+        # remember to update in two places.
+        self._view.add_runs_presenter.handle_new_save_directory(new_directory)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table + Actions
