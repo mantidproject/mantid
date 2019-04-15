@@ -8,3 +8,5 @@ class PhaseTabWidget(object):
         self.phase_table_presenter = PhaseTablePresenter(self.phase_table_view, context)
 
         self.phase_table_view.set_calculate_phase_table_action(self.phase_table_presenter.handle_calulate_phase_table_clicked)
+
+        self.phase_table_view.set_calculate_phase_quad_action(self.phase_table_presenter.handle_calculate_phase_quad_button_clicked)

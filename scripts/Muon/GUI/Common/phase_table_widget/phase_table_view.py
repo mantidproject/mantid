@@ -46,7 +46,6 @@ class PhaseTableView(QtWidgets.QWidget):
         if index != -1:
             self.input_workspace_combo_box.setCurrentIndex(index)
 
-
     @property
     def forward_group(self):
         return str(self.forward_group_combo.currentText())
@@ -67,10 +66,34 @@ class PhaseTableView(QtWidgets.QWidget):
         if index != -1:
             self.backward_group_combo.setCurrentIndex(index)
 
+    @property
+    def phase_quad_input_workspace(self):
+        return str(self.phase_quad_input_workspace_combo.currentText())
+
+    @phase_quad_input_workspace.setter
+    def phase_quad_input_workspace(self, value):
+        index = self.phase_quad_input_workspace_combo.findText(value)
+        if index != -1:
+            self.phase_quad_input_workspace_combo.setCurrentIndex(index)
+
+    @property
+    def phase_table_for_phase_quad(self):
+        return str(self.phase_quad_phase_table_combo.currentText())
+
+    @phase_table_for_phase_quad.setter
+    def phase_table_for_phase_quad(self, value):
+        index = self.phase_quad_phase_table_combo.findText(value)
+        if index != -1:
+            self.phase_quad_phase_table_combo.setCurrentIndex(index)
+
     def set_input_combo_box(self, input_list):
         self.input_workspace_combo_box.clear()
         self.input_workspace_combo_box.addItems(input_list)
         self.input_workspace_combo_box.setCurrentIndex(0)
+
+        self.phase_quad_input_workspace_combo.clear()
+        self.phase_quad_input_workspace_combo.addItems(input_list)
+        self.phase_quad_input_workspace_combo.setCurrentIndex(0)
 
     def set_group_combo_boxes(self, group_list):
         self.forward_group_combo.clear()
@@ -85,8 +108,18 @@ class PhaseTableView(QtWidgets.QWidget):
         self._old_backward_index =  1
         self._old_forward_index = 0
 
+    def set_phase_table_combo_box(self, phase_table_list):
+        self.phase_quad_phase_table_combo.clear()
+
+        self.phase_quad_phase_table_combo.addItems(phase_table_list)
+
+        self.phase_quad_phase_table_combo.setCurrentIndex(0)
+
     def set_calculate_phase_table_action(self, action):
         self.calculate_phase_table_button.clicked.connect(action)
+
+    def set_calculate_phase_quad_action(self, action):
+        self.calculate_phase_quad_button.clicked.connect(action)
 
     def ensure_groups_different(self):
         if self.backward_group_combo.currentText() == self.forward_group_combo.currentText():
@@ -145,7 +178,14 @@ class PhaseTableView(QtWidgets.QWidget):
 
         self.calculate_phase_table_button = QtWidgets.QPushButton('Calculate Phase Table', self)
 
+        self.phase_quad_input_workspace_combo = QtWidgets.QComboBox(self)
+        self.phase_quad_phase_table_combo = QtWidgets.QComboBox(self)
+        self.calculate_phase_quad_button = QtWidgets.QPushButton('Calculate Phase Quad', self)
+
         # add to layout
         splitter.addWidget(self.phase_table_options_table)
         self.grid.addWidget(splitter)
         self.grid.addWidget(self.calculate_phase_table_button)
+        self.grid.addWidget(self.phase_quad_input_workspace_combo)
+        self.grid.addWidget(self.phase_quad_phase_table_combo)
+        self.grid.addWidget(self.calculate_phase_quad_button)
