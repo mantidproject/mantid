@@ -845,8 +845,7 @@ i.e. one pass.
     std::vector<BnId>::iterator vc;
     for (vc = Work.begin(); vc != Work.end(); ++vc) {
       const int GrpIndex(vc->TrueCount() + 1);
-      auto oc = vc + 1;
-      for (oc = vc + 1; oc != Work.end(); ++oc) {
+      for (auto oc = vc + 1; oc != Work.end(); ++oc) {
         const int OCnt = oc->TrueCount();
         if (OCnt > GrpIndex)
           break;
@@ -1123,20 +1122,16 @@ component)
 @return number of parts
 */
 {
-  /**
-  If this is DNF then we don't want
-  to calculate the DNF but just use it
-  */
+  // If this is DNF then we don't want to calculate the DNF but just use it
   if (isDNF()) {
     Parts.clear();
+    Parts.reserve(Units.size() + Comp.size());
     for (const auto &item : Units) {
       Acomp Aitem(1); // Intersection (doesn't matter since 1 object)
       Aitem.addUnitItem(item);
       Parts.push_back(Aitem);
     }
-    for (const auto &item : Comp) {
-      Parts.push_back(item);
-    }
+    std::copy(Comp.cbegin(), Comp.cend(), std::back_inserter(Parts));
     return static_cast<int>(Parts.size());
   }
 

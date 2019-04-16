@@ -474,9 +474,9 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   }
 }
 
-void MeshObject::translate(Kernel::V3D translationVector) {
+void MeshObject::translate(const Kernel::V3D &translationVector) {
   for (Kernel::V3D &vertex : m_vertices) {
-    vertex = vertex + translationVector;
+    vertex += translationVector;
   }
 }
 

@@ -520,10 +520,6 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // form the input string for the ShapeFactory
   std::ostringstream obj_str;
   if (type == "box") {
-
-    if (hz == 0)
-      hz = 0.1;
-
     hx = hy = 0;
     height = 0;
     V3D p0 = vectors[0];
