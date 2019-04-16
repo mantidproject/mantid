@@ -8,6 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -47,7 +48,7 @@ GenerateEventsFilter::GenerateEventsFilter()
 void GenerateEventsFilter::init() {
   // Input/Output Workspaces
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "An input event workspace");
 
@@ -1858,6 +1859,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   int64_t extended_ns = static_cast<int64_t>(1.0E8);
   if (m_dataWS->run().hasProperty("proton_charge")) {
     // Get last proton charge time and compare with run end time
+    // this does nothing but make sure that run().endTime() is same as proton charge end time
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             m_dataWS->run().getProperty("proton_charge"));
@@ -1885,6 +1887,10 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   } else if (norunendset && m_dataWS->getNumberEvents() > 0) {
     // No proton_charge or run_end: sort events and find the last event
     norunendset = false;
+
+    DataObjects::EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(m_dataWS);
+    if (!eventWS)
+      throw std::runtime_error() << "Input workspace " << m_dataWS->name() << " is not an Eventworkspace and does not have proton charge log. Therefore it fails to find run end time.\n";
 
     for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i) {
       const DataObjects::EventList &evlist = m_dataWS->getSpectrum(i);

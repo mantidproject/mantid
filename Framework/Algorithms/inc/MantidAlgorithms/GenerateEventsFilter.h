@@ -158,7 +158,7 @@ private:
   /// Find the end of the run
   Types::Core::DateAndTime findRunEnd();
 
-  DataObjects::EventWorkspace_const_sptr m_dataWS;
+  API::MantidImage_const_sptr m_dataWS;
 
   /// SplitterWorkspace
   DataObjects::SplittersWorkspace_sptr m_splitWS;
