@@ -1891,11 +1891,12 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
 
     DataObjects::EventWorkspace_const_sptr eventWS =
         boost::dynamic_pointer_cast<EventWorkspace>(m_dataWS);
-    if (!eventWS)
-      throw std::runtime_error()
-          << "Input workspace " << m_dataWS->name()
+    if (!eventWS) {
+      g_log.error() << "Input workspace " << m_dataWS->name()
           << " is not an Eventworkspace and does not have proton charge log. "
              "Therefore it fails to find run end time.\n";
+      throw std::runtime_error("Input workspace cannot be neither an EventWorkspace nor have proton charge.");
+    }
 
     for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i) {
       const DataObjects::EventList &evlist = m_dataWS->getSpectrum(i);
