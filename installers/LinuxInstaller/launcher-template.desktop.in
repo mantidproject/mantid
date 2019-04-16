@@ -1,12 +1,12 @@
 [Desktop Entry]
-Name=MantidPlot
+Name=@DESKTOP_NAME@
 Comment=Neutron Data Reduction Framework
-GenericName=MantidPlot
-Exec=/opt/Mantid/bin/MantidPlot
+GenericName=@DESKTOP_NAME@
+Exec=@DESKTOP_EXEC_CMD@
 Terminal=false
 X-MultipleArgs=false
 Type=Application
 Categories=Education;Science;Qt;Analysis
-Icon=mantidplot
+Icon=@DESKTOP_ICON@
 StartupNotify=false
-Name[en]=MantidPlot
+Name[en]=@DESKTOP_NAME@
