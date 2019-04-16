@@ -1885,19 +1885,24 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
 
     g_log.debug() << "Check point 2A "
                   << " run end time = " << runendtime << "\n";
-  } else if (norunendset && m_dataWS->getNumberEvents() > 0) {
+  } else if (norunendset) {
     // No proton_charge or run_end: sort events and find the last event
     norunendset = false;
 
+    runendtime = 0;
+
     DataObjects::EventWorkspace_const_sptr eventWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(m_dataWS);
+        boost::dynamic_pointer_cast<const EventWorkspace>(m_dataWS);
     if (!eventWS) {
       g_log.error()
-          << "Input workspace " << m_dataWS->name()
+          << "Input workspace " << m_dataWS->getName()
           << " is not an Eventworkspace and does not have proton charge log. "
              "Therefore it fails to find run end time.\n";
       throw std::runtime_error("Input workspace cannot be neither an "
                                "EventWorkspace nor have proton charge.");
+    } else if (eventWS->getNumberEvents() == 0) {
+      g_log.error() << "Input EventWorkspace has zero event.  Unable to "
+                       "determine run end time";
     }
 
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
