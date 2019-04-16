@@ -161,12 +161,16 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), outputWS);
 
+  const std::string backgroundRange =
+      std::to_string(static_cast<int>(spectrumRanges.front())) +
+      "," + std::to_string(static_cast<int>(spectrumRanges.back()));
+
   auto LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
   LRBgd->setProperty("InputWorkspace", outputWS);
   LRBgd->setProperty("LowResolutionRange", getPropertyValue("YRange"));
   LRBgd->setProperty("PeakRange", getPropertyValue("PeakRange"));
-  LRBgd->setProperty("BackgroundRange", getPropertyValue("BackgroundRange"));
+  LRBgd->setProperty("BackgroundRange", backgroundRange);
   LRBgd->setProperty("SumPeak", getPropertyValue("SumPeak"));
   LRBgd->execute();
 }
@@ -210,20 +214,19 @@ void ReflectometryBackgroundSubtraction::init() {
   // Average pixel properties
 
   auto lengthArray = boost::make_shared<ArrayLengthValidator<int>>(2);
-  declareProperty(
-      make_unique<ArrayProperty<int>>("PeakRange", "0,0", lengthArray),
+  declareProperty(make_unique<ArrayProperty<int>>("PeakRange", "147, 163", lengthArray),
       "Pixel range defining the reflectivity peak");
   declareProperty(
-      make_unique<ArrayProperty<int>>("BackgroundRange", "0,0", lengthArray),
-      "Pixel range defining the outer range of the background on each side of "
-      "the peak");
-  declareProperty(
-      make_unique<ArrayProperty<int>>("YRange", "0,0", lengthArray),
+      make_unique<ArrayProperty<int>>("YRange", "94, 160", lengthArray),
       "Pixel range defining the low-resolution axis to integrate over");
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
 
-  setPropertySettings("YRange", make_unique<EnabledWhenProperty>(
+  setPropertySettings("PeakRange", make_unique<EnabledWhenProperty>(
+                                    "BackgroundCalculationMethod", IS_EQUAL_TO,
+                                    "Average Pixel Fit"));
+
+	setPropertySettings("YRange", make_unique<EnabledWhenProperty>(
                                     "BackgroundCalculationMethod", IS_EQUAL_TO,
                                     "Average Pixel Fit"));
 
@@ -251,10 +254,12 @@ void ReflectometryBackgroundSubtraction::exec() {
     setPropertyValue("OutputWorkspace", wsName);
   }
 
+	std::vector<specnum_t> indexList;
   std::vector<specnum_t> spectraList;
   for (auto index : indexSet) {
     auto &spec = inputWS->getSpectrum(index);
     spectraList.push_back(spec.getSpectrumNo());
+    indexList.push_back(index);
   }
 
   if (backgroundType == "Per Detector Average") {
@@ -262,13 +267,13 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
-    auto spectrumRanges = findSpectrumRanges(spectraList);
+    auto spectrumRanges = findSpectrumRanges(indexList);
     calculatePolynomialBackground(inputWS, spectrumRanges);
   }
 
   if (backgroundType == "Average Pixel Fit") {
-    auto spectrumRanges = findSpectrumRanges(spectraList);
-    subtractPixelBackground(inputWS, spectrumRanges);
+    auto spectrumRanges = findSpectrumRanges(indexList);
+		subtractPixelBackground(inputWS, spectrumRanges);
   }
 }
 
@@ -293,8 +298,8 @@ ReflectometryBackgroundSubtraction::validateInputs() {
     if (backgroundType == "Average Pixel Fit" && indexSet.size() == 1) {
       errors["InputWorkspaceIndexSet"] = "Input workspace index set must "
                                          "contain a more than one spectra for "
-                                         "polynomial background subtraction";
-    }
+                                         "Average Pixel Fit background subtraction";
+    } 
   }
   return errors;
 }
