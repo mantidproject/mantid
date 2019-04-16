@@ -27,8 +27,10 @@ void AlgorithmProgressPresenter::algorithmStartedSlot(
 
 void AlgorithmProgressPresenter::algorithmEndedSlot(
     Mantid::API::AlgorithmID alg) {
-  m_algorithm = alg;
-  m_view->algorithmEnded();
+  if (alg == this->m_algorithm) {
+    m_algorithm = nullptr;
+    m_view->algorithmEnded();
+  }
 }
 
 /// This slot is triggered whenever an algorithm reports progress.

@@ -319,8 +319,7 @@ bool IndirectInstrumentConfig::updateAnalysersList(MatrixWorkspace_sptr ws) {
   if (analysers.size() == 0)
     return false;
 
-  for (auto it = analysers.begin(); it != analysers.end(); ++it) {
-    QString analyser = *it;
+  for (auto analyser : analysers) {
     std::string ipfReflections =
         instrument->getStringParameter("refl-" + analyser.toStdString())[0];
     QStringList reflections = QString::fromStdString(ipfReflections).split(",");

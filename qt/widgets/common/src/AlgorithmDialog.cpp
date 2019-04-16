@@ -382,11 +382,11 @@ bool AlgorithmDialog::setPropertyValues(const QStringList &skipList) {
   // But only if the individual validation passed
   if (allValid) {
     std::map<std::string, std::string> errs = m_algorithm->validateInputs();
-    for (auto it = errs.begin(); it != errs.end(); it++) {
+    for (auto &err : errs) {
       // only count as an error if the named property exists
-      if (m_algorithm->existsProperty(it->first)) {
-        const QString pName = QString::fromStdString(it->first);
-        const QString value = QString::fromStdString(it->second);
+      if (m_algorithm->existsProperty(err.first)) {
+        const QString pName = QString::fromStdString(err.first);
+        const QString value = QString::fromStdString(err.second);
         if (m_errors.contains(pName)) {
           if (!m_errors[pName].isEmpty())
             m_errors[pName] += "\n";
@@ -761,8 +761,8 @@ void AlgorithmDialog::executeAlgorithmAsync() {
 
   try {
     // Add any custom AlgorithmObservers to the algorithm
-    for (auto it = m_observers.begin(); it != m_observers.end(); ++it) {
-      (*it)->observeAll(algToExec);
+    for (auto &observer : m_observers) {
+      observer->observeAll(algToExec);
     }
 
     // Only need to observe finish events if we are staying open

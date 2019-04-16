@@ -30,6 +30,8 @@ public:
 
   virtual void removePDFWorkspace() = 0;
 
+  virtual bool
+  isSelectedGroupPlottable(std::string const &selectedGroup) const = 0;
   virtual bool isResultGroupPlottable() const = 0;
   virtual bool isPDFGroupPlottable() const = 0;
 

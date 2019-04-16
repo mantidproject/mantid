@@ -180,7 +180,7 @@ class PythonFileInterpreter(QWidget):
         self._presenter.req_abort()
 
     def execute_async(self, ignore_selection=False):
-        self._presenter.req_execute_async(ignore_selection)
+        return self._presenter.req_execute_async(ignore_selection)
 
     def execute_async_blocking(self):
         self._presenter.req_execute_async_blocking()
@@ -301,7 +301,7 @@ class PythonFileInterpreterPresenter(QObject):
             self.view.set_status_message(ABORTED_STATUS_MSG)
 
     def req_execute_async(self, ignore_selection):
-        self._req_execute_impl(blocking=False, ignore_selection=ignore_selection)
+        return self._req_execute_impl(blocking=False, ignore_selection=ignore_selection)
 
     def req_execute_async_blocking(self):
         self._req_execute_impl(blocking=True)

@@ -368,7 +368,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       // Start from 1 to N+1 to be consistent with
       // the case where spectra are specified
       for (int i = 1; i < numDeadTimes / m_numberOfPeriods + 1; i++)
-        specToLoad.push_back(i);
+        specToLoad.emplace_back(i);
     }
 
     if (numDeadTimes < m_numberOfSpectra) {
@@ -390,6 +390,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         // Simplest case - one dead time for one detector
 
         // Populate deadTimes
+        deadTimes.reserve(specToLoad.size());
         for (auto &spectra : specToLoad) {
           deadTimes.emplace_back(deadTimesData[spectra - 1]);
         }
@@ -402,8 +403,9 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
         specToLoad.clear();
         for (int i = 1; i < numDeadTimes + 1; i++) {
-          specToLoad.push_back(i);
+          specToLoad.emplace_back(i);
         }
+        deadTimes.reserve(specToLoad.size());
         for (const auto &spectrum : specToLoad) {
           deadTimes.emplace_back(deadTimesData[spectrum - 1]);
         }
@@ -418,9 +420,10 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
 
           // Populate deadTimes
+          deadTimes.reserve(specToLoad.size());
           for (auto spec : specToLoad) {
             int index = static_cast<int>(spec - 1 + i * m_numberOfSpectra);
-            deadTimes.push_back(deadTimesData[index]);
+            deadTimes.emplace_back(deadTimesData[index]);
           }
 
           // Load into table

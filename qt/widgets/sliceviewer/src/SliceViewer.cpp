@@ -1195,8 +1195,8 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
 //------------------------------------------------------------------------------
 /** Slot called when going into or out of dynamic rebinning mode */
 void SliceViewer::RebinMode_toggled(bool checked) {
-  for (size_t d = 0; d < m_dimWidgets.size(); d++) {
-    m_dimWidgets[d]->showRebinControls(checked);
+  for (auto &dimWidget : m_dimWidgets) {
+    dimWidget->showRebinControls(checked);
   }
   ui.btnRebinRefresh->setEnabled(checked);
   m_syncAutoRebin->setEnabled(checked);

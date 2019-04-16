@@ -768,10 +768,9 @@ void MultiDatasetFit::setLogNames() {
       const std::vector<Mantid::Kernel::Property *> logs =
           ws->run().getLogData();
       QStringList logNames;
-      for (int i = 0; i < static_cast<int>(logs.size()); ++i) {
-        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(
-                logs[i])) {
-          logNames << QString::fromStdString(logs[i]->name());
+      for (auto log : logs) {
+        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(log)) {
+          logNames << QString::fromStdString(log->name());
         }
       }
       if (!logNames.isEmpty()) {

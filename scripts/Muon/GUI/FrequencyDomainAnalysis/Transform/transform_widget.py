@@ -11,10 +11,10 @@ from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformV
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
 from Muon.GUI.Common.observer_pattern import Observer
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class TransformWidget(QtGui.QWidget):
+class TransformWidget(QtWidgets.QWidget):
 
     def __init__(self, load, fft_widget, maxent_widget, parent=None):
         super(TransformWidget, self).__init__(parent)

@@ -313,14 +313,14 @@ void LoadNexusLogs::exec() {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
       file.openPath("/" + entry_name);
-      std::map<std::string, std::string> entries = file.getEntries();
-      std::map<std::string, std::string>::const_iterator it = entries.begin();
+      entries = file.getEntries();
       std::string eventEntry;
-      for (; it != entries.end(); ++it) {
-        if (it->second == "NXevent_data") {
-          eventEntry = it->first;
-          break;
-        }
+      const auto found =
+          std::find_if(entries.cbegin(), entries.cend(), [](const auto &entry) {
+            return entry.second == "NXevent_data";
+          });
+      if (found != entries.cend()) {
+        eventEntry = found->first;
       }
       this->getLogger().debug()
           << "Opening"
@@ -470,7 +470,6 @@ void LoadNexusLogs::loadNPeriods(
     file.closeData();
 
     // Add the proton charge vector
-    API::Run &run = workspace->mutableRun();
     const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
     if (!run.hasProperty(protonChargeByPeriodLabel)) {
       run.addProperty(new ArrayProperty<double>(

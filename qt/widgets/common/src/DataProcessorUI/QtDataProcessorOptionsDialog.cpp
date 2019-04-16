@@ -38,10 +38,10 @@ void QtDataProcessorOptionsDialog::initBindings() {
   // Check all the widgets for the "reflOptionName" property.
   // If it exists, bind the named option to that widget.
   QList<QWidget *> widgets = findChildren<QWidget *>();
-  for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-    QVariant binding = (*it)->property("reflOptionName");
+  for (auto &widget : widgets) {
+    QVariant binding = widget->property("reflOptionName");
     if (binding.isValid())
-      m_bindings[binding.toString()] = (*it)->objectName();
+      m_bindings[binding.toString()] = widget->objectName();
   }
 }
 
@@ -51,20 +51,20 @@ void QtDataProcessorOptionsDialog::saveOptions() {
 
   // Iterate through all our bound widgets, pushing their value into the options
   // map
-  for (auto it = m_bindings.begin(); it != m_bindings.end(); ++it) {
-    QString widgetName = it->second;
+  for (auto &binding : m_bindings) {
+    QString widgetName = binding.second;
     if (widgetName.isEmpty())
       continue;
 
     QCheckBox *checkbox = findChild<QCheckBox *>(widgetName);
     if (checkbox) {
-      options[it->first] = checkbox->isChecked();
+      options[binding.first] = checkbox->isChecked();
       continue;
     }
 
     QSpinBox *spinbox = findChild<QSpinBox *>(widgetName);
     if (spinbox) {
-      options[it->first] = spinbox->value();
+      options[binding.first] = spinbox->value();
       continue;
     }
   }
@@ -78,20 +78,20 @@ void QtDataProcessorOptionsDialog::loadOptions() {
   std::map<QString, QVariant> options = m_presenter->options();
 
   // Set the values from the options
-  for (auto it = options.begin(); it != options.end(); ++it) {
-    QString widgetName = m_bindings[it->first];
+  for (auto &option : options) {
+    QString widgetName = m_bindings[option.first];
     if (widgetName.isEmpty())
       continue;
 
     QCheckBox *checkbox = findChild<QCheckBox *>(widgetName);
     if (checkbox) {
-      checkbox->setChecked(it->second.toBool());
+      checkbox->setChecked(option.second.toBool());
       continue;
     }
 
     QSpinBox *spinbox = findChild<QSpinBox *>(widgetName);
     if (spinbox) {
-      spinbox->setValue(it->second.toInt());
+      spinbox->setValue(option.second.toInt());
       continue;
     }
   }

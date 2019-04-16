@@ -40,6 +40,8 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_propTree->addProperty(m_properties["SampleBinning"]);
   m_propTree->addProperty(m_properties["ResBinning"]);
 
+  formatTreeWidget(m_propTree, m_properties);
+
   // Set default values
   m_dblManager->setValue(m_properties["SampleBinning"], 1);
   m_dblManager->setMinimum(m_properties["SampleBinning"], 1);

@@ -33,7 +33,6 @@ class BeamCentrePresenter(object):
             self._presenter.on_processing_error_centre_finder(error)
 
     def __init__(self, parent_presenter, WorkHandler, BeamCentreModel, SANSCentreFinder):
-        super(BeamCentrePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()

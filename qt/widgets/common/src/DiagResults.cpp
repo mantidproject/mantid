@@ -28,13 +28,13 @@ namespace {
 /// the total number of tests that results are reported for here
 const int NUMTESTS = 5;
 /// the list of tests that we display results for
-const QString TESTS[5] = {"Hard mask", "First detector vanadium test",
-                          "Second detector vanadium test", "Background test",
-                          "PSD Bleed test"};
+const QString TESTS[NUMTESTS] = {"Hard mask", "First detector vanadium test",
+                                 "Second detector vanadium test",
+                                 "Background test", "PSD Bleed test"};
 
 int find_test(const std::string &test_name) {
   int found = -1;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < NUMTESTS; i++) {
     if (TESTS[i].toStdString() == test_name) {
       found = i + 1;
       return found;
@@ -55,8 +55,7 @@ DiagResults::DiagResults(QWidget *parent)
   addRow("Test", "Number of failed spectra");
   // make one row for each set of results
   int row = 0;
-  for (int i = 0; i < NUMTESTS; i++) {
-    QString col1 = TESTS[i];
+  for (auto col1 : TESTS) {
     QString col2 = "N/A";
     row = addRow(col1, col2);
   }
