@@ -34,6 +34,7 @@ Improvements
 - Improved the I(Q, t) tab by adding more validation checks for the input data.
 - Improved the Fit and Difference plots in MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit. It is now possible to adjust their
   relative sizes by dragging a 'handle' between the plots.
+- Improved the I(Q,T) tab by allowing an asymmetric energy range.
 
 Bug Fixes
 #########
