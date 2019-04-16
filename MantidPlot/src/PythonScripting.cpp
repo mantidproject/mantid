@@ -226,8 +226,8 @@ void PythonScripting::setupPythonPath() {
   // any .pth files
   const auto appPath = ConfigService::Instance().getPropertiesDir();
   PyObject *sitemod = PyImport_ImportModule("site");
-  Py_DECREF(PyObject_CallMethod(sitemod, "addsitedir", STR_LITERAL("(s)"),
-                                appPath.c_str()));
+  Py_DECREF(PyObject_CallMethod(sitemod, STR_LITERAL("addsitedir"),
+                                STR_LITERAL("(s)"), appPath.c_str()));
   Py_DECREF(sitemod);
 
   // The python sys.path is then updated as follows:
