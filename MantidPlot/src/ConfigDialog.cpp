@@ -2177,7 +2177,7 @@ void ConfigDialog::languageChange() {
   itemsList->addItem(tr("MD Plotting"));
   itemsList->setCurrentRow(0);
   itemsList->item(0)->setIcon(QIcon(getQPixmap("general_xpm")));
-  itemsList->item(1)->setIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  itemsList->item(1)->setIcon(QIcon(":/mantidplot.png"));
   itemsList->item(2)->setIcon(QIcon(getQPixmap("configTable_xpm")));
   itemsList->item(3)->setIcon(QIcon(getQPixmap("config_curves_xpm")));
   itemsList->item(4)->setIcon(QIcon(getQPixmap("logo_xpm")));
