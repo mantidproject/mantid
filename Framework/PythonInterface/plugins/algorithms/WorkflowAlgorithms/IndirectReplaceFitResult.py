@@ -71,8 +71,8 @@ def get_indices_of_equivalent_labels(input_workspace, destination_workspace):
 def fit_parameter_missing(single_fit_workspace, destination_workspace, exclude_parameters):
     single_parameters = single_fit_workspace.getAxis(1).extractValues()
     destination_parameters = destination_workspace.getAxis(1).extractValues()
-    return any([True for parameter in single_parameters
-                if parameter not in destination_parameters and parameter not in exclude_parameters])
+    return any([parameter not in destination_parameters and parameter not in exclude_parameters
+                for parameter in single_parameters])
 
 
 class IndirectReplaceFitResult(PythonAlgorithm):

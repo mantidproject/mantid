@@ -139,6 +139,29 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         result, _ = CompareWorkspaces(output, expected_output, Tolerance=0.00001)
         self.assertTrue(result)
 
+    def test_that_get_indices_of_equivalent_labels_will_return_the_correct_indices(self):
+        from IndirectReplaceFitResult import get_indices_of_equivalent_labels
+
+        indices = get_indices_of_equivalent_labels(self._input_workspace, self._single_fit_workspace)
+
+        self.assertEqual(indices[0], 0)
+        self.assertEqual(indices[1], 1)
+
+    def test_that_fit_parameter_missing_returns_false_when_there_are_no_fit_parameters_missing(self):
+        from IndirectReplaceFitResult import fit_parameter_missing
+        self.assertFalse(fit_parameter_missing(self._single_fit_workspace, self._input_workspace, ['Chi_squared']))
+
+    def test_that_fit_parameter_missing_returns_true_when_a_fit_parameter_is_missing(self):
+        from IndirectReplaceFitResult import fit_parameter_missing
+        self.assertFalse(fit_parameter_missing(self._single_fit_workspace, self._input_workspace, []))
+
+    def test_that_get_x_insertion_index_returns_the_expected_insertion_index(self):
+        from IndirectReplaceFitResult import get_x_insertion_index
+
+        index = get_x_insertion_index(self._input_workspace, self._single_fit_workspace)
+
+        self.assertEqual(index, 1)
+
 
 if __name__ == '__main__':
     unittest.main()
