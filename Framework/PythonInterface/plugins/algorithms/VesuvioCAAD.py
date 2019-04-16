@@ -11,8 +11,8 @@ from mantid.api import (AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator,
                            StringMandatoryValidator)
-from mantid.simpleapi import (AppendSpectra, Divide, ExtractSingleSpectrum, ExtractSpectra, Integration, SumSpectra,
-                              VesuvioTOFFit)
+from mantid.simpleapi import (AppendSpectra, Divide, EvaluateFunction, ExtractSingleSpectrum, ExtractSpectra,
+                              Integration, Minus, Multiply, SumSpectra, VesuvioTOFFit)
 from functools import reduce
 
 
@@ -61,13 +61,6 @@ def normalise_by_integral(workspace):
                   OutputWorkspace="__divided",
                   StoreInADS=False,
                   EnableLogging=False)
-
-
-def conjoin_workspaces(workspaces):
-    conjoined = workspaces[0]
-    for workspace in workspaces[1:]:
-        conjoined = append(conjoined, workspace)
-    return conjoined
 
 
 def set_axis_labels(workspace, labels, axis_index):
@@ -128,11 +121,12 @@ class VesuvioCAAD(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc='The name of the output workspace containing the sum of the normalised fit data.')
-        self.declareProperty(MatrixWorkspaceProperty(name='OutputCAAD', defaultValue='',
+        self.declareProperty(MatrixWorkspaceProperty(name='OutputDataCAAD', defaultValue='',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc='The name of the output workspace containing the sum of the normalised input data.')
-        self.declareProperty(name='Chi_squared', defaultValue=0.0, direction=Direction.Output,
-                             doc='The value of the Chi-Squared.')
+        self.declareProperty(MatrixWorkspaceProperty(name='OutputChiSquared', defaultValue='',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The output workspace containing the calculated Chi-Squared.')
 
     def _setup(self):
         self._input_workspace = self.getProperty('InputWorkspace').value
@@ -149,15 +143,28 @@ class VesuvioCAAD(PythonAlgorithm):
 
         number_of_spectra = self._input_workspace.getNumberHistograms()
 
-        fit_workspaces = [self._vesuvio_tof_fit(self._input_workspace, index) for index in range(number_of_spectra)]
         input_workspaces = [extract_single_spectra(self._input_workspace, index) for index in range(number_of_spectra)]
+        data_caad = self._compute_caad(input_workspaces)[0]
 
-        fit_caad = conjoin_workspaces(self._compute_caad(fit_workspaces))
+        fit_workspaces = [self._vesuvio_tof_fit(self._input_workspace, index) for index in range(number_of_spectra)]
+        fit_caad = self._compute_caad(fit_workspaces)[0]
         set_axis_labels(fit_caad, self._get_caad_axis_labels(fit_workspaces[0]), 1)
 
-        self.setProperty('OutputWorkspace', fit_caad)
-        self.setProperty('OutputCAAD', self._compute_caad(input_workspaces)[0])
-        self.setProperty('Chi_squared', 5.5)
+        #function = 'composite=ComptonScatteringCountRate,NumDeriv=1,IntensityConstraints="Matrix(1|4)0.000000|1.000000|' \
+        #           '0.000000|-4.000000";name=GramCharlierComptonProfile,Mass=1.007900,HermiteCoeffs=1 0 0,Width=5.000000;' \
+        #           'name=GaussianComptonProfile,Mass=16.000000,Width=10.000000;name=GaussianComptonProfile,Mass=27.000000,' \
+        #           'Width=13.000000;name=GaussianComptonProfile,Mass=133.000000,Width=30.000000;name=Polynomial,n=3'
+
+        #function = 'name=Lorentzian,Amplitude=39.1348,PeakCentre=314.934,FWHM=29.5195;name=Lorentzian,Amplitude=113.69' \
+        #           '4,PeakCentre=365.873,FWHM=21.2816'
+        function = 'name=GaussianComptonProfile,Mass=16.000000,Width=10.000000;name=GaussianComptonProfile,Mass=27.000000,' \
+                   'Width=13.000000;name=GaussianComptonProfile,Mass=133.000000,Width=30.000000;'
+
+        output_test = EvaluateFunction(InputWorkspace=data_caad, Function=function)
+
+        self.setProperty('OutputWorkspace', output_test)
+        self.setProperty('OutputDataCAAD', data_caad)
+        self.setProperty('OutputChiSquared', self._compute_chi_squared(data_caad, fit_caad))
 
     def _vesuvio_tof_fit(self, workspace, index):
         fitted_workspace, _, _ = VesuvioTOFFit(InputWorkspace=workspace,
@@ -195,7 +202,18 @@ class VesuvioCAAD(PythonAlgorithm):
 
     @staticmethod
     def _is_valid_for_caad(label):
-        return label != "Data" and label != "Diff"
+        return label == 'Calc'
+
+    @staticmethod
+    def _compute_chi_squared(data_caad, fit_caad):
+        subtracted = Minus(LHSWorkspace=data_caad,
+                           RHSWorkspace=fit_caad,
+                           StoreInADS=False,
+                           EnableLogging=False)
+        return Multiply(LHSWorkspace=subtracted,
+                        RHSWorkspace=subtracted,
+                        StoreInADS=False,
+                        EnableLogging=False)
 
 
 AlgorithmFactory.subscribe(VesuvioCAAD)
