@@ -79,9 +79,10 @@ public:
     Workspace_sptr workspace;
     TSM_ASSERT("Decoder's data buffers should be created now",
                decoder->hasData());
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
+
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
 
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
@@ -115,9 +116,10 @@ public:
     startCapturing(*decoder, 2);
 
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
+
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
 
     // --- Workspace checks ---
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
@@ -343,9 +345,9 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 2);
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
 
     // Check we did process the event message and extract the events
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
@@ -357,6 +359,63 @@ public:
 
     TSM_ASSERT_EQUALS("Expected 3 events from the event message", 3,
                       eventWksp->getNumberEvents());
+  }
+
+  void test_Compute_Bounds_Multiple_Threads() {
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
+        events = {
+            {0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {1, 0, 0}, {2, 0, 0}, {2, 0, 0},
+            {3, 0, 0}, {3, 0, 0}, {4, 0, 0}, {4, 0, 0}, {5, 0, 0}, {5, 0, 0},
+            {6, 0, 0}, {6, 0, 0}, {7, 0, 0}, {7, 0, 0},
+        };
+
+    const auto groupBounds = computeGroupBoundaries(events, 8);
+    TS_ASSERT_EQUALS(9, groupBounds.size());
+
+    TS_ASSERT_EQUALS(0, groupBounds[0]);
+    TS_ASSERT_EQUALS(2, groupBounds[1]);
+    TS_ASSERT_EQUALS(4, groupBounds[2]);
+    TS_ASSERT_EQUALS(6, groupBounds[3]);
+    TS_ASSERT_EQUALS(8, groupBounds[4]);
+    TS_ASSERT_EQUALS(10, groupBounds[5]);
+    TS_ASSERT_EQUALS(12, groupBounds[6]);
+    TS_ASSERT_EQUALS(14, groupBounds[7]);
+    TS_ASSERT_EQUALS(events.size(), groupBounds[8]);
+  }
+
+  void test_Compute_Bounds_Multiple_Threads_Low_Events() {
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
+        events = {
+            {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0}, {4, 0, 0},
+        };
+
+    const auto groupBounds = computeGroupBoundaries(events, 8);
+    TS_ASSERT_EQUALS(9, groupBounds.size());
+
+    const auto upper = events.size();
+
+    TS_ASSERT_EQUALS(0, groupBounds[0]);
+    TS_ASSERT_EQUALS(1, groupBounds[1]);
+    TS_ASSERT_EQUALS(2, groupBounds[2]);
+    TS_ASSERT_EQUALS(3, groupBounds[3]);
+    TS_ASSERT_EQUALS(5, groupBounds[4]);
+    TS_ASSERT_EQUALS(upper, groupBounds[5]);
+    TS_ASSERT_EQUALS(upper, groupBounds[6]);
+    TS_ASSERT_EQUALS(upper, groupBounds[7]);
+    TS_ASSERT_EQUALS(upper, groupBounds[8]);
+  }
+
+  void test_Compute_Bounds_Single_Thread() {
+    const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
+        events = {
+            {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {3, 0, 0}, {4, 0, 0},
+        };
+
+    const auto groupBounds = computeGroupBoundaries(events, 1);
+    TS_ASSERT_EQUALS(2, groupBounds.size());
+
+    TS_ASSERT_EQUALS(0, groupBounds[0]);
+    TS_ASSERT_EQUALS(events.size(), groupBounds[1]);
   }
 
   //----------------------------------------------------------------------------
@@ -458,7 +517,7 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "");
+    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", 0);
   }
 
   void

@@ -20,6 +20,12 @@ namespace LiveData {
 
 DECLARE_LISTENER(KafkaEventListener)
 
+KafkaEventListener::KafkaEventListener() : API::LiveListener() {
+  declareProperty("BufferThreshold", static_cast<uint64_t>(1000000),
+                  "Threshold number of events at which the intermediate event "
+                  "buffer will be flushed to the buffered EventWorkspace.");
+}
+
 void KafkaEventListener::setAlgorithm(
     const Mantid::API::IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
@@ -38,6 +44,8 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
     g_log.error(
         "KafkaEventListener::connect requires a non-empty instrument name");
   }
+
+  const std::size_t bufferThreshold = getProperty("BufferThreshold");
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
     const std::string eventTopic(m_instrumentName +
@@ -48,7 +56,8 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
         sampleEnvTopic(m_instrumentName +
                        KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(
-        broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic);
+        broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic,
+        bufferThreshold);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
