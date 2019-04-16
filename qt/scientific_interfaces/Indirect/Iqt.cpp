@@ -456,10 +456,23 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updatePropertyValues(QtProperty *, double)));
 
-  if (prop == m_properties["EHigh"] && val < 0)
-    m_dblManager->setValue(m_properties["EHigh"], -val);
-  else if (prop == m_properties["ELow"] && val > 0)
-    m_dblManager->setValue(m_properties["ELow"], -val);
+  if (prop == m_properties["EHigh"]) {
+    if (val < 0) {
+      val = -val;
+      m_dblManager->setValue(m_properties["EHigh"], val);
+    }
+
+    if (m_uiForm.ckSymmetricEnergy->isChecked())
+      m_dblManager->setValue(m_properties["ELow"], -val);
+  } else if (prop == m_properties["ELow"]) {
+    if (val > 0) {
+      val = -val;
+      m_dblManager->setValue(m_properties["ELow"], val);
+    }
+
+    if (m_uiForm.ckSymmetricEnergy->isChecked())
+      m_dblManager->setValue(m_properties["EHigh"], -val);
+  }
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updatePropertyValues(QtProperty *, double)));
