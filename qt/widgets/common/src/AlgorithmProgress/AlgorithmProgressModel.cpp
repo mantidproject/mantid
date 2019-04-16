@@ -82,7 +82,7 @@ void AlgorithmProgressModel::errorHandle(const Mantid::API::IAlgorithm *alg,
 /// @param alg The algorithm that has to be removed from the presenters
 void AlgorithmProgressModel::removeFrom(const Mantid::API::IAlgorithm *alg) {
   this->stopObserving(alg);
-  m_mainWindowPresenter->algorithmEnded(nullptr);
+  m_mainWindowPresenter->algorithmEnded(alg->getAlgorithmID());
   if (m_dialogPresenter) {
     m_dialogPresenter->algorithmEnded(alg->getAlgorithmID());
   }

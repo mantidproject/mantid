@@ -41,6 +41,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
   DEFS IN_MANTIDQT_REFDETECTORVIEWER
   INCLUDE_DIRS
     inc
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
@@ -64,7 +66,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
 mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
   QT_VERSION 4
   SRC src/RefDetectorViewDemo.cpp
-  INCLUDE_DIRS
+  SYSTEM_INCLUDE_DIRS
     ${Boost_INCLUDE_DIRS}
   LINK_LIBS
       ${TCMALLOC_LIBRARIES_LINKTIME}

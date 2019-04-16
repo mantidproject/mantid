@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 from functools import wraps
 import sys
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtCore, QtGui
 
 """
 This module contains the methods for
@@ -17,7 +17,7 @@ adding information to tables.
 """
 
 
-class ValidatedTableItem(QtGui.QTableWidgetItem):
+class ValidatedTableItem(QtWidgets.QTableWidgetItem):
     """
     An extension of the QTableWidgetItem class, which modifies the setData method to first check that the entered
     text is valid; and only runs setData if the validator returns True.
@@ -78,27 +78,27 @@ class ValidatedTableItem(QtGui.QTableWidgetItem):
 
 
 def setRowName(table, row, name):
-    text = QtGui.QTableWidgetItem((name))
+    text = QtWidgets.QTableWidgetItem((name))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
     table.setItem(row, 0, text)
 
 
 def addComboToTable(table,row,options,col=1):
-    combo=QtGui.QComboBox()
+    combo=QtWidgets.QComboBox()
     combo.addItems(options)
     table.setCellWidget(row,col,combo)
     return combo
 
 
 def addDoubleToTable(table,value,row,col=1, minimum=0.0):
-    number_widget = QtGui.QLineEdit(str(value))
+    number_widget = QtWidgets.QLineEdit(str(value))
     number_widget.setValidator(QtGui.QDoubleValidator(minimum, sys.float_info.max, 3))
     table.setCellWidget(row,col, number_widget)
     return number_widget
 
 
 def addCheckBoxToTable(table,state,row,col=1):
-    box = QtGui.QTableWidgetItem()
+    box = QtWidgets.QTableWidgetItem()
     box.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
     if state:
         box.setCheckState(QtCore.Qt.Checked)
@@ -110,7 +110,7 @@ def addCheckBoxToTable(table,state,row,col=1):
 
 
 def addSpinBoxToTable(table,default,row,col=1):
-    box = QtGui.QSpinBox()
+    box = QtWidgets.QSpinBox()
     if default > 99:
         box.setMaximum(default * 10)
     box.setValue(default)

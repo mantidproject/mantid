@@ -15,12 +15,17 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+Improvements
+############
+
+- Changed focus to save out .his files in the format <run-number><instrument> as opposed to <run-number>_<instrument> to allow for better compatibility with opengenie.
+
 Bug Fixes
 #########
 
--Prevented crash caused by canceling algorithms called by GUI.
+- Prevented crash caused by canceling algorithms called by GUI.
 
--Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
+- Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
 
 Single Crystal Diffraction
 --------------------------

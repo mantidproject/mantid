@@ -25,7 +25,7 @@
 namespace Mantid {
 namespace Kernel {
 
-class DLLExport StringTokenizer {
+class DLLExport StringTokenizer final {
 public:
   /// Specify tokenizer options. These can be combined using + or |.
   enum Options {
@@ -113,6 +113,11 @@ public:
    * @return the total number of tokens.
    */
   std::size_t count() const { return m_tokens.size(); }
+
+  /** Get the total number of tokens.
+   * @return the total number of tokens.
+   */
+  std::size_t size() const noexcept { return m_tokens.size(); }
 
 private:
   std::vector<std::string> m_tokens;

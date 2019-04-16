@@ -21,8 +21,13 @@ class RasterizeTest : public CxxTest::TestSuite {
 private:
   static constexpr double CYLINDER_RADIUS = .1;
   static constexpr double CYLINDER_HEIGHT = 3.;
+  static constexpr double CYLINDER_INNER_RADIUS = .09;
   static constexpr double CYLINDER_VOLUME =
       M_PI * CYLINDER_RADIUS * CYLINDER_RADIUS * CYLINDER_HEIGHT;
+  static constexpr double HOLLOW_CYLINDER_VOLUME =
+      M_PI * CYLINDER_HEIGHT *
+      (CYLINDER_RADIUS * CYLINDER_RADIUS -
+       CYLINDER_INNER_RADIUS * CYLINDER_INNER_RADIUS);
 
   static constexpr double SPHERE_RADIUS = 3.2;
   static constexpr double SPHERE_VOLUME =
@@ -41,6 +46,22 @@ private:
 
     return ComponentCreationHelper::createCappedCylinder(
         CYLINDER_RADIUS, CYLINDER_HEIGHT, baseCenter, symmetryAxis, "shape");
+  }
+
+  boost::shared_ptr<CSGObject> createHollowCylinder(bool centered) {
+    V3D baseCenter;
+    V3D symmetryAxis;
+    if (centered) {
+      baseCenter = V3D(0., -.5 * CYLINDER_HEIGHT, 0.);
+      symmetryAxis = V3D(0., 1., 0.);
+    } else {
+      baseCenter = V3D(0.0, 3.0, 0.);
+      symmetryAxis = V3D(0., 0., 1.);
+    }
+
+    return ComponentCreationHelper::createHollowCylinder(
+        CYLINDER_INNER_RADIUS, CYLINDER_RADIUS, CYLINDER_HEIGHT, baseCenter,
+        symmetryAxis, "shape");
   }
 
   boost::shared_ptr<CSGObject> createSphere(bool centered) {
@@ -111,6 +132,22 @@ public:
     simpleRasterChecks(raster, cylinder, NUM_ELEMENTS, CYLINDER_VOLUME);
   }
 
+  void test_calculateHollowCylinder() {
+    constexpr size_t NUM_SLICE{3};
+    constexpr size_t NUM_ANNULLI{3};
+
+    boost::shared_ptr<CSGObject> hollowCylinder = createHollowCylinder(true);
+    TS_ASSERT(hollowCylinder);
+    const auto raster = Rasterize::calculateHollowCylinder(
+        V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
+
+    // all the vector lengths should match
+    constexpr size_t NUM_ELEMENTS =
+        NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
+    simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS,
+                       HOLLOW_CYLINDER_VOLUME);
+  }
+
   void test_calculateOffsetCylinder() {
     constexpr size_t NUM_SLICE{3};
     constexpr size_t NUM_ANNULLI{3};
@@ -124,6 +161,22 @@ public:
     constexpr size_t NUM_ELEMENTS =
         NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
     simpleRasterChecks(raster, cylinder, NUM_ELEMENTS, CYLINDER_VOLUME);
+  }
+
+  void test_calculateOffsetHollowCylinder() {
+    constexpr size_t NUM_SLICE{3};
+    constexpr size_t NUM_ANNULLI{3};
+
+    boost::shared_ptr<CSGObject> hollowCylinder = createHollowCylinder(false);
+    TS_ASSERT(hollowCylinder);
+    const auto raster = Rasterize::calculateHollowCylinder(
+        V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
+
+    // all the vector lengths should match
+    constexpr size_t NUM_ELEMENTS =
+        NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
+    simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS,
+                       HOLLOW_CYLINDER_VOLUME);
   }
 
   void test_calculateCylinderOnSphere() {

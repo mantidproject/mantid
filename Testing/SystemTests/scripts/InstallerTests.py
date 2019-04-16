@@ -28,6 +28,8 @@ parser.add_argument('-o', dest='out2stdout', action='store_true',
                     help='Output to the screen instead of log files')
 parser.add_argument('-R', dest='test_regex', metavar='regexp', default=None,
                     help='Optionally only run the test matched by the regex')
+parser.add_argument("-E", dest="test_exclude", metavar="exclude", default=None,
+                    help="String specifying which tests to not run")
 parser.add_argument('--archivesearch', dest='archivesearch', action='store_true',
                     help='Turn on archive search for file finder')
 parser.add_argument('--exclude-in-pull-requests', dest="exclude_in_pr_builds",action="store_true",
@@ -83,7 +85,6 @@ if not os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     except Exception as err:
         scriptfailure('Revision test failed: '+str(err), installer)
 
-
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:
     run_test_cmd = '%s %s %s/runSystemTests.py --loglevel=%s --executable="%s" --exec-args="%s"' % \
@@ -92,6 +93,8 @@ try:
     run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
+    if options.test_exclude is not None:
+        run_test_cmd += " -E " + options.test_exclude
     if options.archivesearch:
         run_test_cmd += ' --archivesearch'
     if options.exclude_in_pr_builds:

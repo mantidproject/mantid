@@ -1115,11 +1115,10 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
       mapCmptToNameVector;
 
   auto paramNames = comp->getParameterNamesByComponent();
-  for (auto itParamName = paramNames.begin(); itParamName != paramNames.end();
-       ++itParamName) {
+  for (auto &itParamName : paramNames) {
     // build the data structure I need Map comp id -> vector of names
-    std::string paramName = itParamName->first;
-    Mantid::Geometry::ComponentID paramCompId = itParamName->second;
+    std::string paramName = itParamName.first;
+    Mantid::Geometry::ComponentID paramCompId = itParamName.second;
     // attempt to insert this will fail silently if the key already exists
     if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
       mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
@@ -1139,9 +1138,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
           "\nParameters from: " + paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(),
                 Mantid::Kernel::CaseInsensitiveStringComparator());
-      for (auto itParamName = compParamNames.begin();
-           itParamName != compParamNames.end(); ++itParamName) {
-        std::string paramName = *itParamName;
+      for (auto paramName : compParamNames) {
         // no need to search recursively as we are asking from the matching
         // component
         std::string paramValue =

@@ -80,8 +80,8 @@ void FindFilesWorker::run() {
     else if (m_parameters.isForRunFiles) {
       filenames = fileSearcher.findRuns(m_parameters.searchText);
       valueForProperty = "";
-      for (auto cit = filenames.begin(); cit != filenames.end(); ++cit) {
-        valueForProperty += QString::fromStdString(*cit) + ",";
+      for (auto &filename : filenames) {
+        valueForProperty += QString::fromStdString(filename) + ",";
       }
       valueForProperty.chop(1);
     }

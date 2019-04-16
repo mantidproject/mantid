@@ -127,17 +127,17 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
         // -------------- Find the data field name ----------------------------
         if (m_dataField.empty()) {
-          std::map<std::string, std::string> entries = file->getEntries();
-          std::map<std::string, std::string>::iterator it;
-          for (it = entries.begin(); it != entries.end(); ++it) {
-            if (it->second == "SDS") {
-              file->openData(it->first);
+          std::map<std::string, std::string> dataEntries = file->getEntries();
+          for (auto dataEntryIt = dataEntries.begin();
+               dataEntryIt != dataEntries.end(); ++dataEntryIt) {
+            if (dataEntryIt->second == "SDS") {
+              file->openData(dataEntryIt->first);
               if (file->hasAttr("signal")) {
                 int signal = 0;
                 file->getAttr("signal", signal);
                 if (signal == m_signalNo) {
                   // That's the right signal!
-                  m_dataField = it->first;
+                  m_dataField = dataEntryIt->first;
                   // Find the corresponding X axis
                   std::string axes;
                   m_assumeOldFile = false;
@@ -199,9 +199,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
       if (name.substr(0, 4) == "bank") {
         // OK, this is some bank data
         file->openGroup(name, it->second);
-        std::map<std::string, std::string> entries = file->getEntries();
+        const auto bankEntries = file->getEntries();
 
-        if (entries.find("pixel_id") != entries.end()) {
+        if (bankEntries.find("pixel_id") != bankEntries.end()) {
           bankNames.push_back(name);
 
           // Count how many pixels in the bank
@@ -210,9 +210,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           file->closeData();
 
           if (!dims.empty()) {
-            size_t newPixels = 1;
-            for (auto dim : dims)
-              newPixels *= dim;
+            const size_t newPixels = std::accumulate(
+                dims.cbegin(), dims.cend(), static_cast<size_t>(1),
+                [](size_t product, auto dim) { return product * dim; });
             m_numPixels += newPixels;
           }
         } else {
@@ -232,7 +232,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           }
         }
 
-        if (entries.find(m_axisField) != entries.end()) {
+        if (bankEntries.find(m_axisField) != bankEntries.end()) {
           // Get the size of the X vector
           file->openData(m_axisField);
           std::vector<int64_t> dims = file->getInfo().dims;

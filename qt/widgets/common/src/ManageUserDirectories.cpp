@@ -230,33 +230,33 @@ void ManageUserDirectories::browseToDirectory() {
 }
 void ManageUserDirectories::remDir() {
   QList<QListWidgetItem *> selected = listWidget()->selectedItems();
-  for (int i = 0; i < selected.size(); i++) {
-    delete selected[i];
+  for (auto &i : selected) {
+    delete i;
   }
 }
 void ManageUserDirectories::moveUp() {
   QListWidget *list = listWidget();
   QList<QListWidgetItem *> selected = list->selectedItems();
-  for (int i = 0; i < selected.size(); i++) {
-    int index = list->row(selected[i]);
+  for (auto &i : selected) {
+    int index = list->row(i);
     if (index != 0) {
       QListWidgetItem *move = list->takeItem(index);
       list->insertItem(index - 1, move);
     }
-    list->setCurrentItem(selected[i]);
+    list->setCurrentItem(i);
   }
 }
 void ManageUserDirectories::moveDown() {
   QListWidget *list = listWidget();
   int count = list->count();
   QList<QListWidgetItem *> selected = list->selectedItems();
-  for (int i = 0; i < selected.size(); i++) {
-    int index = list->row(selected[i]);
+  for (auto &i : selected) {
+    int index = list->row(i);
     if (index != (count - 1)) {
       QListWidgetItem *move = list->takeItem(index);
       list->insertItem(index + 1, move);
     }
-    list->setCurrentItem(selected[i]);
+    list->setCurrentItem(i);
   }
 }
 void ManageUserDirectories::selectSaveDir() {
