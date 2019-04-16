@@ -973,17 +973,17 @@ class AddOperation(object):
     The AddOperation allows to add two workspaces at a time.
     """
 
-    def __init__(self,isOverlay, time_shifts):
+    def __init__(self, is_overlay, time_shifts):
         """
         The AddOperation requires to know if the workspaces are to
         be plainly added or to be overlaid. Additional time shifts can be
         specified
-        @param isOverlay :: true if the operation is an overlay operation
-        @param time_shifts :: a string with comma-separted time shift values
+        :param is_overlay :: true if the operation is an overlay operation
+        :param time_shifts :: a string with comma-separated time shift values
         """
         super(AddOperation, self).__init__()
         factory = CombineWorkspacesFactory()
-        self.adder = factory.create_add_algorithm(isOverlay)
+        self.adder = factory.create_add_algorithm(is_overlay)
         self.time_shifter = TimeShifter(time_shifts)
 
     def add(self, LHS_workspace, RHS_workspace, output_workspace, run_to_add):
@@ -991,16 +991,17 @@ class AddOperation(object):
         Add two workspaces together and place the result into the outputWorkspace.
         The user needs to specify which run is being added in order to determine
         the correct time shift
-        @param LHS_workspace :: first workspace, this workspace is a reference workspace
+        :param LHS_workspace :: first workspace, this workspace is a reference workspace
                                 and hence never shifted
-        @param RHS_workspace :: second workspace which can be shifted in time
-        @param run_to_add :: the number of the nth added workspace
+        :param RHS_workspace :: second workspace which can be shifted in time
+        :param output_workspace :: the output workspace name
+        :param run_to_add :: the number of the nth added workspace
         """
         current_time_shift = self.time_shifter.get_Nth_time_shift(run_to_add)
         self.adder.add(LHS_workspace=LHS_workspace,
-                       RHS_workspace= RHS_workspace,
-                       output_workspace= output_workspace,
-                       time_shift = current_time_shift)
+                       RHS_workspace=RHS_workspace,
+                       output_workspace=output_workspace,
+                       time_shift=current_time_shift)
 
 
 class CombineWorkspacesFactory(object):
@@ -1011,11 +1012,11 @@ class CombineWorkspacesFactory(object):
     def __init__(self):
         super(CombineWorkspacesFactory, self).__init__()
 
-    def create_add_algorithm(self, isOverlay):
+    def create_add_algorithm(self, is_overlay):
         """
-        @param isOverlay :: if true we provide the OverlayWorkspaces functionality
+        :param is_overlay :: if true we provide the OverlayWorkspaces functionality
         """
-        if isOverlay:
+        if is_overlay:
             return OverlayWorkspaces()
         else:
             return PlusWorkspaces()
@@ -1029,12 +1030,12 @@ class PlusWorkspaces(object):
     def __init__(self):
         super(PlusWorkspaces, self).__init__()
 
-    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift=0.0):
         """
-        @param LHS_workspace :: the first workspace
-        @param RHS_workspace :: the second workspace
-        @param output_workspace :: the output workspace
-        @param time_shift :: unused parameter
+        :param LHS_workspace :: the first workspace
+        :param RHS_workspace :: the second workspace
+        :param output_workspace :: the output workspace
+        :param time_shift :: unused parameter
         """
         lhs_ws = self._get_workspace(LHS_workspace)
         rhs_ws = self._get_workspace(RHS_workspace)
@@ -1042,8 +1043,8 @@ class PlusWorkspaces(object):
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
         # cumulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
-        cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
-        Plus(LHSWorkspace = LHS_workspace, RHSWorkspace = RHS_workspace, OutputWorkspace = output_workspace)
+        cummulative_correction.extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
+        Plus(LHSWorkspace=LHS_workspace, RHSWorkspace=RHS_workspace, OutputWorkspace=output_workspace)
         out_ws = self._get_workspace(output_workspace)
         cummulative_correction.apply_cummulative_logs_to_workspace(out_ws)
 
@@ -1064,12 +1065,12 @@ class OverlayWorkspaces(object):
     def __init__(self):
         super(OverlayWorkspaces, self).__init__()
 
-    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift=0.0):
         """
-        @param LHS_workspace :: the first workspace
-        @param RHS_workspace :: the second workspace
-        @param output_workspace :: the output workspace
-        @param time_shift :: an additional time shift for the overlay procedure
+        :param LHS_workspace :: the first workspace
+        :param RHS_workspace :: the second workspace
+        :param output_workspace :: the output workspace
+        :param time_shift :: an additional time shift for the overlay procedure
         """
         rhs_ws = self._get_workspace(RHS_workspace)
         lhs_ws = self._get_workspace(LHS_workspace)
@@ -1080,18 +1081,19 @@ class OverlayWorkspaces(object):
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
         # cumulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
-        cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
+        cummulative_correction.extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
 
         # Create a temporary workspace with shifted time values from RHS, if the shift is necessary
         temp = rhs_ws
         temp_ws_name = 'shifted'
         if total_time_shift != 0.0:
-            temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
+            temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name,
+                                  RelativeTimeOffset=total_time_shift)
 
         # Add the LHS and shifted workspace
-        Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
+        Plus(LHSWorkspace=LHS_workspace, RHSWorkspace=temp, OutputWorkspace=output_workspace)
 
-        #Apply sample log correciton
+        # Apply sample log correction
         out_ws = self._get_workspace(output_workspace)
         cummulative_correction.apply_cummulative_logs_to_workspace(out_ws)
 
@@ -1118,7 +1120,7 @@ class OverlayWorkspaces(object):
         elif isinstance(workspace, str) and mtd.doesExist(workspace):
             return mtd[workspace]
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 
 
 class TimeShifter(object):
@@ -1134,29 +1136,30 @@ class TimeShifter(object):
     def get_Nth_time_shift(self, n):
         """
         Retrieves the specified additional time shift for the nth addition in seconds.
-        @param n :: the nth addition
+        :param n :: the nth addition
         """
         if len(self._time_shifts) >= (n+1):
             return self._cast_to_float(self._time_shifts[n])
         else:
             return 0.0
 
-    def _cast_to_float(self, element):
+    @staticmethod
+    def _cast_to_float(element):
         float_element = 0.0
         try:
             float_element = float(element)
         except ValueError:
-            pass# Log here
+            pass  # Log here
         return float_element
 
 
 def transfer_special_sample_logs(from_ws, to_ws):
-    '''
+    """
     Transfers selected sample logs from one workspace to another
-    '''
-    single_valued_names = [ "gd_prtn_chrg"]
+    """
+    single_valued_names = ["gd_prtn_chrg"]
     time_series_names = ['good_uah_log', 'good_frames']
-    type_map = {'good_uah_log': float , 'good_frames' : int, "gd_prtn_chrg" : float}
+    type_map = {'good_uah_log': float, 'good_frames': int, "gd_prtn_chrg": float}
 
     run_from = from_ws.getRun()
     run_to = to_ws.getRun()
@@ -1187,19 +1190,19 @@ def transfer_special_sample_logs(from_ws, to_ws):
             alg_log.setProperty("LogType", "Number")
             alg_log.execute()
 
-#pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 
 
 class CummulativeTimeSeriesPropertyAdder(object):
-    '''
+    """
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
     cumulative time series correctly at this point.
-    '''
+    """
 
-    def __init__(self, total_time_shift_seconds = 0):
+    def __init__(self, total_time_shift_seconds=0):
         super(CummulativeTimeSeriesPropertyAdder, self).__init__()
         self._time_series = ['good_uah_log', 'good_frames']
-        self._single_valued= ["gd_prtn_chrg"]
+        self._single_valued = ["gd_prtn_chrg"]
 
         self._original_times_lhs = dict()
         self._original_values_lhs = dict()
@@ -1213,14 +1216,14 @@ class CummulativeTimeSeriesPropertyAdder(object):
         self._start_time_rhs = None
         self._total_time_shift_nano_seconds = int(total_time_shift_seconds*1e9)
 
-        self._type_map = {'good_uah_log': float , 'good_frames' : int, "gd_prtn_chrg" : float}
+        self._type_map = {'good_uah_log': float, 'good_frames': int, "gd_prtn_chrg": float}
 
     def extract_sample_logs_from_workspace(self, lhs, rhs):
-        '''
+        """
         When adding specific logs, we need to make sure that the values are added correctly.
-        @param lhs: the lhs workspace
-        @param rhs: the rhs workspace
-        '''
+        :param lhs: the lhs workspace
+        :param rhs: the rhs workspace
+        """
         run_lhs = lhs.getRun()
         run_rhs = rhs.getRun()
         # Get the cumulative time s
@@ -1257,10 +1260,10 @@ class CummulativeTimeSeriesPropertyAdder(object):
             self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
 
     def apply_cummulative_logs_to_workspace(self, workspace):
-        '''
+        """
         Restore the original values for the shifted properties
-        @param workspace: the workspace which requires correction.
-        '''
+        :param workspace: the workspace which requires correction.
+        """
         for element in self._time_series:
             if (element in self._original_times_rhs and
                     element in self._original_values_rhs):
@@ -1274,11 +1277,11 @@ class CummulativeTimeSeriesPropertyAdder(object):
         self._update_single_valued_entries(workspace)
 
     def _update_single_valued_entries(self, workspace):
-        '''
+        """
         We need to update single-valued entries which are based on the
         cumulative time series
-        @param workspace: the workspace which requires the changes
-        '''
+        :param workspace: the workspace which requires the changes
+        """
         run = workspace.getRun()
 
         alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
@@ -1296,11 +1299,11 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 alg_log.execute()
 
     def _get_cummulative_sample_logs(self, log_name):
-        '''
+        """
         Gets the added sample logs for a particular log.
-        @param log_name: the name of the logs
-        @param an array with times and an array with values
-        '''
+        :param log_name: the name of the logs
+               an array with times and an array with values
+        """
         # Remove data from the beginning of the measurement
         times_lhs, values_lhs, times_rhs, values_rhs = self._get_corrected_times_and_values(log_name)
 
@@ -1312,7 +1315,8 @@ class CummulativeTimeSeriesPropertyAdder(object):
         times_rhs = self._shift_time_series(times_rhs)
 
         # Now merge and sort the two entries
-        time_merged, value_merged = self._create_merged_values_and_times(times_lhs, values_raw_lhs, times_rhs, values_raw_rhs)
+        time_merged, value_merged = self._create_merged_values_and_times(times_lhs, values_raw_lhs,
+                                                                         times_rhs, values_raw_rhs)
 
         # Create cummulated values
         time_final = time_merged
@@ -1321,11 +1325,11 @@ class CummulativeTimeSeriesPropertyAdder(object):
         return time_final, value_final
 
     def _create_cummulated_values(self, values):
-        '''
+        """
         Creates cummulated values
-        @param time: a time array
-        @param value: a value array which is the basis for the accumulation
-        '''
+        :param time: a time array
+        :param value: a value array which is the basis for the accumulation
+        """
         values_accumulated = []
         for index in range(0, len(values)):
             if index == 0:
@@ -1345,7 +1349,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
         zipped = list(zip(times, values))
         # We sort via the times
-        zipped.sort(key = lambda z : z[0])
+        zipped.sort(key=lambda z: z[0])
         unzipped = list(zip(*zipped))
         return unzipped[0], unzipped[1]
 
@@ -1356,10 +1360,10 @@ class CummulativeTimeSeriesPropertyAdder(object):
         return shifted_series
 
     def _get_raw_values(self, values):
-        '''
+        """
         We extract the original data from the cumulative
         series.
-        '''
+        """
         raw_values = []
         for index in range(0, len(values)):
             if index == 0:
@@ -1370,10 +1374,10 @@ class CummulativeTimeSeriesPropertyAdder(object):
         return raw_values
 
     def _get_corrected_times_and_values(self, log_name):
-        '''
+        """
         Removes times before time 0
-        @param log_name: the log to consider
-        '''
+        :param log_name: the log to consider
+        """
         start_time_lhs = self._start_time_lhs
         start_time_rhs = self._start_time_rhs
 
@@ -1408,25 +1412,25 @@ class CummulativeTimeSeriesPropertyAdder(object):
         return index
 
     def _populate_property(self, prop, times, values, type_converter):
-        '''
+        """
         Populates a time series property
-        @param property: the time series property
-        @param times: the times array
-        @param values: the values array
-        @param type_converter: a type converter
-        '''
+        :param prop: the time series property
+        :param times: the times array
+        :param values: the values array
+        :param type_converter: a type converter
+        """
         for time, value in zip(times, values):
             prop.addValue(time, type_converter(value))
 
 
 def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
-    '''
+    """
     Takes a multi-period event workspace and loads the monitors
     as a group workspace
-    @param workspace: Multi-period event workspace
-    @param data_file: The data file
-    @param monitor_appendix: The appendix for monitor data
-    '''
+    :param workspace: Multi-period event workspace
+    :param data_file: The data file
+    :param monitor_appendix: The appendix for monitor data
+    """
     # Load all monitors
     mon_ws_group_name = "temp_ws_group"
     LoadNexusMonitors(Filename=data_file, OutputWorkspace=mon_ws_group_name)
@@ -1436,13 +1440,13 @@ def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appen
 
 
 def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, appendix):
-    '''
+    """
     Takes a multi-period event workspace and loads the monitors
     as a group workspace
-    @param workspace: Multi-period event workspace
-    @param data_file: The data file
-    @param monitor_appendix: The appendix for monitor data
-    '''
+    :param workspace: Multi-period event workspace
+    :param data_file: The data file
+    :param monitor_appendix: The appendix for monitor data
+    """
     if len(monitor_workspace) != len(workspace):
         raise RuntimeError("The workspace and monitor workspace lengths do not match.")
     for index in range(0,len(monitor_workspace)):
@@ -1454,10 +1458,10 @@ def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, app
 
 
 def is_convertible_to_int(input_value):
-    '''
+    """
     Check if the input can be converted to int
-    @param input_value :: a general input
-    '''
+    :param input_value :: a general input
+    """
     try:
         int(input_value)
     except ValueError:
@@ -1466,11 +1470,11 @@ def is_convertible_to_int(input_value):
 
 
 def is_convertible_to_float(input_value):
-    '''
+    """
     Check if the input can be converted to float
-    @param input_value :: a general input
-    @returns true if input can be converted to float else false
-    '''
+    :param input_value :: a general input
+    :returns true if input can be converted to float else false
+    """
     is_convertible = True
     if not input_value:
         is_convertible = False
@@ -1484,11 +1488,11 @@ def is_convertible_to_float(input_value):
 
 
 def is_valid_xml_file_list(input_value):
-    '''
+    """
     Check if the input is a valid xml file list. We only check
     the form and not the existence of the file
-    @param input :: a list input
-    '''
+    :param input :: a list input
+    """
     if not isinstance(input_value, list) or not input or len(input_value) == 0:
         return False
     for element in input_value:
@@ -1498,19 +1502,19 @@ def is_valid_xml_file_list(input_value):
 
 
 def convert_from_string_list(to_convert):
-    '''
+    """
     Convert a Python string list to a comma-separted string
-    @param to_convert :: a string list input
-    '''
+    :param to_convert :: a string list input
+    """
     return ','.join(element.replace(" ", "") for element in to_convert)
 
 
 def convert_to_string_list(to_convert):
-    '''
+    """
     Convert a comma-separted string to a Python string list in a string form
     "file1.xml, file2.xml" -> "['file1.xml','file2.xml']"
-    @param to_convert :: a comma-spearated string
-    '''
+    :param to_convert :: a comma-spearated string
+    """
     string_list = to_convert.replace(" ", "").split(",")
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string

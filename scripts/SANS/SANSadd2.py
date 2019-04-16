@@ -73,7 +73,6 @@ def add_runs(runs,  # noqa: C901
 
     while True:
         isFirstDataSetEvent = False
-        is_first_data_set_group_workspace = False
         try:
             lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _load_ws(
                 userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period)
@@ -135,8 +134,7 @@ def add_runs(runs,  # noqa: C901
 
         # In case of event file force it into a histogram workspace if this is requested
         if isFirstDataSetEvent and not saveAsEvent:
-            handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace,
-                                                                   runs, defType, inst)
+            handle_saving_event_workspace_when_saving_as_histogram(binning, runs, defType, inst)
 
         lastFile = os.path.splitext(lastFile)[0]
         # Now save the added file
@@ -199,8 +197,7 @@ def add_runs(runs,  # noqa: C901
     return 'The following file has been created:\n'+outFile
 
 
-def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace,
-                                                           runs, def_type, inst):
+def handle_saving_event_workspace_when_saving_as_histogram(binning, runs, def_type, inst):
     ws_in_monitor = mtd[ADD_FILES_SUM_TEMPORARY_MONITORS]
     if binning == 'Monitors':
         mon_x = ws_in_monitor.dataX(0)
