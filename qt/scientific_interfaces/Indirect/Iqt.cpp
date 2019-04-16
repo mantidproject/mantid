@@ -447,7 +447,7 @@ bool Iqt::validate() {
 }
 
 /**
- * Ensures that absolute min and max energy are equal.
+ * Ensures that the min energy is below zero and the max energy is above zero
  *
  * @param prop Qt property that was changed
  * @param val New value of that property
@@ -456,24 +456,10 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updatePropertyValues(QtProperty *, double)));
 
-  if (prop == m_properties["EHigh"]) {
-    // If the user enters a negative value for EHigh assume they did not mean to
-    // add a -
-    if (val < 0) {
-      val = -val;
-      m_dblManager->setValue(m_properties["EHigh"], val);
-    }
-
-    m_dblManager->setValue(m_properties["ELow"], -val);
-  } else if (prop == m_properties["ELow"]) {
-    // If the user enters a positive value for ELow, assume they meant to add a
-    if (val > 0) {
-      val = -val;
-      m_dblManager->setValue(m_properties["ELow"], val);
-    }
-
+  if (prop == m_properties["EHigh"] && val < 0)
     m_dblManager->setValue(m_properties["EHigh"], -val);
-  }
+  else if (prop == m_properties["ELow"] && val > 0)
+    m_dblManager->setValue(m_properties["ELow"], -val);
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updatePropertyValues(QtProperty *, double)));
@@ -602,7 +588,7 @@ void Iqt::plotInput(const QString &wsname) {
  * Updates the range selectors and properties when range selector is moved.
  *
  * @param min Range selector min value
- * @param max Range selector amx value
+ * @param max Range selector max value
  */
 void Iqt::rsRangeChangedLazy(double min, double max) {
   double oldMin = m_dblManager->value(m_properties["ELow"]);
