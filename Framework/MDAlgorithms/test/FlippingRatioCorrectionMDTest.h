@@ -10,6 +10,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidMDAlgorithms/FlippingRatioCorrectionMD.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/MergeMD.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 
 using Mantid::MDAlgorithms::FlippingRatioCorrectionMD;
 
@@ -30,9 +35,9 @@ public:
 
   void test_exec()
   {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
+    createMergedMDWorkspace();
 
+/*
     FlippingRatioCorrectionMD alg;
     // Don't put output in ADS by default
     alg.setChild(true);
@@ -49,13 +54,64 @@ public:
     Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
+    */
   }
   
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+
+private:
+  void createMergedMDWorkspace() {
+    std::string md1Name = "__temp_InputMDWorkspaceName1";
+    std::string md2Name = "__temp_InputMDWorkspaceName2";
+    std::string wsName = "MergedWSForFR";
+    std::string peak1 = "100, -2,-2,0.5";
+    std::string peak2 = "100, 2,2,0.5";
+    double param1 = 10., param2 = 20.;
+
+    createMDWorkspace(md1Name, peak1, param1);
+    createMDWorkspace(md2Name, peak2, param2);
+    Mantid::MDAlgorithms::MergeMD algMerge;
+    TS_ASSERT_THROWS_NOTHING(algMerge.initialize())
+    TS_ASSERT(algMerge.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        algMerge.setPropertyValue("InputWorkspaces",md1Name+","+md2Name));
+    TS_ASSERT_THROWS_NOTHING(algMerge.setPropertyValue("OutputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(algMerge.execute(););
+    TS_ASSERT(algMerge.isExecuted());
   }
 
+  void createMDWorkspace(const std::string &wsName, const std::string &peakParams, const double sampleLog) {
+    // Create Workspace
+    const int ndims = 2;
+    std::string extents = "-5,5,-5,5";
+    std::vector<std::string> names(ndims);
+    names[0] = "A";
+    names[1] = "B";
+    std::vector<std::string> units(ndims);
+    units[0] = "a";
+    units[1] = "a";
+    Mantid::MDAlgorithms::CreateMDWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Dimensions", 2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EventType", "MDEvent"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Extents", extents));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Names", names));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Units", units));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wsName));
+    alg.execute();
+    // Add log
+    Mantid::API::IMDEventWorkspace_sptr out =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IMDEventWorkspace>(wsName);
+    Mantid::API::ExperimentInfo_sptr ei(new Mantid::API::ExperimentInfo);
+    out->addExperimentInfo(ei);
+    out->getExperimentInfo(0)->mutableRun().addProperty("prop", sampleLog);
+    // Add peak data
+    Mantid::MDAlgorithms::FakeMDEventData algFake;
+    TS_ASSERT_THROWS_NOTHING(algFake.initialize())
+    TS_ASSERT(algFake.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algFake.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(algFake.setPropertyValue("PeakParams", peakParams));
+    algFake.execute();
+  }
 
 };
 

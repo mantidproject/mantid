@@ -79,7 +79,7 @@ void FlippingRatioCorrectionMD::exec() {
   std::vector<std::string> sampleLogStrings = getProperty("SampleLogs");
 
 
-  std::vector<double> flippingRatio;
+  std::vector<double> flippingRatio, C1, C2; //C1=FR/(FR-1.), C2=1./(FR-1.)
 
   for(uint16_t i=0; i < inWS->getNumExperimentInfo(); i++) {
       const auto &currentRun=inWS->getExperimentInfo(i)->run();
@@ -91,30 +91,23 @@ void FlippingRatioCorrectionMD::exec() {
         sampleLogs[j]=val;
         muParser.DefineVar(s, &sampleLogs[j]);
       }
+      muParser.DefineConst("pi", M_PI);
       muParser.SetExpr(inputFormula);
-      auto variables = muParser.GetVar();
-      auto item = variables.begin();
-      for (; item!=variables.end(); ++item)
-      {
-        try {
-          flippingRatio.push_back(muParser.Eval());
-        }
-        catch (mu::Parser::exception_type &e)
-        {
-          g_log.error()<<"Parsing error in experiment info "<<i<<"\n"<< e.GetMsg() << std::endl;
-          throw std::runtime_error("Parsing error");
-        }
+      try {
+        flippingRatio.push_back(muParser.Eval());
+      }
+      catch (mu::Parser::exception_type &e) {
+        g_log.error()<<"Parsing error in experiment info "<<i<<"\n"<< e.GetMsg() << std::endl;
+        throw std::runtime_error("Parsing error");
       }
   }
-  std::vector<double> C1,C2; //C1=FR/(FR-1.), C2=1./(FR-1.)
   for(auto &fr:flippingRatio) {
     C1.push_back(fr/(fr-1.));
     C2.push_back(1./(fr-1.));
   }
-
   // Create workspaces by cloning
   API::IMDWorkspace_sptr outputWS1, outputWS2;
-  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace",0,0.4,true);
+  API::IAlgorithm_sptr cloneMD = createChildAlgorithm("CloneMDWorkspace",0,0.25,true);
   cloneMD->setProperty("InputWorkspace",inWS);
   cloneMD->setProperty("OutputWorkspace",getPropertyValue("OutputWorkspace1"));
   cloneMD->executeAsChildAlg();
@@ -122,10 +115,13 @@ void FlippingRatioCorrectionMD::exec() {
   API::IMDEventWorkspace_sptr event1 =
       boost::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS1);
   cloneMD->setProperty("OutputWorkspace",getPropertyValue("OutputWorkspace2"));
+  cloneMD->setChildStartProgress(0.25);
+  cloneMD->setChildEndProgress(0.5);
   cloneMD->executeAsChildAlg();
   outputWS2 = cloneMD->getProperty("OutputWorkspace");
   API::IMDEventWorkspace_sptr event2 =
       boost::dynamic_pointer_cast<API::IMDEventWorkspace>(outputWS2);
+
   if(event1){
     m_factor=C1;
     CALL_MDEVENT_FUNCTION(this->executeTemplatedMDE, event1);
