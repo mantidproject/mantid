@@ -61,17 +61,6 @@ public:
     TS_ASSERT(alg->execute())
   }
 
-  void test_executionAveragePixelFit() {
-    auto alg = setupAlgorithm();
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("BackgroundCalculationMethod", "Average Pixel Fit"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6"))
-    TS_ASSERT(alg->execute())
-  }
-
   void test_PerSpectraAverageOutput() {
     // test output of perSpectraAverage method
     // InputWorkspaceIndexSet set to spectra containing background
@@ -112,34 +101,6 @@ public:
     alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
     alg->setProperty("BackgroundCalculationMethod", "Polynomial");
     alg->setProperty("DegreeOfPolynomial", "0");
-    alg->execute();
-    MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-
-    for (size_t i = 0; i != outputWS->getNumberHistograms(); ++i) {
-      const auto &output_counts = outputWS->counts(i);
-      if (i != 3) {
-        for (auto itr = output_counts.begin(); itr != output_counts.end();
-             ++itr) {
-          TS_ASSERT_DELTA(0.0, *itr, 0.0001)
-        }
-      } else {
-        for (auto itr = output_counts.begin(); itr != output_counts.end();
-             ++itr) {
-          TS_ASSERT_DELTA(3.0, *itr, 0.0001)
-        }
-      }
-    }
-  }
-
-  void test_AveragePixelFitOutput() {
-    // test output of Average Pixel Fit method
-    // InputWorkspaceIndexSet set to spectra containing background
-    // output should be 0 for all counts except at peak where values should
-    // be 3.0
-    auto alg = setupAlgorithm();
-    alg->setProperty("InputWorkspace", m_multiDetectorWSWithPeak);
-    alg->setProperty("BackgroundCalculationMethod", "Average Pixel Fit");
-    alg->setProperty("InputWorkspaceIndexSet", "0-2,4-6");
     alg->execute();
     MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
 
