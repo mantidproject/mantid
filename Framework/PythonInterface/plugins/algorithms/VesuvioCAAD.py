@@ -7,12 +7,11 @@
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm, TextAxis,
-                        WorkspaceGroup, WorkspaceGroupProperty)
+from mantid.api import (AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, PythonAlgorithm)
 from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator,
                            StringMandatoryValidator)
 from mantid.simpleapi import (AppendSpectra, Divide, EvaluateFunction, ExtractSingleSpectrum, ExtractSpectra,
-                              Integration, Minus, Multiply, SumSpectra, VesuvioTOFFit)
+                              Integration, Minus, Multiply, SumSpectra)
 from functools import reduce
 
 
@@ -63,11 +62,11 @@ def normalise_by_integral(workspace):
                   EnableLogging=False)
 
 
-def set_axis_labels(workspace, labels, axis_index):
-    axis = TextAxis.create(len(labels))
-    for index, label in enumerate(labels):
-        axis.setLabel(index, label)
-    workspace.replaceAxis(axis_index, axis)
+def simulate_fit(workspace, function):
+    return EvaluateFunction(InputWorkspace=workspace,
+                            Function=function,
+                            StoreInADS=False,
+                            EnableLogging=False)
 
 
 class VesuvioCAAD(PythonAlgorithm):
@@ -105,6 +104,9 @@ class VesuvioCAAD(PythonAlgorithm):
                                  'function=Function1Name,param1=val1,param2=val2;function=Function2Name,param3=val3,'
                                  'param4=val4')
 
+        self.declareProperty(name='Function', defaultValue='', validator=StringMandatoryValidator(),
+                             doc='The functions used to simulate a fit on the CAAD data.')
+
         self.declareProperty(name="MaxIterations", defaultValue=0, validator=IntBoundedValidator(lower=0),
                              doc="Maximum number of fitting iterations.")
         self.declareProperty(name='Background', defaultValue='',
@@ -133,6 +135,8 @@ class VesuvioCAAD(PythonAlgorithm):
         self._masses = self.getPropertyValue('Masses')
         self._mass_profiles = self.getPropertyValue('MassProfiles')
 
+        self._function = self.getPropertyValue('Function')
+
         self._max_iterations = self.getPropertyValue('MaxIterations')
         self._background = self.getPropertyValue('Background')
         self._intensity_constraints = self.getPropertyValue('IntensityConstraints')
@@ -146,38 +150,11 @@ class VesuvioCAAD(PythonAlgorithm):
         input_workspaces = [extract_single_spectra(self._input_workspace, index) for index in range(number_of_spectra)]
         data_caad = self._compute_caad(input_workspaces)[0]
 
-        fit_workspaces = [self._vesuvio_tof_fit(self._input_workspace, index) for index in range(number_of_spectra)]
-        fit_caad = self._compute_caad(fit_workspaces)[0]
-        set_axis_labels(fit_caad, self._get_caad_axis_labels(fit_workspaces[0]), 1)
+        fit_caad = extract_single_spectra(simulate_fit(data_caad, self._function), 1)
 
-        #function = 'composite=ComptonScatteringCountRate,NumDeriv=1,IntensityConstraints="Matrix(1|4)0.000000|1.000000|' \
-        #           '0.000000|-4.000000";name=GramCharlierComptonProfile,Mass=1.007900,HermiteCoeffs=1 0 0,Width=5.000000;' \
-        #           'name=GaussianComptonProfile,Mass=16.000000,Width=10.000000;name=GaussianComptonProfile,Mass=27.000000,' \
-        #           'Width=13.000000;name=GaussianComptonProfile,Mass=133.000000,Width=30.000000;name=Polynomial,n=3'
-
-        #function = 'name=Lorentzian,Amplitude=39.1348,PeakCentre=314.934,FWHM=29.5195;name=Lorentzian,Amplitude=113.69' \
-        #           '4,PeakCentre=365.873,FWHM=21.2816'
-        function = 'name=GaussianComptonProfile,Mass=16.000000,Width=10.000000;name=GaussianComptonProfile,Mass=27.000000,' \
-                   'Width=13.000000;name=GaussianComptonProfile,Mass=133.000000,Width=30.000000;'
-
-        output_test = EvaluateFunction(InputWorkspace=data_caad, Function=function)
-
-        self.setProperty('OutputWorkspace', output_test)
+        self.setProperty('OutputWorkspace', fit_caad)
         self.setProperty('OutputDataCAAD', data_caad)
         self.setProperty('OutputChiSquared', self._compute_chi_squared(data_caad, fit_caad))
-
-    def _vesuvio_tof_fit(self, workspace, index):
-        fitted_workspace, _, _ = VesuvioTOFFit(InputWorkspace=workspace,
-                                               Masses=self._masses,
-                                               MassProfiles=self._mass_profiles,
-                                               Background=self._background,
-                                               IntensityConstraints=self._intensity_constraints,
-                                               Minimizer=self._minimizer,
-                                               MaxIterations=self._max_iterations,
-                                               WorkspaceIndex=index,
-                                               StoreInADS=False,
-                                               EnableLogging=True)
-        return fitted_workspace
 
     def _compute_caad(self, fit_workspaces):
         indices = self._get_caad_indices(fit_workspaces[0])
