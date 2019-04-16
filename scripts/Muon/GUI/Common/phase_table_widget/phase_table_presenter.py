@@ -20,6 +20,7 @@ class PhaseTablePresenter(object):
 
         self.group_change_observer = GenericObserver(self.update_current_groups_list)
         self.run_change_observer = GenericObserver(self.update_current_run_list)
+        self.instrument_changed_observer = GenericObserver(self.update_current_phase_tables)
 
         self.phase_table_calculation_complete_notifier = Observable()
 

@@ -15,6 +15,7 @@ import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
@@ -65,11 +66,11 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
-
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
+        self.phase_context = PhaseTableContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context)
+                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -165,6 +166,9 @@ class FrequencyAnalysisGui(QtGui.QMainWindow):
 
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.transform.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.instrument_changed_observer)
 
     def setup_group_calculation_enable_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
