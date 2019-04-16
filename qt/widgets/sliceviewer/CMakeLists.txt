@@ -9,13 +9,13 @@ set ( SRC_FILES
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
 	src/PeaksViewerOverlayDialog.cpp
-    src/PeakOverlayInteractive.cpp
+        src/PeakOverlayInteractive.cpp
 	src/PeakOverlayViewFactoryBase.cpp
 	src/PeakPalette.cpp
 	src/PeakRepresentation.cpp
 	src/PeakRepresentationCross.cpp
-    src/PeakRepresentationEllipsoid.cpp
-    src/PeakRepresentationSphere.cpp
+        src/PeakRepresentationEllipsoid.cpp
+        src/PeakRepresentationSphere.cpp
 	src/PeaksTableColumnsDialog.cpp
 	src/PeakView.cpp
 	src/PeakViewFactory.cpp
@@ -49,18 +49,18 @@ set ( INC_FILES
 	inc/MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h
 	inc/MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h
 	inc/MantidQtWidgets/SliceViewer/PeakEditMode.h
-    inc/MantidQtWidgets/SliceViewer/PeakBoundingBox.h
-    inc/MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h
+        inc/MantidQtWidgets/SliceViewer/PeakBoundingBox.h
+        inc/MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h
 	inc/MantidQtWidgets/SliceViewer/PeakOverlayView.h
 	inc/MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtWidgets/SliceViewer/PeakOverlayViewFactoryBase.h
 	inc/MantidQtWidgets/SliceViewer/PeakPalette.h
 	inc/MantidQtWidgets/SliceViewer/PeaksPresenter.h
 	inc/MantidQtWidgets/SliceViewer/PeakPrimitives.h
-    inc/MantidQtWidgets/SliceViewer/PeakRepresentation.h
+        inc/MantidQtWidgets/SliceViewer/PeakRepresentation.h
 	inc/MantidQtWidgets/SliceViewer/PeakRepresentationCross.h
-    inc/MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h
-    inc/MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h
+        inc/MantidQtWidgets/SliceViewer/PeakRepresentationEllipsoid.h
+        inc/MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h
 	inc/MantidQtWidgets/SliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtWidgets/SliceViewer/PeakView.h
 	inc/MantidQtWidgets/SliceViewer/PeakViewColor.h
@@ -88,7 +88,7 @@ set ( MOC_FILES
 	inc/MantidQtWidgets/SliceViewer/LineViewer.h
 	inc/MantidQtWidgets/SliceViewer/LinePlotOptions.h
 	inc/MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h
-    inc/MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h
+        inc/MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h
 	inc/MantidQtWidgets/SliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtWidgets/SliceViewer/SliceViewer.h
 	inc/MantidQtWidgets/SliceViewer/SliceViewerWindow.h
@@ -127,6 +127,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
     inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     DataObjects
     ${TCMALLOC_LIBRARIES_LINKTIME}

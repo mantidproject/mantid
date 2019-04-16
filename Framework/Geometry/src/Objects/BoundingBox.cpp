@@ -67,7 +67,7 @@ bool BoundingBox::doesLineIntersect(const V3D &startPoint,
   // intercept
   // Assume that orig is outside of BoundingBox.
   const double tol = Mantid::Kernel::Tolerance;
-  double lambda(0.0);
+  double lambda;
   if (startPoint.X() > xMax()) {
     if (lineDir.X() < -tol) {
       lambda = (xMax() - startPoint.X()) / lineDir.X();
