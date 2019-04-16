@@ -322,6 +322,17 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
                           ${CMAKE_INSTALL_PREFIX}/bin/MantidPlot
                           ${_icon_filename}.png)
   endif()
+
+  if(ENABLE_WORKBENCH)
+    set(_icon_filename ${IMAGES_DIR}/mantid_workbench)
+    if(CPACK_PACKAGE_SUFFIX)
+      set(_icon_filename ${_icon_filename}_${CPACK_PACKAGE_SUFFIX})
+    endif()
+    install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
+                          MantidWorkbench${_app_name_suffix}
+                          ${CMAKE_INSTALL_PREFIX}/bin/mantidworkbench
+                          ${_icon_filename}.png)
+  endif()
 endif()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See
