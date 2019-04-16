@@ -96,6 +96,28 @@ def run_PhaseQuad(parameters_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
+def run_PaddingAndApodization(parameters_dict):
+    alg = mantid.AlgorithmManager.create("PaddingAndApodization")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_FFT(parameters_dict):
+    alg = mantid.AlgorithmManager.create("FFT")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
 def run_AppendSpectra(ws1, ws2):
     """
     Apply the AppendSpectra algorithm to two given workspaces (no checks made).

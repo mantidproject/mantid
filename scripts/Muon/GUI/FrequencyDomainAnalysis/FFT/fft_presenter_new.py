@@ -10,6 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
+import re
+from mantid.api import AnalysisDataService
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 
 
 class FFTPresenter(object):
@@ -74,7 +78,6 @@ class FFTPresenter(object):
             if "PhaseQuad" in option:
                 self.view.removeIm(option)
 
-
     # functions
     def phaseCheck(self):
         self.view.phaseQuadChanged()
@@ -93,7 +96,8 @@ class FFTPresenter(object):
                 self.view.getShiftBoxRow() + 1)
 
     def createThread(self):
-        return thread_model.ThreadModel(self.alg)
+        self._phasequad_calculation_model = ThreadModelWrapper(self.calculate_FFT)
+        return thread_model.ThreadModel(self._phasequad_calculation_model)
 
     # constructs the inputs for the FFT algorithms
     # then executes them (see fft_model to see the order
@@ -101,112 +105,69 @@ class FFTPresenter(object):
     def handleButton(self):
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
-        self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished)
+        self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished, self.handle_error)
 
-        inputs = self.create_algorithm_inputs()
+        self.thread.start()
 
-        try:
-            self.thread.loadData(inputs)
-            self.thread.start()
-            self.view.setPhaseBox()
-        except:
-            pass
-
-    def create_algorithm_inputs(self):
-        # make some inputs
-        inputs = {}
-
-        inputs["Run"] = self.get_input_run()
-        # do apodization and padding to real data
-
-        inputs["preRe"] = self.get_pre_inputs()
-
-        if "PhaseQuad" in self.view.getWS():
-            inputs['phaseTable'] = self.get_phase_table_inputs()
-
-        # do apodization and padding to complex data
-        if self.view.isComplex() and "PhaseQuad" not in self.view.getWS():
-            inputs['preIm'] = self.get_imaginary_inputs()
-
-        # do FFT to transformed data
-        inputs['FFT'] = self.get_fft_inputs()
-
-        return inputs
-
-    def get_input_run(self):
-        return self.getRun(
-            self.view.getInputWS().split(";", 1)[0].split("_", 1)[0])
+    def handle_error(self, error):
+        self.view.activateButton()
+        self.view.warning_popup(error)
 
     def get_pre_inputs(self):
-        preInputs = self.view.initAdvanced()
+        pre_inputs = {}
 
-        if "PhaseQuad" in self.view.getWS():
-            preInputs['InputWorkspace'] = "__phaseQuad__"
-            preInputs['OutputWorkspace'] = "__ReTmp__"
-        else:
-            preInputs['OutputWorkspace'] = "__ReTmp__"
-            preInputs["InputWorkspace"] = self.clean(
-                self.view.getInputWS())
+        pre_inputs['InputWorkspace'] = self.view.workspace
+        pre_inputs["ApodizationFunction"] = self.view.apodization_function
+        pre_inputs["DecayConstant"] = self.view.decay_constant
+        pre_inputs["NegativePadding"] = self.view.negative_padding
+        pre_inputs["Padding"] = self.view.padding_value
 
-        return preInputs
-
-    def get_phase_table_inputs(self):
-        phaseTable = {}
-        phaseTable["newTable"] = self.view.isNewPhaseTable()
-        phaseTable["FirstGoodData"] = self.view.getFirstGoodData()
-        phaseTable["LastGoodData"] = self.view.getLastGoodData()
-        phaseTable["Instrument"] = self.load.data_context.instrument
-        phaseTable["InputWorkspace"] = self.clean(
-            self.view.getInputWS())
-        phaseTable['MaskedDetectors'] = self.load.get_detectors_excluded_from_default_grouping_tables()
-
-        return phaseTable
+        return pre_inputs
 
     def get_imaginary_inputs(self):
-        ImPreInputs = self.view.initAdvanced()
-        ImPreInputs['OutputWorkspace'] = "__ImTmp__"
-        ImPreInputs["InputWorkspace"] = self.clean(
-            self.view.getInputImWS())
+        pre_inputs = {}
 
-        return ImPreInputs
+        pre_inputs['InputWorkspace'] = self.view.imaginary_workspace
+        pre_inputs["ApodizationFunction"] = self.view.apodization_function
+        pre_inputs["DecayConstant"] = self.view.decay_constant
+        pre_inputs["NegativePadding"] = self.view.negative_padding
+        pre_inputs["Padding"] = self.view.padding_value
 
-    def get_fft_inputs(self):
-        FFTInputs = self.get_FFT_input()
-        if "PhaseQuad" in self.view.getWS():
-            self.view.getFFTRePhase(FFTInputs)
-            if self.view.isComplex():
-                self.view.getFFTImPhase(FFTInputs)
+        return pre_inputs
 
-            FFTInputs["OutputWorkspace"] = self.getRun(
-                self.view.getInputWS()) + ";PhaseQuad;FFT"
-        else:
-            FFTInputs["OutputWorkspace"] = self.getRun(
-                self.view.getInputWS()) + ";FFT"
+    def get_fft_inputs(self, real_workspace, imaginary_workspace):
+        FFTInputs = {}
+
+        FFTInputs["AcceptXRoundingErrors"] = True
+        FFTInputs['Real'] = 0
+        FFTInputs['InputWorkspace'] = real_workspace
+        FFTInputs['InputImagWorkspace'] = imaginary_workspace
+        FFTInputs['Imaginary'] = 0
+        FFTInputs['Transform'] = 'Forward'
+        FFTInputs['AutoShift'] = self.view.auto_shift
 
         return FFTInputs
 
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.thread.deleteLater()
-        self.thread = None
 
-    def get_FFT_input(self):
-        FFTInputs = self.view.initFFTInput(
-            self.clean(self.view.getInputWS()))
+    def calculate_FFT(self):
+        real_workspace_padding_paramters = self.get_pre_inputs()
+        imaginary_workspace_padding_parameters = self.get_imaginary_inputs()
 
-        if self.view.isAutoShift():
-            FFTInputs["AutoShift"] = True
-        else:
-            self.view.addFFTShift(FFTInputs)
-        if self.view.isComplex():
-            self.view.addFFTComplex(FFTInputs)
-        return FFTInputs
+        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_paramters)
+        imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
 
-    def clean(self, name):
-        if "PhaseQuad" in name:
-            return self.getRun(name)
-        return name
+        fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input)
 
-    def getRun(self, name):
-        return name.split(" (PhaseQuad)", 1)[0]
+        frequency_domain_workspace = run_FFT(fft_parameters)
+
+        self.add_fft_workspace_to_ADS(real_workspace_padding_paramters, frequency_domain_workspace)
+
+    def add_fft_workspace_to_ADS(self, pre_process_params, fft_workspace):
+        workspace_name = pre_process_params['InputWorkspace'] + '_FFT'
+        run = re.search('[0-9]+', pre_process_params['InputWorkspace']).group()
+
+        AnalysisDataService.addOrReplace(workspace_name, fft_workspace)
+        AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), workspace_name)
