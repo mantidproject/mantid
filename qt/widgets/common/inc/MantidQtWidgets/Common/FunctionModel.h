@@ -24,6 +24,7 @@ namespace MantidWidgets {
     virtual void setFunction(IFunction_sptr fun) = 0;
     virtual IFunction_sptr getFitFunction() const = 0;
     void setFunctionStr(const std::string &funStr);
+    void clear();
   private:
   };
 

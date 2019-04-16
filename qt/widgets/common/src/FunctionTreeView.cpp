@@ -61,7 +61,7 @@ namespace MantidWidgets {
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
 FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories)
-    : QWidget(parent), m_multiDataset(multi), m_allowedCategories(categories)//, m_numberOfDatasets(0),
+    : IFunctionView(parent), m_multiDataset(multi), m_allowedCategories(categories)//, m_numberOfDatasets(0),
       //m_currentDataset(0)
 
 {
@@ -185,7 +185,7 @@ void FunctionTreeView::createBrowser() {
   connect(m_constraintManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(constraintChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
-          SLOT(parameterChanged(QtProperty *)));
+          SLOT(parameterPropertyChanged(QtProperty *)));
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)),
           SLOT(updateCurrentFunctionIndex()));
@@ -1722,7 +1722,7 @@ void FunctionTreeView::attributeVectorDoubleChanged(QtProperty *prop) {
   attributeChanged(vectorProp);
 }
 
-void FunctionTreeView::parameterChanged(QtProperty *prop) {
+void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
   bool isGlobal = true;
   QString newTie;
 

@@ -18,34 +18,12 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
-//#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
-//#include "MantidQtWidgets/Common/UserFunctionDialog.h"
-//
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-//#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-//
+
 #include <QApplication>
 #include <QClipboard>
-//#include <QFileInfo>
-//#include <QGridLayout>
 #include <QHBoxLayout>
-//#include <QInputDialog>
-//#include <QMenu>
 #include <QMessageBox>
-//#include <QMetaMethod>
-//#include <QPushButton>
-//#include <QSettings>
-//#include <QSignalMapper>
-//#include <QTreeWidget>
-//#include <QVBoxLayout>
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
@@ -90,6 +68,7 @@ FunctionBrowser::~FunctionBrowser() {}
  * Clear the contents
  */
 void FunctionBrowser::clear() {
+  m_model->clear();
   m_view->clear();
 }
 

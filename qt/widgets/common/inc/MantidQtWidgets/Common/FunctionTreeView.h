@@ -10,7 +10,7 @@
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction.h"
-//#include "MantidQtWidgets/Common/IFunctionBrowser.h"
+#include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
 #include <QWidget>
@@ -60,7 +60,7 @@ class CreateAttributePropertyForFunctionTreeView;
  *
  * @date 18/04/2012
  */
-class EXPORT_OPT_MANTIDQT_COMMON FunctionTreeView : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionTreeView : public IFunctionView {
   Q_OBJECT
 public:
   /// To keep QtProperty and its QtBrowserItem in one place
@@ -85,51 +85,51 @@ public:
   /// Constructor
   FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories = std::vector<std::string>());
   /// Destructor
-  virtual ~FunctionTreeView() override;
+  ~FunctionTreeView() override;
   /// Clear the contents
-  void clear();
+  void clear() override;
   /// Set the function in the browser
-  void setFunction(Mantid::API::IFunction_sptr fun);
+  void setFunction(Mantid::API::IFunction_sptr fun) override;
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
                                           bool attributesOnly = false);
   /// Check if a function is set
-  bool hasFunction() const;
+  bool hasFunction() const override;
 
   /// Update the function parameter value
   void setParameter(const QString &funcIndex, const QString &paramName,
-                    double value);
+                    double value) override;
   /// Update the function parameter error
   void setParamError(const QString &funcIndex, const QString &paramName,
-                     double error);
+                     double error) override;
   /// Get a value of a parameter
-  double getParameter(const QString &funcIndex, const QString &paramName) const;
+  double getParameter(const QString &funcIndex, const QString &paramName) const override;
 
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
   /// Set error display on/off
-  void setErrorsEnabled(bool enabled);
+  void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
-  void clearErrors();
+  void clearErrors() override;
 
-signals:
-  /// User selects a different function (or one of it's sub-properties)
-  void currentFunctionChanged();
-
-  /// Function parameter gets changed
-  /// @param funcIndex :: Index of the changed function
-  /// @param paramName :: Name of the changed parameter
-  void parameterChanged(const QString &funcIndex,
-                        const QString &paramName);
-
-  /// In multi-dataset context a button value editor was clicked
-  void localParameterButtonClicked(const QString &parName);
-
-  void functionStructureChanged();
-  void globalsChanged();
-  void constraintsChanged();
-  void tiesChanged();
+//signals:
+//  /// User selects a different function (or one of it's sub-properties)
+//  void currentFunctionChanged();
+//
+//  /// Function parameter gets changed
+//  /// @param funcIndex :: Index of the changed function
+//  /// @param paramName :: Name of the changed parameter
+//  void parameterChanged(const QString &funcIndex,
+//                        const QString &paramName);
+//
+//  /// In multi-dataset context a button value editor was clicked
+//  void localParameterButtonClicked(const QString &parName);
+//
+//  void functionStructureChanged();
+//  void globalsChanged();
+//  void constraintsChanged();
+//  void tiesChanged();
 
 protected:
   /// Create the Qt property browser
@@ -262,7 +262,7 @@ protected slots:
   /// Called when the size of a vector attribute is changed
   void attributeVectorSizeChanged(QtProperty *);
   /// Called when a function parameter property is changed
-  void parameterChanged(QtProperty *);
+  void parameterPropertyChanged(QtProperty *);
   /// Called when button in local parameter editor was clicked
   void parameterButtonClicked(QtProperty *);
   /// Called when a tie property changes

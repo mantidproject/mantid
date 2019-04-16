@@ -20,6 +20,8 @@ set ( QT5_SRC_FILES
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
+  src/FunctionMultiDomainPresenter.cpp
+  src/FunctionSingleDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
@@ -110,6 +112,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -179,6 +182,7 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
   inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
@@ -321,6 +325,8 @@ set ( SRC_FILES
   src/FitPropertyBrowser.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
+  src/FunctionMultiDomainPresenter.cpp
+  src/FunctionSingleDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IndirectInstrumentConfig.cpp
@@ -389,6 +395,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/EditLocalParameterDialog.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/LocalParameterEditor.h
   inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
@@ -507,6 +514,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/DistributionOptions.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/IProjectSerialisable.h
@@ -579,6 +587,8 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/ParseKeyValueString.h
   inc/MantidQtWidgets/Common/ParseNumerics.h
   inc/MantidQtWidgets/Common/FunctionModel.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
+  inc/MantidQtWidgets/Common/FunctionSingleDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
@@ -788,6 +798,8 @@ set( TEST_FILES
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
   test/FunctionModelTest.h
+  test/FunctionSingleDomainPresenterTest.h
+  test/FunctionMultiDomainPresenterTest.h
   test/InterfaceManagerTest.h
   test/LogValueFinderTest.h
   test/NonOrthogonalTest.h

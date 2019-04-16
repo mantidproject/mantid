@@ -16,6 +16,7 @@
 #include <QWidget>
 
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {

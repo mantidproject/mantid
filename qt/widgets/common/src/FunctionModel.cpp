@@ -19,6 +19,11 @@ void IFunctionModel::setFunctionStr(const std::string & funStr)
   setFunction(FunctionFactory::Instance().createInitialized(funStr));
 }
 
+void IFunctionModel::clear()
+{
+  setFunction(IFunction_sptr());
+}
+
 void SingleDomainFunctionModel::setFunction(IFunction_sptr fun)
 {
   m_function = boost::dynamic_pointer_cast<CompositeFunction>(fun);
