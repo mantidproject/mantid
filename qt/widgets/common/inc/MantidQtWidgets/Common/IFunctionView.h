@@ -25,14 +25,14 @@ using namespace Mantid::API;
 class EXPORT_OPT_MANTIDQT_COMMON IFunctionView: public QWidget {
   Q_OBJECT
 public:
-  IFunctionView(QWidget *parent) : QWidget(parent) {}
+  IFunctionView(QWidget *parent=nullptr) : QWidget(parent) {}
   virtual ~IFunctionView() {}
   virtual void clear() = 0;
   virtual void setFunction(IFunction_sptr fun) = 0;
   virtual bool hasFunction() const = 0;
-  virtual void setParameter(const QString &funcIndex, const QString &paramName, double value) = 0;
-  virtual void setParamError(const QString &funcIndex, const QString &paramName, double error) = 0;
-  virtual double getParameter(const QString &funcIndex, const QString &paramName) const = 0;
+  virtual void setParameter(const QString &paramName, double value) = 0;
+  virtual void setParamError(const QString &paramName, double error) = 0;
+  virtual double getParameter(const QString &paramName) const = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
 
@@ -40,7 +40,7 @@ signals:
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
   /// Function parameter gets changed
-  void parameterChanged(const QString &funcIndex, const QString &paramName);
+  void parameterChanged(const QString &paramName);
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
   void functionStructureChanged();

@@ -110,68 +110,12 @@ FunctionBrowser::getFunctionByIndex(const QString &index) {
 }
 
 /**
- * Split a qualified parameter name into function index and local parameter
- * name.
- * @param paramName :: Fully qualified parameter name (includes function index)
- * @return :: A string list with the first item is the function index and the
- * second
- *   item is the param local name.
- */
-QStringList
-FunctionBrowser::splitParameterName(const QString &paramName) const {
-  QString functionIndex;
-  QString parameterName = paramName;
-  int j = paramName.lastIndexOf('.');
-  if (j > 0) {
-    ++j;
-    functionIndex = paramName.mid(0, j);
-    parameterName = paramName.mid(j);
-  }
-  QStringList res;
-  res << functionIndex << parameterName;
-  return res;
-}
-
-/**
- * Updates the function parameter value
- * @param funcIndex :: Index of the function
- * @param paramName :: Parameter name
- * @param value :: New value
- */
-void FunctionBrowser::setParameter(const QString &funcIndex,
-                                   const QString &paramName, double value) {
-  m_view->setParameter(funcIndex, paramName, value);
-}
-
-/**
- * Updates the function parameter error
- * @param funcIndex :: Index of the function
- * @param paramName :: Parameter name
- * @param error :: New error
- */
-void FunctionBrowser::setParamError(const QString &funcIndex,
-                                    const QString &paramName, double error) {
-  m_view->setParamError(funcIndex, paramName, error);
-}
-
-/**
- * Get a value of a parameter
- * @param funcIndex :: Index of the function
- * @param paramName :: Parameter name
- */
-double FunctionBrowser::getParameter(const QString &funcIndex,
-                                     const QString &paramName) const {
-  return m_view->getParameter(funcIndex, paramName);
-}
-
-/**
  * Updates the function parameter value
  * @param paramName :: Fully qualified parameter name (includes function index)
  * @param value :: New value
  */
 void FunctionBrowser::setParameter(const QString &paramName, double value) {
-  QStringList name = splitParameterName(paramName);
-  setParameter(name[0], name[1], value);
+  m_view->setParameter(paramName, value);
 }
 
 /**
@@ -180,8 +124,7 @@ void FunctionBrowser::setParameter(const QString &paramName, double value) {
  * @param error :: New error
  */
 void FunctionBrowser::setParamError(const QString &paramName, double error) {
-  QStringList name = splitParameterName(paramName);
-  setParamError(name[0], name[1], error);
+  m_view->setParamError(paramName, error);
 }
 
 /**
@@ -189,8 +132,7 @@ void FunctionBrowser::setParamError(const QString &paramName, double error) {
  * @param paramName :: Fully qualified parameter name (includes function index)
  */
 double FunctionBrowser::getParameter(const QString &paramName) const {
-  QStringList name = splitParameterName(paramName);
-  return getParameter(name[0], name[1]);
+  return 0.0;
 }
 
 /**
@@ -575,44 +517,6 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
 
   //return fun;
 }
-
-///// Make sure that properties are in sync with the cached ties
-///// @param parName :: A parameter to check.
-//void FunctionBrowser::updateLocalTie(const QString &parName) {
-//  auto prop = getParameterProperty(parName);
-//  if (hasTie(prop)) {
-//    auto tieProp = getTieProperty(prop);
-//    removeProperty(tieProp);
-//  }
-//  auto &localParam = m_localParameterValues[parName][m_currentDataset];
-//  if (localParam.fixed) {
-//    addTieProperty(
-//        prop, QString::number(
-//                  m_localParameterValues[parName][m_currentDataset].value));
-//  } else if (!localParam.tie.isEmpty()) {
-//    addTieProperty(prop, localParam.tie);
-//  }
-//}
-
-///// Make sure that properties are in sync with the cached constraints
-///// @param parName :: A parameter to check.
-//void FunctionBrowser::updateLocalConstraint(const QString &parName) {
-//  auto prop = getParameterProperty(parName);
-//  if (hasConstraint(prop)) {
-//    auto props = prop->subProperties();
-//    foreach (QtProperty *p, props) {
-//      if (isConstraint(p)) {
-//        removeProperty(p);
-//      }
-//    }
-//  }
-//  auto &localParam = m_localParameterValues[parName][m_currentDataset];
-//  if (!localParam.lowerBound.isEmpty() && !localParam.upperBound.isEmpty()) {
-//    auto constraint =
-//        getConstraint(parName, localParam.lowerBound, localParam.upperBound);
-//    addConstraintProperties(prop, constraint);
-//  }
-//}
 
 /// Fix/unfix a local parameter
 /// @param parName :: Parameter name

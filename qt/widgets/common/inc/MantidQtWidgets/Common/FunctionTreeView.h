@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
+#include <QStringList>
 #include <QWidget>
 #include <QRect>
 
@@ -90,46 +91,24 @@ public:
   void clear() override;
   /// Set the function in the browser
   void setFunction(Mantid::API::IFunction_sptr fun) override;
-  /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
-                                          bool attributesOnly = false);
   /// Check if a function is set
   bool hasFunction() const override;
-
   /// Update the function parameter value
-  void setParameter(const QString &funcIndex, const QString &paramName,
-                    double value) override;
+  void setParameter(const QString &paramName, double value) override;
   /// Update the function parameter error
-  void setParamError(const QString &funcIndex, const QString &paramName,
-                     double error) override;
+  void setParamError(const QString &paramName, double error) override;
   /// Get a value of a parameter
-  double getParameter(const QString &funcIndex, const QString &paramName) const override;
-
-  /// Resize the browser's columns
-  void setColumnSizes(int s0, int s1, int s2 = -1);
-
+  double getParameter(const QString &paramName) const override;
   /// Set error display on/off
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
   void clearErrors() override;
 
-//signals:
-//  /// User selects a different function (or one of it's sub-properties)
-//  void currentFunctionChanged();
-//
-//  /// Function parameter gets changed
-//  /// @param funcIndex :: Index of the changed function
-//  /// @param paramName :: Name of the changed parameter
-//  void parameterChanged(const QString &funcIndex,
-//                        const QString &paramName);
-//
-//  /// In multi-dataset context a button value editor was clicked
-//  void localParameterButtonClicked(const QString &parName);
-//
-//  void functionStructureChanged();
-//  void globalsChanged();
-//  void constraintsChanged();
-//  void tiesChanged();
+  /// Return the function
+  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
+    bool attributesOnly = false);
+  /// Resize the browser's columns
+  void setColumnSizes(int s0, int s1, int s2 = -1);
 
 protected:
   /// Create the Qt property browser
@@ -190,8 +169,7 @@ protected:
   ///// Get a property for a parameter
   //QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter
-  QtProperty *getParameterProperty(const QString &funcIndex,
-                                   const QString &paramName) const;
+  QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter which is a parent of a given
   /// property (tie or constraint).
   QtProperty *getParentParameterProperty(QtProperty *prop) const;
@@ -224,7 +202,7 @@ protected:
 
   /// Ask user for function type
   virtual QString getUserFunctionFromDialog();
-
+  std::pair<QString, QString> FunctionTreeView::splitParameterName(const QString &paramName) const;
 protected slots:
   /// Show the context menu
   void popupMenu(const QPoint &);

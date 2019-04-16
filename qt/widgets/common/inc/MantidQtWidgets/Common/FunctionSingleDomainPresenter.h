@@ -10,12 +10,14 @@
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction_fwd.h"
-#include "MantidQtWidgets/Common/IFunctionView.h"
 
-#include <QString>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+  class SingleDomainFunctionModel;
+  class IFunctionView;
 
   using namespace Mantid::API;
 
@@ -28,6 +30,7 @@ namespace MantidWidgets {
     void clear();
   private:
     IFunctionView *m_view;
+    std::unique_ptr<SingleDomainFunctionModel> m_model;
   };
 } // namespace MantidWidgets
 } // namespace MantidQt

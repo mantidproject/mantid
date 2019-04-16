@@ -8,29 +8,80 @@
 #ifndef MANTIDWIDGETS_FUNCTIONSINGLEDOMAINPRENTERTEST_H_
 #define MANTIDWIDGETS_FUNCTIONSINGLEDOMAINPRENTERTEST_H_
 
+#include "MantidQtWidgets/Common/FunctionSingleDomainPresenter.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/make_unique.h"
+
 #include <cxxtest/TestSuite.h>
 
-#include <QMap>
+#include <QApplication>
+#include <map>
+
+/// This QApplication object is required to construct the view
+class QApplicationHolder : CxxTest::GlobalFixture {
+public:
+  bool setUpWorld() override {
+    int argc(0);
+    char **argv = {};
+    m_app = new QApplication(argc, argv);
+    return true;
+  }
+
+  bool tearDownWorld() override {
+    delete m_app;
+    return true;
+  }
+
+private:
+  QApplication *m_app;
+};
+
+static QApplicationHolder MAIN_QAPPLICATION;
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
-class MyFunctionView : public IFunctionView {
+class MockFunctionView : public IFunctionView {
 public:
-  void clear() override;
-  void setFunction(IFunction_sptr fun) override;
-  bool hasFunction() const override;
-  void setParameter(const QString &funcIndex, const QString &paramName, double value) override;
-  void setParamError(const QString &funcIndex, const QString &paramName, double error) override;
-  double getParameter(const QString &funcIndex, const QString &paramName) const override;
-  void setErrorsEnabled(bool enabled) override;
-  void clearErrors() override;
+  void clear() override {
+    m_params.clear();
+    m_errors.clear();
+  }
+  void setFunction(IFunction_sptr fun) override {
+    if (fun) {
+      for (size_t i = 0; i < fun->nParams(); ++i) {
+        auto name = fun->parameterName(i);
+        m_params[name] = fun->getParameter(i);
+        m_errors[name] = fun->getError(i);
+      }
+    } else {
+      clear();
+    }
+  }
+  bool hasFunction() const override { return !m_params.empty(); }
+  void setParameter(const QString &paramName, double value) override {
+    m_params[paramName.toStdString()] = value;
+  }
+  void setParamError(const QString &paramName, double error) override {
+    m_errors[paramName.toStdString()] = error;
+  }
+  double getParameter(const QString &paramName) const override {
+    return m_params.at(paramName.toStdString());
+  }
+  void setErrorsEnabled(bool enabled) override { m_areErrorsEnabled = enabled; }
+  void clearErrors() override {
+    for (auto &it : m_errors) {
+      it.second = 0.0;
+    }
+  }
 private:
-
+  std::map<std::string, double> m_params;
+  std::map<std::string, double> m_errors;
+  bool m_areErrorsEnabled{ true };
 };
 
 class FunctionSingleDomainPrenterTest : public CxxTest::TestSuite {
@@ -47,9 +98,23 @@ public:
   }
 
   void test_empty() {
-    SingleDomainFunctionModel model;
-    TS_ASSERT(!model.getFitFunction());
+    auto view = make_unique<MockFunctionView>();
+    FunctionSingleDomainPresenter presenter(view.get());
+    TS_ASSERT(!presenter.getFitFunction());
   }
+
+  void test_simple() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionSingleDomainPresenter presenter(view.get());
+    presenter.setFunctionStr("name=LinearBackground,A0=1,A1=2");
+    TS_ASSERT_DELTA(view->getParameter("A0"), 1.0, 1e-15);
+    TS_ASSERT_DELTA(view->getParameter("A1"), 2.0, 1e-15);
+    auto fun = presenter.getFitFunction();
+    TS_ASSERT(fun);
+    if (!fun) return;
+    TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+  }
+
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONSINGLEDOMAINPRENTERTEST_H_

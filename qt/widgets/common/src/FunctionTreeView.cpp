@@ -1345,9 +1345,8 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
  * @param paramName :: Parameter name
  * @param value :: New value
  */
-void FunctionTreeView::setParameter(const QString &funcIndex,
-                                   const QString &paramName, double value) {
-  auto prop = getParameterProperty(funcIndex, paramName);
+void FunctionTreeView::setParameter(const QString &paramName, double value) {
+  auto prop = getParameterProperty(paramName);
   m_parameterManager->setValue(prop, value);
 }
 
@@ -1357,12 +1356,13 @@ void FunctionTreeView::setParameter(const QString &funcIndex,
  * @param paramName :: Parameter name
  * @param error :: New error
  */
-void FunctionTreeView::setParamError(const QString &funcIndex,
-                                    const QString &paramName, double error) {
-  if (auto prop = getFunctionProperty(funcIndex)) {
+void FunctionTreeView::setParamError(const QString &paramName, double error) {
+  QString index, name;
+  std::tie(index, name) = splitParameterName(paramName);
+  if (auto prop = getFunctionProperty(index)) {
     auto children = prop->subProperties();
     foreach (QtProperty *child, children) {
-      if (isParameter(child) && child->propertyName() == paramName) {
+      if (isParameter(child) && child->propertyName() == name) {
         m_parameterManager->setError(child, error);
         break;
       }
@@ -1375,33 +1375,26 @@ void FunctionTreeView::setParamError(const QString &funcIndex,
  * @param funcIndex :: Index of the function
  * @param paramName :: Parameter name
  */
-double FunctionTreeView::getParameter(const QString &funcIndex,
-                                     const QString &paramName) const {
-  auto prop = getParameterProperty(funcIndex, paramName);
+double FunctionTreeView::getParameter(const QString &paramName) const {
+  auto prop = getParameterProperty(paramName);
   return m_parameterManager->value(prop);
 }
 
-///// Get a property for a parameter
-//QtProperty *
-//FunctionTreeView::getParameterProperty(const QString &paramName) const {
-//  QStringList name = splitParameterName(paramName);
-//  return getParameterProperty(name[0], name[1]);
-//}
-//
 /// Get a property for a parameter
 QtProperty *
-FunctionTreeView::getParameterProperty(const QString &funcIndex,
-                                      const QString &paramName) const {
-  if (auto prop = getFunctionProperty(funcIndex)) {
+FunctionTreeView::getParameterProperty(const QString &paramName) const {
+  QString index, name;
+  std::tie(index, name) = splitParameterName(paramName);
+  if (auto prop = getFunctionProperty(index)) {
     auto children = prop->subProperties();
     foreach (QtProperty *child, children) {
-      if (isParameter(child) && child->propertyName() == paramName) {
+      if (isParameter(child) && child->propertyName() == name) {
         return child;
       }
     }
   }
   std::string message = "Unknown function parameter " +
-                        (funcIndex + paramName).toStdString() +
+                        paramName.toStdString() +
                         "\n\n This may happen if there is a CompositeFunction "
                         "containing only one function.";
   throw std::runtime_error(message);
@@ -1738,7 +1731,7 @@ void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
       m_tieManager->setValue(tieProp, newTie);
     }
   }
-  emit parameterChanged(getIndex(prop), prop->propertyName());
+  emit parameterChanged(getParameterName(prop));
 }
 
 /// Called when a tie property changes
@@ -1820,6 +1813,27 @@ QRect FunctionTreeView::getVisualRectFunctionProperty(const QString &index) cons
 
 QTreeWidget *FunctionTreeView::treeWidget() const {
   return m_browser->treeWidget();
+}
+
+/**
+ * Split a qualified parameter name into function index and local parameter
+ * name.
+ * @param paramName :: Fully qualified parameter name (includes function index)
+ * @return :: A string list with the first item is the function index and the
+ * second
+ *   item is the param local name.
+ */
+std::pair<QString, QString>
+FunctionTreeView::splitParameterName(const QString &paramName) const {
+  QString functionIndex;
+  QString parameterName = paramName;
+  int j = paramName.lastIndexOf('.');
+  if (j > 0) {
+    ++j;
+    functionIndex = paramName.mid(0, j);
+    parameterName = paramName.mid(j);
+  }
+  return std::make_pair(functionIndex, parameterName);
 }
 
 } // namespace MantidWidgets
