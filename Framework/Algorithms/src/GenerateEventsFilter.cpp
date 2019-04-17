@@ -50,7 +50,7 @@ void GenerateEventsFilter::init() {
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "An input event workspace");
+      "An input Matrix workspace.");
 
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
