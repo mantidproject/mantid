@@ -20,6 +20,7 @@ Improvements
 - Increased font size in run table.
 - For ZOOM, SHIFT user file command now moves monitor 5.
 - canSAS output mode will be disabled if 2D reduction mode is selected to avoid accidental errors with data dimension.
+- Batch files created by exporting the runs table have the same order of keys as in the table.
 
 Bug Fixes
 #########
