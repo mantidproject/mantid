@@ -179,7 +179,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.getNumberHistograms(), 1)
+        self.assertEqual(out.getNumberHistograms(), 1)
         Xs = out.readX(0)
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], xMin)
@@ -199,7 +199,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.getNumberHistograms(), 1)
+        self.assertEqual(out.getNumberHistograms(), 1)
         Xs = out.readX(0)
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], 0.)
@@ -243,8 +243,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
         dirWS = illhelpers.refl_add_two_theta(dirWS, 6.7)
         dirWS = illhelpers.refl_preprocess_lineposition('dirWS', dirWS, 51)
-        self.assertEquals(dirWS.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
-        self.assertEquals(dirWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 51)
+        self.assertEqual(dirWS.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
+        self.assertEqual(dirWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 51)
         args = {
             'InputWorkspace': dirWS,
             'OutputWorkspace': 'dirForeground',
@@ -255,11 +255,13 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.assertTrue(alg.isExecuted())
         dirForeground = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
-        self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 51)
-        self.assertEquals(dirForeground.spectrumInfo().size(), 1)
-        self.assertEquals(dirForeground.spectrumInfo().l2(0), dirWS.spectrumInfo().l2(51))
-        self.assertEquals(dirForeground.spectrumInfo().twoTheta(0) * 180. / numpy.pi, 8.389135285788196)
+        self.assertEqual(dirForeground.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
+        self.assertEqual(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 51)
+        self.assertEqual(dirForeground.spectrumInfo().size(), 1)
+        self.assertEqual(dirForeground.spectrumInfo().l2(0), dirWS.spectrumInfo().l2(51))
+        self.assertAlmostEquals(dirForeground.spectrumInfo().twoTheta(0) * 180. / numpy.pi,
+                                8.389135285788196,
+                                delta=1.e-15)
 
     def testReflectedBeamSumInLambdaDetectorMovingAndRotation(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
@@ -267,8 +269,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
         dirWS = illhelpers.refl_add_two_theta(dirWS, 6.7)
         dirWS = illhelpers.refl_preprocess_lineposition('dirWS', dirWS, 50.9)
-        self.assertEquals(dirWS.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
-        self.assertEquals(dirWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 50.9)
+        self.assertEqual(dirWS.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
+        self.assertEqual(dirWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 50.9)
         args = {
             'InputWorkspace': dirWS,
             'OutputWorkspace': 'dirForeground',
@@ -279,11 +281,11 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         self.assertTrue(alg.isExecuted())
         dirForeground = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
-        self.assertEquals(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 50.9)
-        self.assertEquals(dirForeground.spectrumInfo().size(), 1)
-        self.assertEquals(dirForeground.spectrumInfo().l2(0), 3.101234371122588)
-        self.assertEquals(numpy.degrees(dirForeground.spectrumInfo().twoTheta(0)), 8.3914043569830)
+        self.assertEqual(dirForeground.run().getProperty(common.SampleLogs.TWO_THETA).value, 6.7)
+        self.assertEqual(dirForeground.run().getProperty(common.SampleLogs.LINE_POSITION).value, 50.9)
+        self.assertEqual(dirForeground.spectrumInfo().size(), 1)
+        self.assertAlmostEqual(dirForeground.spectrumInfo().l2(0), 3.101234371122588, delta=1.e-15)
+        self.assertAlmostEqual(numpy.degrees(dirForeground.spectrumInfo().twoTheta(0)), 8.3914043569830, delta=1.e-13)
 
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
@@ -291,8 +293,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
         reflWS = illhelpers.refl_add_two_theta(reflWS, 40.2)
         reflWS = illhelpers.refl_preprocess_lineposition('refWS', reflWS, 120.4)
-        self.assertEquals(reflWS.run().getProperty(common.SampleLogs.TWO_THETA).value, 40.2)
-        self.assertEquals(reflWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 120.4)
+        self.assertEqual(reflWS.run().getProperty(common.SampleLogs.TWO_THETA).value, 40.2)
+        self.assertEqual(reflWS.run().getProperty(common.SampleLogs.LINE_POSITION).value, 120.4)
         args = {
             'InputWorkspace': reflWS,
             'OutputWorkspace': 'foreground',
@@ -305,11 +307,11 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.run().getProperty(common.SampleLogs.TWO_THETA).value, 40.2)
-        self.assertEquals(out.run().getProperty(common.SampleLogs.LINE_POSITION).value, 120.4)
-        self.assertEquals(out.spectrumInfo().size(), 1)
-        self.assertEquals(out.spectrumInfo().l2(0), 3.0992766423566)
-        self.assertEquals(numpy.degrees(out.spectrumInfo().twoTheta(0)), 40.3568485178340)
+        self.assertEqual(out.run().getProperty(common.SampleLogs.TWO_THETA).value, 40.2)
+        self.assertEqual(out.run().getProperty(common.SampleLogs.LINE_POSITION).value, 120.4)
+        self.assertEqual(out.spectrumInfo().size(), 1)
+        self.assertAlmostEqual(out.spectrumInfo().l2(0), 3.0992766423566, delta=1.e-13)
+        self.assertAlmostEqual(numpy.degrees(out.spectrumInfo().twoTheta(0)), 40.3568485178340, delta=1.e-13)
         self.assertTrue(alg.isExecuted())
 
     def testReflectedBeamSumInLambdaDetectorMovingAndRotationD17(self):
