@@ -125,39 +125,27 @@ interfaces.
 Glossary of Allowed Suffixes
 ----------------------------
 
-_red
-  This is produced in ISIS Energy Transfer on the :ref:`Data Reduction <interface-indirect-data-reduction>`
-  interface. It can also be produced from ISIS Calibration. It has an x axis of EnergyTransfer (meV) and a
-  y axis of Intensity (1/meV). The histogram axis is spectrum number.
-_res
-  This is produced in ISIS Calibration on the :ref:`Data Reduction <interface-indirect-data-reduction>`
-  interface when Create RES is ticked. It has an x axis of EnergyTransfer (meV) and a y axis of Intensity
-  (1/meV). The histogram axis is spectrum number.
-_calib
-  This is produced in ISIS Calibration on the :ref:`Data Reduction <interface-indirect-data-reduction>`
-  interface. Here x is a single point and y is the spectrum number. The histogram axis is spectrum number.
-_sqw
-  This is produced in S(Q,w) on the :ref:`Data Reduction <interface-indirect-data-reduction>` interface.
-  It has an x axis of EnergyTransfer (meV) and a y axis of Intensity. The histogram axis is Q (:math:`A^-1`).
-_Corrections
-  This is produced in Calculate Paalman Pings or Calculate Monte Carlo Absorption on the
-  :ref:`Data Corrections <interface-indirect-corrections>` interface. It has an x axis of EnergyTransfer
-  (meV) and the y axis is Attenuation Factor. The histogram axis is spectrum number.
-_eq
-  This is produced in Elwin on the :ref:`Data Analysis <interface-indirect-data-analysis>` interface. It
-  has an x axis of Q (:math:`A^-1`) and a y axis of Intensity. The histogram axis is a Sample Environment
-  variable such as Temperature.
-_elf
-  This is produced in Elwin on the :ref:`Data Analysis <interface-indirect-data-analysis>` interface. It
-  has an x axis of Intensity and a y axis of Q (:math:`A^-1`). The histogram axis is Q (:math:`A^-1`).
-_iqt
-  This is produced in I(Q,t) on the :ref:`Data Analysis <interface-indirect-data-analysis>` interface. It
-  has an x axis of Time (:math:`ns`) and the y axis is I(Q,t) (no unit). The histogram axis is spectrum
-  number or Q (:math:`A^-1`).
-_Result
-  This is produced in MSDFit, IqtFit, ConvFit or F(Q)Fit on the
-  :ref:`Data Analysis <interface-indirect-data-analysis>` interface. It has an x axis of Q (:math:`A^-1`)
-  and the y axis is the Fit Parameter. The histogram axis is fit parameter names.
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| Suffix       | Produced on                                                                                                        | X axis                       | Y axis                    | Histogram axis                                 |
++==============+====================================================================================================================+==============================+===========================+================================================+
+| _red         | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISEnergyTransfer                                    | EnergyTransfer (:math:`meV`) | Intensity (1/:math:`meV`) | Spectrum Number                                |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _res         | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISCalibration                                       | EnergyTransfer (:math:`meV`) | Intensity (1/:math:`meV`) | Spectrum Number                                |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _calib       | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISCalibration                                       | Single Point                 | Spectrum Number           | Spectrum Number                                |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _sqw         | :ref:`Data Reduction <interface-indirect-data-reduction>` in S(Q, w)                                               | EnergyTransfer (:math:`meV`) | Intensity                 | Q (:math:`A^-1`)                               |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _Corrections | :ref:`Data Corrections <interface-indirect-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption | EnergyTransfer (:math:`meV`) | Attenuation Factor        | Spectrum Number                                |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _eq          | :ref:`Data Analysis <interface-indirect-data-analysis>` in Elwin                                                   | Q (:math:`A^-1`)             | Intensity                 | Sample Environment variable (e.g. Temperature) |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _elf         | :ref:`Data Analysis <interface-indirect-data-analysis>` in Elwin                                                   | Intensity                    | Q (:math:`A^-1`)          | Q (:math:`A^-1`)                               |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _iqt         | :ref:`Data Analysis <interface-indirect-data-analysis>` in I(Q,t)                                                  | Time (:math:`ns`)            | I(Q,t)                    | Spectrum Number or Q (:math:`A^-1`)            |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
+| _Result      | :ref:`Data Analysis <interface-indirect-data-analysis>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                      | Q (:math:`A^-1`)             | Fit Parameter Value       | Fit Parameter Name                             |
++--------------+--------------------------------------------------------------------------------------------------------------------+------------------------------+---------------------------+------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
 according to the suffixes below:
