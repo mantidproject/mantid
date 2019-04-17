@@ -1894,15 +1894,23 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     DataObjects::EventWorkspace_const_sptr eventWS =
         boost::dynamic_pointer_cast<const EventWorkspace>(m_dataWS);
     if (!eventWS) {
-      g_log.error()
-          << "Input workspace " << m_dataWS->getName()
-          << " is not an Eventworkspace and does not have proton charge log. "
-             "Therefore it fails to find run end time.\n";
-      throw std::runtime_error("Input workspace cannot be neither an "
-                               "EventWorkspace nor have proton charge.");
+      stringstream errss;
+      errss << "Input workspace " << m_dataWS->getName()
+            << " is not an Eventworkspace and does not have sample 'log "
+               "proton_charge'."
+               "Therefore it fails to find run end time.";
+      g_log.error(errss.str());
+
+      throw std::runtime_error(errss.str());
     } else if (eventWS->getNumberEvents() == 0) {
-      g_log.error() << "Input EventWorkspace has zero event.  Unable to "
-                       "determine run end time";
+      stringstream errss;
+      errss << "Input EventWorkspace " << m_dataWS->getName()
+            << " has zero event and does not have sample log 'proton_charge'.  "
+               "Therefore, o Unable to "
+               "determine run end time";
+
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
     }
 
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
