@@ -88,6 +88,10 @@ public:
     return m_shape->shape();
   }
 
+  const detail::ShapeInfo &shapeInfo() const override {
+    return m_shape->shapeInfo();
+  }
+
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &innerRadius,
                      double &radius, double &height) const override {
