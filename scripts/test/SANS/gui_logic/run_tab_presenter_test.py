@@ -938,8 +938,8 @@ class RunTabPresenterTest(unittest.TestCase):
         view = mock.MagicMock()
         presenter.set_view(view)
 
-        test_row = ["SANS2D00022025", "another_file", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "a_user_file.txt"]
+        test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
+                    "", "", "", "another_file", "a_user_file.txt"]
 
         expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
                          "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
