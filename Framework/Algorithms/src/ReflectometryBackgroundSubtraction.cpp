@@ -103,7 +103,7 @@ std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
  * the background
  */
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-    MatrixWorkspace_sptr inputWS, std::vector<double> spectrumRanges) {
+    MatrixWorkspace_sptr inputWS, std::vector<double> indexRanges) {
 
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose an event workspace
@@ -131,7 +131,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   poly->initialize();
   poly->setProperty("InputWorkspace", transposedWS);
   poly->setProperty("Degree", getPropertyValue("DegreeOfPolynomial"));
-  poly->setProperty("XRanges", spectrumRanges);
+  poly->setProperty("XRanges", indexRanges);
   poly->setProperty("CostFunction", getPropertyValue("CostFunction"));
   poly->execute();
   MatrixWorkspace_sptr bgd = poly->getProperty("OutputWorkspace");
@@ -155,7 +155,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * @param inputWS :: the input workspace
  */
 void ReflectometryBackgroundSubtraction::subtractPixelBackground(
-    MatrixWorkspace_sptr inputWS, std::vector<double> spectrumRanges) {
+    MatrixWorkspace_sptr inputWS, std::vector<double> indexRanges) {
 
   // this is needed becuase the algorithm LRSubtractAverageBackground replaces
   // the InputWorkspace with the OutputWorkspace
@@ -164,8 +164,8 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
       getPropertyValue("OutputWorkspace"), outputWS);
 
   const std::string backgroundRange =
-      std::to_string(static_cast<int>(spectrumRanges.front())) + "," +
-      std::to_string(static_cast<int>(spectrumRanges.back()));
+      std::to_string(static_cast<int>(indexRanges.front())) + "," +
+      std::to_string(static_cast<int>(indexRanges.back()));
 
   auto LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
@@ -278,13 +278,13 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
-    auto spectrumRanges = findIndexRanges(indexList);
-    calculatePolynomialBackground(inputWS, spectrumRanges);
+    auto indexRanges = findIndexRanges(indexList);
+    calculatePolynomialBackground(inputWS, indexRanges);
   }
 
   if (backgroundType == "Average Pixel Fit") {
-    auto spectrumRanges = findIndexRanges(indexList);
-    subtractPixelBackground(inputWS, spectrumRanges);
+    auto indexRanges = findIndexRanges(indexList);
+    subtractPixelBackground(inputWS, indexRanges);
   }
 }
 
