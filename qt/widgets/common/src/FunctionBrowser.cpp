@@ -45,8 +45,7 @@ using namespace Mantid::Kernel;
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
 FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<std::string>& categories)
-    : QWidget(parent), m_multiDataset(multi), m_numberOfDatasets(0),
-      m_currentDataset(0)
+    : QWidget(parent)
 {
   auto view = new FunctionTreeView(this, multi, categories);
   m_presenter = make_unique<FunctionMultiDomainPresenter>(view);
@@ -258,17 +257,13 @@ bool FunctionBrowser::hasFunction() const {
 
 /// Get the number of datasets
 int FunctionBrowser::getNumberOfDatasets() const {
-  return m_numberOfDatasets;
+  return m_presenter->getNumberOfDatasets();
 }
 
 /// Set new number of the datasets
 /// @param n :: New value for the number of datasets.
 void FunctionBrowser::setNumberOfDatasets(int n) {
-  if (!m_multiDataset) {
-    throw std::runtime_error(
-        "Function browser wasn't set up for multi-dataset fitting.");
-  }
-  m_numberOfDatasets = n;
+  m_presenter->setNumberOfDatasets(n);
 }
 
 /**
@@ -285,9 +280,9 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
                                              double value) {
   //checkLocalParameter(parName);
   //m_localParameterValues[parName][i].value = value;
-  if (i == m_currentDataset) {
-    setParameter(parName, value);
-  }
+  //if (i == m_currentDataset) {
+  //  setParameter(parName, value);
+  //}
 }
 
 void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
@@ -295,10 +290,10 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
   //checkLocalParameter(parName);
   //m_localParameterValues[parName][i].value = value;
   //m_localParameterValues[parName][i].error = error;
-  if (i == m_currentDataset) {
-    setParameter(parName, value);
-    setParamError(parName, error);
-  }
+  //if (i == m_currentDataset) {
+  //  setParameter(parName, value);
+  //  setParamError(parName, error);
+  //}
 }
 /// Get error of a local parameter
 double FunctionBrowser::getLocalParameterError(const QString &parName,
@@ -328,10 +323,10 @@ void FunctionBrowser::setCurrentDataset(int i) {
 /// Remove local parameter values for a number of datasets.
 /// @param indices :: A list of indices of datasets to remove.
 void FunctionBrowser::removeDatasets(QList<int> indices) {
-  if (indices.size() > m_numberOfDatasets) {
-    throw std::runtime_error(
-        "FunctionBrowser asked to removed too many datasets");
-  }
+  //if (indices.size() > m_numberOfDatasets) {
+  //  throw std::runtime_error(
+  //      "FunctionBrowser asked to removed too many datasets");
+  //}
   //qSort(indices);
   //for (auto par = m_localParameterValues.begin();
   //     par != m_localParameterValues.end(); ++par) {
@@ -353,13 +348,13 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
   //    }
   //  }
   //}
-  setNumberOfDatasets(m_numberOfDatasets - indices.size());
+  //setNumberOfDatasets(m_numberOfDatasets - indices.size());
 }
 
 /// Add local parameters for additional datasets.
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n) {
-  setNumberOfDatasets(m_numberOfDatasets + n);
+  //setNumberOfDatasets(m_numberOfDatasets + n);
 }
 
 /**
@@ -606,7 +601,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
 /// Get the index of the current dataset.
 int FunctionBrowser::getCurrentDataset() const
 {
-  return m_currentDataset;
+  return m_presenter->getCurrentDataset();
 }
 
 /// Resize the browser's columns

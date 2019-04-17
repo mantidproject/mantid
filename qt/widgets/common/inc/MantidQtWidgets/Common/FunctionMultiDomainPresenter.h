@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
+#include <QObject>
 #include <memory>
 
 namespace MantidQt {
@@ -22,7 +23,8 @@ class IFunctionView;
 
 using namespace Mantid::API;
 
-class EXPORT_OPT_MANTIDQT_COMMON FunctionMultiDomainPresenter {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionMultiDomainPresenter: public QObject {
+  Q_OBJECT
 public:
   FunctionMultiDomainPresenter(IFunctionView *view);
   void clear();
@@ -36,6 +38,11 @@ public:
   void setParamError(const QString &paramName, double value);
   double getParameter(const QString &paramName);
   void updateParameters(const IFunction &fun);
+  void setNumberOfDatasets(int);
+  int getNumberOfDatasets() const;
+  int getCurrentDataset() const;
+private slots:
+  void viewChangedParameter(const QString &paramName);
 private:
   IFunctionView *m_view;
   std::unique_ptr<MultiDomainFunctionModel> m_model;

@@ -110,6 +110,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
@@ -182,6 +183,7 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/InterfaceFactory.h
   inc/MantidQtWidgets/Common/MantidDesktopServices.h
@@ -440,6 +442,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
+  inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h

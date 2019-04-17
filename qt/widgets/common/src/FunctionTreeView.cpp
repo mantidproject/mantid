@@ -188,8 +188,8 @@ void FunctionTreeView::createBrowser() {
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
           SLOT(parameterPropertyChanged(QtProperty *)));
 
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)),
-          SLOT(updateCurrentFunctionIndex()));
+  //connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)),
+  //        SLOT(updateCurrentFunctionIndex()));
 
   m_browser->setFocusPolicy(Qt::StrongFocus);
 }
@@ -1810,6 +1810,32 @@ QRect FunctionTreeView::getVisualRectFunctionProperty(const QString &index) cons
   } catch (std::exception &) {
   }
   return rect;
+}
+
+QRect FunctionTreeView::getVisualRectParameterProperty(const QString & paramName) const
+{
+  QRect rect;
+  QtProperty *prop{ nullptr };
+  try {
+    prop = getParameterProperty(paramName);
+    rect = visualItemRect(prop);
+  }
+  catch (std::exception &) {
+  }
+  return rect;
+}
+
+QWidget * FunctionTreeView::getParamWidget(const QString & paramName) const
+{
+  QtProperty *prop{ nullptr };
+  try {
+    prop = getParameterProperty(paramName);
+    auto item = getPropertyWidgetItem(prop);
+    return item->treeWidget()->itemWidget(item, 1);
+  }
+  catch (std::exception &) {
+  }
+  return nullptr;
 }
 
 QTreeWidget *FunctionTreeView::treeWidget() const {

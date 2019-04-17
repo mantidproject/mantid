@@ -338,7 +338,9 @@ public:
   int getNumberOfTieProperties() const { return m_ties.size(); }
   int getNumberOfConstraintProperties() const { return m_constraints.size(); }
   QRect getVisualRectFunctionProperty(const QString &index) const;
+  QRect getVisualRectParameterProperty(const QString &paramName) const;
   QTreeWidget *treeWidget() const;
+  QWidget *getParamWidget(const QString &paramName) const;
 };
 
 } // namespace MantidWidgets

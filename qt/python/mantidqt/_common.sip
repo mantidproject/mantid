@@ -306,6 +306,10 @@ public:
     FunctionTreeView *view() const;
     void setFunction(const QString &funStr);
     QString getFunctionString();
+    void setParameter(const QString &funStr, double value);
+    double getParameter(const QString &funStr);
+    int getNumberOfDatasets() const;
+    void setNumberOfDatasets(int n);
 };
 
 // ---------------------------------
@@ -321,5 +325,8 @@ public:
     int getNumberOfTieProperties() const;
     int getNumberOfConstraintProperties() const;
     QRect getVisualRectFunctionProperty(const QString &index) const;
+    QRect getVisualRectParameterProperty(const QString &index) const;
     QTreeWidget *treeWidget() const;
+    QWidget *getParamWidget(const QString &paramName) const;
+    double getParameter(const QString &paramName) const;
 };

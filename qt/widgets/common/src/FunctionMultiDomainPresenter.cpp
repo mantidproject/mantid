@@ -20,6 +20,7 @@ using namespace Mantid::Kernel;
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
   : m_view(view), m_model(make_unique<MultiDomainFunctionModel>())
 {
+  connect(m_view, SIGNAL(parameterChanged(const QString &)), this, SLOT(viewChangedParameter(const QString &)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun)
@@ -66,6 +67,21 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction & fun)
   }
 }
 
+void FunctionMultiDomainPresenter::setNumberOfDatasets(int n)
+{
+  m_model->setNumberDomains(n);
+}
+
+int FunctionMultiDomainPresenter::getNumberOfDatasets() const
+{
+  return m_model->getNumberDomains();
+}
+
+int FunctionMultiDomainPresenter::getCurrentDataset() const
+{
+  return m_model->currentDomainIndex();
+}
+
 void FunctionMultiDomainPresenter::setFunctionString(const QString & funStr)
 {
   m_model->setFunctionString(funStr);
@@ -86,6 +102,11 @@ void FunctionMultiDomainPresenter::clear()
 {
   m_model->clear();
   m_view->clear();
+}
+
+void FunctionMultiDomainPresenter::viewChangedParameter(const QString &paramName) {
+  auto value = m_view->getParameter(paramName);
+  m_model->setParameter(paramName, value);
 }
 
 } // namespace API

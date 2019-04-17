@@ -180,14 +180,6 @@ protected slots:
   void updateCurrentFunctionIndex();
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;
-
-  /// Set true if the constructed function is intended to be used in a
-  /// multi-dataset fit
-  bool m_multiDataset;
-  /// Number of datasets this function is used for
-  int m_numberOfDatasets;
-  /// Index of a dataset for which the parameters are currently displayed
-  int m_currentDataset;
 public:
   // Intended for testing only
   FunctionTreeView *view() const;
