@@ -35,7 +35,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsPlotting
     MantidQtWidgetsSliceViewer
   OUTPUT_SUBDIR
     designer

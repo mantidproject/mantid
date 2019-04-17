@@ -183,6 +183,7 @@ set ( MOC_FILES
     IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
+    IndirectInstrumentConfig.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
@@ -234,6 +235,7 @@ set ( UI_FILES
    IndirectFitDataView.ui
    IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui
+   IndirectInstrumentConfig.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
    IndirectMoments.ui
@@ -280,7 +282,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsPlotting
     MantidScientificInterfacesGeneral
   INSTALL_DIR_BASE
     ${PLUGINS_DIR}

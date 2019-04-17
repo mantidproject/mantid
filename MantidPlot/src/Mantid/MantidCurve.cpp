@@ -10,7 +10,7 @@
 #include <qwt_symbol.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h"
 
 #include "../ApplicationWindow.h"
 #include "../Graph.h"

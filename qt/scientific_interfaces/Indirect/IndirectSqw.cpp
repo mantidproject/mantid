@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSqw.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"

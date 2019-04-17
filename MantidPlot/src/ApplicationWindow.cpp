@@ -73,7 +73,7 @@
 #include "LineDialog.h"
 #include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MatrixCommand.h"
 #include "MatrixDialog.h"
 #include "MatrixModel.h"
