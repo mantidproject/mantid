@@ -5,7 +5,8 @@ from qtpy.QtWidgets import QApplication, QWidget, QAction
 from qtpy.QtCore import Qt, QPoint, QMetaObject, QEvent
 from qtpy.QtTest import QTest
 
-from mantid import FrameworkManager
+from mantid import FrameworkManager, FunctionFactory
+from mantid.fitfunctions import FunctionWrapper
 from mantidqt.utils.qt.test.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin, print_tree, discover_children,
                                                     get_child)
 from mantidqt.utils.qt import import_qt
@@ -42,6 +43,10 @@ class TestFunctionBrowser(GuiWindowTest):
         QTest.keyClicks(editor, str(value))
         QTest.keyClick(editor, Qt.Key_Return)
 
+    def get_fit_function(self):
+        fun_str = self.widget.getFitFunctionString()
+        return FunctionWrapper.wrap(FunctionFactory.createInitialized(fun_str))
+
 
 def function_browser_test(multi=False):
 
@@ -52,7 +57,15 @@ def function_browser_test(multi=False):
     return wrapper
 
 
-# @function_browser_test(False)
+def dummy_test(multi=False):
+    return lambda x: None
+
+
+function_browser_test_ = function_browser_test
+function_browser_test = dummy_test
+
+
+@function_browser_test(False)
 def test_browser_parameters_view(self):
     browser = self.widget
     self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
@@ -136,7 +149,7 @@ def test_browser_parameters_multi_multi(self):
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     browser.setNumberOfDatasets(3)
     self.assertEqual(browser.getNumberOfDatasets(), 3)
-    fun_str = browser.getFunctionString()
+    fun_str = browser.getFitFunctionString()
     self.assertGreater(len(fun_str), 0)
     self.assertAlmostEquals(browser.getParameter('f0.A0'), 0.0)
     self.assertAlmostEquals(browser.getParameter('f1.A0'), 1.0)
@@ -150,6 +163,54 @@ def test_browser_parameters_multi_multi(self):
     self.assertAlmostEquals(browser.getParameter('f1.A0'), 5.5)
     self.assertAlmostEquals(view.getParameter('f1.A0'), 5.5)
     yield 0.1
+
+
+@function_browser_test(True)
+def test_fit_function_multi(self):
+    assert(isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    view = browser.view()
+    self.assertEqual(view.getNumberOfQtProperties(), 8)
+    browser.setNumberOfDatasets(3)
+    self.assertEqual(browser.getNumberOfDatasets(), 3)
+    fun = self.get_fit_function()
+    self.assertEqual(fun.name, 'MultiDomainFunction')
+    self.assertEqual(fun.nDomains, 3)
+    self.assertEqual(fun[0][0].A0, 0.0)
+    self.assertEqual(fun[0][1].A0, 1.0)
+    self.assertEqual(fun[1][0].A0, 0.0)
+    self.assertEqual(fun[1][1].A0, 1.0)
+    self.assertEqual(fun[2][0].A0, 0.0)
+    self.assertEqual(fun[2][1].A0, 1.0)
+
+
+@function_browser_test(True)
+def test_multi_set_parameters_different_domains(self):
+    assert(isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    view = browser.view()
+    self.assertEqual(view.getNumberOfQtProperties(), 8)
+    browser.setNumberOfDatasets(3)
+    self.assertEqual(browser.getNumberOfDatasets(), 3)
+    self.assertEqual(browser.getCurrentDataset(), 0)
+    browser.setCurrentDataset(1)
+    self.assertEqual(browser.getCurrentDataset(), 1)
+    browser.setParameter('f0.A0', 2.2)
+    browser.setParameter('f1.A0', 3.3)
+    browser.setCurrentDataset(2)
+    self.assertEqual(browser.getCurrentDataset(), 2)
+    browser.setParameter('f0.A0', 4.4)
+    browser.setParameter('f1.A0', 5.5)
+    fun = self.get_fit_function()
+    self.assertEqual(fun[0][0].A0, 0.0)
+    self.assertEqual(fun[0][1].A0, 1.0)
+    self.assertEqual(fun[1][0].A0, 2.2)
+    self.assertEqual(fun[1][1].A0, 3.3)
+    self.assertEqual(fun[2][0].A0, 4.4)
+    self.assertEqual(fun[2][1].A0, 5.5)
+    yield 100
 
 
 if __name__ == '__main__':

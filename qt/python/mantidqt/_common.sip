@@ -306,10 +306,13 @@ public:
     FunctionTreeView *view() const;
     void setFunction(const QString &funStr);
     QString getFunctionString();
+    QString getFitFunctionString() const;
     void setParameter(const QString &funStr, double value);
     double getParameter(const QString &funStr);
     int getNumberOfDatasets() const;
     void setNumberOfDatasets(int n);
+    void setCurrentDataset(int i);
+    int getCurrentDataset() const;
 };
 
 // ---------------------------------

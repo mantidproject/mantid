@@ -183,6 +183,7 @@ protected:
 public:
   // Intended for testing only
   FunctionTreeView *view() const;
+  QString getFitFunctionString() const;
 };
 
 } // namespace MantidWidgets

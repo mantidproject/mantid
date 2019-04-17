@@ -34,6 +34,10 @@ IFunction_sptr FunctionMultiDomainPresenter::getFitFunction() const
   return m_model->getFitFunction();
 }
 
+QString FunctionMultiDomainPresenter::getFitFunctionString() const {
+  return m_model->getFitFunctionString();
+}
+
 IFunction_sptr FunctionMultiDomainPresenter::getFunctionByIndex(const QString & index)
 {
   return getFunctionWithPrefix(index, m_model->getCurrentFunction());
@@ -82,13 +86,18 @@ int FunctionMultiDomainPresenter::getCurrentDataset() const
   return m_model->currentDomainIndex();
 }
 
+void FunctionMultiDomainPresenter::setCurrentDataset(int index)
+{
+  m_model->setCurrentDomainIndex(index);
+}
+
 void FunctionMultiDomainPresenter::setFunctionString(const QString & funStr)
 {
   m_model->setFunctionString(funStr);
   m_view->setFunction(m_model->getCurrentFunction());
 }
 
-QString FunctionMultiDomainPresenter::getFunctionString()
+QString FunctionMultiDomainPresenter::getFunctionString() const
 {
   return m_model->getFunctionString();
 }

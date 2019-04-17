@@ -307,17 +307,7 @@ void FunctionBrowser::resetLocalParameters() {}
 
 /// Set current dataset.
 void FunctionBrowser::setCurrentDataset(int i) {
-  //m_currentDataset = i;
-  //if (m_currentDataset >= m_numberOfDatasets) {
-  //  throw std::runtime_error("Dataset index is outside the range");
-  //}
-  //auto localParameters = getLocalParameters();
-  //foreach (QString par, localParameters) {
-  //  setParameter(par, getLocalParameterValue(par, m_currentDataset));
-  //  setParamError(par, getLocalParameterError(par, m_currentDataset));
-  //  //updateLocalTie(par);
-  //  //updateLocalConstraint(par);
-  //}
+  m_presenter->setCurrentDataset(i);
 }
 
 /// Remove local parameter values for a number of datasets.
@@ -647,6 +637,11 @@ boost::optional<QString> FunctionBrowser::currentFunctionIndex() { return boost:
 QString FunctionBrowser::getUserFunctionFromDialog() { return ""; }
 
 FunctionTreeView *FunctionBrowser::view() const { return dynamic_cast<FunctionTreeView*>(m_presenter->view()); }
+
+QString FunctionBrowser::getFitFunctionString() const
+{
+  return m_presenter->getFitFunctionString();
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -27,6 +27,14 @@ QString IFunctionModel::getFunctionString() const
   return QString::fromStdString(fun->asString());
 }
 
+QString IFunctionModel::getFitFunctionString() const
+{
+  auto fun = getFitFunction();
+  if (!fun)
+    return "";
+  return QString::fromStdString(fun->asString());
+}
+
 void IFunctionModel::clear()
 {
   setFunction(IFunction_sptr());

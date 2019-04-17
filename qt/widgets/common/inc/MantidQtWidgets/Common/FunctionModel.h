@@ -23,6 +23,7 @@ namespace MantidWidgets {
     virtual ~IFunctionModel() {}
     void setFunctionString(const QString &funStr);
     QString getFunctionString() const;
+    QString getFitFunctionString() const;
     void clear();
     virtual void setFunction(IFunction_sptr fun) = 0;
     virtual IFunction_sptr getFitFunction() const = 0;

@@ -30,10 +30,11 @@ public:
   void clear();
   void setFunction(IFunction_sptr fun);
   void setFunctionString(const QString &funStr);
-  QString getFunctionString();
+  QString getFunctionString() const;
   IFunction_sptr getFunction() const;
-  IFunction_sptr getFitFunction() const;
   IFunction_sptr getFunctionByIndex(const QString &index);
+  IFunction_sptr getFitFunction() const;
+  QString getFitFunctionString() const;
   void setParameter(const QString &paramName, double value);
   void setParamError(const QString &paramName, double value);
   double getParameter(const QString &paramName);
@@ -41,6 +42,7 @@ public:
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
+  void setCurrentDataset(int);
 private slots:
   void viewChangedParameter(const QString &paramName);
 private:
