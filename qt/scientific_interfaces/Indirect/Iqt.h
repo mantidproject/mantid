@@ -54,6 +54,7 @@ private:
 
 private slots:
   void algorithmComplete(bool error);
+  void plotInput();
   void plotInput(const QString &wsname);
   void rsRangeChangedLazy(double min, double max);
   void updateRS(QtProperty *prop, double val);
@@ -68,6 +69,8 @@ private slots:
   void plotTiled();
 
 private:
+  void setPreviewSpectrumMaximum(int value);
+
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;

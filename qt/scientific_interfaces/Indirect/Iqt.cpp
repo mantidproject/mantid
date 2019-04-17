@@ -240,6 +240,10 @@ void Iqt::setup() {
           SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
           SLOT(setTiledPlotLastPlot(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(plotInput()));
 }
 
 void Iqt::run() {
@@ -533,19 +537,25 @@ void Iqt::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
+void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+
 void Iqt::plotInput(const QString &wsname) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updatePropertyValues(QtProperty *, double)));
 
   MatrixWorkspace_sptr workspace;
   try {
-    workspace = Mantid::API::AnalysisDataService::Instance()
-                    .retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        wsname.toStdString());
     setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
+    setPreviewSpectrumMaximum(0);
     return;
   }
+
+  setPreviewSpectrumMaximum(
+      static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1);
 
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
@@ -595,6 +605,10 @@ void Iqt::plotInput(const QString &wsname) {
           SLOT(updatePropertyValues(QtProperty *, double)));
 
   updateDisplayedBinParameters();
+}
+
+void Iqt::setPreviewSpectrumMaximum(int value) {
+  m_uiForm.spPreviewSpec->setMaximum(value);
 }
 
 /**
