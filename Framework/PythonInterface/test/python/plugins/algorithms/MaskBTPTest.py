@@ -37,6 +37,16 @@ class MaskBTPTest(unittest.TestCase):
         except RuntimeError:
             pass
         try:
+            MaskBTP(Instrument='SEQUOIA', Bank="22")
+            self.fail("Should not have got here.")
+        except RuntimeError:
+            pass
+        try:
+            MaskBTP(Instrument='SEQUOIA', Bank="27")
+            self.fail("Should not have got here.")
+        except RuntimeError:
+            pass
+        try:
             MaskBTP(Instrument='HYSPEC', Tube="18")
             self.fail("Should not have got here.")
         except RuntimeError:
@@ -69,6 +79,15 @@ class MaskBTPTest(unittest.TestCase):
 
         self.assertTrue(detInfo.isMasked(4403)) #bank5, tube 3 (detID 4400)
         DeleteWorkspace(w)
+
+    def testSEQMaskBTP(self):
+        MaskBTP(Instrument='SEQUOIA', Bank="23")
+        MaskBTP(Instrument='SEQUOIA', Bank="24")
+        MaskBTP(Instrument='SEQUOIA', Bank="25")
+        MaskBTP(Instrument='SEQUOIA', Bank="26")
+        MaskBTP(Instrument='SEQUOIA', Bank="38")
+        return
+        
 
 if __name__ == '__main__':
     unittest.main()
