@@ -111,7 +111,7 @@ then ``main-remote-name=origin`` else if you cloned from a fork then it is the n
 back to the original repository.
 
 Note that these commands will checkout a temporary branch that has the development branch merged with master and not just
-the development branch on its own. This command can be aliased by adding the following to the ``[alias]]`` section of your ``~/.gitconfig``
+the development branch on its own. This command can be aliased by adding the following to the ``[alias]`` section of your ``~/.gitconfig``
 file:
 
 .. code-block:: sh
