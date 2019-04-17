@@ -213,6 +213,8 @@ void Iqt::setup() {
     m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item),
                                   QColor(246, 246, 246));
 
+  setPreviewSpectrumMaximum(0);
+
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators

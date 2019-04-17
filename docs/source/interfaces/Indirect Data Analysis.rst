@@ -305,6 +305,9 @@ SampleBinning
 Symmetric Energy Range
   Untick to allow an asymmetric energy range.
 
+Spectrum
+  Changes the spectrum displayed in the preview plot.
+
 Plot Current Preview
   Plots the currently selected preview plot in a separate external window
 
