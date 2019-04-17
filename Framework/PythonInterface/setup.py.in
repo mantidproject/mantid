@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-#
-
 from setuptools import find_packages, setup
 
 @SETUPTOOLS_BUILD_COMMANDS_DEF@
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name='mantidqt', # must match what is required by workbench setup.py
-    install_requires=['mantid'],
+    name='mantid',
     version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
     packages=find_packages(exclude=['*.test']),
     package_data={'': ['*.ui']},
