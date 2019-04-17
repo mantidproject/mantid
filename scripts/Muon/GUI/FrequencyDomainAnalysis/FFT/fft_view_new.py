@@ -126,7 +126,6 @@ class FFTView(QtWidgets.QWidget):
     def getLayout(self):
         return self.grid
 
-  # add data to view
     def addItems(self, options):
         self.ws.clear()
         self.ws.addItems(options)
@@ -142,18 +141,6 @@ class FFTView(QtWidgets.QWidget):
         index = self.ws.findText(pattern)
         self.ws.removeItem(index)
 
-    def setReTo(self, name):
-        index = self.ws.findText(name)
-        if index == -1:
-            return
-        self.ws.setCurrentIndex(index)
-
-    def setImTo(self, name):
-        index = self.Im_ws.findText(name)
-        if index == -1:
-            return
-        self.Im_ws.setCurrentIndex(index)
-
     # connect signals
     def phaseCheck(self):
         self.phaseCheckSignal.emit()
@@ -164,12 +151,6 @@ class FFTView(QtWidgets.QWidget):
     def buttonClick(self):
         self.buttonSignal.emit()
 
-    def getInputWS(self):
-        return self.ws.currentText()
-
-    def getInputImWS(self):
-        return self.Im_ws.currentText()
-
     # responses to commands
     def activateButton(self):
         self.button.setEnabled(True)
@@ -178,7 +159,7 @@ class FFTView(QtWidgets.QWidget):
         self.button.setEnabled(False)
 
     def setPhaseBox(self):
-        self.FFTTable.setRowHidden(8, "PhaseQuad" not in self.getWS())
+        self.FFTTable.setRowHidden(8, "PhaseQuad" not in self.workspace)
 
     def changed(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() == QtCore.Qt.Checked)
@@ -188,75 +169,7 @@ class FFTView(QtWidgets.QWidget):
 
     def phaseQuadChanged(self):
         # hide complex ws
-        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.getWS())
-
-    def initFFTInput(self, run=None):
-        inputs = {}
-        inputs[
-            'InputWorkspace'] = "__ReTmp__"  #
-        inputs['Real'] = 0  # always zero
-        out = str(self.ws.currentText()).replace(";", "; ")
-        if run is None:
-            run = self.getRunName()
-        inputs['OutputWorkspace'] = run + ";" + out + ";FFT"
-        inputs["AcceptXRoundingErrors"] = True
-        return inputs
-
-    def addFFTComplex(self, inputs):
-        inputs["InputImagWorkspace"] = "__ImTmp__"
-        inputs["Imaginary"] = 0  # always zero
-
-    def addFFTShift(self, inputs):
-        inputs['AutoShift'] = False
-        inputs['Shift'] = float(self.shift.text())
-
-    def addRaw(self, inputs, key):
-        inputs[key] += "_Raw"
-
-    def getFFTRePhase(self, inputs):
-        inputs['InputWorkspace'] = "__ReTmp__"
-        inputs['Real'] = 0  # always zero
-
-    def getFFTImPhase(self, inputs):
-        inputs['InputImagWorkspace'] = "__ReTmp__"
-        inputs['Imaginary'] = 1
-
-    def initAdvanced(self):
-        inputs = {}
-        inputs["ApodizationFunction"] = str(self.apodization.currentText())
-        inputs["DecayConstant"] = float(self.decay.text())
-        inputs["NegativePadding"] = self.negativePadding.checkState()
-        inputs["Padding"] = int(self.padding.text())
-        return inputs
-
-    def ReAdvanced(self, inputs):
-        inputs['InputWorkspace'] = str(
-            self.ws.currentText()).replace(";",
-                                           "; ")
-        inputs['OutputWorkspace'] = "__ReTmp__"
-
-    def ImAdvanced(self, inputs):
-        inputs['InputWorkspace'] = str(
-            self.Im_ws.currentText()).replace(";",
-                                              "; ")
-        inputs['OutputWorkspace'] = "__ImTmp__"
-
-    def RePhaseAdvanced(self, inputs):
-        inputs['InputWorkspace'] = "__phaseQuad__"
-        inputs['OutputWorkspace'] = "__ReTmp__"
-
-    # get methods (from the GUI)
-    def getWS(self):
-        return str(self.ws.currentText()).replace(";", "; ")
-
-    def isAutoShift(self):
-        return self.shift_box.checkState() == QtCore.Qt.Checked
-
-    def isComplex(self):
-        return self.Im_box.checkState() == QtCore.Qt.Checked
-
-    def isRaw(self):
-        return self.Raw_box.checkState() == QtCore.Qt.Checked
+        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.workspace)
 
     def set_raw_checkbox_state(self, state):
         if state:
@@ -284,18 +197,6 @@ class FFTView(QtWidgets.QWidget):
     def getShiftBox(self):
         return self.shift_box
 
-    def getFirstGoodData(self):
-        return float(self.x0.text())
-
-    def getLastGoodData(self):
-        return (self.xN.text())
-
-    def isNewPhaseTable(self):
-        return self.phaseTable_box.checkState() == QtCore.Qt.Checked
-
-    def isPhaseBoxShown(self):
-        return self.FFTTable.isRowHidden(8)
-
     def warning_popup(self, message):
         warning(message, parent=self)
 
@@ -303,13 +204,34 @@ class FFTView(QtWidgets.QWidget):
     def workspace(self):
         return str(self.ws.currentText())
 
+    @workspace.setter
+    def workspace(self, name):
+        index = self.ws.findText(name)
+        if index == -1:
+            return
+        self.ws.setCurrentIndex(index)
+
     @property
     def imaginary_workspace(self):
         return str(self.Im_ws.currentText())
 
+    @imaginary_workspace.setter
+    def imaginary_workspace(self, name):
+        index = self.Im_ws.findText(name)
+        if index == -1:
+            return
+        self.Im_ws.setCurrentIndex(index)
+
     @property
     def imaginary_data(self):
         return self.Im_box.checkState() == QtCore.Qt.Checked
+
+    @imaginary_data.setter
+    def imaginary_data(self, value):
+        if value:
+            self.Im_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            self.Im_box.setCheckState(QtCore.Qt.Unchecked)
 
     @property
     def auto_shift(self):
@@ -329,7 +251,7 @@ class FFTView(QtWidgets.QWidget):
 
     @property
     def negative_padding(self):
-        return self.negativePadding.checkState()
+        return self.negativePadding.checkState() == QtCore.Qt.Checked
 
     @property
     def padding_value(self):

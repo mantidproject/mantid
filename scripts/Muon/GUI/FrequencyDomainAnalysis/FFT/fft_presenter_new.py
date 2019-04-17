@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
@@ -56,14 +55,14 @@ class FFTPresenter(object):
         self.view.deactivateButton()
 
     def getWorkspaceNames(self):
-        name = self.view.getInputWS()
-        final_options = self.load.get_workspace_names_for_FFT_analysis(self.view.isRaw())
+        name = self.view.workspace
+        final_options = self.load.get_workspace_names_for_FFT_analysis(self.view.use_raw_data)
 
         self.view.addItems(final_options)
         self.view.removeRe('PhaseQuad')
         self.removePhaseFromIM(final_options)
 
-        self.view.setReTo(name)
+        self.view.workspace = name
 
     def handle_use_raw_data_changed(self):
         if not self.view.isRaw() and not self.load._do_rebin():
@@ -86,7 +85,7 @@ class FFTPresenter(object):
             self.view.setPhaseBox()
 
     def tableClicked(self, row, col):
-        if row == self.view.getImBoxRow() and col == 1 and "PhaseQuad" not in self.view.getWS():
+        if row == self.view.getImBoxRow() and col == 1 and "PhaseQuad" not in self.view.workspace:
             self.view.changedHideUnTick(
                 self.view.getImBox(),
                 self.view.getImBoxRow() + 1)
@@ -135,16 +134,18 @@ class FFTPresenter(object):
 
         return pre_inputs
 
-    def get_fft_inputs(self, real_workspace, imaginary_workspace):
+    def get_fft_inputs(self, real_workspace, imaginary_workspace, imanginary=0):
         FFTInputs = {}
 
         FFTInputs["AcceptXRoundingErrors"] = True
         FFTInputs['Real'] = 0
         FFTInputs['InputWorkspace'] = real_workspace
-        FFTInputs['InputImagWorkspace'] = imaginary_workspace
-        FFTInputs['Imaginary'] = 0
         FFTInputs['Transform'] = 'Forward'
         FFTInputs['AutoShift'] = self.view.auto_shift
+
+        if self.view.imaginary_data:
+            FFTInputs['InputImagWorkspace'] = imaginary_workspace
+            FFTInputs['Imaginary'] = imanginary
 
         return FFTInputs
 
@@ -153,17 +154,26 @@ class FFTPresenter(object):
         self.activate()
 
     def calculate_FFT(self):
-        real_workspace_padding_paramters = self.get_pre_inputs()
+        imaginary_workspace_index = 0
+        real_workspace_padding_parameters = self.get_pre_inputs()
         imaginary_workspace_padding_parameters = self.get_imaginary_inputs()
 
-        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_paramters)
-        imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
+        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters)
 
-        fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input)
+        if self.view.imaginary_data:
+            if 'PhaseQuad' in self.view.workspace:
+                imaginary_workspace_input = real_workspace_input
+                imaginary_workspace_index = 1
+            else:
+                imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
+        else:
+            imaginary_workspace_input = None
+
+        fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
         frequency_domain_workspace = run_FFT(fft_parameters)
 
-        self.add_fft_workspace_to_ADS(real_workspace_padding_paramters, frequency_domain_workspace)
+        self.add_fft_workspace_to_ADS(real_workspace_padding_parameters, frequency_domain_workspace)
 
     def add_fft_workspace_to_ADS(self, pre_process_params, fft_workspace):
         workspace_name = pre_process_params['InputWorkspace'] + '_FFT'

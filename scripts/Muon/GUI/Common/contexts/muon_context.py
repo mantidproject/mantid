@@ -142,10 +142,7 @@ class MuonContext(object):
         workspace_options = []
 
         for run in run_numbers:
-            workspace_options += [
-                wsName.get_raw_data_workspace_name(self, run_list_to_string(run),
-                                                   period=str(period + 1)) + " (PhaseQuad)"
-                for period in range(self.data_context.num_periods(run))]
+            workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
             for name in pair_names:
                 workspace_options.append(
                     wsName.get_pair_data_workspace_name(self,

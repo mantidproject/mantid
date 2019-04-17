@@ -13,6 +13,7 @@ class GenericObserver(Observer):
     def update(self, observable, arg):
         self.callback()
 
+
 class PhaseTablePresenter(object):
     def __init__(self, view, context):
         self.view = view
@@ -23,6 +24,7 @@ class PhaseTablePresenter(object):
         self.instrument_changed_observer = GenericObserver(self.update_current_phase_tables)
 
         self.phase_table_calculation_complete_notifier = Observable()
+        self.phase_quad_calculation_complete_nofifier = Observable()
 
         self.update_current_phase_tables()
 
@@ -88,6 +90,10 @@ class PhaseTablePresenter(object):
 
         run = re.search('[0-9]+', parameters['InputWorkspace']).group()
         AnalysisDataService.addToGroup(self.context.data_context._base_run_name(run), phase_quad_name)
+
+        self.context.phase_context.add_phase_quad(phase_quad_name)
+
+        self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):
         self.view.setEnabled(False)

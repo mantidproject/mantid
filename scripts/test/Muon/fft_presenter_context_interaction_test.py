@@ -53,12 +53,11 @@ class FFTPresenterTest(unittest.TestCase):
     def test_getWorkspaceNames_sets_workspace_and_imaginary_workspace_list_correctly(self):
         self.presenter.getWorkspaceNames()
 
-        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725_raw_data (PhaseQuad)')
-        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Pair Asym; test_pair; #1')
-        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; top; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bkwd; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; bottom; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(5), 'MUSR22725; Group; fwd; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
+        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; #1')
 
         self.assertEquals(self.view.Im_ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
         self.assertEquals(self.view.Im_ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
@@ -69,12 +68,11 @@ class FFTPresenterTest(unittest.TestCase):
     def test_handle_use_raw_data_changed_when_no_rebin_set(self):
         self.view.set_raw_checkbox_state(False)
 
-        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725_raw_data (PhaseQuad)')
-        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Pair Asym; test_pair; #1')
-        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; top; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bkwd; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; bottom; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(5), 'MUSR22725; Group; fwd; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
+        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; #1')
+        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; #1')
 
         self.assertEquals(self.view.Im_ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
         self.assertEquals(self.view.Im_ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
@@ -88,12 +86,11 @@ class FFTPresenterTest(unittest.TestCase):
         self.gui_context.update({'RebinType': 'Fixed', 'RebinFixed' : 2})
         self.view.set_raw_checkbox_state(False)
 
-        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725_raw_data (PhaseQuad)')
-        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Pair Asym; test_pair; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; top; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; bottom; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(5), 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1')
+        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; Rebin; #1')
+        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; Rebin; #1')
+        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1')
+        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; Rebin; #1')
+        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1')
 
         self.assertEquals(self.view.Im_ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; Rebin; #1')
         self.assertEquals(self.view.Im_ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; Rebin; #1')
@@ -101,32 +98,46 @@ class FFTPresenterTest(unittest.TestCase):
         self.assertEquals(self.view.Im_ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; Rebin; #1')
         self.assertEquals(self.view.Im_ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1')
 
-    # def test_get_pre_inputs_with_phase_quad(self):
-    #     self.presenter.getWorkspaceNames()
-    #
-    #     self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
-    #                                                         'InputWorkspace': '__phaseQuad__', 'NegativePadding': 2,
-    #                                                         'OutputWorkspace': '__ReTmp__', 'Padding': 1})
+    def test_get_pre_inputs_with_phase_quad(self):
+        self.context.phase_context.add_phase_quad('MUSR22725_PhaseQuad_MUSR22725_phase_table')
+        self.presenter.getWorkspaceNames()
+
+        self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
+                                                            'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table',
+                                                            'NegativePadding': True, 'Padding': 1})
 
     def test_pre_inputs(self):
         self.presenter.getWorkspaceNames()
         self.view.ws.setCurrentIndex(1)
 
         self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
-                                                            'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; #1',
-                                                            'NegativePadding': 2, 'Padding': 1})
+                                                            'InputWorkspace': 'MUSR22725; Group; top; Asymmetry; #1',
+                                                            'NegativePadding': True, 'Padding': 1})
 
     def test_get_imaginary_pre_inputs(self):
         self.presenter.getWorkspaceNames()
         self.assertEquals(self.presenter.get_imaginary_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                                                                   'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; #1',
-                                                                  'NegativePadding': 2, 'Padding': 1})
+                                                                  'NegativePadding': True, 'Padding': 1})
 
-    # def test_get_fft_inputs_with_phase_quad(self):
-    #     self.presenter.getWorkspaceNames()
-    #     self.assertEquals(self.presenter.get_fft_inputs(), {'AcceptXRoundingErrors': True, 'AutoShift': True, 'Imaginary': 1,
-    #                                                         'InputImagWorkspace': '__ReTmp__', 'InputWorkspace': '__ReTmp__',
-    #                                                         'OutputWorkspace': u'MUSR22725_raw_data;PhaseQuad;FFT', 'Real': 0})
+    def test_get_fft_inputs_with_phase_quad_no_imag(self):
+        phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
+        self.context.phase_context.add_phase_quad(phase_name)
+        self.presenter.getWorkspaceNames()
+        self.view.imaginary_data = False
+
+        self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name), {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                                                            'InputWorkspace': phase_name,
+                                                            'Real': 0, 'Transform': 'Forward'})
+
+    def test_get_fft_inputs_with_phase_quad(self):
+        phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
+        self.context.phase_context.add_phase_quad(phase_name)
+        self.presenter.getWorkspaceNames()
+
+        self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name, 1), {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                                                            'InputWorkspace': phase_name, 'InputImagWorkspace': phase_name,
+                                                            'Real': 0, 'Imaginary': 1, 'Transform': 'Forward'})
 
     def test_get_fft_inputs_without_phase_quad(self):
         self.presenter.getWorkspaceNames()
@@ -136,12 +147,42 @@ class FFTPresenterTest(unittest.TestCase):
                            'InputImagWorkspace': 'imaginary_input_workspace', 'InputWorkspace': 'input_workspace',
                            'Real': 0, 'Transform': 'Forward'})
 
-    def test_get_initial_input_run(self):
+    def test_get_fft_inputs_with_no_imaginary_workspace_specified(self):
+        self.presenter.getWorkspaceNames()
+        self.view.imaginary_data = False
+
+        self.assertEquals(self.presenter.get_fft_inputs('input_workspace', 'imaginary_input_workspace'),
+                          {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                           'InputWorkspace': 'input_workspace',
+                           'Real': 0, 'Transform': 'Forward'})
+
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_PaddingAndApodization')
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new.run_FFT')
+    def test_calculate_FFT_calls_correct_algorithm_sequence_for_imaginary_phase_quad(self, fft_mock, apodization_mock):
+        apodization_mock_return = mock.MagicMock()
+        fft_mock_return = mock.MagicMock()
+        fft_mock.return_value = fft_mock_return
+        apodization_mock.return_value = apodization_mock_return
+        self.presenter.add_fft_workspace_to_ADS = mock.MagicMock()
+        phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
+        self.context.phase_context.add_phase_quad(phase_name)
         self.presenter.getWorkspaceNames()
 
-        self.assertEquals(self.presenter.get_input_run(), 'MUSR22725')
-        self.view.ws.setCurrentIndex(1)
-        self.assertEquals(self.presenter.get_input_run(), 'MUSR22725')
+        self.presenter.calculate_FFT()
+
+        apodization_mock.assert_called_once_with({'Padding': 1, 'ApodizationFunction': 'Lorentz', 'NegativePadding': True,
+                                                  'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table', 'DecayConstant': 4.4})
+
+        fft_mock.assert_called_once_with({'Real': 0, 'InputWorkspace': apodization_mock_return, 'Transform': 'Forward',
+                                          'AcceptXRoundingErrors': True, 'AutoShift': True, 'InputImagWorkspace': apodization_mock_return,
+                                          'Imaginary': 1})
+
+        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with({'Padding': 1, 'ApodizationFunction': 'Lorentz',
+                                                                         'NegativePadding': True,
+                                                                         'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table',
+                                                                         'DecayConstant': 4.4}, fft_mock_return)
+
+
 
 
 if __name__ == '__main__':
