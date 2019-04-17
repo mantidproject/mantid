@@ -315,7 +315,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
