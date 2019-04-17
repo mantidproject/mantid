@@ -30,13 +30,13 @@ public:
   }
 
   void test_empty() {
-    SingleDomainFunctionModel model;
+    MultiDomainFunctionModel model;
     TS_ASSERT(!model.getFitFunction());
   }
 
   void test_simple() {
-    SingleDomainFunctionModel model;
-    model.setFunctionStr("name=LinearBackground,A0=1,A1=2");
+    MultiDomainFunctionModel model;
+    model.setFunctionString("name=LinearBackground,A0=1,A1=2");
     auto fun = model.getFitFunction();
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
     TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
@@ -45,7 +45,7 @@ public:
 
   void test_simple_multidomain() {
     MultiDomainFunctionModel model;
-    model.setFunctionStr("name=LinearBackground,A0=1,A1=2");
+    model.setFunctionString("name=LinearBackground,A0=1,A1=2");
     model.setNumberDomains(2);
     TS_ASSERT_EQUALS(model.getNumberDomains(), 2);
     TS_ASSERT_EQUALS(model.currentDomainIndex(), 0);

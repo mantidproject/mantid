@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
+#include "FunctionBrowser/FunctionBrowserUtils.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -1813,27 +1814,6 @@ QRect FunctionTreeView::getVisualRectFunctionProperty(const QString &index) cons
 
 QTreeWidget *FunctionTreeView::treeWidget() const {
   return m_browser->treeWidget();
-}
-
-/**
- * Split a qualified parameter name into function index and local parameter
- * name.
- * @param paramName :: Fully qualified parameter name (includes function index)
- * @return :: A string list with the first item is the function index and the
- * second
- *   item is the param local name.
- */
-std::pair<QString, QString>
-FunctionTreeView::splitParameterName(const QString &paramName) const {
-  QString functionIndex;
-  QString parameterName = paramName;
-  int j = paramName.lastIndexOf('.');
-  if (j > 0) {
-    ++j;
-    functionIndex = paramName.mid(0, j);
-    parameterName = paramName.mid(j);
-  }
-  return std::make_pair(functionIndex, parameterName);
 }
 
 } // namespace MantidWidgets

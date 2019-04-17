@@ -202,7 +202,6 @@ protected:
 
   /// Ask user for function type
   virtual QString getUserFunctionFromDialog();
-  std::pair<QString, QString> FunctionTreeView::splitParameterName(const QString &paramName) const;
 protected slots:
   /// Show the context menu
   void popupMenu(const QPoint &);

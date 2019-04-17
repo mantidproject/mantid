@@ -22,7 +22,7 @@ class TestFunctionBrowser(GuiWindowTest):
     def create_widget(self):
         return FunctionBrowser()
 
-    def test_find_peaks_no_workspace(self):
+    def test_view(self):
         browser = self.widget
         self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
         view = browser.view()

@@ -10,24 +10,40 @@
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModel.h"
 
-#include <QString>
+#include <memory>
 
 namespace MantidQt {
-  namespace MantidWidgets {
+namespace MantidWidgets {
 
-    using namespace Mantid::API;
+class MultiDomainFunctionModel;
+class IFunctionView;
 
-    class EXPORT_OPT_MANTIDQT_COMMON FunctionMultiDomainPresenter {
-    public:
-      FunctionMultiDomainPresenter();
-      void setFunction(IFunction_sptr fun);
-      IFunction_sptr getFitFunction() const;
-      void setFunctionStr(const std::string &funStr);
-      void clear();
-    private:
-    };
-  } // namespace MantidWidgets
+using namespace Mantid::API;
+
+class EXPORT_OPT_MANTIDQT_COMMON FunctionMultiDomainPresenter {
+public:
+  FunctionMultiDomainPresenter(IFunctionView *view);
+  void clear();
+  void setFunction(IFunction_sptr fun);
+  void setFunctionString(const QString &funStr);
+  QString getFunctionString();
+  IFunction_sptr getFunction() const;
+  IFunction_sptr getFitFunction() const;
+  IFunction_sptr getFunctionByIndex(const QString &index);
+  void setParameter(const QString &paramName, double value);
+  void setParamError(const QString &paramName, double value);
+  double getParameter(const QString &paramName);
+  void updateParameters(const IFunction &fun);
+private:
+  IFunctionView *m_view;
+  std::unique_ptr<MultiDomainFunctionModel> m_model;
+public:
+  IFunctionView *view() const {return m_view;}
+};
+
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTER_H_

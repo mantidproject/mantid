@@ -18,10 +18,10 @@ set ( QT5_SRC_FILES
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
   src/FlowLayout.cpp
+  src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
   src/FunctionMultiDomainPresenter.cpp
-  src/FunctionSingleDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
@@ -323,10 +323,10 @@ set ( SRC_FILES
   src/FindReplaceDialog.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
+  src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
   src/FunctionMultiDomainPresenter.cpp
-  src/FunctionSingleDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IndirectInstrumentConfig.cpp
@@ -588,7 +588,6 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/ParseNumerics.h
   inc/MantidQtWidgets/Common/FunctionModel.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
-  inc/MantidQtWidgets/Common/FunctionSingleDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
@@ -798,7 +797,6 @@ set( TEST_FILES
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
   test/FunctionModelTest.h
-  test/FunctionSingleDomainPresenterTest.h
   test/FunctionMultiDomainPresenterTest.h
   test/InterfaceManagerTest.h
   test/LogValueFinderTest.h

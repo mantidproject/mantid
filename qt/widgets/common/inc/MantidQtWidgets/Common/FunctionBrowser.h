@@ -29,8 +29,10 @@ class ParameterTie;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class  FunctionTreeView;
-class IFunctionModel;
+class FunctionTreeView;
+class FunctionMultiDomainPresenter;
+
+using namespace Mantid::API;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
@@ -49,16 +51,16 @@ public:
   /// Set the function in the browser
   void setFunction(const QString &funStr) override;
   /// Set the function in the browser
-  void setFunction(Mantid::API::IFunction_sptr fun);
+  void setFunction(IFunction_sptr fun);
   /// Return FunctionFactory function string
   QString getFunctionString() override;
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction();
+  IFunction_sptr getFunction();
   /// Check if a function is set
   bool hasFunction() const;
 
   /// Return a function with specified index
-  Mantid::API::IFunction_sptr getFunctionByIndex(const QString &index);
+  IFunction_sptr getFunctionByIndex(const QString &index);
 
   /// Return index of the current function, if one is selected
   boost::optional<QString> currentFunctionIndex();
@@ -70,7 +72,7 @@ public:
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
-  void updateParameters(const Mantid::API::IFunction &fun) override;
+  void updateParameters(const IFunction &fun) override;
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
@@ -177,8 +179,7 @@ protected slots:
   /// Update current function index depending on currently selected item
   void updateCurrentFunctionIndex();
 protected:
-  std::unique_ptr<IFunctionModel> m_model;
-  FunctionTreeView *m_view;
+  std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;
 
   /// Set true if the constructed function is intended to be used in a
   /// multi-dataset fit
@@ -193,7 +194,6 @@ public:
 };
 
 } // namespace MantidWidgets
-
 } // namespace MantidQt
 
 #endif /*MANTIDWIDGETS_FUNCTIONBROWSER_H_*/

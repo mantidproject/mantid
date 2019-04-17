@@ -14,37 +14,22 @@ namespace MantidWidgets {
 
 using namespace Mantid::API;
 
-void IFunctionModel::setFunctionStr(const std::string & funStr)
+void IFunctionModel::setFunctionString(const QString & funStr)
 {
-  setFunction(FunctionFactory::Instance().createInitialized(funStr));
+  setFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+}
+
+QString IFunctionModel::getFunctionString() const
+{
+  auto fun = getCurrentFunction();
+  if (!fun)
+    return "";
+  return QString::fromStdString(fun->asString());
 }
 
 void IFunctionModel::clear()
 {
   setFunction(IFunction_sptr());
-}
-
-void SingleDomainFunctionModel::setFunction(IFunction_sptr fun)
-{
-  m_function = boost::dynamic_pointer_cast<CompositeFunction>(fun);
-  if (m_function) {
-    return;
-  }
-  m_function = CompositeFunction_sptr(new CompositeFunction);
-  if (fun) {
-    m_function->addFunction(fun);
-  }
-}
-
-IFunction_sptr SingleDomainFunctionModel::getFitFunction() const
-{
-  if (!m_function || m_function->nFunctions() > 1) {
-    return m_function;
-  }
-  if (m_function->nFunctions() == 1) {
-    return m_function->getFunction(0);
-  }
-  return IFunction_sptr();
 }
 
 void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
@@ -74,6 +59,30 @@ IFunction_sptr MultiDomainFunctionModel::getFitFunction() const
     return fun;
   }
   return IFunction_sptr();
+}
+
+void MultiDomainFunctionModel::setParameter(const QString & paramName, double value)
+{
+  getCurrentFunction()->setParameter(paramName.toStdString(), value);
+}
+
+void MultiDomainFunctionModel::setParamError(const QString & paramName, double value)
+{
+  auto fun = getCurrentFunction();
+  auto const index = fun->parameterIndex(paramName.toStdString());
+  fun->setError(index, value);
+}
+
+double MultiDomainFunctionModel::getParameter(const QString & paramName) const
+{
+  return getCurrentFunction()->getParameter(paramName.toStdString());
+}
+
+double MultiDomainFunctionModel::getParamError(const QString & paramName) const
+{
+  auto fun = getCurrentFunction();
+  auto const index = fun->parameterIndex(paramName.toStdString());
+  return fun->getError(index);
 }
 
 IFunction_sptr MultiDomainFunctionModel::getSingleFunction(int index) const

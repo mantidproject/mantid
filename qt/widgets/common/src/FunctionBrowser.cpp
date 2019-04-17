@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
-#include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -36,7 +36,8 @@ Mantid::Kernel::Logger g_log("Function Browser");
 namespace MantidQt {
 namespace MantidWidgets {
 
-  using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 /**
  * Constructor
@@ -46,17 +47,12 @@ namespace MantidWidgets {
 FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<std::string>& categories)
     : QWidget(parent), m_multiDataset(multi), m_numberOfDatasets(0),
       m_currentDataset(0)
-
 {
-  if (multi) {
-    m_model = make_unique<MultiDomainFunctionModel>();
-  } else {
-    m_model = make_unique<SingleDomainFunctionModel>();
-  }
-  m_view = new FunctionTreeView(this, multi, categories);
+  auto view = new FunctionTreeView(this, multi, categories);
+  m_presenter = make_unique<FunctionMultiDomainPresenter>(view);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
-  layout->addWidget(m_view);
+  layout->addWidget(view);
 }
 
 /**
@@ -68,8 +64,7 @@ FunctionBrowser::~FunctionBrowser() {}
  * Clear the contents
  */
 void FunctionBrowser::clear() {
-  m_model->clear();
-  m_view->clear();
+  m_presenter->clear();
 }
 
 /**
@@ -80,7 +75,7 @@ void FunctionBrowser::setFunction(const QString &funStr) {
   if (funStr.isEmpty())
     return;
   try {
-    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized(
+    auto fun = FunctionFactory::Instance().createInitialized(
         funStr.toStdString());
     if (!fun)
       return;
@@ -94,9 +89,8 @@ void FunctionBrowser::setFunction(const QString &funStr) {
  * Set the function in the browser
  * @param fun :: A function
  */
-void FunctionBrowser::setFunction(Mantid::API::IFunction_sptr fun) {
-  m_model->setFunction(fun);
-  m_view->setFunction(fun);
+void FunctionBrowser::setFunction(IFunction_sptr fun) {
+  m_presenter->setFunction(fun);
 }
 
 /**
@@ -104,9 +98,8 @@ void FunctionBrowser::setFunction(Mantid::API::IFunction_sptr fun) {
  * @param index :: Index of the function, or empty string for top-level function
  * @return Function at index, or null pointer if not found
  */
-Mantid::API::IFunction_sptr
-FunctionBrowser::getFunctionByIndex(const QString &index) {
-    return Mantid::API::IFunction_sptr();
+IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
+    return m_presenter->getFunctionByIndex(index);
 }
 
 /**
@@ -115,7 +108,7 @@ FunctionBrowser::getFunctionByIndex(const QString &index) {
  * @param value :: New value
  */
 void FunctionBrowser::setParameter(const QString &paramName, double value) {
-  m_view->setParameter(paramName, value);
+  m_presenter->setParameter(paramName, value);
 }
 
 /**
@@ -124,7 +117,7 @@ void FunctionBrowser::setParameter(const QString &paramName, double value) {
  * @param error :: New error
  */
 void FunctionBrowser::setParamError(const QString &paramName, double error) {
-  m_view->setParamError(paramName, error);
+  m_presenter->setParamError(paramName, error);
 }
 
 /**
@@ -132,7 +125,7 @@ void FunctionBrowser::setParamError(const QString &paramName, double error) {
  * @param paramName :: Fully qualified parameter name (includes function index)
  */
 double FunctionBrowser::getParameter(const QString &paramName) const {
-  return 0.0;
+  return m_presenter->getParameter(paramName);
 }
 
 /**
@@ -140,28 +133,19 @@ double FunctionBrowser::getParameter(const QString &paramName) const {
  * @param fun :: A function to copy the values from. It must have the same
  *   type (composition) as the function in the browser.
  */
-void FunctionBrowser::updateParameters(const Mantid::API::IFunction &fun) {
-  const auto paramNames = fun.getParameterNames();
-  for (const auto &parameter : paramNames) {
-    const QString qName = QString::fromStdString(parameter);
-    setParameter(qName, fun.getParameter(parameter));
-    const size_t index = fun.parameterIndex(parameter);
-    setParamError(qName, fun.getError(index));
-  }
+void FunctionBrowser::updateParameters(const IFunction &fun) {
+  m_presenter->updateParameters(fun);
 }
 
 /**
  * Return FunctionFactory function string
  */
 QString FunctionBrowser::getFunctionString() {
-  auto fun = getFunction();
-  if (!fun)
-    return "";
-  return QString::fromStdString(fun->asString());
+  return m_presenter->getFunctionString();
 }
 
 Mantid::API::IFunction_sptr FunctionBrowser::getFunction() {
-  return Mantid::API::IFunction_sptr();
+  return m_presenter->getFunction();
 }
 
 /**
@@ -269,7 +253,7 @@ void FunctionBrowser::updateCurrentFunctionIndex() {
 }
 
 bool FunctionBrowser::hasFunction() const {
-  return m_view->hasFunction();
+  return false;// m_view->hasFunction();
 }
 
 /// Get the number of datasets
@@ -630,7 +614,7 @@ int FunctionBrowser::getCurrentDataset() const
 /// @param s1 :: New size for the second column (Value).
 /// @param s2 :: New size for the third optional column (Global).
 void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
-  m_view->setColumnSizes(s0, s1, s2);
+  //m_view->setColumnSizes(s0, s1, s2);
 }
 
 ///**
@@ -667,7 +651,7 @@ boost::optional<QString> FunctionBrowser::currentFunctionIndex() { return boost:
 
 QString FunctionBrowser::getUserFunctionFromDialog() { return ""; }
 
-FunctionTreeView *FunctionBrowser::view() const { return m_view; }
+FunctionTreeView *FunctionBrowser::view() const { return dynamic_cast<FunctionTreeView*>(m_presenter->view()); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt
