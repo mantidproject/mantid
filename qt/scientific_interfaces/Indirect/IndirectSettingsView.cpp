@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettingsView.h"
 
+#include "MantidQtWidgets/Common/HelpWindow.h"
+
 #include <QSettings>
 
 namespace {
@@ -45,6 +47,8 @@ IndirectSettingsView::IndirectSettingsView(QWidget *parent)
   connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(emitApplyClicked()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this,
           SLOT(emitCancelClicked()));
+
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(openHelp()));
 }
 
 void IndirectSettingsView::emitUpdateRestrictInputByName(QString const &text) {
@@ -56,6 +60,11 @@ void IndirectSettingsView::emitOkClicked() { emit okClicked(); }
 void IndirectSettingsView::emitApplyClicked() { emit applyClicked(); }
 
 void IndirectSettingsView::emitCancelClicked() { emit cancelClicked(); }
+
+void IndirectSettingsView::openHelp() {
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Indirect Settings"));
+}
 
 void IndirectSettingsView::setInterfaceSettingsVisible(bool visible) {
   m_uiForm.gbInterfaceSettings->setVisible(visible);

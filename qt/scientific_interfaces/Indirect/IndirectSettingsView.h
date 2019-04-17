@@ -57,6 +57,7 @@ private slots:
   void emitOkClicked();
   void emitApplyClicked();
   void emitCancelClicked();
+  void openHelp();
 
 private:
   Ui::IndirectSettingsDialog m_uiForm;
