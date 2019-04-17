@@ -8,5 +8,20 @@ Reflectometry Changes
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
+	
+Algorithms
+----------
+
+New
+###
+
+Improvements
+############
+
+- An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
+
+Bug fixes
+#########
+
 
 :ref:`Release 4.1.0 <v4.1.0>`
