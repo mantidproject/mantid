@@ -7,6 +7,7 @@ function ( add_python_package pkg_name )
   # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
   set ( _setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR} )
+
   if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" )
     set ( SETUPTOOLS_BUILD_COMMANDS_DEF
 "def patch_setuptools_command(cmd_cls_name):
@@ -33,7 +34,17 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   endif ()
 
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
-  set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
+
+  # Parses ARGN and adds the expected parameter EGGLINKNAME as a new variable
+  cmake_parse_arguments(_additional_args "" "EGGLINKNAME" "" ${ARGN})
+
+  # If a custom egg-link name WAs specified use that for the link
+  if (_additional_args_EGGLINKNAME)
+    set ( _egg_link ${_egg_link_dir}/${_egg_link_name}.egg-link )
+  else()
+    # if no egg-link name is specified, then use the target name
+    set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
+  endif()
 
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
     if ( WIN32 )
