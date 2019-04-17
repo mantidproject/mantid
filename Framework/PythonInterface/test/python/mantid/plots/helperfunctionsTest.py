@@ -75,6 +75,13 @@ class HelperFunctionsTest(unittest.TestCase):
                                          VerticalAxisUnit='DeltaE',
                                          VerticalAxisValues=[4, 6, 8],
                                          OutputWorkspace='ws2d_histo')
+        cls.ws1d_distribution = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
+                                                DataY=[2, 3, 4, 5, 6],
+                                                DataE=[1, 2, 3, 4, 6],
+                                                NSpec=1,
+                                                Distribution=True,
+                                                UnitX='meV',
+                                                OutputWorkspace='ws1d_distribution')
         cls.ws2d_point = CreateWorkspace(DataX=[1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4],
                                          DataY=[2] * 12,
                                          NSpec=3,
@@ -139,6 +146,7 @@ class HelperFunctionsTest(unittest.TestCase):
     def tearDownClass(cls):
         config['graph1d.autodistribution'] = cls.g1da
         DeleteWorkspace('ws2d_histo')
+        DeleteWorkspace('ws1d_distribution')
         DeleteWorkspace('ws2d_point')
         DeleteWorkspace('ws1d_point')
         DeleteWorkspace('ws_MD_2d')
@@ -165,6 +173,12 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_get_axes_labels(self):
         axs = funcs.get_axes_labels(self.ws2d_histo)
         self.assertEqual(axs, ('', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
+
+    def test_y_units_correct_on_distribution_workspace(self):
+        ws = self.ws1d_distribution
+        ws.setYUnit('Counts')
+        labels = funcs.get_axes_labels(ws)
+        self.assertEqual(labels[0], 'Counts ($meV^{-1}$)')
 
     def test_get_axes_label_2d_MDWS(self):
         axs = funcs.get_axes_labels(self.ws_MD_2d)

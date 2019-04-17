@@ -600,8 +600,12 @@ def get_axes_labels(workspace, indices=None):
             axes.append('{0} ({1})'.format(axis_title, axis_unit))
         axes.append(title.strip())
     else:
-        '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
-        axes = [workspace.YUnit()]  # TODO: deal with distribution
+        # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
+        y_unit_label = workspace.YUnitLabel()
+        if ' per ' in y_unit_label:
+            label, unit = y_unit_label.split(' per ')
+            y_unit_label = '{} (${}^{{-1}}$)'.format(label, unit)
+        axes_labels = [y_unit_label]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
@@ -609,5 +613,5 @@ def get_axes_labels(workspace, indices=None):
                 unit = '{} (${}$)'.format(unit.caption(), unit.symbol().latex())
             else:
                 unit = unit.caption()
-            axes.append(unit)
-    return tuple(axes)
+            axes_labels.append(unit)
+    return tuple(axes_labels)
