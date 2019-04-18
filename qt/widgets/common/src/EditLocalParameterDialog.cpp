@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
 #include "MantidKernel/make_unique.h"
 
@@ -32,7 +33,7 @@ namespace MantidWidgets {
  * fitted
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
-    QWidget *parent, MantidWidgets::IFunctionBrowser *funcBrowser,
+    QWidget *parent, FunctionMultiDomainPresenter *funcBrowser,
     const QString &parName, const QStringList &wsNames,
     const std::vector<size_t> &wsIndices)
     : QDialog(parent), m_parName(parName) {

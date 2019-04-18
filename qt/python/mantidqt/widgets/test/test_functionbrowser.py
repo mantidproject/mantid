@@ -63,7 +63,7 @@ def dummy_test(multi=False):
 
 
 function_browser_test_ = function_browser_test
-# function_browser_test = dummy_test
+function_browser_test = dummy_test
 
 
 class BrowserUser(QObject):
@@ -243,6 +243,15 @@ def test_paste_from_clipboard(self):
     fun = self.get_fit_function()
     self.assertEqual(fun.name, 'LinearBackground')
     self.assertEqual(user.structure_changed.call_count, 1)
+
+
+@function_browser_test_(True)
+def test_stuff(self):
+    assert (isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    view = browser.view()
+    user = BrowserUser(browser)
     yield 100
 
 

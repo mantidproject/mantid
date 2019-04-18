@@ -18,8 +18,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
-#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
-
 #include <QApplication>
 #include <QClipboard>
 #include <QHBoxLayout>
@@ -209,31 +207,6 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n) {
   m_presenter->addDatasets(n);
-}
-
-/**
- * Launches the Edit Local Parameter dialog and deals with the input from it.
- * @param parName :: Name of parameter that button was clicked for.
- * @param wsNames :: Names of the workspaces the datasets came from.
- * @param wsIndices :: The workspace indices of the datasets.
- */
-void FunctionBrowser::editLocalParameter(const QString &parName,
-                                         const QStringList &wsNames,
-                                         const std::vector<size_t> &wsIndices) {
-  assert(wsNames.size() == wsIndices.size());
-  assert(wsNames.size() == getNumberOfDatasets());
-  EditLocalParameterDialog dialog(parentWidget(), this, parName, wsNames, wsIndices);
-  if (dialog.exec() == QDialog::Accepted) {
-    auto values = dialog.getValues();
-    auto fixes = dialog.getFixes();
-    auto ties = dialog.getTies();
-    assert(values.size() == getNumberOfDatasets());
-    for (int i = 0; i < values.size(); ++i) {
-      setLocalParameterValue(parName, i, values[i]);
-      setLocalParameterFixed(parName, i, fixes[i]);
-      setLocalParameterTie(parName, i, ties[i]);
-    }
-  }
 }
 
 /// Return the multidomain function for multi-dataset fitting

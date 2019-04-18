@@ -29,8 +29,8 @@ public:
   virtual void setFunction(const QString &funStr) = 0;
   virtual void setNumberOfDatasets(int n) = 0;
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
-  virtual void editLocalParameter(const QString &parName, const QStringList &wsNames,
-                                  const std::vector<size_t> &wsIndices) = 0;
+  //virtual void editLocalParameter(const QString &parName, const QStringList &wsNames,
+  //                                const std::vector<size_t> &wsIndices) = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
   virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;

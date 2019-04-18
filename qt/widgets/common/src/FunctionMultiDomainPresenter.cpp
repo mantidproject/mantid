@@ -10,10 +10,12 @@
 #include "MantidKernel/make_unique.h"
 
 #include "FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <QApplication>
 #include <QClipboard>
 #include <QMessageBox>
+#include <QWidget>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -126,6 +128,36 @@ void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices)
 {
 }
 
+double FunctionMultiDomainPresenter::getLocalParameterValue(const QString & parName, int i) const
+{
+  return m_model->getLocalParameterValue(parName, i);
+}
+
+bool FunctionMultiDomainPresenter::isLocalParameterFixed(const QString & parName, int i) const
+{
+  return m_model->isLocalParameterFixed(parName, i);
+}
+
+QString FunctionMultiDomainPresenter::getLocalParameterTie(const QString & parName, int i) const
+{
+  return m_model->getLocalParameterTie(parName, i);
+}
+
+void FunctionMultiDomainPresenter::setLocalParameterValue(const QString & parName, int i, double value)
+{
+  m_model->setLocalParameterValue(parName, i, value);
+}
+
+void FunctionMultiDomainPresenter::setLocalParameterFixed(const QString & parName, int i, bool fixed)
+{
+  m_model->setLocalParameterFixed(parName, i, fixed);
+}
+
+void FunctionMultiDomainPresenter::setLocalParameterTie(const QString & parName, int i, QString tie)
+{
+  m_model->setLocalParameterTie(parName, i, tie);
+}
+
 void FunctionMultiDomainPresenter::viewPastedFunction(const QString & funStr)
 {
   m_model->setFunctionString(funStr);
@@ -166,6 +198,32 @@ void FunctionMultiDomainPresenter::viewChangedParameter(const QString &paramName
   auto const parts = splitParameterName(paramName);
   emit parameterChanged(parts.first, parts.second);
 }
+
+/**
+ * Launches the Edit Local Parameter dialog and deals with the input from it.
+ * @param parName :: Name of parameter that button was clicked for.
+ * @param wsNames :: Names of the workspaces the datasets came from.
+ * @param wsIndices :: The workspace indices of the datasets.
+ */
+void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName,
+  const QStringList &wsNames,
+  const std::vector<size_t> &wsIndices) {
+  assert(wsNames.size() == wsIndices.size());
+  assert(wsNames.size() == getNumberOfDatasets());
+  EditLocalParameterDialog dialog(m_view, this, parName, wsNames, wsIndices);
+  if (dialog.exec() == QDialog::Accepted) {
+    auto values = dialog.getValues();
+    auto fixes = dialog.getFixes();
+    auto ties = dialog.getTies();
+    assert(values.size() == getNumberOfDatasets());
+    for (int i = 0; i < values.size(); ++i) {
+      setLocalParameterValue(parName, i, values[i]);
+      setLocalParameterFixed(parName, i, fixes[i]);
+      setLocalParameterTie(parName, i, ties[i]);
+    }
+  }
+}
+
 
 } // namespace API
 } // namespace MantidQt

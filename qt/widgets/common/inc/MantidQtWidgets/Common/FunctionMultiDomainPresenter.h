@@ -15,6 +15,7 @@
 #include <boost/optional.hpp>
 #include <QObject>
 #include <memory>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -49,6 +50,12 @@ public:
   void setCurrentDataset(int);
   void addDatasets(int);
   void removeDatasets(QList<int> indices);
+  double getLocalParameterValue(const QString &parName, int i) const;
+  bool isLocalParameterFixed(const QString &parName, int i) const;
+  QString getLocalParameterTie(const QString &parName, int i) const;
+  void setLocalParameterValue(const QString &parName, int i, double value);
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
+  void setLocalParameterTie(const QString &parName, int i, QString tie);
 
   void setColumnSizes(int s0, int s1, int s2);
   void setErrorsEnabled(bool enabled);
@@ -58,6 +65,8 @@ signals:
 private slots:
   void viewChangedParameter(const QString &paramName);
   void viewPastedFunction(const QString &funStr);
+  void editLocalParameter(const QString &parName,
+    const QStringList &wsNames, const std::vector<size_t> &wsIndices);
 private:
   IFunctionView *m_view;
   std::unique_ptr<MultiDomainFunctionModel> m_model;

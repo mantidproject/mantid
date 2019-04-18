@@ -154,6 +154,43 @@ void MultiDomainFunctionModel::setCurrentDomainIndex(int index)
   m_currentDomainIndex = static_cast<size_t>(index);
 }
 
+double MultiDomainFunctionModel::getLocalParameterValue(const QString & parName, int i) const
+{
+  return getSingleFunction(i)->getParameter(parName.toStdString());
+}
+
+bool MultiDomainFunctionModel::isLocalParameterFixed(const QString & parName, int i) const
+{
+  auto fun = getSingleFunction(i);
+  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  return fun->isFixed(parIndex);
+}
+
+QString MultiDomainFunctionModel::getLocalParameterTie(const QString & parName, int i) const
+{
+  auto fun = getSingleFunction(i);
+  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const tie = fun->getTie(parIndex);
+  return QString::fromStdString(tie->asString());
+}
+
+void MultiDomainFunctionModel::setLocalParameterValue(const QString & parName, int i, double value)
+{
+  getSingleFunction(i)->setParameter(parName.toStdString(), value);
+}
+
+void MultiDomainFunctionModel::setLocalParameterFixed(const QString & parName, int i, bool fixed)
+{
+  auto fun = getSingleFunction(i);
+  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  getSingleFunction(i)->fix(parIndex);
+}
+
+void MultiDomainFunctionModel::setLocalParameterTie(const QString & parName, int i, QString tie)
+{
+  getSingleFunction(i)->tie(parName.toStdString(), tie.toStdString());
+}
+
 /// Check a domain/function index to be in range.
 void MultiDomainFunctionModel::checkIndex(int index) const {
   if (index < 0 || index >= getNumberDomains()) {

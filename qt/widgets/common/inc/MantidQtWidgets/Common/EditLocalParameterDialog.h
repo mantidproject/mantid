@@ -9,12 +9,13 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/LogValueFinder.h"
-#include "MantidQtWidgets/Common/IFunctionBrowser.h"
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class FunctionMultiDomainPresenter;
 
 /**
  * A dialog for displaying and editing values of local parameters.
@@ -25,7 +26,7 @@ class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public QDialog {
   Q_OBJECT
 public:
   EditLocalParameterDialog(QWidget *parent,
-                           MantidWidgets::IFunctionBrowser *funcBrowser,
+                           FunctionMultiDomainPresenter *funcBrowser,
                            const QString &parName, const QStringList &wsNames,
                            const std::vector<size_t> &wsIndices);
   void doSetup(const QString &parName, const QStringList &wsNames,
