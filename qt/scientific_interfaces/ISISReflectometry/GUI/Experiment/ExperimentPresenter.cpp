@@ -44,7 +44,6 @@ void ExperimentPresenter::notifyRestoreDefaultsRequested() {
 
 void ExperimentPresenter::notifySummationTypeChanged() {
   notifySettingsChanged();
-  updateSummationTypeEnabledState();
 }
 
 void ExperimentPresenter::updateSummationTypeEnabledState() {
@@ -89,7 +88,7 @@ bool ExperimentPresenter::isAutoreducing() const {
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
-void ExperimentPresenter::updateDisplayState() {
+void ExperimentPresenter::updateWidgetEnabledState() {
   if (isProcessing() || isAutoreducing()) {
     m_view->disableAll();
     return;
@@ -101,13 +100,13 @@ void ExperimentPresenter::updateDisplayState() {
   updateFloodCorrectionEnabledState();
 }
 
-void ExperimentPresenter::reductionPaused() { updateDisplayState(); }
+void ExperimentPresenter::reductionPaused() { updateWidgetEnabledState(); }
 
-void ExperimentPresenter::reductionResumed() { updateDisplayState(); }
+void ExperimentPresenter::reductionResumed() { updateWidgetEnabledState(); }
 
-void ExperimentPresenter::autoreductionPaused() { updateDisplayState(); }
+void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
-void ExperimentPresenter::autoreductionResumed() { updateDisplayState(); }
+void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::instrumentChanged(
     std::string const &instrumentName,
@@ -122,13 +121,11 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
       m_view->getPolarizationCorrectionType());
 
   if (polarizationCorrectionRequiresInputs(correctionType)) {
-    m_view->enablePolarizationCorrectionInputs();
     return PolarizationCorrections(correctionType, m_view->getCRho(),
                                    m_view->getCAlpha(), m_view->getCAp(),
                                    m_view->getCPp());
   }
 
-  m_view->disablePolarizationCorrectionInputs();
   return PolarizationCorrections(correctionType);
 }
 
@@ -145,11 +142,9 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
       floodCorrectionTypeFromString(m_view->getFloodCorrectionType());
 
   if (floodCorrectionRequiresInputs(correctionType)) {
-    m_view->enableFloodCorrectionInputs();
     return FloodCorrections(correctionType, m_view->getFloodWorkspace());
   }
 
-  m_view->disableFloodCorrectionInputs();
   return FloodCorrections(correctionType);
 }
 
@@ -221,7 +216,7 @@ ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
   auto validationResult = validateExperimentFromView();
   if (validationResult.isValid()) {
     m_model = validationResult.assertValid();
-    updateDisplayState();
+    updateWidgetEnabledState();
   }
   return validationResult;
 }
@@ -276,7 +271,7 @@ void ExperimentPresenter::updateViewFromModel() {
   // to be valid
   m_view->showStitchParametersValid();
 
-  updateDisplayState();
+  updateWidgetEnabledState();
 
   // Reconnect settings change notifications
   m_view->connectExperimentSettingsWidgets();
