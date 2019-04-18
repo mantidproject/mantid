@@ -20,7 +20,7 @@ the neutron spin.
 When measuring spin flip and non spin flip cross sections, the finite capabilities of the instrument 
 will allow a certain percentage of the other component to leak through. This is denoted by the 
 flipping ratio :math:`F`. Using subscript "m" for measured and "c" for corrected, the corrected 
-intensities are given by [1]_:
+intensities for the spin flip (SF) and non spin flip (NSF) scattering are given by [1]_:
 
 .. math::
 
@@ -53,7 +53,7 @@ base of natural logarithms.
 References
 ----------
 
-.. [1] O Schärpf, *Experience with spin analysis on a time-of-flight multidetectorscatteringinstrument*, In Neutron scattering in the nineties, Proceedings of the IAEA Conference, Jülich 85-97 (1985)
+.. [1] O Schärpf, *Experience with spin analysis on a time-of-flight multidetectorscatteringinstrument*, In Neutron scattering in the nineties, Proceedings of the IAEA Conference, Jülich 85-97 (1985) `https://inis.iaea.org/collection/NCLCollectionStore/_Public/16/076/16076003.pdf <https://inis.iaea.org/collection/NCLCollectionStore/_Public/16/076/16076003.pdf>`__
 
 .. [2] Igor A Zaliznyak et al, *Polarized neutron scattering on HYSPEC: the HYbrid SPECtrometer at SNS*, J. Phys.: Conf. Ser. 862 012030 (2017) `doi:10.1088/1742-6596/862/1/012030 <https://doi.org/10.1088/1742-6596/862/1/012030>`__
 
