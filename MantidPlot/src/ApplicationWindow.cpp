@@ -900,7 +900,7 @@ QMenuBar *ApplicationWindow::myMenuBar() {
 
 void ApplicationWindow::initToolBars() {
   initPlot3DToolBar();
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
   QPixmap openIcon, saveIcon;
 
   standardTools = new QToolBar(tr("Standard Tools"), this);
