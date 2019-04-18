@@ -163,6 +163,7 @@ void InstrumentPresenter::updateViewFromModel() {
     m_view->setLambdaMin(m_model.wavelengthRange()->min());
     m_view->setLambdaMax(m_model.wavelengthRange()->max());
   }
+  m_view->setMonitorIndex(static_cast<int>(m_model.monitorIndex()));
   m_view->setIntegrateMonitors(m_model.integratedMonitors());
   if (m_model.monitorIntegralRange()) {
     m_view->setMonitorIntegralMin(m_model.monitorIntegralRange()->min());
