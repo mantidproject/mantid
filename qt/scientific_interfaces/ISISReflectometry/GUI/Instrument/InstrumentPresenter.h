@@ -56,7 +56,8 @@ private:
   DetectorCorrections detectorCorrectionsFromView();
   void updateModelFromView();
   void updateViewFromModel();
-  void updateWidgetEnabledState() const;
+  void updateWidgetEnabledState();
+  void updateWidgetValidState();
   bool isProcessing() const;
   bool isAutoreducing() const;
 };

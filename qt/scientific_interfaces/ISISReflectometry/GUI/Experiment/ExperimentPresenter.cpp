@@ -259,6 +259,10 @@ void ExperimentPresenter::updateViewFromModel() {
   if (m_model.transmissionRunRange()) {
     m_view->setTransmissionStartOverlap(m_model.transmissionRunRange()->min());
     m_view->setTransmissionEndOverlap(m_model.transmissionRunRange()->max());
+    if (m_model.transmissionRunRange()->isValid(false))
+      m_view->showTransmissionRangeValid();
+    else
+      m_view->showTransmissionRangeInvalid();
   }
   m_view->setPolarizationCorrectionType(polarizationCorrectionTypeToString(
       m_model.polarizationCorrections().correctionType()));
@@ -266,6 +270,11 @@ void ExperimentPresenter::updateViewFromModel() {
       floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+  m_view->setStitchOptions(m_model.stitchParametersString());
+  // The model can't be created with invalid stitch parameters so always set
+  // them
+  // to be valid
+  m_view->showStitchParametersValid();
 
   updateDisplayState();
 

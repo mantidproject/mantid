@@ -46,6 +46,7 @@ public:
   FloodCorrections const &floodCorrections() const;
   boost::optional<RangeInLambda> transmissionRunRange() const;
   std::map<std::string, std::string> stitchParameters() const;
+  std::string stitchParametersString() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
   std::vector<std::array<std::string, 8>> perThetaDefaultsArray() const;
 

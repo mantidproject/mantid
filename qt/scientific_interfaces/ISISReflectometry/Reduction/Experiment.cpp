@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Experiment.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cmath>
 #include <iostream>
 
@@ -48,6 +49,10 @@ boost::optional<RangeInLambda> Experiment::transmissionRunRange() const {
 
 std::map<std::string, std::string> Experiment::stitchParameters() const {
   return m_stitchParameters;
+}
+
+std::string Experiment::stitchParametersString() const {
+  return MantidQt::MantidWidgets::optionsToString(m_stitchParameters);
 }
 
 std::vector<PerThetaDefaults> const &Experiment::perThetaDefaults() const {

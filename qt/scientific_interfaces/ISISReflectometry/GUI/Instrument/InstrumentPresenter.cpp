@@ -54,14 +54,41 @@ bool InstrumentPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
-/** Tells the view to update the enabled/disabled state of all relevant
- * widgets based on whether processing is in progress or not.
+/** Tells the view to update the enabled/disabled state of all widgets
+ * depending on whether they are currently applicable or not
  */
-void InstrumentPresenter::updateWidgetEnabledState() const {
+void InstrumentPresenter::updateWidgetEnabledState() {
   if (isProcessing() || isAutoreducing())
     m_view->disableAll();
   else
     m_view->enableAll();
+
+  if (m_model.detectorCorrections().correctPositions())
+    m_view->enableDetectorCorrectionType();
+  else
+    m_view->disableDetectorCorrectionType();
+}
+
+/** Tells the view to update the valid/invalid state of all widgets
+ * depending on whether their values in the model are valid or not
+ */
+void InstrumentPresenter::updateWidgetValidState() {
+  if (m_model.wavelengthRange() && m_model.wavelengthRange()->isValid(false))
+    m_view->showLambdaRangeValid();
+  else
+    m_view->showLambdaRangeInvalid();
+
+  if (m_model.monitorBackgroundRange() &&
+      m_model.monitorBackgroundRange()->isValid(true))
+    m_view->showMonitorBackgroundRangeValid();
+  else
+    m_view->showMonitorBackgroundRangeInvalid();
+
+  if (m_model.monitorIntegralRange() &&
+      m_model.monitorIntegralRange()->isValid(false))
+    m_view->showMonitorIntegralRangeValid();
+  else
+    m_view->showMonitorIntegralRangeInvalid();
 }
 
 void InstrumentPresenter::reductionPaused() { updateWidgetEnabledState(); }
@@ -82,42 +109,21 @@ void InstrumentPresenter::instrumentChanged(
 
 boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   auto range = RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
-  auto const bothOrNoneMustBeSet = false;
-
-  if (range.isValid(bothOrNoneMustBeSet))
-    m_view->showLambdaRangeValid();
-  else
-    m_view->showLambdaRangeInvalid();
-
-  return rangeOrNone(range, bothOrNoneMustBeSet);
+  return rangeOrNone(range, false);
 }
 
 boost::optional<RangeInLambda>
 InstrumentPresenter::monitorBackgroundRangeFromView() {
   auto range = RangeInLambda(m_view->getMonitorBackgroundMin(),
                              m_view->getMonitorBackgroundMax());
-  auto const bothOrNoneMustBeSet = true;
-
-  if (range.isValid(bothOrNoneMustBeSet))
-    m_view->showMonitorBackgroundRangeValid();
-  else
-    m_view->showMonitorBackgroundRangeInvalid();
-
-  return rangeOrNone(range, bothOrNoneMustBeSet);
+  return rangeOrNone(range, true);
 }
 
 boost::optional<RangeInLambda>
 InstrumentPresenter::monitorIntegralRangeFromView() {
   auto range = RangeInLambda(m_view->getMonitorIntegralMin(),
                              m_view->getMonitorIntegralMax());
-  auto const bothOrNoneMustBeSet = false;
-
-  if (range.isValid(bothOrNoneMustBeSet))
-    m_view->showMonitorIntegralRangeValid();
-  else
-    m_view->showMonitorIntegralRangeInvalid();
-
-  return rangeOrNone(range, bothOrNoneMustBeSet);
+  return rangeOrNone(range, false);
 }
 
 MonitorCorrections InstrumentPresenter::monitorCorrectionsFromView() {
@@ -152,6 +158,7 @@ void InstrumentPresenter::updateModelFromView() {
   auto const detectorCorrections = detectorCorrectionsFromView();
   m_model =
       Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+  updateWidgetValidState();
 }
 
 void InstrumentPresenter::updateViewFromModel() {
@@ -177,10 +184,8 @@ void InstrumentPresenter::updateViewFromModel() {
   m_view->setDetectorCorrectionType(
       detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
 
-  if (m_model.detectorCorrections().correctPositions())
-    m_view->enableDetectorCorrectionType();
-  else
-    m_view->disableDetectorCorrectionType();
+  updateWidgetEnabledState();
+  updateWidgetValidState();
 
   // Reconnect settings change notifications
   m_view->connectInstrumentSettingsWidgets();
