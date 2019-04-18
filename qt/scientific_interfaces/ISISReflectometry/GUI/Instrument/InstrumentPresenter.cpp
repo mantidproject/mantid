@@ -73,18 +73,21 @@ void InstrumentPresenter::updateWidgetEnabledState() {
  * depending on whether their values in the model are valid or not
  */
 void InstrumentPresenter::updateWidgetValidState() {
-  if (m_model.wavelengthRange() && m_model.wavelengthRange()->isValid(false))
+  // Check the ranges are valid. It's fine if they're not set at all,
+  // so show them as valid if the range is not intialised
+  
+  if (!m_model.wavelengthRange() || m_model.wavelengthRange()->isValid(false))
     m_view->showLambdaRangeValid();
   else
     m_view->showLambdaRangeInvalid();
 
-  if (m_model.monitorBackgroundRange() &&
+  if (!m_model.monitorBackgroundRange() ||
       m_model.monitorBackgroundRange()->isValid(true))
     m_view->showMonitorBackgroundRangeValid();
   else
     m_view->showMonitorBackgroundRangeInvalid();
 
-  if (m_model.monitorIntegralRange() &&
+  if (!m_model.monitorIntegralRange() ||
       m_model.monitorIntegralRange()->isValid(false))
     m_view->showMonitorIntegralRangeValid();
   else
