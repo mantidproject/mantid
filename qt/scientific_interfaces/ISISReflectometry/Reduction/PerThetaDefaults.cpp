@@ -62,10 +62,10 @@ perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults) {
   result[2] = perThetaDefaults.transmissionWorkspaceNames().secondRunList();
   if (perThetaDefaults.qRange().min())
     result[3] = std::to_string(*perThetaDefaults.qRange().min());
-  if (perThetaDefaults.qRange().step())
-    result[4] = std::to_string(*perThetaDefaults.qRange().step());
   if (perThetaDefaults.qRange().max())
-    result[5] = std::to_string(*perThetaDefaults.qRange().max());
+    result[4] = std::to_string(*perThetaDefaults.qRange().max());
+  if (perThetaDefaults.qRange().step())
+    result[5] = std::to_string(*perThetaDefaults.qRange().step());
   if (perThetaDefaults.scaleFactor())
     result[6] = std::to_string(*perThetaDefaults.scaleFactor());
   if (perThetaDefaults.processingInstructions())
