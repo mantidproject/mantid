@@ -1906,7 +1906,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
       stringstream errss;
       errss << "Input EventWorkspace " << m_dataWS->getName()
             << " has zero event and does not have sample log 'proton_charge'.  "
-               "Therefore, o Unable to "
+               "Therefore, unable to "
                "determine run end time";
 
       g_log.error(errss.str());
