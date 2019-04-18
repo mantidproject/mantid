@@ -10,8 +10,22 @@ from __future__ import (absolute_import, division, print_function)
 import math
 from Muon.GUI.Common import thread_model
 import mantid.simpleapi as mantid
-
+from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
+import re
+from Muon.GUI.Common.observer_pattern import Observer
+from mantid.api import AnalysisDataService
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+import functools
 raw_data = "_raw_data"
+
+
+class GenericObserver(Observer):
+    def __init__(self, callback):
+        Observer.__init__(self)
+        self.callback = callback
+
+    def update(self, observable, arg):
+        self.callback()
 
 
 class MaxEntPresenter(object):
@@ -20,9 +34,8 @@ class MaxEntPresenter(object):
     This class links the MaxEnt model to the GUI
     """
 
-    def __init__(self, view, alg, load):
+    def __init__(self, view, load):
         self.view = view
-        self.alg = alg
         self.load = load
         self.thread = None
         # set data
@@ -30,7 +43,8 @@ class MaxEntPresenter(object):
         # connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
         self.view.cancelSignal.connect(self.cancel)
-        self.view.phaseSignal.connect(self.handlePhase)
+
+        self.phase_table_observer = GenericObserver(self.update_phase_table_options)
 
     @property
     def widget(self):
@@ -46,12 +60,7 @@ class MaxEntPresenter(object):
     # functions
     def getWorkspaceNames(self):
         final_options = self.load.getGroupedWorkspaceNames()
-        # run = self.load.getRunName()
 
-        self.view.setRun("")
-
-        # if run is not "None":
-        #     final_options.append(run)
         self.view.addItems(final_options)
         start = int(
             math.ceil(math.log(self.load.data_context.num_points) / math.log(2.0)))
@@ -59,8 +68,8 @@ class MaxEntPresenter(object):
         self.view.addNPoints(values)
 
     def cancel(self):
-        if self.thread is not None:
-            self.thread.cancel()
+        if self.maxent_alg is not None:
+            self.maxent_alg.cancel()
 
     # turn on button
     def activate(self):
@@ -70,12 +79,11 @@ class MaxEntPresenter(object):
     def deactivate(self):
         self.view.deactivateCalculateButton()
 
-    def handlePhase(self, row, col):
-        if col == 1 and row == 4:
-            self.view.changedPhaseBox()
-
     def createThread(self):
-        return thread_model.ThreadModel(self.alg)
+        self.maxent_alg = mantid.AlgorithmManager.create("MuonMaxent")
+        calculation_function = functools.partial(self.calculate_maxent, self.maxent_alg)
+        self._maxent_calculation_model = ThreadModelWrapper(calculation_function)
+        return thread_model.ThreadModel(self._maxent_calculation_model)
 
     # constructs the inputs for the MaxEnt algorithms
     # then executes them (see maxent_model to see the order
@@ -83,87 +91,71 @@ class MaxEntPresenter(object):
     def handleMaxEntButton(self):
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
-        self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished)
+        self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished, self.handle_error)
 
-        # make some inputs
-        inputs = {}
-
-        if self.view.usePhases() and self.view.calcPhases():
-            inputs["phaseTable"] = self.get_phase_table_inputs()
-
-        inputs["maxent"] = self.getMaxEntInput()
-
-        inputs["Run"] = self.get_input_run()
-
-        self.thread.loadData(inputs)
         self.thread.start()
-
-    def get_phase_table_inputs(self):
-        phaseTable = {}
-        phaseTable["FirstGoodData"] = self.view.getFirstGoodData()
-        phaseTable["LastGoodData"] = self.view.getLastGoodData()
-        phaseTable["InputWorkspace"] = self.view.getInputWS()
-        phaseTable["DetectorTable"] = "PhaseTable"
-        phaseTable["DataFitted"] = "fits"
-
-        return phaseTable
-
-    def get_input_run(self):
-        return self.view.getInputWS().split("_", 1)[0]
 
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.thread.deleteLater()
-        self.thread = None
-        self.updatePhaseOptions()
 
-    def updatePhaseOptions(self):
+    def handle_error(self, error):
+        self.activate()
+        self.view.warning_popup(error)
+
+    def calculate_maxent(self, alg):
+        maxent_parameters = self.get_parameters_for_maxent_calculation()
+
+        maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
+
+        self.add_maxent_workspace_to_ADS(maxent_parameters, maxent_workspace)
+
+    def get_parameters_for_maxent_calculation(self):
         inputs = {}
-        self.view.addOutputPhases(inputs)
-        name = inputs['OutputPhaseTable']
-        name = name[1:]
 
-        current_list = self.view.getPhaseTableOptions()
-        if self.phaseTableAdded(name) and name not in current_list:
-            index = self.view.getPhaseTableIndex()
-            self.view.addPhaseTableToGUI(name)
-            self.view.setPhaseTableIndex(index)
+        inputs['InputWorkspace'] = self.view.input_workspace
+        run = [float(re.search('[0-9]+', inputs['InputWorkspace']).group())]
 
-    def phaseTableAdded(self, name):
-        return mantid.AnalysisDataService.doesExist(name)
+        if self.view.phase_table:
+            inputs['InputPhaseTable'] = self.view.phase_table
 
-    def getMaxEntInput(self):
-        inputs = self.view.initMaxEntInput()
+        if self.load.dead_time_table(run):
+            inputs['InputDeadTimeTable'] = self.load.dead_time_table(run)
 
-        if self.view.outputPhases():
-            self.view.addOutputPhases(inputs)
+        inputs['FirstGoodTime'] = self.load.first_good_data(run)
 
-        if self.view.outputDeadTime():
-            self.view.addOutputDeadTime(inputs)
+        inputs['LastGoodTime'] = self.load.last_good_data(run)
 
-        if self.view.outputPhaseEvo():
-            self.view.addOutputPhaseEvo(inputs)
+        inputs['Npts'] = self.view.num_points
 
-        if self.view.outputTime():
-            self.view.addOutputTime(inputs)
+        inputs['InnerIterations'] = self.view.inner_iterations
 
-        # for new version 2 of FDA
-        self.cleanOutputsForVersion2(inputs)
+        inputs['OuterIterations'] = self.view.outer_iterations
 
-        if self.view.usePhases():
-            self.view.addPhaseTable(inputs)
+        inputs['DoublePulse'] = self.view.double_pulse
+
+        inputs['Factor'] = self.view.lagrange_multiplier
+
+        inputs['MaxField'] = self.view.maximum_field
+
+        inputs['DefaultLevel'] = self.view.maximum_entropy_constant
+
+        inputs['FitDeadTime'] = self.view.fit_dead_times
 
         return inputs
 
-    def cleanOutputsForVersion2(self, inputs):
-        inputs["InputWorkspace"] = self.view.getInputWS()
-        keys = [
-            "OutputWorkspace",
-            "OutputPhaseTable",
-            "OutputDeadTimeTable",
-            "PhaseConvergenceTable",
-            "ReconstructedSpectra"]
-        for output in keys:
-            if output in inputs:
-                inputs[output] = inputs[output][1:]
+    def update_phase_table_options(self):
+        phase_table_list = self.load.phase_context.get_phase_table_list(self.load.data_context.instrument)
+
+        self.view.update_phase_table_combo(phase_table_list)
+
+    def add_maxent_workspace_to_ADS(self, parameters, maxent_workspace):
+        run = re.search('[0-9]+', parameters['InputWorkspace']).group()
+        name = self.load.data_context._base_run_name(run) + '_MaxEnt'
+
+        AnalysisDataService.addOrReplace(name, maxent_workspace)
+        AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), name)
+
+
+
+

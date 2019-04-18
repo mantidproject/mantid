@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 from mantid.py3compat import mock
 from qtpy import QtWidgets
@@ -39,7 +39,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.gui_context.update({'RebinType': 'None'})
         self.model = maxent_model.MaxEntModel()
 
-        self.view = maxent_view.MaxEntView(self.obj)
+        self.view = maxent_view_new.MaxEntView(self.obj)
 
         self.presenter = maxent_presenter_new.MaxEntPresenter(self.view, self.model, self.context)
 
@@ -62,28 +62,66 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEquals(retrieve_combobox_info(self.view.N_points), ['2048', '4096', '8192', '16384', '32768', '65536',
                                                                        '131072', '262144', '524288', '1048576'])
 
-    def test_get_phase_table_inputs_returns_correctly(self):
+    # def test_get_phase_table_inputs_returns_correctly(self):
+    #     self.presenter.getWorkspaceNames()
+    #
+    #     self.assertEquals(self.presenter.get_phase_table_inputs(), {'DataFitted': 'fits', 'DetectorTable': 'PhaseTable',
+    #                                                                 'FirstGoodData': 0.1, 'InputWorkspace': 'MUSR22725_raw_data',
+    #                                                                 'LastGoodData': 15.0})
+
+    # def test_get_input_run_returns_correctly(self):
+    #     self.presenter.getWorkspaceNames()
+    #
+    #     self.assertEquals(self.presenter.get_input_run(), 'MUSR22725')
+    #
+    # def test_get_max_ent_inputs_return_correctly(self):
+    #     self.presenter.getWorkspaceNames()
+    #
+    #     self.assertEquals(self.presenter.getMaxEntInput(), {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04,
+    #                                                         'FirstGoodTime': 0.1, 'FitDeadTime': True, 'InnerIterations': 10,
+    #                                                         'InputWorkspace': 'MUSR22725_raw_data', 'LastGoodTime': 15.0,
+    #                                                         'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10,
+    #                                                         'OutputWorkspace': 'MUSR22725_raw_data;FrequencyDomain;MaxEnt'})
+
+    def test_get_parameters_for_maxent_calculations(self):
         self.presenter.getWorkspaceNames()
+        self.context.dead_time_table = mock.MagicMock(return_value='deadtime_table_name')
+        self.context.first_good_data = mock.MagicMock(return_value=0.11)
+        self.context.last_good_data = mock.MagicMock(return_value=13.25)
+        self.context.phase_context.phase_tables = ['MUSR22222_phase_table', 'MUSR33333_phase_table',
+                                                   'EMU22222_phase_table']
+        self.presenter.update_phase_table_options()
 
-        self.assertEquals(self.presenter.get_phase_table_inputs(), {'DataFitted': 'fits', 'DetectorTable': 'PhaseTable',
-                                                                    'FirstGoodData': 0.1, 'InputWorkspace': 'MUSR22725_raw_data',
-                                                                    'LastGoodData': 15.0})
+        parameters = self.presenter.get_parameters_for_maxent_calculation()
 
-    def test_get_input_run_returns_correctly(self):
+        self.assertEquals(parameters, {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04, 'FirstGoodTime': 0.11,
+                                       'FitDeadTime': True, 'InnerIterations': 10, 'InputDeadTimeTable': 'deadtime_table_name',
+                                       'InputPhaseTable': 'MUSR22222_phase_table', 'InputWorkspace': 'MUSR22725_raw_data',
+                                       'LastGoodTime': 13.25, 'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10})
+
+    def test_update_phase_table_options_adds_correct_options_to_view_item(self):
+        self.context.phase_context.phase_tables = ['MUSR22222_phase_table', 'MUSR33333_phase_table', 'EMU22222_phase_table']
+
+        self.presenter.update_phase_table_options()
+
+        self.assertEquals(retrieve_combobox_info(self.view.phase_table_combo), ['MUSR22222_phase_table', 'MUSR33333_phase_table'])
+
+    @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter_new.AnalysisDataService')
+    def test_add_maxent_workspace_to_ADS(self, data_service_mock):
         self.presenter.getWorkspaceNames()
+        self.context.dead_time_table = mock.MagicMock(return_value='deadtime_table_name')
+        self.context.first_good_data = mock.MagicMock(return_value=0.11)
+        self.context.last_good_data = mock.MagicMock(return_value=13.25)
+        self.context.phase_context.phase_tables = ['MUSR22222_phase_table', 'MUSR33333_phase_table',
+                                                   'EMU22222_phase_table']
+        self.presenter.update_phase_table_options()
+        parameters = self.presenter.get_parameters_for_maxent_calculation()
+        maxent_workspace = mock.MagicMock()
 
-        self.assertEquals(self.presenter.get_input_run(), 'MUSR22725')
+        self.presenter.add_maxent_workspace_to_ADS(parameters, maxent_workspace)
 
-    def test_get_max_ent_inputs_return_correctly(self):
-        self.presenter.getWorkspaceNames()
-
-        self.assertEquals(self.presenter.getMaxEntInput(), {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04,
-                                                            'FirstGoodTime': 0.1, 'FitDeadTime': True, 'InnerIterations': 10,
-                                                            'InputWorkspace': 'MUSR22725_raw_data', 'LastGoodTime': 15.0,
-                                                            'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10,
-                                                            'OutputWorkspace': 'MUSR22725_raw_data;FrequencyDomain;MaxEnt'})
-
-
+        data_service_mock.addOrReplace.assert_called_once_with('MUSR22725_MaxEnt', maxent_workspace)
+        data_service_mock.addToGroup.assert_called_once_with('MUSR22725', 'MUSR22725_MaxEnt')
 
 
 if __name__ == '__main__':

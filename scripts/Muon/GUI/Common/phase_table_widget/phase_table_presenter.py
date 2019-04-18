@@ -103,6 +103,7 @@ class PhaseTablePresenter(object):
         self.view.warning_popup(error)
 
     def handle_calculation_success(self):
+        self.phase_table_calculation_complete_notifier.notify_subscribers()
         self.update_current_phase_tables()
         self.view.setEnabled(True)
 

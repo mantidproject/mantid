@@ -28,6 +28,8 @@ class MuonContext(object):
         self.phase_context = muon_phase_context
         self.base_directory = base_directory
 
+        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True})
+
     @property
     def data_context(self):
         return self._data_context
@@ -173,9 +175,22 @@ class MuonContext(object):
             for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
         return runs
 
-    @property
-    def first_good_data(self):
+    def first_good_data(self, run):
         if self.gui_context['FirstGoodDataFromFile']:
-            return self.data_context.get_loaded_data_for_run(self.data_context.current_runs[-1])["FirstGoodData"]
+            return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
             return self.gui_context['FirstGoodData']
+
+    def last_good_data(self, run):
+        if self.gui_context['LastGoodDataFromFile']:
+            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
+        else:
+            return self.gui_context['LastGoodData']
+
+    def dead_time_table(self, run):
+        if self.gui_context['DeadTimeSource'] == 'FromADS':
+            return self.gui_context['DeadTimeTable']
+        elif self.gui_context['DeadTimeSource'] == 'FromFile':
+            return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+        elif self.gui_context['DeadTimeSource'] == 'None':
+            return None

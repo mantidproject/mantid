@@ -113,6 +113,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_phase_quad_changed_notifer()
 
+        self.setup_phase_table_changed_notifier()
+
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
@@ -209,6 +211,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
     def setup_phase_quad_changed_notifer(self):
         self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_nofifier.add_subscriber(
             self.transform.phase_quad_observer)
+
+    def setup_phase_table_changed_notifier(self):
+        self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(
+            self.transform._maxent._presenter.phase_table_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
