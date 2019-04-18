@@ -23,9 +23,7 @@ using namespace MantidQt::CustomInterfaces;
 IndirectBayes::IndirectBayes(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
-          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-              this, "Indirect Bayes",
-              "restrict-input-by-name,plot-error-bars")),
+          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(this)),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 

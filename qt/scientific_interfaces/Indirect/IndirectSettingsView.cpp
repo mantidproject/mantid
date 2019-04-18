@@ -40,19 +40,12 @@ IndirectSettingsView::IndirectSettingsView(QWidget *parent)
     : IIndirectSettingsView(parent) {
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(QString const &)),
-          this, SLOT(emitUpdateRestrictInputByName(QString const &)));
-
   connect(m_uiForm.pbOk, SIGNAL(clicked()), this, SLOT(emitOkClicked()));
   connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(emitApplyClicked()));
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this,
           SLOT(emitCancelClicked()));
 
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(openHelp()));
-}
-
-void IndirectSettingsView::emitUpdateRestrictInputByName(QString const &text) {
-  emit updateRestrictInputByName(text.toStdString());
 }
 
 void IndirectSettingsView::emitOkClicked() { emit okClicked(); }
@@ -64,22 +57,6 @@ void IndirectSettingsView::emitCancelClicked() { emit cancelClicked(); }
 void IndirectSettingsView::openHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("Indirect Settings"));
-}
-
-void IndirectSettingsView::setInterfaceSettingsVisible(bool visible) {
-  m_uiForm.gbInterfaceSettings->setVisible(visible);
-}
-
-void IndirectSettingsView::setInterfaceGroupBoxTitle(QString const &title) {
-  m_uiForm.gbInterfaceSettings->setTitle(title);
-}
-
-void IndirectSettingsView::setRestrictInputByNameVisible(bool visible) {
-  m_uiForm.ckRestrictInputDataNames->setVisible(visible);
-}
-
-void IndirectSettingsView::setPlotErrorBarsVisible(bool visible) {
-  m_uiForm.ckPlotErrorBars->setVisible(visible);
 }
 
 void IndirectSettingsView::setSelectedFacility(QString const &text) {

@@ -24,9 +24,7 @@ class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter : public QObject {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsPresenter(QWidget *parent,
-                                     std::string const &settingsGroup,
-                                     std::string const &availableSettings);
+  explicit IndirectSettingsPresenter(QWidget *parent);
   explicit IndirectSettingsPresenter(IndirectSettingsModel *model,
                                      IIndirectSettingsView *view);
 
@@ -39,14 +37,12 @@ signals:
   void applySettings();
 
 private slots:
-  void updateRestrictInputByName(std::string const &text);
   void applyAndCloseSettings();
   void applyChanges();
   void closeDialog();
 
 private:
   void setUpPresenter();
-  void initLayout();
   void saveSettings();
 
   void setApplyingChanges(bool applyingChanges);

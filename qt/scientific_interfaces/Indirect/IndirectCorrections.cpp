@@ -32,9 +32,7 @@ DECLARE_SUBWINDOW(IndirectCorrections)
 IndirectCorrections::IndirectCorrections(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
-          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(
-              this, "Data Corrections",
-              "restrict-input-by-name,plot-error-bars")),
+          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(this)),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 

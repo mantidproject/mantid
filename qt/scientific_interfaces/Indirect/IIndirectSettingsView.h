@@ -23,12 +23,6 @@ public:
   IIndirectSettingsView(QWidget *parent = nullptr) : QDialog(parent){};
   virtual ~IIndirectSettingsView(){};
 
-  virtual void setInterfaceSettingsVisible(bool visible) = 0;
-  virtual void setInterfaceGroupBoxTitle(QString const &title) = 0;
-
-  virtual void setRestrictInputByNameVisible(bool visible) = 0;
-  virtual void setPlotErrorBarsVisible(bool visible) = 0;
-
   virtual void setSelectedFacility(QString const &text) = 0;
   virtual QString getSelectedFacility() const = 0;
 

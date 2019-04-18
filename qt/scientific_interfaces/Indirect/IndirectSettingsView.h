@@ -27,12 +27,6 @@ public:
   explicit IndirectSettingsView(QWidget *parent = nullptr);
   virtual ~IndirectSettingsView() override = default;
 
-  void setInterfaceSettingsVisible(bool visible) override;
-  void setInterfaceGroupBoxTitle(QString const &title) override;
-
-  void setRestrictInputByNameVisible(bool visible) override;
-  void setPlotErrorBarsVisible(bool visible) override;
-
   void setSelectedFacility(QString const &text) override;
   QString getSelectedFacility() const override;
 
@@ -53,7 +47,6 @@ public:
   void setCancelEnabled(bool enable) override;
 
 private slots:
-  void emitUpdateRestrictInputByName(QString const &text);
   void emitOkClicked();
   void emitApplyClicked();
   void emitCancelClicked();

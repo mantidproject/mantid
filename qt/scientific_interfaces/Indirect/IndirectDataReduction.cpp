@@ -55,9 +55,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
       m_settingsPresenter(
-          Mantid::Kernel::make_unique<IndirectSettingsPresenter>(
-              this, "Data Reduction",
-              "restrict-input-by-name,plot-error-bars")),
+          Mantid::Kernel::make_unique<IndirectSettingsPresenter>(this)),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {

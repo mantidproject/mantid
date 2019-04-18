@@ -18,21 +18,16 @@ namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectSettingsModel {
 public:
-  IndirectSettingsModel(std::string const &settingsGroup = "Settings",
-                        std::string const &availableSettings = "");
+  IndirectSettingsModel();
   virtual ~IndirectSettingsModel() = default;
 
-  virtual std::string getSettingsGroup() const;
-
-  virtual bool hasInterfaceSettings() const;
-  virtual bool isSettingAvailable(std::string const &settingName) const;
+  std::string const &getSettingsGroup() const;
 
   virtual void setFacility(std::string const &facility);
   virtual std::string getFacility() const;
 
 private:
-  std::string m_settingsGroup;
-  std::vector<std::string> m_settingsAvailable;
+  std::string const m_settingsGroup;
 };
 
 } // namespace IDA

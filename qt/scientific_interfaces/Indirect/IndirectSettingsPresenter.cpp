@@ -10,13 +10,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectSettingsPresenter::IndirectSettingsPresenter(
-    QWidget *parent, std::string const &settingsGroup,
-    std::string const &availableSettings)
-    : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>(
-                            settingsGroup, availableSettings)),
+IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
+    : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>()),
       m_view(std::make_unique<IndirectSettingsView>(parent)) {
-  m_view->setWindowTitle(QString::fromStdString(settingsGroup) + " Settings");
+  m_view->setWindowTitle(QString::fromStdString(m_model->getSettingsGroup()));
   setUpPresenter();
 }
 
@@ -27,32 +24,17 @@ IndirectSettingsPresenter::IndirectSettingsPresenter(
 }
 
 void IndirectSettingsPresenter::setUpPresenter() {
-  connect(m_view.get(), SIGNAL(updateRestrictInputByName(std::string const &)),
-          this, SLOT(updateRestrictInputByName(std::string const &)));
-
   connect(m_view.get(), SIGNAL(okClicked()), this,
           SLOT(applyAndCloseSettings()));
   connect(m_view.get(), SIGNAL(applyClicked()), this, SLOT(applyChanges()));
   connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
 
-  initLayout();
   loadSettings();
 }
 
 void IndirectSettingsPresenter::showDialog() {
   m_view->show();
   m_view->setFocus();
-}
-
-void IndirectSettingsPresenter::initLayout() {
-  m_view->setInterfaceSettingsVisible(m_model->hasInterfaceSettings());
-  m_view->setInterfaceGroupBoxTitle(
-      QString::fromStdString(m_model->getSettingsGroup()));
-
-  m_view->setRestrictInputByNameVisible(
-      m_model->isSettingAvailable("restrict-input-by-name"));
-  m_view->setPlotErrorBarsVisible(
-      m_model->isSettingAvailable("plot-error-bars"));
 }
 
 void IndirectSettingsPresenter::applyAndCloseSettings() {
@@ -71,12 +53,9 @@ void IndirectSettingsPresenter::closeDialog() { m_view->close(); }
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
 
-  if (m_model->isSettingAvailable("restrict-input-by-name"))
-    m_view->setRestrictInputByNameChecked(
-        getSetting("restrict-input-by-name").toBool());
-
-  if (m_model->isSettingAvailable("plot-error-bars"))
-    m_view->setPlotErrorBarsChecked(getSetting("plot-error-bars").toBool());
+  m_view->setRestrictInputByNameChecked(
+      getSetting("restrict-input-by-name").toBool());
+  m_view->setPlotErrorBarsChecked(getSetting("plot-error-bars").toBool());
 
   emit applySettings();
 }
@@ -87,24 +66,17 @@ QVariant IndirectSettingsPresenter::getSetting(std::string const &settingName) {
 }
 
 void IndirectSettingsPresenter::saveSettings() {
-  auto const group = QString::fromStdString(m_model->getSettingsGroup());
+  auto const settingsGroup =
+      QString::fromStdString(m_model->getSettingsGroup());
 
   m_model->setFacility(m_view->getSelectedFacility().toStdString());
 
-  if (m_model->isSettingAvailable("restrict-input-by-name"))
-    m_view->setSetting(group, "restrict-input-by-name",
-                       m_view->isRestrictInputByNameChecked());
-
-  if (m_model->isSettingAvailable("plot-error-bars"))
-    m_view->setSetting(group, "plot-error-bars",
-                       m_view->isPlotErrorBarsChecked());
+  m_view->setSetting(settingsGroup, "restrict-input-by-name",
+                     m_view->isRestrictInputByNameChecked());
+  m_view->setSetting(settingsGroup, "plot-error-bars",
+                     m_view->isPlotErrorBarsChecked());
 
   emit applySettings();
-}
-
-void IndirectSettingsPresenter::updateRestrictInputByName(
-    std::string const &text) {
-  m_view->setRestrictInputByNameChecked(text == "ISIS");
 }
 
 void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {
