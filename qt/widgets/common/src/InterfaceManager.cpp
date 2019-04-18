@@ -284,3 +284,8 @@ void InterfaceManager::showCustomInterfaceHelp(const QString &name) {
 void InterfaceManager::showWebPage(const QString &url) {
   MantidDesktopServices::openUrl(url);
 }
+
+void InterfaceManager::closeHelpWindow() {
+  auto window = createHelpWindow();
+  window->shutdown();
+}

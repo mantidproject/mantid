@@ -482,6 +482,8 @@ class MainWindow(QMainWindow):
             self.project_recovery.closing_workbench = True
             self.project_recovery.remove_current_pid_folder()
 
+            self.interface_manager.closeHelpWindow()
+
             event.accept()
         else:
             # Cancel was pressed when closing an editor

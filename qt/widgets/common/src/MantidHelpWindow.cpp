@@ -355,7 +355,10 @@ void MantidHelpWindow::showCustomInterface(const std::string &name,
  * close soon. This closes the help window & releases the QProcess
  */
 void MantidHelpWindow::shutdown() {
-  // close the window
+  // close the window and delete the object
+  // Deleting the object ensures the help engine's destructor is called and
+  // avoids a segfault when workbench is closed
+  g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
   g_helpWindow->close();
 }
 
