@@ -48,7 +48,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES
     GUITests
 )

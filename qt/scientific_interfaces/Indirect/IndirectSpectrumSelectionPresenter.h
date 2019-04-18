@@ -10,8 +10,8 @@
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionView.h"
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>

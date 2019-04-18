@@ -4,14 +4,11 @@ set ( SRC_FILES
 	MantidEVWorker.cpp
 	SampleTransmission.cpp
 	StepScan.cpp
-	UserInputValidator.cpp
-	background.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
-	Background.h
 	DataComparison.h
 	DllConfig.h
 	MantidEV.h
@@ -19,11 +16,9 @@ set ( INC_FILES
 	SampleTransmission.h
 	StepScan.h
 	Updateable.h
-	UserInputValidator.h
 )
 
 set ( MOC_FILES
-    Background.h
     DataComparison.h
     MantidEV.h
     SampleTransmission.h
@@ -59,7 +54,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesGeneral
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsPlotting
   INSTALL_DIR_BASE
       ${PLUGINS_DIR}
   OSX_INSTALL_RPATH

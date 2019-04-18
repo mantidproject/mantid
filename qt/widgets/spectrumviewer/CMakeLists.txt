@@ -75,7 +75,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsPlotting
   INSTALL_DIR
     ${LIB_DIR}
   OSX_INSTALL_RPATH

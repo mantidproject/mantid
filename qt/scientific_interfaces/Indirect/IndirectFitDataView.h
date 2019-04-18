@@ -11,8 +11,8 @@
 
 #include "IIndirectFitDataView.h"
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QTabWidget>
 

@@ -38,6 +38,7 @@ set ( SRC_FILES
 	IndirectFitPlotPresenter.cpp
 	IndirectFitPlotView.cpp
 	IndirectFittingModel.cpp
+	IndirectInstrumentConfig.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
 	IndirectMoments.cpp
@@ -127,7 +128,6 @@ set ( INC_FILES
 	IndirectSqw.h
 	IndirectSymmetrise.h
 	IndirectTab.h
-	IndirectTools.h
 	IndirectToolsTab.h
 	IndirectTransmission.h
 	IndirectTransmissionCalc.h
@@ -183,6 +183,7 @@ set ( MOC_FILES
     IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
+    IndirectInstrumentConfig.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
@@ -234,6 +235,7 @@ set ( UI_FILES
    IndirectFitDataView.ui
    IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui
+   IndirectInstrumentConfig.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
    IndirectMoments.ui
@@ -242,9 +244,9 @@ set ( UI_FILES
    IndirectSpectrumSelector.ui
    IndirectSqw.ui
    IndirectSymmetrise.ui
-   IndirectTools.ui
    IndirectTransmission.ui
    IndirectTransmissionCalc.ui
+   IndirectTools.ui
    Iqt.ui
    IqtFit.ui
    JumpFit.ui
@@ -280,7 +282,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsPlotting
     MantidScientificInterfacesGeneral
   INSTALL_DIR_BASE
     ${PLUGINS_DIR}

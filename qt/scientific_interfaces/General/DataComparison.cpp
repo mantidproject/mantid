@@ -9,7 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DataComparison");
