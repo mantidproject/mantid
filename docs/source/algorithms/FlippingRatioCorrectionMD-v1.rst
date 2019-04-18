@@ -41,9 +41,19 @@ the flipping ratio might be described by something like [2]_:
 
     F=6.5+2.8\cos(\pi(omega+3.7)/180)
 
+The MD event workspaces label each MDEvent with the experiment info number. The time averaged log
+value for "omega" is read from each experiment info, the flipping ratio is calculated from the
+user provided formula, and the corrected workspaces are computed.
+
+For the parsing of the formula, the algorithm uses `muparser <http://beltoforion.de/article.php?a=muparser>`_.
+Once can use any of the implemented functions. The constant "pi" can be used in the formula. Use "_e" for the
+base of natural logarithms.
 
 
-.. [1] O. Schärpf, *Experience with spin analysis on a time-of-flight multidetectorscatteringinstrument*, In Neutron scattering in the ‘nineties’, Proceedings of the IAEA Conference, Jülich 85-97 (1985)
+References
+----------
+
+.. [1] O Schärpf, *Experience with spin analysis on a time-of-flight multidetectorscatteringinstrument*, In Neutron scattering in the nineties, Proceedings of the IAEA Conference, Jülich 85-97 (1985)
 
 .. [2] Igor A Zaliznyak et al, *Polarized neutron scattering on HYSPEC: the HYbrid SPECtrometer at SNS*, J. Phys.: Conf. Ser. 862 012030 (2017) `doi:10.1088/1742-6596/862/1/012030 <https://doi.org/10.1088/1742-6596/862/1/012030>`__
 
@@ -59,21 +69,48 @@ Usage
 
 .. testcode:: FlippingRatioCorrectionMDExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+  # Fake an md workspace
+  CreateMDWorkspace(Dimensions=2, EventType='MDEvent', Extents='-5,5,-5,5', Names='A,B', Units='a,a' ,OutputWorkspace='mde1')
+  AddSampleLog(Workspace='mde1', LogName='param', LogText='0.', LogType='Number', NumberType='Double')
+  FakeMDEventData(InputWorkspace='mde1', PeakParams='100,-2,-2,0.1')
+  CreateMDWorkspace(Dimensions=2, EventType='MDEvent', Extents='-5,5,-5,5', Names='A,B', Units='a,a',OutputWorkspace='mde2')
+  AddSampleLog(Workspace='mde2', LogName='param', LogText='90.', LogType='Number', NumberType='Double')
+  FakeMDEventData(InputWorkspace='mde2', PeakParams='100,2,2,0.1')
+  MergeMD(InputWorkspaces='mde1,mde2', OutputWorkspace='merged')
 
-   wsOut = FlippingRatioCorrectionMD()
+  # Calculate flipping ratio corrections
+  FlippingRatioCorrectionMD(InputWorkspace='merged',
+                            FlippingRatio='10+5*sin(param*pi/180)',
+                            SampleLogs='param',
+                            OutputWorkspace1='correctionFoFm1',
+                            OutputWorkspace2='correction1oFm1')
 
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+  # Bin data and extract intensities
+  BinMD(InputWorkspace='correctionFoFm1', AlignedDim0='A,-5,5,2', AlignedDim1='B,-5,5,2', OutputWorkspace='correctionFoFm1_histo')
+  peak1_FoFm1=mtd['correctionFoFm1_histo'].getSignalArray()[0,0]
+  peak2_FoFm1=mtd['correctionFoFm1_histo'].getSignalArray()[1,1]
+  BinMD(InputWorkspace='correction1oFm1', AlignedDim0='A,-5,5,2', AlignedDim1='B,-5,5,2', OutputWorkspace='correction1oFm1_histo')
+  peak1_1oFm1=mtd['correction1oFm1_histo'].getSignalArray()[0,0]
+  peak2_1oFm1=mtd['correction1oFm1_histo'].getSignalArray()[1,1]
+  print("{:>17}   Peak1      Peak2".format(' '))
+  print("{:>17} {:8.3f}   {:8.3f}".format('Original',100,100))
+  print("{:>17} {:8.3f}   {:8.3f}".format('F',10,15))
+  print("{:>17} {:8.3f}   {:8.3f}".format('F/(F-1)',10./9.,15/14.))
+  print("{:>17} {:8.3f}   {:8.3f}".format('Corrected F/(F-1)',peak1_FoFm1,peak2_FoFm1))
+  print("{:>17} {:8.3f}   {:8.3f}".format('1/(F-1)',1./9.,1/14.))
+  print("{:>17} {:8.3f}   {:8.3f}".format('Corrected 1/(F-1)',peak1_1oFm1,peak2_1oFm1))
 
 Output:
 
 .. testoutput:: FlippingRatioCorrectionMDExample
 
-  The output workspace has ?? spectra
+                          Peak1      Peak2
+               Original  100.000    100.000
+                      F   10.000     15.000
+                F/(F-1)    1.111      1.071
+      Corrected F/(F-1)  111.111    107.143
+                1/(F-1)    0.111      0.071
+      Corrected 1/(F-1)   11.111      7.143
 
 .. categories::
 
