@@ -9,6 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import numpy as np
+from collections import namedtuple
+from contextlib import contextmanager
 import json
 import random
 import string
@@ -18,8 +20,12 @@ from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
                            Direction, PropertyCriterion)
-from mantid import config
+from mantid import config as mantid_config
 from os.path import join as pjoin
+
+debug_flag = False  # set to True to prevent erasing temporary workspaces
+# name prefix marking a workspace for deletion after algorithm completion
+temporary_workspace_marker = '_t_'
 
 
 def unique_workspace_name(n=5, prefix='', suffix=''):
@@ -53,8 +59,10 @@ def unique_workspace_name(n=5, prefix='', suffix=''):
 
 def tws(marker=''):
     r"""
-    String starting with '_t_' and guaranteed not to collide with the name of
-    any existing Mantid workspace in the analysis data service
+    String starting with the temporary workspace marker
+    and guaranteed not to collide
+    with the name of any existing Mantid workspace
+    in the analysis data service
 
     Parameters
     ----------
@@ -65,12 +73,68 @@ def tws(marker=''):
     -------
     str
     """
-    return unique_workspace_name(prefix='_t_', suffix='_'+marker)
+    return unique_workspace_name(prefix=temporary_workspace_marker,
+                                 suffix='_'+marker)
+
+
+@contextmanager
+def pyexec_setup(new_options):
+    """
+    Backup keys of mantid.config
+    and clean up temporary files and workspaces
+    upon algorithm completion or exception raised.
+    Workspaces with names beginning
+    with the temporary workspace marker
+    are assumed temporary.
+
+    Parameters
+    ----------
+    new_options: dict
+        Dictionary of mantid configuration options to be modified.
+
+    Yields
+    ------
+    namedtuple:
+        tuple containing two lists.
+        The first list to hold temporary workspaces of arbitrary names.
+        The second list to hold temporary file names.
+        Used to delete the workspaces and files upon algorithm completion.
+    """
+    temp_objects = namedtuple('temp_objects', 'files workspaces')
+    temps = temp_objects(list(), list())
+
+    previous_config = dict()
+    for key, value in new_options.items():
+        previous_config[key] = mantid_config[key]
+        mantid_config[key] = value
+    try:
+        yield temps
+    finally:
+        # reinstate the mantid options
+        for key, value in previous_config.items():
+            mantid_config[key] = value
+        if debug_flag is True:
+            return
+        # delete temporary files
+        for file_name in temps.files:
+            os.remove(file_name)
+        to_be_removed = set()
+        for name in AnalysisDataService.getObjectNames():
+            twml = len(temporary_workspace_marker)
+            if name[0: twml] == temporary_workspace_marker:
+                to_be_removed.add(name)
+        for workspace in temps.workspaces:
+            if isinstance(workspace, str):
+                to_be_removed.add(workspace)
+            else:
+                to_be_removed.add(workspace.name())
+        for name in to_be_removed:
+            sapi.DeleteWorkspace(name)
 
 
 TEMPERATURE_SENSOR = 'SensorA'
 DEFAULT_MASK_GROUP_DIR = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015'
-DEFAULT_CONFIG_DIR = config['instrumentDefinition.directory']
+DEFAULT_CONFIG_DIR = mantid_config['instrumentDefinition.directory']
 
 # BASIS allows two possible reflections, with associated default properties
 # pylint: disable=line-too-long
@@ -120,13 +184,12 @@ class BASISReduction(PythonAlgorithm):
 
     _samWsRun = None
     _samSqwWs = None
-    _debugMode = False  # delete intermediate workspaces if False
 
     def __init__(self):
         PythonAlgorithm.__init__(self)
         self._normalizeToFirst = False
         self._as_json = None
-
+        self._temps = None  # hold names of temporary workspaces and files
         # properties related to flux normalization
         self._flux_normalization_type = None  # default to no flux normalizat.
         self._MonNorm = False  # flux normalization by monitor
@@ -284,12 +347,17 @@ the first two hours"""
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-        config['default.facility'] = 'SNS'
-        config['default.instrument'] = self._long_inst
-        datasearch = config['datasearch.searcharchive']
-        if datasearch != 'On':
-            config['datasearch.searcharchive'] = 'On'
+        # Facility and database configuration
+        config_new_options = {'default.facility': 'SNS',
+                              'default.instrument': 'BASIS',
+                              'datasearch.searcharchive': 'On'}
+        #
+        # implement with ContextDecorator after python2 is deprecated)
+        #
+        with pyexec_setup(config_new_options) as self._temps:
+            self._PyExec()
 
+    def _PyExec(self):
         # Collect Flux Normalization
         if self.getProperty('DoFluxNormalization').value is True:
             self._flux_normalization_type =\
@@ -325,7 +393,7 @@ the first two hours"""
         # Apply default mask if not supplied by user
         self._overrideMask = bool(self._maskFile)
         if not self._overrideMask:
-            config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
+            mantid_config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
             self._maskFile = self._reflection['mask_file']
 
         sapi.LoadMask(Instrument='BASIS',
@@ -392,7 +460,7 @@ the first two hours"""
             # additional reduction steps
             self._samSqwWs = self._group_and_SofQW(self._samWs, self._etBins,
                                                    isSample=True)
-            if not self._debugMode:
+            if debug_flag is False:
                 sapi.DeleteWorkspace(self._samWs)  # delete events file
             # Divide by Vanadium Q slice, if pertinent
             if self._normalizationType == 'by Q slice':
@@ -449,7 +517,7 @@ the first two hours"""
             if self.getProperty('OutputPowderSpectrum').value:
                 self._generatePowderSpectrum()
 
-        if not self._debugMode:
+        if debug_flag is False:
             sapi.DeleteWorkspace('BASIS_MASK')  # delete the mask
             if self._doNorm and bool(norm_runs):
                 sapi.DeleteWorkspace('BASIS_NORM_MASK')  # delete vanadium mask
@@ -700,7 +768,7 @@ the first two hours"""
         if self._MonNorm:
             self._sum_flux(run_set, wsName_mon, extra_extension)
         self._calibrate_data(wsName, wsName_mon)
-        if not self._debugMode:
+        if debug_flag is False:
             if self._MonNorm:
                 sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
@@ -741,7 +809,7 @@ the first two hours"""
             # If mask override used, we need to add default grouping file
             # location to search paths
             if self._overrideMask:
-                config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
+                mantid_config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
                 sapi.GroupDetectors(InputWorkspace=wsName,
                                     OutputWorkspace=wsName,
                                     MapFile=grp_file,
