@@ -1896,7 +1896,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     if (!eventWS) {
       stringstream errss;
       errss << "Input workspace " << m_dataWS->getName()
-            << " is not an Eventworkspace and does not have sample 'log "
+            << " is not an Eventworkspace and does not have sample log "
                "'proton_charge'."
                "Therefore it fails to find run end time.";
       g_log.error(errss.str());
