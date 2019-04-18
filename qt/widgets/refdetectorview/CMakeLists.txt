@@ -20,10 +20,10 @@ set(INC_FILES
     inc/MantidQtWidgets/RefDetectorView/RefLimitsHandler.h)
 
 set(MOC_FILES
-	inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h)
+    inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h)
 
 set(UI_FILES
-	inc/MantidQtWidgets/RefDetectorView/RefImageView.ui)
+vinc/MantidQtWidgets/RefDetectorView/RefImageView.ui)
 
 # Main Library Target
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsRefDetectorView

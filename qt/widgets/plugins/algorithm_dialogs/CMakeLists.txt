@@ -36,7 +36,7 @@ set(MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(INC_FILES
-	${MOC_FILES})
+    ${MOC_FILES})
 
 set(UI_FILES
   inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog.ui

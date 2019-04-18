@@ -25,9 +25,9 @@ set(MOC_FILES
 
 set(UI_FILES
     DataComparison.ui
-	MantidEV.ui
-	SampleTransmission.ui
-	StepScan.ui)
+    MantidEV.ui
+    SampleTransmission.ui
+    StepScan.ui)
 
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                    QT_VERSION 4

@@ -48,4 +48,4 @@ mtd_add_qt_tests(
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES
-	GUITests)
+    GUITests)

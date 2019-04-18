@@ -40,10 +40,10 @@ set(SRC_FILES
     src/XIntegrationControl.cpp)
 
 set(QT4_SRC_FILES
-	src/MiniPlotQwt.cpp)
+    src/MiniPlotQwt.cpp)
 
 set(QT5_SRC_FILES
-	src/MiniPlotMpl.cpp)
+    src/MiniPlotMpl.cpp)
 
 set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/BinDialog.h
@@ -68,10 +68,10 @@ set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/XIntegrationControl.h)
 
 set(QT4_MOC_FILES
-	inc/MantidQtWidgets/InstrumentView/MiniPlotQwt.h)
+    inc/MantidQtWidgets/InstrumentView/MiniPlotQwt.h)
 
 set(QT5_MOC_FILES
-	inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h)
+    inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h)
 
 set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
@@ -119,7 +119,7 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/XIntegrationControl.h)
 
 set(UI_FILES
-	inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
+    inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 
 # Target
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
@@ -210,7 +210,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
 
 # Testing
 set(TEST_FILES
-	test/InstrumentWidgetDecoderTest.h
+    test/InstrumentWidgetDecoderTest.h
     test/InstrumentWidgetEncoderTest.h)
 
 mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsInstrumentWidgetTest

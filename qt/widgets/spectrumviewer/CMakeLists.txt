@@ -44,7 +44,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/SpectrumViewer/TrackingPicker.h)
 
 set(UI_FILES
-	inc/MantidQtWidgets/SpectrumViewer/SpectrumView.ui)
+    inc/MantidQtWidgets/SpectrumViewer/SpectrumView.ui)
 
 # Main Library Target
 mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSpectrumViewer

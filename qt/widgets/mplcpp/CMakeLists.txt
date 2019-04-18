@@ -16,7 +16,7 @@ set(LIB_SRCS
     src/Zoomer.cpp)
 
 set(MOC_HEADERS
-	 inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
+    inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
     inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h)
 
 set(NOMOC_HEADERS
@@ -33,7 +33,7 @@ set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/Zoomer.h)
 
 set(UI_FILES
-	inc/MantidQtWidgets/MplCpp/Colorbar.ui)
+    inc/MantidQtWidgets/MplCpp/Colorbar.ui)
 
 find_package(BoostPython REQUIRED)
 
