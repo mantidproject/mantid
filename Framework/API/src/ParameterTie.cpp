@@ -188,12 +188,9 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
   if (getLocalFunction() == fun) {
     return true;
   }
-  for (const auto &varPair : m_varMap) {
-    if (varPair.second.isParameterOf(fun)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+      m_varMap.cbegin(), m_varMap.cend(),
+      [fun](const auto &element) { return element.second.isParameterOf(fun); });
 }
 
 /**

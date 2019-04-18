@@ -38,14 +38,14 @@ mtd_add_qt_tests(
     CurveFitting
     DataObjects
     ${GMOCK_LIBRARIES}
-	${GTEST_LIBRARIES}
-	${POCO_LIBRARIES}
-	${Boost_LIBRARIES}
+    ${GTEST_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
   QT4_LINK_LIBS
-	Qwt5
+    Qwt5
   MTD_QT_LINK_LIBS
-	MantidScientificInterfacesIndirect
-	MantidQtWidgetsCommon
-	MantidQtWidgetsLegacyQwt
+    MantidScientificInterfacesIndirect
+    MantidQtWidgetsCommon
+    MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES
 	GUITests)

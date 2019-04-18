@@ -22,7 +22,7 @@ from mantid.kernel import (Logger)
 from mantidqt import icons
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
+from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
@@ -34,7 +34,6 @@ from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.models.binning_type import BinningType
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
@@ -134,6 +133,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_reduction_dimensionality_changed(self, is_1d):
+            pass
+
+        @abstractmethod
         def on_data_changed(self, row, column, new_value, old_value):
             pass
 
@@ -228,6 +231,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
 
         self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
+        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
         # Attach validators
         self._attach_validators()
@@ -417,6 +421,11 @@ class SANSDataProcessorGui(QMainWindow,
              "Options"]
             , self.cell(""), self)
 
+        # Default QTreeView size is too small
+        font = self.data_processor_table.font()
+        font.setPointSize(13)
+        self.data_processor_table.setFont(font)
+
         self.data_processor_table.setRootIsDecorated(False)
 
         row_entry = [''] * 16
@@ -548,6 +557,9 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
         set_setting(self.__generic_settings, self.__save_can_key, value)
+
+    def _on_reduction_dimensionality_changed(self, is_1d):
+        self._call_settings_listeners(lambda listener: listener.on_reduction_dimensionality_changed(is_1d))
 
     def _on_user_file_load(self):
         """

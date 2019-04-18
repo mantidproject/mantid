@@ -36,15 +36,15 @@ public:
   void saveToFile(const QString &filename);
 
 protected:
-  void paintEvent(QPaintEvent *) override;
-  void resizeEvent(QResizeEvent *) override;
-  void mousePressEvent(QMouseEvent *) override;
-  void mouseMoveEvent(QMouseEvent *) override;
-  void mouseReleaseEvent(QMouseEvent *) override;
-  void wheelEvent(QWheelEvent *) override;
-  void keyPressEvent(QKeyEvent *) override;
-  void enterEvent(QEvent *) override;
-  void leaveEvent(QEvent *) override;
+  void paintEvent(QPaintEvent * /*unused*/) override;
+  void resizeEvent(QResizeEvent * /*unused*/) override;
+  void mousePressEvent(QMouseEvent * /*event*/) override;
+  void mouseMoveEvent(QMouseEvent * /*event*/) override;
+  void mouseReleaseEvent(QMouseEvent * /*event*/) override;
+  void wheelEvent(QWheelEvent * /*event*/) override;
+  void keyPressEvent(QKeyEvent * /*event*/) override;
+  void enterEvent(QEvent * /*event*/) override;
+  void leaveEvent(QEvent * /*event*/) override;
   ///< The projection surface
   boost::shared_ptr<ProjectionSurface> m_surface;
 };

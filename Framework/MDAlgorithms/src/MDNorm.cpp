@@ -410,8 +410,7 @@ void MDNorm::exec() {
         "sample");
   }
   m_samplePos = sample->getPos();
-  m_beamDir = m_samplePos - source->getPos();
-  m_beamDir.normalize();
+  m_beamDir = normalize(m_samplePos - source->getPos());
   if ((m_inputWS->getNumDims() > 3) &&
       (m_inputWS->getDimension(3)->getName() == "DeltaE")) {
     m_diffraction = false;

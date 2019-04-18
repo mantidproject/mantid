@@ -7,7 +7,7 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
 
@@ -333,10 +333,9 @@ void SVConnections::toggleHScroll() {
   bool is_on = m_svUI->action_Hscroll->isChecked();
   m_svUI->imageHorizontalScrollBar->setVisible(is_on);
   m_svUI->imageHorizontalScrollBar->setEnabled(is_on);
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).updateImage();
-    (**displ).handleResize();
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).updateImage();
+    (*spectrumDisplay).handleResize();
   }
 }
 
@@ -347,10 +346,9 @@ void SVConnections::toggleVScroll() {
   bool is_on = m_svUI->action_Vscroll->isChecked();
   m_svUI->imageVerticalScrollBar->setVisible(is_on);
   m_svUI->imageVerticalScrollBar->setEnabled(is_on);
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).updateImage();
-    (**displ).handleResize();
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).updateImage();
+    (*spectrumDisplay).handleResize();
   }
 }
 
@@ -358,9 +356,8 @@ void SVConnections::toggleVScroll() {
  * Update X range when range selection changed.
  */
 void SVConnections::imageHorizontalRangeChanged() {
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).updateRange();
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).updateRange();
   }
 }
 
@@ -381,9 +378,8 @@ void SVConnections::graphRangeChanged() {
  * Handles updating the image when a scroll bar is moved.
  */
 void SVConnections::scrollBarMoved() {
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).updateImage();
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).updateImage();
   }
 }
 
@@ -402,10 +398,9 @@ void SVConnections::imageSplitterMoved() {
 
   m_svUI->vgraphSplitter->setSizes(vgraph_sizes);
 
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).updateImage();
-    (**displ).handleResize();
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).updateImage();
+    (*spectrumDisplay).handleResize();
   }
 }
 
@@ -424,10 +419,9 @@ void SVConnections::vgraphSplitterMoved() {
 
   m_svUI->imageSplitter->setSizes(vgraph_sizes);
 
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).updateImage();
-    (**displ).handleResize();
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).updateImage();
+    (*spectrumDisplay).handleResize();
   }
 }
 
@@ -458,9 +452,8 @@ void SVConnections::intensitySliderMoved() {
   double max = (double)m_svUI->intensity_slider->maximum();
 
   double scaled_value = 100.0 * (value - min) / (max - min);
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setIntensity(scaled_value);
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).setIntensity(scaled_value);
   }
 }
 
@@ -473,9 +466,8 @@ void SVConnections::setColorScale(ColorMaps::ColorScale positive,
                                   ColorMaps::ColorScale negative) {
   auto positiveTable = ColorMaps::GetColorMap(positive, 256);
   auto negativeTable = ColorMaps::GetColorMap(negative, 256);
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales(positiveTable, negativeTable);
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay).setColorScales(positiveTable, negativeTable);
   }
   m_colorScales = std::make_pair(positive, negative);
   showColorScale(positiveTable, negativeTable);
@@ -561,9 +553,9 @@ void SVConnections::loadColorMap(const QString &file_name) {
 
   auto negative_color_table = ColorMaps::GetColorMap(ColorMaps::GRAY, n_colors);
 
-  for (auto displ = m_spectrumDisplays.begin();
-       displ != m_spectrumDisplays.end(); ++displ) {
-    (**displ).setColorScales(positive_color_table, negative_color_table);
+  for (auto &spectrumDisplay : m_spectrumDisplays) {
+    (*spectrumDisplay)
+        .setColorScales(positive_color_table, negative_color_table);
   }
   showColorScale(positive_color_table, negative_color_table);
 }

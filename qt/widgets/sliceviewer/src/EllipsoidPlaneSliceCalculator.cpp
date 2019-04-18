@@ -9,7 +9,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 /**
  *
  * The functions in this file intend to calculate the paramters of an ellipse

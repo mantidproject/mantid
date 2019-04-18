@@ -122,7 +122,6 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
 void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     DataObjects::SpecialWorkspace2D_const_sptr ws) {
-  auto detidCol = m_calibrationWS->getColumn("detid");
   const bool isMask = (name == "use");
 
   // output array defaults to all one (one group, use the pixel)
@@ -161,14 +160,11 @@ void SaveDiffCal::generateDetidToIndex() {
   }
 }
 
-bool SaveDiffCal::tableHasColumn(const std::string ColumnName) const {
+bool SaveDiffCal::tableHasColumn(const std::string &ColumnName) const {
   const std::vector<std::string> names = m_calibrationWS->getColumnNames();
-  for (const auto &name : names) {
-    if (name == ColumnName)
-      return true;
-  }
-
-  return false;
+  return std::any_of(
+      names.cbegin(), names.cend(),
+      [&ColumnName](const auto &name) { return name == ColumnName; });
 }
 
 //----------------------------------------------------------------------------------------------

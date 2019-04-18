@@ -141,6 +141,8 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      IN_MANTIDQT_INSTRUMENTVIEW
                    INCLUDE_DIRS
                      inc
+                   SYSTEM_INCLUDE_DIRS
+                     ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
@@ -154,7 +156,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                      Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-                     MantidQtWidgetsLegacyQwt
+                     MantidQtWidgetsPlotting
                    INSTALL_DIR
                      ${LIB_DIR}
                    OSX_INSTALL_RPATH

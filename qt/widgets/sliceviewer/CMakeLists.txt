@@ -122,6 +122,8 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSliceViewer
                      inc
                      ../../../Framework/DataObjects/inc
                      ../../../Framework/Crystal/inc
+                   SYSTEM_INCLUDE_DIRS
+                     ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      DataObjects
                      ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -132,7 +134,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsSliceViewer
                      Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-                     MantidQtWidgetsLegacyQwt
+                     MantidQtWidgetsPlotting
                    INSTALL_DIR
                      ${LIB_DIR}
                    OSX_INSTALL_RPATH

@@ -265,7 +265,8 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   m_workspace = histoBuffer;
 }
 
-void KafkaHistoStreamDecoder::sampleDataFromMessage(const std::string &) {
+void KafkaHistoStreamDecoder::sampleDataFromMessage(
+    const std::string & /*buffer*/) {
   throw Kernel::Exception::NotImplementedError("This method will require "
                                                "implementation when processing "
                                                "sample environment messages.");

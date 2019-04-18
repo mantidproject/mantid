@@ -54,7 +54,7 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
 /**
  * @param :: the detected close event
  */
-void IndirectCorrections::closeEvent(QCloseEvent *) {
+void IndirectCorrections::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -79,11 +79,11 @@ void IndirectCorrections::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Set up all tabs
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->setupTab();
-    connect(tab->second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
+  for (auto &tab : m_tabs) {
+    tab.second->setupTab();
+    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
             SIGNAL(runAsPythonScript(const QString &, bool)));
-    connect(tab->second, SIGNAL(showMessageBox(const QString &)), this,
+    connect(tab.second, SIGNAL(showMessageBox(const QString &)), this,
             SLOT(showMessageBox(const QString &)));
   }
 

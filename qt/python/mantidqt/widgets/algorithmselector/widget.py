@@ -46,7 +46,7 @@ class AlgorithmTreeWidget(QTreeWidget):
 
     def mouseDoubleClickEvent(self, mouse_event):
         if mouse_event.button() == Qt.LeftButton:
-            if not self.selectedItems()[0].child(0):
+            if self.selectedItems() and not self.selectedItems()[0].child(0):
                 self.parent.execute_algorithm()
             super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
 
@@ -65,6 +65,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.execute_button = None
         self.search_box = None
         self.tree = None
+        self.algorithm_progress_widget = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
 
@@ -213,10 +214,10 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
 
-        algProgWidget = AlgorithmProgressWidget(self)
-        algProgWidget.setAttribute(Qt.WA_DeleteOnClose)
+        self.algorithm_progress_widget = AlgorithmProgressWidget(self)
+        self.algorithm_progress_widget.setAttribute(Qt.WA_DeleteOnClose)
 
-        layout.addWidget(algProgWidget)
+        layout.addWidget(self.algorithm_progress_widget)
         # todo: Without the sizeHint() call the minimum size is not set correctly
         #       This needs some investigation as to why this is.
         layout.sizeHint()

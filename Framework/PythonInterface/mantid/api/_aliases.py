@@ -7,14 +7,12 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+from __future__ import absolute_import
 
-from ._api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
-                   AlgorithmFactoryImpl, AlgorithmManagerImpl,
-                   FileFinderImpl, FileLoaderRegistryImpl, FunctionFactoryImpl,
-                   WorkspaceFactoryImpl, CatalogManagerImpl)
-from ..kernel._aliases import lazy_instance_access
+from mantid.api import (AlgorithmFactoryImpl, AlgorithmManagerImpl, AnalysisDataServiceImpl, CatalogManagerImpl,
+                        FileFinderImpl, FileLoaderRegistryImpl, FrameworkManagerImpl, FunctionFactoryImpl,
+                        WorkspaceFactoryImpl)
+from mantid.kernel._aliases import lazy_instance_access
 
 # Historically the singleton aliases mapped to the instances rather than
 # the class types, i.e. AnalysisDataService is the instance and not the type,

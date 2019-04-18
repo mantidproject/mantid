@@ -34,7 +34,6 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
 #include <fstream>
-#include <iostream>
 
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
@@ -3009,8 +3008,9 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else {
-    cout << "[DBx211] Cropped Workspace Range: " << m_dataWS->x(m_wsIndex)[0]
-         << ", " << m_dataWS->x(m_wsIndex).back() << '\n';
+    g_log.information() << "[DBx211] Cropped Workspace Range: "
+                        << m_dataWS->x(m_wsIndex)[0] << ", "
+                        << m_dataWS->x(m_wsIndex).back() << '\n';
   }
 }
 

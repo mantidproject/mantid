@@ -9,10 +9,10 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_view import TransformSelectionView
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_presenter import TransformSelectionPresenter
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class TransformSelectionWidget(QtGui.QWidget):
+class TransformSelectionWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(TransformSelectionWidget, self).__init__(parent)

@@ -17,7 +17,6 @@
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {

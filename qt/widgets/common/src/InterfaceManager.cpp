@@ -33,6 +33,9 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 
 // Load libraries once
 std::once_flag DLLS_LOADED;
+
+// Track if message saying offline help is unavailable has been shown
+bool offlineHelpMsgDisplayed = false;
 } // namespace
 
 // initialise VATES factory
@@ -230,8 +233,11 @@ void InterfaceManager::registerHelpWindowFactory(
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
-    g_log.warning(
-        "Offline help is not available in this version of Workbench.");
+    if (!offlineHelpMsgDisplayed) {
+      g_log.information(
+          "Offline help is not available in this version of Workbench.");
+      offlineHelpMsgDisplayed = true;
+    }
     return nullptr;
   } else {
     MantidHelpInterface *interface =

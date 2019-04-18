@@ -10,7 +10,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/ComplexVector.h"
-#include <iostream>
 
 using namespace Mantid::CurveFitting;
 

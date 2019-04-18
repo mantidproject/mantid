@@ -2983,7 +2983,7 @@ bool MuonAnalysis::isOverwriteEnabled() {
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *) {
+void MuonAnalysis::hideEvent(QHideEvent * /*unused*/) {
   // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(false);
@@ -2996,7 +2996,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *) {
+void MuonAnalysis::showEvent(QShowEvent * /*unused*/) {
   // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);

@@ -10,3 +10,20 @@ SANS Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 4.1.0 <v4.1.0>`
+
+ISIS SANS Interface
+-------------------
+
+Improvements
+############
+
+- Increased font size in run table.
+- For ZOOM, SHIFT user file command now moves monitor 5.
+- canSAS output mode will be disabled if 2D reduction mode is selected to avoid accidental errors with data dimension.
+
+Bug Fixes
+#########
+
+- Fixed the error seen when saving to file with event slice data. Event slice output files now contain transmission workspaces.
+- Exporting table as a batch file is fixed for Mantid Workbench.
+- The warning message raised when you have supplied a transmission run without a direct run has been suppressed when data is still being input. The warning will still be raised if you load or process the data.

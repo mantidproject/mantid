@@ -39,7 +39,7 @@ class StretchedExpFT(IFunction1D):
         pass
 
     def function1D(self, xvals, **optparms):
-        """ Fourier transform of the Symmetrized Stretched Exponential
+        r""" Fourier transform of the Symmetrized Stretched Exponential
 
         The Symmetrized Stretched Exponential:
                 height * exp( - |t/tau|**beta )

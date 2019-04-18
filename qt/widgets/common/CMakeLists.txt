@@ -58,6 +58,7 @@ set(QT5_SRC_FILES
     src/TextPropertyWidget.cpp
     src/TSVSerialiser.cpp
     src/UserFunctionDialog.cpp
+    src/UserInputValidator.cpp
     src/UserSubWindow.cpp
     src/VatesViewerInterface.cpp
     src/WidgetScrollbarDecorator.cpp
@@ -203,6 +204,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
+    inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
@@ -284,6 +286,7 @@ set(SRC_FILES
     src/SyncedCheckboxes.cpp
     src/TextPropertyWidget.cpp
     src/TSVSerialiser.cpp
+    src/UserInputValidator.cpp
     src/UserSubWindow.cpp
     src/VatesViewerInterface.cpp
     src/WidgetScrollbarDecorator.cpp
@@ -348,12 +351,10 @@ set(SRC_FILES
     src/FunctionBrowser.cpp
     src/HintingLineEdit.cpp
     src/IndirectFitPropertyBrowser.cpp
-    src/IndirectInstrumentConfig.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/LineEditWithClear.cpp
     src/LogValueSelector.cpp
-    src/MWDiag.cpp
     src/MantidHelpWindow.cpp
     src/MantidTreeModel.cpp
     src/MantidTreeWidget.cpp
@@ -385,7 +386,6 @@ set(SRC_FILES
     src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
     src/WorkspaceSelector.cpp
     src/pqHelpWindow.cxx
-    src/pythonCalc.cpp
     src/QtPropertyBrowser/qtpropertybrowser.cpp
     src/QtPropertyBrowser/qtpropertymanager.cpp
     src/QtPropertyBrowser/qteditorfactory.cpp
@@ -459,7 +459,6 @@ set(MOC_FILES
   inc/MantidQtWidgets/Common/CatalogSelector.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
   inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
-  inc/MantidQtWidgets/Common/IndirectInstrumentConfig.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/MantidWSIndexDialog.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h
@@ -470,11 +469,9 @@ set(MOC_FILES
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
-  inc/MantidQtWidgets/Common/MWDiag.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
-  inc/MantidQtWidgets/Common/pythonCalc.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/SaveWorkspaces.h
   inc/MantidQtWidgets/Common/ScriptEditor.h
@@ -546,6 +543,7 @@ set(INC_FILES
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/SignalBlocker.h
   inc/MantidQtWidgets/Common/TSVSerialiser.h
+  inc/MantidQtWidgets/Common/UserInputValidator.h
   inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   inc/MantidQtWidgets/Common/WindowIcons.h
   inc/MantidQtWidgets/Common/WorkspaceIcons.h
@@ -666,9 +664,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/CatalogSearch.ui
     inc/MantidQtWidgets/Common/CatalogSelector.ui
-    inc/MantidQtWidgets/Common/IndirectInstrumentConfig.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui
-    inc/MantidQtWidgets/Common/MWDiag.ui
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
@@ -747,6 +743,8 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsCommon
                      USE_QTWEBKIT
                    INCLUDE_DIRS
                      inc
+                   SYSTEM_INCLUDE_DIRS
+                     ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${TARGET_LIBRARIES}
                    QT4_LINK_LIBS
@@ -807,6 +805,7 @@ set(TEST_FILES
     test/SignalBlockerTest.h
     test/AlgorithmHintStrategyTest.h
     test/TrackedActionTest.h
+    test/UserInputValidatorTest.h
     test/DataProcessorUI/CommandsTest.h
     test/DataProcessorUI/GenerateNotebookTest.h
     test/DataProcessorUI/OneLevelTreeManagerTest.h
@@ -861,6 +860,7 @@ set(QT5_TEST_FILES
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
     test/InterfaceManagerTest.h
+    test/UserInputValidatorTest.h
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h)
 

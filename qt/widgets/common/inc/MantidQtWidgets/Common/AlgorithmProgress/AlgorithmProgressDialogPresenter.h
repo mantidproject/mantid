@@ -34,10 +34,10 @@ public:
                                    AlgorithmProgressDialogWidget *view,
                                    AlgorithmProgressModel &model);
 
-  void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID, double,
-                             QString) override;
-  void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
+  void algorithmStartedSlot(Mantid::API::AlgorithmID /*unused*/) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/,
+                             double /*unused*/, QString /*unused*/) override;
+  void algorithmEndedSlot(Mantid::API::AlgorithmID /*unused*/) override;
 
 private:
   AlgorithmProgressDialogWidget *m_view;

@@ -16,7 +16,6 @@
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
-#include <iostream>
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {

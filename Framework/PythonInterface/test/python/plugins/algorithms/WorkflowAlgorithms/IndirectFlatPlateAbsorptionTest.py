@@ -8,7 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.simpleapi import LoadNexusProcessed, IndirectFlatPlateAbsorption
-from mantid.api import *
 
 
 class IndirectFlatPlateAbsorptionTest(unittest.TestCase):

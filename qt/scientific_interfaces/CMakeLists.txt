@@ -52,8 +52,7 @@ set(TEST_FILES
     test/ReflSaveTabPresenterTest.h
     test/ReflSettingsPresenterTest.h
     test/ReflSettingsTabPresenterTest.h
-    test/RunMapTest.h
-    test/UserInputValidatorTest.h)
+    test/RunMapTest.h)
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 4

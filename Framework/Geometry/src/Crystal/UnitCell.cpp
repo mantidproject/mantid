@@ -926,9 +926,9 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
       unitCellString, " ", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<double> components;
-
+  components.reserve(cellTokens.size());
   for (const auto &token : cellTokens) {
-    components.push_back(boost::lexical_cast<double>(token));
+    components.emplace_back(boost::lexical_cast<double>(token));
   }
 
   switch (components.size()) {

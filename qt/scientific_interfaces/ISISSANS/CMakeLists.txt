@@ -45,6 +45,8 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesISISSANS
                    PRECOMPILED PrecompiledHeader.h
                    INCLUDE_DIRS
                      ${CMAKE_CURRENT_SOURCE_DIR}
+                   SYSTEM_INCLUDE_DIRS
+                     ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
@@ -56,7 +58,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesISISSANS
                      Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-                     MantidQtWidgetsLegacyQwt
+                     MantidQtWidgetsPlotting
                      MantidScientificInterfacesMuon
                    INSTALL_DIR_BASE
                      ${PLUGINS_DIR}

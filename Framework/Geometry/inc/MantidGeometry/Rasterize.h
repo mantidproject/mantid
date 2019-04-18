@@ -32,22 +32,17 @@ public:
 namespace Rasterize {
 
 MANTID_GEOMETRY_DLL Raster calculate(const Kernel::V3D &beamDirection,
-                                     const Geometry::CSGObject &shape,
+                                     const IObject &shape,
                                      const double cubeSizeInMetre);
 
-MANTID_GEOMETRY_DLL Raster calculate(
-    const Kernel::V3D &beamDirection,
-    const boost::shared_ptr<const IObject> shape, const double cubeSizeInMetre);
-
 MANTID_GEOMETRY_DLL Raster calculateCylinder(const Kernel::V3D &beamDirection,
-                                             const Geometry::CSGObject &shape,
+                                             const IObject &shape,
                                              const size_t numSlices,
                                              const size_t numAnnuli);
 
 MANTID_GEOMETRY_DLL Raster
-calculateCylinder(const Kernel::V3D &beamDirection,
-                  const boost::shared_ptr<const IObject> shape,
-                  const size_t numSlices, const size_t numAnnuli);
+calculateHollowCylinder(const Kernel::V3D &beamDirection, const IObject &shape,
+                        const size_t numSlices, const size_t numAnnuli);
 
 } // namespace Rasterize
 } // namespace Geometry

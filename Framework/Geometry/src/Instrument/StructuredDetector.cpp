@@ -480,32 +480,32 @@ StructuredDetector::getComponentByName(const std::string &cname,
 
 //-------------------------------------------------------------------------------------------------
 /// Does the point given lie within this object component?
-bool StructuredDetector::isValid(const V3D &) const {
+bool StructuredDetector::isValid(const V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::isValid() is not implemented.");
 }
 
 /// Does the point given lie on the surface of this object component?
-bool StructuredDetector::isOnSide(const V3D &) const {
+bool StructuredDetector::isOnSide(const V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::isOnSide() is not implemented.");
 }
 
 /// Checks whether the track given will pass through this Component.
-int StructuredDetector::interceptSurface(Track &) const {
+int StructuredDetector::interceptSurface(Track & /*track*/) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::interceptSurface() is not implemented.");
 }
 
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double StructuredDetector::solidAngle(const V3D &) const {
+double StructuredDetector::solidAngle(const V3D & /*observer*/) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::solidAngle() is not implemented.");
 }
 
 /// Try to find a point that lies within (or on) the object
-int StructuredDetector::getPointInObject(V3D &) const {
+int StructuredDetector::getPointInObject(V3D & /*point*/) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::getPointInObject() is not implemented.");
 }

@@ -79,7 +79,7 @@ public:
   std::string getWindowType() override;
 
 signals:
-  void spectrumDisplayChanged(SpectrumDisplay *);
+  void spectrumDisplayChanged(SpectrumDisplay * /*_t1*/);
 
 protected slots:
   void closeWindow();

@@ -214,10 +214,8 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
   double *F = out->getSignalArray();
   double Fmax = 0.;
   double Fmin = std::numeric_limits<double>::max();
-  double sum = 0.0;
   for (int i = 0; i < gridPts[0] * gridPts[1] * gridPts[2]; i++) {
     if (std::isnormal(F[i])) {
-      sum += F[i];
       Fmin = std::min(Fmin, F[i]);
       Fmax = std::max(Fmax, F[i]);
     }

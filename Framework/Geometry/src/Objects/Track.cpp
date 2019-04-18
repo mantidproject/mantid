@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace Mantid {
 namespace Geometry {
@@ -176,7 +175,6 @@ void Track::buildLink() {
   auto ac = m_surfPoints.cbegin();
   auto bc = ac;
   ++bc;
-  V3D workPt = m_startPoint; // last good point
   // First point is not necessarily in an object
   // Process first point:
   while (ac != m_surfPoints.end() &&
@@ -185,7 +183,6 @@ void Track::buildLink() {
     if (ac->direction == TrackDirection::LEAVING) {
       addLink(m_startPoint, ac->endPoint, ac->distFromStart, *ac->object,
               ac->componentID); // from the void
-      workPt = ac->endPoint;
     }
     ++ac;
     if (bc != m_surfPoints.end()) {
@@ -201,7 +198,7 @@ void Track::buildLink() {
     return;
   }
 
-  workPt = ac->endPoint;
+  V3D workPt = ac->endPoint;       // last good point
   while (bc != m_surfPoints.end()) // Since bc > ac
   {
     if (ac->direction == TrackDirection::ENTERING &&

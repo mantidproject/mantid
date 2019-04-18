@@ -33,7 +33,7 @@ Description          : General plot options dialog
 #include "Graph.h"
 #include "Grid.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
+#include "MantidQtWidgets/Plotting/Qwt/qwt_compat.h"
 #include "MyParser.h"
 #include "Plot.h"
 #include "ScaleDraw.h"
@@ -63,7 +63,7 @@ Description          : General plot options dialog
 #include <QTimeEdit>
 #include <QVector>
 
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include <qwt_plot.h>
 #include <qwt_scale_widget.h>
 
