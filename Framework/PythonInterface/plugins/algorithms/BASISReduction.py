@@ -10,7 +10,8 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 import json
-
+import random
+import string
 import mantid.simpleapi as sapi
 from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
                         FileAction, AnalysisDataService, ExperimentInfo)
@@ -19,6 +20,53 @@ from mantid.kernel import (IntArrayProperty, StringListValidator,
                            Direction, PropertyCriterion)
 from mantid import config
 from os.path import join as pjoin
+
+
+def unique_workspace_name(n=5, prefix='', suffix=''):
+    r"""
+    Create a random sequence of `n` lowercase characters that is guaranteed
+    not to collide with the name of any existing Mantid workspace registered
+    in the analysis data service.
+
+    Parameters
+    ----------
+    n: int
+        Size of the sequence
+    prefix: str
+        String to prefix the randon sequence
+    suffix: str
+        String to suffix the randon sequence
+
+    Returns
+    -------
+    str
+    """
+
+    n_seq = ''.join(random.choice(string.ascii_lowercase) for _ in range(n))
+    ws_name = '{}{}{}'.format(str(prefix), n_seq, str(suffix))
+    while ws_name in AnalysisDataService.getObjectNames():
+        characters = [random.choice(string.ascii_lowercase) for _ in range(n)]
+        n_seq = ''.join(characters)
+        ws_name = '{}{}{}'.format(str(prefix), n_seq, str(suffix))
+    return ws_name
+
+
+def tws(marker=''):
+    r"""
+    String starting with '_t_' and guaranteed not to collide with the name of
+    any existing Mantid workspace in the analysis data service
+
+    Parameters
+    ----------
+    marker: str
+        String to identify the data contained in the workspace. Used as suffix
+
+    Returns
+    -------
+    str
+    """
+    return unique_workspace_name(prefix='_t_', suffix='_'+marker)
+
 
 TEMPERATURE_SENSOR = 'SensorA'
 DEFAULT_MASK_GROUP_DIR = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015'
@@ -229,6 +277,10 @@ the first two hours"""
                              direction=Direction.Input,
                              doc='Output dynamic susceptibility (Xqw)')
         self.setPropertyGroup('OutputSusceptibility', titleAddionalOutput)
+        self.declareProperty('OutputPowderSpectrum', False,
+                             direction=Direction.Input,
+                             doc='Output S(Q) and S(theta) powder diffraction')
+        self.setPropertyGroup('OutputPowderSpectrum', titleAddionalOutput)
 
     # pylint: disable=too-many-branches
     def PyExec(self):
@@ -394,6 +446,8 @@ the first two hours"""
                 susceptibility_filename = processed_filename.replace('sqw', 'Xqw')
                 sapi.SaveNexus(Filename=susceptibility_filename,
                                InputWorkspace=samXqsWs)
+            if self.getProperty('OutputPowderSpectrum').value:
+                self._generatePowderSpectrum()
 
         if not self._debugMode:
             sapi.DeleteWorkspace('BASIS_MASK')  # delete the mask
@@ -871,6 +925,8 @@ the first two hours"""
                                           os.path.basename(parm_file), True)
         return parm_file
 
+    def _generatePowderSpectrum(self):
+        pass
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
