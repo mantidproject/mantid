@@ -51,7 +51,7 @@ class SANSMaskWorkspace(DistributedDataProcessorAlgorithm):
 
         component = self._get_component()
 
-        # Get the correct SANS masking strategy from the SANSMaskFactory
+        # Get the correct SANS masking strategy from create_masker
         workspace = self.getProperty("Workspace").value
         masker = create_masker(state, component)
 
