@@ -30,7 +30,7 @@ private:
                                           std::vector<specnum_t> spectraList);
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
                                      std::vector<double> indexRanges);
-  std::vector<double> findIndexRanges(std::vector<size_t> indexList);
+  std::vector<double> findIndexRanges(std::vector<double> indexList);
   void subtractPixelBackground(API::MatrixWorkspace_sptr inputWS,
                                std::vector<double> indexRanges);
 
