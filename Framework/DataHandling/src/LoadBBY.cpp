@@ -477,7 +477,7 @@ void LoadBBY::loadInstrumentParameters(
         auto pElem = dynamic_cast<Poco::XML::Element *>(pNode);
         std::string name = pElem->getAttribute("name");
         auto nodeList = pElem->childNodes();
-        for (auto i = 0; i < nodeList->length(); i++) {
+        for (unsigned long i = 0; i < nodeList->length(); i++) {
           auto cNode = nodeList->item(i);
           if (cNode->nodeName() == "value") {
             auto cElem = dynamic_cast<Poco::XML::Element *>(cNode);

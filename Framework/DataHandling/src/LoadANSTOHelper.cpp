@@ -61,7 +61,7 @@ EventProcessor::EventProcessor(const std::vector<bool> &roi, size_t stride,
                                double tofMinBoundary, double tofMaxBoundary,
                                double timeMinBoundary, double timeMaxBoundary)
     : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0),
-      m_period(period), m_phase(phase), m_startTime(startTime),
+      m_startTime(startTime), m_period(period), m_phase(phase),
       m_tofMinBoundary(tofMinBoundary), m_tofMaxBoundary(tofMaxBoundary),
       m_timeMinBoundary(timeMinBoundary), m_timeMaxBoundary(timeMaxBoundary) {}
 bool EventProcessor::validFrame() const {
@@ -104,7 +104,8 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
   // check if neutron is in region of intreset
   if (m_roi[id]) {
     // absolute pulse time in nanoseconds
-    auto frameTime = static_cast<int64_t>(m_period * m_frames * 1.0e3);
+    auto frames = static_cast<double>(m_frames);
+    auto frameTime = static_cast<int64_t>(m_period * frames * 1.0e3);
     int64_t pulse = m_startTime + frameTime;
 
     addEventImpl(id, pulse, tof);

@@ -170,8 +170,12 @@ public:
 
     DateAndTime runstart(run.getProperty("run_start")->value());
     auto timeshift = runstart.totalNanoseconds();
-    double minTime = (minPulseTime.totalNanoseconds() - timeshift) * 1.0e-9;
-    double maxTime = (maxPulseTime.totalNanoseconds() - timeshift) * 1.0e-9;
+    double minTime =
+        static_cast<double>(minPulseTime.totalNanoseconds() - timeshift) *
+        1.0e-9;
+    double maxTime =
+        static_cast<double>(maxPulseTime.totalNanoseconds() - timeshift) *
+        1.0e-9;
 
     TS_ASSERT_LESS_THAN(maxTime, 0.0600001);
     TS_ASSERT_LESS_THAN(0.0399999, minTime);
