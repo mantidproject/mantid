@@ -10,9 +10,9 @@
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
+#include <array>
 #include <boost/optional.hpp>
 #include <string>
-#include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
 
