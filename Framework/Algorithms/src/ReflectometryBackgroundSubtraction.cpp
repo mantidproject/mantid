@@ -71,7 +71,8 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
 
 /** Returns the indexNumbers of the ranges of spectra in the given list.
  *
- * @param indexList :: a vector containing an list of all the index numbers of the histograms
+ * @param indexList :: a vector containing an list of all the index numbers of
+ * the histograms
  * @return a vector containing a list of ranges of the given indexList.
  */
 std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
@@ -99,8 +100,8 @@ std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
  * then subtracted from the input workspace.
  *
  * @param inputWS :: the input workspace
- * @param indexRanges :: a vector containing the index of the ranges of histograms containing
- * the background
+ * @param indexRanges :: a vector containing the index of the ranges of
+ * histograms containing the background
  */
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
     MatrixWorkspace_sptr inputWS, std::vector<double> indexRanges) {
@@ -179,7 +180,7 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
   LRBgd->execute();
 
-	//Can only run once as doesn't override output!!!!! TODO::fix this
+  // Can only run once as doesn't override output!!!!! TODO::fix this
 }
 
 //----------------------------------------------------------------------------------------------
@@ -193,8 +194,8 @@ void ReflectometryBackgroundSubtraction::init() {
       "InputWorkspace", "An input workspace",
       boost::make_shared<CommonBinsValidator>());
 
-  std::vector<std::string> backgroundTypes = {
-      "PerDetectorAverage", "Polynomial", "AveragePixelFit"};
+  std::vector<std::string> backgroundTypes = {"PerDetectorAverage",
+                                              "Polynomial", "AveragePixelFit"};
   declareProperty("BackgroundCalculationMethod", "PerDetectorAverage",
                   boost::make_shared<StringListValidator>(backgroundTypes),
                   "The type of background reduction to perform.",
@@ -235,10 +236,9 @@ void ReflectometryBackgroundSubtraction::init() {
                                        "BackgroundCalculationMethod",
                                        IS_EQUAL_TO, "AveragePixelFit"));
 
-  setPropertySettings(
-      "IntegrationRange",
-      make_unique<EnabledWhenProperty>("BackgroundCalculationMethod",
-                                       IS_EQUAL_TO, "AveragePixelFit"));
+  setPropertySettings("IntegrationRange", make_unique<EnabledWhenProperty>(
+                                              "BackgroundCalculationMethod",
+                                              IS_EQUAL_TO, "AveragePixelFit"));
 
   setPropertySettings("SumPeak", make_unique<EnabledWhenProperty>(
                                      "BackgroundCalculationMethod", IS_EQUAL_TO,
@@ -319,7 +319,8 @@ ReflectometryBackgroundSubtraction::validateInputs() {
     auto numberOfypixels = inputWS->getNumberHistograms();
     if (backgroundType == "AveragePixelFit" &&
         (peakRange.front() < 0 || peakRange.back() > numberOfypixels - 1)) {
-      errors["PeakRange"] = "PeakRange must be contained within the number of pixels";
+      errors["PeakRange"] =
+          "PeakRange must be contained within the number of pixels";
     }
   }
   return errors;
