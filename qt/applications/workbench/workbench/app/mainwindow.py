@@ -12,9 +12,6 @@ Defines the QMainWindow of the application and the main() entry point.
 """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# Importing resources loads the data in
-from workbench.app.resources import qCleanupResources  # noqa
-
 import argparse
 import atexit
 import importlib
@@ -59,6 +56,9 @@ from mantidqt.project.project import Project  # noqa
 # Pre-application setup
 plugins.setup_library_paths()
 
+# Importing resources loads the data in. This must be imported before the
+# QApplication is created or paths to Qt's resources will not be set up correctly
+from workbench.app.resources import qCleanupResources  # noqa
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
