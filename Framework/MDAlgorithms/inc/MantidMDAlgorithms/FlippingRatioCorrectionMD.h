@@ -7,16 +7,18 @@
 #ifndef MANTID_MDALGORITHMS_FLIPPINGRATIOCORRECTIONMD_H_
 #define MANTID_MDALGORITHMS_FLIPPINGRATIOCORRECTIONMD_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** FlippingRatioCorrectionMD : TODO: DESCRIPTION
-*/
-class MANTID_MDALGORITHMS_DLL FlippingRatioCorrectionMD : public API::Algorithm {
+/** FlippingRatioCorrectionMD : Algorithm to correct
+ *  MDEvents for flipping ratio
+ */
+class MANTID_MDALGORITHMS_DLL FlippingRatioCorrectionMD
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
