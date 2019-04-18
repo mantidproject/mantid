@@ -6,7 +6,7 @@ set(SRC_FILES src/DesignerPlugin.cpp src/PluginCollectionInterface.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(INC_FILES
-	inc/MantidQtWidgets/Plugins/Designer/DesignerPlugin.h
+	 inc/MantidQtWidgets/Plugins/Designer/DesignerPlugin.h
     inc/MantidQtWidgets/Plugins/Designer/PluginCollectionInterface.h)
 
 set(MOC_FILES ${INC_FILES})

@@ -16,7 +16,7 @@ set(LIB_SRCS
     src/Zoomer.cpp)
 
 set(MOC_HEADERS
-	inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
+	 inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
     inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h)
 
 set(NOMOC_HEADERS
