@@ -188,8 +188,8 @@ void FunctionTreeView::createBrowser() {
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
           SLOT(parameterPropertyChanged(QtProperty *)));
 
-  //connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)),
-  //        SLOT(updateCurrentFunctionIndex()));
+  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)),
+          SLOT(updateCurrentFunctionIndex()));
 
   m_browser->setFocusPolicy(Qt::StrongFocus);
 }
@@ -216,11 +216,13 @@ void FunctionTreeView::createActions() {
   m_actionAddTie = new QAction("Add tie", this);
   connect(m_actionAddTie, SIGNAL(triggered()), this, SLOT(addTie()));
 
-  m_actionFromClipboard = new QAction("Copy from clipboard", this);
+  m_actionFromClipboard = new QAction("Paste from clipboard", this);
+  m_actionFromClipboard->setObjectName("paste_from_clipboard");
   connect(m_actionFromClipboard, SIGNAL(triggered()), this,
-          SLOT(copyFromClipboard()));
+          SLOT(pasteFromClipboard()));
 
   m_actionToClipboard = new QAction("Copy to clipboard", this);
+  m_actionToClipboard->setObjectName("copy_to_clipboard");
   connect(m_actionToClipboard, SIGNAL(triggered()), this,
           SLOT(copyToClipboard()));
 
@@ -262,7 +264,6 @@ void FunctionTreeView::clear() {
 void FunctionTreeView::setFunction(Mantid::API::IFunction_sptr fun) {
   clear();
   addFunction(nullptr, fun);
-  //emit functionStructureChanged();
 }
 
 /**
@@ -1540,7 +1541,7 @@ void FunctionTreeView::addTie() {
 /**
  * Copy function from the clipboard
  */
-void FunctionTreeView::copyFromClipboard() {
+void FunctionTreeView::pasteFromClipboard() {
   QString funStr = QApplication::clipboard()->text();
   if (funStr.isEmpty())
     return;
@@ -1550,6 +1551,7 @@ void FunctionTreeView::copyFromClipboard() {
     if (!fun)
       return;
     this->setFunction(fun);
+    emit functionReplaced(funStr);
   } catch (...) {
     // text in the clipboard isn't a function definition
     QMessageBox::warning(this, "MantidPlot - Warning",
@@ -1666,7 +1668,6 @@ void FunctionTreeView::attributeChanged(QtProperty *prop) {
   // delete and recreate all function's properties (attributes, parameters, etc)
   setFunction(funProp, fun);
   updateFunctionIndices();
-  emit functionStructureChanged();
 }
 
 /** Called when the size of a vector attribute is changed
@@ -1699,7 +1700,6 @@ void FunctionTreeView::attributeVectorSizeChanged(QtProperty *prop) {
     fun->setAttributeValue(attName, attribute);
     setFunction(funProp, fun);
     updateFunctionIndices();
-    emit functionStructureChanged();
   }
 }
 
@@ -1791,6 +1791,23 @@ void FunctionTreeView::setErrorsEnabled(bool enabled) {
  */
 void FunctionTreeView::clearErrors() { m_parameterManager->clearErrors(); }
 
+boost::optional<QString> FunctionTreeView::currentFunctionIndex() const {
+  return m_currentFunctionIndex;
+}
+
+void FunctionTreeView::updateCurrentFunctionIndex() {
+  boost::optional<QString> newIndex;
+
+  if (auto item = m_browser->currentItem()) {
+    auto prop = item->property();
+    newIndex = getIndex(prop);
+  }
+
+  if (m_currentFunctionIndex != newIndex) {
+    m_currentFunctionIndex = newIndex;
+    emit currentFunctionChanged();
+  }
+}
 QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const
 {
   return m_browser->getItemWidget(m_properties.find(prop)->item);

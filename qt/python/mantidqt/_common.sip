@@ -313,6 +313,8 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i);
     int getCurrentDataset() const;
+signals:
+    void functionStructureChanged();
 };
 
 // ---------------------------------

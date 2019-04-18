@@ -52,6 +52,9 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->addWidget(view);
+  connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
+  connect(m_presenter.get(), SIGNAL(parameterChanged(const QString &, const QString &)),
+    this, SIGNAL(parameterChanged(const QString &, const QString &)));
 }
 
 /**
@@ -71,17 +74,7 @@ void FunctionBrowser::clear() {
  * @param funStr :: FunctionFactory function creation string
  */
 void FunctionBrowser::setFunction(const QString &funStr) {
-  if (funStr.isEmpty())
-    return;
-  try {
-    auto fun = FunctionFactory::Instance().createInitialized(
-        funStr.toStdString());
-    if (!fun)
-      return;
-    this->setFunction(fun);
-  } catch (...) {
-    // error in the input string
-  }
+  m_presenter->setFunctionString(funStr);
 }
 
 /**
@@ -147,112 +140,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction() {
   return m_presenter->getFunction();
 }
 
-/**
- * Remove the function under currently selected property
- */
-void FunctionBrowser::removeFunction() {
-
-}
-
-void FunctionBrowser::addFunction() {
-
-}
-
-/**
- * Fix currently selected parameter
- */
-void FunctionBrowser::fixParameter() {
-}
-
-/**
- * Unfix currently selected parameter
- */
-void FunctionBrowser::removeTie() {
-}
-
-/**
- * Add a custom tie to currently selected parameter
- */
-void FunctionBrowser::addTie() {
-}
-
-/**
- * Copy function from the clipboard
- */
-void FunctionBrowser::copyFromClipboard() {
-  QString funStr = QApplication::clipboard()->text();
-  if (funStr.isEmpty())
-    return;
-  try {
-    auto fun = Mantid::API::FunctionFactory::Instance().createInitialized(
-        funStr.toStdString());
-    if (!fun)
-      return;
-    this->setFunction(fun);
-  } catch (...) {
-    // text in the clipboard isn't a function definition
-    QMessageBox::warning(this, "MantidPlot - Warning",
-                         "Text in the clipboard isn't a function definition"
-                         " or contains errors.");
-  }
-}
-
-/**
- * Copy function to the clipboard
- */
-void FunctionBrowser::copyToClipboard() {
-  auto fun = getFunction();
-  if (fun) {
-    QApplication::clipboard()->setText(QString::fromStdString(fun->asString()));
-  }
-}
-
-/**
- * Add both constraints to current parameter
- */
-void FunctionBrowser::addConstraints() {
-}
-
-/**
- * Add both constraints to current parameter
- */
-void FunctionBrowser::addConstraints10() {
-}
-
-/**
- * Add both constraints to current parameter
- */
-void FunctionBrowser::addConstraints50() {
-}
-
-/**
- * Remove both constraints from current parameter
- */
-void FunctionBrowser::removeConstraints() {
-}
-
-/**
- * Remove one constraint from current parameter
- */
-void FunctionBrowser::removeConstraint() {
-}
-
-void FunctionBrowser::updateCurrentFunctionIndex() {
-  //boost::optional<QString> newIndex;
-
-  //if (auto item = m_browser->currentItem()) {
-  //  auto prop = item->property();
-  //  newIndex = getIndex(prop);
-  //}
-
-  //if (m_currentFunctionIndex != newIndex) {
-  //  m_currentFunctionIndex = newIndex;
-  //  emit currentFunctionChanged();
-  //}
-}
-
 bool FunctionBrowser::hasFunction() const {
-  return false;// m_view->hasFunction();
+  return m_presenter->hasFunction();
 }
 
 /// Get the number of datasets
@@ -313,38 +202,13 @@ void FunctionBrowser::setCurrentDataset(int i) {
 /// Remove local parameter values for a number of datasets.
 /// @param indices :: A list of indices of datasets to remove.
 void FunctionBrowser::removeDatasets(QList<int> indices) {
-  //if (indices.size() > m_numberOfDatasets) {
-  //  throw std::runtime_error(
-  //      "FunctionBrowser asked to removed too many datasets");
-  //}
-  //qSort(indices);
-  //for (auto par = m_localParameterValues.begin();
-  //     par != m_localParameterValues.end(); ++par) {
-  //  for (int i = indices.size() - 1; i >= 0; --i) {
-  //    int index = indices[i];
-  //    if (index < 0) {
-  //      throw std::runtime_error(
-  //          "Index of a dataset in FunctionBrowser cannot be negative.");
-  //    }
-  //    if (index < m_numberOfDatasets) {
-  //      auto &v = par.value();
-  //      // value may not have been populated
-  //      if (index < v.size()) {
-  //        v.remove(index);
-  //      }
-  //    } else {
-  //      throw std::runtime_error(
-  //          "Index of a dataset in FunctionBrowser is out of range.");
-  //    }
-  //  }
-  //}
-  //setNumberOfDatasets(m_numberOfDatasets - indices.size());
+  m_presenter->removeDatasets(indices);
 }
 
 /// Add local parameters for additional datasets.
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n) {
-  //setNumberOfDatasets(m_numberOfDatasets + n);
+  m_presenter->addDatasets(n);
 }
 
 /**
@@ -373,118 +237,8 @@ void FunctionBrowser::editLocalParameter(const QString &parName,
 }
 
 /// Return the multidomain function for multi-dataset fitting
-Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
-  return Mantid::API::IFunction_sptr();
-  //if (!m_multiDataset) {
-  //  throw std::runtime_error(
-  //      "Function browser wasn't set up for multi-dataset fitting.");
-  //}
-  //// number of spectra to fit == size of the multi-domain function
-  //int nOfDataSets = getNumberOfDatasets();
-  //if (nOfDataSets == 0) {
-  //  throw std::runtime_error("There are no data sets specified.");
-  //}
-
-  //// description of a single function
-  //QString funStr = getFunctionString();
-
-  //if (nOfDataSets == 1) {
-  //  return Mantid::API::FunctionFactory::Instance().createInitialized(
-  //      funStr.toStdString());
-  //}
-
-  //bool isComposite =
-  //    (std::find(funStr.begin(), funStr.end(), ';') != funStr.end());
-  //if (isComposite) {
-  //  funStr = ";(" + funStr + ")";
-  //} else {
-  //  funStr = ";" + funStr;
-  //}
-
-  //QString multiFunStr = "composite=MultiDomainFunction,NumDeriv=1";
-  //for (int i = 0; i < nOfDataSets; ++i) {
-  //  multiFunStr += funStr;
-  //}
-
-  //// add the global ties
-  //QStringList globals = getGlobalParameters();
-  //QString globalTies;
-  //if (!globals.isEmpty()) {
-  //  globalTies = "ties=(";
-  //  bool isFirst = true;
-  //  foreach (QString par, globals) {
-  //    if (!isFirst)
-  //      globalTies += ",";
-  //    else
-  //      isFirst = false;
-
-  //    for (int i = 1; i < nOfDataSets; ++i) {
-  //      globalTies += QString("f%1.").arg(i) + par + "=";
-  //    }
-  //    globalTies += QString("f0.%1").arg(par);
-  //  }
-  //  globalTies += ")";
-  //  multiFunStr += ";" + globalTies;
-  //}
-
-  //// create the multi-domain function
-  //auto fun = Mantid::API::FunctionFactory::Instance().createInitialized(
-  //    multiFunStr.toStdString());
-  //boost::shared_ptr<Mantid::API::MultiDomainFunction> multiFun =
-  //    boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
-  //if (!multiFun) {
-  //  throw std::runtime_error("Failed to create the MultiDomainFunction");
-  //}
-
-  //auto globalParams = getGlobalParameters();
-
-  //// set the domain indices, initial local parameter values and ties
-  //for (int i = 0; i < nOfDataSets; ++i) {
-  //  multiFun->setDomainIndex(i, i);
-  //  auto fun1 = multiFun->getFunction(i);
-  //  for (size_t j = 0; j < fun1->nParams(); ++j) {
-  //    const auto parameterName = fun1->parameterName(j);
-  //    const auto parName = QString::fromStdString(parameterName);
-  //    if (globalParams.contains(parName))
-  //      continue;
-  //    auto tie = fun1->getTie(j);
-  //    if (tie) {
-  //      // If parameter has a tie at this stage then it gets it from the
-  //      // currently displayed function. But the i-th local parameters may not
-  //      // have this tie, so remove it
-  //      fun1->removeTie(j);
-  //    }
-  //    if (fun1->isFixed(j)) {
-  //      fun1->unfix(j);
-  //    }
-  //    if (fun1->getConstraint(j)) {
-  //      fun1->removeConstraint(parameterName);
-  //    }
-  //    //checkLocalParameter(parName);
-  //    //const auto &localParam = m_localParameterValues[parName][i];
-  //    //if (localParam.fixed) {
-  //    //  // Fix this particular local parameter
-  //    //  fun1->setParameter(j, localParam.value);
-  //    //  fun1->fix(j);
-  //    //} else {
-  //    //  const auto &tie = localParam.tie;
-  //    //  if (!tie.isEmpty()) {
-  //    //    fun1->tie(parameterName, tie.toStdString());
-  //    //  } else {
-  //    //    fun1->setParameter(j, localParam.value);
-  //    //  }
-  //    //}
-  //    //if (!localParam.lowerBound.isEmpty() &&
-  //    //    !localParam.upperBound.isEmpty()) {
-  //    //  auto constraint = getConstraint(parName, localParam.lowerBound,
-  //    //                                  localParam.upperBound);
-  //    //  fun1->addConstraints(constraint.toStdString());
-  //    //}
-  //  }
-  //}
-  //assert(multiFun->nFunctions() == static_cast<size_t>(nOfDataSets));
-
-  //return fun;
+IFunction_sptr FunctionBrowser::getGlobalFunction() {
+  return m_presenter->getFitFunction();
 }
 
 /// Fix/unfix a local parameter
@@ -537,55 +291,6 @@ void FunctionBrowser::setLocalParameterTie(const QString &parName, int i,
 /// @param fun :: A function to get parameter values from.
 void FunctionBrowser::updateMultiDatasetParameters(
     const Mantid::API::IFunction &fun) {
-  //auto cfun = dynamic_cast<const Mantid::API::CompositeFunction *>(&fun);
-  //if (cfun && cfun->nFunctions() > 0) {
-
-  //  // Multiple datasets
-  //  if (const auto *multiFun =
-  //          dynamic_cast<const Mantid::API::MultiDomainFunction *>(cfun)) {
-  //    // Check the function has the correct number of domains
-  //    if (multiFun->getNumberDomains() !=
-  //        static_cast<size_t>(m_numberOfDatasets)) {
-  //      throw std::invalid_argument("Function has incorrect number of domains");
-  //    }
-  //    // update function
-  //    {
-  //      auto sfun = multiFun->getFunction(0);
-  //      const auto globalParameters = getGlobalParameters();
-  //      for (int j = 0; j < globalParameters.size(); ++j) {
-  //        auto const &paramName = globalParameters[j];
-  //        auto paramIndex = sfun->parameterIndex(paramName.toStdString());
-  //        setParameter(paramName, sfun->getParameter(paramIndex));
-  //        setParamError(paramName, sfun->getError(paramIndex));
-  //      }
-  //    }
-  //    size_t currentIndex = static_cast<size_t>(m_currentDataset);
-  //    const auto localParameters = getLocalParameters();
-  //    for (size_t i = 0; i < multiFun->nFunctions(); ++i) {
-  //      auto sfun = multiFun->getFunction(i);
-  //      for (int j = 0; j < localParameters.size(); ++j) {
-  //        auto const &paramName = localParameters[j];
-  //        auto paramIndex = sfun->parameterIndex(paramName.toStdString());
-  //        auto value = sfun->getParameter(paramIndex);
-  //        auto error = sfun->getError(paramIndex);
-  //        setLocalParameterValue(localParameters[j], static_cast<int>(i), value,
-  //                               error);
-  //        if (i == currentIndex) {
-  //          setParameter(paramName, value);
-  //          setParamError(paramName, error);
-  //        }
-  //      }
-  //    }
-  //  } else { // composite function, 1 domain only
-  //    if (m_numberOfDatasets != 1) {
-  //      throw std::invalid_argument(
-  //          "Multiple datasets, but function is single-domain");
-  //    }
-  //    updateParameters(*cfun);
-  //  }
-  //} else {
-  //  updateParameters(fun);
-  //}
 }
 
 /// Get the index of the current dataset.
@@ -599,28 +304,23 @@ int FunctionBrowser::getCurrentDataset() const
 /// @param s1 :: New size for the second column (Value).
 /// @param s2 :: New size for the third optional column (Global).
 void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
-  //m_view->setColumnSizes(s0, s1, s2);
+  m_presenter->setColumnSizes(s0, s1, s2);
 }
 
-///**
-// * Emit a signal when any of the Global options change.
-// */
-//void FunctionBrowser::globalChanged(QtProperty *, const QString &, bool) {
-//  emit globalsChanged();
-//}
-//
-///**
-// * Set display of parameter errors on/off
-// * @param enabled :: [input] On/off display of errors
-// */
+/**
+ * Set display of parameter errors on/off
+ * @param enabled :: [input] On/off display of errors
+ */
 void FunctionBrowser::setErrorsEnabled(bool enabled) {
-//  m_parameterManager->setErrorsEnabled(enabled);
+  m_presenter->setErrorsEnabled(enabled);
 }
-//
-///**
-// * Clear all errors, if they are set
-// */
-void FunctionBrowser::clearErrors() {  }
+
+/**
+ * Clear all errors, if they are set
+ */
+void FunctionBrowser::clearErrors() {
+  m_presenter->clearErrors();
+}
 
 QStringList FunctionBrowser::getGlobalParameters() const {
   return QStringList();
@@ -632,9 +332,9 @@ QStringList FunctionBrowser::getLocalParameters() const {
 
 void FunctionBrowser::setGlobalParameters(QStringList &globals) {}
 
-boost::optional<QString> FunctionBrowser::currentFunctionIndex() { return boost::optional<QString>(); }
-
-QString FunctionBrowser::getUserFunctionFromDialog() { return ""; }
+boost::optional<QString> FunctionBrowser::currentFunctionIndex() {
+  return m_presenter->currentFunctionIndex();
+}
 
 FunctionTreeView *FunctionBrowser::view() const { return dynamic_cast<FunctionTreeView*>(m_presenter->view()); }
 

@@ -11,6 +11,7 @@
 
 #include "MantidAPI/IFunction_fwd.h"
 
+#include <boost/optional.hpp>
 #include <QString>
 #include <QWidget>
 
@@ -35,15 +36,17 @@ public:
   virtual double getParameter(const QString &paramName) const = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
+  virtual boost::optional<QString> currentFunctionIndex() const = 0;
 
 signals:
-  /// User selects a different function (or one of it's sub-properties)
+  /// User replaces the whole function (eg, by pasting it from clipboard)
+  void functionReplaced(const QString &funStr);
+  /// User selects a different (sub)function (or one of it's sub-properties)
   void currentFunctionChanged();
   /// Function parameter gets changed
   void parameterChanged(const QString &paramName);
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
-  void functionStructureChanged();
   void globalsChanged();
   void constraintsChanged();
   void tiesChanged();

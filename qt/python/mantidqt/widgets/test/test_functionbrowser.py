@@ -1,8 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
+from mock import MagicMock, call
 import unittest
 
-from qtpy.QtWidgets import QApplication, QWidget, QAction
-from qtpy.QtCore import Qt, QPoint, QMetaObject, QEvent
+from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import Qt, QPoint, QObject
 from qtpy.QtTest import QTest
 
 from mantid import FrameworkManager, FunctionFactory
@@ -10,7 +11,6 @@ from mantid.fitfunctions import FunctionWrapper
 from mantidqt.utils.qt.test.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin, print_tree, discover_children,
                                                     get_child)
 from mantidqt.utils.qt import import_qt
-from mantidqt.utils.qt.test import GuiTest
 
 
 FunctionBrowser = import_qt('.._common', 'mantidqt.widgets', 'FunctionBrowser')
@@ -51,7 +51,8 @@ class TestFunctionBrowser(GuiWindowTest):
 def function_browser_test(multi=False):
 
     def wrapper(fun):
-        cls = type(fun.__name__, (TestFunctionBrowser,), dict(test=fun, is_multi = multi))
+
+        cls = type(fun.__name__, (TestFunctionBrowser,), dict(test=fun, is_multi=multi))
         return skip(cls)
 
     return wrapper
@@ -62,13 +63,24 @@ def dummy_test(multi=False):
 
 
 function_browser_test_ = function_browser_test
-function_browser_test = dummy_test
+# function_browser_test = dummy_test
+
+
+class BrowserUser(QObject):
+
+    def __init__(self, browser):
+        super(BrowserUser, self).__init__()
+        browser.functionStructureChanged.connect(self.structure_changed)
+        browser.parameterChanged.connect(self.parameter_changed)
+
+    structure_changed = MagicMock()
+    parameter_changed = MagicMock()
 
 
 @function_browser_test(False)
 def test_browser_parameters_view(self):
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     # discover_children(view, QAction)
     self.assertEqual(view.getNumberOfQtProperties(), 8)
@@ -83,7 +95,7 @@ def test_browser_parameters_view(self):
 @function_browser_test(False)
 def test_browser_fun_parameters(self):
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     self.assertGreater(len(browser.getFunctionString()), 0)
@@ -104,7 +116,7 @@ def test_browser_fun_parameters(self):
 @function_browser_test(True)
 def test_browser_parameters_multi_view(self):
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     self.assertGreater(len(browser.getFunctionString()), 0)
@@ -121,7 +133,7 @@ def test_browser_parameters_multi_view(self):
 def test_browser_parameters_multi_single(self):
     assert(isinstance(self, TestFunctionBrowser))
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     self.assertEqual(browser.getNumberOfDatasets(), 1)
@@ -144,9 +156,10 @@ def test_browser_parameters_multi_single(self):
 def test_browser_parameters_multi_multi(self):
     assert(isinstance(self, TestFunctionBrowser))
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=LinearBackground,A0=1')
     view = browser.view()
-    self.assertEqual(view.getNumberOfQtProperties(), 8)
+    user = BrowserUser(browser)
+    self.assertEqual(view.getNumberOfQtProperties(), 9)
     browser.setNumberOfDatasets(3)
     self.assertEqual(browser.getNumberOfDatasets(), 3)
     fun_str = browser.getFitFunctionString()
@@ -159,9 +172,11 @@ def test_browser_parameters_multi_multi(self):
     self.assertAlmostEquals(browser.getParameter('f1.A0'), 3.3)
     self.assertAlmostEquals(view.getParameter('f0.A0'), 2.2)
     self.assertAlmostEquals(view.getParameter('f1.A0'), 3.3)
-    yield self.view_set_parameter('f1.A0', 5.5)
-    self.assertAlmostEquals(browser.getParameter('f1.A0'), 5.5)
-    self.assertAlmostEquals(view.getParameter('f1.A0'), 5.5)
+    yield self.view_set_parameter('f1.A1', 5.5)
+    self.assertAlmostEquals(browser.getParameter('f1.A1'), 5.5)
+    self.assertAlmostEquals(view.getParameter('f1.A1'), 5.5)
+    self.assertEqual(user.parameter_changed.call_count, 3)
+    self.assertEqual(user.parameter_changed.call_args_list[-1], call('f1.', 'A1'))
     yield 0.1
 
 
@@ -169,7 +184,7 @@ def test_browser_parameters_multi_multi(self):
 def test_fit_function_multi(self):
     assert(isinstance(self, TestFunctionBrowser))
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     browser.setNumberOfDatasets(3)
@@ -189,7 +204,7 @@ def test_fit_function_multi(self):
 def test_multi_set_parameters_different_domains(self):
     assert(isinstance(self, TestFunctionBrowser))
     browser = self.widget
-    self.widget.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     browser.setNumberOfDatasets(3)
@@ -210,6 +225,24 @@ def test_multi_set_parameters_different_domains(self):
     self.assertEqual(fun[1][1].A0, 3.3)
     self.assertEqual(fun[2][0].A0, 4.4)
     self.assertEqual(fun[2][1].A0, 5.5)
+
+
+@function_browser_test()
+def test_paste_from_clipboard(self):
+    assert (isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
+    view = browser.view()
+    user = BrowserUser(browser)
+
+    QApplication.clipboard().setText('name=LinearBackground,A0=5,A1=10')
+    pos = view.getVisualRectFunctionProperty('').center()
+    tree = view.treeWidget().viewport()
+    yield self.show_context_menu(tree, pos, pause=0)
+    yield self.mouse_trigger_action('paste_from_clipboard', pause=0)
+    fun = self.get_fit_function()
+    self.assertEqual(fun.name, 'LinearBackground')
+    self.assertEqual(user.structure_changed.call_count, 1)
     yield 100
 
 

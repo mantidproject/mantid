@@ -75,6 +75,9 @@ public:
       it.second = 0.0;
     }
   }
+  boost::optional<QString> currentFunctionIndex() const override {
+    return boost::optional<QString>();
+  }
 private:
   std::map<std::string, double> m_params;
   std::map<std::string, double> m_errors;

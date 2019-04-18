@@ -22,9 +22,6 @@ class EXPORT_OPT_MANTIDQT_COMMON IFunctionBrowser {
 public:
   virtual ~IFunctionBrowser() {}
   virtual QString getFunctionString() = 0;
-  virtual void functionStructureChanged() = 0;
-  virtual void parameterChanged(const QString &funcIndex,
-                                const QString &paramName) = 0;
   virtual void updateParameters(const Mantid::API::IFunction &fun) = 0;
   virtual void clear() = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;

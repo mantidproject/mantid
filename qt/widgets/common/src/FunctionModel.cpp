@@ -69,6 +69,12 @@ IFunction_sptr MultiDomainFunctionModel::getFitFunction() const
   return IFunction_sptr();
 }
 
+bool MultiDomainFunctionModel::hasFunction() const
+{
+  if (!m_function || m_function->nFunctions() == 0) return false;
+  return true;
+}
+
 void MultiDomainFunctionModel::setParameter(const QString & paramName, double value)
 {
   getCurrentFunction()->setParameter(paramName.toStdString(), value);

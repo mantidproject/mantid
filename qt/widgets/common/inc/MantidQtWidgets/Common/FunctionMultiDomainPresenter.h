@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
+#include <boost/optional.hpp>
 #include <QObject>
 #include <memory>
 
@@ -35,16 +36,28 @@ public:
   IFunction_sptr getFunctionByIndex(const QString &index);
   IFunction_sptr getFitFunction() const;
   QString getFitFunctionString() const;
+  bool hasFunction() const;
   void setParameter(const QString &paramName, double value);
   void setParamError(const QString &paramName, double value);
   double getParameter(const QString &paramName);
   void updateParameters(const IFunction &fun);
+  void clearErrors();
+  boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);
+  void addDatasets(int);
+  void removeDatasets(QList<int> indices);
+
+  void setColumnSizes(int s0, int s1, int s2);
+  void setErrorsEnabled(bool enabled);
+signals:
+  void functionStructureChanged();
+  void parameterChanged(const QString &funcIndex, const QString &paramName);
 private slots:
   void viewChangedParameter(const QString &paramName);
+  void viewPastedFunction(const QString &funStr);
 private:
   IFunctionView *m_view;
   std::unique_ptr<MultiDomainFunctionModel> m_model;

@@ -5,11 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
-#include "MantidQtWidgets/Common/IFunctionView.h"
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/make_unique.h"
 
 #include "FunctionBrowser/FunctionBrowserUtils.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -21,12 +25,20 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
   : m_view(view), m_model(make_unique<MultiDomainFunctionModel>())
 {
   connect(m_view, SIGNAL(parameterChanged(const QString &)), this, SLOT(viewChangedParameter(const QString &)));
+  connect(m_view, SIGNAL(functionReplaced(const QString &)), this, SLOT(viewPastedFunction(const QString &)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun)
 {
   m_model->setFunction(fun);
   m_view->setFunction(m_model->getCurrentFunction());
+}
+
+void FunctionMultiDomainPresenter::setFunctionString(const QString & funStr)
+{
+  m_model->setFunctionString(funStr);
+  m_view->setFunction(m_model->getCurrentFunction());
+  emit functionStructureChanged();
 }
 
 IFunction_sptr FunctionMultiDomainPresenter::getFitFunction() const
@@ -36,6 +48,11 @@ IFunction_sptr FunctionMultiDomainPresenter::getFitFunction() const
 
 QString FunctionMultiDomainPresenter::getFitFunctionString() const {
   return m_model->getFitFunctionString();
+}
+
+bool FunctionMultiDomainPresenter::hasFunction() const
+{
+  return m_model->hasFunction();
 }
 
 IFunction_sptr FunctionMultiDomainPresenter::getFunctionByIndex(const QString & index)
@@ -71,6 +88,16 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction & fun)
   }
 }
 
+void FunctionMultiDomainPresenter::clearErrors()
+{
+  m_view->clearErrors();
+}
+
+boost::optional<QString> FunctionMultiDomainPresenter::currentFunctionIndex() const
+{
+  return m_view->currentFunctionIndex();
+}
+
 void FunctionMultiDomainPresenter::setNumberOfDatasets(int n)
 {
   m_model->setNumberDomains(n);
@@ -91,10 +118,18 @@ void FunctionMultiDomainPresenter::setCurrentDataset(int index)
   m_model->setCurrentDomainIndex(index);
 }
 
-void FunctionMultiDomainPresenter::setFunctionString(const QString & funStr)
+void FunctionMultiDomainPresenter::addDatasets(int)
+{
+}
+
+void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices)
+{
+}
+
+void FunctionMultiDomainPresenter::viewPastedFunction(const QString & funStr)
 {
   m_model->setFunctionString(funStr);
-  m_view->setFunction(m_model->getCurrentFunction());
+  emit functionStructureChanged();
 }
 
 QString FunctionMultiDomainPresenter::getFunctionString() const
@@ -113,9 +148,23 @@ void FunctionMultiDomainPresenter::clear()
   m_view->clear();
 }
 
+void FunctionMultiDomainPresenter::setColumnSizes(int s0, int s1, int s2)
+{
+  auto treeView = dynamic_cast<FunctionTreeView*>(m_view);
+  if (treeView)
+    treeView->setColumnSizes(s0, s1, s2);
+}
+
+void FunctionMultiDomainPresenter::setErrorsEnabled(bool enabled)
+{
+  m_view->setErrorsEnabled(enabled);
+}
+
 void FunctionMultiDomainPresenter::viewChangedParameter(const QString &paramName) {
-  auto value = m_view->getParameter(paramName);
+  auto const value = m_view->getParameter(paramName);
   m_model->setParameter(paramName, value);
+  auto const parts = splitParameterName(paramName);
+  emit parameterChanged(parts.first, parts.second);
 }
 
 } // namespace API

@@ -27,6 +27,7 @@ namespace MantidWidgets {
     void clear();
     virtual void setFunction(IFunction_sptr fun) = 0;
     virtual IFunction_sptr getFitFunction() const = 0;
+    virtual bool hasFunction() const = 0;
     virtual void setParameter(const QString &paramName, double value) = 0;
     virtual void setParamError(const QString &paramName, double value) = 0;
     virtual double getParameter(const QString &paramName) const = 0;
@@ -43,6 +44,7 @@ namespace MantidWidgets {
   public:
     void setFunction(IFunction_sptr) override;
     IFunction_sptr getFitFunction() const override;
+    bool hasFunction() const override;
     void setParameter(const QString &paramName, double value) override;
     void setParamError(const QString &paramName, double value) override;
     double getParameter(const QString &paramName) const override;

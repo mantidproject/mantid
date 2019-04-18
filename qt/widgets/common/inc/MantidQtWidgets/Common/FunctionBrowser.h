@@ -58,13 +58,10 @@ public:
   IFunction_sptr getFunction();
   /// Check if a function is set
   bool hasFunction() const;
-
   /// Return a function with specified index
   IFunction_sptr getFunctionByIndex(const QString &index);
-
   /// Return index of the current function, if one is selected
   boost::optional<QString> currentFunctionIndex();
-
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value);
   /// Update the function parameter error
@@ -73,7 +70,6 @@ public:
   double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
   void updateParameters(const IFunction &fun) override;
-
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
   void setGlobalParameters(QStringList &globals);
@@ -101,36 +97,28 @@ public:
   /// Set a tie for a local parameter.
   void setLocalParameterTie(const QString &parName, int i,
                             QString tie) override;
-
   /// Return the multidomain function if number of datasets is greater than 1
-  Mantid::API::IFunction_sptr getGlobalFunction() override;
+  IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
-  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
+  void updateMultiDatasetParameters(const IFunction &fun) override;
   /// Get the index of the current dataset.
   int getCurrentDataset() const override;
-
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
-
   /// Set error display on/off
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
   void clearErrors() override;
 
 signals:
+  void parameterChanged(const QString &funcIndex,
+                        const QString &paramName);
+  void functionStructureChanged();
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
 
-  /// Function parameter gets changed
-  /// @param funcIndex :: Index of the changed function
-  /// @param paramName :: Name of the changed parameter
-  void parameterChanged(const QString &funcIndex,
-                        const QString &paramName) override;
-
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
-
-  void functionStructureChanged() override;
   void globalsChanged();
   void constraintsChanged();
   void tiesChanged();
@@ -146,38 +134,6 @@ public slots:
   void editLocalParameter(const QString &parName, const QStringList &wsNames,
                           const std::vector<size_t> &wsIndices) override;
 
-protected:
-
-  /// Ask user for function type
-  virtual QString getUserFunctionFromDialog();
-
-protected slots:
-  /// Add a function
-  void addFunction();
-  /// Remove a function
-  void removeFunction();
-  /// Fix a parameter
-  void fixParameter();
-  /// Unfix a parameter
-  void removeTie();
-  /// Add a tie to a parameter
-  void addTie();
-  /// Copy function from the clipboard
-  void copyFromClipboard();
-  /// Copy the function to the clipboard
-  void copyToClipboard();
-  /// Add both constraints to current parameter
-  void addConstraints();
-  /// Remove both constraints from current parameter
-  void removeConstraints();
-  /// Add both constraints to current parameter
-  void addConstraints10();
-  /// Add both constraints to current parameter
-  void addConstraints50();
-  /// Remove one of the constraints
-  void removeConstraint();
-  /// Update current function index depending on currently selected item
-  void updateCurrentFunctionIndex();
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;
 public:

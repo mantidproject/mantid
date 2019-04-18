@@ -17,8 +17,6 @@
 #include <QWidget>
 #include <QRect>
 
-#include <boost/optional.hpp>
-
 /* Forward declarations */
 
 class QtTreePropertyBrowser;
@@ -103,6 +101,8 @@ public:
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
   void clearErrors() override;
+  /// Index of currently selected function.
+  boost::optional<QString> currentFunctionIndex() const override;
 
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
@@ -216,7 +216,7 @@ protected slots:
   /// Add a tie to a parameter
   void addTie();
   /// Copy function from the clipboard
-  void copyFromClipboard();
+  void pasteFromClipboard();
   /// Copy the function to the clipboard
   void copyToClipboard();
   /// Add both constraints to current parameter
@@ -229,6 +229,8 @@ protected slots:
   void addConstraints50();
   /// Remove one of the constraints
   void removeConstraint();
+  /// Update index of currently selected function
+  void updateCurrentFunctionIndex();
 
   //   Property change slots
 
@@ -318,7 +320,9 @@ protected:
   QAction *m_actionRemoveConstraints;
   /// Remove one constraints from current parameter
   QAction *m_actionRemoveConstraint;
-
+  /// Index of currently selected function. Gets updated in
+  /// updateCurrentFunctionIndex()
+  boost::optional<QString> m_currentFunctionIndex;
   /// Set true if the constructed function is intended to be used in a
   /// multi-dataset fit
   bool m_multiDataset;
