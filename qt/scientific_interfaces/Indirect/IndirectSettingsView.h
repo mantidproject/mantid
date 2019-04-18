@@ -53,7 +53,9 @@ private slots:
   void openHelp();
 
 private:
-  Ui::IndirectSettingsDialog m_uiForm;
+  void initLayout() override;
+
+  Ui::IndirectSettings m_uiForm;
 };
 
 } // namespace IDA

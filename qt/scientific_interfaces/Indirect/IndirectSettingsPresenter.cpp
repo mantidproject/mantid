@@ -13,7 +13,6 @@ namespace IDA {
 IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
     : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>()),
       m_view(std::make_unique<IndirectSettingsView>(parent)) {
-  m_view->setWindowTitle(QString::fromStdString(m_model->getSettingsGroup()));
   setUpPresenter();
 }
 

@@ -38,6 +38,10 @@ namespace IDA {
 
 IndirectSettingsView::IndirectSettingsView(QWidget *parent)
     : IIndirectSettingsView(parent) {
+  initLayout();
+}
+
+void IndirectSettingsView::initLayout() {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.pbOk, SIGNAL(clicked()), this, SLOT(emitOkClicked()));
