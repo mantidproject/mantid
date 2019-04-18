@@ -604,7 +604,7 @@ def get_axes_labels(workspace, indices=None):
         y_unit_label = workspace.YUnitLabel()
         if ' per ' in y_unit_label:
             label, unit = y_unit_label.split(' per ')
-            y_unit_label = '{} (${}^{{-1}}$)'.format(label, unit)
+            y_unit_label = '{} (${}$)$^{{-1}}$'.format(label, unit)
         axes_labels = [y_unit_label]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)

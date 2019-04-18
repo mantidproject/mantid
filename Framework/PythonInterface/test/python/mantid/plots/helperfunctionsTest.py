@@ -178,7 +178,7 @@ class HelperFunctionsTest(unittest.TestCase):
         ws = self.ws1d_distribution
         ws.setYUnit('Counts')
         labels = funcs.get_axes_labels(ws)
-        self.assertEqual(labels[0], 'Counts ($meV^{-1}$)')
+        self.assertEqual(labels[0], 'Counts ($meV$)$^{-1}$')
 
     def test_get_axes_label_2d_MDWS(self):
         axs = funcs.get_axes_labels(self.ws_MD_2d)
