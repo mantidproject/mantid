@@ -18,6 +18,11 @@ New Instruments
 Algorithms
 ----------
 
+New Algorithms
+##############
+
+- :ref:`algm-FlippingRatioCorrectionMD` algorithm was introduced to account for polarization effects on HYSPEC, but it's not instrument specific.
+
 Removed
 #######
 
