@@ -62,14 +62,28 @@ def get_x_insertion_index(input_workspace, single_fit_workspace):
     return get_bin_index_of_value(input_workspace, bin_value)
 
 
+def get_indices_of_equivalent_labels(input_workspace, destination_workspace):
+    input_labels = input_workspace.getAxis(1).extractValues()
+    labels = destination_workspace.getAxis(1).extractValues()
+    return [index for index, label in enumerate(labels) if label in input_labels]
+
+
+def fit_parameter_missing(single_fit_workspace, destination_workspace, exclude_parameters):
+    single_parameters = single_fit_workspace.getAxis(1).extractValues()
+    destination_parameters = destination_workspace.getAxis(1).extractValues()
+    return any([parameter not in destination_parameters and parameter not in exclude_parameters
+                for parameter in single_parameters])
+
+
 class IndirectReplaceFitResult(PythonAlgorithm):
     _input_workspace = None
     _single_fit_workspace = None
     _output_workspace = None
 
-    _end_row = None
     _bin_value = None
     _insertion_x_index = None
+    _row_indices = None
+    _insertion_y_indices = None
 
     _result_group = None
     _allowed_extension = '_Result'
@@ -124,25 +138,31 @@ class IndirectReplaceFitResult(PythonAlgorithm):
             issues['InputWorkspace'] = 'The input workspace must be a matrix workspace.'
         else:
             input_x_axis = input_workspace.getAxis(0)
+            input_y_axis = input_workspace.getAxis(1)
             if not input_x_axis.isNumeric():
                 issues['InputWorkspace'] = 'The input workspace must have a numeric x axis.'
             if len(input_workspace.readY(0)) < 2:
                 issues['InputWorkspace'] = 'The input workspace must contain result data from a fit involving 2 or ' \
                                            'more spectra.'
+            if not input_y_axis.isText():
+                issues['InputWorkspace'] = 'The input workspace must have a text y axis.'
 
         if not isinstance(single_fit_workspace, MatrixWorkspace):
             issues['SingleFitWorkspace'] = 'The single fit workspace must be a matrix workspace.'
         else:
             single_fit_x_axis = single_fit_workspace.getAxis(0)
+            single_fit_y_axis = single_fit_workspace.getAxis(1)
             if not single_fit_x_axis.isNumeric():
                 issues['SingleFitWorkspace'] = 'The single fit workspace must have a numeric x axis.'
             if len(single_fit_workspace.readY(0)) > 1:
                 issues['SingleFitWorkspace'] = 'The single fit workspace must contain data from a single fit.'
+            if not single_fit_y_axis.isText():
+                issues['SingleFitWorkspace'] = 'The single fit workspace must have a text y axis.'
 
         if isinstance(input_workspace, MatrixWorkspace) and isinstance(single_fit_workspace, MatrixWorkspace):
-            if input_workspace.getNumberHistograms() != single_fit_workspace.getNumberHistograms():
-                issues['InputWorkspace'] = 'The input workspace and single fit workspace must have the same number ' \
-                                           'of histograms.'
+            if fit_parameter_missing(single_fit_workspace, input_workspace, ['Chi_squared']):
+                issues['InputWorkspace'] = 'The fit parameters in the input workspace and single fit workspace do ' \
+                                           'not match.'
 
         return issues
 
@@ -151,10 +171,13 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._single_fit_workspace = self.getPropertyValue('SingleFitWorkspace')
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
 
-        self._end_row = get_ads_workspace(self._single_fit_workspace).getNumberHistograms() - 1
-        self._bin_value = get_ads_workspace(self._single_fit_workspace).readX(0)[0]
-        self._insertion_x_index = get_x_insertion_index(get_ads_workspace(self._input_workspace),
-                                                        get_ads_workspace(self._single_fit_workspace))
+        input_workspace = get_ads_workspace(self._input_workspace)
+        single_fit_workspace = get_ads_workspace(self._single_fit_workspace)
+
+        self._bin_value = single_fit_workspace.readX(0)[0]
+        self._insertion_x_index = get_x_insertion_index(input_workspace, single_fit_workspace)
+        self._row_indices = get_indices_of_equivalent_labels(input_workspace, single_fit_workspace)
+        self._insertion_y_indices = get_indices_of_equivalent_labels(single_fit_workspace, input_workspace)
 
         self._result_group = find_result_group_containing(self._input_workspace, self._allowed_extension + 's')
 
@@ -167,13 +190,18 @@ class IndirectReplaceFitResult(PythonAlgorithm):
         self._add_workspace_to_group()
 
     def _copy_data(self):
+        self._copy_value(self._row_indices[0], self._insertion_y_indices[0], self._input_workspace)
+        for from_index, to_index in zip(self._row_indices[1:], self._insertion_y_indices[1:]):
+            self._copy_value(from_index, to_index, self._output_workspace)
+
+    def _copy_value(self, row_index, insertion_index, destination_workspace):
         copy_algorithm = self.createChildAlgorithm(name='CopyDataRange', startProgress=0.1,
                                                    endProgress=1.0, enableLogging=True)
         copy_algorithm.setAlwaysStoreInADS(True)
 
-        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": self._input_workspace,
-                "StartWorkspaceIndex": 0, "EndWorkspaceIndex": self._end_row, "XMin": self._bin_value,
-                "XMax": self._bin_value, "InsertionYIndex": 0, "InsertionXIndex": self._insertion_x_index,
+        args = {"InputWorkspace": self._single_fit_workspace, "DestWorkspace": destination_workspace,
+                "StartWorkspaceIndex": row_index, "EndWorkspaceIndex": row_index, "XMin": self._bin_value,
+                "XMax": self._bin_value, "InsertionYIndex": insertion_index, "InsertionXIndex": self._insertion_x_index,
                 "OutputWorkspace": self._output_workspace}
 
         for key, value in args.items():
