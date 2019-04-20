@@ -1,4 +1,5 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
@@ -8,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import re
 import numpy as np
 from collections import namedtuple
 from contextlib import contextmanager
@@ -19,16 +21,15 @@ from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
                         FileAction, AnalysisDataService, ExperimentInfo)
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
-                           Direction, PropertyCriterion)
+                           Direction, PropertyCriterion, logger)
 from mantid import config as mantid_config
 from os.path import join as pjoin
 
-debug_flag = False  # set to True to prevent erasing temporary workspaces
 # name prefix marking a workspace for deletion after algorithm completion
 temporary_workspace_marker = '_t_'
 
 
-def unique_workspace_name(n=5, prefix='', suffix=''):
+def unique_workspace_name(n=3, prefix='', suffix=''):
     r"""
     Create a random sequence of `n` lowercase characters that is guaranteed
     not to collide with the name of any existing Mantid workspace registered
@@ -78,7 +79,7 @@ def tws(marker=''):
 
 
 @contextmanager
-def pyexec_setup(new_options):
+def pyexec_setup(remove_temp, new_options):
     """
     Backup keys of mantid.config
     and clean up temporary files and workspaces
@@ -113,7 +114,7 @@ def pyexec_setup(new_options):
         # reinstate the mantid options
         for key, value in previous_config.items():
             mantid_config[key] = value
-        if debug_flag is True:
+        if remove_temp is False:
             return
         # delete temporary files
         for file_name in temps.files:
@@ -124,7 +125,7 @@ def pyexec_setup(new_options):
             if name[0: twml] == temporary_workspace_marker:
                 to_be_removed.add(name)
         for workspace in temps.workspaces:
-            if isinstance(workspace, str):
+            if isinstance(workspace, str) and AnalysisDataService.doesExist(workspace):
                 to_be_removed.add(workspace)
             else:
                 to_be_removed.add(workspace.name())
@@ -178,9 +179,7 @@ class BASISReduction(PythonAlgorithm):
     _flux_normalization_types = ['Monitor', 'Proton Charge', 'Duration']
     _groupDetOpt = None
     _overrideMask = None
-    _dMask = None
     _run_list = None  # a list of runs, or a list of sets of runs
-    _samWs = None
 
     _samWsRun = None
     _samSqwWs = None
@@ -190,6 +189,11 @@ class BASISReduction(PythonAlgorithm):
         self._normalizeToFirst = False
         self._as_json = None
         self._temps = None  # hold names of temporary workspaces and files
+        self.remove_temp = None  # set to true to keep temporary workspaces
+
+        # properties related to the sample
+        self._samWs = None  # name of the sample events file
+
         # properties related to flux normalization
         self._flux_normalization_type = None  # default to no flux normalizat.
         self._MonNorm = False  # flux normalization by monitor
@@ -198,7 +202,11 @@ class BASISReduction(PythonAlgorithm):
         self._reflection = None  # entry in the reflections dictionary
         self._etBins = None
         self._qBins = None
+
+        # properties related to the mask
         self._maskFile = None
+        self._dMask = None  # list of masked detectors
+        self._maskWs = None  # name of the mask workspace
 
         # properties related to division by Vanadium (normalization)
         self._doNorm = None  # stores the selected item from normalization_types
@@ -207,6 +215,7 @@ class BASISReduction(PythonAlgorithm):
         self._norm_run_list = None
         self._normWs = None
         self._normMonWs = None
+        self._normMask = None  # name of vanadium mask workspace
 
         # properties related to saving NSXPE file
         self._nsxpe_do = False
@@ -344,6 +353,9 @@ the first two hours"""
                              direction=Direction.Input,
                              doc='Output S(Q) and S(theta) powder diffraction')
         self.setPropertyGroup('OutputPowderSpectrum', titleAddionalOutput)
+        self.declareProperty('RemoveTemp', True, direction=Direction.Input,
+                             doc='Remove temporary workspaces and files')
+        self.setPropertyGroup('RemoveTemp', titleAddionalOutput)
 
     # pylint: disable=too-many-branches
     def PyExec(self):
@@ -354,7 +366,8 @@ the first two hours"""
         #
         # implement with ContextDecorator after python2 is deprecated)
         #
-        with pyexec_setup(config_new_options) as self._temps:
+        self.remove_temp = self.getProperty('RemoveTemp').value
+        with pyexec_setup(self.remove_temp, config_new_options) as self._temps:
             self._PyExec()
 
     def _PyExec(self):
@@ -396,14 +409,15 @@ the first two hours"""
             mantid_config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
             self._maskFile = self._reflection['mask_file']
 
+        self._maskWs = tws('BASIS_MASK')
         sapi.LoadMask(Instrument='BASIS',
-                      OutputWorkspace='BASIS_MASK',
+                      OutputWorkspace=self._maskWs,
                       InputFile=self._maskFile)
 
         # Work around length issue
-        _dMask = sapi.ExtractMask('BASIS_MASK')
+        _dMask = sapi.ExtractMask(InputWorkspace=self._maskWs,
+                                  OutputWorkspace=tws('ExtractMask'))
         self._dMask = _dMask[1]
-        sapi.DeleteWorkspace(_dMask[0])
 
         #
         #  Process the Vanadium
@@ -419,7 +433,8 @@ the first two hours"""
             # norm_runs encompasses a single set, thus _getRuns returns
             # a list of only one item
             norm_set = self._get_runs(norm_runs, doIndiv=False)[0]
-            normWs = self._sum_and_calibrate(norm_set, extra_extension='_norm')
+            normWs = tws(self._make_run_name(norm_set[0]) + '_vanadium')
+            self._sum_and_calibrate(norm_set, normWs)
 
             normRange = self._reflection['vanadium_wav_range']
             bin_width = normRange[1] - normRange[0]
@@ -431,15 +446,17 @@ the first two hours"""
                            Params=self._normRange)
                 self._normWs = normWs
             # Detectors outside limits are substituted by MedianDetectorTest
+            self._normMask = tws('BASIS_NORM_MASK')
             sapi.FindDetectorsOutsideLimits(InputWorkspace=normWs,
                                             LowThreshold=1.0*bin_width,
                                             # no count events outside ranges
                                             RangeLower=normRange[0],
                                             RangeUpper=normRange[1],
-                                            OutputWorkspace='BASIS_NORM_MASK')
+                                            OutputWorkspace=self._normMask)
             # additional reduction steps when normalizing by Q slice
             if self._normalizationType == 'by Q slice':
-                self._normWs = self._group_and_SofQW(normWs, self._etBins,
+                self._normWs = self._group_and_SofQW(normWs, normWs,
+                                                     self._etBins,
                                                      isSample=False)
         #
         #  Process the sample
@@ -447,21 +464,21 @@ the first two hours"""
         self._run_list = self._get_runs(self.getProperty('RunNumbers').value,
                                         doIndiv=self._doIndiv)
         for run_set in self._run_list:
-            self._samWs = self._sum_and_calibrate(run_set)
+            self._samWs = tws(self._make_run_name(run_set[0]))
+            self._sum_and_calibrate(run_set, self._samWs)
             self._samWsRun = str(run_set[0])
             # Divide by Vanadium detector ID, if pertinent
             if self._normalizationType == 'by detector ID':
-                # Mask detectors with insufficient Vanadium signal before dividing
+                # Mask detectors with low Vanadium signal before dividing
                 sapi.MaskDetectors(Workspace=self._samWs,
-                                   MaskedWorkspace='BASIS_NORM_MASK')
+                                   MaskedWorkspace=self._normMask)
                 sapi.Divide(LHSWorkspace=self._samWs,
                             RHSWorkspace=self._normWs,
                             OutputWorkspace=self._samWs)
             # additional reduction steps
-            self._samSqwWs = self._group_and_SofQW(self._samWs, self._etBins,
-                                                   isSample=True)
-            if debug_flag is False:
-                sapi.DeleteWorkspace(self._samWs)  # delete events file
+            prefix = self._make_run_name(run_set[0])
+            self._samSqwWs = self._group_and_SofQW(self._samWs, prefix,
+                                                   self._etBins, isSample=True)
             # Divide by Vanadium Q slice, if pertinent
             if self._normalizationType == 'by Q slice':
                 sapi.Divide(LHSWorkspace=self._samSqwWs,
@@ -515,20 +532,7 @@ the first two hours"""
                 sapi.SaveNexus(Filename=susceptibility_filename,
                                InputWorkspace=samXqsWs)
             if self.getProperty('OutputPowderSpectrum').value:
-                self._generatePowderSpectrum()
-
-        if debug_flag is False:
-            sapi.DeleteWorkspace('BASIS_MASK')  # delete the mask
-            if self._doNorm and bool(norm_runs):
-                sapi.DeleteWorkspace('BASIS_NORM_MASK')  # delete vanadium mask
-                sapi.DeleteWorkspace(self._normWs)  # Delete vanadium S(Q)
-                if self._normalizationType == 'by Q slice':
-                    sapi.DeleteWorkspace(normWs)  # Delete vanadium events file
-            if self.getProperty('ExcludeTimeSegment').value:
-                sapi.DeleteWorkspace('splitter')
-                [sapi.DeleteWorkspace(name) for name in
-                 ('splitted_unfiltered', 'TOFCorrectWS') if
-                 AnalysisDataService.doesExist(name)]
+                self.generatePowderSpectrum()
 
     def _get_runs(self, rlist, doIndiv=True):
         r"""
@@ -599,7 +603,7 @@ the first two hours"""
         """
         return '{0}_{1}_event.nxs'.format(self._short_inst, str(run))
 
-    def _sum_runs(self, run_set, sam_ws, extra_ext=None):
+    def _sum_runs(self, run_set, sam_ws):
         r"""
         Aggregate the set of runs
 
@@ -612,16 +616,13 @@ the first two hours"""
         extra_ext: str
             Suffix to be added to the temporary workspaces
         """
-        for run in run_set:
-            ws_name = self._make_run_name(run)
-            if extra_ext is not None:
-                ws_name += extra_ext
+        self.load_single_run(run_set[0], sam_ws)
+        for run in run_set[1:]:
+            ws_name = tws('sum_runs_'+run)
             self.load_single_run(run, ws_name)
-            if sam_ws != ws_name:
-                sapi.Plus(LHSWorkspace=sam_ws,
-                          RHSWorkspace=ws_name,
-                          OutputWorkspace=sam_ws)
-                sapi.DeleteWorkspace(ws_name)
+            sapi.Plus(LHSWorkspace=sam_ws,
+                      RHSWorkspace=ws_name,
+                      OutputWorkspace=sam_ws)
 
     def load_single_run(self, run, name):
         r"""
@@ -650,7 +651,7 @@ the first two hours"""
         if str(run) + ':' in self.getProperty('ExcludeTimeSegment').value:
             self._filterEvents(run, name)
 
-    def _sum_flux(self, run_set, mon_ws, extra_ext=None):
+    def _sum_monitors(self, run_set, mon_ws):
         r"""
         Generate aggregate monitor workspace from a list of run numbers
 
@@ -660,24 +661,18 @@ the first two hours"""
             List of run numbers
         mon_ws: str
             Name of output workspace
-        extra_ext: str
-            Extension to output workspace name, used for vanadium run(s)
         """
-        for run in run_set:
-            ws_name = self._make_run_name(run)
-            if extra_ext is not None:
-                ws_name += extra_ext
-            mon_ws_name = ws_name + '_monitors'
-            run_file = self._make_run_file(run)
-            sapi.LoadNexusMonitors(Filename=run_file,
-                                   OutputWorkspace=mon_ws_name)
-            if mon_ws != mon_ws_name:
-                sapi.Plus(LHSWorkspace=mon_ws,
-                          RHSWorkspace=mon_ws_name,
-                          OutputWorkspace=mon_ws)
-                sapi.DeleteWorkspace(mon_ws_name)
+        sapi.LoadNexusMonitors(Filename=self._make_run_file(run_set[0]),
+                               OutputWorkspace=mon_ws)
+        for run in run_set[1:]:
+            ws_name = tws('sum_monitors_'+run)
+            sapi.LoadNexusMonitors(Filename=self._make_run_file(run),
+                                   OutputWorkspace=ws_name)
+            sapi.Plus(LHSWorkspace=mon_ws,
+                      RHSWorkspace=ws_name,
+                      OutputWorkspace=mon_ws)
 
-    def _generate_flux_spectrum(self, sam_ws, mon_ws):
+    def _generate_flux_spectrum(self, run_set, sam_ws):
         r"""
         Retrieve the aggregate flux and create an spectrum of intensities
         versus wavelength such that intensities will be similar for any
@@ -687,29 +682,36 @@ the first two hours"""
         ----------
         sam_ws: str
             Name of aggregated sample workspace
-        mon_ws: str
+
+        Returns
+        -------
+        str
             Name of aggregated flux workspace (output workspace)
         """
+
         flux_binning = [1.5, 0.0005, 7.5]  # wavelength binning
+        suffix = re.sub('[^0-9a-zA-Z]+', '_', self._flux_normalization_type)
+        flux_ws = tws(self._make_run_name(run_set[0]) + '_' + suffix)
         if self._MonNorm:
+            self._sum_monitors(run_set, flux_ws)
             rpf = self._elucidate_reflection_parameter_file(sam_ws)
-            sapi.LoadParameterFile(Workspace=mon_ws, Filename=rpf)
-            sapi.ModeratorTzeroLinear(InputWorkspace=mon_ws,
-                                      OutputWorkspace=mon_ws)
-            sapi.Rebin(InputWorkspace=mon_ws,
-                       OutputWorkspace=mon_ws,
+            sapi.LoadParameterFile(Workspace=flux_ws, Filename=rpf)
+            sapi.ModeratorTzeroLinear(InputWorkspace=flux_ws,
+                                      OutputWorkspace=flux_ws)
+            sapi.Rebin(InputWorkspace=flux_ws,
+                       OutputWorkspace=flux_ws,
                        Params='10',  # 10 microseconds TOF bin width
                        PreserveEvents=False)
-            sapi.ConvertUnits(InputWorkspace=mon_ws,
-                              OutputWorkspace=mon_ws,
+            sapi.ConvertUnits(InputWorkspace=flux_ws,
+                              OutputWorkspace=flux_ws,
                               Target='Wavelength')
-            sapi.OneMinusExponentialCor(InputWorkspace=mon_ws,
-                                        OutputWorkspace=mon_ws,
+            sapi.OneMinusExponentialCor(InputWorkspace=flux_ws,
+                                        OutputWorkspace=flux_ws,
                                         C='0.20749999999999999',
                                         C1='0.001276')
-            sapi.Scale(InputWorkspace=mon_ws, OutputWorkspace=mon_ws,
+            sapi.Scale(InputWorkspace=flux_ws, OutputWorkspace=flux_ws,
                        Factor='1e-06')
-            sapi.Rebin(InputWorkspace=mon_ws, OutputWorkspace=mon_ws,
+            sapi.Rebin(InputWorkspace=flux_ws, OutputWorkspace=flux_ws,
                        Params=flux_binning)
         else:
             ws = mtd[sam_ws].getRun()
@@ -723,12 +725,13 @@ the first two hours"""
             x = np.arange(flux_binning[0], flux_binning[2], flux_binning[1])
             y = f[self._flux_normalization_type] * \
                 aggregate_flux * np.ones(len(x) - 1)
-            _mon_ws = sapi.CreateWorkspace(OutputWorkspace=mon_ws,
+            _flux_ws = sapi.CreateWorkspace(OutputWorkspace=flux_ws,
                                            DataX=x, DataY=y,
                                            UnitX='Wavelength')
-            _mon_ws.setYUnit(mtd[sam_ws].YUnit())
+            _flux_ws.setYUnit(mtd[sam_ws].YUnit())
+        return flux_ws
 
-    def _calibrate_data(self, sam_ws, mon_ws):
+    def _calibrate_data(self, run_set, sam_ws):
         sapi.MaskDetectors(Workspace=sam_ws, DetectorList=self._dMask)
         rpf = self._elucidate_reflection_parameter_file(sam_ws)
         sapi.LoadParameterFile(Workspace=sam_ws, Filename=rpf)
@@ -738,14 +741,14 @@ the first two hours"""
                           OutputWorkspace=sam_ws,
                           Target='Wavelength', EMode='Indirect')
         if self._flux_normalization_type is not None:
-            self._generate_flux_spectrum(sam_ws, mon_ws)
+            flux_ws = self._generate_flux_spectrum(run_set, sam_ws)
             sapi.RebinToWorkspace(WorkspaceToRebin=sam_ws,
-                                  WorkspaceToMatch=mon_ws,
+                                  WorkspaceToMatch=flux_ws,
                                   OutputWorkspace=sam_ws)
-            sapi.Divide(LHSWorkspace=sam_ws, RHSWorkspace=mon_ws,
+            sapi.Divide(LHSWorkspace=sam_ws, RHSWorkspace=flux_ws,
                         OutputWorkspace=sam_ws)
 
-    def _sum_and_calibrate(self, run_set, extra_extension=''):
+    def _sum_and_calibrate(self, run_set, wsName):
         """
         Aggregate the set of runs and calibrate
 
@@ -761,19 +764,10 @@ the first two hours"""
         str
             workspace name of the aggregated and calibrated data
         """
-        wsName = self._make_run_name(run_set[0])
-        wsName += extra_extension
-        wsName_mon = wsName + '_monitors'
-        self._sum_runs(run_set, wsName, extra_extension)
-        if self._MonNorm:
-            self._sum_flux(run_set, wsName_mon, extra_extension)
-        self._calibrate_data(wsName, wsName_mon)
-        if debug_flag is False:
-            if self._MonNorm:
-                sapi.DeleteWorkspace(wsName_mon)  # delete monitors
-        return wsName
+        self._sum_runs(run_set, wsName)
+        self._calibrate_data(run_set, wsName)
 
-    def _group_and_SofQW(self, wsName, etRebins, isSample=True):
+    def _group_and_SofQW(self, wsName, prefix, etRebins, isSample=True):
         r"""
         Transforms from wavelength and detector ID to S(Q,E)
 
@@ -781,6 +775,8 @@ the first two hours"""
         ----------
         wsName: str
             Name of a workspace as a function of wavelength and detector id
+        prefix: str
+            Name prefix for output workspaces and files
         etRebins: list
             Final energy domain and bin width
         isSample: bool
@@ -825,7 +821,7 @@ the first two hours"""
                     run.getProperty(self._nxspe_psi_angle_log)
                 psi_angle = np.average(psi_angle_logproperty.value)
                 psi_angle += self._nxspe_offset
-                nxspe_filename = wsName + extension
+                nxspe_filename = prefix + extension
                 sapi.SaveNXSPE(InputWorkspace=wsName,
                                Filename=nxspe_filename,
                                Efixed=self._reflection['default_energy'],
@@ -836,7 +832,7 @@ the first two hours"""
                     .format(self._nxspe_psi_angle_log)
                 self.log().error(error_message)
 
-        wsSqwName = wsName + '_divided_sqw' \
+        wsSqwName = prefix + '_divided_sqw' \
             if isSample and self._doNorm else wsName + '_sqw'
         sapi.SofQW3(InputWorkspace=wsName,
                     QAxisBinning=self._qBins,
@@ -880,7 +876,7 @@ the first two hours"""
         a, b = fragment.split('-')
         b = inf if 'end' in b else float(b)
         a = float(a)
-        splitter = sapi.CreateEmptyTableWorkspace(OutputWorkspace='splitter')
+        splitter = sapi.CreateEmptyTableWorkspace(OutputWorkspace=tws('splitter'))
         splitter.addColumn('double', 'start')
         splitter.addColumn('double', 'stop')
         splitter.addColumn('str', 'target')
@@ -891,6 +887,7 @@ the first two hours"""
         else:
             splitter.addRow([0, a, '0'])
             splitter.addRow([b, inf, '0'])
+        self._temps.extend('splitted_unfiltered', 'TOFCorrectWS')
 
     def _filterEvents(self, run, ws_name):
         r"""
@@ -993,8 +990,30 @@ the first two hours"""
                                           os.path.basename(parm_file), True)
         return parm_file
 
-    def _generatePowderSpectrum(self):
-        pass
+    def generatePowderSpectrum(self):
+        r"""Call BASISPowderReduction to generate a powder spectrum"""
+        powder_reducer = self.createChildAlgorithm("BASISPowderDiffraction",
+                                                   enableLogging=False)
+        for prop in ('RunNumbers', 'DoFluxNormalization',
+                     'FluxNormalizationType'):
+            powder_reducer.setProperty(prop, self.getProperty(prop).value)
+        # This may go later into a input property
+        powder_reducer.setProperty('MomentumTransferBins', [0.1, 0.02, 4.0])
+
+        vanadium_runs = self.getProperty('NormRunNumbers').value
+        if bool(vanadium_runs):
+            powder_reducer.setProperty('VanadiumRuns', vanadium_runs)
+            suffix = '_divided_sq'
+        else:
+            suffix = '_sq'
+
+        first_run = re.compile('^([0-9]+)').search(
+            self.getProperty('RunNumbers').value).group(0)
+        powder_reducer.setProperty('OutputWorkspace',
+                                   self._make_run_name(first_run) + suffix)
+        powder_reducer.execute()
+        debug_name = self._make_run_name(first_run) + suffix
+        SaveNexus('/tmp/debug_name.nxs', debug_name)
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
