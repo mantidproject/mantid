@@ -21,7 +21,7 @@ from mantid.api import (mtd, PythonAlgorithm, AlgorithmFactory, FileProperty,
                         FileAction, AnalysisDataService, ExperimentInfo)
 from mantid.kernel import (IntArrayProperty, StringListValidator,
                            FloatArrayProperty, EnabledWhenProperty,
-                           Direction, PropertyCriterion, logger)
+                           Direction, PropertyCriterion)
 from mantid import config as mantid_config
 from os.path import join as pjoin
 
@@ -725,9 +725,8 @@ the first two hours"""
             x = np.arange(flux_binning[0], flux_binning[2], flux_binning[1])
             y = f[self._flux_normalization_type] * \
                 aggregate_flux * np.ones(len(x) - 1)
-            _flux_ws = sapi.CreateWorkspace(OutputWorkspace=flux_ws,
-                                           DataX=x, DataY=y,
-                                           UnitX='Wavelength')
+            _flux_ws = sapi.CreateWorkspace(OutputWorkspace=flux_ws, DataX=x,
+                                            DataY=y, UnitX='Wavelength')
             _flux_ws.setYUnit(mtd[sam_ws].YUnit())
         return flux_ws
 
@@ -1012,8 +1011,7 @@ the first two hours"""
         powder_reducer.setProperty('OutputWorkspace',
                                    self._make_run_name(first_run) + suffix)
         powder_reducer.execute()
-        debug_name = self._make_run_name(first_run) + suffix
-        SaveNexus('/tmp/debug_name.nxs', debug_name)
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISReduction)
