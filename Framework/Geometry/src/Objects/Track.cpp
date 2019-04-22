@@ -234,17 +234,17 @@ void Track::buildLink() {
 }
 
 double Track::distFromStart() const {
-return std::accumulate(m_links.begin(), m_links.end(), 0.,
-                       [](double total, const auto &link) {
-  return total + link.distFromStart;
-});
+  return std::accumulate(m_links.begin(), m_links.end(), 0.,
+                         [](double total, const auto &link) {
+                           return total + link.distFromStart;
+                         });
 }
 
 double Track::distInsideObject() const {
   return std::accumulate(m_links.begin(), m_links.end(), 0.,
                          [](double total, const auto &link) {
-    return total + link.distInsideObject;
-  });
+                           return total + link.distInsideObject;
+                         });
 }
 
 std::ostream &operator<<(std::ostream &os, TrackDirection direction) {

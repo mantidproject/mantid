@@ -109,8 +109,8 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection,
     total += it->distFromStart;
   }
   return total;
-//  std::cout << position << ": " << incoming.count() << std::endl;
-//  return incoming.front().distFromStart;
+  //  std::cout << position << ": " << incoming.count() << std::endl;
+  //  return incoming.front().distFromStart;
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
