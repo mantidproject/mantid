@@ -231,9 +231,9 @@ bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
  * @param ut :: Initial track
  * @return Number of segments added
  */
-int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
+size_t MeshObject2D::interceptSurface(Geometry::Track &ut) const {
 
-  int originalCount = ut.count(); // Number of intersections original track
+  size_t originalCount = ut.size(); // Number of intersections original track
 
   const auto &norm = m_planeParameters.normal;
   auto t = -(ut.startPoint().scalar_prod(norm) +
@@ -257,7 +257,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
     }
   }
 
-  return ut.count() - originalCount;
+  return ut.size() - originalCount;
 }
 
 MeshObject2D *MeshObject2D::clone() const {

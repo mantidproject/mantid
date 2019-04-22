@@ -383,7 +383,7 @@ double DetectorEfficiencyCor::distToSurface(const V3D &start,
   // part that is outside
   shape->interceptSurface(track);
 
-  if (track.count() != 1) { // the track missed the shape, probably the shape is
+  if (track.size() != 1) { // the track missed the shape, probably the shape is
                             // not centered on the origin
     throw std::invalid_argument(
         "Fatal error interpreting the shape of a detector");

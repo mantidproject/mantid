@@ -418,7 +418,7 @@ public:
 
   void checkTrackIntercept(IObject_sptr obj, Track &track,
                            const std::vector<Link> &expectedResults) {
-    int unitCount = obj->interceptSurface(track);
+    size_t unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());
     checkTrackIntercept(track, expectedResults);
   }
@@ -612,7 +612,7 @@ public:
     TS_ASSERT_EQUALS(false, shell->isValid(V3D(0, 0, 0)));
 
     Track p1(V3D(-2, 0, 0), V3D(1, 0, 0));
-    int nsegments = shell->interceptSurface(p1);
+    size_t nsegments = shell->interceptSurface(p1);
     TS_ASSERT_EQUALS(2, nsegments);
     // total traversed distance -> 2*(r2-r1)
     double distanceInside(0.0);

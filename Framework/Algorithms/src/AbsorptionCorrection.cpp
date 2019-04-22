@@ -437,7 +437,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
     // detector
     const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
-    int temp = m_sampleObject->interceptSurface(outgoing);
+    size_t temp = m_sampleObject->interceptSurface(outgoing);
 
     /* Most of the time, the number of hits is 1. Sometime, we have more than
      * one intersection due to
@@ -451,7 +451,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
     // Not hitting the cylinder from inside, usually means detector is badly
     // defined,
     // i.e, position is (0,0,0).
-    if (temp < 1) {
+    if (temp == 0) {
       // FOR NOW AT LEAST, JUST IGNORE THIS ERROR AND USE A ZERO PATH LENGTH,
       // WHICH I RECKON WILL MAKE A
       // NEGLIGIBLE DIFFERENCE ANYWAY (ALWAYS SEEMS TO HAPPEN WITH ELEMENT RIGHT

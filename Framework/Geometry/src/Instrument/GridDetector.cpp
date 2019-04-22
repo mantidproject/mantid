@@ -769,7 +769,7 @@ bool GridDetector::isOnSide(const V3D & /*point*/) const {
 
 //-------------------------------------------------------------------------------------------------
 /// Checks whether the track given will pass through this Component.
-int GridDetector::interceptSurface(Track & /*track*/) const {
+size_t GridDetector::interceptSurface(Track & /*track*/) const {
   throw Kernel::Exception::NotImplementedError(
       "GridDetector::interceptSurface() is not implemented.");
 }

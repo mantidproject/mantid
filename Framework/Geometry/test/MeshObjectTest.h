@@ -451,7 +451,7 @@ public:
 
   void checkTrackIntercept(IObject_uptr obj, Track &track,
                            const std::vector<Link> &expectedResults) {
-    int unitCount = obj->interceptSurface(track);
+    size_t unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());
     checkTrackIntercept(track, expectedResults);
   }

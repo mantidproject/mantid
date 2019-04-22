@@ -9,6 +9,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include <array>
+#include <iostream>
 
 namespace Mantid {
 namespace Geometry {
@@ -103,7 +104,13 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection,
   Track incoming(position, -beamDirection);
 
   shape.interceptSurface(incoming);
-  return incoming.front().distFromStart;
+  double total = 0.;
+  for (auto it = incoming.begin(); it != incoming.end(); ++it) {
+    total += it->distFromStart;
+  }
+  return total;
+//  std::cout << position << ": " << incoming.count() << std::endl;
+//  return incoming.front().distFromStart;
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,

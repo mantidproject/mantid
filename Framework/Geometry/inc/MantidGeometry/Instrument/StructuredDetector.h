@@ -101,7 +101,7 @@ public:
   bool isOnSide(const Kernel::V3D &point) const override;
 
   /// Checks whether the track given will pass through this Component.
-  int interceptSurface(Track &track) const override;
+  size_t interceptSurface(Track &track) const override;
 
   /// Finds the approximate solid angle covered by the component when viewed
   /// from the point given

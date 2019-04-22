@@ -143,9 +143,9 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
  * @param UT :: Initial track
  * @return Number of segments added
  */
-int MeshObject::interceptSurface(Geometry::Track &UT) const {
+size_t MeshObject::interceptSurface(Geometry::Track &UT) const {
 
-  int originalCount = UT.count(); // Number of intersections original track
+  size_t originalCount = UT.size(); // Number of intersections original track
   BoundingBox bb = getBoundingBox();
   if (!bb.doesLineIntersect(UT)) {
     return 0;
@@ -165,7 +165,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   }
   UT.buildLink();
 
-  return UT.count() - originalCount;
+  return UT.size() - originalCount;
 }
 
 /**

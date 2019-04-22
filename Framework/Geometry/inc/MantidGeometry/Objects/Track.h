@@ -192,7 +192,7 @@ public:
   /// Returns a reference to the last link (const version)
   LType::const_reference back() const { return m_links.back(); }
   /// Returns the number of links
-  int count() const { return static_cast<int>(m_links.size()); }
+  size_t size() const { return m_links.size(); }
   /// Is the link complete?
   int nonComplete() const;
 

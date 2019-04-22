@@ -48,7 +48,7 @@ public:
   bool isValid(
       const Kernel::V3D &point) const override; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const override;
-  int interceptSurface(Geometry::Track &ut) const override;
+  size_t interceptSurface(Geometry::Track &ut) const override;
   MeshObject2D *clone() const override;
   MeshObject2D *
   cloneWithMaterial(const Kernel::Material &material) const override;

@@ -75,7 +75,7 @@ public:
     int nsegments(0);
     TS_ASSERT_THROWS_NOTHING(nsegments = kit->interceptSurfaces(ray));
     TS_ASSERT_EQUALS(3, nsegments);
-    TS_ASSERT_EQUALS(3, ray.count());
+    TS_ASSERT_EQUALS(3, ray.size());
   }
 
   void test_BoundingBox_Encompasses_Whole_Object() {

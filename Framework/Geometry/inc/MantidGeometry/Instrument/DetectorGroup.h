@@ -207,7 +207,7 @@ protected:
   void setPos(const Kernel::V3D &) override {}
   void setRot(const Kernel::Quat &) override {}
   void copyRot(const IComponent &) {}
-  int interceptSurface(Track &) const override { return -10; }
+  size_t interceptSurface(Track &) const override { return 0; }
   void translate(const Kernel::V3D &) override {}
   void translate(double, double, double) override {}
   void rotate(const Kernel::Quat &) override {}

@@ -1099,8 +1099,8 @@ int CSGObject::procString(const std::string &Line) {
  * @param UT :: Initial track
  * @return Number of segments added
  */
-int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int originalCount = UT.count(); // Number of intersections original track
+size_t CSGObject::interceptSurface(Geometry::Track &UT) const {
+  size_t originalCount = UT.size(); // Number of intersections original track
   // Loop over all the surfaces.
   LineIntersectVisit LI(UT.startPoint(), UT.direction());
   std::vector<const Surface *>::const_iterator vc;
@@ -1123,7 +1123,7 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
   }
   UT.buildLink();
   // Return number of track segments added
-  return (UT.count() - originalCount);
+  return (UT.size() - originalCount);
 }
 
 /**

@@ -103,7 +103,7 @@ double MCInteractionVolume::calculateAbsorption(
   }
   const auto toStart = normalize(startPos - scatterPos);
   Track beforeScatter(scatterPos, toStart);
-  int nlinks = m_sample->interceptSurface(beforeScatter);
+  auto nlinks = m_sample->interceptSurface(beforeScatter);
   if (m_env) {
     nlinks += m_env->interceptSurfaces(beforeScatter);
   }

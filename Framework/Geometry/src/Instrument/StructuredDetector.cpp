@@ -492,7 +492,7 @@ bool StructuredDetector::isOnSide(const V3D & /*point*/) const {
 }
 
 /// Checks whether the track given will pass through this Component.
-int StructuredDetector::interceptSurface(Track & /*track*/) const {
+size_t StructuredDetector::interceptSurface(Track & /*track*/) const {
   throw Kernel::Exception::NotImplementedError(
       "StructuredDetector::interceptSurface() is not implemented.");
 }

@@ -266,20 +266,20 @@ public:
     Mantid::Geometry::Track onTargetTrack(V3D{0.5, 0.5, -1},
                                           V3D{0, 0, 1} /*along z*/);
     TS_ASSERT_EQUALS(mesh.interceptSurface(onTargetTrack), 1);
-    TS_ASSERT_EQUALS(onTargetTrack.count(), 1);
+    TS_ASSERT_EQUALS(onTargetTrack.size(), 1);
 
     // Track completely misses
     Mantid::Geometry::Track missTargetTrack(
         V3D{50, 0.5, -1},
         V3D{0, 0, 1} /*along z*/); // Intersects plane but no triangles
     TS_ASSERT_EQUALS(mesh.interceptSurface(missTargetTrack), 0);
-    TS_ASSERT_EQUALS(missTargetTrack.count(), 0);
+    TS_ASSERT_EQUALS(missTargetTrack.size(), 0);
 
     // Track goes through edge
     Mantid::Geometry::Track edgeTargetTrack(
         V3D{0, 0, -1}, V3D{0, 0, 1} /*along z*/); // Passes through lower edge
     TS_ASSERT_EQUALS(mesh.interceptSurface(edgeTargetTrack), 1);
-    TS_ASSERT_EQUALS(edgeTargetTrack.count(), 1);
+    TS_ASSERT_EQUALS(edgeTargetTrack.size(), 1);
   }
 
   void test_equals() {

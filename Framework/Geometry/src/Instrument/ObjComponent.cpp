@@ -107,7 +107,7 @@ bool ObjComponent::isOnSide(const V3D &point) const {
  * been
  * set
  */
-int ObjComponent::interceptSurface(Track &track) const {
+size_t ObjComponent::interceptSurface(Track &track) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
     throw Kernel::Exception::NullPointerException(
@@ -119,7 +119,7 @@ int ObjComponent::interceptSurface(Track &track) const {
   const V3D trkDirection = takeOutRotation(track.direction());
 
   Track probeTrack(trkStart, trkDirection);
-  const int intercepts = shape()->interceptSurface(probeTrack);
+  const size_t intercepts = shape()->interceptSurface(probeTrack);
 
   Track::LType::const_iterator it;
   for (it = probeTrack.cbegin(); it != probeTrack.cend(); ++it) {

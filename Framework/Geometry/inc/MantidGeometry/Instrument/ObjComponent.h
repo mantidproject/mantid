@@ -53,7 +53,7 @@ public:
 
   bool isValid(const Kernel::V3D &point) const override;
   bool isOnSide(const Kernel::V3D &point) const override;
-  int interceptSurface(Track &track) const override;
+  size_t interceptSurface(Track &track) const override;
   double solidAngle(const Kernel::V3D &observer) const override;
   ///@todo This should go in favour of just the class related one.
   void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin,

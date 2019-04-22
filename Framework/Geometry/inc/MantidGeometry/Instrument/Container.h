@@ -52,7 +52,7 @@ public:
 
   int getName() const override { return m_shape->getName(); }
 
-  int interceptSurface(Geometry::Track &t) const override {
+  size_t interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);
   }
   double solidAngle(const Kernel::V3D &observer) const override {
