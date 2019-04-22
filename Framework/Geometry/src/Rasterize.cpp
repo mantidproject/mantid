@@ -104,13 +104,7 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection,
   Track incoming(position, -beamDirection);
 
   shape.interceptSurface(incoming);
-  double total = 0.;
-  for (auto it = incoming.begin(); it != incoming.end(); ++it) {
-    total += it->distFromStart;
-  }
-  return total;
-  //  std::cout << position << ": " << incoming.count() << std::endl;
-  //  return incoming.front().distFromStart;
+  return incoming.distFromStart();
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
