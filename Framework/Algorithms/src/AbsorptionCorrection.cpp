@@ -439,15 +439,6 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
     Track outgoing(m_elementPositions[i], direction);
     size_t temp = m_sampleObject->interceptSurface(outgoing);
 
-    /* Most of the time, the number of hits is 1. Sometime, we have more than
-     * one intersection due to
-     * arithmetic imprecision. If it is the case, then selecting the first
-     * intersection is valid.
-     * In principle, one could check the consistency of all distances if hits is
-     * larger than one by doing:
-     * Mantid::Geometry::Track::LType::const_iterator it=outgoing.begin();
-     * and looping until outgoing.end() checking the distances with it->Dist
-     */
     // Not hitting the cylinder from inside, usually means detector is badly
     // defined,
     // i.e, position is (0,0,0).
@@ -468,7 +459,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
       // AbsorptionCorrection::calculateDistances");
     } else // The normal situation
     {
-      L2s[i] = outgoing.cbegin()->distFromStart;
+      L2s[i] = outgoing.distFromStart();
     }
   }
 }
