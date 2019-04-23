@@ -1,5 +1,5 @@
 digraph ReflectometryILLPreprocess {
-  label = "ReflectometryILLAutoReduction pre-processing"
+  label = "ReflectometryILLAutoProcess pre-processing"
   $global_style
 
   subgraph params {
