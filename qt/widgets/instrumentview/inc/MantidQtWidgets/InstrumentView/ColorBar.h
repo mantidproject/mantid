@@ -10,7 +10,7 @@
 #include <QtGlobal>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
+#include "MantidQtWidgets/Plotting/Qwt/DraggableColorBarWidget.h"
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/MplCpp/ColorbarWidget.h"
 #endif

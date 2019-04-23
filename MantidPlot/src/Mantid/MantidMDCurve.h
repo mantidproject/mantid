@@ -9,7 +9,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCurve.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
 #include <boost/shared_ptr.hpp>
 
 // Forward definitions

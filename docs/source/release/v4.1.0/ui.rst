@@ -12,6 +12,8 @@ UI & Usability Changes
 Installation
 ------------
 
+- Linux desktops now have an icon and launcher for the nightly builds allowing it to be started without having to go to the terminal.
+
 MantidPlot
 ----------
 

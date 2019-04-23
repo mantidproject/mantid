@@ -107,7 +107,7 @@ void AlgorithmDialog::initializeLayout() {
   setWindowTitle(QString::fromStdString(getAlgorithm()->name()) +
                  " input dialog");
   // Set the icon
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
 
   // These containers are for ensuring the 'replace input workspace; button
   // works correctly

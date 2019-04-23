@@ -1,6 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file alias="MantidPlot_Icon_32offset.png">../../images/MantidPlot_Icon_32offset.png</file>
+    <file alias="mantidplot.png">../../images/mantidplot.png</file>
     <file alias="data_replace.png">../../images/data_replace.png</file>
     <file alias="fileclose.png">../../images/fileclose.png</file>
     <file alias="history.png">../../images/history.png</file>

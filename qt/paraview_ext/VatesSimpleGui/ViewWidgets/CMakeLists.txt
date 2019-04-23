@@ -121,7 +121,7 @@ mtd_add_qt_library(
 	Qwt5
   MTD_QT_LINK_LIBS
 	MantidQtWidgetsCommon
-	MantidQtWidgetsLegacyQwt
+	MantidQtWidgetsPlotting
 	VatesSimpleGuiQtWidgets
 	MantidQtWidgetsFactory
 	MantidQtWidgetsSliceViewer

@@ -2,7 +2,7 @@
 
 set(MODULE_TEMPLATE src/kernel.cpp.in)
 
-# Files containing export definitions, these are automatically processed 
+# Files containing export definitions, these are automatically processed
 # -- Do NOT sort this list. The order defines the order in which the export
 # definitions occur and some depend on their base classes being exported first
 # --
@@ -123,11 +123,6 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel)
 endif()
 
-copy_files_to_dir("${PY_FILES}"
-                  ${CMAKE_CURRENT_SOURCE_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_INSTALL_FILES)
-
 # Generate the packagesetup module for the build & install package
 set(PACKAGESETUP_PY packagesetup)
 set(NEXUSLIB ${NEXUS_C_LIBRARIES})
@@ -150,18 +145,10 @@ endif()
 
 # Build version
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.py)
+               ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py)
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.py)
-# Copy py to build directory, taking care of multi-config (MSVC) builds
-copy_files_to_dir(${PACKAGESETUP_PY}.py
-                  ${CMAKE_CURRENT_BINARY_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_INSTALL_FILES)
-copy_files_to_dir(${MPISETUP_PY}.py
-                  ${CMAKE_CURRENT_BINARY_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_INSTALL_FILES)
+               ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py)
 
 # Package version
 if(WIN32 OR (APPLE AND ENABLE_MANTIDPLOT))
@@ -182,7 +169,7 @@ add_library(PythonKernelModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonKernelModule _kernel)
-set_target_output_directory(PythonKernelModule ${OUTPUT_DIR} .pyd)
+
 # Add the required dependencies
 target_link_libraries(PythonKernelModule
                       PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}

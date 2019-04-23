@@ -77,6 +77,7 @@ public:
                         const size_t) const = 0;
 
   virtual detail::ShapeInfo::GeometryShape shape() const = 0;
+  virtual const detail::ShapeInfo &shapeInfo() const = 0;
   virtual void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                              std::vector<Kernel::V3D> &vectors,
                              double &innerRadius, double &radius,
