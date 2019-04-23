@@ -1,10 +1,13 @@
 #include "../inc/MantidQtWidgets/CharIconPainter.h"
+#include "../inc/MantidQtWidgets/Icon.h"
+#include <QVariant>
+#include <math.h>
 
 namespace MantidQt {
 namespace Widgets {
 namespace Icons {
 
-void CharIconPainter::paint(IconicFont &iconic, QPainter *painter, QRect rect,
+void CharIconPainter::paint(IconicFont *iconic, QPainter *painter, QRect rect,
                             QIcon::Mode mode, QIcon::State state,
                             std::vector<QHash<QString, QVariant>> &options) {
   for (auto &option : options) {
@@ -12,35 +15,46 @@ void CharIconPainter::paint(IconicFont &iconic, QPainter *painter, QRect rect,
   }
 }
 
-void CharIconPainter::paintIcon(IconicFont &iconic, QPainter *painter,
+void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
                                 QRect rect, QIcon::Mode mode,
                                 QIcon::State state,
                                 QHash<QString, QVariant> &options) {
+  // These variables will be useful later on, so I have left them being passed
+  // down this far. This is because they can be used for defining variable
+  // changes based on state of the buttons/QObject that the Icon is present in.
+  UNUSED_ARG(mode);
+  UNUSED_ARG(state);
+
   painter->save();
   const auto colorVariant = options[QString("color")];
   const auto scaleVariant = options[QString("scaleFactor")];
   const auto charecterStringVariant = options[QString("charecter")];
   const auto prefixVariant = options[QString("prefix")];
-  const auto charecter = iconic.getCharmap()[prefixVariant.toString()]
-                                            [charecterStringVariant.toString()];
+  const auto charecterVariant =
+      iconic->getCharmap()[prefixVariant.toString()]
+                          [charecterStringVariant.toString()];
 
   // Set some defaults so it doesn't fail later if nothing was set
   QString color("black");
   double scaleFactor(1.0);
-  if (colorVariant.isString()) {
+  if (colorVariant.canConvert<QString>()) {
     color = colorVariant.toString();
   }
-  if (scaleVariant.isString()) {
-    scaleFactor = charVariant.toString();
+  if (scaleVariant.canConvert<double>()) {
+    scaleFactor = scaleVariant.toDouble();
   }
-  painter.setPen(QColor(color));
+  painter->setPen(QColor(color));
 
   // A 16 pixel-high icon yields a font size of 14, which is pixel perfect for
   // font-awesome. 16 * 0.875 = 14 The reason why the glyph size is smaller than
   // the icon size is to account for font bearing.
-  drawSize = 0.875 * unsigned long(rect.height() * scaleFactor);
+  const auto drawSize = static_cast<int>(
+      std::floor(0.875 * std::round(rect.height() * scaleFactor)));
 
-  painter->setFont(iconic.font(m_prefix, draw_size));
+  const auto prefix = prefixVariant.toString();
+  const auto charecter = charecterVariant.toString();
+
+  painter->setFont(iconic->getFont(m_prefix, drawSize));
   painter->setOpacity(1.0);
   painter->drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, charecter);
   painter->restore();

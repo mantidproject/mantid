@@ -9,6 +9,7 @@
 
 #include "CharIconEngine.h"
 #include "CharIconPainter.h"
+#include "DllOption.h"
 
 #include <QHash>
 #include <QIcon>
@@ -32,17 +33,20 @@ QIcon getIcon(const std::vector<QString> &iconNames,
               const boost::optional<std::vector<QHash<QString, QVariant>>>
                   &options = boost::none);
 
-class IconicFont {
+class EXPORT_OPT_MANTIDQT_ICONS IconicFont {
 public:
   IconicFont();
   QIcon getIcon(const std::vector<QString> &iconNames,
                 const boost::optional<std::vector<QHash<QString, QVariant>>>
-                    &options = boost::none_t);
+                    &options = boost::none);
   QHash<QString, QHash<QString, QVariant>> const getCharmap() const;
+  QFont getFont(const QString &prefix, const int drawSize);
 
 private:
-  void load_font(const QString &prefix, const QString &ttfFilename,
-                 const QString &charmapFilename);
+  void loadFont(const QString &prefix, const QString &ttfFilename,
+                const QString &charmapFilename);
+  QIcon iconByPainter(CharIconPainter *painter,
+                      std::vector<QHash<QString, QVariant>> &options);
 
   QHash<QString, QString> m_fontnames;
 

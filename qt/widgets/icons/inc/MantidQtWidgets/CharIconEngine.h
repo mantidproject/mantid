@@ -7,9 +7,13 @@
 #ifndef MANTIDQT_WIDGETS_ICONS_CHARICONENGINE_H_
 #define MANTIDQT_WIDGETS_ICONS_CHARICONENGINE_H_
 
+#include "DllOption.h"
+
 #include <QHash>
 #include <QIcon>
+#include <QIconEngine>
 #include <QPainter>
+#include <QPixmap>
 #include <QRect>
 #include <QString>
 #include <QVariant>
@@ -20,19 +24,21 @@ namespace Widgets {
 namespace Icons {
 
 class IconicFont;
+class CharIconPainter;
 
-class CharIconEngine : QIconEngine {
+class EXPORT_OPT_MANTIDQT_ICONS CharIconEngine : public QIconEngine {
 public:
-  CharIconEngine::CharIconEngine(
-      IconicFont &iconic, QPainter *painter,
-      std::vector<QHash<QString, QVariant>> &options);
+  CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
+                 std::vector<QHash<QString, QVariant>> &options);
   void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode,
              QIcon::State state) override;
-  void pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state);
+  QPixmap pixmap(const QSize &size, QIcon::Mode mode,
+                 QIcon::State state) override;
+  QIconEngine *clone() const override;
 
 private:
-  IconicFont &m_iconic;
-  QPainter *m_painter;
+  IconicFont *m_iconic;
+  CharIconPainter *m_painter;
   std::vector<QHash<QString, QVariant>> &m_options;
 };
 
