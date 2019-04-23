@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsView.h"
-#include "../Batch/BatchView.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"

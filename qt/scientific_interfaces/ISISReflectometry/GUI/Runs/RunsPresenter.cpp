@@ -58,26 +58,23 @@ namespace CustomInterfaces {
  * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
  */
-RunsPresenter::RunsPresenter(IRunsView *mainView,
-                             ProgressableView *progressableView,
-                             RunsTablePresenterFactory *makeRunsTablePresenter,
-                             double thetaTolerance,
-                             std::vector<std::string> const &instruments,
-                             int defaultInstrumentIndex,
-                             IMessageHandler *messageHandler,
-                             boost::shared_ptr<IAutoreduction> autoreduction,
-                             boost::shared_ptr<ISearcher> searcher)
+RunsPresenter::RunsPresenter(
+    IRunsView *mainView, ProgressableView *progressableView,
+    const RunsTablePresenterFactory &makeRunsTablePresenter,
+    double thetaTolerance, std::vector<std::string> const &instruments,
+    int defaultInstrumentIndex, IMessageHandler *messageHandler,
+    boost::shared_ptr<IAutoreduction> autoreduction,
+    boost::shared_ptr<ISearcher> searcher)
     : m_autoreduction(autoreduction), m_view(mainView),
-      m_progressView(progressableView),
-      m_makeRunsTablePresenter(makeRunsTablePresenter),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_searcher(searcher), m_instruments(instruments),
+      m_progressView(progressableView), m_mainPresenter(nullptr),
+      m_messageHandler(messageHandler), m_searcher(searcher),
+      m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
-  m_tablePresenter = (*m_makeRunsTablePresenter)(m_view->table());
+  m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
 
   if (!m_autoreduction)

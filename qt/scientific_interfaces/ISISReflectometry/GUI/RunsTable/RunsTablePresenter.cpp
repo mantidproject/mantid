@@ -6,14 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
-#include "GUI/Plotting/Plotter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"
-#include "RunsTableView.h"
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
@@ -65,7 +63,7 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
-    double thetaTolerance, ReductionJobs jobs, const IPlotter *plotter)
+    double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
       m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
@@ -578,7 +576,7 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter->reflectometryPlot(workspaces);
+  m_plotter.reflectometryPlot(workspaces);
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
@@ -593,7 +591,7 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   if (workspaces.empty())
     return;
 
-  m_plotter->reflectometryPlot(workspaces);
+  m_plotter.reflectometryPlot(workspaces);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

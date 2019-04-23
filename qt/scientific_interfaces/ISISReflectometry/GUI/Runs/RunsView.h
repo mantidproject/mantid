@@ -35,7 +35,6 @@ namespace CustomInterfaces {
 
 // Forward decs
 class SearchModel;
-class BatchView;
 
 using MantidWidgets::SlitCalculator;
 namespace DataProcessor = MantidWidgets::DataProcessor;
@@ -124,7 +123,6 @@ private:
   QBasicTimer m_timer;
 
   RunsTableView *m_tableView;
-  BatchView *m_batchView;
 
 private slots:
   void on_actionSearch_triggered();

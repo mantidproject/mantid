@@ -33,7 +33,6 @@ class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView,
 public:
   JobTreeView(QStringList const &columnHeadings, Cell const &defaultCellStyle,
               QWidget *parent = nullptr);
-  ~JobTreeView(){};
 
   void filterRowsBy(std::unique_ptr<RowPredicate> predicate) override;
   void filterRowsBy(RowPredicate *predicate) override;

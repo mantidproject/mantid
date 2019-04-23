@@ -54,9 +54,9 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
 public:
   RunsPresenter(
       IRunsView *mainView, ProgressableView *progressView,
-      RunsTablePresenterFactory *makeRunsTablePresenter, double thetaTolerance,
-      std::vector<std::string> const &instruments, int defaultInstrumentIndex,
-      IMessageHandler *messageHandler,
+      const RunsTablePresenterFactory &makeRunsTablePresenter,
+      double thetaTolerance, std::vector<std::string> const &instruments,
+      int defaultInstrumentIndex, IMessageHandler *messageHandler,
       boost::shared_ptr<IAutoreduction> autoreduction =
           boost::shared_ptr<IAutoreduction>(),
       boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>());
@@ -111,7 +111,6 @@ private:
   IRunsView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
-  RunsTablePresenterFactory *m_makeRunsTablePresenter;
   /// The data processor presenters stored in a vector
   std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter

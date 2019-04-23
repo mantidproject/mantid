@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchView.h"
-#include "../MainWindow/MainWindowView.h"
 #include "GUI/Event/EventView.h"
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"

@@ -70,8 +70,8 @@ void MainWindowView::initLayout() {
 #else
   Plotter plotter;
 #endif
-  auto makeRunsTablePresenter =
-      RunsTablePresenterFactory(instruments, thetaTolerance, &plotter);
+  auto makeRunsTablePresenter = RunsTablePresenterFactory(
+      instruments, thetaTolerance, std::move(plotter));
 
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto autoreduction = boost::shared_ptr<IAutoreduction>();

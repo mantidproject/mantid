@@ -9,7 +9,6 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "../MainWindow/IMainWindowView.h"
-#include "../MainWindow/MainWindowView.h"
 #endif
 
 namespace MantidQt {

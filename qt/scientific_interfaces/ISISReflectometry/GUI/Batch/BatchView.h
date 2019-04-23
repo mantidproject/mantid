@@ -23,8 +23,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MainWindowView;
-
 class BatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
@@ -41,7 +39,6 @@ public:
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
   void cancelAlgorithmQueue() override;
-  void executePythonCode(const std::string &pythonCode);
 
 private slots:
   void onBatchComplete(bool error);
