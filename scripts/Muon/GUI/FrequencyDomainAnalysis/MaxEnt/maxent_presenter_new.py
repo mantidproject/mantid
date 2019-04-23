@@ -16,6 +16,7 @@ from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import AnalysisDataService
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 import functools
+from mantid.api import WorkspaceGroup
 raw_data = "_raw_data"
 
 
@@ -26,6 +27,9 @@ class GenericObserver(Observer):
 
     def update(self, observable, arg):
         self.callback()
+
+optional_output_suffixes = {'OutputPhaseTable': '_phase_table', 'OutputDeadTimeTable': '_dead_times',
+                            'ReconstructedSpectra': '_reconstructed_spectra', 'PhaseConvergenceTable': '_phase_convergence'}
 
 
 class MaxEntPresenter(object):
@@ -108,7 +112,13 @@ class MaxEntPresenter(object):
 
         maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
 
-        self.add_maxent_workspace_to_ADS(maxent_parameters, maxent_workspace)
+        base_name, group = self.calculate_base_name_and_group(maxent_parameters['InputWorkspace'])
+
+        output_name = self.add_maxent_workspace_to_ADS(base_name, group, maxent_workspace)
+
+        maxent_output_options = self.get_maxent_output_options()
+
+        self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, group)
 
     def get_parameters_for_maxent_calculation(self):
         inputs = {}
@@ -149,13 +159,35 @@ class MaxEntPresenter(object):
 
         self.view.update_phase_table_combo(phase_table_list)
 
-    def add_maxent_workspace_to_ADS(self, parameters, maxent_workspace):
-        run = re.search('[0-9]+', parameters['InputWorkspace']).group()
-        name = self.load.data_context._base_run_name(run) + '_MaxEnt'
+    def add_maxent_workspace_to_ADS(self, base_name, group, maxent_workspace):
+        AnalysisDataService.addOrReplace(base_name, maxent_workspace)
+        AnalysisDataService.addToGroup(group, base_name)
 
-        AnalysisDataService.addOrReplace(name, maxent_workspace)
-        AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), name)
+    def get_maxent_output_options(self):
+        output_options = {}
 
+        output_options['OutputPhaseTable'] = self.view.output_phase_table
+        output_options['OutputDeadTimeTable'] = self.view.output_dead_times
+        output_options['ReconstructedSpectra'] = self.view.output_reconstructed_spectra
+        output_options['PhaseConvergenceTable'] = self.view.output_phase_convergence
 
+        return output_options
 
+    def add_optional_outputs_to_ADS(self, alg, output_options, base_name, group):
+        for key in output_options:
+            if output_options[key]:
+                output = alg.getProperty(key).value
+                AnalysisDataService.addOrReplace(base_name + optional_output_suffixes[key], output)
+                AnalysisDataService.addToGroup(group, base_name + optional_output_suffixes[key])
 
+    def calculate_base_name_and_group(self, input_workspace):
+        run = re.search('[0-9]+', input_workspace).group()
+        base_name = self.load.data_context._base_run_name(run) + '_MaxEnt'
+        group = self.load.data_context._base_run_name(run) + ' MaxEnt Outputs'
+
+        if not AnalysisDataService.doesExist(group):
+            new_group = WorkspaceGroup()
+            AnalysisDataService.addOrReplace(group, new_group)
+            AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), group)
+
+        return base_name, group

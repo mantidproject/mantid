@@ -238,5 +238,5 @@ class MaxEntView(QtWidgets.QWidget):
         return self.output_phase_evo_box.checkState() == QtCore.Qt.Checked
 
     @property
-    def output_reconsturcted_spectra(self):
+    def output_reconstructed_spectra(self):
         return self.output_data_box.checkState() == QtCore.Qt.Checked

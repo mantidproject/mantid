@@ -123,6 +123,10 @@ def run_MuonMaxent(parameters_dict, alg):
     alg.setAlwaysStoreInADS(False)
     alg.setRethrows(True)
     alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperty("OutputPhaseTable", "__NotUsedPhase")
+    alg.setProperty("OutputDeadTimeTable", "__NotUsedDead")
+    alg.setProperty("ReconstructedSpectra", "__NotUsedRecon")
+    alg.setProperty("PhaseConvergenceTable", "__NotUsedConverge")
     alg.setProperties(parameters_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
