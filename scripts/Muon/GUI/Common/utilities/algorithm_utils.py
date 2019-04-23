@@ -82,7 +82,7 @@ def run_CalMuonDetectorPhases(parameter_dict):
     alg.setProperty("DataFitted", "__NotUsed")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("DetectorTable").value
+    return alg.getProperty("DetectorTable").value, alg.getProperty('DataFitted').value
 
 
 def run_PhaseQuad(parameters_dict):

@@ -2,7 +2,7 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, WorkspaceGroup
 import re
 
 class GenericObserver(Observer):
@@ -69,7 +69,10 @@ class PhaseTablePresenter(object):
 
         phase_quad = run_PhaseQuad(parameters)
 
-        self.add_phase_quad_to_ADS(parameters, phase_quad)
+        base_name = parameters['InputWorkspace'].split('_')[0] + '_PhaseQuad_phase_table_'\
+                          + parameters['PhaseTable'].split('_')[0]
+        base_name, group = self.calculate_base_name_and_group(base_name)
+        self.add_phase_quad_to_ADS(base_name, group, phase_quad)
 
     def get_parameters_for_phase_quad(self):
         parameters = {}
@@ -82,17 +85,11 @@ class PhaseTablePresenter(object):
 
         return parameters
 
-    def add_phase_quad_to_ADS(self, parameters, phase_quad):
-        phase_quad_name = parameters['InputWorkspace'].split('_')[0] + '_PhaseQuad_phase_table_'\
-                          + parameters['PhaseTable'].split('_')[0]
+    def add_phase_quad_to_ADS(self, base_name, group, phase_quad):
+        AnalysisDataService.addOrReplace(base_name, phase_quad)
+        AnalysisDataService.addToGroup(group, base_name)
 
-        AnalysisDataService.addOrReplace(phase_quad_name, phase_quad)
-
-        run = re.search('[0-9]+', parameters['InputWorkspace']).group()
-        AnalysisDataService.addToGroup(self.context.data_context._base_run_name(run), phase_quad_name)
-
-        self.context.phase_context.add_phase_quad(phase_quad_name)
-
+        self.context.phase_context.add_phase_quad(base_name)
         self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):
@@ -110,17 +107,25 @@ class PhaseTablePresenter(object):
     def calculate_phase_table(self):
         parameters = self.create_parameters_for_cal_muon_phase_algorithm()
 
-        detector_table = run_CalMuonDetectorPhases(parameters)
+        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters)
 
-        self.add_phase_table_to_ADS(parameters, detector_table)
+        base_name, group = self.calculate_base_name_and_group(parameters['DetectorTable'])
+        self.add_phase_table_to_ADS(base_name, group, detector_table)
+        self.add_fitting_info_to_ADS_if_required(base_name, group, fitting_information)
 
         return parameters['DetectorTable']
 
-    def add_phase_table_to_ADS(self, parameters, detector_table):
-        AnalysisDataService.addOrReplace(parameters['DetectorTable'], detector_table)
-        run = re.search('[0-9]+', parameters['DetectorTable']).group()
-        AnalysisDataService.addToGroup(self.context.data_context._base_run_name(run), parameters['DetectorTable'])
-        self.context.phase_context.add_phase_table(parameters['DetectorTable'])
+    def add_phase_table_to_ADS(self, base_name, group, detector_table):
+        AnalysisDataService.addOrReplace(base_name, detector_table)
+        AnalysisDataService.addToGroup(group, base_name)
+        self.context.phase_context.add_phase_table(base_name)
+
+    def add_fitting_info_to_ADS_if_required(self, base_name, group, fitting_information):
+        if not self.view.output_fit_information:
+            return
+
+        AnalysisDataService.addOrReplace(base_name + '_fit_information', fitting_information)
+        AnalysisDataService.addToGroup(group, base_name + '_fit_information')
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
         parameters = {}
@@ -154,3 +159,15 @@ class PhaseTablePresenter(object):
         phase_table_list.append('Construct')
 
         self.view.set_phase_table_combo_box(phase_table_list)
+
+    def calculate_base_name_and_group(self, table_name):
+        run = re.search('[0-9]+', table_name).group()
+        base_name = table_name
+        group = self.context.data_context._base_run_name(run) + ' PhaseTables'
+
+        if not AnalysisDataService.doesExist(group):
+            new_group = WorkspaceGroup()
+            AnalysisDataService.addOrReplace(group, new_group)
+            AnalysisDataService.addToGroup(self.context.data_context._base_run_name(run), group)
+
+        return base_name, group

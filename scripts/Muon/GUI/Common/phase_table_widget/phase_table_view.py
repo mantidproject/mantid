@@ -90,6 +90,10 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         if index != -1:
             self.phase_quad_phase_table_combo.setCurrentIndex(index)
 
+    @property
+    def output_fit_information(self):
+        return self.output_fit_info_box.checkState() == QtCore.Qt.Checked
+
     def set_input_combo_box(self, input_list):
         self.input_workspace_combo_box.clear()
         self.input_workspace_combo_box.addItems(input_list)
@@ -161,6 +165,10 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
 
         table_utils.setRowName(self.phase_table_options_table, 4, "Last Good Data")
         self.last_good_data_item = table_utils.addDoubleToTable(self.phase_table_options_table, 15.0, 4)
+
+        table_utils.setRowName(self.phase_table_options_table, 5, "Output fit information")
+        self.output_fit_info_box = table_utils.addCheckBoxToTable(
+            self.phase_table_options_table, False, 5)
 
         self.phase_table_options_table.resizeRowsToContents()
 

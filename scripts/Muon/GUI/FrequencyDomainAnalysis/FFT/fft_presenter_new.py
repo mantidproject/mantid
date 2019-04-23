@@ -11,7 +11,7 @@ import mantid.simpleapi as mantid
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
 import re
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, WorkspaceGroup
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 
 
@@ -173,11 +173,22 @@ class FFTPresenter(object):
 
         frequency_domain_workspace = run_FFT(fft_parameters)
 
-        self.add_fft_workspace_to_ADS(real_workspace_padding_parameters, frequency_domain_workspace)
+        base_name, group = self.calculate_base_name_and_group(real_workspace_padding_parameters['InputWorkspace'])
 
-    def add_fft_workspace_to_ADS(self, pre_process_params, fft_workspace):
-        workspace_name = pre_process_params['InputWorkspace'] + '_FFT'
-        run = re.search('[0-9]+', pre_process_params['InputWorkspace']).group()
+        self.add_fft_workspace_to_ADS(base_name, group, frequency_domain_workspace)
 
-        AnalysisDataService.addOrReplace(workspace_name, fft_workspace)
-        AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), workspace_name)
+    def add_fft_workspace_to_ADS(self, base_name, group, fft_workspace):
+        AnalysisDataService.addOrReplace(base_name, fft_workspace)
+        AnalysisDataService.addToGroup(group, base_name)
+
+    def calculate_base_name_and_group(self, fft_workspace_name):
+        run = re.search('[0-9]+', fft_workspace_name).group()
+        base_name = fft_workspace_name + ';FFT'
+        group = self.load.data_context._base_run_name(run) + ' FFT'
+
+        if not AnalysisDataService.doesExist(group):
+            new_group = WorkspaceGroup()
+            AnalysisDataService.addOrReplace(group, new_group)
+            AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), group)
+
+        return base_name, group

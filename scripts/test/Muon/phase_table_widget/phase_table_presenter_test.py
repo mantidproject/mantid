@@ -11,6 +11,7 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from mantid.py3compat import mock
 from Muon.GUI.Common.contexts.context_setup import setup_context
 from Muon.GUI.Common import mock_widget
+from qtpy import QtCore
 
 
 class PhaseTablePresenterTest(unittest.TestCase):
@@ -80,10 +81,10 @@ class PhaseTablePresenterTest(unittest.TestCase):
         parameters = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
         mock_phase_table = mock.MagicMock()
 
-        self.presenter.add_phase_table_to_ADS(parameters, mock_phase_table)
+        self.presenter.add_phase_table_to_ADS('MUSR22222_period_1_phase_table', 'MUSR22222 PhaseTable', mock_phase_table)
 
         mock_data_service.addOrReplace.assert_called_once_with(parameters['DetectorTable'], mock_phase_table)
-        mock_data_service.addToGroup.assert_called_once_with('MUSR22222', parameters['DetectorTable'])
+        mock_data_service.addToGroup.assert_called_once_with('MUSR22222 PhaseTable', parameters['DetectorTable'])
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
     def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorith_mock):
@@ -91,14 +92,15 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
-        parameters = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
-        run_algorith_mock.return_value = detector_table_mock
+        run_algorith_mock.return_value = (detector_table_mock, mock.MagicMock())
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
+        self.presenter.calculate_base_name_and_group = mock.MagicMock(
+            return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
 
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
-        self.presenter.add_phase_table_to_ADS.assert_called_once_with(parameters, detector_table_mock)
+        self.presenter.add_phase_table_to_ADS.assert_called_once_with('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable', detector_table_mock)
         self.assertTrue(self.view.isEnabled())
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
@@ -107,6 +109,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.update_view_from_model()
         run_algorith_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
+        self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
 
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
@@ -198,6 +201,23 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_calculation_error.assert_not_called()
         self.presenter.calculate_phase_table.assert_called_once_with()
 
+    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.AnalysisDataService')
+    def test_add_fitting_info_to_ADS_does_nothing_if_output_fitting_info_is_false(self, mock_data_service):
+        self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable', 'MUSR22222 PhaseTable', mock.MagicMock())
+
+        mock_data_service.addOrReplace.assert_not_called()
+        mock_data_service.addToGroup.assert_not_called()
+
+    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.AnalysisDataService')
+    def test_add_fitting_info_to_ADS_adds_fitting_info_to_ADS_if_option_selected(self, mock_data_service):
+        self.view.output_fit_info_box.setCheckState(QtCore.Qt.Checked)
+        fit_information = mock.MagicMock()
+
+        self.presenter.add_fitting_info_to_ADS_if_required('MUSR22222_PhaseTable', 'MUSR22222 PhaseTable',
+                                                           fit_information)
+
+        mock_data_service.addOrReplace.assert_called_once_with('MUSR22222_PhaseTable_fit_information', fit_information)
+        mock_data_service.addToGroup.assert_called_once_with('MUSR22222 PhaseTable', 'MUSR22222_PhaseTable_fit_information')
 
 
 if __name__ == '__main__':
