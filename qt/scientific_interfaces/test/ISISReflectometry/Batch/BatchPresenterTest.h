@@ -9,6 +9,7 @@
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
 #include "../ReflMockObjects.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MockBatchView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -48,7 +49,9 @@ public:
             DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
         m_runsTable(m_instruments, 0.1, ReductionJobs()),
         m_slicing(), m_mockAlgorithmsList{
-                         boost::make_shared<MockBatchJobAlgorithm>()} {}
+                         boost::make_shared<MockBatchJobAlgorithm>()} {
+    Mantid::API::FrameworkManager::Instance();
+  }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
