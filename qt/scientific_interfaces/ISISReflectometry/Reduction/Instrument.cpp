@@ -51,5 +51,14 @@ DetectorCorrectionType Instrument::detectorCorrectionType() const {
   return m_detectorCorrections.correctionType();
 }
 
+bool operator!=(Instrument const &lhs, Instrument const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(Instrument const &lhs, Instrument const &rhs) {
+  return lhs.wavelengthRange() == rhs.wavelengthRange() &&
+         lhs.monitorCorrections() == rhs.monitorCorrections() &&
+         lhs.detectorCorrections() == rhs.detectorCorrections();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

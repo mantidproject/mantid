@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <!-- These are mandatory parameters without which the reduction will fail -->
+  <parameter name="LambdaMin">
+    <value val="0.0"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="0.0"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

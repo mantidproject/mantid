@@ -68,6 +68,11 @@ private:
   std::map<std::string, std::string> m_stitchParameters;
   std::vector<PerThetaDefaults> m_perThetaDefaults;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs,
+                                               Experiment const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs,
+                                               Experiment const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENT_H_

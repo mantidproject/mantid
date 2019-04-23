@@ -42,6 +42,11 @@ private:
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs,
+                                               Instrument const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Instrument const &lhs,
+                                               Instrument const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_INSTRUMENT_H_

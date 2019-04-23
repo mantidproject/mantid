@@ -95,5 +95,22 @@ PerThetaDefaults const *Experiment::wildcardDefaults() const {
     return nullptr;
   }
 }
+
+bool operator!=(Experiment const &lhs, Experiment const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(Experiment const &lhs, Experiment const &rhs) {
+  return lhs.analysisMode() == rhs.analysisMode() &&
+         lhs.reductionType() == rhs.reductionType() &&
+         lhs.summationType() == rhs.summationType() &&
+         lhs.includePartialBins() == rhs.includePartialBins() &&
+         lhs.debug() == rhs.debug() &&
+         lhs.polarizationCorrections() == rhs.polarizationCorrections() &&
+         lhs.floodCorrections() == rhs.floodCorrections() &&
+         lhs.transmissionRunRange() == rhs.transmissionRunRange() &&
+         lhs.stitchParameters() == rhs.stitchParameters() &&
+         lhs.perThetaDefaults() == rhs.perThetaDefaults();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

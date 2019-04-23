@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="PolarizationAnalysis" type="string">
+      <value val="ParameterFile"/>
+  </parameter>
+
+  <parameter name="FloodCorrection" type="string">
+      <value val="ParameterFile"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

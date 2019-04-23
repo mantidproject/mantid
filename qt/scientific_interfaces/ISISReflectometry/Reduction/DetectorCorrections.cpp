@@ -19,5 +19,16 @@ bool DetectorCorrections::correctPositions() const {
 DetectorCorrectionType DetectorCorrections::correctionType() const {
   return m_correctionType;
 }
+
+bool operator!=(DetectorCorrections const &lhs,
+                DetectorCorrections const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(DetectorCorrections const &lhs,
+                DetectorCorrections const &rhs) {
+  return lhs.correctPositions() == rhs.correctPositions() &&
+         lhs.correctionType() == rhs.correctionType();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

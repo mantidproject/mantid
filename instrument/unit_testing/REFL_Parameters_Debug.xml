@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="Debug">
+      <value val="1"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

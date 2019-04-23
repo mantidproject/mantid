@@ -55,6 +55,11 @@ private:
   bool m_correctPositions;
   DetectorCorrectionType m_correctionType;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(DetectorCorrections const &lhs,
+                                               DetectorCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(DetectorCorrections const &lhs,
+                                               DetectorCorrections const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_DETECTORCORRECTIONS_H_

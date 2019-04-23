@@ -9,6 +9,10 @@
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
 #include "../ReflMockObjects.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MockInstrumentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -31,7 +35,9 @@ public:
   }
   static void destroySuite(InstrumentPresenterTest *suite) { delete suite; }
 
-  InstrumentPresenterTest() : m_view() {}
+  InstrumentPresenterTest() : m_view() {
+    Mantid::API::FrameworkManager::Instance();
+  }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -245,6 +251,48 @@ public:
     verifyAndClear();
   }
 
+  void testRestoreDefaultsNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Mandatory");
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesMonitorOptions() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Monitor");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_Monitor.xml
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), 2);
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
+                     RangeInLambda(17.0, 18.0));
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(),
+                     RangeInLambda(4.0, 10.0));
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesWavelengthRange() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("WavelengthRange");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_WavelengthRange.xml
+    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(),
+                     RangeInLambda(1.5, 17.0));
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesUpdatesDetectorOptions() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Detector");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_Detector.xml
+    auto const expected =
+        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
+    TS_ASSERT_EQUALS(presenter.instrument().detectorCorrections(), expected);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
@@ -252,7 +300,7 @@ private:
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
     auto monitorCorrections = MonitorCorrections(
-        0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
     auto detectorCorrections =
         DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
     return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
@@ -288,6 +336,29 @@ private:
     EXPECT_CALL(m_mainPresenter, isAutoreducing())
         .Times(1)
         .WillOnce(Return(false));
+  }
+
+  // Get a dummy reflectometry instrument with the given parameters file type.
+  // paramsType is appended to "REFL_Parameters_" to form the name for the file
+  // to load. See ReflectometryHelper.h for details.
+  Mantid::Geometry::Instrument_const_sptr
+  getInstrumentWithParameters(std::string const &paramsType) {
+    auto workspace = Mantid::TestHelpers::createREFL_WS(
+        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
+    return workspace->getInstrument();
+  }
+
+  void expectInstrumentWithDefaultParameters() {
+    // Use the default REFL_Parameters.xml file, which is empty
+    expectInstrumentWithParameters("");
+  }
+
+  void expectInstrumentWithParameters(std::string const &paramsType) {
+    // Use the REFL_Parameters_<paramsType> file
+    auto instrument = getInstrumentWithParameters(paramsType);
+    EXPECT_CALL(m_mainPresenter, instrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
   }
 
   void

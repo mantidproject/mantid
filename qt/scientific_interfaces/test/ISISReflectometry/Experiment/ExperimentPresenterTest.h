@@ -9,6 +9,10 @@
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
 #include "../ReflMockObjects.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MockExperimentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -38,7 +42,9 @@ public:
   }
   static void destroySuite(ExperimentPresenterTest *suite) { delete suite; }
 
-  ExperimentPresenterTest() : m_view() {}
+  ExperimentPresenterTest() : m_view() {
+    Mantid::API::FrameworkManager::Instance();
+  }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -427,6 +433,83 @@ public:
     verifyAndClear();
   }
 
+  void testRestoreDefaultsNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    expectInstrumentWithDefaultParameters();
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesAnalysisMode() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Analysis");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_Analysis.xml
+    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
+                     AnalysisMode::MultiDetector);
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesReductionOptions() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Reduction");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_Reduction.xml
+    TS_ASSERT_EQUALS(presenter.experiment().summationType(),
+                     SummationType::SumInQ);
+    TS_ASSERT_EQUALS(presenter.experiment().reductionType(),
+                     ReductionType::NonFlatSample);
+    TS_ASSERT_EQUALS(presenter.experiment().includePartialBins(), true);
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesDebugOptions() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Debug");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_Debug.xml
+    TS_ASSERT_EQUALS(presenter.experiment().debug(), true);
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesPerTheta() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("PerTheta");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_PerTheta.xml
+    auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
+                                     RangeInQ(0.01, 0.03, 0.2), 0.7,
+                                     std::string("390-415"));
+    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().size(), 1);
+    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(),
+                     expected);
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesTransmissionRunRange() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("TransmissionRunRange");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_TransmissionRunRange.xml
+    auto const expected = RangeInLambda{10.0, 12.0};
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), expected);
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesCorrection() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Correction");
+    presenter.notifyRestoreDefaultsRequested();
+    // Compare with REFL_Parameters_Correction.xml
+    TS_ASSERT_EQUALS(
+        presenter.experiment().polarizationCorrections().correctionType(),
+        PolarizationCorrectionType::ParameterFile);
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections().correctionType(),
+                     FloodCorrectionType::ParameterFile);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
@@ -436,15 +519,20 @@ private:
     auto polarizationCorrections =
         PolarizationCorrections(PolarizationCorrectionType::None);
     auto floodCorrections = FloodCorrections(FloodCorrectionType::Workspace);
-    auto transmissionRunRange = boost::none;
+    auto transmissionRunRange = RangeInLambda{0, 0};
     auto stitchParameters = std::map<std::string, std::string>();
-    auto perThetaDefaults = std::vector<PerThetaDefaults>();
+    auto perThetaDefaults =
+        PerThetaDefaults(boost::none, TransmissionRunPair(),
+                         RangeInQ(boost::none, boost::none, boost::none),
+                         boost::none, boost::none);
+    auto perThetaDefaultsList =
+        std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),
-                      std::move(floodCorrections),
-                      std::move(transmissionRunRange),
-                      std::move(stitchParameters), std::move(perThetaDefaults));
+                      std::move(floodCorrections), transmissionRunRange,
+                      std::move(stitchParameters),
+                      std::move(perThetaDefaultsList));
   }
 
   ExperimentPresenter makePresenter() {
@@ -606,6 +694,29 @@ private:
   }
   OptionsRow optionsRowWithProcessingInstructionsInvalid() {
     return {"", "", "", "", "", "", "", "bad"};
+  }
+
+  // Get a dummy reflectometry instrument with the given parameters file type.
+  // paramsType is appended to "REFL_Parameters_" to form the name for the file
+  // to load. See ReflectometryHelper.h for details.
+  Mantid::Geometry::Instrument_const_sptr
+  getInstrumentWithParameters(std::string const &paramsType) {
+    auto workspace = Mantid::TestHelpers::createREFL_WS(
+        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
+    return workspace->getInstrument();
+  }
+
+  void expectInstrumentWithDefaultParameters() {
+    // Use the default REFL_Parameters.xml file, which is empty
+    expectInstrumentWithParameters("");
+  }
+
+  void expectInstrumentWithParameters(std::string const &paramsType) {
+    // Use the REFL_Parameters_<paramsType> file
+    auto instrument = getInstrumentWithParameters(paramsType);
+    EXPECT_CALL(m_mainPresenter, instrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
   }
 
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {

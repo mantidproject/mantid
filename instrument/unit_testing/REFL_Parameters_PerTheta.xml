@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="QMin">
+    <value val="0.01"/>
+  </parameter>
+
+  <parameter name="dQ/Q">
+    <value val="0.03"/>
+  </parameter>
+
+  <parameter name="QMax">
+    <value val="0.2"/>
+  </parameter>
+
+  <parameter name="ScaleFactor">
+    <value val="0.7"/>
+  </parameter>
+
+  <parameter name="ProcessingInstructions" type="string"> 
+    <value val="390-415"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

@@ -34,6 +34,9 @@ private:
   boost::optional<RangeInLambda> m_backgroundRange;
   boost::optional<RangeInLambda> m_integralRange;
 };
+
+bool operator!=(MonitorCorrections const &lhs, MonitorCorrections const &rhs);
+bool operator==(MonitorCorrections const &lhs, MonitorCorrections const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_MONITORCORRECTIONS_H_
