@@ -12,7 +12,7 @@ Reflectometry Changes
 New
 ###
 
-- The new work-flow algorithm :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>` allows to perform a flexible reduction. It implements the incoherent reduction and the sample angle option.
+- The new work-flow algorithm :ref:`algm-ReflectometryILLAutoProcess` allows to perform a flexible reduction. It implements the incoherent reduction and the sample angle option.
 
 BUGFIXES
 ########
