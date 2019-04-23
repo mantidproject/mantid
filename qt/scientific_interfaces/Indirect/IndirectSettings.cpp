@@ -26,7 +26,10 @@ void IndirectSettings::initLayout() {
           SLOT(closeSettings()));
 }
 
-void IndirectSettings::closeSettings() { this->close(); }
+void IndirectSettings::closeSettings() {
+  if (window())
+    window()->close();
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

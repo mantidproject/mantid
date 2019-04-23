@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<INTERFACE-PROPERTIES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/Interfaces/1.0" 
-xsi:schemaLocation="http://www.mantidproject.org/Interfaces/1.0 http://schema.mantidproject.org/Interfaces/1.0/IndirectInterfacePropertiesSchema.xsd">
+
+<INTERFACE-PROPERTIES xmlns="http://www.w3schools.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.xsd">
 
 	<INTERFACE id="ISISEnergyTransfer">
 		<EXTENSIONS calibration=".nxs"/>
