@@ -10,6 +10,8 @@ set ( INC_FILES
   inc/MantidQtWidgets/Icon.h
 )
 
+qt5_add_resources(RES_FILES ${CMAKE_CURRENT_LIST_DIR}/resources/icons.qrc)
+
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsIcons
   QT_VERSION 5
   SRC ${SRC_FILES}
