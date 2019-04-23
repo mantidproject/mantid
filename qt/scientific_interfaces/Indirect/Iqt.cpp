@@ -246,6 +246,9 @@ void Iqt::setup() {
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
+
+  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this,
+          SLOT(updateEnergyRange(int)));
 }
 
 void Iqt::run() {
@@ -637,6 +640,13 @@ void Iqt::updateRS(QtProperty *prop, double val) {
     xRangeSelector->setMinimum(val);
   else if (prop == m_properties["EHigh"])
     xRangeSelector->setMaximum(val);
+}
+
+void Iqt::updateEnergyRange(int state) {
+  if (state != 0) {
+    auto const value = m_dblManager->value(m_properties["ELow"]);
+    m_dblManager->setValue(m_properties["EHigh"], -value);
+  }
 }
 
 void Iqt::setTiledPlotFirstPlot(int value) {

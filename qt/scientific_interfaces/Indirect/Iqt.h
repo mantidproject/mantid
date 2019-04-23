@@ -67,6 +67,7 @@ private slots:
   void plotClicked();
   void errorsClicked();
   void plotTiled();
+  void updateEnergyRange(int state);
 
 private:
   void setPreviewSpectrumMaximum(int value);
