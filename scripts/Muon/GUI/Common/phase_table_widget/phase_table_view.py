@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
 from mantidqt.utils.qt import load_ui
 
 ui_muon_phases_tab, _ = load_ui(__file__, "muon_phases_tab.ui")
+
 
 class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
     def __init__(self, parent=None):
@@ -113,7 +114,7 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         self.forward_group_combo.setCurrentIndex(0)
         self.backward_group_combo.setCurrentIndex(1)
 
-        self._old_backward_index =  1
+        self._old_backward_index = 1
         self._old_forward_index = 0
 
     def set_phase_table_combo_box(self, phase_table_list):

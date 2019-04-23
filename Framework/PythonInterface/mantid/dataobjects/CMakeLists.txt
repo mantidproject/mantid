@@ -2,7 +2,7 @@
 
 set(MODULE_TEMPLATE src/dataobjects.cpp.in)
 
-# Files containing export definitions, these are automatically processed 
+# Files containing export definitions, these are automatically processed
 # -- Do NOT sort this list. The order defines the order in which the export
 # definitions occur and some depend on their base classes being exported first
 # --
@@ -45,11 +45,6 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/dataobjects)
 endif()
 
-copy_files_to_dir("${PY_FILES}"
-                  ${CMAKE_CURRENT_SOURCE_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_INSTALL_FILES)
-
 # Create the target for this directory
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/DataObjects/inc)
@@ -61,7 +56,6 @@ add_library(PythonDataObjectsModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonDataObjectsModule _dataobjects)
-set_target_output_directory(PythonDataObjectsModule ${OUTPUT_DIR} .pyd)
 
 # Add the required dependencies
 target_link_libraries(PythonDataObjectsModule

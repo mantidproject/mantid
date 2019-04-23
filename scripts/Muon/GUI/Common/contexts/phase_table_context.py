@@ -1,5 +1,6 @@
-default_dict = {'first_good_time' : 0.1, 'last_good_time': 15, 'forward_group': 'fwd', 'backward_group': 'bwd', 'input_workspace': '',
+default_dict = {'first_good_time': 0.1, 'last_good_time': 15, 'forward_group': 'fwd', 'backward_group': 'bwd', 'input_workspace': '',
                 'phase_quad_input_workspace': '', 'phase_table_for_phase_quad': ''}
+
 
 class PhaseTableContext(object):
     def __init__(self):
@@ -20,7 +21,3 @@ class PhaseTableContext(object):
 
     def get_phase_quad(self, instrument, run):
         return [phase_quad for phase_quad in self.phase_quad if instrument in phase_quad and run in phase_quad]
-
-
-
-

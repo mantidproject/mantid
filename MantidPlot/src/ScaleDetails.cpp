@@ -12,8 +12,8 @@
 #include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/qwt_compat.h"
 #include "Plot.h"
 
 #include "MantidKernel/Logger.h"

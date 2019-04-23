@@ -19,7 +19,8 @@ Improvements
 
 - Increased font size in run table.
 - For ZOOM, SHIFT user file command now moves monitor 5.
-- canSAS output mode will be disabled if 2D reduction mode is selected to avoid accidental errors with data dimension.
+- Batch files no longer require an output name to load. When processing, an auto-generated name is used instead.
+- canSAS output mode will be disable if 2D reduction mode is selected to avoid accidental errors with data dimension.
 
 Bug Fixes
 #########

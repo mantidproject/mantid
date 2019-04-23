@@ -184,7 +184,7 @@ public:
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
   detail::ShapeInfo::GeometryShape shape() const override;
-  const detail::ShapeInfo &shapeInfo() const;
+  const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                      std::vector<Kernel::V3D> &vectors, double &innerRadius,
                      double &radius, double &height) const override;

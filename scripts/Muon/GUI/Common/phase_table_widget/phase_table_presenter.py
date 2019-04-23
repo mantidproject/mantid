@@ -5,6 +5,7 @@ from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid.api import AnalysisDataService, WorkspaceGroup
 import re
 
+
 class GenericObserver(Observer):
     def __init__(self, callback):
         Observer.__init__(self)
@@ -70,7 +71,7 @@ class PhaseTablePresenter(object):
         phase_quad = run_PhaseQuad(parameters)
 
         base_name = parameters['InputWorkspace'].split('_')[0] + '_PhaseQuad_phase_table_'\
-                          + parameters['PhaseTable'].split('_')[0]
+            + parameters['PhaseTable'].split('_')[0]
         base_name, group = self.calculate_base_name_and_group(base_name)
         self.add_phase_quad_to_ADS(base_name, group, phase_quad)
 

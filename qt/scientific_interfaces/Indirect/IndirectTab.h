@@ -11,24 +11,23 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
-#include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
+#endif
 
 #include <QDoubleValidator>
 #include <QMap>
 #include <QPair>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 #include <algorithm>
+#include <map>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)

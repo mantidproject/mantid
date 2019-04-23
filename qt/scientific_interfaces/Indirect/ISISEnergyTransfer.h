@@ -7,7 +7,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 
-#include "../General/Background.h"
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
 #include "ui_ISISEnergyTransfer.h"

@@ -14,7 +14,7 @@
 #include "IEnggDiffractionView.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"

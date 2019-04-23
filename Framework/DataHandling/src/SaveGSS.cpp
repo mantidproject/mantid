@@ -190,9 +190,7 @@ void SaveGSS::init() {
 
   auto must_be_3 = boost::make_shared<Kernel::ArrayLengthValidator<int>>(3);
   auto precision_range =
-      boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
-  precision_range->setLower(0);
-  precision_range->setUpper(10);
+      boost::make_shared<Kernel::ArrayBoundedValidator<int>>(0, 10);
 
   auto precision_validator = boost::make_shared<Kernel::CompositeValidator>();
   precision_validator->add(must_be_3);

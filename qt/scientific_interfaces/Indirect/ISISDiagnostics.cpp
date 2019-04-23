@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 

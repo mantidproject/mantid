@@ -41,7 +41,7 @@
 #include <QWidgetList>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 #include <qwt3d_color.h>
 
 using Mantid::Kernel::ConfigService;
