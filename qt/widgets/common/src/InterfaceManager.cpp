@@ -12,7 +12,7 @@
 #include "MantidQtWidgets/Common/GenericDialog.h"
 #include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
+#include "MantidQtWidgets/Common/MantidHelpWindow.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
@@ -27,6 +27,7 @@
 
 using namespace MantidQt::API;
 using Mantid::Kernel::AbstractInstantiator;
+using MantidQt::MantidWidgets::MantidHelpWindow;
 
 namespace {
 // static logger
@@ -286,6 +287,8 @@ void InterfaceManager::showWebPage(const QString &url) {
 }
 
 void InterfaceManager::closeHelpWindow() {
-  auto window = createHelpWindow();
-  window->shutdown();
+  if (MantidHelpWindow::helpWindowExists()) {
+    auto window = createHelpWindow();
+    window->shutdown();
+  }
 }
