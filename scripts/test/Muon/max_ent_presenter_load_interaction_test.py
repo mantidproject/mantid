@@ -98,10 +98,10 @@ class MaxEntPresenterTest(unittest.TestCase):
         parameters = self.presenter.get_parameters_for_maxent_calculation()
         maxent_workspace = mock.MagicMock()
 
-        self.presenter.add_maxent_workspace_to_ADS(parameters, maxent_workspace)
+        self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', 'MUSR33333 MaxEnt Outputs', maxent_workspace)
 
         data_service_mock.addOrReplace.assert_called_once_with('MUSR22725_MaxEnt', maxent_workspace)
-        data_service_mock.addToGroup.assert_called_once_with('MUSR22725', 'MUSR22725_MaxEnt')
+        data_service_mock.addToGroup.assert_called_once_with('MUSR33333 MaxEnt Outputs', 'MUSR22725_MaxEnt')
 
     def test_get_output_options_defaults_returns_correctly(self):
         self.presenter.getWorkspaceNames()
@@ -130,7 +130,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         base_name, group = self.presenter.calculate_base_name_and_group('MUSR33333_something')
 
         self.assertEquals(base_name, 'MUSR33333_MaxEnt')
-        self.assertEquals(group, 'MUSR33333_MaxEnt_Outputs')
+        self.assertEquals(group, 'MUSR33333 MaxEnt Outputs')
 
 
 if __name__ == '__main__':

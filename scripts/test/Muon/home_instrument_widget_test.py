@@ -175,6 +175,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
     def test_that_on_dead_time_unselected_deadtime_model_set_to_none(self):
         self.view.deadtime_selector.setCurrentIndex(1)
+        self.context.gui_context['DeadTimeSource'] = 'FromFile'
         self.view.deadtime_selector.setCurrentIndex(0)
 
         self.assertEqual(self.view.deadtime_label_3.text(), self.presenter.dead_time_from_data_text([0.0]))
@@ -217,6 +218,7 @@ class HomeTabInstrumentPresenterTest(unittest.TestCase):
 
     def test_that_returning_to_None_options_hides_table_workspace_selector(self):
         self.view.deadtime_selector.setCurrentIndex(2)
+        self.context.gui_context['DeadTimeSource'] = 'FromADS'
         self.view.deadtime_selector.setCurrentIndex(0)
 
         self.assertEqual(self.view.deadtime_label_3.text(), "From 0.000 to 0.000 (ave. 0.000)")

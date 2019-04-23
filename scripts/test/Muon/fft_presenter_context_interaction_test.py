@@ -164,6 +164,8 @@ class FFTPresenterTest(unittest.TestCase):
         fft_mock.return_value = fft_mock_return
         apodization_mock.return_value = apodization_mock_return
         self.presenter.add_fft_workspace_to_ADS = mock.MagicMock()
+        self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=('MUSR22725_PhaseQuad_MUSR22725_phase_table',
+                                                                                    'MUSR22725 PhaseTable'))
         phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
         self.context.phase_context.add_phase_quad(phase_name)
         self.presenter.getWorkspaceNames()
@@ -177,12 +179,9 @@ class FFTPresenterTest(unittest.TestCase):
                                           'AcceptXRoundingErrors': True, 'AutoShift': True, 'InputImagWorkspace': apodization_mock_return,
                                           'Imaginary': 1})
 
-        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with({'Padding': 1, 'ApodizationFunction': 'Lorentz',
-                                                                         'NegativePadding': True,
-                                                                         'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table',
-                                                                         'DecayConstant': 4.4}, fft_mock_return)
-
-
+        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with('MUSR22725_PhaseQuad_MUSR22725_phase_table',
+                                                                        'MUSR22725 PhaseTable',
+                                                                        fft_mock_return)
 
 
 if __name__ == '__main__':
