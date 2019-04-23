@@ -420,7 +420,7 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=Fal
     Returns x,y,z 2D arrays
     '''
     try:
-        _ = workspace.blocksize()
+        workspace.blocksize()
     except RuntimeError:
         raise ValueError('The spectra are not the same length. Try using pcolor, pcolorfast, or pcolormesh instead')
     x = workspace.extractX()
@@ -507,7 +507,7 @@ def get_data_uneven_flag(workspace, **kwargs):
     '''
     aligned = kwargs.pop('axisaligned', False)
     try:
-        _ = workspace.blocksize()
+        workspace.blocksize()
     except RuntimeError:
         aligned = True
     return aligned, kwargs
@@ -600,12 +600,8 @@ def get_axes_labels(workspace, indices=None):
             axes.append('{0} ({1})'.format(axis_title, axis_unit))
         axes.append(title.strip())
     else:
-        # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
-        y_unit_label = workspace.YUnitLabel()
-        if ' per ' in y_unit_label:
-            label, unit = y_unit_label.split(' per ')
-            y_unit_label = '{} (${}$)$^{{-1}}$'.format(label, unit)
-        axes_labels = [y_unit_label]
+        # For matrix workspaces, return a tuple of ``(YUnit, <other units>)`
+        axes_labels = [workspace.YUnitLabel(useLatexText=True)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()
