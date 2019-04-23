@@ -7,53 +7,30 @@
 #ifndef MANTIDQT_WIDGETS_ICONS_ICONLOADER_H_
 #define MANTIDQT_WIDGETS_ICONS_ICONLOADER_H_
 
-// Std imports
-#include <vector>
+#include "CharIconEngine.h"
+#include "CharIconPainter.h"
 
-// Third party imports
 #include <QHash>
 #include <QIcon>
 #include <QIconEngine>
 #include <QString>
 #include <QVariant>
 #include <boost/optional.hpp>
+#include <vector>
+
+namespace MantidQt {
+namespace Widgets {
+namespace Icons {
 
 QIcon getIcon(const QString &iconName);
 
 QIcon getIcon(const QString &iconName,
-              const boost::optional<QString> &color = boost::none_t,
-              const boost::optional<double> &scaleFactor = boost::none_t);
+              const boost::optional<QString> &color = boost::none,
+              const boost::optional<double> &scaleFactor = boost::none);
 
 QIcon getIcon(const std::vector<QString> &iconNames,
               const boost::optional<std::vector<QHash<QString, QVariant>>>
-                  &options = boost::none_t);
-
-class CharIconEngine : QIconEngine {
-public:
-  CharIconEngine::CharIconEngine(
-      IconicFont &iconic, QPainter *painter,
-      std::vector<QHash<QString, QVariant>> &options);
-  void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode,
-             QIcon::State state) override;
-  void pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state);
-
-private:
-  IconicFont &m_iconic;
-  QPainter *m_painter;
-  std::vector<QHash<QString, QVariant>> &m_options;
-};
-
-class CharIconPainter {
-public:
-  void paint(IconicFont &iconic, QPainter *painter, QRect rect,
-             QIcon::Mode mode, QIcon::State state,
-             std::vector<QHash<QString, QVariant>> &options);
-
-private:
-  void paintIcon(IconicFont &iconic, QPainter *painter, QRect rect,
-                 QIcon::Mode mode, QIcon::State state,
-                 QHash<QString, QVariant> &options);
-};
+                  &options = boost::none);
 
 class IconicFont {
 public:
@@ -74,5 +51,9 @@ private:
 
   CharIconPainter m_painter;
 };
+
+} // namespace Icons
+} // namespace Widgets
+} // namespace MantidQt
 
 #endif /* MANTIDQT_WIDGETS_ICONS_ICONLOADER_H_ */

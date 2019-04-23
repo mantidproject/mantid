@@ -1,9 +1,13 @@
-set ( SRC_FILES 
-  src/IconLoader.cpp
+set ( SRC_FILES
+  src/CharIconPainter.cpp
+  src/CharIconEngine.cpp
+  src/Icon.cpp
 )
 
 set ( INC_FILES 
-  inc/MantidQtWidgets/IconLoader.h
+  inc/MantidQtWidgets/CharIconPainter.h
+  inc/MantidQtWidgets/CharIconEngine.h
+  inc/MantidQtWidgets/Icon.h
 )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsIcons
