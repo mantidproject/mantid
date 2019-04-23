@@ -39,8 +39,8 @@ Creates interaction with a line
 class MANTID_GEOMETRY_DLL LineIntersectVisit : public BaseVisit {
 private:
   Line ATrack;                  ///< The line
-  std::list<Kernel::V3D> PtOut; ///< The intersection point
-  std::list<double> DOut;       ///< The distance
+  std::vector<Kernel::V3D> PtOut; ///< The intersection point
+  std::vector<double> DOut;       ///< The distance
 
   void procTrack();
 
@@ -56,9 +56,9 @@ public:
 
   // Accessor
   /// Get the distance
-  const std::list<double> &getDistance() const { return DOut; }
+  const std::vector<double> &getDistance() const { return DOut; }
   /// Get the intersection points
-  const std::list<Kernel::V3D> &getPoints() const { return PtOut; }
+  const std::vector<Kernel::V3D> &getPoints() const { return PtOut; }
   /// Get the number of intersection points
   unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
 

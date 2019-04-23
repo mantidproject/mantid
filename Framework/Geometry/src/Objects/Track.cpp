@@ -21,7 +21,7 @@ using Kernel::V3D;
 /**
  * Default constructor
  */
-Track::Track() : m_startPoint(), m_unitVector(0., 0., 1.) {}
+Track::Track() : Track(V3D(), V3D(0, 0, 1)) {}
 
 /**
  * Constructor
@@ -34,6 +34,8 @@ Track::Track(const V3D &startPt, const V3D &unitVector)
     throw std::invalid_argument(
         "Failed to construct track: direction is not a unit vector.");
   }
+  m_links.reserve(2);
+  m_surfPoints.reserve(4);
 }
 
 /**

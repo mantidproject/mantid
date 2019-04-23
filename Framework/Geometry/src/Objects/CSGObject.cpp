@@ -1100,31 +1100,31 @@ int CSGObject::procString(const std::string &Line) {
  * @return Number of segments added
  */
 int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int originalCount = UT.count(); // Number of intersections original track
-  // Loop over all the surfaces.
-  LineIntersectVisit LI(UT.startPoint(), UT.direction());
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    (*vc)->acceptVisitor(LI);
-  }
-  const auto &IPoints(LI.getPoints());
-  const auto &dPoints(LI.getDistance());
-
-  auto ditr = dPoints.begin();
-  auto itrEnd = IPoints.end();
-  for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
-    if (*ditr > 0.0) // only interested in forward going points
-    {
-      // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, UT.direction());
-      if (flag != TrackDirection::INVALID)
-        UT.addPoint(flag, *iitr, *this);
+    int originalCount = UT.count(); // Number of intersections original track
+    // Loop over all the surfaces.
+    LineIntersectVisit LI(UT.startPoint(), UT.direction());
+    std::vector<const Surface *>::const_iterator vc;
+    for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+      (*vc)->acceptVisitor(LI);
     }
+    const auto &IPoints(LI.getPoints());
+    const auto &dPoints(LI.getDistance());
+
+    auto ditr = dPoints.begin();
+    auto itrEnd = IPoints.end();
+    for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
+      if (*ditr > 0.0) // only interested in forward going points
+      {
+        // Is the point and enterance/exit Point
+        const TrackDirection flag = calcValidType(*iitr, UT.direction());
+        if (flag != TrackDirection::INVALID)
+          UT.addPoint(flag, *iitr, *this);
+      }
+    }
+    UT.buildLink();
+    // Return number of track segments added
+    return (UT.count() - originalCount);
   }
-  UT.buildLink();
-  // Return number of track segments added
-  return (UT.count() - originalCount);
-}
 
 /**
  * Calculate if a point PT is a valid point on the track
