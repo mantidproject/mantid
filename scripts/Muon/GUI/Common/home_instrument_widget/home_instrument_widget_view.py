@@ -38,6 +38,8 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             self.on_time_zero_checkbox_state_change)
         self.firstgooddata_checkbox.stateChanged.connect(
             self.on_first_good_data_checkbox_state_change)
+        self.lastgooddata_checkbox.stateChanged.connect(
+            self.on_last_good_data_checkbox_state_change)
 
         self._on_dead_time_from_data_selected = None
         self._on_dead_time_from_other_file_selected = lambda: 0
@@ -46,6 +48,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.timezero_checkbox.setChecked(True)
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
+        self.last_good_data_edit_enabled(True)
 
         self._on_time_zero_changed = lambda: 0
         self._on_first_good_data_changed = lambda: 0
@@ -57,6 +60,8 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
         self.firstgooddata_edit.editingFinished.connect(
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
+        self.lastgooddata_edit.editingFinished.connect(
+            lambda: self._on_last_good_data_changed() if not self.is_last_good_data_checked() else None)
         self.deadtime_file_selector.currentIndexChanged.connect(
             self.on_dead_time_file_combo_changed)
 
@@ -66,6 +71,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.setup_instrument_row()
         self.setup_time_zero_row()
         self.setup_first_good_data_row()
+        self.setup_last_good_data_row()
         self.setup_dead_time_row()
         self.setup_rebin_row()
 
@@ -86,7 +92,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.group2 = QtWidgets.QGroupBox("Rebin")
         self.group2.setFlat(False)
 
-        self.group2.setLayout(self.horizontal_layout_5)
+        self.group2.setLayout(self.horizontal_layout_6)
 
         self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
@@ -328,6 +334,75 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         return float(self.firstgooddata_edit.text())
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Last Good Data
+    #-------------------------------------------------------------------------------------------------------------------
+
+    def setup_last_good_data_row(self):
+
+        self.lastgooddata_label = QtWidgets.QLabel(self)
+        self.lastgooddata_label.setObjectName("lastgooddataLabel")
+        self.lastgooddata_label.setText("Last Good Data : ")
+
+        self.lastgooddata_edit = QtWidgets.QLineEdit(self)
+
+        lastgooddata_validator = QtGui.QRegExpValidator(
+            QtCore.QRegExp(valid_float_regex),
+            self.firstgooddata_edit)
+        self.lastgooddata_edit.setValidator(lastgooddata_validator)
+        self.lastgooddata_edit.setObjectName("lastgooddataEdit")
+        self.lastgooddata_edit.setText("")
+
+        self.lastgooddata_unit_label = QtWidgets.QLabel(self)
+        self.lastgooddata_unit_label.setObjectName("lastgooddataUnitLabel")
+        self.lastgooddata_unit_label.setText(u" \u03BCs (From data file ")
+
+        self.lastgooddata_checkbox = QtWidgets.QCheckBox(self)
+        self.lastgooddata_checkbox.setObjectName("lastgooddataCheckbox")
+        self.lastgooddata_checkbox.setChecked(True)
+
+        self.lastgooddata_label_2 = QtWidgets.QLabel(self)
+        self.lastgooddata_label_2.setObjectName("lastGoodDataLabel")
+        self.lastgooddata_label_2.setText(" )")
+
+        self.horizontal_layout_4 = QtWidgets.QHBoxLayout()
+        self.horizontal_layout_4.setObjectName("horizontalLayout4")
+        self.horizontal_layout_4.addSpacing(10)
+        self.horizontal_layout_4.addWidget(self.lastgooddata_unit_label)
+        self.horizontal_layout_4.addWidget(self.lastgooddata_checkbox)
+        self.horizontal_layout_4.addWidget(self.lastgooddata_label_2)
+        self.horizontal_layout_4.addStretch(0)
+
+        self.layout.addWidget(self.lastgooddata_label, 3, 0)
+        self.layout.addWidget(self.lastgooddata_edit, 3, 1)
+        self.layout.addItem(self.horizontal_layout_4, 3, 2)
+
+    def on_last_good_data_changed(self, slot):
+        self._on_last_good_data_changed = slot
+
+    def set_last_good_data(self, last_good_data):
+        self.lastgooddata_edit.setText(
+            "{0:.3f}".format(round(float(last_good_data), 3)))
+
+    def on_last_good_data_checkState_changed(self, slot):
+        self.lastgooddata_checkbox.stateChanged.connect(slot)
+
+    def last_good_data_state(self):
+        return self.lastgooddata_checkbox.checkState()
+
+    def is_last_good_data_checked(self):
+        return self.lastgooddata_checkbox.checkState()
+
+    def on_last_good_data_checkbox_state_change(self):
+        self.last_good_data_edit_enabled(
+            self.lastgooddata_checkbox.checkState())
+
+    def last_good_data_edit_enabled(self, disabled):
+        self.lastgooddata_edit.setEnabled(not disabled)
+
+    def get_last_good_data(self):
+        return float(self.lastgooddata_edit.text())
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Dead time correction
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -365,10 +440,10 @@ class InstrumentWidgetView(QtWidgets.QWidget):
                                                "dead times will be saved as a table, and automatically selected "
                                                "as the dead time for the current data.")
 
-        self.horizontal_layout_4 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_4.setObjectName("horizontalLayout3")
-        self.horizontal_layout_4.addSpacing(10)
-        self.horizontal_layout_4.addWidget(self.deadtime_label_3)
+        self.horizontal_layout_5 = QtWidgets.QHBoxLayout()
+        self.horizontal_layout_5.setObjectName("horizontalLayout5")
+        self.horizontal_layout_5.addSpacing(10)
+        self.horizontal_layout_5.addWidget(self.deadtime_label_3)
 
         self.dead_time_file_layout = QtWidgets.QHBoxLayout()
         self.dead_time_file_layout.addWidget(self.deadtime_browse_button)
@@ -377,13 +452,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_other_file_label = QtWidgets.QLabel(self)
         self.dead_time_other_file_label.setText("From other file : ")
 
-        self.layout.addWidget(self.deadtime_label, 3, 0)
-        self.layout.addWidget(self.deadtime_selector, 3, 1)
-        self.layout.addItem(self.horizontal_layout_4, 3, 2)
-        self.layout.addWidget(self.deadtime_label_2, 4, 0)
-        self.layout.addWidget(self.deadtime_file_selector, 4, 1)
-        self.layout.addWidget(self.dead_time_other_file_label, 5, 0)
-        self.layout.addWidget(self.deadtime_browse_button, 5, 1)
+        self.layout.addWidget(self.deadtime_label, 4, 0)
+        self.layout.addWidget(self.deadtime_selector, 4, 1)
+        self.layout.addItem(self.horizontal_layout_5, 4, 2)
+        self.layout.addWidget(self.deadtime_label_2, 5, 0)
+        self.layout.addWidget(self.deadtime_file_selector, 5, 1)
+        self.layout.addWidget(self.dead_time_other_file_label, 6, 0)
+        self.layout.addWidget(self.deadtime_browse_button, 6, 1)
 
     def on_dead_time_file_option_changed(self, slot):
         self._on_dead_time_file_option_selected = slot
@@ -517,19 +592,19 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
-        self.horizontal_layout_5 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_5.setObjectName("horizontalLayout3")
-        self.horizontal_layout_5.addSpacing(10)
+        self.horizontal_layout_6 = QtWidgets.QHBoxLayout()
+        self.horizontal_layout_6.setObjectName("horizontalLayout6")
+        self.horizontal_layout_6.addSpacing(10)
 
-        self.horizontal_layout_5.addWidget(self.rebin_label)
-        self.horizontal_layout_5.addWidget(self.rebin_selector)
+        self.horizontal_layout_6.addWidget(self.rebin_label)
+        self.horizontal_layout_6.addWidget(self.rebin_selector)
 
-        self.horizontal_layout_5.addWidget(self.rebin_steps_label)
-        self.horizontal_layout_5.addWidget(self.rebin_steps_edit)
-        self.horizontal_layout_5.addWidget(self.rebin_variable_label)
-        self.horizontal_layout_5.addWidget(self.rebin_variable_edit)
-        self.horizontal_layout_5.addStretch(0)
-        self.horizontal_layout_5.addSpacing(10)
+        self.horizontal_layout_6.addWidget(self.rebin_steps_label)
+        self.horizontal_layout_6.addWidget(self.rebin_steps_edit)
+        self.horizontal_layout_6.addWidget(self.rebin_variable_label)
+        self.horizontal_layout_6.addWidget(self.rebin_variable_edit)
+        self.horizontal_layout_6.addStretch(0)
+        self.horizontal_layout_6.addSpacing(10)
 
         self.rebin_steps_label.hide()
         self.rebin_steps_edit.hide()

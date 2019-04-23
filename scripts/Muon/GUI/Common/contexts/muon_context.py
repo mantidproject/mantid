@@ -179,13 +179,22 @@ class MuonContext(object):
         if self.gui_context['FirstGoodDataFromFile']:
             return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            return self.gui_context['FirstGoodData']
+            if 'FirstGoodData' in self.gui_context:
+                return self.gui_context['FirstGoodData']
+            else:
+                self.gui_context['FirstGoodData'] = self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+                return self.gui_context['FirstGoodData']
 
     def last_good_data(self, run):
         if self.gui_context['LastGoodDataFromFile']:
             return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
         else:
-            return self.gui_context['LastGoodData']
+            if 'LastGoodData' in self.gui_context:
+                return self.gui_context['LastGoodData']
+            else:
+                self.gui_context['LastGoodData'] = round(max(self.data_context.get_loaded_data_for_run(run)
+                                                             ["OutputWorkspace"][0].workspace.dataX(0)), 2)
+                return self.gui_context['LastGoodData']
 
     def dead_time_table(self, run):
         if self.gui_context['DeadTimeSource'] == 'FromADS':
