@@ -25,6 +25,7 @@ Improvements
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
 - :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` is able to accept any `MatrixWorkspace`, as long as it has run objects loaded from `LoadNexusLogs <algm-LoadNexusLogs>`, other than `EventWorkspace`.
 - :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` has a new property `ScatterFrom` which allows for calculating the correction for the other components (i.e. container and environment)
+- An error due to the locale issue may appear when reading the incident energy Ei value from the logs in :ref:`ConvertUnits <algm-ConvertUnits>`, :ref:`algm-DgsReduction`, and :ref:`algm-ConvertToMDMinMaxGlobal`.
 
 Removed
 #######
