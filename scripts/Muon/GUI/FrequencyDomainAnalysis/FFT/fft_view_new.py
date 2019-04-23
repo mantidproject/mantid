@@ -8,8 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore
 
-import mantid.simpleapi as mantid
-
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
 

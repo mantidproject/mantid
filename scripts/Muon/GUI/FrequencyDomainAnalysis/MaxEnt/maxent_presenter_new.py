@@ -114,7 +114,7 @@ class MaxEntPresenter(object):
 
         base_name, group = self.calculate_base_name_and_group(maxent_parameters['InputWorkspace'])
 
-        output_name = self.add_maxent_workspace_to_ADS(base_name, group, maxent_workspace)
+        self.add_maxent_workspace_to_ADS(base_name, group, maxent_workspace)
 
         maxent_output_options = self.get_maxent_output_options()
 

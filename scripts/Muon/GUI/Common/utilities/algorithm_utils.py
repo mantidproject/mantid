@@ -131,6 +131,7 @@ def run_MuonMaxent(parameters_dict, alg):
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
 
+
 def run_AppendSpectra(ws1, ws2):
     """
     Apply the AppendSpectra algorithm to two given workspaces (no checks made).
