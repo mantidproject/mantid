@@ -206,6 +206,8 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
                            Qt::WindowFlags parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != nullptr);
+  // Take ownership of the engine
+  m_helpEngine->setParent(this);
 
   Ui::pqHelpWindow ui;
   ui.setupUi(this);
