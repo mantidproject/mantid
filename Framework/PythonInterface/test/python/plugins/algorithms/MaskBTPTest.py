@@ -42,11 +42,6 @@ class MaskBTPTest(unittest.TestCase):
         except RuntimeError:
             pass
         try:
-            MaskBTP(Instrument='SEQUOIA', Bank="27")
-            self.fail("Should not have got here.")
-        except RuntimeError:
-            pass
-        try:
             MaskBTP(Instrument='HYSPEC', Tube="18")
             self.fail("Should not have got here.")
         except RuntimeError:
@@ -85,6 +80,8 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="24")
         MaskBTP(Instrument='SEQUOIA', Bank="25")
         MaskBTP(Instrument='SEQUOIA', Bank="26")
+        MaskBTP(Instrument='SEQUOIA', Bank="27")
+        MaskBTP(Instrument='SEQUOIA', Bank="37")
         MaskBTP(Instrument='SEQUOIA', Bank="38")
         return
         

@@ -174,7 +174,12 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         elif self.instname=="SEQUOIA":
             # there are only banks 23-26 in A row
             if self.bankmin[self.instname]<=banknum<= 23+4-1:
-                return self.instrument.getComponentByName("A row")[banknum-23][0]
+                A_row = self.instrument.getComponentByName("A row")
+                if A_row is None: return None
+                return A_row[banknum-23][0]
+            if 27<=banknum<=37:
+                # these banks are still missing
+                return
             if 38<=banknum<= 74:
                 return self.instrument.getComponentByName("B row")[banknum-38][0]
             elif 75<=banknum<= 113:
@@ -182,7 +187,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             elif 114<=banknum<=self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
-                raise ValueError("Out of range index for SEQUOIA instrument bank numbers")
+                raise ValueError("Out of range index for SEQUOIA instrument bank numbers: %s" % (banknum,))
         elif self.instname in ["CNCS", "CORELLI","HYSPEC", "WAND"]:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]
