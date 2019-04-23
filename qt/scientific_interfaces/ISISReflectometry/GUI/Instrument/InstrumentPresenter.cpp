@@ -75,7 +75,7 @@ void InstrumentPresenter::updateWidgetEnabledState() {
 void InstrumentPresenter::updateWidgetValidState() {
   // Check the ranges are valid. It's fine if they're not set at all,
   // so show them as valid if the range is not intialised
-  
+
   if (!m_model.wavelengthRange() || m_model.wavelengthRange()->isValid(false))
     m_view->showLambdaRangeValid();
   else
