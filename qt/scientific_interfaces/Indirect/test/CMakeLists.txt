@@ -1,26 +1,24 @@
-###########################################################################
 # Testing
-###########################################################################
-set ( TEST_FILES
-  ConvFitDataPresenterTest.h
-  ConvFitModelTest.h
-  IndirectDataTablePresenterTest.h
-  IndirectFitDataPresenterTest.h
-  IndirectFitDataTest.h
-  IndirectFitOutputOptionsModelTest.h
-  IndirectFitOutputOptionsPresenterTest.h
-  IndirectFitOutputTest.h
-  IndirectFitPlotModelTest.h
-  IndirectFitPlotPresenterTest.h
-  IndirectFittingModelTest.h
-  IndirectSpectrumSelectionPresenterTest.h
-  IqtFitModelTest.h
-  JumpFitDataPresenterTest.h
-  JumpFitModelTest.h
-  MSDFitModelTest.h
-)
+set(TEST_FILES
+    ConvFitDataPresenterTest.h
+    ConvFitModelTest.h
+    IndirectDataTablePresenterTest.h
+    IndirectFitDataPresenterTest.h
+    IndirectFitDataTest.h
+    IndirectFitOutputOptionsModelTest.h
+    IndirectFitOutputOptionsPresenterTest.h
+    IndirectFitOutputTest.h
+    IndirectFitPlotModelTest.h
+    IndirectFitPlotPresenterTest.h
+    IndirectFittingModelTest.h
+    IndirectSpectrumSelectionPresenterTest.h
+    IqtFitModelTest.h
+    JumpFitDataPresenterTest.h
+    JumpFitModelTest.h
+    MSDFitModelTest.h)
 
-mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
+mtd_add_qt_tests(
+  TARGET_NAME MantidQtInterfacesIndirectTest
   QT_VERSION 4
   SRC ${TEST_FILES}
   INCLUDE_DIRS
@@ -50,5 +48,4 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES
-    GUITests
-)
+    GUITests)
