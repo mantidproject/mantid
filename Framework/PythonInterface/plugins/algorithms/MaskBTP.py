@@ -173,13 +173,11 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise ValueError("Out of range index for ARCS instrument bank numbers")
         elif self.instname=="SEQUOIA":
             # there are only banks 23-26 in A row
-            if self.bankmin[self.instname]<=banknum<= 23+4-1:
+            if self.bankmin[self.instname]<=banknum<= 37:
                 A_row = self.instrument.getComponentByName("A row")
-                if A_row is None: return None
+                if A_row is None or banknum>26:
+                    return None
                 return A_row[banknum-23][0]
-            if 27<=banknum<=37:
-                # these banks are still missing
-                return
             if 38<=banknum<= 74:
                 return self.instrument.getComponentByName("B row")[banknum-38][0]
             elif 75<=banknum<= 113:
