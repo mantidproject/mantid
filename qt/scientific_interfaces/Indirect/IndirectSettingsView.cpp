@@ -37,19 +37,16 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectSettingsView::IndirectSettingsView(QWidget *parent)
-    : IIndirectSettingsView(parent) {
-  initLayout();
-}
+    : IIndirectSettingsView(parent),
+      m_uiForm(std::make_unique<Ui::IndirectInterfaceSettings>()) {
+  m_uiForm->setupUi(this);
 
-void IndirectSettingsView::initLayout() {
-  m_uiForm.setupUi(this);
-
-  connect(m_uiForm.pbOk, SIGNAL(clicked()), this, SLOT(emitOkClicked()));
-  connect(m_uiForm.pbApply, SIGNAL(clicked()), this, SLOT(emitApplyClicked()));
-  connect(m_uiForm.pbCancel, SIGNAL(clicked()), this,
+  connect(m_uiForm->pbOk, SIGNAL(clicked()), this, SLOT(emitOkClicked()));
+  connect(m_uiForm->pbApply, SIGNAL(clicked()), this, SLOT(emitApplyClicked()));
+  connect(m_uiForm->pbCancel, SIGNAL(clicked()), this,
           SLOT(emitCancelClicked()));
 
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(openHelp()));
+  connect(m_uiForm->pbHelp, SIGNAL(clicked()), this, SLOT(openHelp()));
 }
 
 void IndirectSettingsView::emitOkClicked() { emit okClicked(); }
@@ -64,28 +61,28 @@ void IndirectSettingsView::openHelp() {
 }
 
 void IndirectSettingsView::setSelectedFacility(QString const &text) {
-  auto const index = m_uiForm.cbFacility->findText(text);
-  m_uiForm.cbFacility->setCurrentIndex(index != -1 ? index : 0);
+  auto const index = m_uiForm->cbFacility->findText(text);
+  m_uiForm->cbFacility->setCurrentIndex(index != -1 ? index : 0);
 }
 
 QString IndirectSettingsView::getSelectedFacility() const {
-  return m_uiForm.cbFacility->currentText();
+  return m_uiForm->cbFacility->currentText();
 }
 
 void IndirectSettingsView::setRestrictInputByNameChecked(bool check) {
-  m_uiForm.ckRestrictInputDataNames->setChecked(check);
+  m_uiForm->ckRestrictInputDataNames->setChecked(check);
 }
 
 bool IndirectSettingsView::isRestrictInputByNameChecked() const {
-  return m_uiForm.ckRestrictInputDataNames->isChecked();
+  return m_uiForm->ckRestrictInputDataNames->isChecked();
 }
 
 void IndirectSettingsView::setPlotErrorBarsChecked(bool check) {
-  m_uiForm.ckPlotErrorBars->setChecked(check);
+  m_uiForm->ckPlotErrorBars->setChecked(check);
 }
 
 bool IndirectSettingsView::isPlotErrorBarsChecked() const {
-  return m_uiForm.ckPlotErrorBars->isChecked();
+  return m_uiForm->ckPlotErrorBars->isChecked();
 }
 
 void IndirectSettingsView::setSetting(QString const &settingsGroup,
@@ -100,19 +97,19 @@ QVariant IndirectSettingsView::getSetting(QString const &settingsGroup,
 }
 
 void IndirectSettingsView::setApplyText(QString const &text) {
-  m_uiForm.pbApply->setText(text);
+  m_uiForm->pbApply->setText(text);
 }
 
 void IndirectSettingsView::setApplyEnabled(bool enable) {
-  m_uiForm.pbApply->setEnabled(enable);
+  m_uiForm->pbApply->setEnabled(enable);
 }
 
 void IndirectSettingsView::setOkEnabled(bool enable) {
-  m_uiForm.pbOk->setEnabled(enable);
+  m_uiForm->pbOk->setEnabled(enable);
 }
 
 void IndirectSettingsView::setCancelEnabled(bool enable) {
-  m_uiForm.pbCancel->setEnabled(enable);
+  m_uiForm->pbCancel->setEnabled(enable);
 }
 
 } // namespace IDA

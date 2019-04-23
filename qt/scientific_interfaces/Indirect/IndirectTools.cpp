@@ -121,7 +121,7 @@ void IndirectTools::runClicked() {
  */
 void IndirectTools::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  // m_settingsPresenter->showDialog();
 }
 
 /**

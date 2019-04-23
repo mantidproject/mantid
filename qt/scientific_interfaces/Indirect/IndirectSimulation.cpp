@@ -116,7 +116,7 @@ void IndirectSimulation::loadSettings() {
  */
 void IndirectSimulation::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  //m_settingsPresenter->showDialog();
 }
 
 /**

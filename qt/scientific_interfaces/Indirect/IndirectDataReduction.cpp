@@ -80,7 +80,7 @@ IndirectDataReduction::~IndirectDataReduction() {
 
 void IndirectDataReduction::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  //m_settingsPresenter->showDialog();
 }
 
 /**

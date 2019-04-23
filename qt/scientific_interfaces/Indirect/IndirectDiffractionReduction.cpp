@@ -734,7 +734,7 @@ void IndirectDiffractionReduction::openDirectoryDialog() {
  */
 void IndirectDiffractionReduction::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  // m_settingsPresenter->showDialog();
 }
 
 /**

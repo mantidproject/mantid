@@ -113,7 +113,7 @@ void IndirectBayes::loadSettings() {
  */
 void IndirectBayes::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  //m_settingsPresenter->showDialog();
 }
 
 /**

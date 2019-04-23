@@ -148,7 +148,7 @@ void IndirectCorrections::openDirectoryDialog() {
  */
 void IndirectCorrections::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  // m_settingsPresenter->showDialog();
 }
 
 /**

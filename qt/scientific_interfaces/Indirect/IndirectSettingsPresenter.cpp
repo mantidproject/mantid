@@ -31,9 +31,8 @@ void IndirectSettingsPresenter::setUpPresenter() {
   loadSettings();
 }
 
-void IndirectSettingsPresenter::showDialog() {
-  m_view->show();
-  m_view->setFocus();
+IIndirectSettingsView *IndirectSettingsPresenter::getView() {
+  return m_view.get();
 }
 
 void IndirectSettingsPresenter::applyAndCloseSettings() {
@@ -47,7 +46,7 @@ void IndirectSettingsPresenter::applyChanges() {
   setApplyingChanges(false);
 }
 
-void IndirectSettingsPresenter::closeDialog() { m_view->close(); }
+void IndirectSettingsPresenter::closeDialog() { emit closeSettings(); }
 
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
@@ -56,7 +55,7 @@ void IndirectSettingsPresenter::loadSettings() {
       getSetting("restrict-input-by-name").toBool());
   m_view->setPlotErrorBarsChecked(getSetting("plot-error-bars").toBool());
 
-  emit applySettings();
+  // emit applySettings();
 }
 
 QVariant IndirectSettingsPresenter::getSetting(std::string const &settingName) {

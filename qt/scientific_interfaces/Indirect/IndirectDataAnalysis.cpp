@@ -155,7 +155,7 @@ void IndirectDataAnalysis::openDirectoryDialog() {
  */
 void IndirectDataAnalysis::settingsClicked() {
   m_settingsPresenter->loadSettings();
-  m_settingsPresenter->showDialog();
+  //m_settingsPresenter->showDialog();
 }
 
 /**

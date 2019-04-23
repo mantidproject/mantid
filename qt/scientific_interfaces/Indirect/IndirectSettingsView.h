@@ -7,7 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSVIEW_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSETTINGSVIEW_H_
 
-#include "ui_IndirectSettings.h"
+#include "ui_IndirectInterfaceSettings.h"
 
 #include "IIndirectSettingsView.h"
 
@@ -53,9 +53,7 @@ private slots:
   void openHelp();
 
 private:
-  void initLayout() override;
-
-  Ui::IndirectSettings m_uiForm;
+  std::unique_ptr<Ui::IndirectInterfaceSettings> m_uiForm;
 };
 
 } // namespace IDA

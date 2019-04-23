@@ -9,20 +9,18 @@
 
 #include "DllConfig.h"
 
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include <QObject>
+#include <QWidget>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IIndirectSettingsView
-    : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INDIRECT_DLL IIndirectSettingsView : public QWidget {
   Q_OBJECT
 
 public:
-  IIndirectSettingsView(QWidget *parent = nullptr)
-      : MantidQt::API::UserSubWindow(parent){};
+  IIndirectSettingsView(QWidget *parent = nullptr) : QWidget(parent){};
   virtual ~IIndirectSettingsView(){};
 
   virtual void setSelectedFacility(QString const &text) = 0;

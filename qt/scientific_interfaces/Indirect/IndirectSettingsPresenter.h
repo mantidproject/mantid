@@ -24,16 +24,18 @@ class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter : public QObject {
   Q_OBJECT
 
 public:
-  explicit IndirectSettingsPresenter(QWidget *parent);
+  explicit IndirectSettingsPresenter(QWidget *parent = nullptr);
   explicit IndirectSettingsPresenter(IndirectSettingsModel *model,
                                      IIndirectSettingsView *view);
 
-  void showDialog();
+  IIndirectSettingsView *IndirectSettingsPresenter::getView();
+
   void loadSettings();
 
   QVariant getSetting(std::string const &settingName);
 
 signals:
+  void closeSettings();
   void applySettings();
 
 private slots:
