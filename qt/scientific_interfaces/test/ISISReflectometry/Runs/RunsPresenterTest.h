@@ -21,11 +21,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
+using testing::_;
 
 //=====================================================================================
 // Functional tests
