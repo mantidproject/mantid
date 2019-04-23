@@ -112,21 +112,42 @@ void InstrumentPresenter::instrumentChanged(
 
 boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   auto range = RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
-  return rangeOrNone(range, false);
+  bool const bothOrNoneMustBeSet = false;
+
+  if (range.isValid(bothOrNoneMustBeSet))
+    m_view->showLambdaRangeValid();
+  else
+    m_view->showLambdaRangeInvalid();
+
+  return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
 boost::optional<RangeInLambda>
 InstrumentPresenter::monitorBackgroundRangeFromView() {
   auto range = RangeInLambda(m_view->getMonitorBackgroundMin(),
                              m_view->getMonitorBackgroundMax());
-  return rangeOrNone(range, true);
+  bool const bothOrNoneMustBeSet = true;
+
+  if (range.isValid(bothOrNoneMustBeSet))
+    m_view->showMonitorBackgroundRangeValid();
+  else
+    m_view->showMonitorBackgroundRangeInvalid();
+
+  return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
 boost::optional<RangeInLambda>
 InstrumentPresenter::monitorIntegralRangeFromView() {
   auto range = RangeInLambda(m_view->getMonitorIntegralMin(),
                              m_view->getMonitorIntegralMax());
-  return rangeOrNone(range, false);
+  bool const bothOrNoneMustBeSet = false;
+
+  if (range.isValid(bothOrNoneMustBeSet))
+    m_view->showMonitorIntegralRangeValid();
+  else
+    m_view->showMonitorIntegralRangeInvalid();
+
+  return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
 MonitorCorrections InstrumentPresenter::monitorCorrectionsFromView() {
@@ -161,7 +182,6 @@ void InstrumentPresenter::updateModelFromView() {
   auto const detectorCorrections = detectorCorrectionsFromView();
   m_model =
       Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
-  updateWidgetValidState();
 }
 
 void InstrumentPresenter::updateViewFromModel() {
