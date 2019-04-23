@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
+targetNamespace="http://www.mantidproject.org/Interfaces/1.0">
+	
+<xs:element name="INTERFACE-PROPERTIES">
+  <xs:complexType>
+    <xs:element name="INTERFACE">
+	  <xs:complexType>
+        <xs:attribute name="id"/>
+        <xs:element name="EXTENSIONS"/>
+        <xs:element name="FILE-SUFFIXES"/>
+        <xs:element name="WORKSPACE-SUFFIXES"/>
+	  </xs:complexType>
+    </xs:element>
+  </xs:complexType>
+</xs:element>
+  
+</xs:schema>
