@@ -265,6 +265,8 @@ void ExperimentPresenter::updateViewFromModel() {
       floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+  else
+    m_view->setFloodWorkspace("");
   m_view->setStitchOptions(m_model.stitchParametersString());
   // The model can't be created with invalid stitch parameters so always set
   // them
