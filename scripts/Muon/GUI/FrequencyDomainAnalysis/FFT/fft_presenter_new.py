@@ -74,7 +74,6 @@ class FFTPresenter(object):
             if "PhaseQuad" in option:
                 self.view.removeIm(option)
 
-
     # functions
     def phaseCheck(self):
         self.view.phaseQuadChanged()
@@ -109,7 +108,7 @@ class FFTPresenter(object):
             self.thread.loadData(inputs)
             self.thread.start()
             self.view.setPhaseBox()
-        except:
+        except Exception:
             pass
 
     def create_algorithm_inputs(self):

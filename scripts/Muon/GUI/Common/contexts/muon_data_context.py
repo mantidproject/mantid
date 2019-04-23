@@ -196,7 +196,7 @@ class MuonDataContext(object):
     @property
     def num_points(self):
         workspace_lengths = [len(self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0]
-                        .workspace.readX(0)) for run in self.current_runs]
+                             .workspace.readX(0)) for run in self.current_runs]
         if workspace_lengths:
             return max(workspace_lengths)
         else:
