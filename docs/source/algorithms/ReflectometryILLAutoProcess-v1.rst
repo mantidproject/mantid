@@ -26,16 +26,15 @@ The detector angle option is more critical to use than the sample angle option.
 It likely happens that the reduced output work-space does not have the same number of points as the Cosmos reduction result.
 For FIGARO, a good agreement of the reduction could be observed, but not enough experiments were compared.
 Not all options of the Cosmos GUI are available. For example, a modification of variables taken from the NeXus file should be done via the available instrument control tools.
-Do not use the workbench, prefer Python scripts or MantidPlot: if investigating work-spaces (history, plots, ...), it may crash.
 
 Work-flow
 ---------
 
 The processing of the direct and reflected beams are shown in the following diagrams.
 
-.. diagram:: ReflectometryILLAutoReduction1-v1_wkflw.dot
+.. diagram:: ReflectometryILLAutoProcess1-v1_wkflw.dot
 
-.. diagram:: ReflectometryILLAutoReduction2-v1_wkflw.dot
+.. diagram:: ReflectometryILLAutoProcess2-v1_wkflw.dot
 
 Usage
 -----
@@ -44,7 +43,7 @@ Usage
 
 **Example - ReflectometryILLAutoReduction1**
 
-.. testcode:: ReflectometryILLAutoReduction1
+.. testcode:: ReflectometryILLAutoProcess1
 
    angleOffset = 10
    angleWidth = 20
@@ -69,7 +68,7 @@ Usage
        WavelengthUpper=31.0
    )
 
-.. testoutput:: ReflectometryILLAutoReduction1
+.. testoutput:: ReflectometryILLAutoProcess1
 
 .. categories::
 
