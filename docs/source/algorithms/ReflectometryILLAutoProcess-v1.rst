@@ -41,7 +41,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - ReflectometryILLAutoReduction1**
+**Example - ReflectometryILLAutoProcess1**
 
 .. testcode:: ReflectometryILLAutoProcess1
 
