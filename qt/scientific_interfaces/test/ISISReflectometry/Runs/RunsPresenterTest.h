@@ -21,11 +21,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 //=====================================================================================
 // Functional tests
@@ -36,12 +36,12 @@ public:
   // This means the constructor isn't called when running other tests
   static RunsPresenterTest *createSuite() {
     IMainWindowView *mainWindowMock = new MockMainWindowView();
-    Plotter *plotter = new Plotter(mainWindowMock);
+    Plotter plotter(mainWindowMock);
     return new RunsPresenterTest(plotter);
   }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
-  RunsPresenterTest(Plotter *plotter)
+  RunsPresenterTest(Plotter plotter)
       : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
                                               "POLREF", "OFFSPEC"},
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
@@ -272,7 +272,7 @@ private:
   public:
     RunsPresenterFriend(
         IRunsView *mainView, ProgressableView *progressView,
-        RunsTablePresenterFactory *makeRunsTablePresenter,
+        const RunsTablePresenterFactory &makeRunsTablePresenter,
         double thetaTolerance, std::vector<std::string> const &instruments,
         int defaultInstrumentIndex, IMessageHandler *messageHandler,
         boost::shared_ptr<IAutoreduction> autoreduction =
@@ -286,13 +286,13 @@ private:
   RunsPresenterFriend makePresenter() {
     auto const defaultInstrumentIndex = 0;
     IMainWindowView *mainWindowMock = new MockMainWindowView();
-    Plotter *plotter = new Plotter(mainWindowMock);
+    Plotter plotter(mainWindowMock);
     m_runsTablePresenterFactory =
         MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter);
     auto presenter = RunsPresenterFriend(
-        &m_view, &m_progressView, &m_runsTablePresenterFactory,
-        m_thetaTolerance, m_instruments, defaultInstrumentIndex,
-        &m_messageHandler, m_autoreduction, m_searcher);
+        &m_view, &m_progressView, m_runsTablePresenterFactory, m_thetaTolerance,
+        m_instruments, defaultInstrumentIndex, &m_messageHandler,
+        m_autoreduction, m_searcher);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;

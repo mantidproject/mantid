@@ -22,12 +22,13 @@ namespace CustomInterfaces {
 class MockRunsTablePresenterFactory : public RunsTablePresenterFactory {
 public:
   MockRunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                                double thetaTolerance, Plotter *plotter)
+                                double thetaTolerance, Plotter plotter)
       : RunsTablePresenterFactory(instruments, thetaTolerance, plotter) {}
   std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const override {
+    Plotter plotter(nullptr);
     return Mantid::Kernel::make_unique<MockRunsTablePresenter>(
-        view, m_instruments, m_thetaTolerance, ReductionJobs());
+        view, m_instruments, m_thetaTolerance, ReductionJobs(), plotter);
   }
 };
 } // namespace CustomInterfaces

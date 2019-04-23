@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
+#include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "DllConfig.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -20,9 +21,10 @@ class MockRunsTablePresenter : public RunsTablePresenter {
 public:
   MockRunsTablePresenter(IRunsTableView *view,
                          std::vector<std::string> const &instruments,
-                         double thetaTolerance, ReductionJobs reductionJobs)
+                         double thetaTolerance, ReductionJobs reductionJobs,
+                         const IPlotter &plotter)
       : RunsTablePresenter(view, instruments, thetaTolerance, reductionJobs,
-                           nullptr){};
+                           plotter){};
   MOCK_METHOD0(notifyProcessRequested, void());
   MOCK_METHOD0(notifyPauseRequested, void());
   MOCK_METHOD0(notifyInsertRowRequested, void());
