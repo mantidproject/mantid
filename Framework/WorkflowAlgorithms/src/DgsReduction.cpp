@@ -913,7 +913,8 @@ void DgsReduction::exec() {
     // Collect information
     std::string sqwWsName = outputWsName + "_pd_sqw";
     std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");
-    const double initialEnergy = outputWS->run().getPropertyValueAsType<double>("Ei");
+    const double initialEnergy =
+        outputWS->run().getPropertyValueAsType<double>("Ei");
 
     IAlgorithm_sptr sofqw = this->createChildAlgorithm("SofQW3");
     sofqw->setProperty("InputWorkspace", outputWS);
