@@ -66,7 +66,7 @@ class MuonGroup(object):
             raise AttributeError("MuonGroup : detectors must be a list of ints.")
         elif isinstance(detector_ids, list):
             if sum([not isinstance(item, int) for item in detector_ids]) == 0:
-                self._detector_ids = list(set(sorted(detector_ids)))
+                self._detector_ids = sorted(list(set(detector_ids)))
             else:
                 raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:

@@ -55,7 +55,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         result = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
 
-        self.assertEquals(result, {'BackwardSpectra': [8, 2, 4, 10, 6], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 9, 5, 7],
+        self.assertEquals(result, {'BackwardSpectra': [2, 4, 6, 8, 10], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 5, 7, 9],
                                    'InputWorkspace': 'input_workspace_name', 'LastGoodData': 15,
                                    'DetectorTable': 'input_workspace_name_phase_table'})
 
@@ -197,7 +197,6 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_calculation_success.assert_called_once_with()
         self.presenter.handle_calculation_error.assert_not_called()
         self.presenter.calculate_phase_table.assert_called_once_with()
-
 
 
 if __name__ == '__main__':
