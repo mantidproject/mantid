@@ -13,7 +13,7 @@ import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, PropertyMode,
                         WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
+from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
@@ -339,8 +339,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         mandatoryPositiveInt.add(IntBoundedValidator(lower=0))
         positiveFloat = FloatBoundedValidator(lower=0)
         positiveInt = IntBoundedValidator(lower=0)
-        positiveIntArray = IntArrayBoundedValidator()
-        positiveIntArray.setLower(0)
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
