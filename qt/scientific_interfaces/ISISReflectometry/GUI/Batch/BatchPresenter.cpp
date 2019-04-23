@@ -235,8 +235,8 @@ void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   g_log.information() << "Instrument changed to " << instrumentName;
 
   // Load a workspace for this instrument so we can get the actual instrument
-  IAlgorithm_sptr loadAlg =
-      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto loadAlg =
+      AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
   loadAlg->setChild(true);
   loadAlg->initialize();
   loadAlg->setProperty("InstrumentName", instrumentName);
