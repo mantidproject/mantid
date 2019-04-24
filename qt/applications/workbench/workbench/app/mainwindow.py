@@ -170,6 +170,9 @@ class MainWindow(QMainWindow):
         self.project = None
         self.project_recovery = None
 
+        # Interface Runner
+        self.executioner = None
+
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -310,9 +313,11 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launch_custom_gui(self, filename):
-        executioner = PythonCodeExecution()
-        executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
-        executioner.execute(open(filename).read(), filename)
+        if self.executioner == None:
+            self.executioner = PythonCodeExecution()
+            self.executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
+
+        self.executioner.execute(open(filename).read(), filename)
 
     def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
@@ -321,7 +326,6 @@ class MainWindow(QMainWindow):
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
                          'Frequency_Domain_Analysis_Old.py',
-                         'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
         # detect the python interfaces
