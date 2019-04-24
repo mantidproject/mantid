@@ -15,6 +15,10 @@
     <value val="18.0"/>
   </parameter>
 
+  <parameter name="NormalizeByIntegratedMonitors">
+    <value val="1"/>
+  </parameter>
+
   <parameter name="MonitorIntegralMin">
     <value val="4.0"/>
   </parameter>

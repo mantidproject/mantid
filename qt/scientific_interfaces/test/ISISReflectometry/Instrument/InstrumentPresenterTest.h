@@ -259,12 +259,25 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesMonitorOptions() {
+  void testRestoreDefaultsUpdatesMonitorOptionsInView() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Monitor");
+    EXPECT_CALL(m_view, setMonitorIndex(2)).Times(1);
+    EXPECT_CALL(m_view, setIntegrateMonitors(true)).Times(1);
+    EXPECT_CALL(m_view, setMonitorBackgroundMin(17.0)).Times(1);
+    EXPECT_CALL(m_view, setMonitorBackgroundMax(18.0)).Times(1);
+    EXPECT_CALL(m_view, setMonitorIntegralMin(4.0)).Times(1);
+    EXPECT_CALL(m_view, setMonitorIntegralMax(10.0)).Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesMonitorOptionsInModel() {
     auto presenter = makePresenter();
     expectInstrumentWithParameters("Monitor");
     presenter.notifyRestoreDefaultsRequested();
-    // Compare with REFL_Parameters_Monitor.xml
     TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), 2);
+    TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), true);
     TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
                      RangeInLambda(17.0, 18.0));
     TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(),
@@ -272,21 +285,38 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesWavelengthRange() {
+  void testRestoreDefaultsUpdatesWavelengthRangeInView() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("WavelengthRange");
+    EXPECT_CALL(m_view, setLambdaMin(1.5)).Times(1);
+    EXPECT_CALL(m_view, setLambdaMax(17.0)).Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesWavelengthRangeInModel() {
     auto presenter = makePresenter();
     expectInstrumentWithParameters("WavelengthRange");
     presenter.notifyRestoreDefaultsRequested();
-    // Compare with REFL_Parameters_WavelengthRange.xml
     TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(),
                      RangeInLambda(1.5, 17.0));
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesUpdatesDetectorOptions() {
+  void testRestoreDefaultsUpdatesUpdatesDetectorOptionsInView() {
+    auto presenter = makePresenter();
+    expectInstrumentWithParameters("Detector");
+    EXPECT_CALL(m_view, setCorrectDetectors(true)).Times(1);
+    EXPECT_CALL(m_view, setDetectorCorrectionType("RotateAroundSample"))
+        .Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesUpdatesDetectorOptionsInModel() {
     auto presenter = makePresenter();
     expectInstrumentWithParameters("Detector");
     presenter.notifyRestoreDefaultsRequested();
-    // Compare with REFL_Parameters_Detector.xml
     auto const expected =
         DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
     TS_ASSERT_EQUALS(presenter.instrument().detectorCorrections(), expected);
