@@ -876,6 +876,39 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
   m_axes[axisIndex] = newAxis;
 }
 
+
+/**
+ *  Whether the workspace contains common X bins with logarithmic spacing
+ *  @return whether the workspace contains common X bins with log spacing
+ */
+bool MatrixWorkspace::isCommonLogBins() const {
+  if (!this->isCommonBins()) {
+    return false;
+  }
+
+  if (this->getNumberHistograms() == 0) {
+    return false;
+  }
+
+  const auto &x0 = this->x(0);
+  if (x0.size() < 2) {
+    return false;
+  }
+
+  // guard against all axis elements being equal
+  if (x0[1] == x0[0]) {
+    return false;
+  }
+
+  double diff = x0[1] / x0[0];
+  for (size_t i = 1; i < x0.size() - 1; ++i) {
+    if (x0[i + 1] / x0[i] != diff) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Return the number of Axis stored by this workspace
  * @return int
