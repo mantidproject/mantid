@@ -48,6 +48,7 @@ private:
   Instrument m_model;
   IBatchPresenter *m_mainPresenter;
 
+  void restoreDefaults();
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();
   boost::optional<RangeInLambda> monitorIntegralRangeFromView();

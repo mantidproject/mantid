@@ -37,8 +37,7 @@ void ExperimentPresenter::notifySettingsChanged() {
 }
 
 void ExperimentPresenter::notifyRestoreDefaultsRequested() {
-  m_model = experimentDefaults(m_mainPresenter->instrument());
-  updateViewFromModel();
+  restoreDefaults();
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -112,7 +111,12 @@ void ExperimentPresenter::instrumentChanged(
     std::string const &instrumentName,
     Mantid::Geometry::Instrument_const_sptr instrument) {
   UNUSED_ARG(instrumentName);
-  m_model = experimentDefaults(instrument);
+  UNUSED_ARG(instrument);
+  restoreDefaults();
+}
+
+void ExperimentPresenter::restoreDefaults() {
+  m_model = experimentDefaults(m_mainPresenter->instrument());
   updateViewFromModel();
 }
 

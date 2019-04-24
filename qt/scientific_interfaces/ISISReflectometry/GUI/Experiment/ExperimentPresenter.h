@@ -68,6 +68,9 @@ public:
 
 private:
   IBatchPresenter *m_mainPresenter;
+
+  void restoreDefaults();
+
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
