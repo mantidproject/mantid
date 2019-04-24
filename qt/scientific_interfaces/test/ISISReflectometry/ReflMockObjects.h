@@ -106,9 +106,7 @@ public:
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD2(instrumentChanged,
-               void(std::string const &,
-                    Mantid::Geometry::Instrument_const_sptr));
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
@@ -132,9 +130,7 @@ public:
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD2(instrumentChanged,
-               void(std::string const &,
-                    Mantid::Geometry::Instrument_const_sptr));
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
 };
 
 class MockInstrumentPresenter : public IInstrumentPresenter {
@@ -145,9 +141,7 @@ public:
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD2(instrumentChanged,
-               void(std::string const &,
-                    Mantid::Geometry::Instrument_const_sptr));
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
 };
 
 class MockSavePresenter : public ISavePresenter {

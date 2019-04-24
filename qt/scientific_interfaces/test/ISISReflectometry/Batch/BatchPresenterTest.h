@@ -62,11 +62,9 @@ public:
   void testChildPresentersUpdatedWhenInstrumentChanged() {
     auto presenter = makePresenter();
     auto const instrument = std::string("POLREF");
-    EXPECT_CALL(*m_runsPresenter, instrumentChanged(instrument, _)).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, instrumentChanged(instrument, _))
-        .Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, instrumentChanged(instrument, _))
-        .Times(1);
+    EXPECT_CALL(*m_runsPresenter, instrumentChanged(instrument)).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, instrumentChanged(instrument)).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, instrumentChanged(instrument)).Times(1);
     presenter.notifyInstrumentChanged(instrument);
     verifyAndClear();
   }

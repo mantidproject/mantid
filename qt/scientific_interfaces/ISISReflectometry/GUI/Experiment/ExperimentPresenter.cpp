@@ -107,11 +107,8 @@ void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
-void ExperimentPresenter::instrumentChanged(
-    std::string const &instrumentName,
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
-  UNUSED_ARG(instrument);
   restoreDefaults();
 }
 

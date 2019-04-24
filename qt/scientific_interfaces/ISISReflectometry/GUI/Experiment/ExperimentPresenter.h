@@ -62,9 +62,7 @@ public:
   void reductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionResumed() override;
-  void instrumentChanged(
-      std::string const &instrumentName,
-      Mantid::Geometry::Instrument_const_sptr instrument) override;
+  void instrumentChanged(std::string const &instrumentName) override;
 
 private:
   IBatchPresenter *m_mainPresenter;

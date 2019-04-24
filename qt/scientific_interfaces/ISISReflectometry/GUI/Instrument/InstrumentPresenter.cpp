@@ -101,11 +101,8 @@ void InstrumentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::instrumentChanged(
-    std::string const &instrumentName,
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
-  UNUSED_ARG(instrument);
   restoreDefaults();
 }
 

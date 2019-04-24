@@ -246,9 +246,9 @@ void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
   m_instrument = instWorkspace->getInstrument();
 
-  m_runsPresenter->instrumentChanged(instrumentName, m_instrument);
-  m_experimentPresenter->instrumentChanged(instrumentName, m_instrument);
-  m_instrumentPresenter->instrumentChanged(instrumentName, m_instrument);
+  m_runsPresenter->instrumentChanged(instrumentName);
+  m_experimentPresenter->instrumentChanged(instrumentName);
+  m_instrumentPresenter->instrumentChanged(instrumentName);
 }
 
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {

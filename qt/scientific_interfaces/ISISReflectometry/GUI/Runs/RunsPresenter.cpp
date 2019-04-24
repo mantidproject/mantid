@@ -216,12 +216,10 @@ void RunsPresenter::autoreductionPaused() {
   tablePresenter()->autoreductionPaused();
 }
 
-void RunsPresenter::instrumentChanged(
-    std::string const &instrumentName,
-    Mantid::Geometry::Instrument_const_sptr instrument) {
+void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
   m_instrumentChanged = true;
   m_view->setSearchInstrument(instrumentName);
-  tablePresenter()->instrumentChanged(instrumentName, instrument);
+  tablePresenter()->instrumentChanged(instrumentName);
 }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }

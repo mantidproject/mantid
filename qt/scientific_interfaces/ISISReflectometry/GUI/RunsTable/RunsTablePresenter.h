@@ -36,9 +36,7 @@ public:
   RunsTable const &runsTable() const override;
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
-  void instrumentChanged(
-      std::string const &instrumentName,
-      Mantid::Geometry::Instrument_const_sptr instrument) override;
+  void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides

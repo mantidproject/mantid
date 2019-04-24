@@ -82,9 +82,7 @@ public:
   void reductionResumed() override;
   void autoreductionResumed() override;
   void autoreductionPaused() override;
-  void instrumentChanged(
-      std::string const &instrumentName,
-      Mantid::Geometry::Instrument_const_sptr instrument) override;
+  void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
   // RunsViewSubscriber overrides

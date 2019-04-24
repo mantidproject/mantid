@@ -31,9 +31,7 @@ public:
   virtual void reductionResumed() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
-  virtual void
-  instrumentChanged(std::string const &instrumentName,
-                    Mantid::Geometry::Instrument_const_sptr instrument) = 0;
+  virtual void instrumentChanged(std::string const &instrumentName) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
