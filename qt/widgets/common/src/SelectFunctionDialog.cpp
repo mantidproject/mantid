@@ -24,6 +24,9 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+namespace MantidQt {
+namespace MantidWidgets {
+
 /**
  * Constructor.
  * @param parent :: A parent widget
@@ -117,3 +120,6 @@ QString SelectFunctionDialog::getFunction() const {
 
   return items[0]->text(0);
 }
+
+} // MantidQt
+} // MantidWidgets

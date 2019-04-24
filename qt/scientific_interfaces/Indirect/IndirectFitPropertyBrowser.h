@@ -74,9 +74,7 @@ public:
   void setFitEnabled(bool enable);
   void setWorkspaceIndex(int i);
   int workspaceIndex() const;
-  void updateFunctionBrowserData(size_t nData);
-  void editLocalParameter(const QString &parName, const QStringList &wsNames,
-    const std::vector<size_t> &wsIndices);
+  void updateFunctionBrowserData(size_t nData, const QStringList &datasetNames);
   void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
 
 public slots:

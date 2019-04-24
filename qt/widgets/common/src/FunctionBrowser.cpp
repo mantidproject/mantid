@@ -153,6 +153,13 @@ void FunctionBrowser::setNumberOfDatasets(int n) {
   m_presenter->setNumberOfDatasets(n);
 }
 
+/// Set the names of the datasets. They will be displayed by the
+/// local parameter editing dialog.
+/// @param names :: Names of the datasets
+void FunctionBrowser::setDatasetNames(const QStringList &names) {
+  m_presenter->setDatasetNames(names);
+}
+
 /**
  * Get value of a local parameter
  * @param parName :: Name of a parameter.
@@ -201,12 +208,6 @@ void FunctionBrowser::setCurrentDataset(int i) {
 /// @param indices :: A list of indices of datasets to remove.
 void FunctionBrowser::removeDatasets(QList<int> indices) {
   m_presenter->removeDatasets(indices);
-}
-
-/// Add local parameters for additional datasets.
-/// @param n :: Number of datasets added.
-void FunctionBrowser::addDatasets(int n) {
-  m_presenter->addDatasets(n);
 }
 
 /// Return the multidomain function for multi-dataset fitting

@@ -24,10 +24,12 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
-  : m_view(view), m_model(make_unique<MultiDomainFunctionModel>())
+  : m_view(view), m_model(make_unique<MultiDomainFunctionModel>()), m_editLocalParameterDialog(nullptr)
 {
   connect(m_view, SIGNAL(parameterChanged(const QString &)), this, SLOT(viewChangedParameter(const QString &)));
   connect(m_view, SIGNAL(functionReplaced(const QString &)), this, SLOT(viewPastedFunction(const QString &)));
+  connect(m_view, SIGNAL(functionAdded(const QString &)), this, SLOT(viewAddedFunction(const QString &)));
+  connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this, SLOT(editLocalParameter(const QString &)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun)
@@ -105,6 +107,11 @@ void FunctionMultiDomainPresenter::setNumberOfDatasets(int n)
   m_model->setNumberDomains(n);
 }
 
+void FunctionMultiDomainPresenter::setDatasetNames(const QStringList & names)
+{
+  m_model->setDatasetNames(names);
+}
+
 int FunctionMultiDomainPresenter::getNumberOfDatasets() const
 {
   return m_model->getNumberDomains();
@@ -118,10 +125,6 @@ int FunctionMultiDomainPresenter::getCurrentDataset() const
 void FunctionMultiDomainPresenter::setCurrentDataset(int index)
 {
   m_model->setCurrentDomainIndex(index);
-}
-
-void FunctionMultiDomainPresenter::addDatasets(int)
-{
 }
 
 void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices)
@@ -161,6 +164,13 @@ void FunctionMultiDomainPresenter::setLocalParameterTie(const QString & parName,
 void FunctionMultiDomainPresenter::viewPastedFunction(const QString & funStr)
 {
   m_model->setFunctionString(funStr);
+  emit functionStructureChanged();
+}
+
+void FunctionMultiDomainPresenter::viewAddedFunction(const QString & funStr)
+{
+  auto prefix = m_view->currentFunctionIndex();
+  m_model->addFunction(prefix.value_or(""), funStr);
   emit functionStructureChanged();
 }
 
@@ -205,16 +215,18 @@ void FunctionMultiDomainPresenter::viewChangedParameter(const QString &paramName
  * @param wsNames :: Names of the workspaces the datasets came from.
  * @param wsIndices :: The workspace indices of the datasets.
  */
-void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName,
-  const QStringList &wsNames,
-  const std::vector<size_t> &wsIndices) {
-  assert(wsNames.size() == wsIndices.size());
-  assert(wsNames.size() == getNumberOfDatasets());
-  EditLocalParameterDialog dialog(m_view, this, parName, wsNames, wsIndices);
-  if (dialog.exec() == QDialog::Accepted) {
-    auto values = dialog.getValues();
-    auto fixes = dialog.getFixes();
-    auto ties = dialog.getTies();
+void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
+  m_editLocalParameterDialog = new EditLocalParameterDialog(m_view, this, parName, m_model->getDatasetNames());
+  connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(editLocalParameterFinish(int)));
+  m_editLocalParameterDialog->open();
+}
+
+void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
+  if (result == QDialog::Accepted) {
+    auto parName = m_editLocalParameterDialog->getParameterName();
+    auto values = m_editLocalParameterDialog->getValues();
+    auto fixes = m_editLocalParameterDialog->getFixes();
+    auto ties = m_editLocalParameterDialog->getTies();
     assert(values.size() == getNumberOfDatasets());
     for (int i = 0; i < values.size(); ++i) {
       setLocalParameterValue(parName, i, values[i]);
@@ -222,6 +234,7 @@ void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName,
       setLocalParameterTie(parName, i, ties[i]);
     }
   }
+  m_editLocalParameterDialog = nullptr;
 }
 
 

@@ -35,11 +35,11 @@ IFunction_sptr getFunctionWithPrefix(const QString & prefix, const IFunction_spt
   if (j < 0) {
     throw std::runtime_error("Error in fit function prefix: " + prefix.toStdString() + "\nIt must end with a dot (.)");
   }
-  if (j < 3 || prefix[0] != 'f') {
+  if (j < 2 || prefix[0] != 'f') {
     throw std::runtime_error("Error in fit function prefix: " + prefix.toStdString() + "\nIt must start with an 'f' followed by an integer.");
   }
-  auto funIndex = prefix.mid(1, j - 2).toInt();
-  return getFunctionWithPrefix(prefix.mid(j), compFun->getFunction(funIndex));
+  auto funIndex = prefix.mid(1, j - 1).toInt();
+  return getFunctionWithPrefix(prefix.mid(j + 1), compFun->getFunction(funIndex));
 }
 
 } // namespace MantidWidgets

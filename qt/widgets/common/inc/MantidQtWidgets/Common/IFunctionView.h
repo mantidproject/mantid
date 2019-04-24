@@ -41,6 +41,8 @@ public:
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)
   void functionReplaced(const QString &funStr);
+  /// User adds a function
+  void functionAdded(const QString &funStr);
   /// User selects a different (sub)function (or one of it's sub-properties)
   void currentFunctionChanged();
   /// Function parameter gets changed

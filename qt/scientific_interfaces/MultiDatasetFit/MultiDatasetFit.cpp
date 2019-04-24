@@ -453,21 +453,6 @@ int MultiDatasetFit::getNumberOfSpectra() const {
   return m_dataController->getNumberOfSpectra();
 }
 
-/// Start an editor to display and edit individual local parameter values.
-/// @param parName :: Fully qualified name for a local parameter (Global
-/// unchecked).
-void MultiDatasetFit::editLocalParameterValues(const QString &parName) {
-  QStringList wsNames;
-  std::vector<size_t> wsIndices;
-  const int n = getNumberOfSpectra();
-  for (int i = 0; i < n; ++i) {
-    wsNames.append(getWorkspaceName(i));
-    wsIndices.push_back(getWorkspaceIndex(i));
-  }
-
-  m_functionBrowser->editLocalParameter(parName, wsNames, wsIndices);
-}
-
 /// Set the fit status info string after a fit is finished.
 /// @param status :: The Fit's status property.
 /// @param chiSquared :: The chi squared value returned by Fit.

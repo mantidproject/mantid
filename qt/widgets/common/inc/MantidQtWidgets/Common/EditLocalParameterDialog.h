@@ -27,10 +27,9 @@ class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public QDialog {
 public:
   EditLocalParameterDialog(QWidget *parent,
                            FunctionMultiDomainPresenter *funcBrowser,
-                           const QString &parName, const QStringList &wsNames,
-                           const std::vector<size_t> &wsIndices);
-  void doSetup(const QString &parName, const QStringList &wsNames,
-               const std::vector<size_t> &wsIndices);
+                           const QString &parName, const QStringList &wsNames);
+  void doSetup(const QString &parName, const QStringList &wsNames);
+  QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;

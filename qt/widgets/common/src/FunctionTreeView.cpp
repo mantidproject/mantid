@@ -62,8 +62,7 @@ namespace MantidWidgets {
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
 FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories)
-    : IFunctionView(parent), m_multiDataset(multi), m_allowedCategories(categories)//, m_numberOfDatasets(0),
-      //m_currentDataset(0)
+    : IFunctionView(parent), m_multiDataset(multi), m_allowedCategories(categories), m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser
@@ -199,7 +198,8 @@ void FunctionTreeView::createBrowser() {
  */
 void FunctionTreeView::createActions() {
   m_actionAddFunction = new QAction("Add function", this);
-  connect(m_actionAddFunction, SIGNAL(triggered()), this, SLOT(addFunction()));
+  m_actionAddFunction->setObjectName("add_function");
+  connect(m_actionAddFunction, SIGNAL(triggered()), this, SLOT(addFunctionBegin()));
 
   m_actionRemoveFunction = new QAction("Remove function", this);
   m_actionRemoveFunction->setObjectName("remove_function");
@@ -1160,8 +1160,7 @@ void FunctionTreeView::popupMenu(const QPoint &) {
 /**
  * Add a function to currently selected composite function property
  */
-void FunctionTreeView::addFunction() {
-  QString newFunction;
+void FunctionTreeView::addFunctionBegin() {
 
   auto item = m_browser->currentItem();
   QtProperty *prop = nullptr;
@@ -1181,8 +1180,21 @@ void FunctionTreeView::addFunction() {
     }
   }
 
-  // Get new function type
-  newFunction = getUserFunctionFromDialog();
+  // Start the dialog
+  if (!m_selectFunctionDialog) {
+    m_selectFunctionDialog = new SelectFunctionDialog(this, m_allowedCategories);
+    connect(m_selectFunctionDialog, SIGNAL(finished(int)), this, SLOT(addFunctionEnd(int)));
+  }
+  m_selectedFunctionProperty = prop;
+  m_selectFunctionDialog->open();
+}
+
+void FunctionTreeView::addFunctionEnd(int result) {
+  if (result != QDialog::Accepted) {
+    return;
+  }
+
+  QString newFunction = m_selectFunctionDialog->getFunction();
   if (newFunction.isEmpty())
     return;
 
@@ -1190,6 +1202,7 @@ void FunctionTreeView::addFunction() {
   auto f = Mantid::API::FunctionFactory::Instance().createFunction(
       newFunction.toStdString());
 
+  auto prop = m_selectedFunctionProperty;
   if (prop) { // there are other functions defined
     Mantid::API::IFunction_sptr fun =
         Mantid::API::FunctionFactory::Instance().createFunction(
@@ -1209,20 +1222,7 @@ void FunctionTreeView::addFunction() {
   } else { // the browser is empty - add first function
     addFunction(nullptr, f);
   }
-  //emit functionStructureChanged();
-}
-
-/**
- * Ask user to select a function and return it
- * @returns :: function string
- */
-QString FunctionTreeView::getUserFunctionFromDialog() {
-  SelectFunctionDialog dlg(this, m_allowedCategories);
-  if (dlg.exec() == QDialog::Accepted) {
-    return dlg.getFunction();
-  } else {
-    return QString();
-  }
+  emit functionAdded(QString::fromStdString(f->asString()));
 }
 
 /**
@@ -1814,6 +1814,7 @@ QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const
 }
 
 QRect FunctionTreeView::visualItemRect(QtProperty *prop) const {
+  if (!prop) return QRect();
   auto item = getPropertyWidgetItem(prop);
   return item->treeWidget()->visualItemRect(item);
 }

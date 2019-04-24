@@ -9,7 +9,7 @@ from qtpy.QtTest import QTest
 from mantid import FrameworkManager, FunctionFactory
 from mantid.fitfunctions import FunctionWrapper
 from mantidqt.utils.qt.test.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin, print_tree, discover_children,
-                                                    get_child)
+                                                    get_child, click_on)
 from mantidqt.utils.qt import import_qt
 
 
@@ -63,7 +63,7 @@ def dummy_test(multi=False):
 
 
 function_browser_test_ = function_browser_test
-function_browser_test = dummy_test
+# function_browser_test = dummy_test
 
 
 class BrowserUser(QObject):
@@ -245,14 +245,29 @@ def test_paste_from_clipboard(self):
     self.assertEqual(user.structure_changed.call_count, 1)
 
 
-@function_browser_test_(True)
-def test_stuff(self):
+@function_browser_test()
+def test_add_function(self):
     assert (isinstance(self, TestFunctionBrowser))
     browser = self.widget
-    browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
     user = BrowserUser(browser)
-    yield 100
+    pos = view.getVisualRectFunctionProperty('').center()
+    tree = view.treeWidget().viewport()
+    yield self.show_context_menu(tree, pos, pause=0)
+    yield self.mouse_trigger_action('add_function', pause=0)
+    yield self.wait_for_modal()
+    dlg = self.get_active_modal_widget()
+    # discover_children(dlg)
+    tree = get_child(dlg, 'fitTree')
+    item = tree.findItems('Background', Qt.MatchExactly)[0]
+    item.setExpanded(True)
+    item = tree.findItems('FlatBackground', Qt.MatchRecursive)[0]
+    pos = tree.visualItemRect(item).center()
+    yield click_on(tree.viewport(), pos)
+    dlg.accept()
+    fun = self.get_fit_function()
+    self.assertEqual(fun.name, 'FlatBackground')
+    self.assertEqual(user.structure_changed.call_count, 1)
 
 
 if __name__ == '__main__':

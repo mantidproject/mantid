@@ -188,26 +188,12 @@ void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) {
 void MuonAnalysisFitFunctionPresenter::updateNumberOfDatasets(int nDatasets) {
   m_funcBrowser->clearErrors();
   m_funcBrowser->setNumberOfDatasets(nDatasets);
-}
-
-/**
- * Called when user clicks the "edit local parameter" button in the function
- * browser.
- * Launches the Edit Local Parameter dialog and deals with the input from it.
- * @param parName :: [input] Name of parameter that button was clicked for
- */
-void MuonAnalysisFitFunctionPresenter::editLocalParameterClicked(
-    const QString &parName) {
-  const int nDatasets = m_funcBrowser->getNumberOfDatasets();
   // get names of workspaces
   QStringList wsNames;
   for (const auto &name : m_fitBrowser->getWorkspaceNamesToFit()) {
     wsNames.append(QString::fromStdString(name));
   }
-  // spectrum indices are all zero
-  std::vector<size_t> wsIndices(nDatasets, 0);
-
-  m_funcBrowser->editLocalParameter(parName, wsNames, wsIndices);
+  m_funcBrowser->setDatasetNames(wsNames);
 }
 
 /**

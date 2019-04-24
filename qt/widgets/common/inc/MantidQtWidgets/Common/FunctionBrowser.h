@@ -127,12 +127,10 @@ public slots:
 
   // Handling of multiple datasets
   void setNumberOfDatasets(int n) override;
+  void setDatasetNames(const QStringList &names) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
   void removeDatasets(QList<int> indices);
-  void addDatasets(int n);
-  //void editLocalParameter(const QString &parName, const QStringList &wsNames,
-  //                        const std::vector<size_t> &wsIndices) override;
 
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;

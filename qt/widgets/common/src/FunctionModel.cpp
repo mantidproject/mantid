@@ -8,6 +8,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "FunctionBrowser/FunctionBrowserUtils.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -48,7 +49,7 @@ void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
   m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
   if (fun) {
     for (int i = 0; i < m_numberDomains; ++i) {
-      m_function->addFunction(fun);
+      m_function->addFunction(fun->clone());
     }
   }
 }
@@ -73,6 +74,21 @@ bool MultiDomainFunctionModel::hasFunction() const
 {
   if (!m_function || m_function->nFunctions() == 0) return false;
   return true;
+}
+
+void MultiDomainFunctionModel::addFunction(const QString & prefix, const QString & funStr)
+{
+  if (prefix.isEmpty()) {
+    setFunctionString(funStr);
+    return;
+  }
+  auto parentFun = getFunctionWithPrefix(prefix, m_function);
+  auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
+  if (cf) {
+    cf->addFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+  } else {
+    throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+  }
 }
 
 void MultiDomainFunctionModel::setParameter(const QString & paramName, double value)
@@ -138,6 +154,25 @@ void MultiDomainFunctionModel::setNumberDomains(int nDomains)
   m_numberDomains = nDomains;
 }
 
+void MultiDomainFunctionModel::setDatasetNames(const QStringList & names)
+{
+  if (static_cast<size_t>(names.size()) != m_numberDomains) {
+    throw std::runtime_error("Number of dataset names doesn't match the number of domains.");
+  }
+  m_datasetNames = names;
+}
+
+QStringList MultiDomainFunctionModel::getDatasetNames() const
+{
+  if (static_cast<size_t>(m_datasetNames.size()) != m_numberDomains) {
+    m_datasetNames.clear();
+    for (size_t i = 0; i < m_numberDomains; ++i) {
+      m_datasetNames << QString::number(i);
+    }
+  }
+  return m_datasetNames;
+}
+
 int MultiDomainFunctionModel::getNumberDomains() const
 {
   return static_cast<int>(m_numberDomains);
@@ -171,6 +206,7 @@ QString MultiDomainFunctionModel::getLocalParameterTie(const QString & parName, 
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   auto const tie = fun->getTie(parIndex);
+  if (!tie) return "";
   return QString::fromStdString(tie->asString());
 }
 
@@ -183,11 +219,16 @@ void MultiDomainFunctionModel::setLocalParameterFixed(const QString & parName, i
 {
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
-  getSingleFunction(i)->fix(parIndex);
+  if (fixed) {
+    getSingleFunction(i)->fix(parIndex);
+  } else {
+    getSingleFunction(i)->unfix(parIndex);
+  }
 }
 
 void MultiDomainFunctionModel::setLocalParameterTie(const QString & parName, int i, QString tie)
 {
+  if (tie.isEmpty()) return;
   getSingleFunction(i)->tie(parName.toStdString(), tie.toStdString());
 }
 

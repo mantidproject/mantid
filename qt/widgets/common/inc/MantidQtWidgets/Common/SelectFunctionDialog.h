@@ -19,6 +19,9 @@ namespace Ui {
 class SelectFunctionDialog;
 }
 
+namespace MantidQt {
+namespace MantidWidgets {
+
 /**
  * Select a function type out of a list of available ones.
  */
@@ -46,5 +49,8 @@ private:
                             &categoryFunctionsMap,
                         const std::vector<std::string> &restrictions);
 };
+
+} // MantidQt
+} // MantidWidgets
 
 #endif // MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_

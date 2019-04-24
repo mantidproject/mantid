@@ -112,7 +112,6 @@ protected slots:
 
 private slots:
   void plotSelectedSpectra();
-  void editLocalParameterValues(const QString &parName);
 
   void respondToChangeOfSpectraRange(std::size_t);
   void respondToSingleResolutionLoaded();
@@ -147,6 +146,7 @@ private:
   std::string getOutputBasename() const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::vector<std::string> getFitParameterNames() const;
+  QStringList getDatasetNames() const;
 
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);

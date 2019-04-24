@@ -248,15 +248,9 @@ void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
 
 int IndirectFitPropertyBrowser::workspaceIndex() const { return m_functionBrowser->getCurrentDataset(); }
 
-void IndirectFitPropertyBrowser::updateFunctionBrowserData(size_t nData) {
+void IndirectFitPropertyBrowser::updateFunctionBrowserData(size_t nData, const QStringList &datasetNames) {
   m_functionBrowser->setNumberOfDatasets(static_cast<int>(nData));
-}
-
-void IndirectFitPropertyBrowser::editLocalParameter(
-    const QString &parName, const QStringList &wsNames,
-    const std::vector<size_t> &wsIndices) {
-  m_functionBrowser->editLocalParameter(parName, wsNames, wsIndices);
-  emit functionChanged();
+  m_functionBrowser->setDatasetNames(datasetNames);
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {

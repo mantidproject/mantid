@@ -52,6 +52,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class CreateAttributePropertyForFunctionTreeView;
+class SelectFunctionDialog;
 
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
@@ -200,13 +201,12 @@ protected:
   QString getConstraint(const QString &paramName, const QString &lowerBound,
                         const QString &upperBound) const;
 
-  /// Ask user for function type
-  virtual QString getUserFunctionFromDialog();
 protected slots:
   /// Show the context menu
   void popupMenu(const QPoint &);
   /// Add a function
-  void addFunction();
+  void addFunctionBegin();
+  void addFunctionEnd(int result);
   /// Remove a function
   void removeFunction();
   /// Fix a parameter
@@ -327,6 +327,8 @@ protected:
   /// multi-dataset fit
   bool m_multiDataset;
   std::vector<std::string> m_allowedCategories;
+  SelectFunctionDialog *m_selectFunctionDialog;
+  QtProperty *m_selectedFunctionProperty;
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;

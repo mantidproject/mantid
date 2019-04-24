@@ -22,6 +22,7 @@ namespace MantidWidgets {
 
 class MultiDomainFunctionModel;
 class IFunctionView;
+class EditLocalParameterDialog;
 
 using namespace Mantid::API;
 
@@ -45,10 +46,10 @@ public:
   void clearErrors();
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
+  void setDatasetNames(const QStringList &names);
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);
-  void addDatasets(int);
   void removeDatasets(QList<int> indices);
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
@@ -65,11 +66,13 @@ signals:
 private slots:
   void viewChangedParameter(const QString &paramName);
   void viewPastedFunction(const QString &funStr);
-  void editLocalParameter(const QString &parName,
-    const QStringList &wsNames, const std::vector<size_t> &wsIndices);
+  void viewAddedFunction(const QString &funStr);
+  void editLocalParameter(const QString &parName);
+  void editLocalParameterFinish(int result);
 private:
   IFunctionView *m_view;
   std::unique_ptr<MultiDomainFunctionModel> m_model;
+  EditLocalParameterDialog *m_editLocalParameterDialog;
 public:
   IFunctionView *view() const {return m_view;}
 };

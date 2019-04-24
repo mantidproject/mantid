@@ -135,9 +135,6 @@ void IndirectFitAnalysisTab::connectSpectrumPresenter() {
 }
 
 void IndirectFitAnalysisTab::connectFitPropertyBrowser() {
-  connect(m_fitPropertyBrowser,
-          SIGNAL(localParameterEditRequested(const QString &)), this,
-          SLOT(editLocalParameterValues(const QString &)));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
           this, SLOT(respondToFunctionChanged()));
 }
@@ -622,8 +619,21 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
           SLOT(fitAlgorithmComplete(bool)));
 }
 
+QStringList IndirectFitAnalysisTab::getDatasetNames() const {
+  QStringList datasetNames;
+  auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
+  for (size_t i = 0; i < numberWorkspaces; ++i) {
+    auto const name = QString::fromStdString(m_fittingModel->getWorkspace(i)->getName());
+    auto const numberSpectra = m_fittingModel->getNumberOfSpectra(i);
+    for (size_t j = 0; j < numberSpectra; ++j) {
+      datasetNames << name + " (" + QString::number(j) + ")";
+    }
+  }
+  return datasetNames;
+}
+
 void IndirectFitAnalysisTab::updateDataReferences() {
-  m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->getNumberOfDatasets());
+  m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->getNumberOfDatasets(), getDatasetNames());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
 }
 
@@ -640,30 +650,12 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 
-/// Start an editor to display and edit individual local parameter values.
-/// @param parName :: Fully qualified name for a local parameter (Global
-/// unchecked).
-void IndirectFitAnalysisTab::editLocalParameterValues(const QString &parName) {
-  QStringList wsNames;
-  std::vector<size_t> wsIndices;
-  auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
-  for (size_t i = 0; i <numberWorkspaces; ++i) {
-    auto const name = QString::fromStdString(m_fittingModel->getWorkspace(i)->getName());
-    auto const numberSpectra = m_fittingModel->getNumberOfSpectra(i);
-    for (size_t j = 0; j < numberSpectra; ++j) {
-      wsNames.push_back(name);
-      wsIndices.push_back(j);
-    }
-  }
-  m_fitPropertyBrowser->editLocalParameter(parName, wsNames, wsIndices);
-}
-
 void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(size_t i)
 {
   m_plotPresenter->updateSelectedDataName();
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
-  m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->getNumberOfDatasets());
+  m_fitPropertyBrowser->updateFunctionBrowserData(m_fittingModel->getNumberOfDatasets(), getDatasetNames());
   setModelFitFunction();
 }
 

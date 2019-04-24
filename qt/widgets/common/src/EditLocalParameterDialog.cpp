@@ -34,10 +34,10 @@ namespace MantidWidgets {
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, FunctionMultiDomainPresenter *funcBrowser,
-    const QString &parName, const QStringList &wsNames,
-    const std::vector<size_t> &wsIndices)
+    const QString &parName, const QStringList &wsNames)
     : QDialog(parent), m_parName(parName) {
   m_uiForm.setupUi(this);
+  setAttribute(Qt::WA_DeleteOnClose);
   const int n = funcBrowser->getNumberOfDatasets();
   for (int i = 0; i < n; ++i) {
     const double value = funcBrowser->getLocalParameterValue(parName, i);
@@ -48,7 +48,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(
     m_ties.push_back(tie);
   }
 
-  doSetup(parName, wsNames, wsIndices);
+  doSetup(parName, wsNames);
 }
 
 /**
@@ -61,8 +61,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * fitted
  */
 void EditLocalParameterDialog::doSetup(const QString &parName,
-                                       const QStringList &wsNames,
-                                       const std::vector<size_t> &wsIndices) {
+                                       const QStringList &wsNames) {
   m_logFinder = Mantid::Kernel::make_unique<LogValueFinder>(wsNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
@@ -83,13 +82,11 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
-  assert(wsNames.size() == static_cast<int>(wsIndices.size()));
   for (int i = 0; i < wsNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(wsNames[i] + " (" +
-                                           QString::number(wsIndices[i]) + ")");
+    auto headerItem = new QTableWidgetItem(wsNames[i]);
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();
