@@ -122,7 +122,8 @@ void RecalculateTrajectoriesExtents::exec() {
     if (outWS->getDimension(3)->getMDFrame().name() == "DeltaE") {
       diffraction = false;
       if (outWS->getExperimentInfo(0)->run().hasProperty("Ei")) {
-        Ei = outWS->getExperimentInfo(0)->run().getPropertyValueAsType<double>("Ei");
+        Ei = outWS->getExperimentInfo(0)->run().getPropertyValueAsType<double>(
+            "Ei");
       } else {
         throw std::runtime_error(
             "Workspace contains energy transfer axis, but no Ei."

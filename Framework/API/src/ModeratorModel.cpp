@@ -11,7 +11,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
 
-
 namespace Mantid {
 namespace API {
 

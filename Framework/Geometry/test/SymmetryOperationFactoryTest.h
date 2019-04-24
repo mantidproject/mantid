@@ -13,7 +13,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 
-
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 

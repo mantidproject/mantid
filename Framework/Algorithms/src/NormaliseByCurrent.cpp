@@ -10,7 +10,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 

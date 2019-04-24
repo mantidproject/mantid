@@ -23,7 +23,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
-
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;

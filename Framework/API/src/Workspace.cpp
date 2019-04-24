@@ -10,7 +10,6 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/make_unique.h"
 
-
 namespace Mantid {
 namespace API {
 

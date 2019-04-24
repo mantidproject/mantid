@@ -19,7 +19,6 @@
 #include <QPushButton>
 #include <QRegExp>
 
-
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 

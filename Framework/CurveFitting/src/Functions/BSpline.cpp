@@ -12,7 +12,6 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {

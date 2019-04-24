@@ -15,7 +15,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {

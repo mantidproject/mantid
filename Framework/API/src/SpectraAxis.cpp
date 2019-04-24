@@ -15,7 +15,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
-
 namespace Mantid {
 namespace API {
 

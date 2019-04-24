@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-
 namespace Mantid {
 namespace CurveFitting {
 
