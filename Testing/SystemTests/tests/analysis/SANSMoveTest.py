@@ -13,7 +13,7 @@ import systemtesting
 
 from mantid.api import AlgorithmManager
 from mantid.kernel import (Quat, V3D)
-from sans.algorithm_detail.move_workspaces import (sans_move_factory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
+from sans.algorithm_detail.move_workspaces import (create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                                    SANSMoveLARMOROldStyle)
 from sans.common.enums import (SANSFacility, DetectorType)
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
@@ -40,7 +40,7 @@ class SANSMoveFactoryTest(unittest.TestCase):
         # Arrange
         workspace = load_workspace(file_name)
         # Act
-        mover = sans_move_factory(workspace)
+        mover = create_mover(workspace)
         # Assert
         self.assertTrue(isinstance(mover, mover_type))
 
@@ -103,7 +103,7 @@ class SANSMoveTest(unittest.TestCase):
 
     @staticmethod
     def _provide_mover(workspace):
-        return sans_move_factory(workspace)
+        return create_mover(workspace)
 
     def compare_expected_position(self, expected_position, expected_rotation, component, move_info, workspace):
         position, rotation = SANSMoveTest._get_position_and_rotation(workspace, move_info, component)

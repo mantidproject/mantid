@@ -14,7 +14,7 @@
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 #include "MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>

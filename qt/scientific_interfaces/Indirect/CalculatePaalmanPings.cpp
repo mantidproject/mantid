@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CalculatePaalmanPings.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -14,6 +13,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
 #include <QDoubleValidator>

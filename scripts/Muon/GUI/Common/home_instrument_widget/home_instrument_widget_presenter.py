@@ -198,7 +198,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         try:
             self._model.check_dead_time_file_selection(selection)
             self._model.set_user_dead_time_from_ADS(selection)
-            dead_times = self._model._data.gui_variables['DeadTimeTable'].toDict()['dead-time']
+            dead_times = self._model._context.gui_context['DeadTimeTable'].toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
         except ValueError as error:

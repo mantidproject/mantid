@@ -397,30 +397,25 @@ class MaskerISIS(Masker):
         return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
 
 
-class MaskFactory(object):
-    def __init__(self):
-        super(MaskFactory, self).__init__()
+def create_masker(state, detector_type):
+    """
+    Provides the appropriate masker.
 
-    @staticmethod
-    def create_masker(state, detector_type):
-        """
-        Provides the appropriate masker.
-
-        :param state: a SANSState object
-        :param detector_type: either HAB or LAB
-        :return: the corresponding slicer
-        """
-        data_info = state.data
-        instrument = data_info.instrument
-        detector_names = state.reduction.detector_names
-        if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
-                        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
-            run_number = data_info.sample_scatter_run_number
-            file_name = data_info.sample_scatter
-            _, ipf_path = get_instrument_paths_for_sans_file(file_name)
-            spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
-            masker = MaskerISIS(spectra_block, instrument, detector_names)
-        else:
-            masker = NullMasker()
-            NotImplementedError("MaskFactory: Other instruments are not implemented yet.")
-        return masker
+    :param state: a SANSState object
+    :param detector_type: either HAB or LAB
+    :return: the corresponding slicer
+    """
+    data_info = state.data
+    instrument = data_info.instrument
+    detector_names = state.reduction.detector_names
+    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
+                    instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
+        run_number = data_info.sample_scatter_run_number
+        file_name = data_info.sample_scatter
+        _, ipf_path = get_instrument_paths_for_sans_file(file_name)
+        spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
+        masker = MaskerISIS(spectra_block, instrument, detector_names)
+    else:
+        masker = NullMasker()
+        NotImplementedError("create_masker: Other instruments are not implemented yet.")
+    return masker

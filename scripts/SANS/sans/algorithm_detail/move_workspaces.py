@@ -746,7 +746,7 @@ class SANSMoveZOOM(SANSMove):
         return instrument_type is SANSInstrument.ZOOM
 
 
-def sans_move_factory(workspace):
+def create_mover(workspace):
     # Get selection
     run_number = workspace.getRunNumber()
     instrument = workspace.getInstrument()

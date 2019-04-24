@@ -44,8 +44,7 @@ class ConjoinFiles(PythonAlgorithm):
         raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))
 
     def PyInit(self):
-        greaterThanZero = IntArrayBoundedValidator()
-        greaterThanZero.setLower(0)
+        greaterThanZero = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("RunNumbers",values=[0],validator=greaterThanZero), doc="Run numbers")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
         self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))

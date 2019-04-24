@@ -12,7 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("SampleTransmission");

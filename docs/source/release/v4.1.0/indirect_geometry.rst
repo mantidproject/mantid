@@ -22,6 +22,7 @@ Improvements
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` permits now flux normalization by proton charge and run duration.
 - :ref:`BASISReduction <algm-BASISReduction>` permits now flux normalization by proton charge and run duration.
 - :ref:`BASISReduction <algm-BASISReduction>` permits now retaining events only within a time window.
+- :ref:`BASISReduction <algm-BASISReduction>` can output now the powder diffraction spectra.
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
 
 

@@ -9,6 +9,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include <iosfwd>
 #include <vector>
 
 namespace Mantid {
@@ -34,6 +35,7 @@ public:
     CONE,           ///< CONE
     HOLLOWCYLINDER, ///< HOLLOW CYLINDER
   };
+
   struct CuboidGeometry {
     const Kernel::V3D &leftFrontBottom;
     const Kernel::V3D &leftFrontTop;
@@ -124,6 +126,10 @@ public:
                          double outerRadius, double height);
   bool operator==(const ShapeInfo &other);
 };
+
+MANTID_GEOMETRY_DLL std::ostream &
+operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
+
 } // namespace detail
 } // namespace Geometry
 } // namespace Mantid

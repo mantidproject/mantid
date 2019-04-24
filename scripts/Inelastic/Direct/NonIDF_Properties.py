@@ -191,7 +191,7 @@ class NonIDF_Properties(object):
             new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,instr_name)
         else:
 #pylint: disable=protected-access
-            if isinstance(Instrument,geometry._geometry.Instrument):
+            if isinstance(Instrument,geometry.Instrument):
                 instrument = Instrument
                 instr_name = instrument.getFullName()
                 try:

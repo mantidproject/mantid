@@ -7,13 +7,13 @@
 #include "JumpFit.h"
 #include "JumpFitDataPresenter.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 

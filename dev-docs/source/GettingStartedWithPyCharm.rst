@@ -157,7 +157,7 @@ This **does not** require a PyCharm Professional license for debugging, but requ
 
 
 Remote Debugging of Unit Tests with PyCharm
-#############################
+###########################################
 
 This requires a PyCharm Professional license for the Remote Debugging feature.
 
