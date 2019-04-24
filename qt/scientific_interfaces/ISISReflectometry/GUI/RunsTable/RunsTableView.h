@@ -17,6 +17,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class RunsView;
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTableView : public QWidget,
                                                      public IRunsTableView {
   Q_OBJECT
@@ -58,6 +60,8 @@ private slots:
   void onPastePressed(bool);
   void onFilterChanged(QString const &);
   void onInstrumentChanged(int index);
+  void onPlotSelectedPressed(bool);
+  void onPlotSelectedStitchedOutputPressed(bool);
 
 private:
   void addToolbarActions();
@@ -77,7 +81,6 @@ private:
 class RunsTableViewFactory {
 public:
   explicit RunsTableViewFactory(std::vector<std::string> const &instruments);
-  RunsTableView *operator()(int defaultInstrumentIndex) const;
   RunsTableView *operator()() const;
   int defaultInstrumentFromConfig() const;
   int indexOfElseFirst(std::string const &instrument) const;

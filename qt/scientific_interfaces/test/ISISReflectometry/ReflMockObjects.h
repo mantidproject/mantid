@@ -42,7 +42,6 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /**** Views ****/
-
 class MockMainWindowView : public IMainWindowView {
 public:
   MOCK_METHOD3(askUserString,
@@ -54,9 +53,12 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  MOCK_METHOD0(newBatch, IBatchView *());
+  MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));
+  MOCK_METHOD1(removeBatch, void(int));
+  MOCK_CONST_METHOD0(batches, std::vector<IBatchView *>());
   ~MockMainWindowView() override{};
 };
-
 /**** Presenters ****/
 
 class MockMainWindowPresenter : public IMainWindowPresenter {

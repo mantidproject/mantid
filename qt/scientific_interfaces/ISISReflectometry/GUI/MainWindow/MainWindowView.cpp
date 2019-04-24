@@ -7,6 +7,7 @@
 #include "MainWindowView.h"
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
+#include "GUI/Plotting/Plotter.h"
 #include "MantidKernel/make_unique.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -64,8 +65,14 @@ void MainWindowView::initLayout() {
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
-  auto makeRunsTablePresenter =
-      RunsTablePresenterFactory(instruments, thetaTolerance);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  Plotter plotter(this);
+#else
+  Plotter plotter;
+#endif
+  auto makeRunsTablePresenter = RunsTablePresenterFactory(
+      instruments, thetaTolerance, std::move(plotter));
+
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto autoreduction = boost::shared_ptr<IAutoreduction>();
   auto searcher = boost::shared_ptr<ISearcher>();

@@ -16,8 +16,6 @@
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
 
-#include <iostream>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Colour {
@@ -65,9 +63,9 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
-    double thetaTolerance, ReductionJobs jobs)
+    double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
-      m_jobViewUpdater(m_view->jobs()) {
+      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
 }
 
@@ -564,6 +562,36 @@ bool RunsTablePresenter::isProcessing() const {
 
 bool RunsTablePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+void RunsTablePresenter::notifyPlotSelectedPressed() {
+  std::vector<std::string> workspaces;
+  const auto rows = m_model.selectedRows();
+
+  for (const auto &row : rows) {
+    if (row.state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
+  }
+
+  if (workspaces.empty())
+    return;
+
+  m_plotter.reflectometryPlot(workspaces);
+}
+
+void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
+  std::vector<std::string> workspaces;
+  const auto groups = m_model.selectedGroups();
+
+  for (const auto &group : groups) {
+    if (group.state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(group.postprocessedWorkspaceName());
+  }
+
+  if (workspaces.empty())
+    return;
+
+  m_plotter.reflectometryPlot(workspaces);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

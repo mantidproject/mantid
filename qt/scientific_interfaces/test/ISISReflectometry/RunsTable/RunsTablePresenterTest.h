@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_
 
+#include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
@@ -98,16 +99,17 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
-    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs());
+    Plotter plotter(nullptr);
+    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), plotter);
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
-    return RunsTablePresenter(&view, {}, 0.01, std::move(jobs));
+    Plotter plotter(nullptr);
+    return RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
   }
 
 protected:
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockRunsTableView> m_view;
 };
-
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_

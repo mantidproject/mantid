@@ -40,6 +40,8 @@ public:
   void resetSkippedItems();
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  std::vector<Group> selectedGroups() const;
+  std::vector<Row> selectedRows() const;
 
 private:
   std::vector<std::string> m_instruments;

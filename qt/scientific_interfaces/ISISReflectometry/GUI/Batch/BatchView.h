@@ -26,7 +26,7 @@ namespace CustomInterfaces {
 class BatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
-  explicit BatchView(QWidget *parent = nullptr);
+  explicit BatchView(QWidget *parent);
   void subscribe(BatchViewSubscriber *notifyee) override;
 
   IRunsView *runs() const override;
