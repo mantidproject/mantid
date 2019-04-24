@@ -7,11 +7,11 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import PyQt4.QtGui as QtGui
+from qtpy import QtWidgets
 
 
 def getWidgetIfOpen(name):
-    allWidgets = QtGui.QApplication.allWidgets()
+    allWidgets = QtWidgets.QApplication.allWidgets()
     for widget in allWidgets:
         if widget.accessibleName() == name:
             return widget

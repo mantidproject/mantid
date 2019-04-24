@@ -177,9 +177,14 @@ class MainWindow(QMainWindow):
         self.project = None
         self.project_recovery = None
 
+<<<<<<< HEAD
         # Interfaces
         self.interface_manager = None
         self.interface_executor = None
+=======
+        # Interface Runner
+        self.executioner = None
+>>>>>>> Added Frequency Domain Analysis to workbench
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -379,7 +384,6 @@ class MainWindow(QMainWindow):
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
                          'Frequency_Domain_Analysis_Old.py',
-                         'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
         # detect the python interfaces
