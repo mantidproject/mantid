@@ -59,7 +59,7 @@ class MaxEntPresenter(object):
 
     def clear(self):
         self.view.addItems([])
-        self.view.clearPhaseTables()
+        self.view.update_phase_table_combo([])
 
     # functions
     def getWorkspaceNames(self):
