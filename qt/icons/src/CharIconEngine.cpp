@@ -4,11 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "../inc/MantidQtWidgets/CharIconEngine.h"
-#include "../inc/MantidQtWidgets/CharIconPainter.h"
+#include "MantidQtIcons/CharIconEngine.h"
+#include "MantidQtIcons/CharIconPainter.h"
 
 namespace MantidQt {
-namespace Widgets {
 namespace Icons {
 
 CharIconEngine::CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
@@ -34,5 +33,4 @@ QIconEngine *CharIconEngine::clone() const {
 }
 
 } // namespace Icons
-} // namespace Widgets
 } // namespace MantidQt

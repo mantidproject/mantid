@@ -45,8 +45,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
-        self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
-        self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
+        self.COPY_ICON = mantidqt.icons.icons.get_icon("fa.files-o")
+        self.GRAPH_ICON = mantidqt.icons.icons.get_icon('fa.line-chart')
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model

@@ -5,7 +5,6 @@ add_subdirectory ( common )
 add_subdirectory ( mplcpp )
 add_subdirectory ( instrumentview )
 add_subdirectory ( plugins )
-add_subdirectory ( icons )
 
 if ( ENABLE_MANTIDPLOT ) 
   add_subdirectory ( legacyqwt )

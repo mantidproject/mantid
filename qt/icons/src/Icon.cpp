@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "../inc/MantidQtWidgets/Icon.h"
+#include "MantidQtIcons/Icon.h"
 
 #include <QFile>
 #include <QFontDatabase>
@@ -12,13 +12,9 @@
 #include <QJsonObject>
 #include <boost/algorithm/string.hpp>
 
-namespace MantidQt {
-namespace Widgets {
-namespace Icons {
-
 namespace {
-IconicFont &iconFontInstance() {
-  static IconicFont iconicFont;
+MantidQt::Icons::IconicFont &iconFontInstance() {
+  static MantidQt::Icons::IconicFont iconicFont;
   return iconicFont;
 }
 
@@ -44,7 +40,8 @@ std::vector<std::string> splitIconName(std::string iconName) {
 void addValuesToOptions(std::vector<QHash<QString, QVariant>> &options,
                         const std::vector<QString> iconNames,
                         unsigned int vectorIndex) {
-  auto splitValues = splitIconName(iconNames[vectorIndex].toStdString());
+  std::string iconName = iconNames[vectorIndex].toStdString();
+  auto splitValues = splitIconName(iconName);
   const auto prefix = splitValues.at(0);
   const auto charecter = splitValues.at(1);
   options[vectorIndex].insert(QString("prefix"),
@@ -54,38 +51,29 @@ void addValuesToOptions(std::vector<QHash<QString, QVariant>> &options,
 }
 } // namespace
 
-QIcon getIcon(const QString &iconName) {
-  std::vector<QString> iconNames;
-  iconNames.emplace_back(iconName);
-  return getIcon(iconNames);
-}
-
-QIcon getIcon(const QString &iconName, const boost::optional<QString> &color,
-              const boost::optional<double> &scaleFactor) {
+QIcon MantidQt::Icons::getIcon(const QString &iconName, const QString &color,
+                               const double &scaleFactor) {
   QHash<QString, QVariant> options;
-  if (color) {
-    options.insert(QString("color"), QVariant(color.get()));
-  }
-  if (scaleFactor) {
-    options.insert(QString("scaleFactor"), QVariant(scaleFactor.get()));
-  }
+  options.insert(QString("color"), QVariant(color));
+  options.insert(QString("scaleFactor"), QVariant(scaleFactor));
+
   std::vector<QString> iconNames;
   iconNames.emplace_back(iconName);
-  if (!options.empty()) {
-    std::vector<QHash<QString, QVariant>> optionsList;
-    optionsList.emplace_back(options);
-    return getIcon(iconNames, optionsList);
-  } else {
-    return getIcon(iconNames);
-  }
+
+  std::vector<QHash<QString, QVariant>> optionsList;
+  optionsList.emplace_back(options);
+  return MantidQt::Icons::getIcon(iconNames, optionsList);
 }
 
-QIcon getIcon(
+QIcon MantidQt::Icons::getIcon(
     const std::vector<QString> &iconNames,
-    const boost::optional<std::vector<QHash<QString, QVariant>>> &options) {
+    const std::vector<QHash<QString, QVariant>> &options) {
   auto &iconicFont = iconFontInstance();
   return iconicFont.getIcon(iconNames, options);
 }
+
+namespace MantidQt {
+namespace Icons {
 
 IconicFont::IconicFont() {
   this->loadFont(QString("mdi"), QString(":/mdi-font.ttf"),
@@ -94,38 +82,31 @@ IconicFont::IconicFont() {
 
 QIcon IconicFont::getIcon(
     const std::vector<QString> &iconNames,
-    const boost::optional<std::vector<QHash<QString, QVariant>>> &options) {
+    const std::vector<QHash<QString, QVariant>> &options) {
+
   std::vector<QHash<QString, QVariant>> actualOptions;
-  if (options) {
-    // Assume there are mutliple
-    if (iconNames.size() != options.get().size()) {
-      throw std::invalid_argument(
-          "Icon names passed and options are not the same length");
-    }
-    actualOptions = options.get();
-    for (auto i = 0u; i < iconNames.size(); ++i) {
-      addValuesToOptions(actualOptions, iconNames, i);
-    }
-  } else {
-    // Assert that there is only one IconName
-    if (iconNames.size() > 1) {
-      throw std::invalid_argument("Extra Icon names passed without options");
-    }
-    addValuesToOptions(actualOptions, iconNames, 0);
+  // Assume there may be mutliple
+  if (iconNames.size() != options.size()) {
+    throw std::invalid_argument(
+        "Icon names passed and options are not the same length");
   }
+  actualOptions = options;
+  for (auto i = 0u; i < iconNames.size(); ++i) {
+    addValuesToOptions(actualOptions, iconNames, i);
+  }
+
   return this->iconByPainter(&m_painter, actualOptions);
 }
 
 QIcon IconicFont::iconByPainter(
     CharIconPainter *painter, std::vector<QHash<QString, QVariant>> &options) {
-  CharIconEngine engine(this, painter, options);
-  return QIcon(&engine);
+  auto engine = new CharIconEngine(this, painter, options);
+  return QIcon(engine);
 }
 
 void IconicFont::loadFont(const QString &prefix, const QString &ttfFilename,
                           const QString &charmapFilename) {
-  const auto id =
-      QFontDatabase::addApplicationFont(QFile(ttfFilename).fileName());
+  const auto id = QFontDatabase::addApplicationFont(ttfFilename);
   const auto loadedFontFamilies = QFontDatabase::applicationFontFamilies(id);
   if (!loadedFontFamilies.empty()) {
     m_fontnames.insert(prefix, loadedFontFamilies[0]);
@@ -144,6 +125,9 @@ QFont IconicFont::getFont(const QString &prefix, const int drawSize) {
   return font;
 }
 
+QHash<QString, QHash<QString, QVariant>> const IconicFont::getCharmap() const {
+  return m_charmap;
+}
+
 } // namespace Icons
-} // namespace Widgets
 } // namespace MantidQt

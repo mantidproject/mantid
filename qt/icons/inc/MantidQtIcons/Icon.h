@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_ICONS_ICONLOADER_H_
-#define MANTIDQT_WIDGETS_ICONS_ICONLOADER_H_
+#ifndef MANTIDQT_ICONS_ICONLOADER_H_
+#define MANTIDQT_ICONS_ICONLOADER_H_
 
-#include "CharIconEngine.h"
-#include "CharIconPainter.h"
-#include "DllOption.h"
+#include "MantidQtIcons/CharIconEngine.h"
+#include "MantidQtIcons/CharIconPainter.h"
+#include "MantidQtIcons/DllOption.h"
 
 #include <QHash>
 #include <QIcon>
@@ -20,25 +20,21 @@
 #include <vector>
 
 namespace MantidQt {
-namespace Widgets {
 namespace Icons {
 
-QIcon getIcon(const QString &iconName);
+EXPORT_OPT_MANTIDQT_ICONS QIcon getIcon(const QString &iconName,
+                                        const QString &color = QString("black"),
+                                        const double &scaleFactor = 1.0);
 
-QIcon getIcon(const QString &iconName,
-              const boost::optional<QString> &color = boost::none,
-              const boost::optional<double> &scaleFactor = boost::none);
-
-QIcon getIcon(const std::vector<QString> &iconNames,
-              const boost::optional<std::vector<QHash<QString, QVariant>>>
-                  &options = boost::none);
+EXPORT_OPT_MANTIDQT_ICONS QIcon
+getIcon(const std::vector<QString> &iconNames,
+        const std::vector<QHash<QString, QVariant>> &options);
 
 class EXPORT_OPT_MANTIDQT_ICONS IconicFont {
 public:
   IconicFont();
   QIcon getIcon(const std::vector<QString> &iconNames,
-                const boost::optional<std::vector<QHash<QString, QVariant>>>
-                    &options = boost::none);
+                const std::vector<QHash<QString, QVariant>> &options);
   QHash<QString, QHash<QString, QVariant>> const getCharmap() const;
   QFont getFont(const QString &prefix, const int drawSize);
 
@@ -57,7 +53,6 @@ private:
 };
 
 } // namespace Icons
-} // namespace Widgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_WIDGETS_ICONS_ICONLOADER_H_ */
+#endif /* MANTIDQT_ICONS_ICONLOADER_H_ */

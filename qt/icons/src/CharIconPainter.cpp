@@ -4,13 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "../inc/MantidQtWidgets/CharIconPainter.h"
-#include "../inc/MantidQtWidgets/Icon.h"
+#include "MantidQtIcons/CharIconPainter.h"
+#include "MantidQtIcons/Icon.h"
 #include <QVariant>
 #include <math.h>
 
 namespace MantidQt {
-namespace Widgets {
 namespace Icons {
 
 void CharIconPainter::paint(IconicFont *iconic, QPainter *painter, QRect rect,
@@ -67,5 +66,4 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
 }
 
 } // namespace Icons
-} // namespace Widgets
 } // namespace MantidQt

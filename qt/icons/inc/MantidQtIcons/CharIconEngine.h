@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_ICONS_CHARICONENGINE_H_
-#define MANTIDQT_WIDGETS_ICONS_CHARICONENGINE_H_
+#ifndef MANTIDQT_ICONS_CHARICONENGINE_H_
+#define MANTIDQT_ICONS_CHARICONENGINE_H_
 
 #include "DllOption.h"
 
@@ -20,7 +20,6 @@
 #include <vector>
 
 namespace MantidQt {
-namespace Widgets {
 namespace Icons {
 
 class IconicFont;
@@ -43,7 +42,6 @@ private:
 };
 
 } // namespace Icons
-} // namespace Widgets
 } // namespace MantidQt
 
 #endif /* MANTIDQT_WIDGETS_ICONS_CHARICONENGINE_H_ */
