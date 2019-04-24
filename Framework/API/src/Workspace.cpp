@@ -10,7 +10,6 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/make_unique.h"
 
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace API {

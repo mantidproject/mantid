@@ -23,7 +23,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
-#include <boost/lexical_cast.hpp>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;

@@ -175,8 +175,7 @@ void DetectorEfficiencyCor::retrieveProperties() {
   // If we're not given an Ei, see if one has been set.
   if (m_Ei == EMPTY_DBL()) {
     if (m_inputWS->run().hasProperty("Ei")) {
-      Kernel::Property *eiprop = m_inputWS->run().getProperty("Ei");
-      m_Ei = boost::lexical_cast<double>(eiprop->value());
+      m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
       g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
     } else {
       throw std::invalid_argument(

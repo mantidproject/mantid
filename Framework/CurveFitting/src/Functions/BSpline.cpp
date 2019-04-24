@@ -12,7 +12,6 @@
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace CurveFitting {

@@ -10,7 +10,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
 
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -55,8 +54,7 @@ double NormaliseByCurrent::extractCharge(
 
   int nPeriods = 0;
   try {
-    Property *nPeriodsProperty = run.getLogData("nperiods");
-    nPeriods = boost::lexical_cast<int>(nPeriodsProperty->value());
+    nPeriods = run.getPropertyValueAsType<int>("nperiods");
   } catch (Exception::NotFoundError &) {
     g_log.information() << "No nperiods property. If this is multi-period "
                            "data, then you will be normalising against the "

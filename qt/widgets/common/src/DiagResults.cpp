@@ -19,7 +19,6 @@
 #include <QPushButton>
 #include <QRegExp>
 
-#include <boost/lexical_cast.hpp>
 
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;

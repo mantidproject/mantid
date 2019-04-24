@@ -27,7 +27,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/lexical_cast.hpp>
 
 // clang-format off
 #include <nexus/NeXusFile.hpp>

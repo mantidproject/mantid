@@ -15,7 +15,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
