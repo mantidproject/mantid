@@ -32,6 +32,8 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <boost/algorithm/string/regex.hpp>
+
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -933,9 +935,20 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) {
 /// Returns a caption for the units of the data in the workspace
 std::string MatrixWorkspace::YUnitLabel(bool useLatexText /* = false */) const {
   std::string retVal;
-  if (!m_YUnitLabel.empty())
+  if (!m_YUnitLabel.empty()) {
     retVal = m_YUnitLabel;
-  else {
+    if (useLatexText) {
+      std::vector<std::string> splitVec;
+      boost::split_regex(splitVec, retVal, boost::regex(" per "));
+      if (splitVec.size() > 1) {
+        retVal = splitVec[0];
+        std::string unitString = "";
+        for (size_t i = 1; i < splitVec.size(); i++)
+          unitString += splitVec[i];
+        retVal += " ($" + unitString + "$)$^{-1}$";
+      }
+    }
+  } else {
     retVal = m_YUnit;
     // If this workspace is a distribution & has at least one axis & this axis
     // has its unit set then append that unit to the string to be returned
