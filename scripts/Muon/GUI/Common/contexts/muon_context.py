@@ -176,6 +176,9 @@ class MuonContext(object):
         return runs
 
     def first_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+        
         if self.gui_context['FirstGoodDataFromFile']:
             return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
@@ -186,6 +189,9 @@ class MuonContext(object):
                 return self.gui_context['FirstGoodData']
 
     def last_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
         if self.gui_context['LastGoodDataFromFile']:
             return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
         else:
