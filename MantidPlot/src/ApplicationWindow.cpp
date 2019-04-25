@@ -73,7 +73,7 @@
 #include "LineDialog.h"
 #include "LogisticFit.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MatrixCommand.h"
 #include "MatrixDialog.h"
 #include "MatrixModel.h"
@@ -900,7 +900,7 @@ QMenuBar *ApplicationWindow::myMenuBar() {
 
 void ApplicationWindow::initToolBars() {
   initPlot3DToolBar();
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
   QPixmap openIcon, saveIcon;
 
   standardTools = new QToolBar(tr("Standard Tools"), this);

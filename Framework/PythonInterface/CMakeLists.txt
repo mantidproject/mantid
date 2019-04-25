@@ -10,8 +10,7 @@ set(Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
 # NumPy
 find_package(Numpy REQUIRED)
-include_directories(SYSTEM ${PYTHON_INCLUDE_PATH})
-include_directories(SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR})
+include_directories(SYSTEM ${PYTHON_INCLUDE_PATH} ${PYTHON_NUMPY_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
 # Base of the subproject include dir
 set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface)
@@ -34,9 +33,9 @@ set(PYTHON_DEPS ${MPI_CXX_LIBRARIES})
 add_subdirectory(core)
 
 # A function for generating the exports
-#  - MODULE_TEMPLATE: The file containing the @EXPORT_FUNCTIONS@ and 
+#  - MODULE_TEMPLATE: The file containing the @EXPORT_FUNCTIONS@ and
 #    @EXPORT_DECLARE@ flags to replace
-#  - OUTPUT_FILE:The path to the generated output file 
+#  - OUTPUT_FILE:The path to the generated output file
 #  - ... The list of export files
 function(CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE)
   set(_fwd_declarations)
@@ -102,7 +101,9 @@ function(SET_PYTHON_PROPERTIES TARGET TARGET_NAME)
   set_property(TARGET ${TARGET} PROPERTY FOLDER "MantidFramework/Python")
 endfunction()
 
+###########################################################################
 # mantid package
+###########################################################################
 
 # All targets can see these includes
 include_directories(core/inc)
@@ -111,7 +112,31 @@ include_directories(core/inc)
 include_directories(inc)
 add_subdirectory(mantid)
 
+include ( PythonPackageTargetFunctions )
+
+# Adds `mantid` as a target in the `MantidFramework/Python` folder
+add_python_package ( PythonInterface EGGLINKNAME mantid )
+set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
+add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
+  PythonGeometryModule PythonAPIModule PythonDataObjectsModule
+  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule PythonPlotsModestImageModule )
+
+# Clear any leftover bin/$(Configuration)/mantid/ folder, from when
+# PythonInterface was being copied over.
+# The last semicolon is there to have an iteration with an empty string
+# which makes the last check just bin/mantid for non-Windows builds
+set(_windows_configurations "Debug/;Release/;")
+foreach(_configuration IN LISTS _windows_configurations)
+set(_old_mantid_dir ${CMAKE_BINARY_DIR}/bin/${_configuration}mantid)
+  if(EXISTS ${_old_mantid_dir})
+    message("Removing old mantid PythonInterface directory: ${_old_mantid_dir}")
+    file(REMOVE_RECURSE ${_old_mantid_dir})
+  endif()
+endforeach(_configuration)
+
+###########################################################################
 # Python algorithms
+###########################################################################
 clean_orphaned_pyc_files(${CMAKE_CURRENT_SOURCE_DIR}/plugins)
 
 # tests

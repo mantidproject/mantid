@@ -89,12 +89,13 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      ${CMAKE_CURRENT_LIST_DIR}
                      ${COMMON_SIP_DIR}
                      ${PYTHON_INCLUDE_PATH}
+                     ${SIP_INCLUDE_DIR}
                      ../../../Framework/PythonInterface/core/inc
                    PYQT_VERSION 4
                    LINK_LIBS
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      MantidQtWidgetsCommonQt4
-                     MantidQtWidgetsLegacyQwtQt4
+                     MantidQtWidgetsPlottingQt4
                      MantidQtWidgetsSliceViewerQt4
                      MantidQtWidgetsFactoryQt4
                      MantidQtWidgetsRefDetectorViewQt4

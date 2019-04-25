@@ -95,11 +95,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         threeNonnegativeInts = CompositeValidator()
         threeNonnegativeInts.add(IntArrayLengthValidator(3))
-        nonnegativeInts = IntArrayBoundedValidator()
-        nonnegativeInts.setLower(0)
+        nonnegativeInts = IntArrayBoundedValidator(lower=0)
         threeNonnegativeInts.add(nonnegativeInts)
-        nonnegativeFloatArray = FloatArrayBoundedValidator()
-        nonnegativeFloatArray.setLower(0.)
+        nonnegativeFloatArray = FloatArrayBoundedValidator(lower=0.)
         inWavelength = WorkspaceUnitValidator('Wavelength')
         self.declareProperty(
             MatrixWorkspaceProperty(

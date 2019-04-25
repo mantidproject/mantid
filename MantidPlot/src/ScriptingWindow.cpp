@@ -76,7 +76,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
   initMenus();
   readSettings();
 
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
 
 #ifdef Q_OS_MAC

@@ -123,6 +123,8 @@ void Sample::setShape(const IObject_sptr &shape) {
  */
 const Material &Sample::getMaterial() const { return m_shape->material(); }
 
+bool Sample::hasEnvironment() const { return (m_environment != nullptr); }
+
 /**
  * Return a reference to the sample environment that this sample is attached to
  * @return A const reference to a SampleEnvironment object

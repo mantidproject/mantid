@@ -453,17 +453,18 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # A few defines needed for OpenCascade on the Mac
+
 if(APPLE)
   add_definitions(-DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP)
 endif()
-
-include_directories(${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS})
-include_directories(${GSL_INCLUDE_DIR})
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidGeometry/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Geometry ${SRC_FILES} ${INC_FILES})
+
+target_include_directories(Geometry SYSTEM PUBLIC ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+
 # Set the name of the generated library
 set_target_properties(Geometry
                       PROPERTIES OUTPUT_NAME

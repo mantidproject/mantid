@@ -11,6 +11,8 @@ set(PY_FILES
 # Copy python files to output directory
 set(OUTPUT_DIR
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers)
+
+# Copy the files for the testhelpers to the build directory
 copy_files_to_dir("${PY_FILES}"
                   ${CMAKE_CURRENT_SOURCE_DIR}
                   ${OUTPUT_DIR}
@@ -36,7 +38,7 @@ add_library(PythonWorkspaceCreationHelper
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonWorkspaceCreationHelper WorkspaceCreationHelper)
-set_target_output_directory(PythonWorkspaceCreationHelper ${OUTPUT_DIR} .pyd)
+
 # Override folder
 set_property(TARGET PythonWorkspaceCreationHelper
              PROPERTY FOLDER "UnitTests/Python")

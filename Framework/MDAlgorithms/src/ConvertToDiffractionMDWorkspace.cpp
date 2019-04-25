@@ -327,8 +327,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   if (LorentzCorrection) {
     API::Run &run = m_inWS->mutableRun();
     if (run.hasProperty("LorentzCorrection")) {
-      Kernel::Property *prop = run.getProperty("LorentzCorrection");
-      bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
+      bool lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         LorentzCorrection = false;
         g_log.warning()

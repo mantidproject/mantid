@@ -22,6 +22,7 @@ Improvements
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` permits now flux normalization by proton charge and run duration.
 - :ref:`BASISReduction <algm-BASISReduction>` permits now flux normalization by proton charge and run duration.
 - :ref:`BASISReduction <algm-BASISReduction>` permits now retaining events only within a time window.
+- :ref:`BASISReduction <algm-BASISReduction>` can output now the powder diffraction spectra.
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
 
 
@@ -32,6 +33,8 @@ Improvements
 ############
 - Improved the output options of MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit so that Chi_squared can now be plotted.
 - Improved the I(Q, t) tab by adding more validation checks for the input data.
+- Improved the Fit and Difference plots in MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit. It is now possible to adjust their
+  relative sizes by dragging a 'handle' between the plots.
 
 Bug Fixes
 #########
@@ -56,6 +59,10 @@ Bug Fixes
 
 Data Reduction Interface
 ------------------------
+
+Improvements
+############
+- Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
 
 Bug Fixes
 #########

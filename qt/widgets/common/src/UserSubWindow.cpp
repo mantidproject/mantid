@@ -56,7 +56,7 @@ void UserSubWindow::initializeLayout() {
   setObjectName(m_ifacename);
 
   // Set the icon
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
 
   m_bIsInitialized = true;
 

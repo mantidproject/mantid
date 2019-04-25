@@ -17,10 +17,9 @@ set ( LIB_SRCS
   src/Zoomer.cpp
 )
 
-set ( MOC_HEADERS
-  inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
-  inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h
-)
+set(MOC_HEADERS
+    inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
+    inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h)
 
 set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Artist.h
@@ -37,11 +36,10 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Zoomer.h
 )
 
-set ( UI_FILES
-  inc/MantidQtWidgets/MplCpp/Colorbar.ui
-)
+set(UI_FILES
+    inc/MantidQtWidgets/MplCpp/Colorbar.ui)
 
-find_package ( BoostPython REQUIRED )
+find_package(BoostPython REQUIRED)
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
@@ -78,4 +76,4 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
 )
 
 # Testing
-add_subdirectory ( test )
+add_subdirectory(test)

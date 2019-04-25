@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <map>
 #include <string>

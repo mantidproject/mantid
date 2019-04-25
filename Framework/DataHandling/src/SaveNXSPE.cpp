@@ -128,8 +128,7 @@ void SaveNXSPE::exec() {
   // TODO: Check that this is the way round we want to do it.
   const API::Run &run = inputWS->run();
   if (run.hasProperty("Ei")) {
-    Kernel::Property *propEi = run.getProperty("Ei");
-    efixed = boost::lexical_cast<double, std::string>(propEi->value());
+    efixed = run.getPropertyValueAsType<double>("Ei");
   }
   nxFile.writeData("fixed_energy", efixed);
   nxFile.openData("fixed_energy");

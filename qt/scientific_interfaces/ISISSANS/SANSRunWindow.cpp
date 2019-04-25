@@ -3015,16 +3015,15 @@ void SANSRunWindow::handleDefSaveClick() {
 
   const QStringList algs(getSaveAlgs());
   QString saveCommand;
-  for (QStringList::const_iterator alg = algs.begin(); alg != algs.end();
-       ++alg) {
-    QString ext = SaveWorkspaces::getSaveAlgExt(*alg);
+  for (const auto &alg : algs) {
+    QString ext = SaveWorkspaces::getSaveAlgExt(alg);
     QString fname = fileBase.endsWith(ext) ? fileBase : fileBase + ext;
-    if ((*alg) == "SaveRKH")
+    if (alg == "SaveRKH")
       saveCommand +=
-          (*alg) + "('" + m_outputWS + "','" + fname + "', Append=False)\n";
-    else if ((*alg) == "SaveCanSAS1D") {
+          alg + "('" + m_outputWS + "','" + fname + "', Append=False)\n";
+    else if (alg == "SaveCanSAS1D") {
       saveCommand +=
-          (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+          alg + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
       Workspace_sptr workspace_ptr =
           AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
@@ -3047,9 +3046,9 @@ void SANSRunWindow::handleDefSaveClick() {
                      ", SampleWidth=" + sampleWidth +
                      ", SampleThickness=" + sampleThickness;
       saveCommand += ")\n";
-    } else if ((*alg) == "SaveNXcanSAS") {
+    } else if (alg == "SaveNXcanSAS") {
       saveCommand +=
-          (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+          alg + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
       Workspace_sptr workspace_ptr =
           AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
@@ -3062,7 +3061,7 @@ void SANSRunWindow::handleDefSaveClick() {
       }
       saveCommand += ")\n";
     } else
-      saveCommand += (*alg) + "('" + m_outputWS + "','" + fname + "')\n";
+      saveCommand += alg + "('" + m_outputWS + "','" + fname + "')\n";
   }
 
   saveCommand += "print('success')\n";
@@ -3256,8 +3255,8 @@ void SANSRunWindow::handleInstrumentChange() {
   QWidget *front_center_widgets[] = {
       m_uiForm.front_beam_x, m_uiForm.front_beam_y, m_uiForm.front_radio};
   bool loq_selected = (instClass == "LOQ()");
-  for (int i = 0; i < 3; i++)
-    front_center_widgets[i]->setEnabled(true);
+  for (auto &front_center_widget : front_center_widgets)
+    front_center_widget->setEnabled(true);
   // Set the label of the radio buttons according to the
   // beamline usage:
   // REAR/FRONT -> SANS2D
@@ -3483,10 +3482,10 @@ void SANSRunWindow::checkList() {
   // split up the comma separated list ignoring spaces
   Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try {
-    for (Poco::StringTokenizer::Iterator i = in.begin(), end = in.end();
-         i != end; ++i) { // try a lexical cast, we don't need its result only
-                          // if there was an error
-      boost::lexical_cast<double>(*i);
+    for (const auto &i :
+         in) { // try a lexical cast, we don't need its result only
+               // if there was an error
+      boost::lexical_cast<double>(i);
     }
     // there were no errors
     if (!input.empty()) {
@@ -3967,8 +3966,8 @@ void SANSRunWindow::transSelectorChanged(int currindex) {
   QWidget *wid[] = {m_uiForm.trans_can_label, m_uiForm.transFitOnOff_can,
                     m_uiForm.transFit_ck_can, m_uiForm.trans_min_can,
                     m_uiForm.trans_max_can,   m_uiForm.trans_opt_can};
-  for (size_t i = 0; i < 6; i++)
-    wid[i]->setVisible(visible);
+  for (auto &i : wid)
+    i->setVisible(visible);
 }
 
 void SANSRunWindow::loadTransmissionSettings() {

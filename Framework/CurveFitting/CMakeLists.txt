@@ -501,7 +501,7 @@ endif()
 set_property(TARGET CurveFitting PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
-
+target_include_directories(CurveFitting SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(CurveFitting
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}

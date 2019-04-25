@@ -133,8 +133,8 @@ void PeaksWorkspaceWidget::createTableMVC() {
   ui.tblPeaks->setModel(m_tableModel);
 
   const std::vector<int> hideCols = model->defaultHideCols();
-  for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
-    ui.tblPeaks->setColumnHidden(*it, true);
+  for (auto &hideCol : hideCols)
+    ui.tblPeaks->setColumnHidden(hideCol, true);
   ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
   ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
   m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();

@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTransmissionCalc.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QTreeWidgetItem>
 
