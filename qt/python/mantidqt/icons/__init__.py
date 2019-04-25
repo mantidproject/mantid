@@ -14,5 +14,5 @@ from mantidqt.utils.qt import import_qt
 _getIcon = import_qt('._icons', 'mantidqt', 'getIcon')
 
 
-def get_icon(*names, **options):
-    return _getIcon(*names, **options)
+def get_icon(name, color, scale_factor):
+    return _getIcon(name, color, scale_factor)

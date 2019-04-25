@@ -119,9 +119,6 @@ void IconicFont::loadFont(const QString &prefix, const QString &ttfFilename,
 QFont IconicFont::getFont(const QString &prefix, const int drawSize) {
   QFont font(m_fontnames[prefix]);
   font.setPixelSize(drawSize);
-  if (prefix[prefix.size() - 1] == "s") {
-    font.setStyleName("Solid");
-  }
   return font;
 }
 

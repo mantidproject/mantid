@@ -27,8 +27,6 @@ private:
   void paintIcon(IconicFont *iconic, QPainter *painter, QRect rect,
                  QIcon::Mode mode, QIcon::State state,
                  QHash<QString, QVariant> &options);
-
-  QString m_prefix;
 };
 
 } // namespace Icons

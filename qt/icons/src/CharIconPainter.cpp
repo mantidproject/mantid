@@ -27,6 +27,8 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   // These variables will be useful later on, so I have left them being passed
   // down this far. This is because they can be used for defining variable
   // changes based on state of the buttons/QObject that the Icon is present in.
+  // Since we currently don't use this feature availible with QIcon they have
+  // not yet been implemented.
   UNUSED_ARG(mode);
   UNUSED_ARG(state);
 
@@ -59,7 +61,9 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   const auto prefix = prefixVariant.toString();
   const auto charecter = charecterVariant.toString();
 
-  painter->setFont(iconic->getFont(m_prefix, drawSize));
+  const auto prefixString = prefix.toStdString();
+
+  painter->setFont(iconic->getFont(prefix, drawSize));
   painter->setOpacity(1.0);
   painter->drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, charecter);
   painter->restore();

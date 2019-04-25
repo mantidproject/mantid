@@ -15,9 +15,9 @@ from mantidqt.icons import get_icon
 from mantidqt.utils.qt import add_actions, create_action
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import CodeEditorTabPresenter
 
-ABORT_BUTTON_RED_COLOR = QColor(230, 84, 80)
+ABORT_BUTTON_RED_COLOR = QColor(230, 84, 80).name()
 
-PLAY_BUTTON_GREEN_COLOR = QColor(73, 156, 84)
+PLAY_BUTTON_GREEN_COLOR = QColor(73, 156, 84).name()
 
 
 class CodeEditorTabWidget(QTabWidget):
@@ -46,7 +46,7 @@ class CodeEditorTabWidget(QTabWidget):
         plus_button = QPushButton(self)
         plus_button.setObjectName(self.NEW_EDITOR_PLUS_BTN_OBJECT_NAME)
         plus_button.clicked.connect(parent.plus_button_clicked)
-        plus_button.setIcon(get_icon("fa.plus"))
+        plus_button.setIcon(get_icon("mdi.plus"))
         self.setCornerWidget(plus_button, Qt.TopLeftCorner)
 
     def setup_tabs_context_menu(self, parent):
@@ -77,13 +77,13 @@ class CodeEditorTabWidget(QTabWidget):
 
         run_button = QPushButton(container_widget)
         run_button.setObjectName(self.RUN_BUTTON_OBJECT_NAME)
-        run_button.setIcon(get_icon("fa.play", color=PLAY_BUTTON_GREEN_COLOR))
+        run_button.setIcon(get_icon("mdi.play", PLAY_BUTTON_GREEN_COLOR))
         run_button.clicked.connect(parent.execute_current_async)
         layout.addWidget(run_button)
 
         abort_button = QPushButton(container_widget)
         abort_button.setObjectName(self.ABORT_BUTTON_OBJECT_NAME)
-        abort_button.setIcon(get_icon("fa.square", color=ABORT_BUTTON_RED_COLOR))
+        abort_button.setIcon(get_icon("mdi.square", ABORT_BUTTON_RED_COLOR))
         abort_button.clicked.connect(parent.abort_current)
         layout.addWidget(abort_button)
 

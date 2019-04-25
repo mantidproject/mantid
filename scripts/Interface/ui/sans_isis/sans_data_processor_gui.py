@@ -214,12 +214,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.instrument = SANSInstrument.NoInstrument
 
-        self.paste_button.setIcon(icons.get_icon("fa.paste"))
-        self.copy_button.setIcon(icons.get_icon("fa.copy"))
-        self.cut_button.setIcon(icons.get_icon("fa.cut"))
-        self.erase_button.setIcon(icons.get_icon("fa.eraser"))
-        self.delete_row_button.setIcon(icons.get_icon("fa.trash"))
-        self.insert_row_button.setIcon(icons.get_icon("fa.table"))
+        self.paste_button.setIcon(icons.get_icon("mdi.content-paste"))
+        self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
+        self.cut_button.setIcon(icons.get_icon("mdi.content-cut"))
+        self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
+        self.delete_row_button.setIcon(icons.get_icon("mdi.trash-can"))
+        self.insert_row_button.setIcon(icons.get_icon("mdi.table"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
