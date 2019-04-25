@@ -313,7 +313,7 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launch_custom_gui(self, filename):
-        if self.executioner == None:
+        if self.executioner is None:
             self.executioner = PythonCodeExecution()
             self.executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
 

@@ -178,7 +178,7 @@ class MuonContext(object):
     def first_good_data(self, run):
         if not self.data_context.get_loaded_data_for_run(run):
             return 0.0
-        
+
         if self.gui_context['FirstGoodDataFromFile']:
             return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
