@@ -120,11 +120,50 @@ class FigureInteraction(object):
             return
 
         menu = QMenu()
+
         if self.fit_browser.tool is not None:
             self.fit_browser.add_to_menu(menu)
             menu.addSeparator()
         self._add_axes_scale_menu(menu)
+        self._add_error_bars_menu(menu)
         menu.exec_(QCursor.pos())
+
+    def _toggle_all_error_bars(self, containers):
+        for container in containers:
+            self._toggle_error_bar_for(container)
+
+    def _toggle_error_bar_for(self, container, force_state=None):
+        # TODO force_state unused?
+        error_line = container.lines[2][0]
+        # can't check with just if force_state
+        # because it will fail when false
+        # if force_state is None:
+        error_line.set_visible(not error_line.get_visible())
+        # else:
+        #     error_line.set_visible(force_state)
+
+        self.canvas.figure.axes[0].legend()
+        self.canvas.draw()
+
+    def _add_error_bars_menu(self, menu):
+        containers = self.canvas.figure.axes[0].containers
+
+        # if there's more than one line plotted, then
+        # add a sub menu, containing an action to hide the
+        # error bar for each line
+        if len(containers) > 1:
+            # add into the correct menu,
+            # if there is a single line, then
+            # add the action to the main menu
+            error_bars_menu = QMenu("Error Bars", menu)
+            menu.addMenu(error_bars_menu)
+            # this contains the error bar data
+            for line_container in containers:
+                error_bars_menu.addAction(line_container.get_label(),
+                                          partial(self._toggle_error_bar_for, line_container))
+
+        # always add the toggle all error bars option
+        menu.addAction("Toggle error bars", partial(self._toggle_all_error_bars, containers))
 
     def _add_axes_scale_menu(self, menu):
         """Add the Axes scale options menu to the given menu"""
