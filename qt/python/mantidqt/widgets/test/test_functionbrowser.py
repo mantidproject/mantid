@@ -70,11 +70,10 @@ class BrowserUser(QObject):
 
     def __init__(self, browser):
         super(BrowserUser, self).__init__()
+        self.structure_changed = MagicMock()
+        self.parameter_changed = MagicMock()
         browser.functionStructureChanged.connect(self.structure_changed)
         browser.parameterChanged.connect(self.parameter_changed)
-
-    structure_changed = MagicMock()
-    parameter_changed = MagicMock()
 
 
 @function_browser_test(False)
@@ -267,6 +266,39 @@ def test_add_function(self):
     dlg.accept()
     fun = self.get_fit_function()
     self.assertEqual(fun.name, 'FlatBackground')
+    self.assertEqual(user.structure_changed.call_count, 1)
+
+
+@function_browser_test()
+def test_add_function_to_composite(self):
+    assert (isinstance(self, TestFunctionBrowser))
+    browser = self.widget
+    browser.setFunction('name=FlatBackground;(name=FlatBackground,A0=1;name=FlatBackground,A0=2)')
+    view = browser.view()
+    user = BrowserUser(browser)
+    pos = view.getVisualRectFunctionProperty('f1.').center()
+    tree = view.treeWidget().viewport()
+    yield self.show_context_menu(tree, pos, pause=0)
+    yield self.mouse_trigger_action('add_function', pause=0)
+    yield self.wait_for_modal()
+    dlg = self.get_active_modal_widget()
+    tree = get_child(dlg, 'fitTree')
+    item = tree.findItems('Background', Qt.MatchExactly)[0]
+    item.setExpanded(True)
+    item = tree.findItems('LinearBackground', Qt.MatchRecursive)[0]
+    pos = tree.visualItemRect(item).center()
+    yield click_on(tree.viewport(), pos)
+    dlg.accept()
+    fun = self.get_fit_function()
+    self.assertEqual(fun.name, 'CompositeFunction')
+    self.assertEqual(fun[0].name, 'FlatBackground')
+    self.assertEqual(fun[1].name, 'CompositeFunction')
+    self.assertEqual(fun[1][0].name, 'FlatBackground')
+    self.assertEqual(fun[1][1].name, 'FlatBackground')
+    self.assertEqual(fun[1][2].name, 'LinearBackground')
+    self.assertEqual(fun[1][0].A0, 1.0)
+    self.assertEqual(fun[1][1].A0, 2.0)
+    self.assertEqual(fun[1][2].A0, 0.0)
     self.assertEqual(user.structure_changed.call_count, 1)
 
 

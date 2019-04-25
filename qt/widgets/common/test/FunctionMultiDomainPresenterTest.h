@@ -11,7 +11,10 @@
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include <cxxtest/TestSuite.h>
 #include <QApplication>
@@ -44,43 +47,47 @@ static QApplicationHolder MAIN_QAPPLICATION;
 class MockFunctionView : public IFunctionView {
 public:
   void clear() override {
-    m_params.clear();
-    m_errors.clear();
+    m_function = IFunction_sptr();
   }
   void setFunction(IFunction_sptr fun) override {
-    if (fun) {
-      for (size_t i = 0; i < fun->nParams(); ++i) {
-        auto name = fun->parameterName(i);
-        m_params[name] = fun->getParameter(i);
-        m_errors[name] = fun->getError(i);
-      }
-    }
-    else {
-      clear();
-    }
+    m_function = fun->clone();
   }
-  bool hasFunction() const override { return !m_params.empty(); }
+  bool hasFunction() const override { return bool(m_function); }
   void setParameter(const QString &paramName, double value) override {
-    m_params[paramName.toStdString()] = value;
+    m_function->setParameter(paramName.toStdString(), value);
   }
   void setParamError(const QString &paramName, double error) override {
-    m_errors[paramName.toStdString()] = error;
+    auto const i = m_function->parameterIndex(paramName.toStdString());
+    m_function->setError(i, error);
   }
   double getParameter(const QString &paramName) const override {
-    return m_params.at(paramName.toStdString());
+    return m_function->getParameter(paramName.toStdString());
   }
   void setErrorsEnabled(bool enabled) override { m_areErrorsEnabled = enabled; }
   void clearErrors() override {
-    for (auto &it : m_errors) {
-      it.second = 0.0;
+    for (size_t i = 0; i < m_function->nParams(); ++i) {
+      m_function->setError(i, 0.0);
     }
   }
   boost::optional<QString> currentFunctionIndex() const override {
-    return boost::optional<QString>();
+    return m_currentFunctionIndex;
+  }
+
+  void addFunction(const QString &prefix, const QString& funStr) {
+    m_currentFunctionIndex = prefix;
+    if (prefix.isEmpty()) {
+      auto fun = m_function ? m_function->asString() + ";" : "";
+      m_function = FunctionFactory::Instance().createInitialized(fun + funStr.toStdString());
+    } else {
+      auto parentFun = boost::dynamic_pointer_cast<CompositeFunction>(
+        getFunctionWithPrefix(prefix, m_function));
+      parentFun->addFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+    }
+    emit functionAdded(funStr);
   }
 private:
-  std::map<std::string, double> m_params;
-  std::map<std::string, double> m_errors;
+  IFunction_sptr m_function;
+  boost::optional<QString> m_currentFunctionIndex;
   bool m_areErrorsEnabled{ true };
 };
 
@@ -103,7 +110,7 @@ public:
     TS_ASSERT(!presenter.getFitFunction());
   }
 
-  void test_simple() {
+  void test_setFunction() {
     auto view = make_unique<MockFunctionView>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=LinearBackground,A0=1,A1=2");
@@ -113,6 +120,85 @@ public:
     TS_ASSERT(fun);
     if (!fun) return;
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+  }
+
+  void test_view_addFunction() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;name=FlatBackground,A0=2)");
+    view->addFunction("f1.", "name=LinearBackground");
+    auto newFun = presenter.getFunction()->getFunction(1)->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(1)->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+  }
+
+  void test_view_addFunction_top_level() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    view->addFunction("", "name=LinearBackground");
+    auto newFun = presenter.getFunction()->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+  }
+
+  void test_view_addFunction_to_empty() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    view->addFunction("", "name=LinearBackground");
+    auto newFun = presenter.getFunction();
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+  }
+
+  void test_view_multi_addFunction() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;name=FlatBackground,A0=2)");
+    view->addFunction("f1.", "name=LinearBackground");
+    auto newFun = presenter.getFunction()->getFunction(1)->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(0)->getFunction(1)->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(1)->getFunction(1)->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(2)->getFunction(1)->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+  }
+
+  void test_view_multi_addFunction_top_level() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    presenter.setFunctionString("name=FlatBackground");
+    view->addFunction("", "name=LinearBackground");
+    auto newFun = presenter.getFunction()->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(0)->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(1)->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(2)->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+  }
+
+  void test_view_multi_addFunction_to_empty() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    view->addFunction("", "name=LinearBackground");
+    auto newFun = presenter.getFunction();
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(0);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(1);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction()->getFunction(2);
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
   }
 };
 

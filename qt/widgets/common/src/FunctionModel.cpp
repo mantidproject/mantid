@@ -8,7 +8,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -50,6 +50,7 @@ void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
   if (fun) {
     for (int i = 0; i < m_numberDomains; ++i) {
       m_function->addFunction(fun->clone());
+      m_function->setDomainIndex(i, i);
     }
   }
 }
@@ -78,16 +79,23 @@ bool MultiDomainFunctionModel::hasFunction() const
 
 void MultiDomainFunctionModel::addFunction(const QString & prefix, const QString & funStr)
 {
-  if (prefix.isEmpty()) {
+  if (!m_function) {
     setFunctionString(funStr);
     return;
   }
-  auto parentFun = getFunctionWithPrefix(prefix, m_function);
-  auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
-  if (cf) {
-    cf->addFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
-  } else {
-    throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+  auto newFun = FunctionFactory::Instance().createInitialized(funStr.toStdString());
+  for (int i = 0; i < getNumberDomains(); ++i) {
+    auto fun = getSingleFunction(i);
+    auto parentFun = getFunctionWithPrefix(prefix, fun);
+    auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
+    if (cf) {
+      cf->addFunction(newFun->clone());
+    } else if(i == 0 && prefix.isEmpty()) {
+      setFunctionString(getFunctionString() + ";" + funStr);
+      break;
+    } else {
+      throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+    }
   }
 }
 

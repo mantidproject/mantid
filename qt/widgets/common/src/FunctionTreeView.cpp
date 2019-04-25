@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionTreeView.h"
-#include "FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"

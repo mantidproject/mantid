@@ -9,7 +9,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/make_unique.h"
 
-#include "FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <QApplication>
