@@ -85,20 +85,20 @@ public:
 
   // property accessors/modifiers
   bool isForRunFiles() const;
-  void isForRunFiles(bool);
+  void isForRunFiles(bool /*mode*/);
   bool isForDirectory() const;
-  void isForDirectory(bool);
+  void isForDirectory(bool /*mode*/);
   QString getLabelText() const;
   void setLabelText(const QString &text);
-  void setLabelMinWidth(int);
+  void setLabelMinWidth(int /*width*/);
   bool allowMultipleFiles() const;
-  void allowMultipleFiles(bool);
+  void allowMultipleFiles(bool /*allow*/);
   bool isOptional() const;
-  void isOptional(bool);
+  void isOptional(bool /*optional*/);
   ButtonOpts doButtonOpt() const;
   void doButtonOpt(ButtonOpts buttonOpt);
   bool doMultiEntry() const;
-  void doMultiEntry(bool);
+  void doMultiEntry(bool /*multiEntry*/);
   QString getAlgorithmProperty() const;
   void setAlgorithmProperty(const QString &name);
   QStringList getFileExtensions() const;
@@ -106,10 +106,10 @@ public:
   bool extsAsSingleOption() const;
   void extsAsSingleOption(bool value);
   LiveButtonOpts liveButtonState() const;
-  void liveButtonState(LiveButtonOpts);
+  void liveButtonState(LiveButtonOpts /*option*/);
 
   // Standard setters/getters
-  void liveButtonSetChecked(bool);
+  void liveButtonSetChecked(bool /*checked*/);
   bool liveButtonIsChecked() const;
   bool isEmpty() const;
   QString getText() const;
@@ -156,7 +156,7 @@ public:
 
 signals:
   /// Emitted when the file text changes
-  void fileTextChanged(const QString &);
+  void fileTextChanged(const QString & /*_t1*/);
   /// Emitted when the editing has finished
   void fileEditingFinished();
   /// Emitted when files finding starts.
@@ -170,7 +170,7 @@ signals:
   /// found).
   void fileFindingFinished();
   /// Emitted when the live button is toggled
-  void liveButtonPressed(bool);
+  void liveButtonPressed(bool /*_t1*/);
   /// Emitted when inspection of any found files is completed
   void fileInspectionFinished();
 
@@ -189,9 +189,9 @@ public slots:
 
 public:
   // Method for handling drop events
-  void dropEvent(QDropEvent *) override;
+  void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent *) override;
+  void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
 
 private:
   /// Create a file filter from a list of extensions

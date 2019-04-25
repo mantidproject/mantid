@@ -10,22 +10,13 @@ set(PYTHON_PKG_ROOT
 set(OUTPUT_DIR ${PYTHON_PKG_ROOT})
 
 # Select the pure Python files to be included in the distribution
-set(PY_FILES __init__.py simpleapi.py fitfunctions.py)
+set(PY_FILES __init__.py simpleapi.py fitfunctions.py utils.py)
 
-copy_files_to_dir("${PY_FILES}"
-                  ${CMAKE_CURRENT_SOURCE_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_PKGROOT_INSTALL_FILES)
-# Generate the version module
+# Generate the version module Build version
 set(VERSION_PY pyversion)
-# Build version
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.py)
-# Copy py to build directory, taking care of multi-config (MSVC) builds
-copy_files_to_dir(${VERSION_PY}.py
-                  ${CMAKE_CURRENT_BINARY_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_PKGROOT_INSTALL_FILES)
+               ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py)
+
 # Package version
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py)
@@ -39,28 +30,14 @@ set_property(TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python")
 # Sub modules
 
 add_subdirectory(kernel)
-add_dependencies(PythonKernelModule PythonModule) # Ensure the module files are
-                                                  # in place
+# Ensure the module files are in place
+add_dependencies(PythonKernelModule PythonModule)
 add_subdirectory(geometry)
 add_subdirectory(api)
 add_subdirectory(dataobjects)
 add_subdirectory(_plugins)
 add_subdirectory(plots)
 add_subdirectory(py3compat)
-
-# Create an overall target
-add_custom_target(PythonInterface
-                  DEPENDS PythonInterfaceCore
-                          PythonKernelModule
-                          PythonGeometryModule
-                          PythonAPIModule
-                          PythonDataObjectsModule
-                          PythonCurveFittingModule
-                          PythonPlotsModule
-                          PythonPy3CompatModule)
-set_property(TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python")
-
-# Bundle Python DLL (where appropriate)
 
 # Defines the target the will cause the Python bundle to be copied
 set(PYBUNDLE_POST_TARGET PythonModule)

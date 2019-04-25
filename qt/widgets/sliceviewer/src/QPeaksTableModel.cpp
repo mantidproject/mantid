@@ -273,14 +273,14 @@ void QPeaksTableModel::setPeaksWorkspace(
 /**
 @return the row count.
 */
-int QPeaksTableModel::rowCount(const QModelIndex &) const {
+int QPeaksTableModel::rowCount(const QModelIndex & /*parent*/) const {
   return static_cast<int>(m_peaksWS->rowCount());
 }
 
 /**
 @return the number of columns in the model.
 */
-int QPeaksTableModel::columnCount(const QModelIndex &) const {
+int QPeaksTableModel::columnCount(const QModelIndex & /*parent*/) const {
   return static_cast<int>(m_dataLookup.size());
 }
 

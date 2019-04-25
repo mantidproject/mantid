@@ -324,12 +324,10 @@ void ConvertToDiffractionMDWorkspace::exec() {
   // -------- Input workspace -> convert to Event
   // ------------------------------------
   m_inWS = getProperty("InputWorkspace");
-  Workspace2D_sptr m_InWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
   if (LorentzCorrection) {
     API::Run &run = m_inWS->mutableRun();
     if (run.hasProperty("LorentzCorrection")) {
-      Kernel::Property *prop = run.getProperty("LorentzCorrection");
-      bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
+      bool lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         LorentzCorrection = false;
         g_log.warning()
@@ -539,14 +537,12 @@ void ConvertToDiffractionMDWorkspace::exec() {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // 3. Split boxes
-    if (DODEBUG)
+    if (DODEBUG) {
       g_log.information() << cputim << ": Added tasks worth " << eventsAdded
                           << " events. WorkspaceIndex " << wi << std::endl;
-    // Do all the adding tasks
-    if (DODEBUG)
       g_log.information() << cputim
                           << ": Performing the addition of these events.\n";
-
+    }
     // Now do all the splitting tasks
     ws->splitAllIfNeeded(ts);
     if (ts->size() > 0)
@@ -579,15 +575,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
   // Recount totals at the end.
   cputim.reset();
   ws->refreshCache();
-  if (DODEBUG)
-    g_log.information() << cputim << ": Performing the refreshCache().\n";
-
-  // TODO: Centroid in parallel, maybe?
-  // ws->getBox()->refreshCentroid(NULL);
-  // if (DODEBUG) g_log.information() << cputim << ": Performing the
-  // refreshCentroid().\n";
-
   if (DODEBUG) {
+    g_log.information() << cputim << ": Performing the refreshCache().\n";
     g_log.information() << "Workspace has " << ws->getNPoints()
                         << " events. This took " << cputimtotal
                         << " in total.\n";

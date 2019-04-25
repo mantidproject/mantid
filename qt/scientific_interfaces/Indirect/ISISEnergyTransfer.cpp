@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 
@@ -284,12 +284,15 @@ bool ISISEnergyTransfer::validate() {
 
 bool ISISEnergyTransfer::numberInCorrectRange(
     std::size_t const &spectraNumber) const {
-  auto const instrumentDetails = getInstrumentDetails();
-  auto const spectraMin =
-      static_cast<std::size_t>(instrumentDetails["spectra-min"].toInt());
-  auto const spectraMax =
-      static_cast<std::size_t>(instrumentDetails["spectra-max"].toInt());
-  return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+  if (hasInstrumentDetail("spectra-min") &&
+      hasInstrumentDetail("spectra-max")) {
+    auto const spectraMin =
+        static_cast<std::size_t>(getInstrumentDetail("spectra-min").toInt());
+    auto const spectraMax =
+        static_cast<std::size_t>(getInstrumentDetail("spectra-max").toInt());
+    return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+  }
+  return false;
 }
 
 QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
@@ -395,8 +398,12 @@ void ISISEnergyTransfer::run() {
     reductionAlg->setProperty("GroupingString", grouping.second);
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
-  reductionAlg->setProperty("OutputWorkspace",
-                            "IndirectEnergyTransfer_Workspaces");
+
+  m_outputGroupName = instName.toLower().toStdString() +
+                      m_uiForm.dsRunFiles->getText().toStdString() + "_" +
+                      getAnalyserName().toStdString() +
+                      getReflectionName().toStdString() + "_Reduced";
+  reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
 
@@ -418,14 +425,13 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  auto const outputName("IndirectEnergyTransfer_Workspaces");
-
-  if (!error && doesExistInADS(outputName)) {
-    if (auto const outputGroup = getADSWorkspaceGroup(outputName)) {
+  if (!error && doesExistInADS(m_outputGroupName)) {
+    if (auto const outputGroup = getADSWorkspaceGroup(m_outputGroupName)) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
-      ungroupWorkspace(outputGroup->getName());
+      if (!m_uiForm.ckGroupOutput->isChecked())
+        ungroupWorkspace(outputGroup->getName());
 
       // Enable plotting and saving
       m_uiForm.pbPlot->setEnabled(true);
@@ -442,17 +448,13 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 }
 
 int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
-  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return i;
-  return 0;
+  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+  return index >= 0 ? index : 0;
 }
 
 bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
-  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return false;
-  return true;
+  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+  return index == -1;
 }
 
 void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {
@@ -472,36 +474,37 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
     removeGroupingOption(option);
 }
 
+void ISISEnergyTransfer::setInstrumentDefault() {
+  auto const instrumentDetails = getInstrumentDetails();
+  try {
+    setInstrumentDefault(instrumentDetails);
+  } catch (std::exception const &ex) {
+    showMessageBox(ex.what());
+  }
+}
+
 /**
  * Called when the instrument has changed, used to update default values.
  */
-void ISISEnergyTransfer::setInstrumentDefault() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+void ISISEnergyTransfer::setInstrumentDefault(
+    QMap<QString, QString> const &instDetails) {
+  auto const instrumentName = getInstrumentDetail(instDetails, "instrument");
+  auto const specMin = getInstrumentDetail(instDetails, "spectra-min").toInt();
+  auto const specMax = getInstrumentDetail(instDetails, "spectra-max").toInt();
 
   // Set the search instrument for runs
-  m_uiForm.dsRunFiles->setInstrumentOverride(
-      getInstrumentDetail(instDetails, "instrument"));
+  m_uiForm.dsRunFiles->setInstrumentOverride(instrumentName);
 
   QStringList qens;
   qens << "IRIS"
        << "OSIRIS";
-  m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
+  m_uiForm.spEfixed->setEnabled(qens.contains(instrumentName));
 
   QStringList allowDefaultGroupingInstruments;
   allowDefaultGroupingInstruments << "TOSCA";
   includeExtraGroupingOption(
-      allowDefaultGroupingInstruments.contains(instDetails["instrument"]),
-      "Default");
+      allowDefaultGroupingInstruments.contains(instrumentName), "Default");
 
-  if (instDetails["spectra-min"].isEmpty() ||
-      instDetails["spectra-max"].isEmpty()) {
-    emit showMessageBox("Could not gather necessary data from parameter file.");
-    return;
-  }
-
-  // Set spectra min/max for spinners in UI
-  const int specMin = instDetails["spectra-min"].toInt();
-  const int specMax = instDetails["spectra-max"].toInt();
   // Spectra spinners
   m_uiForm.spSpectraMin->setMinimum(specMin);
   m_uiForm.spSpectraMin->setMaximum(specMax);
@@ -520,17 +523,17 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMax->setValue(1);
 
-  if (!instDetails["Efixed"].isEmpty())
-    m_uiForm.spEfixed->setValue(instDetails["Efixed"].toDouble());
-  else
-    m_uiForm.spEfixed->setValue(0.0);
+  m_uiForm.spEfixed->setValue(
+      hasInstrumentDetail(instDetails, "Efixed")
+          ? getInstrumentDetail(instDetails, "Efixed").toDouble()
+          : 0.0);
 
   // Default rebinning parameters can be set in instrument parameter file
-  if (!instDetails["rebin-default"].isEmpty()) {
-    m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
+  if (hasInstrumentDetail(instDetails, "rebin-default")) {
+    auto const rebinDefault = getInstrumentDetail(instDetails, "rebin-default");
+    m_uiForm.leRebinString->setText(rebinDefault);
     m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = getInstrumentDetail(instDetails, "rebin-default")
-                         .split(",", QString::SkipEmptyParts);
+    auto const rbp = rebinDefault.split(",", QString::SkipEmptyParts);
     if (rbp.size() == 3) {
       m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
       m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -547,24 +550,22 @@ void ISISEnergyTransfer::setInstrumentDefault() {
     m_uiForm.leRebinString->setText("");
   }
 
-  if (!instDetails["cm-1-convert-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
-    m_uiForm.ckCm1Units->setChecked(defaultOptions);
-  }
+  setInstrumentCheckBoxProperty(m_uiForm.ckCm1Units, instDetails,
+                                "cm-1-convert-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckSaveNexus, instDetails,
+                                "save-nexus-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckSaveASCII, instDetails,
+                                "save-ascii-choice");
+  setInstrumentCheckBoxProperty(m_uiForm.ckFold, instDetails,
+                                "fold-frames-choice");
+}
 
-  if (!instDetails["save-nexus-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["save-nexus-choice"] == "true";
-    m_uiForm.ckSaveNexus->setChecked(defaultOptions);
-  }
-
-  if (!instDetails["save-ascii-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["save-ascii-choice"] == "true";
-    m_uiForm.ckSaveASCII->setChecked(defaultOptions);
-  }
-
-  if (!instDetails["fold-frames-choice"].isEmpty()) {
-    bool defaultOptions = instDetails["fold-frames-choice"] == "true";
-    m_uiForm.ckFold->setChecked(defaultOptions);
+void ISISEnergyTransfer::setInstrumentCheckBoxProperty(
+    QCheckBox *checkbox, QMap<QString, QString> const &instDetails,
+    QString const &instrumentProperty) {
+  if (hasInstrumentDetail(instDetails, instrumentProperty)) {
+    auto const value = getInstrumentDetail(instDetails, instrumentProperty);
+    checkbox->setChecked(value == "true");
   }
 }
 

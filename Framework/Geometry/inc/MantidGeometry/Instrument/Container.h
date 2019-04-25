@@ -88,10 +88,14 @@ public:
     return m_shape->shape();
   }
 
+  const detail::ShapeInfo &shapeInfo() const override {
+    return m_shape->shapeInfo();
+  }
+
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
-                     std::vector<Kernel::V3D> &vectors, double &myradius,
-                     double &myheight) const override {
-    m_shape->GetObjectGeom(type, vectors, myradius, myheight);
+                     std::vector<Kernel::V3D> &vectors, double &innerRadius,
+                     double &radius, double &height) const override {
+    m_shape->GetObjectGeom(type, vectors, innerRadius, radius, height);
   }
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();

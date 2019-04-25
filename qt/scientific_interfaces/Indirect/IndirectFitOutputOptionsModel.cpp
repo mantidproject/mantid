@@ -211,6 +211,12 @@ WorkspaceGroup_sptr IndirectFitOutputOptionsModel::getPDFWorkspace() const {
 
 void IndirectFitOutputOptionsModel::removePDFWorkspace() { m_pdfGroup.reset(); }
 
+bool IndirectFitOutputOptionsModel::isSelectedGroupPlottable(
+    std::string const &selectedGroup) const {
+  return isResultGroupSelected(selectedGroup) ? isResultGroupPlottable()
+                                              : isPDFGroupPlottable();
+}
+
 bool IndirectFitOutputOptionsModel::isResultGroupPlottable() const {
   if (m_resultGroup)
     return containsPlottableWorkspace(m_resultGroup);

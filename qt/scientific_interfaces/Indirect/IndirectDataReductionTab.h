@@ -7,24 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 
+#include "IndirectInstrumentConfig.h"
 #include "IndirectTab.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/IndirectInstrumentConfig.h"
-#include "MantidQtWidgets/Common/PythonRunner.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager>
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser>
-#include <QDoubleValidator>
-#include <QMap>
-
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -85,6 +69,10 @@ protected:
   QString getInstrumentDetail(QString const &key) const;
   QString getInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
                               QString const &key) const;
+  void validateInstrumentDetail(QString const &key) const;
+  bool hasInstrumentDetail(QString const &key) const;
+  bool hasInstrumentDetail(QMap<QString, QString> const &instrumentDetails,
+                           QString const &key) const;
   MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
   QString getInstrumentName() const;
   QString getAnalyserName() const;

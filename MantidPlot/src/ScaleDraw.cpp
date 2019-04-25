@@ -17,7 +17,7 @@
  ***************************************************************************/
 #include "ScaleDraw.h"
 #include "Graph.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/Plotting/Qwt/ScaleEngine.h"
 #include "MyParser.h"
 
 #include <QPainter>

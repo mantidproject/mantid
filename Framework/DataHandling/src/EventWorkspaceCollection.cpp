@@ -233,8 +233,9 @@ size_t EventWorkspaceCollection::getNumberEvents() const {
 
 void EventWorkspaceCollection::setIndexInfo(
     const Indexing::IndexInfo &indexInfo) {
+  const HistogramData::BinEdges edges(2);
   for (auto &ws : m_WsVec)
-    ws = create<EventWorkspace>(*ws, indexInfo, HistogramData::BinEdges(2));
+    ws = create<EventWorkspace>(*ws, indexInfo, edges);
 }
 
 void EventWorkspaceCollection::setInstrument(

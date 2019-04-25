@@ -161,9 +161,8 @@ void FitOptionsBrowser::createCommonProperties() {
     QStringList minimizers;
 
     // Store them in the m_minimizer enum property
-    for (auto it = minimizerOptions.begin(); it != minimizerOptions.end();
-         ++it) {
-      minimizers << QString::fromStdString(*it);
+    for (auto &minimizerOption : minimizerOptions) {
+      minimizers << QString::fromStdString(minimizerOption);
     }
     m_enumManager->setEnumNames(m_minimizer, minimizers);
     int i =
@@ -184,8 +183,8 @@ void FitOptionsBrowser::createCommonProperties() {
         Mantid::API::CostFunctionFactory::Instance().getKeys();
     QStringList costFunctions;
     // Store them in the m_minimizer enum property
-    for (auto it = costOptions.begin(); it != costOptions.end(); ++it) {
-      costFunctions << QString::fromStdString(*it);
+    for (auto &costOption : costOptions) {
+      costFunctions << QString::fromStdString(costOption);
     }
     m_enumManager->setEnumNames(m_costFunction, costFunctions);
     m_browser->addProperty(m_costFunction);
@@ -380,10 +379,9 @@ void FitOptionsBrowser::updateMinimizer() {
 
   // Create and add properties to the minimizer group
   auto minimizerProperties = minimizer->getProperties();
-  for (auto property = minimizerProperties.begin();
-       property != minimizerProperties.end(); ++property) {
-    auto prop = createPropertyProperty(*property);
-    if (!*property)
+  for (auto &minimizerProperty : minimizerProperties) {
+    auto prop = createPropertyProperty(minimizerProperty);
+    if (!minimizerProperty)
       continue;
     m_minimizerGroup->addSubProperty(prop);
   }
@@ -523,7 +521,7 @@ void FitOptionsBrowser::setProperty(const QString &name, const QString &value) {
 /**
  * Get the value of the Minimizer property.
  */
-QString FitOptionsBrowser::getMinimizer(QtProperty *) const {
+QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
   int i = m_enumManager->value(m_minimizer);
   QString minimStr = m_enumManager->enumNames(m_minimizer)[i];
 
@@ -560,7 +558,8 @@ QString FitOptionsBrowser::getMinimizer(QtProperty *) const {
  * Set new value to the Minimizer property.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setMinimizer(QtProperty *, const QString &value) {
+void FitOptionsBrowser::setMinimizer(QtProperty * /*unused*/,
+                                     const QString &value) {
   QStringList terms = value.split(',');
   int i = m_enumManager->enumNames(m_minimizer).indexOf(terms[0]);
   m_enumManager->setValue(m_minimizer, i);

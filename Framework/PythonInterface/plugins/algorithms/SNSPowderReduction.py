@@ -164,20 +164,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("PushDataPositive", "None",
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
-        arrvalidatorBack = IntArrayBoundedValidator()
-        arrvalidatorBack.setLower(-1)
-        self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidatorBack),
+        arrvalidator = IntArrayBoundedValidator(lower=-1)
+        self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidator),
                              doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
-        arrvalidatorVan = IntArrayBoundedValidator()
-        arrvalidatorVan.setLower(-1)
-        self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidatorVan),
-                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
-                                 "")
-        arrvalidatorVanBack = IntArrayBoundedValidator()
-        arrvalidatorVanBack.setLower(-1)
-        self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
-                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
-                                 "")
+        self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidator),
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
+        self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidator),
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,

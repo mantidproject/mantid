@@ -1,16 +1,15 @@
-from PyQt4 import QtGui
-import six
 import unittest
+from PyQt4 import QtGui
 
 from mantid.py3compat import mock
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
-from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.observer_pattern import Observer
 
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 maximum_number_of_groups = 20
 
@@ -28,11 +27,12 @@ class GroupingTablePresenterTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonDataContext()
+        setup_context_for_tests(self)
+        
         self.gui_variable_observer = Observer()
 
-        self.data.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
-        self.model = GroupingTabModel(data=self.data)
+        self.gui_context.gui_variables_notifier.add_subscriber(self.gui_variable_observer)
+        self.model = GroupingTabModel(context=self.context)
         self.view = GroupingTableView(parent=self.obj)
         self.presenter = GroupingTablePresenter(self.view, self.model)
 
@@ -251,7 +251,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
             self.assertEqual(self.view.warning_popup.call_count, call_count)
 
             self.assertEqual(self.view.get_table_item_text(0, 1), "1")
-            self.assertEqual(self.model._data._groups["my_group_0"].detectors, [1])
+            self.assertEqual(self.model._context.group_pair_context["my_group_0"].detectors, [1])
 
     def test_that_displayed_values_are_simplified_to_least_verbose_form(self):
         self.presenter.handle_add_group_button_clicked()
@@ -260,7 +260,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.grouping_table.item(0, 1).setText("20-25,10,5,4,3,2,1")
 
         self.assertEqual(self.view.get_table_item_text(0, 1), "1-5,10,20-25")
-        self.assertEqual(self.model._data._groups["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
+        self.assertEqual(self.model._context.group_pair_context["group_0"].detectors, [1, 2, 3, 4, 5, 10, 20, 21, 22, 23, 24, 25])
 
     def test_that_if_detector_list_changed_that_number_of_detectors_updates(self):
         self.presenter.handle_add_group_button_clicked()
@@ -300,20 +300,20 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_min.setText(number)
         self.view.group_range_use_first_good_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_disabling_range_min_editing_removes_context_variable(self):
         number = '1.12'
         self.view.group_range_min.setText(number)
         self.view.group_range_use_first_good_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMin'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
         self.view.group_range_use_first_good_data.setChecked(True)
 
-        self.assertFalse('GroupRangeMin' in self.data.gui_variables)
+        self.assertFalse('GroupRangeMin' in self.gui_context)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
     def test_enabling_range_max_editing_creates_context_variable(self):
@@ -321,20 +321,20 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_max.setText(number)
         self.view.group_range_use_last_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
     def test_disabling_range_max_editing_removes_context_variable(self):
         number = '1.12'
         self.view.group_range_max.setText(number)
         self.view.group_range_use_last_data.setChecked(False)
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(number))
-        self.gui_variable_observer.update.assert_called_once_with(self.data.gui_variables_notifier, None)
+        self.assertEqual(self.gui_context['GroupRangeMax'], float(number))
+        self.gui_variable_observer.update.assert_called_once_with(self.gui_context.gui_variables_notifier, None)
 
         self.view.group_range_use_last_data.setChecked(True)
 
-        self.assertFalse('GroupRangeMax' in self.data.gui_variables)
+        self.assertFalse('GroupRangeMax' in self.gui_context)
         self.assertEqual(self.gui_variable_observer.update.call_count, 2)
 
     def test_updating_range_min_to_be_greater_than_range_max_displays_warning_and_vice_versa(self):
@@ -348,13 +348,13 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.view.group_range_min.setText('2.0')
         self.view.group_range_min.editingFinished.emit()
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMin'], float(original_min))
+        self.assertEqual(self.gui_context['GroupRangeMin'], float(original_min))
         self.view.warning_popup.assert_called_once_with('Minimum of group asymmetry range must be less than maximum')
 
         self.view.group_range_max.setText('0.05')
         self.view.group_range_max.editingFinished.emit()
 
-        self.assertEqual(self.data.gui_variables['GroupRangeMax'], float(original_max))
+        self.assertEqual(self.gui_context['GroupRangeMax'], float(original_max))
         self.view.warning_popup.assert_called_with('Maximum of group asymmetry range must be greater than minimum')
         self.assertEqual(self.view.warning_popup.call_count, 2)
 

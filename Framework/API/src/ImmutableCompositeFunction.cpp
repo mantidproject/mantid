@@ -97,11 +97,14 @@ ImmutableCompositeFunction::parameterIndex(const std::string &name) const {
  * Returns the alias or name of parameter i
  */
 std::string ImmutableCompositeFunction::parameterName(size_t i) const {
-  for (const auto &alias : m_aliases) {
-    if (alias.second == i)
-      return alias.first;
+  const auto found =
+      std::find_if(m_aliases.cbegin(), m_aliases.cend(),
+                   [i](const auto &element) { return element.second == i; });
+  if (found == m_aliases.cend()) {
+    return CompositeFunction::parameterName(i);
+  } else {
+    return found->first;
   }
-  return CompositeFunction::parameterName(i);
 }
 
 //-----------------------------------------------------------------------------------------------

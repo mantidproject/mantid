@@ -50,8 +50,7 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("Shape", "sphere", doc="Shape to punch out reflections",
                              validator=StringListValidator(['sphere', 'cube']))
         self.setPropertySettings("Shape", condition)
-        val_min_zero = FloatArrayBoundedValidator()
-        val_min_zero.setLower(0.)
+        val_min_zero = FloatArrayBoundedValidator(lower=0.)
         self.declareProperty(FloatArrayProperty("Size", [0.2], validator=val_min_zero),
                              "Width of cube/diameter of sphere used to remove reflections, in (HKL) (one or three values)")
         self.setPropertySettings("Size", condition)

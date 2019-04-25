@@ -20,8 +20,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 
-#include <boost/lexical_cast.hpp>
-
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
@@ -184,7 +182,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     // iterate through each Tdata element  and get the values of "Lambda",
     //"T" and "Tdev" text nodes and fill X,Y,E vectors
     for (unsigned long index = 0; index < nBins; ++index) {
-      Node *idataElem = tdataElemList->item(index);
+      idataElem = tdataElemList->item(index);
       Element *elem = dynamic_cast<Element *>(idataElem);
       if (elem) {
         // setting X vector

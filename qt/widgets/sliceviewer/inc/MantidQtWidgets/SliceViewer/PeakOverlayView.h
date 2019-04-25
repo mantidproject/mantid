@@ -38,7 +38,7 @@ public:
   virtual void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) = 0;
   /// Show the background radius
-  virtual void showBackgroundRadius(const bool) {}
+  virtual void showBackgroundRadius(const bool /*unused*/) {}
   virtual void
   movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
                             NonOrthogonalAxis &info) = 0;

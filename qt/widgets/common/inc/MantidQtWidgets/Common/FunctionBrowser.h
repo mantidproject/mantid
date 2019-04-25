@@ -302,7 +302,7 @@ protected:
 
 protected slots:
   /// Show the context menu
-  void popupMenu(const QPoint &);
+  void popupMenu(const QPoint & /*unused*/);
   /// Add a function
   void addFunction();
   /// Remove a function
@@ -333,21 +333,22 @@ protected slots:
   //   Property change slots
 
   /// Called when a function attribute property is changed
-  void attributeChanged(QtProperty *);
+  void attributeChanged(QtProperty * /*prop*/);
   /// Called when a member of a vector attribute is changed
-  void attributeVectorDoubleChanged(QtProperty *);
+  void attributeVectorDoubleChanged(QtProperty * /*prop*/);
   /// Called when the size of a vector attribute is changed
-  void attributeVectorSizeChanged(QtProperty *);
+  void attributeVectorSizeChanged(QtProperty * /*prop*/);
   /// Called when a function parameter property is changed
-  void parameterChanged(QtProperty *);
+  void parameterChanged(QtProperty * /*prop*/);
   /// Called when button in local parameter editor was clicked
-  void parameterButtonClicked(QtProperty *);
+  void parameterButtonClicked(QtProperty * /*prop*/);
   /// Called when a tie property changes
-  void tieChanged(QtProperty *);
+  void tieChanged(QtProperty * /*prop*/);
   /// Called when a constraint property changes
-  void constraintChanged(QtProperty *);
+  void constraintChanged(QtProperty * /*prop*/);
   /// Called when "Global" check-box was clicked
-  void globalChanged(QtProperty *, const QString &, bool);
+  void globalChanged(QtProperty * /*unused*/, const QString & /*unused*/,
+                     bool /*unused*/);
   /// Set value of an attribute (as a property) to a function
   void setAttributeToFunction(Mantid::API::IFunction &fun, QtProperty *prop);
 

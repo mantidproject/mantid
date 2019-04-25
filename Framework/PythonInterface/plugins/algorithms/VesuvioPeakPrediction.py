@@ -38,8 +38,7 @@ class VesuvioPeakPrediction(VesuvioBase):
                              validator=StringListValidator(['Debye', 'Einstein']),
                              doc='Model used to make predictions')
 
-        arrvalid = FloatArrayBoundedValidator()
-        arrvalid.setLower(0.0)
+        arrvalid = FloatArrayBoundedValidator(lower=0.)
 
         self.declareProperty(FloatArrayProperty(name='Temperature', validator=arrvalid),
                              doc='Temperature (K)')

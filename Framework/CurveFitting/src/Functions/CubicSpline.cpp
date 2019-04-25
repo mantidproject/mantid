@@ -12,7 +12,7 @@
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
+#include <ostream>
 #include <stdexcept>
 #include <vector>
 

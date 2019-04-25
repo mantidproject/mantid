@@ -201,7 +201,7 @@
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>Mode:</string>
+         <string>Grouping:</string>
         </property>
         <property name="buddy">
          <cstring>cbGroupingOptions</cstring>
@@ -1073,6 +1073,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="ckGroupOutput">
+          <property name="text">
+           <string>Group Output</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="ckFold">

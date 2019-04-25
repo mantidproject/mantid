@@ -17,7 +17,6 @@
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 #include <boost/scoped_array.hpp>
 
@@ -227,7 +226,7 @@ void SaveISISNexus::exec() {
   selog();
 
   NXclosegroup(handle); // raw_data_1
-  status = NXclose(&handle);
+  NXclose(&handle);
 
   delete m_isisRaw;
 }

@@ -203,6 +203,16 @@ template <typename T> void sortDataBlocks(T &dataBlcokCollection) {
   std::sort(std::begin(dataBlcokCollection), std::end(dataBlcokCollection),
             comparison);
 }
+
+std::vector<std::pair<int64_t, int64_t>> spectrumIDIntervals(
+    const std::vector<Mantid::DataHandling::DataBlock> &blocks) {
+  std::vector<std::pair<int64_t, int64_t>> intervals;
+  intervals.reserve(blocks.size());
+  for (const auto &block : blocks) {
+    intervals.emplace_back(block.getMinSpectrumID(), block.getMaxSpectrumID());
+  }
+  return intervals;
+}
 } // namespace
 
 namespace Mantid {
@@ -239,11 +249,7 @@ void DataBlockComposite::setMaxSpectrumID(int64_t /*minSpecID*/) {
 }
 
 std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const {
-  std::vector<std::pair<int64_t, int64_t>> intervals;
-  for (const auto &dataBlock : m_dataBlocks) {
-    intervals.push_back(std::make_pair(dataBlock.getMinSpectrumID(),
-                                       dataBlock.getMaxSpectrumID()));
-  }
+  const auto intervals = spectrumIDIntervals(m_dataBlocks);
   return Mantid::Kernel::make_unique<DataBlockGenerator>(intervals);
 }
 
@@ -258,11 +264,11 @@ void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
 }
 
 size_t DataBlockComposite::getNumberOfSpectra() const {
-  size_t total = 0;
-  for (const auto &element : m_dataBlocks) {
-    total += element.getNumberOfSpectra();
-  }
-  return total;
+  return std::accumulate(m_dataBlocks.cbegin(), m_dataBlocks.cend(),
+                         static_cast<size_t>(0),
+                         [](size_t sum, const auto &element) {
+                           return sum + element.getNumberOfSpectra();
+                         });
 }
 
 size_t DataBlockComposite::getNumberOfChannels() const {
@@ -409,20 +415,11 @@ bool DataBlockComposite::operator==(const DataBlockComposite &other) const {
  */
 void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   // Get intervals for current data blocks
-  std::vector<std::pair<int64_t, int64_t>> originalIntervals;
-  for (const auto &dataBlock : m_dataBlocks) {
-    originalIntervals.emplace_back(dataBlock.getMinSpectrumID(),
-                                   dataBlock.getMaxSpectrumID());
-  }
+  const auto originalIntervals = spectrumIDIntervals(m_dataBlocks);
 
   // Get intervals for the data blocks which should be removed
-  auto removeBlocks = toRemove.getDataBlocks();
-  std::vector<std::pair<int64_t, int64_t>> toRemoveIntervals;
-  toRemoveIntervals.reserve(removeBlocks.size());
-  for (const auto &dataBlock : removeBlocks) {
-    toRemoveIntervals.emplace_back(dataBlock.getMinSpectrumID(),
-                                   dataBlock.getMaxSpectrumID());
-  }
+  const auto removeBlocks = toRemove.getDataBlocks();
+  const auto toRemoveIntervals = spectrumIDIntervals(removeBlocks);
 
   // Now create the new intervals which don't include the removeInterval
   // values

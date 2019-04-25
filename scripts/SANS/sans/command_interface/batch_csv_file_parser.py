@@ -100,10 +100,6 @@ class BatchCsvParser(object):
         if BatchReductionEntry.SampleScatter not in output or not output[BatchReductionEntry.SampleScatter]:
             raise RuntimeError("The sample_scatter entry in row {0} seems to be missing.".format(row_number))
 
-        # Ensure that output_as was set
-        if BatchReductionEntry.Output not in output or not output[BatchReductionEntry.Output]:
-            raise RuntimeError("The output_as entry in row {0} seems to be missing.".format(row_number))
-
         # Ensure that the transmission data for the sample is specified either completely or not at all.
         has_sample_transmission = BatchReductionEntry.SampleTransmission in output and \
                                   output[BatchReductionEntry.SampleTransmission]  # noqa
