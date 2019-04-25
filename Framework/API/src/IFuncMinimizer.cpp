@@ -9,8 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace API {
 

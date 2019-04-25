@@ -38,7 +38,7 @@ Usage
    # Create dummy workspace.
    out_ws = CreateSimulationWorkspace(Instrument="IRIS", BinParams="0,500,2000")
    out_ws.setY(0, numpy.array([10.0, 50.0, 30.0, 60.0]))
-   AddSampleLog(out_ws, 'Ei', LogText='321', LogType='Number')
+   AddSampleLog(out_ws, 'Ei', LogText='321', LogType='Number', NumberType='Double')
    out_ws.setDistribution(True)
    
    file_path = os.path.join(config["defaultsave.directory"], "NXSPEData.nxspe")

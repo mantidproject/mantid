@@ -315,16 +315,13 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     if (efixed == 0) {
       const API::Run &run = m_matWs->run();
       if (run.hasProperty("Ei")) {
-        Kernel::Property *prop = run.getProperty("Ei");
-        efixed = boost::lexical_cast<double, std::string>(prop->value());
+        efixed = run.getPropertyValueAsType<double>("Ei");
         emode = 1; // only correct if direct geometry
       } else if (run.hasProperty("EnergyRequested")) {
-        Kernel::Property *prop = run.getProperty("EnergyRequested");
-        efixed = boost::lexical_cast<double, std::string>(prop->value());
+        efixed = run.getPropertyValueAsType<double>("EnergyRequested");
         emode = 1;
       } else if (run.hasProperty("EnergyEstimate")) {
-        Kernel::Property *prop = run.getProperty("EnergyEstimate");
-        efixed = boost::lexical_cast<double, std::string>(prop->value());
+        efixed = run.getPropertyValueAsType<double>("EnergyEstimate");
         emode = 1;
       }
     }

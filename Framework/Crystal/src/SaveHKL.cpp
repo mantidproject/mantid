@@ -274,9 +274,8 @@ void SaveHKL::exec() {
                    << "Power Lorentz corrections = " << m_power_th << " \n";
   API::Run &run = peaksW->mutableRun();
   if (run.hasProperty("Radius")) {
-    Kernel::Property *prop = run.getProperty("Radius");
     if (m_radius == EMPTY_DBL())
-      m_radius = boost::lexical_cast<double, std::string>(prop->value());
+      m_radius = run.getPropertyValueAsType<double>("Radius");
   } else {
     run.addProperty<double>("Radius", m_radius, true);
   }

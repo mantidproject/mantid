@@ -15,8 +15,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace API {
 
