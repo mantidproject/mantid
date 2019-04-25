@@ -816,7 +816,7 @@ target_link_libraries(MantidPlot
                       ${CORE_MANTIDLIBS}
                       PythonInterfaceCore
                       MantidQtWidgetsCommonQt4
-                      MantidQtWidgetsLegacyQwtQt4
+                      MantidQtWidgetsPlottingQt4
                       MantidQtWidgetsFactoryQt4
                       MantidQtWidgetsInstrumentViewQt4
                       MantidQtWidgetsSliceViewerQt4

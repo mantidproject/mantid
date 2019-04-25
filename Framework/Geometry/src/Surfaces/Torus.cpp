@@ -152,12 +152,9 @@ int Torus::setSurface(const std::string &Pstr)
   if (ptype >= 3)
     return errAxis;
 
-  Kernel::V3D Norm;
   Kernel::V3D PtVec;
-  Norm[ptype] = 1.0;
 
   // Torus on X/Y/Z axis
-  Norm[ptype] = 1.0;
   if (!sectionV3D(Line, Centre))
     return errCent;
   if (!sectionV3D(Line, PtVec))

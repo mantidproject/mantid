@@ -7,7 +7,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 
-#include "../General/Background.h"
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
 #include "ui_ISISEnergyTransfer.h"
@@ -70,14 +69,11 @@ private:
                                      QMap<QString, QString> const &instDetails,
                                      QString const &instrumentProperty);
 
-  Ui::ISISEnergyTransfer m_uiForm;
-
   std::pair<std::string, std::string> createMapFile(
       const std::string
           &groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
-  std::vector<std::string>
-      m_outputWorkspaces; ///< get a vector of workspaces to plot
+
   bool numberInCorrectRange(std::size_t const &spectraNumber) const;
   QString checkCustomGroupingNumbersInRange(
       std::vector<std::size_t> const &customGroupingNumbers) const;
@@ -90,6 +86,10 @@ private:
   void setSaveEnabled(bool enable);
   void setPlotIsPlotting(bool plotting);
   void setPlotTimeIsPlotting(bool plotting);
+
+  std::string m_outputGroupName;
+  std::vector<std::string> m_outputWorkspaces;
+  Ui::ISISEnergyTransfer m_uiForm;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

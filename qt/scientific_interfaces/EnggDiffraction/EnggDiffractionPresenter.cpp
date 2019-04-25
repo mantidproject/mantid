@@ -597,8 +597,8 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
 
 void EnggDiffractionPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
-  for (size_t i = 0; i < msgs.size(); i++) {
-    g_log.information() << msgs[i] << '\n';
+  for (const auto &msg : msgs) {
+    g_log.information() << msg << '\n';
   }
 }
 
@@ -682,10 +682,9 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (size_t i = 0; i < filename.size(); i++) {
-          char *str = &filename[i];
-          if (std::isdigit(*str)) {
-            run_number += filename[i];
+        for (const char &ch : filename) {
+          if (std::isdigit(ch)) {
+            run_number += ch;
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
@@ -736,10 +735,9 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (size_t i = 0; i < filename.size(); i++) {
-          char *str = &filename[i];
-          if (std::isdigit(*str)) {
-            run_number += filename[i];
+        for (const char &ch : filename) {
+          if (std::isdigit(ch)) {
+            run_number += ch;
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
@@ -1466,8 +1464,8 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
   std::vector<std::string> res;
   res.reserve(bankIDs.size());
   std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
-  for (size_t b = 0; b < bankIDs.size(); b++) {
-    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankIDs[b]) +
+  for (auto bankID : bankIDs) {
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankID) +
                      ".nxs");
   }
 

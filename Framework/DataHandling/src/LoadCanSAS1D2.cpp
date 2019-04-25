@@ -20,8 +20,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 
-#include <boost/lexical_cast.hpp>
-
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;

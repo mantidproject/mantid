@@ -488,8 +488,11 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       // try and get the value from the run parameters
       const API::Run &run = inputWS->run();
       if (run.hasProperty("Ei")) {
-        Kernel::Property *prop = run.getProperty("Ei");
-        efixedProp = boost::lexical_cast<double, std::string>(prop->value());
+        try {
+          efixedProp = run.getPropertyValueAsType<double>("Ei");
+        } catch (Kernel::Exception::NotFoundError &) {
+          throw std::runtime_error("Cannot retrieve Ei value from the logs");
+        }
       } else {
         if (needEfixed) {
           throw std::invalid_argument(

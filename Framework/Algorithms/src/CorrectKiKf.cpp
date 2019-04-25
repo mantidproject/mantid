@@ -85,8 +85,7 @@ void CorrectKiKf::exec() {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
       if (inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
-        efixedProp = boost::lexical_cast<double>(eiprop->value());
+        efixedProp = inputWS->run().getPropertyValueAsType<double>("Ei");
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
         throw std::invalid_argument(
@@ -198,8 +197,7 @@ void CorrectKiKf::execEvent() {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
       if (inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
-        efixedProp = boost::lexical_cast<double>(eiprop->value());
+        efixedProp = inputWS->run().getPropertyValueAsType<double>("Ei");
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
         throw std::invalid_argument(

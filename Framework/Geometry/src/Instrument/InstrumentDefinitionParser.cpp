@@ -1225,10 +1225,11 @@ void InstrumentDefinitionParser::appendAssembly(
           InstrumentDefinitionParser::getParentComponent(pElem);
 
       // check if this location is in the exclude list
-      auto it = find(excludeList.cbegin(), excludeList.cend(),
-                     InstrumentDefinitionParser::getNameOfLocationElement(
-                         pElem, pParentElem));
-      if (it == excludeList.end()) {
+      auto inExcluded =
+          find(excludeList.cbegin(), excludeList.cend(),
+               InstrumentDefinitionParser::getNameOfLocationElement(
+                   pElem, pParentElem));
+      if (inExcluded == excludeList.end()) {
 
         std::string typeName =
             (InstrumentDefinitionParser::getParentComponent(pElem))
@@ -2404,8 +2405,8 @@ void InstrumentDefinitionParser::setLogfile(
       Poco::AutoPtr<NodeList> pNLpoint = pLookUp->getElementsByTagName("point");
       unsigned long numberPoint = pNLpoint->length();
 
-      for (unsigned long i = 0; i < numberPoint; i++) {
-        Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
+      for (unsigned long j = 0; j < numberPoint; j++) {
+        Element *pPoint = static_cast<Element *>(pNLpoint->item(j));
         double x = attrToDouble(pPoint, "x");
         double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);

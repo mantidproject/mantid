@@ -474,9 +474,9 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   }
 }
 
-void MeshObject::translate(Kernel::V3D translationVector) {
+void MeshObject::translate(const Kernel::V3D &translationVector) {
   for (Kernel::V3D &vertex : m_vertices) {
-    vertex = vertex + translationVector;
+    vertex += translationVector;
   }
 }
 
@@ -513,6 +513,10 @@ std::vector<double> MeshObject::getVertices() const {
 
 detail::ShapeInfo::GeometryShape MeshObject::shape() const {
   return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
+
+const detail::ShapeInfo &MeshObject::shapeInfo() const {
+  throw std::runtime_error("MeshObject::shapeInfo() is not implemented");
 }
 
 /**
