@@ -9,18 +9,17 @@
 #
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QWidget, QVBoxLayout
-from qtpy.QtCore import Signal, Qt
+from qtpy.QtCore import Qt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from .dimensionwidget import DimensionWidget
 
 
 class SliceViewerView(QWidget):
-    dimensionsChanged = Signal()
-    valueChanged =  Signal()
-
-    def __init__(self, dims_info, parent=None):
+    def __init__(self, presenter, dims_info, parent=None):
         super(SliceViewerView, self).__init__(parent)
+
+        self.presenter = presenter
 
         self.setWindowTitle("SliceViewer")
         self.setWindowFlags(Qt.Window)
@@ -28,8 +27,8 @@ class SliceViewerView(QWidget):
 
         # Dimension widget
         self.dimensions = DimensionWidget(dims_info, parent=self)
-        self.dimensions.dimensionsChanged.connect(self.dimensionsChanged)
-        self.dimensions.valueChanged.connect(self.valueChanged)
+        self.dimensions.dimensionsChanged.connect(self.presenter.new_plot)
+        self.dimensions.valueChanged.connect(self.presenter.update_plot_data)
 
         # MPL figure
         self.fig = Figure()

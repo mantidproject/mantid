@@ -16,9 +16,7 @@ class SliceViewer(object):
     def __init__(self, ws, parent=None):
         self.model = SliceViewerModel(ws)
 
-        self.view = SliceViewerView(self.model.get_dimensions_info(), parent)
-        self.view.dimensionsChanged.connect(self.new_plot)
-        self.view.valueChanged.connect(self.update_plot_data)
+        self.view = SliceViewerView(self, self.model.get_dimensions_info(), parent)
 
         self.new_plot()
 
