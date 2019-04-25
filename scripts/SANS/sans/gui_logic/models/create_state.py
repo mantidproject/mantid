@@ -16,12 +16,14 @@ from sans.state.state import State
 sans_logger = Logger("SANS")
 
 
-def create_states(state_model, table_model, instrument, facility, row_index=None, file_lookup=True):
+def create_states(state_model, table_model, instrument, facility, row_index=None,
+                  file_lookup=True, user_file=""):
     """
     Here we create the states based on the settings in the models
     :param state_model: the state model object
     :param table_model: the table model object
     :param row_index: the selected row, if None then all rows are generated
+    :param user_file: the user file under which the data is reduced
     """
     number_of_rows = table_model.get_number_of_rows()
     rows = [x for x in row_index if x < number_of_rows]
@@ -33,7 +35,8 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
     for row in rows:
         if file_lookup:
             table_model.wait_for_file_information(row)
-        state = _create_row_state(row, table_model, state_model, facility, instrument, file_lookup, gui_state_director)
+        state = _create_row_state(row, table_model, state_model, facility, instrument, file_lookup,
+                                  gui_state_director, user_file)
         if isinstance(state, State):
             states.update({row: state})
         elif isinstance(state, str):
@@ -41,7 +44,8 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
     return states, errors
 
 
-def _create_row_state(row, table_model, state_model, facility, instrument, file_lookup, gui_state_director):
+def _create_row_state(row, table_model, state_model, facility, instrument, file_lookup,
+                      gui_state_director, user_file):
     try:
         sans_logger.information("Generating state for row {}".format(row))
         state = None
@@ -57,9 +61,11 @@ def _create_row_state(row, table_model, state_model, facility, instrument, file_
             if row_user_file:
                 row_state_model = create_gui_state_from_userfile(row_user_file, state_model)
                 row_gui_state_director = GuiStateDirector(table_model, row_state_model, facility)
-                state = row_gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup)
+                state = row_gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup,
+                                                            user_file=row_user_file)
             else:
-                state = gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup)
+                state = gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup,
+                                                        user_file=user_file)
         return state
     except (ValueError, RuntimeError) as e:
         return "{}".format(str(e))

@@ -917,7 +917,8 @@ class RunTabPresenter(object):
                                            self._view.instrument,
                                            self._facility,
                                            row_index=row_index,
-                                           file_lookup=file_lookup)
+                                           file_lookup=file_lookup,
+                                           user_file=self._view.get_user_file_path())
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")

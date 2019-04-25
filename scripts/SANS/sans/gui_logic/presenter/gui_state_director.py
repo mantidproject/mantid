@@ -29,7 +29,8 @@ class GuiStateDirector(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D):
+    def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D,
+                     user_file=""):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
         if file_lookup:
@@ -37,7 +38,7 @@ class GuiStateDirector(object):
         else:
             file_information = SANSFileInformationMock(instrument=instrument, facility=self._facility)
 
-        data_builder = get_data_builder(self._facility, file_information)
+        data_builder = get_data_builder(self._facility, file_information, user_file)
 
         self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
         self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
