@@ -173,8 +173,7 @@ private:
   void addSampleLogs(MatrixWorkspace_sptr inputWS) {
     inputWS->mutableRun().addProperty("wavelength", m_wavelength);
     inputWS->instrumentParameters().addDouble(
-        inputWS->getInstrument()->getComponentID(), "l2",
-        m_l2);
+        inputWS->getInstrument()->getComponentID(), "l2", m_l2);
   }
 };
 

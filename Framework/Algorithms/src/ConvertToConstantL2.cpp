@@ -139,7 +139,8 @@ void ConvertToConstantL2::exec() {
 void ConvertToConstantL2::getWavelengthFromRun() {
   const auto &run = m_inputWS->run();
   if (!run.hasProperty("wavelength")) {
-    throw Exception::NotFoundError("Sample log property not found", "wavelength");
+    throw Exception::NotFoundError("Sample log property not found",
+                                   "wavelength");
   }
   m_wavelength = run.getPropertyValueAsType<double>("wavelength");
   g_log.debug() << "Wavelength = " << m_wavelength;

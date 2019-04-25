@@ -120,8 +120,7 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
 double
 LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
                                   std::string s) {
-  std::vector<double> prop =
-      workspace->getInstrument()->getNumberParameter(s);
+  std::vector<double> prop = workspace->getInstrument()->getNumberParameter(s);
   if (prop.empty()) {
     g_log.debug("Property <" + s + "> doesn't exist!");
     return EMPTY_DBL();

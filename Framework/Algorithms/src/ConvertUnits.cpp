@@ -488,7 +488,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
         try {
           efixedProp = run.getPropertyValueAsType<double>("Ei");
         } catch (std::invalid_argument &) {
-          throw std::runtime_error("Could not retrieve incident energy from run object");
+          throw std::runtime_error(
+              "Could not retrieve incident energy from run object");
         }
       } else {
         if (needEfixed) {
