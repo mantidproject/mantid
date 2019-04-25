@@ -48,6 +48,15 @@ def plot(axes, workspace, *args, **kwargs):
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
     :param zdir: Which direction to use as z ('x', 'y' or 'z') when plotting a 2D set.
+    :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
+                    and will be interpreted as a list of indices. You need to use ``slice(None)`` to
+                    select which dimension to plot. *e.g.* to select the second axis to plot from a
+                    3D volume use ``indices=(5, slice(None), 10)`` where the 5/10 are the bins selected
+                    for the other 2 axes.
+    :param slicepoint: Specify which slice of an MDHistoWorkspace to use when plotting in the dimension units.
+                       You need to use ``None`` to select which dimension to plot. *e.g.* to select the second
+                       axis to plot from a 3D volume use ``slicepoint=(1.0, None, 2.0)`` where the 1.0/2.0 are
+                       the dimension selected for the other 2 axes.
     '''
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
@@ -80,6 +89,15 @@ def scatter(axes, workspace, *args, **kwargs):
                 the case of a single row to specify the same color for all points.
     :param depthshade:	Whether or not to shade the scatter markers to give the appearance
                         of depth. Default is True.
+    :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
+                    and will be interpreted as a list of indices. You need to use ``slice(None)`` to
+                    select which dimensions to plot. *e.g.* to select the last two axes to plot from a
+                    3D volume use ``indices=(5, slice(None), slice(None))`` where the 5 is the bin selected
+                    for the first axis.
+    :param slicepoint: Specify which slice of an MDHistoWorkspace to use when plotting in the dimension units.
+                       You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
+                       two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
+                       the value of the dimension selected for the first axis.
     '''
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
@@ -97,6 +115,15 @@ def plot_wireframe(axes, workspace, *args, **kwargs):
     :param cstride: Array column stride (step size), defaults to 1
     :param rcount:	Use at most this many rows, defaults to 50
     :param ccount:	Use at most this many columns, defaults to 50
+    :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
+                    and will be interpreted as a list of indices. You need to use ``slice(None)`` to
+                    select which dimensions to plot. *e.g.* to select the last two axes to plot from a
+                    3D volume use ``indices=(5, slice(None), slice(None))`` where the 5 is the bin selected
+                    for the first axis.
+    :param slicepoint: Specify which slice of an MDHistoWorkspace to use when plotting in the dimension units.
+                       You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
+                       two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
+                       the value of the dimension selected for the first axis.
     '''
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
@@ -121,6 +148,15 @@ def plot_surface(axes, workspace, *args, **kwargs):
     :param vmax:	Maximum value to map
     :param shade:	Whether to shade the facecolors
     :param facecolors:	Face colors for the individual patches
+    :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
+                    and will be interpreted as a list of indices. You need to use ``slice(None)`` to
+                    select which dimensions to plot. *e.g.* to select the last two axes to plot from a
+                    3D volume use ``indices=(5, slice(None), slice(None))`` where the 5 is the bin selected
+                    for the first axis.
+    :param slicepoint: Specify which slice of an MDHistoWorkspace to use when plotting in the dimension units.
+                       You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
+                       two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
+                       the value of the dimension selected for the first axis.
     '''
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
@@ -139,6 +175,15 @@ def contour(axes, workspace, *args, **kwargs):
     :param zdir:	The direction to use: x, y or z (default)
     :param offset:	If specified plot a projection of the contour lines
                     on this position in plane normal to zdir
+    :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
+                    and will be interpreted as a list of indices. You need to use ``slice(None)`` to
+                    select which dimensions to plot. *e.g.* to select the last two axes to plot from a
+                    3D volume use ``indices=(5, slice(None), slice(None))`` where the 5 is the bin selected
+                    for the first axis.
+    :param slicepoint: Specify which slice of an MDHistoWorkspace to use when plotting in the dimension units.
+                       You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
+                       two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
+                       the value of the dimension selected for the first axis.
     '''
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
@@ -155,6 +200,15 @@ def contourf(axes, workspace, *args, **kwargs):
     :param zdir:	The direction to use: x, y or z (default)
     :param offset:	If specified plot a projection of the filled contour on this
                     position in plane normal to zdir
+    :param indices: Specify which slice of an MDHistoWorkspace to use when plotting. Needs to be a tuple
+                    and will be interpreted as a list of indices. You need to use ``slice(None)`` to
+                    select which dimensions to plot. *e.g.* to select the last two axes to plot from a
+                    3D volume use ``indices=(5, slice(None), slice(None))`` where the 5 is the bin selected
+                    for the first axis.
+    :param slicepoint: Specify which slice of an MDHistoWorkspace to use when plotting in the dimension units.
+                       You need to use ``None`` to select which dimension to plot. *e.g.* to select the last
+                       two axes to plot from a 3D volume use ``slicepoint=(1.0, None, None)`` where the 1.0 is
+                       the value of the dimension selected for the first axis.
     '''
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
