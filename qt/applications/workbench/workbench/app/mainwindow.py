@@ -177,14 +177,9 @@ class MainWindow(QMainWindow):
         self.project = None
         self.project_recovery = None
 
-<<<<<<< HEAD
         # Interfaces
         self.interface_manager = None
         self.interface_executor = None
-=======
-        # Interface Runner
-        self.executioner = None
->>>>>>> Added Frequency Domain Analysis to workbench
 
     def setup(self):
         # menus must be done first so they can be filled by the

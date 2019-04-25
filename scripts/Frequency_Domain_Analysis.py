@@ -13,8 +13,8 @@ from qtpy import QtCore
 Name = "Frequency_Domain_Analysis_2"
 
 
-try:
-    global muon_freq
+if 'muon_freq' in globals():
+    muon_freq = globals()['muon_freq']
     if not muon_freq.isHidden():
         muon_freq.setWindowState(
             muon_freq.windowState(
@@ -24,8 +24,7 @@ try:
         muon_freq = FrequencyAnalysisGui()
         muon_freq.resize(700, 700)
         muon_freq.show()
-except:
+else:
     muon_freq = FrequencyAnalysisGui()
     muon_freq.resize(700, 700)
     muon_freq.show()
-
