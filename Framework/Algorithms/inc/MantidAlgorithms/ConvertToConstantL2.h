@@ -51,7 +51,7 @@ private:
   void init() override;
   void exec() override;
   void initWorkspaces();
-  double getRunProperty(std::string);
+  void getWavelengthFromRun();
   double getInstrumentProperty(std::string);
   double calculateTOF(double);
 

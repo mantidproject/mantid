@@ -15,7 +15,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/Strings.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/format.hpp>
@@ -66,9 +65,7 @@ void ConvertToConstantL2::initWorkspaces() {
   if (m_outputWS != this->m_inputWS) {
     m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
-
-  m_wavelength = getRunProperty("wavelength");
-  g_log.debug() << "Wavelength = " << m_wavelength;
+  this->getWavelengthFromRun();
   m_l2 = getInstrumentProperty("l2");
   g_log.debug() << " L2 = " << m_l2 << '\n';
 }
@@ -137,23 +134,16 @@ void ConvertToConstantL2::exec() {
 }
 
 /*
- * Get run property as double
- * @s - input property name
+ * Get run property wavelength as double
  *
  */
-double ConvertToConstantL2::getRunProperty(std::string s) {
+void ConvertToConstantL2::getWavelengthFromRun() {
   const auto &run = m_inputWS->run();
-  if (!run.hasProperty(s)) {
-    throw Exception::NotFoundError("Sample log property not found", s);
+  if (!run.hasProperty("wavelength")) {
+    throw Exception::NotFoundError("Sample log property not found", "wavelength");
   }
-  Mantid::Kernel::Property *prop = run.getProperty(s);
-  double val;
-  if (!Strings::convert(prop->value(), val)) {
-    const std::string mesg =
-        "Cannot convert sample log '" + s + "' to a number.";
-    throw std::runtime_error(mesg);
-  }
-  return val;
+  m_wavelength = run.getPropertyValueAsType<double>("wavelength");
+  g_log.debug() << "Wavelength = " << m_wavelength;
 }
 /*
  * Get instrument property as double

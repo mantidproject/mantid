@@ -171,8 +171,7 @@ private:
   }
 
   void addSampleLogs(MatrixWorkspace_sptr inputWS) {
-    inputWS->mutableRun().addProperty(
-        "wavelength", boost::lexical_cast<std::string>(m_wavelength));
+    inputWS->mutableRun().addProperty("wavelength", m_wavelength);
 
     inputWS->instrumentParameters().addString(
         inputWS->getInstrument()->getComponentID(), "l2",
