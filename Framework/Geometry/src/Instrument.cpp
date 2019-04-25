@@ -1038,7 +1038,6 @@ void Instrument::saveNexus(::NeXus::File *file,
     file->closeGroup(); // detectors
 
     // Create Monitor IDs vector
-    auto detmons = getDetectors(detmonIDs);
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (isMonitorViaIndex(i))

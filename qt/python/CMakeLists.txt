@@ -38,10 +38,12 @@ if(ENABLE_WORKBENCH)
   add_subdirectory(mantidqt)
 
   # Setup dependency chain
-  add_dependencies(mantidqt
-                   mantidqt_resources
-                   mantidqt_commonqt5
-                   mantidqt_instrumentviewqt5)
+  add_dependencies ( mantidqt
+    mantidqt_resources
+    mantidqt_commonqt5
+    mantidqt_instrumentviewqt5
+    PythonInterface
+  )
 
   if(ENABLE_MANTIDPLOT)
     add_dependencies(mantidqt mantidqt_commonqt4)
@@ -57,7 +59,7 @@ if(ENABLE_WORKBENCH)
       COMMENT "Copying debug PyQt5 to bin/Debug")
   endif()
 
- 
+
   # Testing
 
   # ctest targets

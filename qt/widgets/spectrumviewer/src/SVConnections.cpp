@@ -7,7 +7,7 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
 

@@ -113,6 +113,7 @@ protected:
 private:
   /// Initialisation code
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   /// Execution code
   void exec() override;
 

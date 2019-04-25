@@ -123,8 +123,7 @@ public:
     }
     const API::Run &run = wsout->run();
     if (run.hasProperty("Radius")) {
-      Kernel::Property *prop = run.getProperty("Radius");
-      radius = boost::lexical_cast<double, std::string>(prop->value());
+      radius = run.getPropertyValueAsType<double>("Radius");
     } else {
       throw std::invalid_argument("Could not retrieve Radius from run object");
     }

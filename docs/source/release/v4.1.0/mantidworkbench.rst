@@ -7,9 +7,11 @@ MantidWorkbench Changes
 
 Improvements
 ############
+- Linux desktops now have an icon to launch the workbench without using the terminal.
 - The log level of help page notices has been reduced to declutter your message window.
 - Single line commenting in the script editor is now enabled without needing to highlight any text.
 - You can now import from local python files that are in the same directory as the script you're executing.
+- You can now double-click the numbers on a figure axis to adjust the axis' scale.
 
 Bugfixes
 ########

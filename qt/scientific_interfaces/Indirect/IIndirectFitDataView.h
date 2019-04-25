@@ -7,8 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QObject>
 #include <QTabWidget>

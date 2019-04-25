@@ -146,8 +146,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       }
     }
   } else {
-    for (const auto &q_vector : q_vectors)
-      sorted_qs.push_back(q_vector);
+    std::copy(q_vectors.cbegin(), q_vectors.cend(),
+              std::back_inserter(sorted_qs));
   }
 
   std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::compareMagnitude);
@@ -343,8 +343,8 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
       }
     }
   } else {
-    for (const auto &q_vector : q_vectors)
-      sorted_qs.push_back(q_vector);
+    std::copy(q_vectors.cbegin(), q_vectors.cend(),
+              std::back_inserter(sorted_qs));
   }
 
   std::sort(sorted_qs.begin(), sorted_qs.end(), V3D::compareMagnitude);
@@ -1907,7 +1907,6 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
     throw std::invalid_argument("Find_UB(): UB matrix NULL or not 3X3");
   }
 
-  int num_indexed = 0;
   int max_indexed = 0;
   V3D a_dir(0, 0, 0);
   V3D b_dir(0, 0, 0);
@@ -1927,8 +1926,8 @@ bool IndexingUtils::FormUB_From_abc_Vectors(DblMatrix &UB,
         c_temp = directions[k];
         vol = fabs(acrossb.scalar_prod(c_temp));
         if (vol > min_vol) {
-          num_indexed = NumberIndexed_3D(a_temp, b_temp, c_temp, q_vectors,
-                                         req_tolerance);
+          const auto num_indexed = NumberIndexed_3D(a_temp, b_temp, c_temp,
+                                                    q_vectors, req_tolerance);
 
           // Requiring 20% more indexed with longer edge lengths, favors
           // the smaller unit cells.

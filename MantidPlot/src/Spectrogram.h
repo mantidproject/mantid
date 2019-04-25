@@ -42,7 +42,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 
 #include <QPainter>
 #include <boost/shared_ptr.hpp>

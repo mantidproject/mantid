@@ -10,26 +10,25 @@ Running the Unit Tests
 Overview
 ########
 
-We use `CTest <http://www.cmake.org/cmake/help/ctest-2-8-docs.html>`__
+We use `CTest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`__
 for building and running our unit tests. This wraps the underlying
 `cxxtest <cxxtest>`__ or other (e.g. pyunit) test code.
 
-CMake/CTest: Command Line using a makefile generator
-####################################################
+CMake/CTest: Command Line
+#########################
 
 The unit tests are currently excluded from the 'all' target. To build
-the all the tests, including the dependent framework code (in all these
-examples in parallel using 8 cores):
+all of the tests, including the dependent framework code run:
 
 .. code-block:: sh
 
-   make -j8 AllTests
+   cmake --build . --target AllTests
 
 To build only one package of tests (and its dependencies):
 
 .. code-block:: sh
 
-   make -j8 KernelTest
+   cmake --build . --target KernelTest
 
 To run all the tests:
 
@@ -41,7 +40,7 @@ To build and run all the tests in one shot:
 
 .. code-block:: sh
 
-   make -j8 check
+   cmake --build . --target check
 
 To run a specific test or set of tests (will run all those that match
 the search string):
@@ -76,23 +75,21 @@ ones to note are:
 -  ``--repeat-until-fail``\ : require each test to run times without
    failing in order to pass. Useful to try and find random failures
 
-Running Unit Tests Manually
+Running Unit Tests Directly
 ###########################
 
-Starting in your build folder (e.g. Mantid/Code/debug):
+Starting in your build folder:
 
--  Running an entire test suite (e.g. KernelTest):
+-  Running an entire test suite (e.g. `KernelTest`):
 
    .. code-block:: sh
 
-      ctest -j8 -R KernelTest
       ./bin/KernelTest
 
 -  Running a specific test class.
 
    .. code-block:: sh
 
-      ctest -R MyTestClassName
       ./bin/KernelTest MyTestClassName
 
 -  Running a specific test from a CxxTest test class (not possible via CTest).

@@ -229,7 +229,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::MWView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/MWView.h</header>
+   <header>MantidQtWidgets/Plotting/Qwt/MWView.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
@@ -239,7 +239,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

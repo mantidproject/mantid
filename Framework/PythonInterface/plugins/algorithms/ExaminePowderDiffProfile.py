@@ -86,8 +86,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         self.declareProperty("ProcessBackground", False, "Option to process background from input data file.")
         backgroundtypes = ["Polynomial", "Chebyshev", "FullprofPolynomial"]
         self.declareProperty("BackgroundType", "Polynomial", StringListValidator(backgroundtypes), "Type of background.")
-        arrvalidator = FloatArrayBoundedValidator()
-        arrvalidator.setLower(0.)
+        arrvalidator = FloatArrayBoundedValidator(lower=0.)
         self.declareProperty(FloatArrayProperty("BackgroundPoints", values=[], validator=arrvalidator, direction=Direction.Input),
                              "User specified X/TOF values of the data points to calculate background.")
         self.declareProperty(MatrixWorkspaceProperty("BackgroundWorkspace", "", Direction.Output, PropertyMode.Optional),

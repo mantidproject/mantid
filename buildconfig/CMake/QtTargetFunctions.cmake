@@ -159,9 +159,11 @@ function (mtd_add_qt_target)
   endif()
 
   if (PARSED_LIBRARY)
-    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS}
+      ${PARSED_MOC} ${PARSED_NOMOC} ${RES_FILES})
   elseif (PARSED_EXECUTABLE)
-    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS}
+      ${PARSED_NOMOC} ${PARSED_NOMOC} ${RES_FILES})
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()

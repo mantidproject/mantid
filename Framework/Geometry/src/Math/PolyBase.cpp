@@ -462,7 +462,7 @@ std::vector<std::complex<double>> PolyBase::calcRoots(const double epsilon)
   }
 
   // x^3+a_2 x^2+ a_1 x+c=0
-  if (iDegree == 2) {
+  if (iDegree == 3) {
     solveCubic(Out[0], Out[1], Out[2]);
     return Out;
   }

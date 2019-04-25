@@ -74,3 +74,15 @@ class MuonPair(object):
             self._alpha = float(new_alpha)
         else:
             raise AttributeError("Alpha must be > 0.0.")
+
+    def show_raw(self, run, name):
+        str(run) not in self._workspace or self._workspace[str(run)].show(name)
+
+    def show_rebin(self, run, name):
+        str(run) not in self.workspace_rebin or self.workspace_rebin[str(run)].show(name)
+
+    def update_asymmetry_workspace(self, asymmetry_workspace, run, rebin=False):
+        if not rebin:
+            self._workspace.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
+        else:
+            self.workspace_rebin.update({str(run): MuonWorkspaceWrapper(asymmetry_workspace)})
