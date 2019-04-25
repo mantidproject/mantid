@@ -10,6 +10,7 @@ Improvements
 - The log level of help page notices has been reduced to declutter your message window.
 - Single line commenting in the script editor is now enabled without needing to highlight any text.
 - You can now import from local python files that are in the same directory as the script you're executing.
+- All icons have been replaced with icons from Material Design: https://material.io/tools/icons.
 
 Bugfixes
 ########

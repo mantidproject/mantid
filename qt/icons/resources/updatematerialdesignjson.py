@@ -1,3 +1,4 @@
+# Script from https://github.com/spyder-ide/qtawesome/commit/4985bd6e9bb75824de2d2f789fe5fbbf4016b823
 # script used to create charmap
 import re
 import json
