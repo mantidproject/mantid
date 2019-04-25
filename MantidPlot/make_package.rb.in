@@ -361,7 +361,7 @@ else
   p "Unknown python distribution at #{python_exe}"
 end
 
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
                "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
                "skimage"]
