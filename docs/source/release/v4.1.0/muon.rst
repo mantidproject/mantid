@@ -11,3 +11,7 @@ MuSR Changes
 
 
 :ref:`Release 4.1.0 <v4.1.0>`
+
+New
+###
+* Added phase tab for calculating phase tables and phase quad workspaces to Frequency Domain Analysis GUI.
