@@ -153,6 +153,18 @@ QString FunctionMultiDomainPresenter::getLocalParameterTie(const QString & parNa
 void FunctionMultiDomainPresenter::setLocalParameterValue(const QString & parName, int i, double value)
 {
   m_model->setLocalParameterValue(parName, i, value);
+  if (m_model->currentDomainIndex() == i) {
+    m_view->setParameter(parName, value);
+  }
+}
+
+void FunctionMultiDomainPresenter::setLocalParameterValue(const QString & parName, int i, double value, double error)
+{
+  m_model->setLocalParameterValue(parName, i, value, error);
+  if (m_model->currentDomainIndex() == i) {
+    m_view->setParameter(parName, value);
+    m_view->setParamError(parName, error);
+  }
 }
 
 void FunctionMultiDomainPresenter::setLocalParameterFixed(const QString & parName, int i, bool fixed)

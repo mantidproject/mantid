@@ -37,6 +37,7 @@ public:
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
+  virtual void setParameterTie(const QString &paramName, const QString &tie) = 0;
 
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)

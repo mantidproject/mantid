@@ -55,6 +55,7 @@ public:
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;
   void setLocalParameterValue(const QString &parName, int i, double value);
+  void setLocalParameterValue(const QString &parName, int i, double value, double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, QString tie);
 

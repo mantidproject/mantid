@@ -233,6 +233,14 @@ void MultiDomainFunctionModel::setLocalParameterValue(const QString & parName, i
   getSingleFunction(i)->setParameter(parName.toStdString(), value);
 }
 
+void MultiDomainFunctionModel::setLocalParameterValue(const QString & parName, int i, double value, double error)
+{
+  auto fun = getSingleFunction(i);
+  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  fun->setParameter(parIndex, value);
+  fun->setError(parIndex, error);
+}
+
 void MultiDomainFunctionModel::setLocalParameterFixed(const QString & parName, int i, bool fixed)
 {
   auto fun = getSingleFunction(i);

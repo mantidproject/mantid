@@ -85,6 +85,10 @@ public:
     }
     emit functionAdded(funStr);
   }
+
+  void setParameterTie(const QString &paramName, const QString &tie) {
+    m_function->tie(paramName.toStdString(), tie.toStdString());
+  }
 private:
   IFunction_sptr m_function;
   boost::optional<QString> m_currentFunctionIndex;

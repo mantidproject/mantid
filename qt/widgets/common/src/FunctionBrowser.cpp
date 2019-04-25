@@ -167,28 +167,19 @@ void FunctionBrowser::setDatasetNames(const QStringList &names) {
  */
 double FunctionBrowser::getLocalParameterValue(const QString &parName,
                                                int i) const {
-  return 0.0;
+  return m_presenter->getLocalParameterValue(parName, i);
 }
 
 void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
                                              double value) {
-  //checkLocalParameter(parName);
-  //m_localParameterValues[parName][i].value = value;
-  //if (i == m_currentDataset) {
-  //  setParameter(parName, value);
-  //}
+  m_presenter->setLocalParameterValue(parName, i, value);
 }
 
 void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
                                              double value, double error) {
-  //checkLocalParameter(parName);
-  //m_localParameterValues[parName][i].value = value;
-  //m_localParameterValues[parName][i].error = error;
-  //if (i == m_currentDataset) {
-  //  setParameter(parName, value);
-  //  setParamError(parName, error);
-  //}
+  m_presenter->setLocalParameterValue(parName, i, value);
 }
+
 /// Get error of a local parameter
 double FunctionBrowser::getLocalParameterError(const QString &parName,
                                                int i) const {

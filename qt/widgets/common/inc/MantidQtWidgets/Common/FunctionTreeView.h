@@ -104,6 +104,8 @@ public:
   void clearErrors() override;
   /// Index of currently selected function.
   boost::optional<QString> currentFunctionIndex() const override;
+  /// Set a tie
+  void setParameterTie(const QString &paramName, const QString &tie) override;
 
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,

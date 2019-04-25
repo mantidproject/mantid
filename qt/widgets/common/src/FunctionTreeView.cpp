@@ -1808,6 +1808,12 @@ void FunctionTreeView::updateCurrentFunctionIndex() {
     emit currentFunctionChanged();
   }
 }
+
+void FunctionTreeView::setParameterTie(const QString &paramName, const QString &tie) {
+  auto paramProp = getParameterProperty(paramName);
+  addTieProperty(paramProp, tie);
+}
+
 QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const
 {
   return m_browser->getItemWidget(m_properties.find(prop)->item);
