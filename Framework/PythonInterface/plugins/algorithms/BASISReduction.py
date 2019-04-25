@@ -525,8 +525,7 @@ the first two hours"""
                                           Temperature=str(temperature))
                 sapi.ConvertUnits(InputWorkspace=samXqsWs,
                                   OutputWorkspace=samXqsWs,
-                                  Target='DeltaE_inFrequency',
-                                  Emode='Indirect')
+                                  Target='DeltaE_inFrequency')
                 self.serialize_in_log(samXqsWs)
                 susceptibility_filename = processed_filename.replace('sqw', 'Xqw')
                 sapi.SaveNexus(Filename=susceptibility_filename,
@@ -738,7 +737,9 @@ the first two hours"""
                                   OutputWorkspace=sam_ws)
         sapi.ConvertUnits(InputWorkspace=sam_ws,
                           OutputWorkspace=sam_ws,
-                          Target='Wavelength', EMode='Indirect')
+                          Target='Wavelength',
+                          EMode='Indirect',
+                          EFixed=self._reflection['default_energy'])
         if self._flux_normalization_type is not None:
             flux_ws = self._generate_flux_spectrum(run_set, sam_ws)
             sapi.RebinToWorkspace(WorkspaceToRebin=sam_ws,
@@ -789,10 +790,12 @@ the first two hours"""
         sapi.ConvertUnits(InputWorkspace=wsName,
                           OutputWorkspace=wsName,
                           Target='DeltaE',
-                          EMode='Indirect')
+                          EMode='Indirect',
+                          EFixed=self._reflection['default_energy'])
         sapi.CorrectKiKf(InputWorkspace=wsName,
                          OutputWorkspace=wsName,
-                         EMode='Indirect')
+                         EMode='Indirect',
+                         EFixed=self._reflection['default_energy'])
         sapi.Rebin(InputWorkspace=wsName,
                    OutputWorkspace=wsName,
                    Params=etRebins)
@@ -831,8 +834,9 @@ the first two hours"""
                     .format(self._nxspe_psi_angle_log)
                 self.log().error(error_message)
 
-        wsSqwName = prefix + '_divided_sqw' \
-            if isSample and self._doNorm else wsName + '_sqw'
+        wsSqwName = prefix if isSample is True else wsName
+        wsSqwName += '_divided_sqw' if self._doNorm is True else '_sqw'
+
         sapi.SofQW3(InputWorkspace=wsName,
                     QAxisBinning=self._qBins,
                     EMode='Indirect',
