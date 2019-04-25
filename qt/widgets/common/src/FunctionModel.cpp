@@ -123,6 +123,16 @@ double MultiDomainFunctionModel::getParamError(const QString & paramName) const
   return fun->getError(index);
 }
 
+QStringList MultiDomainFunctionModel::getParameterNames() const
+{
+  QStringList names;
+  const auto paramNames = getCurrentFunction()->getParameterNames();
+  for (auto const name : paramNames) {
+    names << QString::fromStdString(name);
+  }
+  return names;
+}
+
 IFunction_sptr MultiDomainFunctionModel::getSingleFunction(int index) const
 {
   checkIndex(index);

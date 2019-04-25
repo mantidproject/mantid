@@ -34,6 +34,7 @@ namespace MantidWidgets {
     virtual void setParamError(const QString &paramName, double value) = 0;
     virtual double getParameter(const QString &paramName) const = 0;
     virtual double getParamError(const QString &paramName) const = 0;
+    virtual QStringList getParameterNames() const = 0;
     virtual IFunction_sptr getSingleFunction(int index) const = 0;
     virtual IFunction_sptr getCurrentFunction() const = 0;
     virtual void setNumberDomains(int) = 0;
@@ -54,6 +55,7 @@ namespace MantidWidgets {
     void setParamError(const QString &paramName, double value) override;
     double getParameter(const QString &paramName) const override;
     double getParamError(const QString &paramName) const override;
+    QStringList getParameterNames() const override;
     IFunction_sptr getSingleFunction(int index) const override;
     IFunction_sptr getCurrentFunction() const override;
     void setNumberDomains(int) override;

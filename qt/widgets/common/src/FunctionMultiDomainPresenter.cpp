@@ -125,6 +125,10 @@ int FunctionMultiDomainPresenter::getCurrentDataset() const
 void FunctionMultiDomainPresenter::setCurrentDataset(int index)
 {
   m_model->setCurrentDomainIndex(index);
+  for (auto const name : m_model->getParameterNames()) {
+    m_view->setParameter(name, m_model->getParameter(name));
+    m_view->setParamError(name, m_model->getParamError(name));
+  }
 }
 
 void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices)

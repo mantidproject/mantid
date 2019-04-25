@@ -200,6 +200,52 @@ public:
     newFun = presenter.getFitFunction()->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
   }
+
+  void test_setCurrentDataset() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    presenter.setFunctionString("name=FlatBackground");
+    presenter.setParameter("A0", 1.0);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 1.0);
+    presenter.setCurrentDataset(1);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 0.0);
+    presenter.setParameter("A0", 2.0);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 2.0);
+    presenter.setCurrentDataset(2);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 0.0);
+    presenter.setParameter("A0", 3.0);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 3.0);
+    presenter.setCurrentDataset(0);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 1.0);
+    presenter.setCurrentDataset(1);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 2.0);
+    presenter.setCurrentDataset(2);
+    TS_ASSERT_EQUALS(view->getParameter("A0"), 3.0);
+  }
+
+  void test_setCurrentDataset_composite() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    presenter.setFunctionString("name=FlatBackground;name=FlatBackground");
+    presenter.setParameter("f1.A0", 1.0);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 1.0);
+    presenter.setCurrentDataset(1);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 0.0);
+    presenter.setParameter("f1.A0", 2.0);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 2.0);
+    presenter.setCurrentDataset(2);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 0.0);
+    presenter.setParameter("f1.A0", 3.0);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 3.0);
+    presenter.setCurrentDataset(0);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 1.0);
+    presenter.setCurrentDataset(1);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 2.0);
+    presenter.setCurrentDataset(2);
+    TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 3.0);
+  }
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRENTERTEST_H_
