@@ -21,7 +21,7 @@ class EXPORT_OPT_MANTIDQT_ICONS CharIconPainter : public QPainter {
 public:
   void paint(IconicFont *iconic, QPainter *painter, QRect rect,
              QIcon::Mode mode, QIcon::State state,
-             std::vector<QHash<QString, QVariant>> &options);
+             QList<QHash<QString, QVariant>> &options);
 
 private:
   void paintIcon(IconicFont *iconic, QPainter *painter, QRect rect,

@@ -46,7 +46,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
-        self.DELETE_ROW = mantidqt.icons.get_icon("mdi.minus-box-outline")
+        self.GRAPH_ICON = mantidqt.icons.get_icon("mdi.chart-line")
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model

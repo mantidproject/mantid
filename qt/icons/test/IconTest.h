@@ -48,22 +48,22 @@ public:
   }
 
   void testGetIconLong() {
-    std::vector<QHash<QString, QVariant>> options;
+    QList<QHash<QString, QVariant>> options;
     QHash<QString, QVariant> option1;
     option1.insert(QString("color"), QVariant(QString("red")));
     option1.insert(QString("scaleFactor"), QVariant(1.5));
-    options.emplace_back(option1);
+    options.append(option1);
     auto icon = MantidQt::Icons::getIcon({QString("mdi.run-fast")}, options);
     auto isNull = icon.isNull();
     TS_ASSERT(!isNull);
   }
 
   void testIconicFontGetIconThrowsOnOptionsAndVectorOfDifferentSizes() {
-    std::vector<QHash<QString, QVariant>> options;
+    QList<QHash<QString, QVariant>> options;
     QHash<QString, QVariant> option1;
     option1.insert(QString("color"), QVariant(QString("red")));
     option1.insert(QString("scaleFactor"), QVariant(1.5));
-    options.emplace_back(option1);
+    options.append(option1);
     TS_ASSERT_THROWS(
         MantidQt::Icons::getIcon(
             {QString("mdi.run-fast"), QString("mdi.run-fast")}, options),
@@ -75,6 +75,11 @@ public:
     auto font = iconicFont.getFont(QString("mdi"), 16);
     TS_ASSERT_EQUALS(font.family().toStdString(), "Material Design Icons")
     TS_ASSERT_EQUALS(font.pixelSize(), 16)
+  }
+
+  void testGetIconThrowsIfIconLibraryIsNotPresent() {
+    TS_ASSERT_THROWS(MantidQt::Icons::getIcon(QString("fda.run-fast")),
+                     std::invalid_argument);
   }
 };
 

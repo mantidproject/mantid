@@ -7,6 +7,4 @@ using namespace MantidQt::Icons;
 
 QIcon getIcon(const QString &iconName, const QString &color = QString("black"), const double scaleFactor = 1.0);
 
-// To achieve this exposure, we would need to add to vector.sip and add support for
-// std::vector<QHash<QString, QVariant>> as a specialisation.
-// QIcon getIcon(const std::vector<QString> &iconNames, const std::vector<QHash<QString, QVariant>> &options);
+QIcon getIcon(const QStringList &iconNames, const QList<QVariant> &options);

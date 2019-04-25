@@ -1,6 +1,8 @@
 This read me is to explain how to go about updating the current icon library
 Currently in use is the material design logos by google: https://material.io/tools/icons/?style=baseline
 
+The current version of material design that has been added has these icons: https://cdn.materialdesignicons.com/3.6.95/
+
 If the file names differ from the source then the script may need to be re-evaluated.
 
 - Delete the files from the folder containing this folder named `materialdesignicons.css`, `materialdesignicons-webfont-charmap.json`, and `materialdesignicons-webfont.ttf`

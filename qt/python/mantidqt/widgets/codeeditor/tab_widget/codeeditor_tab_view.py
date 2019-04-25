@@ -46,7 +46,7 @@ class CodeEditorTabWidget(QTabWidget):
         plus_button = QPushButton(self)
         plus_button.setObjectName(self.NEW_EDITOR_PLUS_BTN_OBJECT_NAME)
         plus_button.clicked.connect(parent.plus_button_clicked)
-        plus_button.setIcon(get_icon("mdi.plus"))
+        plus_button.setIcon(get_icon("mdi.plus", "black", 1.2))
         self.setCornerWidget(plus_button, Qt.TopLeftCorner)
 
     def setup_tabs_context_menu(self, parent):
@@ -77,13 +77,13 @@ class CodeEditorTabWidget(QTabWidget):
 
         run_button = QPushButton(container_widget)
         run_button.setObjectName(self.RUN_BUTTON_OBJECT_NAME)
-        run_button.setIcon(get_icon("mdi.play", PLAY_BUTTON_GREEN_COLOR))
+        run_button.setIcon(get_icon("mdi.play", PLAY_BUTTON_GREEN_COLOR, 1.6))
         run_button.clicked.connect(parent.execute_current_async)
         layout.addWidget(run_button)
 
         abort_button = QPushButton(container_widget)
         abort_button.setObjectName(self.ABORT_BUTTON_OBJECT_NAME)
-        abort_button.setIcon(get_icon("mdi.square", ABORT_BUTTON_RED_COLOR))
+        abort_button.setIcon(get_icon("mdi.square", ABORT_BUTTON_RED_COLOR, 1.1))
         abort_button.clicked.connect(parent.abort_current)
         layout.addWidget(abort_button)
 

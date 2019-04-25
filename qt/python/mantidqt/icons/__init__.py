@@ -11,8 +11,4 @@ from __future__ import (absolute_import)
 
 from mantidqt.utils.qt import import_qt
 
-_getIcon = import_qt('._icons', 'mantidqt', 'getIcon')
-
-
-def get_icon(name, color, scale_factor):
-    return _getIcon(name, color, scale_factor)
+get_icon = import_qt('._icons', 'mantidqt', 'getIcon')

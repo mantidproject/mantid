@@ -14,7 +14,7 @@ namespace Icons {
 
 void CharIconPainter::paint(IconicFont *iconic, QPainter *painter, QRect rect,
                             QIcon::Mode mode, QIcon::State state,
-                            std::vector<QHash<QString, QVariant>> &options) {
+                            QList<QHash<QString, QVariant>> &options) {
   for (auto &option : options) {
     this->paintIcon(iconic, painter, rect, mode, state, option);
   }
@@ -35,11 +35,10 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   painter->save();
   const auto colorVariant = options[QString("color")];
   const auto scaleVariant = options[QString("scaleFactor")];
-  const auto charecterStringVariant = options[QString("charecter")];
-  const auto prefixVariant = options[QString("prefix")];
-  const auto charecterVariant =
-      iconic->getCharmap()[prefixVariant.toString()]
-                          [charecterStringVariant.toString()];
+  const auto charecterOption = options[QString("charecter")].toString();
+  const auto prefix = options[QString("prefix")].toString();
+  const auto charecter =
+      iconic->findCharecterFromCharMap(prefix, charecterOption);
 
   // Set some defaults so it doesn't fail later if nothing was set
   QString color("black");
@@ -58,14 +57,16 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   const auto drawSize = static_cast<int>(
       std::floor(0.875 * std::round(rect.height() * scaleFactor)));
 
-  const auto prefix = prefixVariant.toString();
-  const auto charecter = charecterVariant.toString();
-
-  const auto prefixString = prefix.toStdString();
+  bool unicodeGenerationSuccess;
+  const auto unicode = QChar(charecter.toUInt(&unicodeGenerationSuccess, 16));
+  if (!unicodeGenerationSuccess) {
+    throw std::invalid_argument("Failed to convert hex value: \"" +
+                                charecter.toStdString() + "\" to unicode.");
+  }
 
   painter->setFont(iconic->getFont(prefix, drawSize));
   painter->setOpacity(1.0);
-  painter->drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, charecter);
+  painter->drawText(rect, Qt::AlignCenter | Qt::AlignVCenter, unicode);
   painter->restore();
 }
 
