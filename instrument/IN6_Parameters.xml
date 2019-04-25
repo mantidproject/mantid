@@ -9,7 +9,7 @@
 
 		<!-- Distance between sample and equatorial line of the detector. Mandatory
 			if you want to correct the flight paths. -->
-		<parameter name="l2" type="string">
+		<parameter name="l2">
 			<value val="2.483" />
 		</parameter>
 
