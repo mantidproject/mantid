@@ -10,9 +10,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include <algorithm>
-#include <boost/algorithm/string.hpp>
-
 using namespace Mantid::Kernel;
 
 namespace MantidQt {

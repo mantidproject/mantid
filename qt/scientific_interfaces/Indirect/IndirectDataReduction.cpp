@@ -54,11 +54,11 @@ using namespace MantidQt::CustomInterfaces::IDA;
  */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(
-          Mantid::Kernel::make_unique<IndirectSettingsPresenter>(this)),
+      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
+  m_settings->initLayout();
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this,
           SLOT(instrumentLoadingDone(bool)));
@@ -79,8 +79,8 @@ IndirectDataReduction::~IndirectDataReduction() {
 }
 
 void IndirectDataReduction::settingsClicked() {
-  m_settingsPresenter->loadSettings();
-  //m_settingsPresenter->showDialog();
+  m_settings->loadSettings();
+  m_settings->show();
 }
 
 /**
@@ -137,7 +137,7 @@ void IndirectDataReduction::initLayout() {
           SLOT(instrumentSetupChanged(const QString &, const QString &,
                                       const QString &)));
 
-  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+  connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
 
   // Needed to initially apply the settings loaded on the settings GUI
@@ -390,10 +390,8 @@ void IndirectDataReduction::handleConfigChange(
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectDataReduction::applySettings() {
-  auto const filter =
-      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
-  auto const errorBars =
-      m_settingsPresenter->getSetting("plot-error-bars").toBool();
+  auto const filter = m_settings->restrictInputDataByName();
+  auto const errorBars = m_settings->plotErrorBars();
 
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(filter);

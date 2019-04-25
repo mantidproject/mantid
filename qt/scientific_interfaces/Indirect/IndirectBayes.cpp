@@ -22,10 +22,10 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectBayes::IndirectBayes(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(
-          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(this)),
+      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
+  m_settings->initLayout();
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -57,7 +57,7 @@ void IndirectBayes::initLayout() {
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
 
-  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+  connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
 
   // Needed to initially apply the settings loaded on the settings GUI
@@ -112,8 +112,8 @@ void IndirectBayes::loadSettings() {
  * Opens the settings dialog
  */
 void IndirectBayes::settingsClicked() {
-  m_settingsPresenter->loadSettings();
-  //m_settingsPresenter->showDialog();
+  m_settings->loadSettings();
+  m_settings->show();
 }
 
 /**
@@ -140,10 +140,8 @@ void IndirectBayes::manageUserDirectories() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectBayes::applySettings() {
-  auto const filter =
-      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
-  auto const errorBars =
-      m_settingsPresenter->getSetting("plot-error-bars").toBool();
+  auto const filter = m_settings->restrictInputDataByName();
+  auto const errorBars = m_settings->plotErrorBars();
 
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
     tab->second->filterInputData(filter);

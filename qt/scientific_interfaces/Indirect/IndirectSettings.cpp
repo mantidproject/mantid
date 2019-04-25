@@ -22,9 +22,21 @@ void IndirectSettings::initLayout() {
   auto centralWidget = m_uiForm.centralWidget->layout();
   centralWidget->addWidget(m_presenter->getView());
 
+  connect(m_presenter.get(), SIGNAL(applySettings()), this,
+          SIGNAL(applySettings()));
   connect(m_presenter.get(), SIGNAL(closeSettings()), this,
           SLOT(closeSettings()));
 }
+
+bool IndirectSettings::restrictInputDataByName() const {
+  return m_presenter->getSetting("restrict-input-by-name").toBool();
+}
+
+bool IndirectSettings::plotErrorBars() const {
+  return m_presenter->getSetting("plot-error-bars").toBool();
+}
+
+void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
 
 void IndirectSettings::closeSettings() {
   if (window())

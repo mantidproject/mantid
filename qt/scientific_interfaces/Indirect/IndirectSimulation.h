@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 
-#include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "IndirectSimulationTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -64,7 +64,7 @@ private:
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
+  std::unique_ptr<IDA::IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectSimulationTab *> m_simulationTabs;
   /// Change Observer for ConfigService (monitors user directories)

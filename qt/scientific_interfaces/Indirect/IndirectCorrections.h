@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 
-#include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "IndirectTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectCorrections.h"
@@ -85,7 +85,7 @@ private slots:
 
 private:
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
+  std::unique_ptr<IDA::IndirectSettings> m_settings;
 
   /// UI form containing all Qt elements.
   Ui::IndirectCorrections m_uiForm;

@@ -19,8 +19,6 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -34,12 +32,12 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
  */
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(
-          Mantid::Kernel::make_unique<IndirectSettingsPresenter>(this)),
+      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
   m_uiForm.setupUi(this);
+  m_settings->initLayout();
 
   // Allows us to get a handle on a tab using an enum, for example
   // "m_tabs[ELWIN]".
@@ -100,7 +98,7 @@ void IndirectDataAnalysis::initLayout() {
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 
-  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+  connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
 
   // Needed to initially apply the settings loaded on the settings GUI
@@ -154,8 +152,8 @@ void IndirectDataAnalysis::openDirectoryDialog() {
  * Opens the settings dialog.
  */
 void IndirectDataAnalysis::settingsClicked() {
-  m_settingsPresenter->loadSettings();
-  //m_settingsPresenter->showDialog();
+  m_settings->loadSettings();
+  m_settings->show();
 }
 
 /**
@@ -178,10 +176,8 @@ void IndirectDataAnalysis::exportTabPython() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectDataAnalysis::applySettings() {
-  auto const filter =
-      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
-  auto const errorBars =
-      m_settingsPresenter->getSetting("plot-error-bars").toBool();
+  auto const filter = m_settings->restrictInputDataByName();
+  auto const errorBars = m_settings->plotErrorBars();
 
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(filter);

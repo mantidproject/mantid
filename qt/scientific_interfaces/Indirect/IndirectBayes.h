@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 
 #include "IndirectBayesTab.h"
-#include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectBayes.h"
 
@@ -65,7 +65,7 @@ private:
   void loadSettings();
 
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
+  std::unique_ptr<IDA::IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)

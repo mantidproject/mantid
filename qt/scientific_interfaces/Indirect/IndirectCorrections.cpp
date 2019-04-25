@@ -31,10 +31,10 @@ DECLARE_SUBWINDOW(IndirectCorrections)
  */
 IndirectCorrections::IndirectCorrections(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(
-          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(this)),
+      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
+  m_settings->initLayout();
 
   // Allows us to get a handle on a tab using an enum, for example
   // "m_tabs[ELWIN]".
@@ -97,7 +97,7 @@ void IndirectCorrections::initLayout() {
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 
-  connect(m_settingsPresenter.get(), SIGNAL(applySettings()), this,
+  connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
 
   // Needed to initially apply the settings loaded on the settings GUI
@@ -147,8 +147,8 @@ void IndirectCorrections::openDirectoryDialog() {
  * Opens the settings dialog
  */
 void IndirectCorrections::settingsClicked() {
-  m_settingsPresenter->loadSettings();
-  // m_settingsPresenter->showDialog();
+  m_settings->loadSettings();
+  m_settings->show();
 }
 
 /**
@@ -171,10 +171,8 @@ void IndirectCorrections::exportTabPython() {
  * Updates the settings decided on the Settings Dialog
  */
 void IndirectCorrections::applySettings() {
-  auto const filter =
-      m_settingsPresenter->getSetting("restrict-input-by-name").toBool();
-  auto const errorBars =
-      m_settingsPresenter->getSetting("plot-error-bars").toBool();
+  auto const filter = m_settings->restrictInputDataByName();
+  auto const errorBars = m_settings->plotErrorBars();
 
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(filter);

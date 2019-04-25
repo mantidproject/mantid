@@ -29,12 +29,19 @@ public:
   static std::string name() { return "Settings"; }
   static QString categoryInfo() { return "Indirect"; }
 
+  void initLayout() override;
+  void loadSettings();
+
+  bool restrictInputDataByName() const;
+  bool plotErrorBars() const;
+
+signals:
+  void applySettings();
+
 private slots:
   void closeSettings();
 
 private:
-  void initLayout() override;
-
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
   Ui::IndirectSettings m_uiForm;
 };

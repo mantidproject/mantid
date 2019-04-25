@@ -23,14 +23,14 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(
-          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(this)),
+      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
 IndirectSimulation::~IndirectSimulation() {}
 
 void IndirectSimulation::initLayout() {
   m_uiForm.setupUi(this);
+  m_settings->initLayout();
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -115,8 +115,8 @@ void IndirectSimulation::loadSettings() {
  * Opens the settings dialog
  */
 void IndirectSimulation::settingsClicked() {
-  m_settingsPresenter->loadSettings();
-  //m_settingsPresenter->showDialog();
+  m_settings->loadSettings();
+  m_settings->show();
 }
 
 /**

@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 
-#include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "IndirectTab.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectDataAnalysis.h"
@@ -88,7 +88,7 @@ private:
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
+  std::unique_ptr<IDA::IndirectSettings> m_settings;
   /// The settings group
   QString m_settingsGroup;
   /// Integer validator

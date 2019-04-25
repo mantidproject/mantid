@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 
-#include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "ui_IndirectDiffractionReduction.h"
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -93,7 +93,7 @@ private:
 
 private:
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettingsPresenter> m_settingsPresenter;
+  std::unique_ptr<IDA::IndirectSettings> m_settings;
   Ui::IndirectDiffractionReduction
       m_uiForm; /// The form generated using Qt Designer
   QDoubleValidator *m_valDbl;

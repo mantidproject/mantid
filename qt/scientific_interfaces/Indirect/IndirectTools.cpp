@@ -22,12 +22,12 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectTools::IndirectTools(QWidget *parent)
     : UserSubWindow(parent),
-      m_settingsPresenter(
-          Mantid::Kernel::make_unique<IDA::IndirectSettingsPresenter>(this)),
+      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectTools::handleDirectoryChange) {}
 
 void IndirectTools::initLayout() {
   m_uiForm.setupUi(this);
+  m_settings->initLayout();
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -120,8 +120,8 @@ void IndirectTools::runClicked() {
  * Opens the settings dialog
  */
 void IndirectTools::settingsClicked() {
-  m_settingsPresenter->loadSettings();
-  // m_settingsPresenter->showDialog();
+  m_settings->loadSettings();
+  m_settings->show();
 }
 
 /**
