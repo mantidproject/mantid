@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 using namespace Mantid::API;
 
@@ -39,6 +39,8 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_propTree->addProperty(m_properties["EMax"]);
   m_propTree->addProperty(m_properties["SampleBinning"]);
   m_propTree->addProperty(m_properties["ResBinning"]);
+
+  formatTreeWidget(m_propTree, m_properties);
 
   // Set default values
   m_dblManager->setValue(m_properties["SampleBinning"], 1);

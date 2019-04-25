@@ -474,9 +474,9 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   }
 }
 
-void MeshObject::translate(Kernel::V3D translationVector) {
+void MeshObject::translate(const Kernel::V3D &translationVector) {
   for (Kernel::V3D &vertex : m_vertices) {
-    vertex = vertex + translationVector;
+    vertex += translationVector;
   }
 }
 
@@ -515,19 +515,24 @@ detail::ShapeInfo::GeometryShape MeshObject::shape() const {
   return detail::ShapeInfo::GeometryShape::NOSHAPE;
 }
 
+const detail::ShapeInfo &MeshObject::shapeInfo() const {
+  throw std::runtime_error("MeshObject::shapeInfo() is not implemented");
+}
+
 /**
  * get info on standard shapes (none for Mesh Object)
  */
 void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                                std::vector<Kernel::V3D> &vectors,
-                               double &myradius, double &myheight) const {
+                               double &innerRadius, double &radius,
+                               double &height) const {
   // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
   // Retained for possible future use.
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
-  m_handler->GetObjectGeom(type, vectors, myradius, myheight);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
 }
 
 } // NAMESPACE Geometry

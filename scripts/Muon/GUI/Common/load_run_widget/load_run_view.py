@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import pyqtSignal as Signal
+from qtpy import QtWidgets, QtCore, QtGui
+from qtpy.QtCore import Signal
 
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 from Muon.GUI.Common.message_box import warning
 
 
-class LoadRunWidgetView(QtGui.QWidget):
+class LoadRunWidgetView(QtWidgets.QWidget):
     # signals for parent widgets
     loadingStarted = Signal()
     loadingFinished = Signal()
@@ -39,33 +39,33 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.setObjectName("LoadRunWidget")
         self.resize(468, 45)
 
-        self.load_current_run_button = QtGui.QPushButton(self)
+        self.load_current_run_button = QtWidgets.QPushButton(self)
         self.load_current_run_button.setText("Load Current Run")
         self.load_current_run_button.setToolTip("Load the current run for the current instrument")
         self.load_current_run_button.setObjectName("loadCurrentRunButton")
 
-        self.increment_run_button = QtGui.QToolButton(self)
+        self.increment_run_button = QtWidgets.QToolButton(self)
         self.increment_run_button.setText(">")
         self.increment_run_button.setToolTip("Increment the run")
         self.increment_run_button.setObjectName("incrementRunButton")
 
-        self.decrement_run_button = QtGui.QToolButton(self)
+        self.decrement_run_button = QtWidgets.QToolButton(self)
         self.decrement_run_button.setText("<")
         self.decrement_run_button.setToolTip("Decrement the run")
         self.decrement_run_button.setObjectName("decrementRunButton")
 
-        self.instrument_label = QtGui.QLabel(self)
+        self.instrument_label = QtWidgets.QLabel(self)
         self.instrument_label.setText("Instrument")
         self.instrument_label.setToolTip("")
         self.instrument_label.setObjectName("instrumentLabel")
 
-        self.run_edit = QtGui.QLineEdit(self)
+        self.run_edit = QtWidgets.QLineEdit(self)
         self.run_edit.setToolTip(
             "Enter run number using " + run_utils.delimiter
             + " and " + run_utils.range_separator + " as delimiter and range-separator respectively")
         self.run_edit.setObjectName("runEdit")
 
-        self.horizontal_layout = QtGui.QHBoxLayout(self)
+        self.horizontal_layout = QtWidgets.QHBoxLayout(self)
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.load_current_run_button)
         self.horizontal_layout.addWidget(self.decrement_run_button)

@@ -160,7 +160,7 @@ public:
   bool blockCheckBoxSignals(bool block);
 
 Q_SIGNALS:
-  void toggled(bool);
+  void toggled(bool /*_t1*/);
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;

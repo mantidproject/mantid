@@ -286,7 +286,7 @@ IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
       new MultiDomainFunction);
   const auto functionString = function->asString();
   for (auto i = 0u; i < numberOfWorkspaces(); ++i) {
-    auto addDomains = [&](std::size_t) {
+    auto addDomains = [&](std::size_t /*unused*/) {
       const auto index = multiDomainFunction->nFunctions();
       multiDomainFunction->addFunction(createFunction(functionString));
       multiDomainFunction->setDomainIndex(index, index);

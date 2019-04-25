@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>602</width>
-    <height>475</height>
+    <height>525</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -560,7 +560,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/ContourPreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

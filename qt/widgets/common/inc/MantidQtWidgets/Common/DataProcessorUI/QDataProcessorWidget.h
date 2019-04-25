@@ -40,19 +40,24 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = nullptr);
-  QDataProcessorWidget(const WhiteList &, QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
+  QDataProcessorWidget(const WhiteList & /*whitelist*/, QWidget *parent,
+                       int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
                        QWidget *parent, int group = 0);
-  QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
-                       const ProcessingAlgorithm &, QWidget *parent,
-                       int group = 0);
-  QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
-                       const PostprocessingAlgorithm &, QWidget *parent,
-                       int group = 0);
-  QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
-                       const ProcessingAlgorithm &,
-                       const PostprocessingAlgorithm &, QWidget *parent,
-                       int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const PreprocessMap & /*preprocessMap*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
+                       QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
+                       const PostprocessingAlgorithm & /*postprocessor*/,
+                       QWidget *parent, int group = 0);
+  QDataProcessorWidget(const WhiteList & /*whitelist*/,
+                       const PreprocessMap & /*preprocessMap*/,
+                       const ProcessingAlgorithm & /*algorithm*/,
+                       const PostprocessingAlgorithm & /*postprocessor*/,
+                       QWidget *parent, int group = 0);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
@@ -122,7 +127,7 @@ public:
   QString getCurrentInstrument() const override;
 
   // Forward a main presenter to this view's presenter
-  void accept(DataProcessorMainPresenter *);
+  void accept(DataProcessorMainPresenter * /*mainPresenter*/);
 
   // Force re-processing of rows
   void setForcedReProcessing(bool forceReProcessing) override;
@@ -150,7 +155,7 @@ signals:
   void processButtonClicked();
   void processingFinished();
   void instrumentHasChanged();
-  void dataChanged(const QModelIndex &, const QModelIndex &);
+  void dataChanged(const QModelIndex & /*_t1*/, const QModelIndex & /*_t2*/);
 
 private:
   // initialise the interface

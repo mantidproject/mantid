@@ -1,20 +1,22 @@
-from PyQt4 import QtGui
-import six
 import unittest
+from PyQt4 import QtGui
 
+import six
 from mantid.py3compat import mock
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
 
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.contexts.muon_context import MuonContext
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
-
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
-
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, MuonGroup
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 
 
 class GroupingTabPresenterTest(unittest.TestCase):
@@ -23,8 +25,14 @@ class GroupingTabPresenterTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.context = MuonDataContext()
-        self.model = GroupingTabModel(data=self.context)
+        self.loaded_data = MuonLoadData()
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
+        self.context = MuonContext(muon_data_context=self.data_context, muon_group_context=self.group_context,
+                                   muon_gui_context=self.gui_context)
+
+        self.model = GroupingTabModel(context=self.context)
 
         self.grouping_table_view = GroupingTableView(parent=self.obj)
         self.grouping_table_widget = GroupingTablePresenter(self.grouping_table_view, self.model)
@@ -80,8 +88,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
         pair_name = "pair_0"
 
-        self.assertEqual(self.context.pairs[pair_name].forward_group, "fwd")
-        self.assertEqual(self.context.pairs[pair_name].backward_group, "bwd")
+        self.assertEqual(self.group_context[pair_name].forward_group, "fwd")
+        self.assertEqual(self.group_context[pair_name].backward_group, "bwd")
 
     def test_that_clear_button_clears_model_and_view(self):
         self.view.clear_grouping_button.clicked.emit(True)
@@ -160,6 +168,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.presenter.update_thread.start.assert_called_once_with()
 
     def test_removing_group_removes_linked_pairs(self):
+        self.group_context.clear_pairs()
+        self.group_context.clear_groups()
         self.add_three_groups()
         self.add_two_pairs()
 

@@ -157,20 +157,22 @@ public:
   std::string saveToProject() const;
 
 signals:
-  void enableLighting(bool);
-  void plot1D(const QString &, const std::set<int> &, bool);
-  void createDetectorTable(const QString &, const std::vector<int> &, bool);
-  void needSetIntegrationRange(double, double);
-  void surfaceTypeChanged(int);
+  void enableLighting(bool /*_t1*/);
+  void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/,
+              bool /*_t3*/);
+  void createDetectorTable(const QString & /*_t1*/,
+                           const std::vector<int> & /*_t2*/, bool /*_t3*/);
+  void needSetIntegrationRange(double /*_t1*/, double /*_t2*/);
+  void surfaceTypeChanged(int /*_t1*/);
   void colorMapChanged();
-  void colorMapMinValueChanged(double);
-  void colorMapMaxValueChanged(double);
-  void colorMapRangeChanged(double, double);
-  void scaleTypeChanged(int);
-  void nthPowerChanged(double);
-  void integrationRangeChanged(double, double);
-  void glOptionChanged(bool);
-  void requestSelectComponent(const QString &);
+  void colorMapMinValueChanged(double /*_t1*/);
+  void colorMapMaxValueChanged(double /*_t1*/);
+  void colorMapRangeChanged(double /*_t1*/, double /*_t2*/);
+  void scaleTypeChanged(int /*_t1*/);
+  void nthPowerChanged(double /*_t1*/);
+  void integrationRangeChanged(double /*_t1*/, double /*_t2*/);
+  void glOptionChanged(bool /*_t1*/);
+  void requestSelectComponent(const QString & /*_t1*/);
   void preDeletingHandle();
   void clearingHandle();
   void maskedWorkspaceOverlayed();
@@ -183,31 +185,31 @@ protected:
   bool eventFilter(QObject *obj, QEvent *ev) override;
 
 public slots:
-  void tabChanged(int);
+  void tabChanged(int /*unused*/);
   void componentSelected(size_t componentIndex);
-  void executeAlgorithm(const QString &, const QString &);
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
+  void executeAlgorithm(const QString & /*unused*/, const QString & /*unused*/);
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*alg*/);
 
   void setupColorMap();
 
   void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
-  void changeScaleType(int);                               // Deprecated
-  void changeNthPower(double);
+  void changeScaleType(int /*type*/);                      // Deprecated
+  void changeNthPower(double /*nth_power*/);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated
   void changeColorMapRange(double minValue, double maxValue); // Deprecated
-  void setIntegrationRange(double, double);
-  void setBinRange(double, double);
-  void disableColorMapAutoscaling(); // Deprecated
-  void setColorMapAutoscaling(bool); // Deprecated
+  void setIntegrationRange(double /*xmin*/, double /*xmax*/);
+  void setBinRange(double /*xmin*/, double /*xmax*/);
+  void disableColorMapAutoscaling();        // Deprecated
+  void setColorMapAutoscaling(bool /*on*/); // Deprecated
 
-  void setViewDirection(const QString &);
+  void setViewDirection(const QString & /*input*/);
   void pickBackgroundColor();
   void saveImage(QString filename);
-  void setInfoText(const QString &);
-  void set3DAxesState(bool);
-  void setSurfaceType(int);
-  void setWireframe(bool);
+  void setInfoText(const QString & /*text*/);
+  void set3DAxesState(bool /*on*/);
+  void setSurfaceType(int /*type*/);
+  void setWireframe(bool /*on*/);
 
   /// Overlay a workspace with the given name
   bool overlay(const QString &wsName);
@@ -319,7 +321,7 @@ private:
   /// overlay a masked workspace on the projection surface
   void overlayMaskedWorkspace(Mantid::API::IMaskWorkspace_sptr ws);
   /// overlay a table workspace with shape parameters on the projection surface
-  void overlayShapesWorkspace(Mantid::API::ITableWorkspace_sptr);
+  void overlayShapesWorkspace(Mantid::API::ITableWorkspace_sptr /*ws*/);
   /// get a workspace from the ADS
   Mantid::API::Workspace_sptr getWorkspaceFromADS(const std::string &name);
   /// get a handle to the unwrapped surface

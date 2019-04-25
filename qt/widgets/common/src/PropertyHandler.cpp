@@ -198,15 +198,14 @@ private:
  */
 void PropertyHandler::initAttributes() {
   std::vector<std::string> attNames = function()->getAttributeNames();
-  for (int i = 0; i < m_attributes.size(); i++) {
-    m_item->property()->removeSubProperty(m_attributes[i]);
+  for (auto &attribute : m_attributes) {
+    m_item->property()->removeSubProperty(attribute);
   }
   m_attributes.clear();
   m_vectorMembers.clear();
-  for (size_t i = 0; i < attNames.size(); i++) {
-    QString aName = QString::fromStdString(attNames[i]);
-    Mantid::API::IFunction::Attribute att =
-        function()->getAttribute(attNames[i]);
+  for (const auto &attName : attNames) {
+    QString aName = QString::fromStdString(attName);
+    Mantid::API::IFunction::Attribute att = function()->getAttribute(attName);
     CreateAttributeProperty tmp(m_browser, this, aName);
     QtProperty *prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
@@ -215,8 +214,8 @@ void PropertyHandler::initAttributes() {
 }
 
 void PropertyHandler::initParameters() {
-  for (int i = 0; i < m_parameters.size(); i++) {
-    m_item->property()->removeSubProperty(m_parameters[i]);
+  for (auto &parameter : m_parameters) {
+    m_item->property()->removeSubProperty(parameter);
   }
   m_parameters.clear();
   for (size_t i = 0; i < function()->nParams(); i++) {
@@ -743,7 +742,7 @@ protected:
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set vector property
-  void apply(const std::vector<double> &) const override {
+  void apply(const std::vector<double> & /*unused*/) const override {
     // this method is supposed to be called when corresponding
     // property value changes but it doesn't have a value because
     // it's a group property
@@ -893,8 +892,7 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop) {
  */
 void PropertyHandler::applyToAllAttributes(
     void (PropertyHandler::*func)(QtProperty *)) {
-  for (int i = 0; i < m_attributes.size(); ++i) {
-    QtProperty *attribute = m_attributes[i];
+  for (auto attribute : m_attributes) {
     (this->*(func))(attribute);
   }
 
@@ -927,8 +925,7 @@ void PropertyHandler::updateAttribute(QtProperty *attribute) {
  */
 void PropertyHandler::applyToAllParameters(
     void (PropertyHandler::*func)(QtProperty *)) {
-  for (int i = 0; i < m_parameters.size(); i++) {
-    QtProperty *prop = m_parameters[i];
+  for (auto prop : m_parameters) {
     (this->*(func))(prop);
   }
 

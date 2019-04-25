@@ -8,11 +8,6 @@
 #define MANTID_KERNEL_ARRAYBOUNDEDVALIDATOR_H_
 
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/IValidator.h"
-#include "MantidKernel/TypedValidator.h"
-#include <string>
-#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -26,42 +21,49 @@ namespace Kernel {
     @date 09/11/2010
 */
 template <typename TYPE>
-class MANTID_KERNEL_DLL ArrayBoundedValidator
+class MANTID_KERNEL_DLL ArrayBoundedValidator final
     : public TypedValidator<std::vector<TYPE>> {
 public:
-  ArrayBoundedValidator();
-  ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv);
-  ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound);
-  ArrayBoundedValidator(BoundedValidator<TYPE> &bv);
-  ~ArrayBoundedValidator() override;
+  ArrayBoundedValidator() = default;
+  ArrayBoundedValidator(const ArrayBoundedValidator<TYPE> &abv) noexcept;
+  ArrayBoundedValidator(const TYPE lowerBound, const TYPE upperBound) noexcept;
+  ArrayBoundedValidator(TYPE lowerBound, TYPE upperBound,
+                        bool exclusive) noexcept;
+  ArrayBoundedValidator(BoundedValidator<TYPE> &bv) noexcept;
   /// Clone the current state
   IValidator_sptr clone() const override;
-  /// Return the object that checks the bounds
-  boost::shared_ptr<BoundedValidator<TYPE>> getValidator() const;
-
   /// Return if it has a lower bound
-  bool hasLower() const;
+  bool hasLower() const noexcept;
   /// Return if it has a lower bound
-  bool hasUpper() const;
+  bool hasUpper() const noexcept;
   /// Return the lower bound value
-  const TYPE &lower() const;
+  TYPE lower() const noexcept;
   /// Return the upper bound value
-  const TYPE &upper() const;
+  TYPE upper() const noexcept;
+  bool isLowerExclusive() const noexcept;
+  /// Check if upper bound is exclusive
+  bool isUpperExclusive() const noexcept;
+  /// Set the lower bound to be exclusive
+  void setLowerExclusive(const bool exclusive) noexcept;
+  /// Set the upper bound to be exclusive
+  void setUpperExclusive(const bool exclusive) noexcept;
+
+  /// Set both the upper and lower bounds to be exclusive
+  void setExclusive(const bool exclusive) noexcept;
 
   /// Set lower bound value
-  void setLower(const TYPE &value);
+  void setLower(const TYPE &value) noexcept;
   /// Set upper bound value
-  void setUpper(const TYPE &value);
+  void setUpper(const TYPE &value) noexcept;
   /// Clear lower bound value
-  void clearLower();
+  void clearLower() noexcept;
   /// Clear upper bound value
-  void clearUpper();
+  void clearUpper() noexcept;
 
 private:
   std::string checkValidity(const std::vector<TYPE> &value) const override;
 
-  /// The object used to do the actual validation
-  boost::shared_ptr<BoundedValidator<TYPE>> boundVal;
+  BoundedValidator<TYPE> m_actualValidator;
 };
 
 } // namespace Kernel

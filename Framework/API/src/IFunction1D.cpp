@@ -26,7 +26,6 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
-#include <boost/lexical_cast.hpp>
 
 #include <sstream>
 

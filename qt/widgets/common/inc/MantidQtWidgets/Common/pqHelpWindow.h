@@ -94,7 +94,7 @@ public slots:
 
 signals:
   /// fired to relay warning messages from the help system.
-  void helpWarnings(const QString &);
+  void helpWarnings(const QString & /*_t1*/);
 
 protected slots:
   void search();

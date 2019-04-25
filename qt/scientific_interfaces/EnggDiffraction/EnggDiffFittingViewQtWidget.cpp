@@ -11,7 +11,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
 #include <array>
 #include <iomanip>

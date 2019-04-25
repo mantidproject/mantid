@@ -186,11 +186,13 @@ double PeakRepresentationEllipsoid::getEffectiveRadius() const {
   return m_showBackgroundRadii ? m_backgroundOuterRadii[0] : m_peakRadii[0];
 }
 
-void PeakRepresentationEllipsoid::setOccupancyInView(const double) {
+void PeakRepresentationEllipsoid::setOccupancyInView(
+    const double /*fraction*/) {
   // DO NOTHING
 }
 
-void PeakRepresentationEllipsoid::setOccupancyIntoView(const double) {
+void PeakRepresentationEllipsoid::setOccupancyIntoView(
+    const double /*fraction*/) {
   // DO NOTHING
 }
 
@@ -200,7 +202,7 @@ const Mantid::Kernel::V3D &PeakRepresentationEllipsoid::getOrigin() const {
 
 std::shared_ptr<PeakPrimitives>
 PeakRepresentationEllipsoid::getDrawingInformation(
-    PeakRepresentationViewInformation) {
+    PeakRepresentationViewInformation /*viewInformation*/) {
   auto drawingInformation = std::make_shared<PeakPrimitivesEllipse>(
       Mantid::Kernel::V3D() /*peakOrigin*/, 0.0 /*peakOpacityAtDistance*/,
       0 /* peakLineWidth */, 0.0 /*peakInnerRadiusMajorAxis*/,

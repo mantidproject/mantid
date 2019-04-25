@@ -24,7 +24,7 @@ from qtpy.QtWidgets import QActionGroup, QMenu
 
 # local imports
 from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import ToolbarStateChecker
+from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
 AXES_SCALE_MENU_OPTS = OrderedDict([
@@ -57,7 +57,7 @@ class FigureInteraction(object):
                                              self.on_mouse_button_press))
 
         self.canvas = canvas
-        self.toolbar_checker = ToolbarStateChecker(self.canvas.toolbar)
+        self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
 
     @property
@@ -77,7 +77,7 @@ class FigureInteraction(object):
         # local variables to avoid constant self lookup
         canvas = self.canvas
         if (event.button == canvas.buttond[Qt.RightButton] and
-                self.toolbar_checker.is_tool_active() is False):
+                not self.toolbar_manager.is_tool_active()):
             self._show_context_menu(event)
         elif event.dblclick and event.button == canvas.buttond[Qt.LeftButton]:
             self._show_axis_editor(event)
@@ -100,9 +100,11 @@ class FigureInteraction(object):
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
                 move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif ax.xaxis.contains(event)[0]:
+            elif (ax.xaxis.contains(event)[0] or
+                  any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
                 move_and_show(XAxisEditor(canvas, ax))
-            elif ax.yaxis.contains(event)[0]:
+            elif (ax.yaxis.contains(event)[0] or
+                  any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
                 move_and_show(YAxisEditor(canvas, ax))
 
     def _show_context_menu(self, event):

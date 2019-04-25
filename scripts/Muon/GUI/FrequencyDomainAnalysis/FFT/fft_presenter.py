@@ -67,7 +67,7 @@ class FFTPresenter(object):
             self.view.setReTo(name)
 
     def handle_use_raw_data_changed(self):
-        if not self.view.isRaw() and not self.load.context.do_rebin():
+        if not self.view.isRaw() and not self.load.context._do_rebin():
             self.view.set_raw_checkbox_state(True)
             self.view.warning_popup('No rebin options specified')
             return

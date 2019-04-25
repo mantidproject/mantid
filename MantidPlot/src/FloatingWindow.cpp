@@ -34,7 +34,7 @@ FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f)
       d_app(appWindow), m_draggingToTiledWindow(false),
       m_isInsideTiledWindow(false), m_dragMouseDown(false) {
   setFocusPolicy(Qt::StrongFocus);
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
 #ifdef Q_OS_WIN
   // remember the flags
   m_flags = windowFlags();

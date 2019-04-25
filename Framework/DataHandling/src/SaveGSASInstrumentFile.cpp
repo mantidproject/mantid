@@ -1055,8 +1055,8 @@ double SaveGSASInstrumentFile::getProfileParameterValue(
     stringstream errss;
     errss << "Profile map does not contain parameter " << paramname
           << ". Available parameters are ";
-    for (const auto &piter : profilemap) {
-      errss << piter.first << ", ";
+    for (const auto &parameter : profilemap) {
+      errss << parameter.first << ", ";
     }
     g_log.error(errss.str());
     throw runtime_error(errss.str());

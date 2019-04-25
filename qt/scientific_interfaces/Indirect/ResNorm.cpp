@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <map>
 #include <string>
@@ -57,6 +57,8 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
 
   m_propTree->addProperty(m_properties["EMin"]);
   m_propTree->addProperty(m_properties["EMax"]);
+
+  formatTreeWidget(m_propTree, m_properties);
 
   // Connect data selector to handler method
   connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString &)), this,

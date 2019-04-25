@@ -71,9 +71,9 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
 }
 
 InstrumentRenderer::~InstrumentRenderer() {
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
+  for (unsigned int i : m_displayListId) {
+    if (i != 0) {
+      glDeleteLists(i, 1);
     }
   }
 }

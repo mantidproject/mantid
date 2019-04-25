@@ -202,8 +202,7 @@ void MDNormSCD::cacheInputs() {
         "sample");
   }
   m_samplePos = sample->getPos();
-  m_beamDir = m_samplePos - source->getPos();
-  m_beamDir.normalize();
+  m_beamDir = normalize(m_samplePos - source->getPos());
 }
 
 /**

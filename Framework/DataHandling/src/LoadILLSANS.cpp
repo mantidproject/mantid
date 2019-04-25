@@ -662,7 +662,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
     m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
-    nxStat = NXclose(&nxHandle);
+    NXclose(&nxHandle);
   }
 }
 

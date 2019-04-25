@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 

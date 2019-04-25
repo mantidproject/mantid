@@ -615,7 +615,7 @@ std::string Component::getParamDescription(const std::string &pname,
   if (!m_map) { // no description for non-parameterized components
     return std::string("");
   }
-  Parameter_sptr param = Parameter_sptr(); // Null shared pointer
+  Parameter_sptr param;
   if (recursive) {
     param = m_map->getRecursive(this, pname);
   } else {
@@ -647,7 +647,7 @@ std::string Component::getParamShortDescription(const std::string &pname,
   if (!m_map) { // no tooltips for non-parameterized components
     return std::string("");
   }
-  Parameter_sptr param = Parameter_sptr(); // Null shared pointer
+  Parameter_sptr param;
   if (recursive) {
     param = m_map->getRecursive(this, pname);
   } else {

@@ -387,13 +387,13 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   std::string type;
   detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
-  double radius, height;
+  double radius, height, innerRadius;
   boost::shared_ptr<const IObject> obj = group.front()->shape();
   if (!obj) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Found ObjComponent without shape");
   }
-  obj->GetObjectGeom(otype, vectors, radius, height);
+  obj->GetObjectGeom(otype, vectors, innerRadius, radius, height);
   if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
     type = "box";
   } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
@@ -520,10 +520,6 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // form the input string for the ShapeFactory
   std::ostringstream obj_str;
   if (type == "box") {
-
-    if (hz == 0)
-      hz = 0.1;
-
     hx = hy = 0;
     height = 0;
     V3D p0 = vectors[0];

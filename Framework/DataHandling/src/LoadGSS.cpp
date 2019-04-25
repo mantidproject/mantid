@@ -208,8 +208,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         // Have to force a copy of the input or the stack gets corrupted
         // on MSVC when inputLine.str() falls out of scope which then
         // corrupts the value in result
-        const std::string input = inputLine.str();
-        if (boost::regex_search(input, result, L1_REG_EXP) &&
+        const std::string line = inputLine.str();
+        if (boost::regex_search(line, result, L1_REG_EXP) &&
             result.size() == 2) {
           primaryflightpath = std::stod(std::string(result[1]));
 
@@ -232,8 +232,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         double difc(0.f);
 
         boost::smatch result;
-        const std::string input = inputLine.str();
-        if (boost::regex_search(input, result, DET_POS_REG_EXP) &&
+        const std::string line = inputLine.str();
+        if (boost::regex_search(line, result, DET_POS_REG_EXP) &&
             result.size() == 4) {
           totalpath = std::stod(std::string(result[1]));
           tth = std::stod(std::string(result[2]));

@@ -375,8 +375,8 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
   // Any arguments in the args dict are assumed to be values that should
   // override the default set by the sampleEnv samplegeometry if it exists
   if (sampleEnv) {
-    if (sampleEnv->container()->hasSampleShape()) {
-      const auto &can = sampleEnv->container();
+    if (sampleEnv->getContainer().hasSampleShape()) {
+      const auto &can = sampleEnv->getContainer();
       Container::ShapeArgs shapeArgs;
       if (args) {
         const auto &props = args->getProperties();
@@ -387,7 +387,7 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
                             val * 0.01);
         }
       }
-      auto shapeObject = can->createSampleShape(shapeArgs);
+      auto shapeObject = can.createSampleShape(shapeArgs);
       // Given that the object is a CSG object, set the object
       // directly on the sample ensuring we preserve the
       // material.

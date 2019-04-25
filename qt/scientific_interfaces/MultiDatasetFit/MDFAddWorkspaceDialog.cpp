@@ -76,12 +76,12 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const {
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
   QStringList workspaceNames;
   auto wsNames = ADS.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted);
-  for (auto name = wsNames.begin(); name != wsNames.end(); ++name) {
-    if (ADS.retrieveWS<Mantid::API::MatrixWorkspace>(*name)) {
-      workspaceNames << QString::fromStdString(*name);
+  for (auto &wsName : wsNames) {
+    if (ADS.retrieveWS<Mantid::API::MatrixWorkspace>(wsName)) {
+      workspaceNames << QString::fromStdString(wsName);
       continue;
     }
-    auto grp = ADS.retrieveWS<Mantid::API::WorkspaceGroup>(*name);
+    auto grp = ADS.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
     if (grp) {
       bool hasMatrixWorkspace = false;
       for (auto ws : grp->getAllItems()) {
@@ -91,7 +91,7 @@ QStringList AddWorkspaceDialog::availableWorkspaces() const {
         }
       }
       if (hasMatrixWorkspace) {
-        workspaceNames << QString::fromStdString(*name);
+        workspaceNames << QString::fromStdString(wsName);
       }
     }
   }

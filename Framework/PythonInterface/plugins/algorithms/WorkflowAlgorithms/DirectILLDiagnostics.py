@@ -9,14 +9,15 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import ILL_utilities as utils
 import mantid
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode,
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, Property, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, CreateSingleValuedWorkspace, Divide,
-                              ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Multiply, Plus, SolidAngle)
+from mantid.simpleapi import (ClearMaskFlag, CreateEmptyTableWorkspace, Divide, ExtractMask, Integration, LoadMask, MaskDetectors,
+                              MedianDetectorTest, Plus, Scale, SolidAngle)
 import numpy
 import os.path
 
@@ -92,14 +93,10 @@ def _createMaskWS(ws, name, algorithmLogging):
     extractResult = ExtractMask(InputWorkspace=ws,
                                 OutputWorkspace=name,
                                 EnableLogging=algorithmLogging)
-    zeroWS = CreateSingleValuedWorkspace(DataValue=0.,
-                                         ErrorValue=0.,
-                                         EnableLogging=algorithmLogging,
-                                         StoreInADS=False)
-    maskWS = Multiply(LHSWorkspace=extractResult.OutputWorkspace,
-                      RHSWorkspace=zeroWS,
-                      OutputWorkspace=name,
-                      EnableLogging=algorithmLogging)
+    maskWS = Scale(InputWorkspace=extractResult.OutputWorkspace,
+                   Factor=0.,
+                   OutputWorkspace=name,
+                   EnableLogging=algorithmLogging)
     return maskWS
 
 
@@ -202,18 +199,6 @@ def _integrateElasticPeaks(ws, eppWS, sigmaMultiplier, wsNames, wsCleanup, algor
     wsCleanup.cleanup(integratedElasticPeaksWS)
     wsCleanup.cleanup(solidAngleWS)
     return solidAngleCorrectedElasticPeaksWS
-
-
-def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
-    """Mask detectors according to diagnostics."""
-    maskedWSName = wsNames.withSuffix('diagnostics_applied')
-    maskedWS = CloneWorkspace(InputWorkspace=ws,
-                              OutputWorkspace=maskedWSName,
-                              EnableLogging=algorithmLogging)
-    MaskDetectors(Workspace=maskedWS,
-                  MaskedWorkspace=diagnosticsWS,
-                  EnableLogging=algorithmLogging)
-    return maskedWS
 
 
 def _maskedListToStr(masked):
@@ -335,78 +320,78 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
     def PyExec(self):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 7)
-        report = common.Report()
-        subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
+        self._report = utils.Report()
+        self._subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsNames = common.NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
+        self._names = utils.NameSource(wsNamePrefix, cleanupMode)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
 
         progress.report('Loading inputs')
-        mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
+        mainWS = self._inputWS()
 
-        maskWSName = wsNames.withSuffix('combined_mask')
-        maskWS = _createMaskWS(mainWS, maskWSName, subalgLogging)
-        wsCleanup.cleanupLater(maskWS)
+        maskWSName = self._names.withSuffix('combined_mask')
+        maskWS = _createMaskWS(mainWS, maskWSName, self._subalgLogging)
+        self._cleanup.cleanupLater(maskWS)
 
         reportWS = None
         if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
             reportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
-            reportWS = _createDiagnosticsReportTable(reportWSName, mainWS.getNumberHistograms(), subalgLogging)
+            reportWS = _createDiagnosticsReportTable(reportWSName, mainWS.getNumberHistograms(), self._subalgLogging)
 
         progress.report('Loading default mask')
-        defaultMaskWS = self._defaultMask(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        defaultMaskWS = self._defaultMask(mainWS)
         defaultMaskedSpectra = set()
         if defaultMaskWS is not None:
             defaultMaskedSpectra = _reportDefaultMask(reportWS, defaultMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=defaultMaskWS,
-                          EnableLogging=subalgLogging)
-            wsCleanup.cleanup(defaultMaskWS)
+                          EnableLogging=self._subalgLogging)
+            self._cleanup.cleanup(defaultMaskWS)
 
         progress.report('User-defined mask')
-        userMaskWS = self._userMask(mainWS, wsNames, wsCleanup, subalgLogging)
+        userMaskWS = self._userMask(mainWS)
         maskWS = Plus(LHSWorkspace=maskWS,
                       RHSWorkspace=userMaskWS,
-                      EnableLogging=subalgLogging)
-        wsCleanup.cleanup(userMaskWS)
+                      EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(userMaskWS)
 
         beamStopMaskedSpectra = set()
-        if self._beamStopDiagnosticsEnabled(mainWS, report):
+        if self._beamStopDiagnosticsEnabled(mainWS):
             progress.report('Diagnosing beam stop')
-            beamStopMaskWS = self._beamStopDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
+            beamStopMaskWS = self._beamStopDiagnostics(mainWS, maskWS)
             beamStopMaskedSpectra = _reportBeamStopMask(reportWS, beamStopMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=beamStopMaskWS,
-                          EnableLogging=subalgLogging)
-            wsCleanup.cleanup(beamStopMaskWS)
+                          EnableLogging=self._subalgLogging)
+            self._cleanup.cleanup(beamStopMaskWS)
 
         bkgMaskedSpectra = set()
-        if self._bkgDiagnosticsEnabled(mainWS, report):
+        if self._bkgDiagnosticsEnabled(mainWS):
             progress.report('Diagnosing backgrounds')
-            bkgMaskWS, bkgWS = self._bkgDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
+            bkgMaskWS, bkgWS = self._bkgDiagnostics(mainWS)
             bkgMaskedSpectra = _reportBkgDiagnostics(reportWS, bkgWS, bkgMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=bkgMaskWS,
-                          EnableLogging=subalgLogging)
-            wsCleanup.cleanup(bkgMaskWS)
-            wsCleanup.cleanup(bkgWS)
+                          EnableLogging=self._subalgLogging)
+            self._cleanup.cleanup(bkgMaskWS)
+            self._cleanup.cleanup(bkgWS)
 
         peakMaskedSpectra = set()
-        if self._peakDiagnosticsEnabled(mainWS, report):
+        if self._peakDiagnosticsEnabled(mainWS):
             progress.report('Diagnosing peaks')
-            peakMaskWS, peakIntensityWS = self._peakDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
+            peakMaskWS, peakIntensityWS = self._peakDiagnostics(mainWS)
             peakMaskedSpectra = _reportPeakDiagnostics(reportWS, peakIntensityWS, peakMaskWS)
             maskWS = Plus(LHSWorkspace=maskWS,
                           RHSWorkspace=peakMaskWS,
-                          EnableLogging=subalgLogging)
-            wsCleanup.cleanup(peakMaskWS)
-            wsCleanup.cleanup(peakIntensityWS)
+                          EnableLogging=self._subalgLogging)
+            self._cleanup.cleanup(peakMaskWS)
+            self._cleanup.cleanup(peakIntensityWS)
 
         self._outputReports(reportWS, defaultMaskedSpectra, beamStopMaskedSpectra,
                             peakMaskedSpectra, bkgMaskedSpectra)
 
-        self._finalize(maskWS, wsCleanup, report)
+        self._finalize(maskWS)
         progress.report('Done')
 
     def PyInit(self):
@@ -420,8 +405,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
         positiveFloat = FloatBoundedValidator(lower=0)
-        positiveIntArray = IntArrayBoundedValidator()
-        positiveIntArray.setLower(0)
+        positiveIntArray = IntArrayBoundedValidator(lower=0)
         scalingFactor = FloatBoundedValidator(lower=0, upper=1)
 
         # Properties.
@@ -436,10 +420,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='A diagnostics mask workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=common.CLEANUP_ON,
+                             defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([
-                                 common.CLEANUP_ON,
-                                 common.CLEANUP_OFF]),
+                                 utils.Cleanup.ON,
+                                 utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
@@ -604,7 +588,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                     issues[propName] = 'The low threshold cannot equal or exceed 1.'
         return issues
 
-    def _beamStopDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, algorithmLogging):
+    def _beamStopDiagnostics(self, mainWS, maskWS):
         """Diagnose beam stop and return a mask workspace."""
         import operator
 
@@ -631,8 +615,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                     return i
                 i += step
             return i
-        beamStopDiagnosticsWSName = wsNames.withSuffix('beam_stop_diagnostics')
-        beamStopDiagnosticsWS = _createMaskWS(mainWS, beamStopDiagnosticsWSName, algorithmLogging)
+        beamStopDiagnosticsWSName = self._names.withSuffix('beam_stop_diagnostics')
+        beamStopDiagnosticsWS = _createMaskWS(mainWS, beamStopDiagnosticsWSName, self._subalgLogging)
         threshold = self.getProperty(common.PROP_BEAM_STOP_THRESHOLD).value
         beginIndices, endIndices = _beamStopRanges(mainWS)
         for i in range(len(beginIndices)):
@@ -647,7 +631,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                     ys[0] = 1.0
         return beamStopDiagnosticsWS
 
-    def _beamStopDiagnosticsEnabled(self, mainWS, report):
+    def _beamStopDiagnosticsEnabled(self, mainWS):
         """Return true if beam stop diagnostics are enabled, false otherwise."""
         beamStopDiagnostics = self.getProperty(common.PROP_BEAM_STOP_DIAGNOSTICS).value
         if beamStopDiagnostics == common.BEAM_STOP_DIAGNOSTICS_AUTO:
@@ -658,28 +642,28 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         elif beamStopDiagnostics == common.BEAM_STOP_DIAGNOSTICS_ON:
             instrument = mainWS.getInstrument()
             if not instrument.hasParameter('beam_stop_diagnostics_spectra'):
-                report.error("'beam_stop_diagnostics_spectra' missing from instrument parameters. "
-                             + "Beam stop diagnostics disabled.")
+                self._report.error("'beam_stop_diagnostics_spectra' missing from instrument parameters. "
+                                   + "Beam stop diagnostics disabled.")
                 return False
             return True
         return False
 
-    def _bkgDiagnostics(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _bkgDiagnostics(self, mainWS):
         """Perform background diagnostics."""
         if self.getProperty(common.PROP_EPP_WS).isDefault:
             # With the AUTO option validateInputs might let missing EPPWorkspace pass.
             raise RuntimeError('Missing ' + common.PROP_EPP_WS + '. Elastic peak positions are needed for background diagnostics.')
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
-        integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
+        integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, self._names, self._cleanup, self._subalgLogging)
         lowThreshold = self._bkgDiagnosticsLowThreshold(mainWS)
         highThreshold = self._bkgDiagnosticsHighThreshold(mainWS)
         significanceTest = self._bkgDiagnosticsSignificanceTest(mainWS)
         settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-        bkgDiagnosticsWS = _bkgDiagnostics(integratedBkgs, settings, wsNames, subalgLogging)
+        bkgDiagnosticsWS = _bkgDiagnostics(integratedBkgs, settings, self._names, self._subalgLogging)
         return (bkgDiagnosticsWS, integratedBkgs)
 
-    def _bkgDiagnosticsEnabled(self, mainWS, report):
+    def _bkgDiagnosticsEnabled(self, mainWS):
         """Return true if background diagnostics are enabled, false otherwise."""
         bkgDiagnostics = self.getProperty(common.PROP_BKG_DIAGNOSTICS).value
         if bkgDiagnostics == common.BKG_DIAGNOSTICS_AUTO:
@@ -687,9 +671,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             if instrument.hasParameter('enable_background_diagnostics'):
                 enabled = instrument.getBoolParameter('enable_background_diagnostics')[0]
                 if not enabled:
-                    report.notice('Background diagnostics disable by the IPF.')
+                    self._report.notice('Background diagnostics disable by the IPF.')
                     return False
-            report.notice('Background diagnostics enabled.')
+            self._report.notice('Background diagnostics enabled.')
             return True
         return bkgDiagnostics == common.BKG_DIAGNOSTICS_ON
 
@@ -705,7 +689,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         """Return a suitable value for the significance test."""
         return self._value(ws, common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST, 'background_diagnostics_significance_test', 3.3)
 
-    def _defaultMask(self, mainWS, wsNames, wsCleanup, report, algorithmLogging):
+    def _defaultMask(self, mainWS):
         """Load instrument specific default mask or return None if not available."""
         option = self.getProperty(common.PROP_DEFAULT_MASK).value
         if option == common.DEFAULT_MASK_OFF:
@@ -713,30 +697,30 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         instrument = mainWS.getInstrument()
         instrumentName = instrument.getName()
         if not instrument.hasParameter('Workflow.MaskFile'):
-            report.notice('No default mask available for ' + instrumentName + '.')
+            self._report.notice('No default mask available for ' + instrumentName + '.')
             return None
         maskFilename = instrument.getStringParameter('Workflow.MaskFile')[0]
         maskFile = os.path.join(mantid.config.getInstrumentDirectory(), 'masks', maskFilename)
-        defaultMaskWSName = wsNames.withSuffix('default_mask')
+        defaultMaskWSName = self._names.withSuffix('default_mask')
         defaultMaskWS = LoadMask(Instrument=instrumentName,
                                  InputFile=maskFile,
                                  RefWorkspace=mainWS,
                                  OutputWorkspace=defaultMaskWSName,
-                                 EnableLogging=algorithmLogging)
-        report.notice('Default mask loaded from ' + maskFilename)
+                                 EnableLogging=self._subalgLogging)
+        self._report.notice('Default mask loaded from ' + maskFilename)
         return defaultMaskWS
 
-    def _finalize(self, outWS, wsCleanup, report):
+    def _finalize(self, outWS):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
-        wsCleanup.cleanup(outWS)
-        wsCleanup.finalCleanup()
-        report.toLog(self.log())
+        self._cleanup.cleanup(outWS)
+        self._cleanup.finalCleanup()
+        self._report.toLog(self.log())
 
-    def _inputWS(self, wsNames, wsCleanup, subalgLogging):
+    def _inputWS(self):
         """Return the raw input workspace."""
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
-        wsCleanup.protect(mainWS)
+        self._cleanup.protect(mainWS)
         return mainWS
 
     def _outputReports(self, reportWS, defaultMaskedSpectra, directBeamMaskedSpectra,
@@ -755,22 +739,22 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         report += _maskedListToStr(bkgMaskedSpectra - hardMasking)
         self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT, report)
 
-    def _peakDiagnostics(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _peakDiagnostics(self, mainWS):
         """Perform elastic peak diagnostics."""
         if self.getProperty(common.PROP_EPP_WS).isDefault:
             # With the AUTO option validateInputs might let missing EPPWorkspace pass.
             raise RuntimeError('Missing ' + common.PROP_EPP_WS + '. Elastic peak positions are needed for peak diagnostics.')
         eppWS = self.getProperty(common.PROP_EPP_WS).value
         sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-        integratedPeaksWS = _integrateElasticPeaks(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
+        integratedPeaksWS = _integrateElasticPeaks(mainWS, eppWS, sigmaMultiplier, self._names, self._cleanup, self._subalgLogging)
         lowThreshold = self._peakDiagnosticsLowThreshold(mainWS)
         highThreshold = self._peakDiagnosticsHighThreshold(mainWS)
         significanceTest = self._peakDiagnosticsSignificanceTest(mainWS)
         settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-        peakDiagnosticsWS = _elasticPeakDiagnostics(integratedPeaksWS, settings, wsNames, subalgLogging)
+        peakDiagnosticsWS = _elasticPeakDiagnostics(integratedPeaksWS, settings, self._names, self._subalgLogging)
         return (peakDiagnosticsWS, integratedPeaksWS)
 
-    def _peakDiagnosticsEnabled(self, mainWS, report):
+    def _peakDiagnosticsEnabled(self, mainWS):
         """Return true if elastic peak diagnostics are enabled, false otherwise."""
         peakDiagnostics = self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value
         if peakDiagnostics == common.ELASTIC_PEAK_DIAGNOSTICS_AUTO:
@@ -778,9 +762,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             if instrument.hasParameter('enable_elastic_peak_diagnostics'):
                 enabled = instrument.getBoolParameter('enable_elastic_peak_diagnostics')[0]
                 if not enabled:
-                    report.notice('Elastic peak diagnostics disabled by the IPF.')
+                    self._report.notice('Elastic peak diagnostics disabled by the IPF.')
                     return False
-            report.notice('Elastic peak diagnostics enabled.')
+            self._report.notice('Elastic peak diagnostics enabled.')
             return True
         return peakDiagnostics == common.ELASTIC_PEAK_DIAGNOSTICS_ON
 
@@ -796,19 +780,19 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         """Return a suitable value for the significance test."""
         return self._value(ws, common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST, 'elastic_peak_diagnostics_significance_test', 3.3)
 
-    def _userMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
+    def _userMask(self, mainWS):
         """Return combined masked spectra and components."""
         userMask = self.getProperty(common.PROP_USER_MASK).value
         maskComponents = self.getProperty(common.PROP_USER_MASK_COMPONENTS).value
-        maskWSName = wsNames.withSuffix('user_mask')
-        maskWS = _createMaskWS(mainWS, maskWSName, algorithmLogging)
+        maskWSName = self._names.withSuffix('user_mask')
+        maskWS = _createMaskWS(mainWS, maskWSName, self._subalgLogging)
         MaskDetectors(Workspace=maskWS,
                       DetectorList=userMask,
                       ComponentList=maskComponents,
-                      EnableLogging=algorithmLogging)
+                      EnableLogging=self._subalgLogging)
         extractResult = ExtractMask(InputWorkspace=maskWS,
                                     OutputWorkspace=maskWSName,
-                                    EnableLogging=algorithmLogging)
+                                    EnableLogging=self._subalgLogging)
         return extractResult.OutputWorkspace
 
     def _value(self, ws, propertyName, instrumentParameterName, defaultValue):

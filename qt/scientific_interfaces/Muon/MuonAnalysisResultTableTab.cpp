@@ -261,18 +261,18 @@ std::pair<QStringList, QStringList> MuonAnalysisResultTableTab::getFitLabels() {
   std::map<std::string, Workspace_sptr> items =
       AnalysisDataService::Instance().topLevelItems();
 
-  for (auto it = items.begin(); it != items.end(); ++it) {
-    if (it->second->id() != "WorkspaceGroup")
+  for (auto &item : items) {
+    if (item.second->id() != "WorkspaceGroup")
       continue;
 
-    if (it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) == 0) {
+    if (item.first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) == 0) {
       std::string label =
-          it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
+          item.first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
       seqLabels << QString::fromStdString(label);
-    } else if (it->first.find(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX) ==
+    } else if (item.first.find(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX) ==
                0) {
       std::string label =
-          it->first.substr(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX.size());
+          item.first.substr(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX.size());
       simLabels << QString::fromStdString(label);
     } else {
       continue;
@@ -316,21 +316,21 @@ MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
 
   QStringList workspaces;
 
-  for (auto subGroup = wsNames.begin(); subGroup != wsNames.end(); subGroup++) {
-    auto wsGroup = ads.retrieveWS<WorkspaceGroup>(*subGroup);
+  for (auto &wsName : wsNames) {
+    auto wsGroup = ads.retrieveWS<WorkspaceGroup>(wsName);
     if (sequential) {
       std::vector<std::string> tmpNames = wsGroup->getNames();
-      for (auto it = tmpNames.begin(); it != tmpNames.end(); it++) {
-        if (!isFittedWs(*it))
+      for (auto &tmpName : tmpNames) {
+        if (!isFittedWs(tmpName))
           continue; // Doesn't pass basic checks
 
-        workspaces << QString::fromStdString(wsBaseName(*it));
+        workspaces << QString::fromStdString(wsBaseName(tmpName));
       }
     } else {
-      if (!isFittedWs(*subGroup))
+      if (!isFittedWs(wsName))
         continue; // Doesn't pass basic checks
 
-      workspaces << QString::fromStdString(wsBaseName(*subGroup));
+      workspaces << QString::fromStdString(wsBaseName(wsName));
     }
   }
 
@@ -346,20 +346,22 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces() {
 
   auto allWorkspaces = AnalysisDataService::Instance().getObjectNames();
 
-  for (auto it = allWorkspaces.begin(); it != allWorkspaces.end(); it++) {
-    if (!isFittedWs(*it))
+  for (auto &allWorkspace : allWorkspaces) {
+    if (!isFittedWs(allWorkspace))
       continue; // Doesn't pass basic checks
 
     // Ignore sequential fit results
-    if (boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
+    if (boost::starts_with(allWorkspace,
+                           MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
 
     // Ignore simultaneous fit results
-    if (boost::starts_with(*it, MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
+    if (boost::starts_with(allWorkspace,
+                           MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
       continue;
     }
 
-    workspaces << QString::fromStdString(wsBaseName(*it));
+    workspaces << QString::fromStdString(wsBaseName(allWorkspace));
   }
 
   return workspaces;

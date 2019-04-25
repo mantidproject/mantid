@@ -868,9 +868,9 @@ void RepoModel::setupModelData(RepoItem *root) {
   parents << root;
 
   // FOREACH entry in LISTFILES
-  for (unsigned int number = 0; number < list.size(); number++) {
+  for (const auto &number : list) {
     // folder or file inside the repository
-    QString lineData = QString::fromStdString(list[number]);
+    QString lineData = QString::fromStdString(number);
 
     // Read the column data from the rest of the line.
     QStringList pathStrings = lineData.split("/");

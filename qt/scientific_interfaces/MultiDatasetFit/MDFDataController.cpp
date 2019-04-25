@@ -72,11 +72,10 @@ void DataController::addWorkspace() {
       }
 
       if (!matrixWorkspaces.empty()) {
-        for (auto iws = matrixWorkspaces.begin(); iws != matrixWorkspaces.end();
-             ++iws) {
-          wsName = QString::fromStdString((**iws).getName());
-          for (auto i = indices.begin(); i != indices.end(); ++i) {
-            addWorkspaceSpectrum(wsName, *i, **iws);
+        for (auto &matrixWorkspace : matrixWorkspaces) {
+          auto name = QString::fromStdString((*matrixWorkspace).getName());
+          for (auto &index : indices) {
+            addWorkspaceSpectrum(name, index, *matrixWorkspace);
           }
         }
         emit spectraAdded(
@@ -136,8 +135,8 @@ void DataController::removeSelectedSpectra() {
   if (ranges.isEmpty())
     return;
   QList<int> rows;
-  for (auto range = ranges.begin(); range != ranges.end(); ++range) {
-    for (int row = range->topRow(); row <= range->bottomRow(); ++row) {
+  for (auto &range : ranges) {
+    for (int row = range.topRow(); row <= range.bottomRow(); ++row) {
       rows.push_back(row);
     }
   }
@@ -234,7 +233,9 @@ std::pair<double, double> DataController::getFittingRange(int i) const {
 }
 
 /// Inform the others that a dataset was updated.
-void DataController::updateDataset(int row, int) { emit dataSetUpdated(row); }
+void DataController::updateDataset(int row, int /*unused*/) {
+  emit dataSetUpdated(row);
+}
 
 /// Object's parent cast to MultiDatasetFit.
 MultiDatasetFit *DataController::owner() const {

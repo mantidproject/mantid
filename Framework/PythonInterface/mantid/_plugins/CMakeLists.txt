@@ -2,10 +2,9 @@
 
 set(MODULE_TEMPLATE src/curvefitting.cpp.in)
 
-# Files containing export definitions, these are automatically processed 
+# Files containing export definitions, these are automatically processed
 # -- Do NOT sort this list. The order defines the order in which the export
 # definitions occur and some depend on their base classes being exported first
-# --
 set(EXPORT_FILES src/Exports/ProductFunction.cpp)
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/curvefitting.cpp)
@@ -28,12 +27,9 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/_plugins)
 endif()
 
-copy_files_to_dir("${PY_FILES}"
-                  ${CMAKE_CURRENT_SOURCE_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_INSTALL_FILES)
-
+#
 # Create the target for this directory
+#
 
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
@@ -45,7 +41,6 @@ add_library(PythonCurveFittingModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonCurveFittingModule _curvefitting)
-set_target_output_directory(PythonCurveFittingModule ${OUTPUT_DIR} .pyd)
 
 # Add the required dependencies
 target_link_libraries(PythonCurveFittingModule
