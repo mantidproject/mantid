@@ -9,14 +9,11 @@ Indirect Settings
 Overview
 --------
 
-Provides a range of options to change the preferences on an Indirect interface. The following
-image is the settings window as displayed when opened from the Data Analysis interface.
+Provides options which allow you to customise and save the behaviour of features on the
+Indirect interfaces. 
 
-.. figure:: ../images/Data_Analysis_Settings.png
-  :class: screenshot
-  :align: center
-  :figwidth: 70%
-  :alt: Indirect settings GUI.
+.. interface:: Settings
+  :width: 450
 
 Action Buttons
 --------------
@@ -34,7 +31,7 @@ Cancel
 General
 -------
 
-This section contains options which will be applyed across all of the Indirect interfaces.
+This section contains options which are widespread.
 
 Options
 ~~~~~~~
@@ -43,29 +40,10 @@ Facility
   Allows you to choose the selected facility.
 
 
-Indirect Bayes
---------------
+Interface Settings
+------------------
 
-This section is displayed only when the settings window is opened from the Bayes
-interface.
-
-Options
-~~~~~~~
-
-Restrict allowed input files by name
-  This will allow you to load input files with any names if unticked. Previously, only
-  input files with certain end extensions such as *_red* were allowed to be loaded. See
-  the glossary below to understand the restrictions on data when this option is ticked.
-
-Plot error bars for output plots
-  This will ensure that error bars are plotted on the output data plots if it is ticked.
-
-
-Data Analysis
--------------
-
-This section is displayed only when the settings window is opened from the Data Analysis
-interface.
+This section contains settings which are more specific to the Indirect interfaces.
 
 Options
 ~~~~~~~
@@ -77,49 +55,6 @@ Restrict allowed input files by name
 
 Plot error bars for output plots
   This will ensure that error bars are plotted on the output data plots if it is ticked.
-
-
-Data Corrections
-----------------
-
-This section is displayed only when the settings window is opened from the Data Corrections
-interface.
-
-Options
-~~~~~~~
-
-Restrict allowed input files by name
-  This will allow you to load input files with any names if unticked. Previously, only
-  input files with certain end extensions such as *_red* were allowed to be loaded. See
-  the glossary below to understand the restrictions on data when this option is ticked.
-
-Plot error bars for output plots
-  This will ensure that error bars are plotted on the output data plots if it is ticked.
-
-
-Data Reduction
---------------
-
-This section is displayed only when the settings window is opened from the Data Reduction
-interface.
-
-Options
-~~~~~~~
-
-Restrict allowed input files by name
-  This will allow you to load input files with any names if unticked. Previously, only
-  input files with certain end extensions such as *_red* were allowed to be loaded. See
-  the glossary below to understand the restrictions on data when this option is ticked.
-
-Plot error bars for output plots
-  This will ensure that error bars are plotted on the output data plots if it is ticked.
-
-
-Other Interfaces
-----------------
-
-There are currently no interface-specific settings for the Diffraction, Simulation and Tools
-interfaces.
 
 
 Glossary of Allowed Suffixes
@@ -148,7 +83,7 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
-according to the suffixes below:
+according to the suffixes below.
 
 Indirect Bayes Suffixes
 ~~~~~~~~~~~~~~~~~~~~~~~
