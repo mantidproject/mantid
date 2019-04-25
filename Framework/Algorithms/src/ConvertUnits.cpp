@@ -193,8 +193,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should "
-           "have "
-           "at least 2 values. Found "
+           "have at least 2 values. Found "
         << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
@@ -209,8 +208,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
   double factor, power;
   if (m_inputUnit->quickConversion(*m_outputUnit, factor, power))
   // If test fails, could also check whether a quick conversion in the
-  // opposite
-  // direction has been entered
+  // opposite direction has been entered
   {
     outputWS = this->convertQuickly(inputWS, factor, power);
   } else {
@@ -475,8 +473,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     emode = 2;
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass
-  // empty
-  // vector
+  // empty vector
   std::vector<double> emptyVec;
   const bool needEfixed =
       (outputUnit->unitID().find("DeltaE") != std::string::npos ||
@@ -490,8 +487,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       if (run.hasProperty("Ei")) {
         try {
           efixedProp = run.getPropertyValueAsType<double>("Ei");
-        } catch (Kernel::Exception::NotFoundError &) {
-          throw std::runtime_error("Cannot retrieve Ei value from the logs");
+        } catch (std::invalid_argument &) {
+          throw std::runtime_error("Could not retrieve incident energy from run object");
         }
       } else {
         if (needEfixed) {
@@ -741,11 +738,9 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a
-    // different
-    // number of bins in each spectrum because, in general L2 is different for
-    // each
-    // one.
-    // Thus, we first need to loop to find largest 'good' range
+    // different number of bins in each spectrum because, in general L2
+    // is different for each one. Thus, we first need to loop to find
+    // largest 'good' range
     std::vector<MantidVec::difference_type> lastBins(numSpec);
     int maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i) {
