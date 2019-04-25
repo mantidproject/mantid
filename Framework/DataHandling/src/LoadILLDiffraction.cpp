@@ -248,7 +248,7 @@ void LoadILLDiffraction::loadMetaData() {
 
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
-    nxStat = NXclose(&nxHandle);
+    NXclose(&nxHandle);
   }
 
   if (mutableRun.hasProperty("Detector.calibration_file")) {

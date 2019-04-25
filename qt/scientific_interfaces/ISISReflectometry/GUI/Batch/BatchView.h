@@ -23,12 +23,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MainWindowView;
-
 class BatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
-  explicit BatchView(QWidget *parent, MainWindowView *mainView);
+  explicit BatchView(QWidget *parent);
   void subscribe(BatchViewSubscriber *notifyee) override;
 
   IRunsView *runs() const override;
@@ -41,7 +39,6 @@ public:
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
   void cancelAlgorithmQueue() override;
-  void executePythonCode(const std::string &pythonCode);
 
 private slots:
   void onBatchComplete(bool error);
@@ -67,7 +64,6 @@ private:
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
-  MainWindowView *m_mainView;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

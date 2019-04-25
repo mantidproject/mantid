@@ -177,8 +177,9 @@ void LoadGSASInstrumentFile::exec() {
       }
     } else {
       // Else, use all available banks
-      for (auto &bank : bankparammap) {
-        bankIds.push_back(static_cast<int>(bank.first));
+      bankIds.reserve(bankparammap.size());
+      for (const auto &bank : bankparammap) {
+        bankIds.emplace_back(static_cast<int>(bank.first));
       }
     }
 
@@ -346,8 +347,7 @@ void LoadGSASInstrumentFile::parseBank(std::map<std::string, double> &parammap,
   parammap["Sig2"] = param3;
   parammap["Gam0"] = param4;
 
-  currentLineIndex = findINSPRCFLine(lines, currentLineIndex + 1, param1,
-                                     param2, param3, param4);
+  findINSPRCFLine(lines, currentLineIndex + 1, param1, param2, param3, param4);
   parammap["Gam1"] = param1;
   parammap["Gam2"] = param2;
   if (param3 != 0.0) {
@@ -450,7 +450,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
 
   // add profile parameter rows
   for (size_t i = 0; i < numparams; ++i) {
-    TableRow newrow = tablews->appendRow();
+    newrow = tablews->appendRow();
 
     string parname = vec_parname[i];
     newrow << parname;
@@ -466,7 +466,6 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
       }
 
       // Locate parameter
-      map<string, double>::iterator parmapiter;
       parmapiter = bpmapiter->second.find(parname);
       if (parmapiter == bpmapiter->second.end()) {
         throw runtime_error("Parameter cannot be found in a bank's map.");

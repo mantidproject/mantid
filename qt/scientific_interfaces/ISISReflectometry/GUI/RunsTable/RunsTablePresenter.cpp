@@ -8,12 +8,10 @@
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
-#include "Plotter.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"
-#include "RunsTableView.h"
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
 #include <boost/regex.hpp>
@@ -65,9 +63,9 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
-    double thetaTolerance, ReductionJobs jobs)
+    double thetaTolerance, ReductionJobs jobs, const IPlotter &plotter)
     : m_view(view), m_model(instruments, thetaTolerance, std::move(jobs)),
-      m_jobViewUpdater(m_view->jobs()) {
+      m_jobViewUpdater(m_view->jobs()), m_plotter(plotter) {
   m_view->subscribe(this);
 }
 
@@ -571,23 +569,14 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   const auto rows = m_model.selectedRows();
 
   for (const auto &row : rows) {
-    const auto workspaceName = row.reducedWorkspaceNames().iVsQBinned();
-    if (workspaceName != "")
-      workspaces.emplace_back(workspaceName);
+    if (row.state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
   }
 
   if (workspaces.empty())
     return;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
-  Plotter plotter(runsTable);
-#else
-  Plotter plotter;
-#endif
-  plotter.reflectometryPlot(workspaces);
-
-  m_view->jobs().clearSelection();
+  m_plotter.reflectometryPlot(workspaces);
 }
 
 void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
@@ -595,23 +584,14 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   const auto groups = m_model.selectedGroups();
 
   for (const auto &group : groups) {
-    const auto workspaceName = group.postprocessedWorkspaceName();
-    if (workspaceName != "")
-      workspaces.emplace_back(workspaceName);
+    if (group.state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(group.postprocessedWorkspaceName());
   }
 
   if (workspaces.empty())
     return;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  const auto runsTable = dynamic_cast<RunsTableView *>(m_view);
-  Plotter plotter(runsTable);
-#else
-  Plotter plotter;
-#endif
-  plotter.reflectometryPlot(workspaces);
-
-  m_view->jobs().clearSelection();
+  m_plotter.reflectometryPlot(workspaces);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

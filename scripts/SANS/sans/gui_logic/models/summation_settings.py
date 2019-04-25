@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import ConfigService
-from sans.gui_logic.models.binning_type import BinningType
+from sans.common.enums import BinningType
 
 
 class OverlayEventWorkspaces(object):

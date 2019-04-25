@@ -113,8 +113,8 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  const auto &componentInfo =
-      inputW ? inputW->componentInfo() : inputP->componentInfo();
+  auto &componentInfo =
+      inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
   auto compIndex = componentInfo.indexOf(comp->getComponentID());
   if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo,
                                                       compIndex)) {
@@ -131,13 +131,7 @@ void MoveInstrumentComponent::exec() {
     position += comp->getPos();
 
   const auto componentId = comp->getComponentID();
-  if (inputW) {
-    auto &componentInfo = inputW->mutableComponentInfo();
-    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
-  } else if (inputP) {
-    auto &componentInfo = inputP->mutableComponentInfo();
-    componentInfo.setPosition(componentInfo.indexOf(componentId), position);
-  }
+  componentInfo.setPosition(componentInfo.indexOf(componentId), position);
 }
 
 } // namespace DataHandling

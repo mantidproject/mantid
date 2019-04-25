@@ -66,6 +66,7 @@ set ( TEST_FILES
   test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
   test/ISISReflectometry/Runs/RunsPresenterTest.h
   test/ISISReflectometry/Save/SavePresenterTest.h
+  test/ISISReflectometry/Plotting/PlotterTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

@@ -15,6 +15,13 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+Bug Fixes
+#########
+
+-Prevented crash caused by canceling algorithms called by GUI.
+
+-Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
+
 Single Crystal Diffraction
 --------------------------
 

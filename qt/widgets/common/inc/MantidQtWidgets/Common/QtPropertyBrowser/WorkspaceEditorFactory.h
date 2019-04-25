@@ -23,11 +23,12 @@ public:
 protected:
   using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler
                                                    // warning
-  void connectPropertyManager(QtStringPropertyManager *) override {}
+  void connectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
   QWidget *createEditorForManager(QtStringPropertyManager *manager,
                                   QtProperty *property,
                                   QWidget *parent) override;
-  void disconnectPropertyManager(QtStringPropertyManager *) override {}
+  void
+  disconnectPropertyManager(QtStringPropertyManager * /*manager*/) override {}
 };
 
 class WorkspaceEditor : public WorkspaceSelector {

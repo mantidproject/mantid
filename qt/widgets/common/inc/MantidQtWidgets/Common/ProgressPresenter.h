@@ -29,7 +29,7 @@ public:
                                          static_cast<int>(end));
   }
 
-  void doReport(const std::string &) override {
+  void doReport(const std::string & /*msg*/) override {
     if (m_progressableView->isPercentageIndicator())
       m_progressableView->setProgress(static_cast<int>(m_i));
   }

@@ -86,17 +86,17 @@ public slots:
   virtual void setHWHMMinimum(double maximum) = 0;
 
 signals:
-  void selectedFitDataChanged(std::size_t);
+  void selectedFitDataChanged(std::size_t /*_t1*/);
   void plotCurrentPreview();
-  void plotSpectrumChanged(std::size_t);
-  void plotGuessChanged(bool);
+  void plotSpectrumChanged(std::size_t /*_t1*/);
+  void plotGuessChanged(bool /*_t1*/);
   void fitSelectedSpectrum();
-  void startXChanged(double);
-  void endXChanged(double);
-  void hwhmMinimumChanged(double);
-  void hwhmMaximumChanged(double);
-  void hwhmChanged(double, double);
-  void backgroundChanged(double);
+  void startXChanged(double /*_t1*/);
+  void endXChanged(double /*_t1*/);
+  void hwhmMinimumChanged(double /*_t1*/);
+  void hwhmMaximumChanged(double /*_t1*/);
+  void hwhmChanged(double /*_t1*/, double /*_t2*/);
+  void backgroundChanged(double /*_t1*/);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -34,11 +34,12 @@ class BinDialog : public QDialog {
 public:
   explicit BinDialog(QWidget *parent = nullptr);
   ~BinDialog() override;
-  void setIntegralMinMax(double, double, bool);
+  void setIntegralMinMax(double /*minBin*/, double /*maxBin*/,
+                         bool /*useEverything*/);
 signals:
   /// This signal is sent when changing the bin range selected.
   /// Parameters are: min, max, and a bool set to true to mean "everything"
-  void IntegralMinMax(double, double, bool);
+  void IntegralMinMax(double /*_t1*/, double /*_t2*/, bool /*_t3*/);
 
 public slots:
   void btnOKClicked();

@@ -47,7 +47,7 @@ public:
   void componentSelected(size_t componentIndex) override;
   void getSelectedDetectors(std::vector<size_t> &detIndices) override;
   void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
-  void resize(int, int) override;
+  void resize(int /*unused*/, int /*unused*/) override;
   QString getInfoText() const override;
   /// Load settings for the 3D projection from a project file
   virtual void loadFromProject(const std::string &lines) override;

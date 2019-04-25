@@ -26,7 +26,7 @@ public:
 private slots:
   void accept() override;
   void reject() override;
-  void workspaceNameChanged(const QString &);
+  void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);
 
 private:

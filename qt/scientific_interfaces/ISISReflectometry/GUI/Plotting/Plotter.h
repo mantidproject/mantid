@@ -8,30 +8,31 @@
 #define MANTID_ISISREFLECTOMETRY_PLOTTER_H
 
 #include "Common/DllConfig.h"
+#include "IPlotter.h"
 
 #include <QtGlobal>
-#include <string>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-class RunsTableView;
+class IMainWindowView;
 #endif
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Plotter : public IPlotter {
 public:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter(RunsTableView *RunsTable);
+  Plotter(MantidQt::CustomInterfaces::IMainWindowView *mainWindowView);
+  void runPython(const std::string &pythonCode) const;
 #endif
-  void reflectometryPlot(const std::vector<std::string> &workspaces);
+  void
+  reflectometryPlot(const std::vector<std::string> &workspaces) const override;
 
 private:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  void runPython(const std::string &pythonCode);
   // Object only needed for MantidPlot implementation as it requires Python
   // execution
-  RunsTableView *m_runsTableView;
+  MantidQt::CustomInterfaces::IMainWindowView *m_mainWindowView;
 #endif
 };
 

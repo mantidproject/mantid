@@ -49,7 +49,7 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
   auto const prefix = std::string("IvsQ_");
   auto const separator = std::string("_");
   for (auto const &workspace : workspaces) {
-    auto name = removePrefix(workspace, prefix);
+    auto const name = removePrefix(workspace, prefix);
     outputName += separator + name;
   }
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);

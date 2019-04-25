@@ -266,7 +266,7 @@ int Quadratic::onSurface(const Kernel::V3D &Pt) const
 */
 {
   const double res = eqnValue(Pt);
-  return (fabs(res) > Tolerance) ? 0 : 1;
+  return (std::abs(res) > Tolerance) ? 0 : 1;
 }
 
 void Quadratic::displace(const Kernel::V3D &Pt)

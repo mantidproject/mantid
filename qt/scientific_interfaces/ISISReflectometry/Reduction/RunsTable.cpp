@@ -56,7 +56,8 @@ std::vector<Group> RunsTable::selectedGroups() const {
       const auto group = m_reductionJobs.getGroupFromPath(rowPath);
       groups.emplace_back(group);
     } catch (std::invalid_argument) {
-      // We should assume we found a row here.
+      // We should assume that a row was found here, or the row was not
+      // initialised.
     }
   }
   return groups;
@@ -69,7 +70,8 @@ std::vector<Row> RunsTable::selectedRows() const {
       const auto row = m_reductionJobs.getRowFromPath(rowPath);
       rows.emplace_back(row);
     } catch (std::invalid_argument) {
-      // We should assume that a group was found here
+      // We should assume that a group was found here, or the row was not
+      // initialised.
     }
   }
   return rows;

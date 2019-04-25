@@ -34,7 +34,8 @@ public:
   /// Set all four values atomically
   void set(float red, float green, float blue, float alpha);
   /// Retrieve the component colours
-  void get(float &, float &, float &, float &) const;
+  void get(float & /*red*/, float & /*green*/, float & /*blue*/,
+           float & /*alpha*/) const;
   void get(unsigned char &r, unsigned char &g, unsigned char &b) const;
   /// Retrieve the component colours
   void getUB3(unsigned char *c) const;

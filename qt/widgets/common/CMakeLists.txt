@@ -173,7 +173,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h
-
+  
   inc/MantidQtWidgets/Common/Batch/JobTreeView.h
   inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
 
@@ -244,7 +244,6 @@ set ( QT5_INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
-
   inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
 
   inc/MantidQtWidgets/Common/Python/Object.h

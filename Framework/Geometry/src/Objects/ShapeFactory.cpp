@@ -80,7 +80,7 @@ boost::shared_ptr<CSGObject> ShapeFactory::createShape(std::string shapeXML,
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
-
+  auto thing = createShape(pRootElem);
   // convert into a Geometry object
   return createShape(pRootElem);
 }
@@ -170,6 +170,7 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
             numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
+            lastElement = pE;
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
             numPrimitives++;
           } else if (primitiveName == "cuboid") {
@@ -418,8 +419,7 @@ ShapeFactory::parseCylinder(Poco::XML::Element *pElem,
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  V3D normVec = parsePosition(pElemAxis);
-  normVec.normalize();
+  const V3D normVec = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
@@ -475,8 +475,7 @@ std::string ShapeFactory::parseSegmentedCylinder(
   Element *pElemRadius = getShapeElement(pElem, "radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  V3D normVec = parsePosition(pElemAxis);
-  normVec.normalize();
+  const V3D normVec = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
@@ -534,8 +533,7 @@ std::string ShapeFactory::parseHollowCylinder(
   Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  V3D normVec = parsePosition(pElemAxis);
-  normVec.normalize();
+  const V3D normVec = normalize(parsePosition(pElemAxis));
   const double innerRadius = getDoubleAttribute(pElemInnerRadius, "val");
   if (innerRadius <= 0.0) {
     throw std::runtime_error(
@@ -667,8 +665,7 @@ CuboidCorners ShapeFactory::parseCuboid(Poco::XML::Element *pElem) {
       // Use a quarternion to do a rotation for us, with respect to the default
       // axis.  Our "Quat" implementation requires that the vectors passed to
       // it be normalised.
-      V3D axis = parsePosition(pElem_axis);
-      axis.normalize();
+      const V3D axis = normalize(parsePosition(pElem_axis));
       const Quat rotation(DEFAULT_AXIS, axis);
 
       rotation.rotate(result.lfb);
@@ -704,8 +701,7 @@ ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
                           int &l_id) {
   auto corners = parseCuboid(pElem);
 
-  V3D pointTowardBack = corners.lbb - corners.lfb;
-  pointTowardBack.normalize();
+  const V3D pointTowardBack = normalize(corners.lbb - corners.lfb);
 
   // add front plane cutoff
   auto pPlaneFrontCutoff = boost::make_shared<Plane>();
@@ -731,8 +727,7 @@ ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
-  V3D pointTowardRight = corners.rfb - corners.lfb;
-  pointTowardRight.normalize();
+  const V3D pointTowardRight = normalize(corners.rfb - corners.lfb);
 
   // add left plane cutoff
   auto pPlaneLeftCutoff = boost::make_shared<Plane>();
@@ -756,8 +751,7 @@ ShapeFactory::parseCuboid(Poco::XML::Element *pElem,
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
-  V3D pointTowardTop = corners.lft - corners.lfb;
-  pointTowardTop.normalize();
+  const V3D pointTowardTop = normalize(corners.lft - corners.lfb);
 
   // add bottom plane cutoff
   auto pPlaneBottomCutoff = boost::make_shared<Plane>();
@@ -803,8 +797,7 @@ ShapeFactory::parseInfiniteCone(Poco::XML::Element *pElem,
   Element *pElemAxis = getShapeElement(pElem, "axis");
   Element *pElemAngle = getShapeElement(pElem, "angle");
 
-  V3D normVec = parsePosition(pElemAxis);
-  normVec.normalize();
+  const V3D normVec = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
@@ -850,8 +843,7 @@ ShapeFactory::parseCone(Poco::XML::Element *pElem,
   Element *pElemAngle = getShapeElement(pElem, "angle");
   Element *pElemHeight = getShapeElement(pElem, "height");
 
-  V3D normVec = parsePosition(pElemAxis);
-  normVec.normalize();
+  const V3D normVec = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
@@ -896,14 +888,9 @@ ShapeFactory::parseCone(Poco::XML::Element *pElem,
 std::string ShapeFactory::parseHexahedronFromStruct(
     Hexahedron &hex, std::map<int, boost::shared_ptr<Surface>> &prim,
     int &l_id) {
-  V3D pointTowardBack = hex.lbb - hex.lfb;
-  pointTowardBack.normalize();
-
-  V3D normal;
-
   // add front face
   auto pPlaneFrontCutoff = boost::make_shared<Plane>();
-  normal = (hex.rfb - hex.lfb).cross_prod(hex.lft - hex.lfb);
+  auto normal = (hex.rfb - hex.lfb).cross_prod(hex.lft - hex.lfb);
 
   // V3D jjj = (normal*(rfb-rbb));
   if (normal.scalar_prod(hex.rfb - hex.rbb) < 0)
@@ -1070,8 +1057,9 @@ ShapeFactory::parseTaperedGuide(Poco::XML::Element *pElem,
 
   // For centre and axis we allow defaults.
   const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
-  V3D axis = pElemAxis ? parsePosition(pElemAxis) : DEFAULT_AXIS;
-  axis.normalize(); // Quat requires normalised axes.
+  // Quat requires normalised axes.
+  const V3D axis =
+      normalize(pElemAxis ? parsePosition(pElemAxis) : DEFAULT_AXIS);
 
   const double apertureStartWidth =
       getDoubleAttribute(pElemApertureStart, "width");
@@ -1146,8 +1134,7 @@ ShapeFactory::parseTorus(Poco::XML::Element *pElem,
       getShapeElement(pElem, "radius-from-centre-to-tube");
   Element *pElemRadiusTube = getShapeElement(pElem, "radius-tube");
 
-  V3D normVec = parsePosition(pElemAxis);
-  normVec.normalize();
+  const V3D normVec = normalize(parsePosition(pElemAxis));
 
   // getDoubleAttribute can throw - put the calls above any new
   const double radiusCentre = getDoubleAttribute(pElemRadiusFromCentre, "val");
@@ -1453,21 +1440,32 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     Element *pElemHeight = getShapeElement(pElem, "height");
-    V3D normVec = parsePosition(pElemAxis);
-    normVec.normalize();
+    const V3D normVec = normalize(parsePosition(pElemAxis));
     shapeInfo.setCylinder(parsePosition(pElemCentre), normVec,
                           std::stod(pElemRadius->getAttribute("val")),
                           std::stod(pElemHeight->getAttribute("val")));
+  } else if (pElem->tagName() == "hollow-cylinder") {
+    Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
+    Element *pElemAxis = getShapeElement(pElem, "axis");
+    Element *pElemInnerRadius = getShapeElement(pElem, "inner-radius");
+    Element *pElemOuterRadius = getShapeElement(pElem, "outer-radius");
+    Element *pElemHeight = getShapeElement(pElem, "height");
+    V3D normVec = parsePosition(pElemAxis);
+    normVec.normalize();
+    shapeInfo.setHollowCylinder(
+        parsePosition(pElemCentre), normVec,
+        std::stod(pElemInnerRadius->getAttribute("val")),
+        std::stod(pElemOuterRadius->getAttribute("val")),
+        std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
     Element *pElemAngle = getShapeElement(pElem, "angle");
     Element *pElemHeight = getShapeElement(pElem, "height");
 
-    V3D normVec = parsePosition(pElemAxis);
-    normVec.normalize();
-    double height = std::stod(pElemHeight->getAttribute("val"));
-    double radius =
+    const V3D normVec = normalize(parsePosition(pElemAxis));
+    const double height = std::stod(pElemHeight->getAttribute("val"));
+    const double radius =
         height * tan(M_PI * std::stod(pElemAngle->getAttribute("val")) / 180.0);
     shapeInfo.setCone(parsePosition(pElemTipPoint), normVec, radius, height);
   }

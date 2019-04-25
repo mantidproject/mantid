@@ -239,7 +239,10 @@ def pcolormesh_from_names(names, fig=None):
 def use_imshow(ws):
     y = ws.getAxis(1).extractValues()
     difference = np.diff(y)
-    return np.all(np.isclose(difference[:-1], difference[0]))
+    try:
+        return np.all(np.isclose(difference[:-1], difference[0]))
+    except IndexError:
+        return False
 
 
 def pcolormesh(workspaces, fig=None):
