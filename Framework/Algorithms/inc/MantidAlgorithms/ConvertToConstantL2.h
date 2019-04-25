@@ -52,7 +52,7 @@ private:
   void exec() override;
   void initWorkspaces();
   void getWavelengthFromRun();
-  double getInstrumentProperty(std::string);
+  void getL2FromInstrument();
   double calculateTOF(double);
 
   /// The user selected (input) workspace

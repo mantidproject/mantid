@@ -66,8 +66,7 @@ void ConvertToConstantL2::initWorkspaces() {
     m_outputWS = create<MatrixWorkspace>(*m_inputWS);
   }
   this->getWavelengthFromRun();
-  m_l2 = getInstrumentProperty("l2");
-  g_log.debug() << " L2 = " << m_l2 << '\n';
+  this->getL2FromInstrument();
 }
 
 /**
@@ -146,18 +145,16 @@ void ConvertToConstantL2::getWavelengthFromRun() {
   g_log.debug() << "Wavelength = " << m_wavelength;
 }
 /*
- * Get instrument property as double
- * @s - input property name
+ * Get instrument property l2 as double
  *
  */
-double ConvertToConstantL2::getInstrumentProperty(std::string s) {
-  std::vector<std::string> prop = m_instrument->getStringParameter(s);
+void ConvertToConstantL2::getL2FromInstrument() {
+  std::vector<double> prop = m_instrument->getNumberParameter("l2");
   if (prop.empty()) {
-    const std::string mesg = "Property <" + s + "> doesn't exist!";
-    throw std::runtime_error(mesg);
+    throw std::runtime_error("Property l1 doesn't exist!");
   }
-  g_log.debug() << "prop[0] = " << prop[0] << '\n';
-  return boost::lexical_cast<double>(prop[0]);
+  m_l2 = prop[0];
+  g_log.debug() << " L2 = " << m_l2 << '\n';
 }
 
 /*
