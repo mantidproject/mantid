@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GenerateEventsFilter.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -47,9 +48,9 @@ GenerateEventsFilter::GenerateEventsFilter()
 void GenerateEventsFilter::init() {
   // Input/Output Workspaces
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "An input event workspace");
+      "An input Matrix workspace.");
 
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -1858,6 +1859,8 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   int64_t extended_ns = static_cast<int64_t>(1.0E8);
   if (m_dataWS->run().hasProperty("proton_charge")) {
     // Get last proton charge time and compare with run end time
+    // this does nothing but make sure that run().endTime() is same as proton
+    // charge end time
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             m_dataWS->run().getProperty("proton_charge"));
@@ -1882,12 +1885,36 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
 
     g_log.debug() << "Check point 2A "
                   << " run end time = " << runendtime << "\n";
-  } else if (norunendset && m_dataWS->getNumberEvents() > 0) {
+  } else if (norunendset) {
     // No proton_charge or run_end: sort events and find the last event
     norunendset = false;
 
-    for (size_t i = 0; i < m_dataWS->getNumberHistograms(); ++i) {
-      const DataObjects::EventList &evlist = m_dataWS->getSpectrum(i);
+    runendtime = 0;
+
+    DataObjects::EventWorkspace_const_sptr eventWS =
+        boost::dynamic_pointer_cast<const EventWorkspace>(m_dataWS);
+    if (!eventWS) {
+      stringstream errss;
+      errss << "Input workspace " << m_dataWS->getName()
+            << " is not an Eventworkspace and does not have sample log "
+               "'proton_charge'."
+               "Therefore it fails to find run end time.";
+      g_log.error(errss.str());
+
+      throw std::runtime_error(errss.str());
+    } else if (eventWS->getNumberEvents() == 0) {
+      stringstream errss;
+      errss << "Input EventWorkspace " << m_dataWS->getName()
+            << " has zero event and does not have sample log 'proton_charge'.  "
+               "Therefore, unable to "
+               "determine run end time";
+
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
+    }
+
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
+      const DataObjects::EventList &evlist = eventWS->getSpectrum(i);
       if (evlist.getNumberEvents() > 0) {
         // If event list is empty, the returned value may not make any sense
         DateAndTime lastpulse = evlist.getPulseTimeMax();

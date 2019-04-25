@@ -36,6 +36,7 @@ def run_MuonGroupingCounts(parameter_dict):
     alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
     alg.execute()

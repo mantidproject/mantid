@@ -12,7 +12,6 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 
 namespace Mantid {

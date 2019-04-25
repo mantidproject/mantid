@@ -142,8 +142,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         nonnegativeInt = IntBoundedValidator(lower=0)
         wsIndexRange = IntBoundedValidator(lower=0, upper=255)
-        nonnegativeIntArray = IntArrayBoundedValidator()
-        nonnegativeIntArray.setLower(0)
+        nonnegativeIntArray = IntArrayBoundedValidator(lower=0)
         maxTwoNonnegativeInts = CompositeValidator()
         maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
         maxTwoNonnegativeInts.add(nonnegativeIntArray)

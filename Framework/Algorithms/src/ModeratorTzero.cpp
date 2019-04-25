@@ -19,8 +19,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -113,8 +111,7 @@ void ModeratorTzero::exec() {
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
-    Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
-    double Ei = boost::lexical_cast<double>(eiprop->value());
+    double Ei = inputWS->run().getPropertyValueAsType<double>("Ei");
     mu::Parser parser;
     parser.DefineVar("incidentEnergy", &Ei); // associate E1 to this parser
     parser.SetExpr(m_formula);
@@ -241,8 +238,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
-    Kernel::Property *eiprop = outputWS->run().getProperty("Ei");
-    double Ei = boost::lexical_cast<double>(eiprop->value());
+    double Ei = outputWS->run().getPropertyValueAsType<double>("Ei");
     mu::Parser parser;
     parser.DefineVar("incidentEnergy", &Ei); // associate E1 to this parser
     parser.SetExpr(m_formula);

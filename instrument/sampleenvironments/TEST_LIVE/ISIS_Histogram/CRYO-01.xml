@@ -1,11 +1,11 @@
 <!-- Definition of Cryostat 01-->
 <environmentspec>
   <materials>
-    <material id="van" formula="V"/>
+    <material id="van" formula="V" numberdensity="0.0721"/>
   </materials>
   <components>
     <containers>
-      <container id="8mm" material="van">
+      <container id="8mm" material="van" numberdensity="0.0721">
 	<geometry>
 	  <hollow-cylinder id="cyla">
 	    <centre-of-bottom-base x="0.0" y="-0.025" z="0.0"/>

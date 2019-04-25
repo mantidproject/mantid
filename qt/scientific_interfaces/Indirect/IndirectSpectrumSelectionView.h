@@ -9,10 +9,10 @@
 
 #include "ui_IndirectSpectrumSelector.h"
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <cstddef>
 

@@ -25,7 +25,7 @@ from mantid.py3compat import setswitchinterval
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
-# -----------------------------------------------------------------------------exception_handler.py
+# -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
 

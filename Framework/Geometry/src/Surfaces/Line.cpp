@@ -13,12 +13,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
+#include <boost/optional.hpp>
 
+namespace {
+Mantid::Kernel::Logger logger("Line");
+}
 namespace Mantid {
 namespace Geometry {
-namespace {
-Kernel::Logger logger("Line");
-}
 
 using Kernel::Tolerance;
 using Kernel::V3D;
@@ -125,35 +126,31 @@ cases exist.
   if (ix < 1)
     return 0;
 
-  int nCnt(0); // number of good points
-
-  Kernel::V3D Ans;
+  boost::optional<Kernel::V3D> Ans1;
   if (SQ.first.imag() == 0.0 && SQ.first.real() >= 0.0) // +ve roots only
   {
     const double lambda = SQ.first.real();
-    Kernel::V3D Ans = getPoint(lambda);
-    PntOut.push_back(Ans);
+    Ans1 = getPoint(lambda);
+    PntOut.emplace_back(*Ans1);
     if (ix < 2) // only one unique root.
       return 1;
-    nCnt = 1;
   }
   if (SQ.second.imag() == 0.0 && SQ.second.real() >= 0.0) // +ve roots only
   {
     const double lambda = SQ.second.real();
-    if (!nCnt) // first point wasn't good.
-    {
-      PntOut.push_back(getPoint(lambda));
+    const Kernel::V3D Ans2 = getPoint(lambda);
+    if (!Ans1) {
+      // first point wasn't good.
+      PntOut.emplace_back(Ans2);
+      return 1;
+    } else if (Ans1->distance(Ans2) < Tolerance) {
+      // If points too close return only 1 item.
       return 1;
     }
-    Kernel::V3D Ans2 = getPoint(lambda);
-    // If points too close return only 1 item.
-    if (Ans.distance(Ans2) < Tolerance)
-      return 1;
-
-    PntOut.push_back(Ans2);
+    PntOut.emplace_back(Ans2);
     return 2;
   }
-  return 0; // both point imaginary
+  return 0; // both points imaginary
 }
 
 int Line::intersect(std::list<Kernel::V3D> &VecOut, const Quadratic &Sur) const

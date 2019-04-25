@@ -400,10 +400,14 @@ detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
   return detail::ShapeInfo::GeometryShape::NOSHAPE;
 }
 
+const detail::ShapeInfo &MeshObject2D::shapeInfo() const {
+  throw std::runtime_error("MeshObject2D::shapeInfo() is not implemented");
+}
+
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
                                  std::vector<Kernel::V3D> &, double &, double &,
                                  double &) const {
-  throw std::runtime_error("Not implemented");
+  throw std::runtime_error("MeshObject2D::GetObjectGeom is not implemented");
 }
 
 void MeshObject2D::draw() const {

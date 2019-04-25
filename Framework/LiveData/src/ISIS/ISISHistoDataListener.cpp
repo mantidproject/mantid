@@ -31,7 +31,6 @@ GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 
 #include <algorithm>

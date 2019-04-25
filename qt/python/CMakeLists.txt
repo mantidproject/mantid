@@ -42,7 +42,9 @@ if(ENABLE_WORKBENCH)
                    mantidqt_resources
                    mantidqt_commonqt5
                    mantidqt_instrumentviewqt5
-                   mantidqt_iconsqt5)
+                   mantidqt_iconsqt5
+                   PythonInterface
+  )
 
   if(ENABLE_MANTIDPLOT)
     add_dependencies(mantidqt mantidqt_commonqt4)
@@ -58,7 +60,7 @@ if(ENABLE_WORKBENCH)
       COMMENT "Copying debug PyQt5 to bin/Debug")
   endif()
 
- 
+
   # Testing
 
   # ctest targets
