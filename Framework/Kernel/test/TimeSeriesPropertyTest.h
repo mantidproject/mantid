@@ -1349,28 +1349,22 @@ public:
    * Test cloneWithTimeShift
    */
   void test_cloneWithTimeShift() {
-    TimeSeriesProperty<int> *time_series =
-        new TimeSeriesProperty<int>("IntUnixTest");
+    auto time_series = std::make_unique<TimeSeriesProperty<int>>("IntUnixTest");
     time_series->addValue("2019-02-10T16:17:00", 1);
 
-    TimeSeriesProperty<int> *time_series_small_shift =
-        dynamic_cast<TimeSeriesProperty<int> *>(
-            time_series->cloneWithTimeShift(100.));
-    std::vector<DateAndTime> small_shift_times =
-        time_series_small_shift->timesAsVector();
+    auto time_series_small_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(100.));
+    const auto &small_shift_times = time_series_small_shift->timesAsVector();
     TS_ASSERT_EQUALS(small_shift_times[0], DateAndTime("2019-02-10T16:18:40"));
 
-    TimeSeriesProperty<int> *time_series_large_shift =
-        dynamic_cast<TimeSeriesProperty<int> *>(
-            time_series->cloneWithTimeShift(1234.));
-    std::vector<DateAndTime> large_shift_times =
-        time_series_large_shift->timesAsVector();
+    auto time_series_large_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(1234.));
+    const auto &large_shift_times = time_series_large_shift->timesAsVector();
     TS_ASSERT_EQUALS(large_shift_times[0], DateAndTime("2019-02-10T16:37:34"));
 
-    TimeSeriesProperty<int> *time_series_negative_shift =
-        dynamic_cast<TimeSeriesProperty<int> *>(
-            time_series->cloneWithTimeShift(-1234.));
-    std::vector<DateAndTime> negative_shift_times =
+    auto time_series_negative_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(-1234.));
+    const auto &negative_shift_times =
         time_series_negative_shift->timesAsVector();
     TS_ASSERT_EQUALS(negative_shift_times[0],
                      DateAndTime("2019-02-10T15:56:26"));
@@ -1380,7 +1374,6 @@ public:
     // seconds in DateAndTime::operator+= Typical usage of this method is with
     // shifts in the range tested here.
 
-    delete time_series;
     delete time_series_small_shift;
     delete time_series_large_shift;
     delete time_series_negative_shift;
