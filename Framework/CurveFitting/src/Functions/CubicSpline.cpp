@@ -12,6 +12,7 @@
 #include "MantidKernel/Logger.h"
 
 #include <algorithm>
+#include <ostream>
 #include <stdexcept>
 #include <vector>
 
