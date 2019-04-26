@@ -7,7 +7,7 @@
 #include "MantidQtIcons/CharIconPainter.h"
 #include "MantidQtIcons/Icon.h"
 #include <QVariant>
-#include <math.h>
+#include <cmath>
 
 namespace MantidQt {
 namespace Icons {
