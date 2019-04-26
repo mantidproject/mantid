@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource>
+    <file alias="mdi-charmap.json">materialdesignicons-webfont-charmap.json</file>
+    <file alias="mdi-font.ttf">materialdesignicons-webfont.ttf</file>
+  </qresource>
+</RCC>

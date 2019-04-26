@@ -38,11 +38,12 @@ if(ENABLE_WORKBENCH)
   add_subdirectory(mantidqt)
 
   # Setup dependency chain
-  add_dependencies ( mantidqt
-    mantidqt_resources
-    mantidqt_commonqt5
-    mantidqt_instrumentviewqt5
-    PythonInterface
+  add_dependencies(mantidqt
+                   mantidqt_resources
+                   mantidqt_commonqt5
+                   mantidqt_instrumentviewqt5
+                   mantidqt_iconsqt5
+                   PythonInterface
   )
 
   if(ENABLE_MANTIDPLOT)
@@ -125,7 +126,9 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
-    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py)
+    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
+    mantidqt/icons/test/test_icons.py
+  )
 
   # Tests
   set(PYUNITTEST_RUN_SERIAL ON)

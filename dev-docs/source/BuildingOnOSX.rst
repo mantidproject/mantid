@@ -376,7 +376,6 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
     sudo -H pip install mock==1.0.1
     sudo pip install sphinx_bootstrap_theme
     sudo pip install psutil
-    sudo pip install qtawesome
     sudo pip install "matplotlib>=2.1.2"
     sudo pip install requests==2.9.1 
 
