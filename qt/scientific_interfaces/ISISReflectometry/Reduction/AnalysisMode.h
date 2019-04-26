@@ -18,7 +18,7 @@ inline AnalysisMode analysisModeFromString(std::string const &analysisMode) {
   else if (analysisMode == "MultiDetectorAnalysis")
     return AnalysisMode::MultiDetector;
   else
-    throw std::runtime_error("Unexpected analysis mode.");
+    throw std::invalid_argument("Unexpected analysis mode.");
 }
 
 inline std::string analysisModeToString(AnalysisMode analysisMode) {
@@ -28,7 +28,7 @@ inline std::string analysisModeToString(AnalysisMode analysisMode) {
   case AnalysisMode::MultiDetector:
     return "MultiDetectorAnalysis";
   }
-  throw std::runtime_error("Unexpected analysis mode");
+  throw std::invalid_argument("Unexpected analysis mode");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

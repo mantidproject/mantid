@@ -28,7 +28,7 @@ detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
   case DetectorCorrectionType::RotateAroundSample:
     return "RotateAroundSample";
   }
-  throw std::runtime_error("Unexpected detector correction type");
+  throw std::invalid_argument("Unexpected detector correction type");
 }
 
 inline DetectorCorrectionType
@@ -37,7 +37,7 @@ detectorCorrectionTypeFromString(std::string const &correctionType) {
     return DetectorCorrectionType::VerticalShift;
   if (correctionType == "RotateAroundSample")
     return DetectorCorrectionType::RotateAroundSample;
-  throw std::runtime_error("Unexpected detector correction type");
+  throw std::invalid_argument("Unexpected detector correction type");
 }
 
 /** The DetectorCorrections model holds information about whether

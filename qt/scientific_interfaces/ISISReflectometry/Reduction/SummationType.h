@@ -24,7 +24,7 @@ inline SummationType summationTypeFromString(std::string const &summationType) {
   else if (summationType == "SumInQ")
     return SummationType::SumInQ;
   else
-    throw std::runtime_error("Unexpected summation type.");
+    throw std::invalid_argument("Unexpected summation type.");
 }
 
 inline std::string summationTypeToString(SummationType summationType) {
@@ -34,7 +34,7 @@ inline std::string summationTypeToString(SummationType summationType) {
   case SummationType::SumInQ:
     return "SumInQ";
   }
-  throw std::runtime_error("Unexpected summation type");
+  throw std::invalid_argument("Unexpected summation type");
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
