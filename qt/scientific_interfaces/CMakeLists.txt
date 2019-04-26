@@ -41,7 +41,6 @@ set ( TEST_FILES
   test/MuonAnalysisHelperTest.h
   test/MuonAnalysisResultTableCreatorTest.h
   test/RunMapTest.h
-  test/UserInputValidatorTest.h
   test/ISISReflectometry/Batch/BatchJobRunnerTest.h
   test/ISISReflectometry/Batch/BatchPresenterTest.h
   test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
