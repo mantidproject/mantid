@@ -8,16 +8,58 @@
 
 #include <QFile>
 #include <QFontDatabase>
+#include <boost/algorithm/string.hpp>
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValueIterator>
+#else
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <boost/algorithm/string.hpp>
+#endif
 
 namespace {
 MantidQt::Icons::IconicFont &iconFontInstance() {
   static MantidQt::Icons::IconicFont iconicFont;
   return iconicFont;
 }
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+// In Qt4 there is no access to QJsonDocument and a method for reading JSON in
+// the QT standard library so the Qt4 method must be used.
 
+// This code for decode and decodeInner was inspired and
+// taken from:
+// https://stackoverflow.com/questions/4169988/easiest-way-to-parse-json-in-qt-4-7
+// specifically in the answer by user2243820 on April 4th 2013 at 8:10
+
+QHash<QString, QVariant> decodeInner(QScriptValue object) {
+  QHash<QString, QVariant> map;
+  QScriptValueIterator it(object);
+  while (it.hasNext()) {
+    it.next();
+    if (it.value().isString())
+      map.insert(it.name(), QVariant(it.value().toString()));
+    else
+      throw std::runtime_error(
+          "Decoding JSON file not successful as some values are not strings.");
+  }
+  return map;
+}
+
+QHash<QString, QVariant> decode(const QString &jsonStr) {
+  QScriptValue object;
+  QScriptEngine engine;
+  object = engine.evaluate("(" + jsonStr + ")");
+  return decodeInner(object);
+}
+
+QHash<QString, QVariant> loadJsonFile(const QString &charmapFileName) {
+  QFile jsonFile(charmapFileName);
+  jsonFile.open(QFile::ReadOnly);
+  return decode(jsonFile.readAll());
+}
+
+#else
 QHash<QString, QVariant> loadJsonFile(const QString &charmapFileName) {
   QFile jsonFile(charmapFileName);
   jsonFile.open(QFile::ReadOnly);
@@ -26,7 +68,7 @@ QHash<QString, QVariant> loadJsonFile(const QString &charmapFileName) {
   // VariantHash = QHash<QString, QVariant> in this case QVaraint = QString
   return jsonObject.toVariantHash();
 }
-
+#endif
 } // namespace
 
 QIcon MantidQt::Icons::getIcon(const QString &iconName, const QString &color,
