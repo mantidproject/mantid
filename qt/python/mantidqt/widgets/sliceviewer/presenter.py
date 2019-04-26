@@ -13,10 +13,10 @@ from .view import SliceViewerView
 
 
 class SliceViewer(object):
-    def __init__(self, ws, parent=None):
-        self.model = SliceViewerModel(ws)
-
-        self.view = SliceViewerView(self, self.model.get_dimensions_info(), parent)
+    def __init__(self, ws, parent=None, model=None, view=None):
+        # Create model and view, or accept mocked versions
+        self.model = model if model else SliceViewerModel(ws)
+        self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(), parent)
 
         self.new_plot()
 
