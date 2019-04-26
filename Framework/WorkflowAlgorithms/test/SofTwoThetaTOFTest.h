@@ -47,7 +47,7 @@ public:
     inputWS->getAxis(0)->setUnit("TOF");
     inputWS->mutableRun().addProperty("wavelength", 1.0);
     auto &paramMap = inputWS->instrumentParameters();
-    paramMap.addString(inputWS->getInstrument().get(), "l2", 5.);
+    paramMap.addDouble(inputWS->getInstrument().get(), "l2", 5.);
     WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
