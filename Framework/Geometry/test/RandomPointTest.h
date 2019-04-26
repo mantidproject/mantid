@@ -284,7 +284,7 @@ public:
     constexpr double polarAngle{0.4};
     constexpr V3D alongAxis{0., 0., 1.};
     constexpr V3D basis{1., 1., 1.}; // X and Z elements are not 0 here
-    
+
     Mantid::Kernel::V3D basis2;
     if (basis.X() == 0) {
       Mantid::Kernel::V3D x{1., 0., 0.};
