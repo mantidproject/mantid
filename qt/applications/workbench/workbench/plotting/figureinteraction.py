@@ -14,17 +14,16 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 from collections import OrderedDict
 from functools import partial
-
-# third party imports
-from mantid.py3compat import iteritems
-from mantidqt.plotting.figuretype import FigureType, figure_type
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu
 
+# third party imports
+from mantid.py3compat import iteritems
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from workbench.plotting.toolbar import ToolbarStateManager
 # local imports
 from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
 AXES_SCALE_MENU_OPTS = OrderedDict([
@@ -40,6 +39,8 @@ class FigureInteraction(object):
     Defines the behaviour of interaction events on a figure canvas. Note that
     this currently only works with Qt canvas types.
     """
+
+    MPL_NOLEGEND = "_nolegend_"
 
     def __init__(self, fig_manager):
         """
@@ -59,6 +60,8 @@ class FigureInteraction(object):
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
+
+        # self.MPL_NOLEGEND = self.canvas.figure.axes[0].MPL_NOLEGEND
 
     @property
     def nevents(self):
@@ -128,42 +131,120 @@ class FigureInteraction(object):
         self._add_error_bars_menu(menu)
         menu.exec_(QCursor.pos())
 
-    def _toggle_all_error_bars(self, containers):
+    def _toggle_all_error_bars(self):
+        containers = self.canvas.figure.axes[0].containers
+
+        # iterate over all error containers to
+        # toggle error bar on lines that have errors already
         for container in containers:
-            self._toggle_error_bar_for(container)
+            # extract the line reference from the container
+            line = container[0]
 
-    def _toggle_error_bar_for(self, container, force_state=None):
-        # TODO force_state unused?
-        error_line = container.lines[2][0]
-        # can't check with just if force_state
-        # because it will fail when false
-        # if force_state is None:
-        error_line.set_visible(not error_line.get_visible())
-        # else:
-        #     error_line.set_visible(force_state)
+            if line.get_label() == self.MPL_NOLEGEND:
+                self._toggle_error_bar_for(self._find_errorbar_container(line))
 
-        self.canvas.figure.axes[0].legend()
+        lines = self.canvas.figure.axes[0].lines
+        # Iterate over all lines to add new error bars.
+        # Each added errorbar changes the lines list, making the iteration not just 1..n.
+        # The line is always removed from pos `index`,
+        # and errors are added at the end of the list, the next element is moved 1 position up.
+        # Therefore the index should only be increased
+        # if the line it is looking for already has errors plotted
+        index = 0
+        while index < len(lines):
+            line = lines[index]
+            # line doesn't have errors, add them
+            # this will remove the line from the current index,
+            # and move the next one to the current index
+            if line.get_label() != self.MPL_NOLEGEND:
+                self._add_errorbar_for(index)
+            else:
+                # the line has errors, move forwards in the iteration
+                index += 1
+
+    def _update_plot_after(self, func, *args, **kwargs):
+        """
+        Updates the legend and the plot after the function has been executed.
+        Used to funnel through the updates through a common place
+
+        :param func:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        func(*args, **kwargs)
+        self.canvas.figure.axes[0].legend().draggable()
         self.canvas.draw()
 
-    def _add_error_bars_menu(self, menu):
+    def _add_errorbar_for(self, index):
+        # more magic here
+        # TODO extract into class
+        from mantid.simpleapi import mtd
+        ws = mtd[self.canvas.figure.axes[0].creation_args[index]["workspaces"]]
+        specNum = self.canvas.figure.axes[0].creation_args[index]["specNum"]
+        # just plots the spectrum with errors on the same plot
+        errorbar_container = self.canvas.figure.axes[0].errorbar(ws, specNum=specNum)
+
+        lines = self.canvas.figure.axes[0].lines
+        # change the color of the data line
+        errorbar_container[0].set_color(lines[index].get_color())
+        # change the color of the error line
+        errorbar_container[2][0].set_color(lines[index].get_color())
+
+        # The swaps are done do pretend the line was replaced 'inplace'
+        # this keeps the legend order the same.
+
+        # swap in .lines, remove the old line reference
+        lines[index], lines[-1] = lines[-1], lines[index]
+        # delete the reference to the old line
+        del lines[-1]
+
+        # swap in .creation_args, remove the old args reference
+        cargs = self.canvas.figure.axes[0].creation_args
+        cargs[index], cargs[-1] = cargs[-1], cargs[index]
+        # delete the reference to the old creation args
+        del cargs[-1]
+
+    def _toggle_error_bar_for(self, errorbar_container):
+        # the container has the errors there
+        error_line = errorbar_container.lines[2][0]
+        error_line.set_visible(not error_line.get_visible())
+
+    def _find_errorbar_container(self, line):
         containers = self.canvas.figure.axes[0].containers
+
+        for container in containers:
+            if line == container[0]:
+                return container
+
+    def _add_error_bars_menu(self, menu):
+        lines = self.canvas.figure.axes[0].lines
 
         # if there's more than one line plotted, then
         # add a sub menu, containing an action to hide the
         # error bar for each line
-        if len(containers) > 1:
+        if len(lines) > 1:
             # add into the correct menu,
             # if there is a single line, then
             # add the action to the main menu
             error_bars_menu = QMenu("Error Bars", menu)
             menu.addMenu(error_bars_menu)
-            # this contains the error bar data
-            for line_container in containers:
-                error_bars_menu.addAction(line_container.get_label(),
-                                          partial(self._toggle_error_bar_for, line_container))
+
+            for index, line in enumerate(lines):
+                if line.get_label() == self.MPL_NOLEGEND:
+                    # this line has an errorbar, which contains the label in the legend
+                    error_line = self._find_errorbar_container(line)
+                    label = error_line.get_label()
+                    # simply toggles the visibility of the error line
+                    error_bars_menu.addAction(label,
+                                              partial(self._update_plot_after, self._toggle_error_bar_for, error_line))
+                else:
+                    # this line has no errorbar, so the label is contained here
+                    label = line.get_label()
+                    error_bars_menu.addAction(label, partial(self._update_plot_after, self._add_errorbar_for, index))
 
         # always add the toggle all error bars option
-        menu.addAction("Toggle error bars", partial(self._toggle_all_error_bars, containers))
+        menu.addAction("Toggle error bars", partial(self._update_plot_after, self._toggle_all_error_bars))
 
     def _add_axes_scale_menu(self, menu):
         """Add the Axes scale options menu to the given menu"""
