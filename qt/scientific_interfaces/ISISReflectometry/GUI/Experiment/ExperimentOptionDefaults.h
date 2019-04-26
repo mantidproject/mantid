@@ -14,8 +14,16 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-Experiment
-experimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
+
+class IExperimentOptionDefaults {
+public:
+  virtual Experiment operator()(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
+};
+
+class ExperimentOptionDefaults : public IExperimentOptionDefaults {
+public:
+  Experiment operator()(Mantid::Geometry::Instrument_const_sptr instrument) override;
+};
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H

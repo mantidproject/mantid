@@ -20,10 +20,9 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 std::string stringValueOrEmpty(boost::optional<double> value) {
   return value ? std::to_string(*value) : "";
 }
-}
 
 Experiment
-experimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(instrument);
 
   auto analysisMode = analysisModeFromString(defaults.getStringOrDefault(
@@ -92,6 +91,12 @@ experimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
       std::move(polarizationCorrections), std::move(floodCorrections),
       std::move(transmissionRunRange), std::move(stitchParameters),
       std::move(perThetaValidationResult.assertValid()));
+}
+} // unnamed namespace
+
+Experiment ExperimentOptionDefaults::operator()(
+      Mantid::Geometry::Instrument_const_sptr instrument) {
+  return getExperimentDefaults(instrument);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

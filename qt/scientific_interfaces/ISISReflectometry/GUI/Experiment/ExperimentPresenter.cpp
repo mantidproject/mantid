@@ -113,6 +113,7 @@ void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
 }
 
 void ExperimentPresenter::restoreDefaults() {
+  ExperimentOptionDefaults experimentDefaults;
   m_model = experimentDefaults(m_mainPresenter->instrument());
   updateViewFromModel();
 }
