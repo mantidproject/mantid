@@ -4,7 +4,7 @@
 <component-link name="REFL" >
 
   <parameter name="Debug">
-      <value val="badDebugOption"/>
+      <value val="99"/>
   </parameter>
 
 </component-link>

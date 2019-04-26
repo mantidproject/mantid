@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
-#include "ExperimentOptionDefaults.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "PerThetaDefaultsTableValidator.h"
@@ -15,11 +14,11 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
-                                         Experiment experiment,
-                                         double defaultsThetaTolerance)
-    : m_view(view), m_model(std::move(experiment)),
-      m_thetaTolerance(defaultsThetaTolerance) {
+ExperimentPresenter::ExperimentPresenter(
+    IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+    std::unique_ptr<IExperimentOptionDefaults> experimentDefaults)
+    : m_experimentDefaults(std::move(experimentDefaults)), m_view(view),
+      m_model(std::move(experiment)), m_thetaTolerance(defaultsThetaTolerance) {
   m_view->subscribe(this);
 }
 
@@ -113,8 +112,7 @@ void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
 }
 
 void ExperimentPresenter::restoreDefaults() {
-  ExperimentOptionDefaults experimentDefaults;
-  m_model = experimentDefaults(m_mainPresenter->instrument());
+  m_model = m_experimentDefaults->get(m_mainPresenter->instrument());
   updateViewFromModel();
 }
 

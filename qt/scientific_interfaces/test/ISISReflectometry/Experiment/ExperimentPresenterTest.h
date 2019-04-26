@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MockExperimentView.h"
+#include "MockExperimentOptionDefaults.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -434,24 +435,26 @@ public:
   }
 
   void testRestoreDefaultsNotifiesMainPresenter() {
-    auto presenter = makePresenter();
-    expectInstrumentWithDefaultParameters();
+    auto defaultOptions = expectDefaults(makeModel());
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
   void testRestoreDefaultsUpdatesAnalysisModeInView() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Analysis");
+    auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setAnalysisMode("MultiDetectorAnalysis")).Times(1);
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
   void testRestoreDefaultsUpdatesAnalysisModeInModel() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Analysis");
+    auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
                      AnalysisMode::MultiDetector);
@@ -459,8 +462,10 @@ public:
   }
 
   void testRestoreDefaultsUpdatesReductionOptionsInView() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Reduction");
+    auto model = makeModelWithReduction(SummationType::SumInQ,
+                                        ReductionType::NonFlatSample, true);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setSummationType("SumInQ")).Times(1);
     EXPECT_CALL(m_view, setReductionType("NonFlatSample")).Times(1);
     EXPECT_CALL(m_view, setIncludePartialBins(true)).Times(1);
@@ -469,8 +474,10 @@ public:
   }
 
   void testRestoreDefaultsUpdatesReductionOptionsInModel() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Reduction");
+    auto model = makeModelWithReduction(SummationType::SumInQ,
+                                        ReductionType::NonFlatSample, true);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(presenter.experiment().summationType(),
                      SummationType::SumInQ);
@@ -481,24 +488,30 @@ public:
   }
 
   void testRestoreDefaultsUpdatesDebugOptionsInView() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Debug");
+    auto model = makeModelWithDebug(true);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setDebugOption(true)).Times(1);
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
   void testRestoreDefaultsUpdatesDebugOptionsInModel() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Debug");
+    auto model = makeModelWithDebug(true);
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(presenter.experiment().debug(), true);
     verifyAndClear();
   }
 
   void testRestoreDefaultsUpdatesPerThetaInView() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("PerTheta");
+    auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(),
+                                             RangeInQ(0.01, 0.03, 0.2),
+                                             0.7, std::string("390-415"));
+    auto model = makeModelWithPerThetaDefaults(std::move(perThetaDefaults));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     auto const expected = std::vector<std::array<std::string, 8>>{
         {"", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
          "390-415"}};
@@ -508,8 +521,12 @@ public:
   }
 
   void testRestoreDefaultsUpdatesPerThetaInModel() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("PerTheta");
+    auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(boost::none,
+                                                                TransmissionRunPair(),
+                                                                RangeInQ(0.01, 0.03, 0.2),
+                                                                0.7, std::string("390-415")));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      RangeInQ(0.01, 0.03, 0.2), 0.7,
@@ -521,8 +538,9 @@ public:
   }
 
   void testRestoreDefaultsUpdatesTransmissionRunRangeInView() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("TransmissionRunRange");
+    auto model = makeModelWithTransmissionRunRange(RangeInLambda{10.0, 12.0});
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setTransmissionStartOverlap(10.0)).Times(1);
     EXPECT_CALL(m_view, setTransmissionEndOverlap(12.0)).Times(1);
     EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
@@ -531,8 +549,9 @@ public:
   }
 
   void testRestoreDefaultsUpdatesTransmissionRunRangeInModel() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("TransmissionRunRange");
+    auto model = makeModelWithTransmissionRunRange(RangeInLambda{10.0, 12.0});
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     auto const expected = RangeInLambda{10.0, 12.0};
     TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), expected);
@@ -540,8 +559,11 @@ public:
   }
 
   void testRestoreDefaultsUpdatesCorrectionInView() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Correction");
+    auto model = makeModelWithCorrections(
+        PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
+        FloodCorrections(FloodCorrectionType::ParameterFile));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setPolarizationCorrectionType("ParameterFile"))
         .Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
@@ -550,8 +572,10 @@ public:
   }
 
   void testRestoreDefaultsUpdatesCorrectionInModel() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Correction");
+    auto model = makeModelWithCorrections(PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
+                                          FloodCorrections(FloodCorrectionType::ParameterFile));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(
         presenter.experiment().polarizationCorrections().correctionType(),
@@ -564,33 +588,100 @@ public:
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
+  NiceMock<MockExperimentOptionDefaults> m_defaultOptions;
   double m_thetaTolerance{0.01};
 
+  PolarizationCorrections makePolarizationCorrections() {
+    return PolarizationCorrections(PolarizationCorrectionType::None);
+  }
+  
+  FloodCorrections makeFloodCorrections() {
+    return FloodCorrections(FloodCorrectionType::Workspace);
+  }
+
+  RangeInLambda makeTransmissionRunRange() {
+    return RangeInLambda{0, 0};
+  }
+
+  std::map<std::string, std::string> makeStitchParameters() {
+    return std::map<std::string, std::string>();
+  }
+
+  std::vector<PerThetaDefaults> makePerThetaDefaults() {
+    auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(),
+                                             RangeInQ(boost::none, boost::none, boost::none),
+                                             boost::none, boost::none);
+    return std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
+  }
+
   Experiment makeModel() {
-    auto polarizationCorrections =
-        PolarizationCorrections(PolarizationCorrectionType::None);
-    auto floodCorrections = FloodCorrections(FloodCorrectionType::Workspace);
-    auto transmissionRunRange = RangeInLambda{0, 0};
-    auto stitchParameters = std::map<std::string, std::string>();
-    auto perThetaDefaults =
-        PerThetaDefaults(boost::none, TransmissionRunPair(),
-                         RangeInQ(boost::none, boost::none, boost::none),
-                         boost::none, boost::none);
-    auto perThetaDefaultsList =
-        std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                      SummationType::SumInLambda, false, false,
+                      makePolarizationCorrections(),
+                      makeFloodCorrections(), makeTransmissionRunRange(),
+                      makeStitchParameters(), makePerThetaDefaults());
+  }
+
+  Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
+    return Experiment(analysisMode, ReductionType::Normal,
+                      SummationType::SumInLambda, false, false,
+                      makePolarizationCorrections(),
+                      makeFloodCorrections(), makeTransmissionRunRange(),
+                      makeStitchParameters(), makePerThetaDefaults());
+  }
+
+  Experiment makeModelWithReduction(SummationType summationType,
+                                    ReductionType reductionType,
+                                    bool includePartialBins) {
+    return Experiment(AnalysisMode::PointDetector, reductionType,
+                      summationType, includePartialBins, false,
+                      makePolarizationCorrections(),
+                      makeFloodCorrections(), makeTransmissionRunRange(),
+                      makeStitchParameters(), makePerThetaDefaults());
+  }
+
+  Experiment makeModelWithDebug(bool debug) {
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                      SummationType::SumInLambda, false, debug,
+                      makePolarizationCorrections(),
+                      makeFloodCorrections(), makeTransmissionRunRange(),
+                      makeStitchParameters(), makePerThetaDefaults());
+  }
+
+  Experiment makeModelWithPerThetaDefaults(PerThetaDefaults perThetaDefaults) {
+    auto perThetaList = std::vector<PerThetaDefaults>();
+    perThetaList.emplace_back(std::move(perThetaDefaults));
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                      SummationType::SumInLambda, false, false,
+                      makePolarizationCorrections(),
+                      makeFloodCorrections(), makeTransmissionRunRange(),
+                      makeStitchParameters(), std::move(perThetaList));
+  }
+
+  Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                      SummationType::SumInLambda, false, false,
+                      makePolarizationCorrections(),
+                      makeFloodCorrections(), std::move(range),
+                      makeStitchParameters(), makePerThetaDefaults());
+  }
+
+  Experiment makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
+                                      FloodCorrections floodCorrections) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),
-                      std::move(floodCorrections), transmissionRunRange,
-                      std::move(stitchParameters),
-                      std::move(perThetaDefaultsList));
+                      std::move(floodCorrections), makeTransmissionRunRange(),
+                      makeStitchParameters(), makePerThetaDefaults());
   }
 
-  ExperimentPresenter makePresenter() {
+  ExperimentPresenter
+  makePresenter(std::unique_ptr<IExperimentOptionDefaults> defaultOptions =
+                    std::make_unique<MockExperimentOptionDefaults>()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter =
-        ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance);
+    auto presenter = ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance,
+                                         std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -626,6 +717,15 @@ private:
         .WillOnce(Return(std::string("SumInQ")));
     EXPECT_CALL(m_view, getReductionType())
         .WillOnce(Return(std::string("DivergentBeam")));
+  }
+
+  std::unique_ptr<IExperimentOptionDefaults>
+  expectDefaults(Experiment const &model) {
+    // Create a defaults object, set expectations on it, and return it so
+    // that it can be passed to the presenter
+    auto defaultOptions = std::make_unique<MockExperimentOptionDefaults>();
+    EXPECT_CALL(*defaultOptions, get(_)).Times(1).WillOnce(Return(model));
+    return defaultOptions;
   }
 
   void runWithPolarizationCorrectionInputsDisabled(std::string const &type) {
@@ -745,29 +845,6 @@ private:
   }
   OptionsRow optionsRowWithProcessingInstructionsInvalid() {
     return {"", "", "", "", "", "", "", "bad"};
-  }
-
-  // Get a dummy reflectometry instrument with the given parameters file type.
-  // paramsType is appended to "REFL_Parameters_" to form the name for the file
-  // to load. See ReflectometryHelper.h for details.
-  Mantid::Geometry::Instrument_const_sptr
-  getInstrumentWithParameters(std::string const &paramsType) {
-    auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
-    return workspace->getInstrument();
-  }
-
-  void expectInstrumentWithDefaultParameters() {
-    // Use the default REFL_Parameters.xml file, which is empty
-    expectInstrumentWithParameters("");
-  }
-
-  void expectInstrumentWithParameters(std::string const &paramsType) {
-    // Use the REFL_Parameters_<paramsType> file
-    auto instrument = getInstrumentWithParameters(paramsType);
-    EXPECT_CALL(m_mainPresenter, instrument())
-        .Times(1)
-        .WillOnce(Return(instrument));
   }
 
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {

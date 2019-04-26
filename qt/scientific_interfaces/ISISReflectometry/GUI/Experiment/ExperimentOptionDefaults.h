@@ -7,22 +7,22 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #include "Common/DllConfig.h"
-#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/Experiment.h"
-#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IExperimentOptionDefaults {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentOptionDefaults {
 public:
-  virtual Experiment operator()(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
+  virtual ~IExperimentOptionDefaults() = default;
+  virtual Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 
-class ExperimentOptionDefaults : public IExperimentOptionDefaults {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults
+    : public IExperimentOptionDefaults {
 public:
-  Experiment operator()(Mantid::Geometry::Instrument_const_sptr instrument) override;
+  Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) override;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -94,7 +94,7 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
 }
 } // unnamed namespace
 
-Experiment ExperimentOptionDefaults::operator()(
+Experiment ExperimentOptionDefaults::get(
       Mantid::Geometry::Instrument_const_sptr instrument) {
   return getExperimentDefaults(instrument);
 }

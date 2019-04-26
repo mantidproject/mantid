@@ -9,6 +9,7 @@
 
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
+#include "ExperimentOptionDefaults.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
 #include "PerThetaDefaultsTableValidationError.h"
@@ -45,8 +46,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
     : public ExperimentViewSubscriber,
       public IExperimentPresenter {
 public:
-  ExperimentPresenter(IExperimentView *view, Experiment experiment,
-                      double defaultsThetaTolerance);
+  ExperimentPresenter(
+      IExperimentView *view, Experiment experiment,
+      double defaultsThetaTolerance,
+      std::unique_ptr<IExperimentOptionDefaults> experimentDefaults =
+          std::make_unique<ExperimentOptionDefaults>());
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   Experiment const &experiment() const override;
@@ -63,6 +67,9 @@ public:
   void autoreductionPaused() override;
   void autoreductionResumed() override;
   void instrumentChanged(std::string const &instrumentName) override;
+
+protected:
+  std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
 
 private:
   IBatchPresenter *m_mainPresenter;

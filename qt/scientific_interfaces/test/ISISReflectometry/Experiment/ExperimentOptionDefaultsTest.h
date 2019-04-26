@@ -24,10 +24,6 @@ using testing::NiceMock;
 using testing::Return;
 using testing::_;
 
-// The missing braces warning is a false positive -
-// https://llvm.org/bugs/show_bug.cgi?id=21629
-GNU_DIAG_OFF("missing-braces")
-
 class ExperimentOptionDefaultsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -37,138 +33,100 @@ public:
   }
   static void destroySuite(ExperimentOptionDefaultsTest *suite) { delete suite; }
 
-  ExperimentOptionDefaultsTest() : m_view() {
+  ExperimentOptionDefaultsTest() {
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void testValidAnalysisMode() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Analysis");
-    presenter.notifyRestoreDefaultsRequested();
-    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
+  void testValidAnalysisMode() { 
+    auto result = getDefaults("Analysis");
+    TS_ASSERT_EQUALS(result.analysisMode(),
                      AnalysisMode::MultiDetector);
-    verifyAndClear();
   }
 
   void testInvalidAnalysisMode() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Analysis_Invalid");
-    TS_ASSERT_THROWS(presenter.notifyRestoreDefaultsRequested(), std::invalid_argument);
+    getDefaultsThrows("Analysis_Invalid");
   }
 
   void testValidReductionOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Reduction");
-    presenter.notifyRestoreDefaultsRequested();
-    TS_ASSERT_EQUALS(presenter.experiment().summationType(),
+    auto result = getDefaults("Reduction");
+    TS_ASSERT_EQUALS(result.summationType(),
                      SummationType::SumInQ);
-    TS_ASSERT_EQUALS(presenter.experiment().reductionType(),
+    TS_ASSERT_EQUALS(result.reductionType(),
                      ReductionType::NonFlatSample);
-    TS_ASSERT_EQUALS(presenter.experiment().includePartialBins(), true);
-    verifyAndClear();
+    TS_ASSERT_EQUALS(result.includePartialBins(), true);
   }
 
   void testInvalidReductionOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Reduction_Invalid");
-    TS_ASSERT_THROWS(presenter.notifyRestoreDefaultsRequested(), std::invalid_argument);
+    getDefaultsThrows("Reduction_Invalid");
   }
 
   void testValidDebugOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Debug");
-    presenter.notifyRestoreDefaultsRequested();
-    TS_ASSERT_EQUALS(presenter.experiment().debug(), true);
-    verifyAndClear();
+    auto result = getDefaults("Debug");
+    TS_ASSERT_EQUALS(result.debug(), true);
   }
 
   void testInvalidDebugOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Debug_Invalid");
-    TS_ASSERT_THROWS(presenter.notifyRestoreDefaultsRequested(), std::invalid_argument);
+    getDefaultsThrows("Debug_Invalid");
   }
 
   void testValidPerThetaOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("PerTheta");
-    presenter.notifyRestoreDefaultsRequested();
+    auto result = getDefaults("PerTheta");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      RangeInQ(0.01, 0.03, 0.2), 0.7,
                                      std::string("390-415"));
-    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().size(), 1);
-    TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(),
+    TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
+    TS_ASSERT_EQUALS(result.perThetaDefaults().front(),
                      expected);
-    verifyAndClear();
   }
 
   void testInvalidPerThetaOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("PerTheta_Invalid");
-    TS_ASSERT_THROWS(presenter.notifyRestoreDefaultsRequested(), std::invalid_argument);
+    getDefaultsThrows("PerTheta_Invalid");
   }
 
   void testValidTransmissionRunRange() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("TransmissionRunRange");
-    presenter.notifyRestoreDefaultsRequested();
+    auto result = getDefaults("TransmissionRunRange");
     auto const expected = RangeInLambda{10.0, 12.0};
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), expected);
-    verifyAndClear();
+    TS_ASSERT_EQUALS(result.transmissionRunRange(), expected);
   }
 
   void testInvalidTransmissionRunRange() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("TransmissionRunRange_Invalid");
-    TS_ASSERT_THROWS(presenter.notifyRestoreDefaultsRequested(), std::invalid_argument);
+    getDefaultsThrows("TransmissionRunRange_Invalid");
   }
 
   void testValidCorrectionOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Correction");
-    presenter.notifyRestoreDefaultsRequested();
+    auto result = getDefaults("Correction");
     TS_ASSERT_EQUALS(
-        presenter.experiment().polarizationCorrections().correctionType(),
+        result.polarizationCorrections().correctionType(),
         PolarizationCorrectionType::ParameterFile);
-    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections().correctionType(),
+    TS_ASSERT_EQUALS(result.floodCorrections().correctionType(),
                      FloodCorrectionType::ParameterFile);
-    verifyAndClear();
   }
 
   void testInvalidCorrectionOptions() {
-    auto presenter = makePresenter();
-    expectInstrumentWithParameters("Correction_Invalid");
-    TS_ASSERT_THROWS(presenter.notifyRestoreDefaultsRequested(), std::invalid_argument);
+    getDefaultsThrows("Correction_Invalid");
   }
 
 private:
-  void verifyAndClear() {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
-  }
- 
-  // Get a dummy reflectometry instrument with the given parameters file type.
-  // paramsType is appended to "REFL_Parameters_" to form the name for the file
-  // to load. See ReflectometryHelper.h for details.
-  void Mantid::Geometry::Instrument_const_sptr
-  getInstrumentWithParameters(std::string const &paramsType) {
+
+  Experiment getDefaults(std::string const &paramsType) {
+    // Get a dummy reflectometry instrument with the given parameters file type.
+    // paramsType is appended to "REFL_Parameters_" to form the name for the file
+    // to load. See ReflectometryHelper.h for details.
     auto workspace = Mantid::TestHelpers::createREFL_WS(
         5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
-    return workspace->getInstrument();
+    auto instrument = workspace->getInstrument();
+    ExperimentOptionDefaults experimentDefaults;
+    return experimentDefaults.get(instrument);
   }
 
-  void expectInstrumentWithDefaultParameters() {
-    // Use the default REFL_Parameters.xml file, which is empty
-    expectInstrumentWithParameters("");
-  }
 
-  void expectInstrumentWithParameters(std::string const &paramsType) {
-    // Use the REFL_Parameters_<paramsType> file
-    auto instrument = getInstrumentWithParameters(paramsType);
-    EXPECT_CALL(m_mainPresenter, instrument())
-        .Times(1)
-        .WillOnce(Return(instrument));
+  void getDefaultsThrows(std::string const &paramsType) {
+    auto workspace = Mantid::TestHelpers::createREFL_WS(
+        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
+    auto instrument = workspace->getInstrument();
+    ExperimentOptionDefaults experimentDefaults;
+    TS_ASSERT_THROWS(experimentDefaults.get(instrument), std::invalid_argument);
   }
-
-GNU_DIAG_ON("missing-braces")
+};
 
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENTOPTIONDEFAULTSTEST_H_
