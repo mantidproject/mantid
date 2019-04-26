@@ -26,11 +26,20 @@ Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
                                  const Kernel::V3D &alongAxis,
                                  double polarAngle, double radialLength) {
   using boost::math::pow;
-  Mantid::Kernel::V3D basis2{1., 0., 0.};
-  if (basis.X() != 0. && basis.Z() != 0) {
-    const auto inverseXZSumSq = 1. / (pow<2>(basis.X()) + pow<2>(basis.Z()));
-    basis2.setX(std::sqrt(1. - pow<2>(basis.X()) * inverseXZSumSq));
-    basis2.setZ(basis.X() * std::sqrt(inverseXZSumSq));
+  // Use basis to get a second perpendicular vector to define basis2
+  Mantid::Kernel::V3D basis2;
+  if (basis.X() == 0) {
+    Mantid::Kernel::V3D x{1., 0., 0.};
+    basis2 = x;
+  } else if (basis.Y() == 0) {
+    Mantid::Kernel::V3D y{0., 1., 0.};
+    basis2 = y;
+  } else if (basis.Z() == 0) {
+    Mantid::Kernel::V3D z{0., 0., 1.};
+    basis2 = z;
+  } else {
+    Mantid::Kernel::V3D v{-basis.Y(), basis.X(), 0.};
+    basis2 = Mantid::Kernel::normalize(v);
   }
   const Kernel::V3D basis3{basis.cross_prod(basis2)};
   const Kernel::V3D localPoint{
@@ -100,8 +109,8 @@ Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo,
   const double c2 = geometry.radius * geometry.radius;
   const double r{std::sqrt(c1 + (c2 - c1) * r2)};
   const double z{geometry.height * r3};
+  const Kernel::V3D basis1{geometry.axis};
   const Kernel::V3D alongAxis{geometry.axis * z};
-  const Kernel::V3D &basis1{geometry.axis};
   auto localPoint = localPointInCylinder(basis1, alongAxis, polar, r);
   return localPoint + geometry.centreOfBottomBase;
 }
