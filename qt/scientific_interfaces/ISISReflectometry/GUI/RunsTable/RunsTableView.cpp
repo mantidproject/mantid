@@ -9,12 +9,9 @@
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtIcons/Icons.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
-
-#if !QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/Icons.h"
-#endif
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -146,117 +143,69 @@ void RunsTableView::setProcessButtonEnabled(bool enable) {
  */
 QAction *RunsTableView::addToolbarItem(Action action, std::string const &icon,
                                        std::string const &description) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_actions[action] = m_ui.toolBar->addAction(
-      QIcon(QString::fromStdString(icon)), QString::fromStdString(description));
-  return m_actions[action];
-#else
-  // Need for this if statement should be temporary for testing
   QIcon qIcon;
   if (icon == "") {
     qIcon = QIcon(QString::fromStdString(""));
   } else {
-    qIcon = MantidQt::Widgets::Common::getIcon(icon);
+    qIcon = MantidQt::Icons::getIcon(icon);
   }
 
   m_actions[action] =
       m_ui.toolBar->addAction(qIcon, QString::fromStdString(description));
   return m_actions[action];
-#endif
 }
 
 void RunsTableView::addToolbarActions() {
-  std::map<Action, std::string> iconMap;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  // MantidPlot Icons
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Process, "://stat_rows.png"));
-  iconMap.insert(std::pair<Action, std::string>(Action::Pause, "://pause.png"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Expand, "://expand_all.png"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Collapse, "://collapse_all.png"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::PlotSelected, "://graph.png"));
-  iconMap.insert(std::pair<Action, std::string>(
-      Action::PlotSelectedStitchedOutput, "://trajectory.png"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::InsertRow, "://insert_row.png"));
-  iconMap.insert(std::pair<Action, std::string>(Action::InsertGroup,
-                                                "://insert_group.png"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::DeleteRow, "://delete_row.png"));
-  iconMap.insert(std::pair<Action, std::string>(Action::DeleteGroup,
-                                                "://delete_group.png"));
-  iconMap.insert(std::pair<Action, std::string>(Action::Copy, "://copy.png"));
-  iconMap.insert(std::pair<Action, std::string>(Action::Paste, "://paste.png"));
-  iconMap.insert(std::pair<Action, std::string>(Action::Cut, "://cut.png"));
-#else
-  // Workbench Icons
-  iconMap.insert(std::pair<Action, std::string>(Action::Process, "fa.play"));
-  iconMap.insert(std::pair<Action, std::string>(Action::Pause, "fa.pause"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Expand, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Collapse, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::PlotSelected, "fa.fighter-jet"));
-  iconMap.insert(std::pair<Action, std::string>(
-      Action::PlotSelectedStitchedOutput, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::InsertRow, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::InsertGroup, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::DeleteRow, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::DeleteGroup, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Copy, "fa.fighter-jet"));
-  iconMap.insert(
-      std::pair<Action, std::string>(Action::Paste, "fa.fighter-jet"));
-  iconMap.insert(std::pair<Action, std::string>(Action::Cut, "fa.fighter-jet"));
-#endif
-  connect(addToolbarItem(Action::Process, iconMap[Action::Process],
-                         "Process selected runs"),
+  connect(addToolbarItem(Action::Process, "mdi.sigma", "Process selected runs"),
           SIGNAL(triggered(bool)), this, SLOT(onProcessPressed(bool)));
-  connect(addToolbarItem(Action::Pause, iconMap[Action::Pause],
-                         "Pause processing of runs"),
-          SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
-  connect(addToolbarItem(Action::Expand, iconMap[Action::Expand],
-                         "Expand all groups"),
+
+  connect(
+      addToolbarItem(Action::Pause, "mdi.pause", "Pause processing of runs"),
+      SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
+
+  connect(addToolbarItem(Action::Expand, "mdi.expand-all", "Expand all groups"),
           SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
-  connect(addToolbarItem(Action::Collapse, iconMap[Action::Collapse],
+
+  connect(addToolbarItem(Action::Collapse, "mdi.collapse-all",
                          "Collapse all groups"),
           SIGNAL(triggered(bool)), this,
           SLOT(onCollapseAllGroupsPressed(bool)));
-  connect(addToolbarItem(Action::PlotSelected, iconMap[Action::PlotSelected],
+
+  connect(addToolbarItem(Action::PlotSelected, "mdi.chart-line",
                          "Plot selected rows as graphs"),
           SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed(bool)));
+
   connect(addToolbarItem(Action::PlotSelectedStitchedOutput,
-                         iconMap[Action::PlotSelectedStitchedOutput],
+                         "mdi.chart-areaspline",
                          "Plot selected rows with stitched outputs as graphs"),
           SIGNAL(triggered(bool)), this,
           SLOT(onPlotSelectedStitchedOutputPressed(bool)));
-  connect(addToolbarItem(Action::InsertRow, iconMap[Action::InsertRow],
+
+  connect(addToolbarItem(Action::InsertRow, "mdi.calendar-plus",
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
-  connect(addToolbarItem(Action::InsertGroup, iconMap[Action::InsertGroup],
-                         "Insert group after first selected"),
-          SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
-  connect(addToolbarItem(Action::DeleteRow, iconMap[Action::DeleteRow],
+
+  connect(addToolbarItem(Action::DeleteRow, "mdi.calendar-minus",
                          "Delete all selected rows"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteRowPressed(bool)));
-  connect(addToolbarItem(Action::DeleteGroup, iconMap[Action::DeleteGroup],
+
+  connect(addToolbarItem(Action::InsertGroup, "mdi.group",
+                         "Insert group after first selected"),
+          SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
+
+  connect(addToolbarItem(Action::DeleteGroup, "mdi.ungroup",
                          "Delete all selected groups"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteGroupPressed(bool)));
-  connect(addToolbarItem(Action::Copy, iconMap[Action::Copy],
+
+  connect(addToolbarItem(Action::Copy, "mdi.content-copy",
                          "Copy the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
-  connect(addToolbarItem(Action::Paste, iconMap[Action::Paste],
+
+  connect(addToolbarItem(Action::Paste, "mdi.content-paste",
                          "Paste over the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onPastePressed(bool)));
-  connect(addToolbarItem(Action::Cut, iconMap[Action::Cut],
+
+  connect(addToolbarItem(Action::Cut, "mdi.content-cut",
                          "Cut the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
 }
