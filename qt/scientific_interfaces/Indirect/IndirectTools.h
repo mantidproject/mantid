@@ -7,10 +7,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
 
+#include "IndirectInterface.h"
 #include "IndirectSettings.h"
 #include "IndirectToolsTab.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectTools.h"
 
 #include <Poco/NObserver.h>
@@ -25,7 +25,7 @@ the interface window and
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectTools : public MantidQt::API::UserSubWindow {
+class DLLExport IndirectTools : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -66,7 +66,7 @@ private:
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettings> m_settings;
+  std::unique_ptr<IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectToolsTab *> m_tabs;
   /// Change Observer for ConfigService (monitors user directories)

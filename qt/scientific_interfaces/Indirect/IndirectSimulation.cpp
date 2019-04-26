@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
-// Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSimulation)
@@ -22,8 +21,8 @@ DECLARE_SUBWINDOW(IndirectSimulation)
 using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
-    : UserSubWindow(parent),
-      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
+    : IndirectInterface(parent),
+      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
 IndirectSimulation::~IndirectSimulation() {}

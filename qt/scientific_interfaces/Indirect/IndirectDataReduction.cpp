@@ -30,30 +30,20 @@
 #include <QDir>
 #include <QMessageBox>
 
-// Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt {
-namespace CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectDataReduction)
-}
-} // namespace MantidQt
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace MantidQt;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
 }
 
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-using namespace MantidQt;
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::IDA;
+namespace MantidQt {
+namespace CustomInterfaces {
+DECLARE_SUBWINDOW(IndirectDataReduction)
 
-/**
- * Default constructor for class. Initialises interface pointers to NULL values.
- * @param parent :: This is a pointer to the "parent" object in Qt, most likely
- * the main MantidPlot window.
- */
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
-    : UserSubWindow(parent),
+    : IndirectInterface(parent),
       m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
@@ -66,9 +56,6 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent)
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 }
 
-/**
- * Destructor
- */
 IndirectDataReduction::~IndirectDataReduction() {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 
@@ -550,3 +537,6 @@ void IndirectDataReduction::openDirectoryDialog() {
 void IndirectDataReduction::showMessageBox(const QString &message) {
   showInformationBox(message);
 }
+
+} // namespace CustomInterfaces
+} // namespace MantidQt

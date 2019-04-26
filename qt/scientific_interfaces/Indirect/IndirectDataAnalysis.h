@@ -7,9 +7,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 
+#include "IndirectInterface.h"
 #include "IndirectSettings.h"
 #include "IndirectTab.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectDataAnalysis.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -40,7 +40,7 @@ class IndirectDataAnalysisTab;
  *
  * Is a friend to the IndirectDataAnalysisTab class.
  */
-class IndirectDataAnalysis : public MantidQt::API::UserSubWindow {
+class IndirectDataAnalysis : public IndirectInterface {
   Q_OBJECT
 
   /// Allow IndirectDataAnalysisTab to have access.
@@ -88,7 +88,7 @@ private:
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettings> m_settings;
+  std::unique_ptr<IndirectSettings> m_settings;
   /// The settings group
   QString m_settingsGroup;
   /// Integer validator

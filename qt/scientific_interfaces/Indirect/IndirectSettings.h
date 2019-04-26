@@ -9,6 +9,7 @@
 
 #include "ui_IndirectSettings.h"
 
+#include "IndirectInterface.h"
 #include "IndirectSettingsPresenter.h"
 
 #include "DllConfig.h"
@@ -16,10 +17,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectSettings
-    : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INDIRECT_DLL IndirectSettings : public IndirectInterface {
   Q_OBJECT
 
 public:
@@ -46,7 +45,6 @@ private:
   Ui::IndirectSettings m_uiForm;
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

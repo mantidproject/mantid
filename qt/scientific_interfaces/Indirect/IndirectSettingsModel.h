@@ -14,7 +14,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectSettingsModel {
 public:
@@ -30,7 +29,6 @@ private:
   std::string const m_settingsGroup;
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

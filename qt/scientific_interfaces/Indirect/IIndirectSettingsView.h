@@ -14,7 +14,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IIndirectSettingsView : public QWidget {
   Q_OBJECT
@@ -49,7 +48,6 @@ signals:
   void cancelClicked();
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

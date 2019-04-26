@@ -9,7 +9,8 @@
 
 #include "IndirectSettings.h"
 #include "IndirectTab.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "IndirectInterface.h"
+
 #include "ui_IndirectCorrections.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -41,7 +42,7 @@ class CorrectionsTab;
  *
  * Is a friend to the CorrectionsTab class.
  */
-class IndirectCorrections : public MantidQt::API::UserSubWindow {
+class IndirectCorrections : public IndirectInterface {
   Q_OBJECT
 
   /// Allow CorrectionsTab to have access.
@@ -85,7 +86,7 @@ private slots:
 
 private:
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettings> m_settings;
+  std::unique_ptr<IndirectSettings> m_settings;
 
   /// UI form containing all Qt elements.
   Ui::IndirectCorrections m_uiForm;

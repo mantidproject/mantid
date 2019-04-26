@@ -34,7 +34,6 @@ QVariant getQSetting(QString const &settingGroup, QString const &settingName) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 IndirectSettingsView::IndirectSettingsView(QWidget *parent)
     : IIndirectSettingsView(parent),
@@ -112,6 +111,5 @@ void IndirectSettingsView::setCancelEnabled(bool enable) {
   m_uiForm->pbCancel->setEnabled(enable);
 }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

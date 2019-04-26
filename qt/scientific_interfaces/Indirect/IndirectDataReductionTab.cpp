@@ -24,9 +24,7 @@ Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
+
 IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
                                                    QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
@@ -34,9 +32,6 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
           SLOT(tabExecutionComplete(bool)));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 IndirectDataReductionTab::~IndirectDataReductionTab() {}
 
 void IndirectDataReductionTab::runTab() {

@@ -11,18 +11,15 @@
 #include "ResNorm.h"
 #include "Stretch.h"
 
-// Add this class to the list of specialised dialogs in this namespace
+using namespace MantidQt::CustomInterfaces;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectBayes)
-}
-} // namespace MantidQt
-
-using namespace MantidQt::CustomInterfaces;
 
 IndirectBayes::IndirectBayes(QWidget *parent)
-    : UserSubWindow(parent),
-      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
+    : IndirectInterface(parent),
+      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
   m_settings->initLayout();
@@ -160,3 +157,6 @@ void IndirectBayes::showMessageBox(const QString &message) {
 }
 
 IndirectBayes::~IndirectBayes() {}
+
+} // namespace CustomInterfaces
+} // namespace MantidQt

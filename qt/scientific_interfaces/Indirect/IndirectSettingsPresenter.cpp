@@ -8,7 +8,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
     : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>()),
@@ -84,6 +83,5 @@ void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {
   m_view->setCancelEnabled(!applyingChanges);
 }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

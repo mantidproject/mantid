@@ -8,11 +8,10 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 DECLARE_SUBWINDOW(IndirectSettings)
 
 IndirectSettings::IndirectSettings(QWidget *parent)
-    : MantidQt::API::UserSubWindow(parent) {
+    : IndirectInterface(parent) {
   m_uiForm.setupUi(this);
 }
 
@@ -43,6 +42,5 @@ void IndirectSettings::closeSettings() {
     window()->close();
 }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

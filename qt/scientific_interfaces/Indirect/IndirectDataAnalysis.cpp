@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------
-// Includes
-//----------------------
 #include "IndirectDataAnalysis.h"
 
 #include "ConvFit.h"
@@ -22,16 +19,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-// Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
-/**
- * Constructor.
- *
- * @param parent :: the parent QWidget.
- */
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
-    : UserSubWindow(parent),
+    : IndirectInterface(parent),
       m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),

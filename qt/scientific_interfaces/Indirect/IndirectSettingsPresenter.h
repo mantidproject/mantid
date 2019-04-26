@@ -18,7 +18,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter : public QObject {
   Q_OBJECT
@@ -53,7 +52,6 @@ private:
   std::unique_ptr<IIndirectSettingsView> m_view;
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

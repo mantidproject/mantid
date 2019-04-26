@@ -7,15 +7,15 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 
+#include "IndirectInterface.h"
 #include "IndirectSettings.h"
 #include "ui_IndirectDiffractionReduction.h"
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDiffractionReduction : public MantidQt::API::UserSubWindow {
+class IndirectDiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
 public:
@@ -93,7 +93,7 @@ private:
 
 private:
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettings> m_settings;
+  std::unique_ptr<IndirectSettings> m_settings;
   Ui::IndirectDiffractionReduction
       m_uiForm; /// The form generated using Qt Designer
   QDoubleValidator *m_valDbl;

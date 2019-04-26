@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 
 #include "IndirectBayesTab.h"
+#include "IndirectInterface.h"
 #include "IndirectSettings.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectBayes.h"
@@ -25,7 +26,7 @@ window.
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectBayes : public MantidQt::API::UserSubWindow {
+class DLLExport IndirectBayes : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -65,7 +66,7 @@ private:
   void loadSettings();
 
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettings> m_settings;
+  std::unique_ptr<IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)

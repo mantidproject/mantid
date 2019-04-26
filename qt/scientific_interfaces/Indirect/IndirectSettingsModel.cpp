@@ -14,7 +14,6 @@ using namespace Mantid::Kernel;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 IndirectSettingsModel::IndirectSettingsModel()
     : m_settingsGroup("Indirect Settings") {}
@@ -33,6 +32,5 @@ std::string IndirectSettingsModel::getFacility() const {
   return ConfigService::Instance().getFacility().name();
 }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

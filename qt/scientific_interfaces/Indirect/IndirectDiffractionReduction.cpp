@@ -18,12 +18,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-// Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 
 namespace {
-/// static logger
 Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
 
 // Helper function for use with std::transform.
@@ -34,22 +32,14 @@ std::string toStdString(const QString &qString) {
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction)
 
-using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
-
 using MantidQt::API::BatchAlgorithmRunner;
 
-//----------------------
-// Public member functions
-//----------------------
-/// Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : UserSubWindow(parent),
-      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
+    : IndirectInterface(parent),
+      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
-/// Destructor
 IndirectDiffractionReduction::~IndirectDiffractionReduction() {
   saveSettings();
 }

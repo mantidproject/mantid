@@ -17,21 +17,13 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
-// Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(IndirectCorrections)
 
-/**
- * Constructor.
- *
- * @param parent :: the parent QWidget.
- */
 IndirectCorrections::IndirectCorrections(QWidget *parent)
-    : UserSubWindow(parent),
-      m_settings(Mantid::Kernel::make_unique<IDA::IndirectSettings>(this)),
+    : IndirectInterface(parent),
+      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
   m_settings->initLayout();

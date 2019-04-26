@@ -7,10 +7,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 
+#include "IndirectInterface.h"
 #include "IndirectSettings.h"
 #include "IndirectSimulationTab.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_IndirectSimulation.h"
 
 #include <Poco/NObserver.h>
@@ -25,7 +25,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson, STFC
   */
 
-class DLLExport IndirectSimulation : public MantidQt::API::UserSubWindow {
+class DLLExport IndirectSimulation : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -64,7 +64,7 @@ private:
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
   /// The settings dialog
-  std::unique_ptr<IDA::IndirectSettings> m_settings;
+  std::unique_ptr<IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectSimulationTab *> m_simulationTabs;
   /// Change Observer for ConfigService (monitors user directories)
