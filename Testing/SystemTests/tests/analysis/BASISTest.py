@@ -262,7 +262,7 @@ class BASISReduction5Test(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_333.xml',
-                'BSS_90146.nxs',
+                'BSS_90146.nxs.h5',
                 'BASIS_90146_sqw.nxs']
 
     def runTest(self):
@@ -294,9 +294,9 @@ class BASISReduction6Test(systemtesting.MantidSystemTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_333.xml',
-                'BSS_90146.nxs',
-                'BSS_90175.nxs',
-                'BASIS_90146_sqw.nxs']
+                'BSS_90146.nxs.h5',
+                'BSS_90175.nxs.h5',
+                'BASIS_90146_divided_sqw.nxs']
 
     def runTest(self):
         try:
