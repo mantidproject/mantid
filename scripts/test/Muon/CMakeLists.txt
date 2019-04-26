@@ -4,6 +4,8 @@ set ( TEST_PY_FILES
    FFTModel_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
+   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
+   fitting_tab_widget/fitting_tab_presenter_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py

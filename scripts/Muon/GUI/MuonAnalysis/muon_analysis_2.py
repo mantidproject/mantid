@@ -22,9 +22,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabW
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 
@@ -76,6 +74,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
+        self.fitting_tab = FittingTabWidget(self.context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget()
@@ -124,6 +123,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
         self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
+        self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
