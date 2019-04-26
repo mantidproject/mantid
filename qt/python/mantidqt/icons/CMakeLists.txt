@@ -27,6 +27,7 @@ if(ENABLE_WORKBENCH)
                        MantidQtIconsQt5
                        Qt5::Core
                        Qt5::Gui
+					   ${PYTHON_LIBRARIES}
                      INSTALL_DIR
                        ${WORKBENCH_LIB_DIR}/mantidqt
                      LINUX_INSTALL_RPATH
