@@ -1,510 +1,482 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RunsWidget</class>
- <widget class="QWidget" name="RunsWidget">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>958</width>
-    <height>409</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>RunsTab</string>
-  </property>
-  <property name="toolTip">
-   <string/>
-  </property>
-  <layout class="QVBoxLayout" name="layoutMain">
-   <property name="leftMargin">
-    <number>1</number>
-   </property>
-   <property name="topMargin">
-    <number>1</number>
-   </property>
-   <property name="rightMargin">
-    <number>1</number>
-   </property>
-   <property name="bottomMargin">
-    <number>1</number>
-   </property>
-   <item>
-    <widget class="QSplitter" name="splitterTables">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string>QSplitter::handle { background-color:white }</string>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="childrenCollapsible">
-      <bool>true</bool>
-     </property>
-     <widget class="QGroupBox" name="searchPane">
-      <property name="title">
-       <string>Search Runs</string>
+  <class>RunsWidget</class>
+  <widget class="QWidget" name="RunsWidget">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>958</width>
+        <height>409</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>RunsTab</string>
+    </property>
+    <property name="toolTip">
+      <string/>
+    </property>
+    <layout class="QVBoxLayout" name="layoutMain">
+      <property name="leftMargin">
+        <number>1</number>
       </property>
-      <layout class="QVBoxLayout" name="layoutSearchPane">
-       <property name="spacing">
+      <property name="topMargin">
         <number>1</number>
-       </property>
-       <property name="leftMargin">
-        <number>1</number>
-       </property>
-       <property name="topMargin">
-        <number>1</number>
-       </property>
-       <property name="rightMargin">
-        <number>1</number>
-       </property>
-       <property name="bottomMargin">
-        <number>1</number>
-       </property>
-       <item>
-        <layout class="QFormLayout" name="layoutSearchForm">
-         <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="labelInstrument">
-           <property name="text">
-            <string>&amp;Instrument:</string>
-           </property>
-           <property name="buddy">
-            <cstring>comboSearchInstrument</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="comboSearchInstrument">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>150</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>The instrument used for the investigation to search for</string>
-           </property>
-           <property name="whatsThis">
-            <string>Specifies which instrument you're searching for data from.</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="labelInvestigationId">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>I&amp;nvestigation Id:</string>
-           </property>
-           <property name="buddy">
-            <cstring>textSearch</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="textSearch">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>40</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>The Id of the investigation runs to search for</string>
-           </property>
-           <property name="whatsThis">
-            <string>Specifies the investigation id that you are searching for runs from.</string>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-           <property name="cursorPosition">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QPushButton" name="buttonSearch">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Search for runs using ICAT</string>
-           </property>
-           <property name="whatsThis">
-            <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
-           </property>
-           <property name="text">
-            <string>Search</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="buttonAutoreduce">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Process all runs in this investigation and poll for new runs</string>
-           </property>
-           <property name="whatsThis">
-            <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
-           </property>
-           <property name="text">
-            <string>Autoprocess</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-             <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QPushButton" name="buttonAutoreducePause">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Pause auto-processing</string>
-           </property>
-           <property name="whatsThis">
-            <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
-           </property>
-           <property name="accessibleName">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Pause</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-             <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableView" name="tableSearchResults">
-         <property name="contextMenuPolicy">
-          <enum>Qt::CustomContextMenu</enum>
-         </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::ExtendedSelection</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-         <attribute name="horizontalHeaderDefaultSectionSize">
-          <number>60</number>
-         </attribute>
-         <attribute name="horizontalHeaderMinimumSectionSize">
-          <number>20</number>
-         </attribute>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
-         <attribute name="verticalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="verticalHeaderDefaultSectionSize">
-          <number>20</number>
-         </attribute>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="layoutSearchBottomRow">
-         <item>
-          <widget class="QProgressBar" name="progressBar">
-           <property name="toolTip">
-            <string>Shows the current progress when transferring runs manually, or a busy indicator to show that auto-processing is running</string>
-           </property>
-           <property name="whatsThis">
-            <string>When transferring runs manually, this bar shows the progress as a percentage complete. Alternatively, when auto-processing is running, it shows a busy indicator to show that the background polling and transfer of runs is continually running.</string>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="buttonTransfer">
-           <property name="toolTip">
-            <string>Transfer the selected run(s) into the processing table</string>
-           </property>
-           <property name="whatsThis">
-            <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
-           </property>
-           <property name="text">
-            <string>Transfer</string>
-           </property>
-           <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupLiveData">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>45</height>
-          </size>
-         </property>
-         <property name="title">
-          <string>Live data</string>
-         </property>
-         <widget class="QPushButton" name="buttonMonitor">
-          <property name="geometry">
-           <rect>
-            <x>1</x>
-            <y>20</y>
-            <width>114</width>
-            <height>25</height>
-           </rect>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Start a background process to monitor live data for this instrument</string>
-          </property>
-          <property name="text">
-           <string>Start monitor</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-            <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="buttonStopMonitor">
-          <property name="geometry">
-           <rect>
-            <x>121</x>
-            <y>20</y>
-            <width>114</width>
-            <height>25</height>
-           </rect>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Stop monitor</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-            <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
-          </property>
-         </widget>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QGroupBox" name="tablePane">
-      <property name="title">
-       <string>Process Runs</string>
       </property>
-      <layout class="QVBoxLayout" name="layoutProcessPane">
-       <property name="spacing">
+      <property name="rightMargin">
         <number>1</number>
-       </property>
-       <property name="leftMargin">
+      </property>
+      <property name="bottomMargin">
         <number>1</number>
-       </property>
-       <property name="topMargin">
-        <number>1</number>
-       </property>
-       <property name="rightMargin">
-        <number>1</number>
-       </property>
-       <property name="bottomMargin">
-        <number>1</number>
-       </property>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-  </layout>
-  <action name="actionSearch">
-   <property name="icon">
-    <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-     <normaloff>:/folder.png</normaloff>:/folder.png</iconset>
-   </property>
-   <property name="text">
-    <string>Search</string>
-   </property>
-   <property name="toolTip">
-    <string>Search for runs using ICAT</string>
-   </property>
-   <property name="whatsThis">
-    <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
-   </property>
-  </action>
-  <action name="actionAutoreduce">
-   <property name="icon">
-    <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-     <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
-   </property>
-   <property name="text">
-    <string>Autoreduce</string>
-   </property>
-   <property name="toolTip">
-    <string>Process all runs in this investigation and poll for new runs</string>
-   </property>
-   <property name="whatsThis">
-    <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
-   </property>
-  </action>
-  <action name="actionTransfer">
-   <property name="icon">
-    <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-     <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
-   </property>
-   <property name="text">
-    <string>Transfer</string>
-   </property>
-   <property name="toolTip">
-    <string>Transfer the selected run(s) into the processing table</string>
-   </property>
-   <property name="whatsThis">
-    <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
-   </property>
-  </action>
-  <action name="actionAutoreducePause">
-   <property name="icon">
-    <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-     <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
-   </property>
-   <property name="text">
-    <string>Pause</string>
-   </property>
-   <property name="toolTip">
-    <string>Pause auto-processing</string>
-   </property>
-   <property name="whatsThis">
-    <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
-   </property>
-  </action>
- </widget>
- <tabstops>
-  <tabstop>comboSearchInstrument</tabstop>
-  <tabstop>tableSearchResults</tabstop>
- </tabstops>
- <resources>
-  <include location="../../../../../MantidPlot/icons/icons.qrc"/>
- </resources>
- <connections>
-  <connection>
-   <sender>buttonSearch</sender>
-   <signal>clicked()</signal>
-   <receiver>actionSearch</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>217</x>
-     <y>143</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>textSearch</sender>
-   <signal>returnPressed()</signal>
-   <receiver>actionSearch</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>228</x>
-     <y>112</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonAutoreduce</sender>
-   <signal>clicked()</signal>
-   <receiver>actionAutoreduce</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonAutoreducePause</sender>
-   <signal>clicked()</signal>
-   <receiver>actionAutoreducePause</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>478</x>
-     <y>159</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+      </property>
+      <item>
+        <widget class="QSplitter" name="splitterTables">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="styleSheet">
+            <string>QSplitter::handle { background-color:white }</string>
+          </property>
+          <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="childrenCollapsible">
+            <bool>true</bool>
+          </property>
+          <widget class="QGroupBox" name="searchPane">
+            <property name="title">
+              <string>Search Runs</string>
+            </property>
+            <layout class="QVBoxLayout" name="layoutSearchPane">
+              <property name="spacing">
+                <number>1</number>
+              </property>
+              <property name="leftMargin">
+                <number>1</number>
+              </property>
+              <property name="topMargin">
+                <number>1</number>
+              </property>
+              <property name="rightMargin">
+                <number>1</number>
+              </property>
+              <property name="bottomMargin">
+                <number>1</number>
+              </property>
+              <item>
+                <layout class="QFormLayout" name="layoutSearchForm">
+                  <property name="fieldGrowthPolicy">
+                    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+                  </property>
+                  <item row="0" column="0">
+                    <widget class="QLabel" name="labelInstrument">
+                      <property name="text">
+                        <string>&amp;Instrument:</string>
+                      </property>
+                      <property name="buddy">
+                        <cstring>comboSearchInstrument</cstring>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="0" column="1">
+                    <widget class="QComboBox" name="comboSearchInstrument">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                        <size>
+                          <width>150</width>
+                          <height>0</height>
+                        </size>
+                      </property>
+                      <property name="toolTip">
+                        <string>The instrument used for the investigation to search for</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>Specifies which instrument you're searching for data from.</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="1" column="0">
+                    <widget class="QLabel" name="labelInvestigationId">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="text">
+                        <string>I&amp;nvestigation Id:</string>
+                      </property>
+                      <property name="buddy">
+                        <cstring>textSearch</cstring>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="1" column="1">
+                    <widget class="QLineEdit" name="textSearch">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                        <size>
+                          <width>40</width>
+                          <height>0</height>
+                        </size>
+                      </property>
+                      <property name="toolTip">
+                        <string>The Id of the investigation runs to search for</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>Specifies the investigation id that you are searching for runs from.</string>
+                      </property>
+                      <property name="inputMethodHints">
+                        <set>Qt::ImhDigitsOnly</set>
+                      </property>
+                      <property name="cursorPosition">
+                        <number>0</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="2" column="1">
+                    <widget class="QPushButton" name="buttonSearch">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="toolTip">
+                        <string>Search for runs using ICAT</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
+                      </property>
+                      <property name="text">
+                        <string>Search</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="3" column="0">
+                    <widget class="QPushButton" name="buttonAutoreduce">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="toolTip">
+                        <string>Process all runs in this investigation and poll for new runs</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
+                      </property>
+                      <property name="text">
+                        <string>Autoprocess</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="3" column="1">
+                    <widget class="QPushButton" name="buttonAutoreducePause">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="toolTip">
+                        <string>Pause auto-processing</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
+                      </property>
+                      <property name="accessibleName">
+                        <string/>
+                      </property>
+                      <property name="text">
+                        <string>Pause</string>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QTableView" name="tableSearchResults">
+                  <property name="contextMenuPolicy">
+                    <enum>Qt::CustomContextMenu</enum>
+                  </property>
+                  <property name="selectionMode">
+                    <enum>QAbstractItemView::ExtendedSelection</enum>
+                  </property>
+                  <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                  <attribute name="horizontalHeaderDefaultSectionSize">
+                    <number>60</number>
+                  </attribute>
+                  <attribute name="horizontalHeaderMinimumSectionSize">
+                    <number>20</number>
+                  </attribute>
+                  <attribute name="horizontalHeaderStretchLastSection">
+                    <bool>true</bool>
+                  </attribute>
+                  <attribute name="verticalHeaderVisible">
+                    <bool>false</bool>
+                  </attribute>
+                  <attribute name="verticalHeaderDefaultSectionSize">
+                    <number>20</number>
+                  </attribute>
+                </widget>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" name="layoutSearchBottomRow">
+                  <item>
+                    <widget class="QProgressBar" name="progressBar">
+                      <property name="toolTip">
+                        <string>Shows the current progress when transferring runs manually, or a busy indicator to show that auto-processing is running</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>When transferring runs manually, this bar shows the progress as a percentage complete. Alternatively, when auto-processing is running, it shows a busy indicator to show that the background polling and transfer of runs is continually running.</string>
+                      </property>
+                      <property name="value">
+                        <number>0</number>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QToolButton" name="buttonTransfer">
+                      <property name="toolTip">
+                        <string>Transfer the selected run(s) into the processing table</string>
+                      </property>
+                      <property name="whatsThis">
+                        <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
+                      </property>
+                      <property name="text">
+                        <string>Transfer</string>
+                      </property>
+                      <property name="toolButtonStyle">
+                        <enum>Qt::ToolButtonTextBesideIcon</enum>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </item>
+              <item>
+                <widget class="QGroupBox" name="groupLiveData">
+                  <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                    <size>
+                      <width>0</width>
+                      <height>45</height>
+                    </size>
+                  </property>
+                  <property name="title">
+                    <string>Live data</string>
+                  </property>
+                  <widget class="QPushButton" name="buttonMonitor">
+                    <property name="geometry">
+                      <rect>
+                        <x>1</x>
+                        <y>20</y>
+                        <width>114</width>
+                        <height>25</height>
+                      </rect>
+                    </property>
+                    <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                      </sizepolicy>
+                    </property>
+                    <property name="toolTip">
+                      <string>Start a background process to monitor live data for this instrument</string>
+                    </property>
+                    <property name="text">
+                      <string>Start monitor</string>
+                    </property>
+                  </widget>
+                  <widget class="QPushButton" name="buttonStopMonitor">
+                    <property name="geometry">
+                      <rect>
+                        <x>121</x>
+                        <y>20</y>
+                        <width>114</width>
+                        <height>25</height>
+                      </rect>
+                    </property>
+                    <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                      </sizepolicy>
+                    </property>
+                    <property name="text">
+                      <string>Stop monitor</string>
+                    </property>
+                  </widget>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QGroupBox" name="tablePane">
+            <property name="title">
+              <string>Process Runs</string>
+            </property>
+            <layout class="QVBoxLayout" name="layoutProcessPane">
+              <property name="spacing">
+                <number>1</number>
+              </property>
+              <property name="leftMargin">
+                <number>1</number>
+              </property>
+              <property name="topMargin">
+                <number>1</number>
+              </property>
+              <property name="rightMargin">
+                <number>1</number>
+              </property>
+              <property name="bottomMargin">
+                <number>1</number>
+              </property>
+            </layout>
+          </widget>
+        </widget>
+      </item>
+    </layout>
+    <action name="actionSearch">
+      <property name="text">
+        <string>Search</string>
+      </property>
+      <property name="toolTip">
+        <string>Search for runs using ICAT</string>
+      </property>
+      <property name="whatsThis">
+        <string>Searches ICAT for runs from the given instrument with the given investigation id.</string>
+      </property>
+    </action>
+    <action name="actionAutoreduce">
+      <property name="text">
+        <string>Autoreduce</string>
+      </property>
+      <property name="toolTip">
+        <string>Process all runs in this investigation and poll for new runs</string>
+      </property>
+      <property name="whatsThis">
+        <string>Start a background process that will poll for new runs in the current investigation. When runs are found, they are automatically transferred to the table and processed.</string>
+      </property>
+    </action>
+    <action name="actionTransfer">
+      <property name="icon">
+        <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
+          <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
+      </property>
+      <property name="text">
+        <string>Transfer</string>
+      </property>
+      <property name="toolTip">
+        <string>Transfer the selected run(s) into the processing table</string>
+      </property>
+      <property name="whatsThis">
+        <string>This transfers the currenly-selected runs in the Search table into the main table, ready for processing</string>
+      </property>
+    </action>
+    <action name="actionAutoreducePause">
+      <property name="text">
+        <string>Pause</string>
+      </property>
+      <property name="toolTip">
+        <string>Pause auto-processing</string>
+      </property>
+      <property name="whatsThis">
+        <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
+      </property>
+    </action>
+  </widget>
+  <tabstops>
+    <tabstop>comboSearchInstrument</tabstop>
+    <tabstop>tableSearchResults</tabstop>
+  </tabstops>
+  <resources>
+    <include location="../../../../../MantidPlot/icons/icons.qrc"/>
+  </resources>
+  <connections>
+    <connection>
+      <sender>buttonSearch</sender>
+      <signal>clicked()</signal>
+      <receiver>actionSearch</receiver>
+      <slot>trigger()</slot>
+      <hints>
+        <hint type="sourcelabel">
+          <x>217</x>
+          <y>143</y>
+        </hint>
+        <hint type="destinationlabel">
+          <x>-1</x>
+          <y>-1</y>
+        </hint>
+      </hints>
+    </connection>
+    <connection>
+      <sender>textSearch</sender>
+      <signal>returnPressed()</signal>
+      <receiver>actionSearch</receiver>
+      <slot>trigger()</slot>
+      <hints>
+        <hint type="sourcelabel">
+          <x>228</x>
+          <y>112</y>
+        </hint>
+        <hint type="destinationlabel">
+          <x>-1</x>
+          <y>-1</y>
+        </hint>
+      </hints>
+    </connection>
+    <connection>
+      <sender>buttonAutoreduce</sender>
+      <signal>clicked()</signal>
+      <receiver>actionAutoreduce</receiver>
+      <slot>trigger()</slot>
+      <hints>
+        <hint type="sourcelabel">
+          <x>20</x>
+          <y>20</y>
+        </hint>
+        <hint type="destinationlabel">
+          <x>-1</x>
+          <y>-1</y>
+        </hint>
+      </hints>
+    </connection>
+    <connection>
+      <sender>buttonAutoreducePause</sender>
+      <signal>clicked()</signal>
+      <receiver>actionAutoreducePause</receiver>
+      <slot>trigger()</slot>
+      <hints>
+        <hint type="sourcelabel">
+          <x>478</x>
+          <y>159</y>
+        </hint>
+        <hint type="destinationlabel">
+          <x>-1</x>
+          <y>-1</y>
+        </hint>
+      </hints>
+    </connection>
+  </connections>
 </ui>

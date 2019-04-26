@@ -56,6 +56,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtIcons
   INSTALL_DIR_BASE
       ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
@@ -70,7 +71,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_ISISREFLECTOMETRY
+  DEFS 
+    IN_MANTIDQT_ISISREFLECTOMETRY
   PRECOMPILED PrecompiledHeader.h
   INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -80,9 +82,10 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
-	${PYTHON_LIBRARIES}
+	  ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtIcons
     MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE
       ${PLUGINS_DIR}

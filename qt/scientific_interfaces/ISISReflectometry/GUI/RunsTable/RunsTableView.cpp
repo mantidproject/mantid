@@ -9,9 +9,10 @@
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtIcons/Icons.h"
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -147,7 +148,7 @@ QAction *RunsTableView::addToolbarItem(Action action, std::string const &icon,
   if (icon == "") {
     qIcon = QIcon(QString::fromStdString(""));
   } else {
-    qIcon = MantidQt::Icons::getIcon(icon);
+    qIcon = MantidQt::Icons::getIcon(QString::fromStdString(icon));
   }
 
   m_actions[action] =
@@ -181,19 +182,19 @@ void RunsTableView::addToolbarActions() {
           SIGNAL(triggered(bool)), this,
           SLOT(onPlotSelectedStitchedOutputPressed(bool)));
 
-  connect(addToolbarItem(Action::InsertRow, "mdi.calendar-plus",
+  connect(addToolbarItem(Action::InsertRow, "mdi.table-row-plus-after",
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
 
-  connect(addToolbarItem(Action::DeleteRow, "mdi.calendar-minus",
+  connect(addToolbarItem(Action::DeleteRow, "mdi.table-row-remove",
                          "Delete all selected rows"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteRowPressed(bool)));
 
-  connect(addToolbarItem(Action::InsertGroup, "mdi.group",
+  connect(addToolbarItem(Action::InsertGroup, "mdi.table-plus",
                          "Insert group after first selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
 
-  connect(addToolbarItem(Action::DeleteGroup, "mdi.ungroup",
+  connect(addToolbarItem(Action::DeleteGroup, "mdi.table-remove",
                          "Delete all selected groups"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteGroupPressed(bool)));
 
