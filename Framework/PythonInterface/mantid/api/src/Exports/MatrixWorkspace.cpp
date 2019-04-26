@@ -65,7 +65,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
 // Overloads for YUnitLabel which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
-                                       YUnitLabel, 0, 1)
+                                       YUnitLabel, 0, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -289,7 +289,7 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel,
            MatrixWorkspace_YUnitLabelOverloads(
-               (arg("self"), arg("useLatexText")),
+               (arg("self"), arg("useLatex"), arg("plotAsDistribution")),
                "Returns the caption for the Y axis"))
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),

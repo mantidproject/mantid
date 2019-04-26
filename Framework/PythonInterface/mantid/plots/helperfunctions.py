@@ -566,7 +566,7 @@ def get_sample_log(workspace, **kwargs):
 # ====================================================
 
 
-def get_axes_labels(workspace, indices=None):
+def get_axes_labels(workspace, indices=None, plot_as_dist=True, use_latex=True):
     """
     Get axis labels from a Workspace2D or an MDHistoWorkspace
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
@@ -576,9 +576,12 @@ def get_axes_labels(workspace, indices=None):
     If MDWorkspace then the last element will be the values selected by the indices, to be set as title.
 
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+    :param indices:
+    :param plot_as_dist: bool: plotting as distribution
+    :param use_latex: bool: return y-unit label in Latex form
     """
     if isinstance(workspace, MultipleExperimentInfos):
-        axes = ['Intensity']
+        axes_labels = ['Intensity']
         title = ''
         if indices is None:
             dims = workspace.getNonIntegratedDimensions()
@@ -597,11 +600,12 @@ def get_axes_labels(workspace, indices=None):
             axis_unit = axis_unit.replace('DeltaE', 'meV')
             axis_unit = axis_unit.replace('Angstrom', r'$\AA$')
             axis_unit = axis_unit.replace('MomentumTransfer', r'$\AA^{-1}$')
-            axes.append('{0} ({1})'.format(axis_title, axis_unit))
-        axes.append(title.strip())
+            axes_labels.append('{0} ({1})'.format(axis_title, axis_unit))
+        axes_labels.append(title.strip())
     else:
-        # For matrix workspaces, return a tuple of ``(YUnit, <other units>)`
-        axes_labels = [workspace.YUnitLabel(useLatexText=True)]
+        # For matrix workspaces, return a tuple of ``(YUnit, <other units>)``
+        axes_labels = [workspace.YUnitLabel(useLatex=use_latex,
+                                            plotAsDistribution=plot_as_dist)]
         for index in range(workspace.axes()):
             axis = workspace.getAxis(index)
             unit = axis.getUnit()

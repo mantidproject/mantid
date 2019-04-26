@@ -32,6 +32,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
 #include <cmath>
@@ -933,19 +934,30 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) {
 }
 
 /// Returns a caption for the units of the data in the workspace
-std::string MatrixWorkspace::YUnitLabel(bool useLatexText /* = false */) const {
+std::string
+MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
+                            bool plotAsDistribution /* = false */) const {
   std::string retVal;
   if (!m_YUnitLabel.empty()) {
     retVal = m_YUnitLabel;
-    if (useLatexText) {
+    // If the workspace is marked as a distribution its units are already
+    // correct, if the workspace is not a distribution but is being plotted as
+    // one we must adjust the unit
+    if (plotAsDistribution && !this->isDistribution()) {
+      if (useLatex) {
+        retVal += " per $" + this->getAxis(0)->unit()->label().latex() + "$";
+      } else {
+        retVal += " per " + this->getAxis(0)->unit()->label().ascii();
+      }
+    }
+    if (useLatex) {
       std::vector<std::string> splitVec;
       boost::split_regex(splitVec, retVal, boost::regex(" per "));
       if (splitVec.size() > 1) {
         retVal = splitVec[0];
-        std::string unitString = "";
-        for (size_t i = 1; i < splitVec.size(); i++)
-          unitString += splitVec[i];
-        retVal += " ($" + unitString + "$)$^{-1}$";
+        splitVec.erase(splitVec.begin());
+        std::string unitString = boost::algorithm::join(splitVec, " ");
+        retVal += " (" + unitString + ")$^{-1}$";
       }
     }
   } else {
@@ -954,9 +966,9 @@ std::string MatrixWorkspace::YUnitLabel(bool useLatexText /* = false */) const {
     // has its unit set then append that unit to the string to be returned
     if (!retVal.empty() && this->isDistribution() && this->axes() &&
         this->getAxis(0)->unit()) {
-      if (useLatexText) {
-        retVal = retVal + " ($" + this->getAxis(0)->unit()->label().ascii() +
-                 "$)$^{-1}$";
+      if (useLatex) {
+        retVal = retVal + " (" + this->getAxis(0)->unit()->label().latex() +
+                 ")$^{-1}$";
       } else {
         retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
       }
