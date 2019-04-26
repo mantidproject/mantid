@@ -12,8 +12,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -35,9 +33,8 @@ DECLARE_SUBWINDOW(IndirectDiffractionReduction)
 using MantidQt::API::BatchAlgorithmRunner;
 
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : IndirectInterface(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
-      m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
+    : IndirectInterface(parent), m_valDbl(nullptr),
+      m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
 IndirectDiffractionReduction::~IndirectDiffractionReduction() {
@@ -49,13 +46,11 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() {
  */
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
-  m_settings->initLayout();
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
-          SLOT(settingsClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
-          SLOT(openDirectoryDialog()));
+          SLOT(manageUserDirectories()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
 
   connect(m_uiForm.iicInstrumentConfiguration,
@@ -710,29 +705,8 @@ void IndirectDiffractionReduction::instrumentSelected(
   }
 }
 
-/**
- * Handles opening the directory manager window.
- */
-void IndirectDiffractionReduction::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Opens the settings dialog
- */
-void IndirectDiffractionReduction::settingsClicked() {
-  m_settings->loadSettings();
-  m_settings->show();
-}
-
-/**
- * Handles the user clicking the help button.
- */
-void IndirectDiffractionReduction::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Diffraction"));
+std::string IndirectDiffractionReduction::documentationPage() const {
+  return "Indirect Diffraction";
 }
 
 void IndirectDiffractionReduction::initLocalPython() {}

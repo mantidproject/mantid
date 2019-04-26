@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSIMULATION_H_
+#include "ui_IndirectSimulation.h"
 
 #include "IndirectInterface.h"
-#include "IndirectSettings.h"
 #include "IndirectSimulationTab.h"
+
 #include "MantidKernel/ConfigService.h"
-#include "ui_IndirectSimulation.h"
 
 #include <Poco/NObserver.h>
 
@@ -44,17 +44,9 @@ public: // public constructor, destructor and functions
   /// Setup tab UI
   void initLayout() override;
 
-private slots:
-  /// Opens the Indirect settings GUI
-  void settingsClicked();
-  /// Slot for clicking on the help button
-  void helpClicked();
-  /// Slot for clicking on the manage directories button
-  void manageUserDirectories();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
-
 private:
+  std::string documentationPage() const override;
+
   /// Load default interface settings for each tab
   void loadSettings();
   /// Called upon a close event.
@@ -63,8 +55,6 @@ private:
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  /// The settings dialog
-  std::unique_ptr<IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectSimulationTab *> m_simulationTabs;
   /// Change Observer for ConfigService (monitors user directories)

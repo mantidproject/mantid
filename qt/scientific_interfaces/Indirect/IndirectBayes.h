@@ -6,12 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
+#include "ui_IndirectBayes.h"
 
 #include "IndirectBayesTab.h"
 #include "IndirectInterface.h"
-#include "IndirectSettings.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "ui_IndirectBayes.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
@@ -44,19 +42,11 @@ public: // public constructor, destructor and functions
   static QString categoryInfo() { return "Indirect"; }
   void initLayout() override;
 
-private slots:
-  /// Opens the Indirect settings GUI
-  void settingsClicked();
-  /// Slot for clicking on the hlep button
-  void helpClicked();
-  /// Slot for clicking on the manage directories button
-  void manageUserDirectories();
-  /// Applies the settings for this interface
-  void applySettings();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
-
 private:
+  std::string documentationPage() const override;
+
+  void applySettings(std::map<std::string, QVariant> &settings) override;
+
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
@@ -65,8 +55,6 @@ private:
   /// Load default interface settings for each tab
   void loadSettings();
 
-  /// The settings dialog
-  std::unique_ptr<IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)

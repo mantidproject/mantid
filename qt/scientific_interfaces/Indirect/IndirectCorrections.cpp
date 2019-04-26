@@ -4,18 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------
-// Includes
-//----------------------
-
 #include "IndirectCorrections.h"
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
-
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,10 +16,8 @@ DECLARE_SUBWINDOW(IndirectCorrections)
 
 IndirectCorrections::IndirectCorrections(QWidget *parent)
     : IndirectInterface(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
-  m_settings->initLayout();
 
   // Allows us to get a handle on a tab using an enum, for example
   // "m_tabs[ELWIN]".
@@ -83,17 +74,13 @@ void IndirectCorrections::initLayout() {
 
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
-          SLOT(settingsClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
-          SLOT(openDirectoryDialog()));
-
-  connect(m_settings.get(), SIGNAL(applySettings()), this,
-          SLOT(applySettings()));
+          SLOT(manageUserDirectories()));
 
   // Needed to initially apply the settings loaded on the settings GUI
-  applySettings();
+  applySettings(getInterfaceSettings());
 }
 
 /**
@@ -126,29 +113,12 @@ void IndirectCorrections::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Opens a directory dialog.
- */
-void IndirectCorrections::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Opens the settings dialog
- */
-void IndirectCorrections::settingsClicked() {
-  m_settings->loadSettings();
-  m_settings->show();
-}
-
-/**
- * Opens the Mantid Wiki web page of the current tab.
- */
-void IndirectCorrections::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Corrections"));
+void IndirectCorrections::applySettings(
+    std::map<std::string, QVariant> &settings) {
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
+    tab->second->filterInputData(settings["RestrictInput"].toBool());
+    tab->second->setPlotErrorBars(settings["ErrorBars"].toBool());
+  }
 }
 
 /**
@@ -159,27 +129,8 @@ void IndirectCorrections::exportTabPython() {
   m_tabs[currentTab]->exportPythonScript();
 }
 
-/**
- * Updates the settings decided on the Settings Dialog
- */
-void IndirectCorrections::applySettings() {
-  auto const filter = m_settings->restrictInputDataByName();
-  auto const errorBars = m_settings->plotErrorBars();
-
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->filterInputData(filter);
-    tab->second->setPlotErrorBars(errorBars);
-  }
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message The message to display in the message box
- */
-void IndirectCorrections::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectCorrections::documentationPage() const {
+  return "Indirect Corrections";
 }
 
 } // namespace CustomInterfaces

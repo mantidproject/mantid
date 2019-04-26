@@ -9,16 +9,20 @@
 
 #include "ui_IndirectSettings.h"
 
-#include "IndirectInterface.h"
 #include "IndirectSettingsPresenter.h"
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
+#include <map>
+
+#include <QVariant>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSettings : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectSettings
+    : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
@@ -31,8 +35,7 @@ public:
   void initLayout() override;
   void loadSettings();
 
-  bool restrictInputDataByName() const;
-  bool plotErrorBars() const;
+  std::map<std::string, QVariant> getSettings() const;
 
 signals:
   void applySettings();

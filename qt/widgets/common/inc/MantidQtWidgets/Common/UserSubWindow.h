@@ -73,6 +73,9 @@ public:
   /// A list of aliases
   static std::set<std::string> aliases() { return std::set<std::string>(); }
 
+  virtual void otherUserSubWindowCreated(UserSubWindow *window) {}
+  virtual void otherUserSubWindowCreated(QList<UserSubWindow *> windows) {}
+
 public:
   /// DefaultConstructor
   UserSubWindow(QWidget *parent = nullptr);

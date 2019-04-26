@@ -24,6 +24,7 @@
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
+#include <QPointer>
 #include <QStringList>
 
 using namespace MantidQt::API;
@@ -39,6 +40,12 @@ std::once_flag DLLS_LOADED;
 
 // Track if message saying offline help is unavailable has been shown
 bool offlineHelpMsgDisplayed = false;
+
+QList<QPointer<UserSubWindow>> &existingInterfaces() {
+  static QList<QPointer<UserSubWindow>> existingInterfaces;
+  return existingInterfaces;
+}
+
 } // namespace
 
 // initialise VATES factory
@@ -164,6 +171,20 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
     user_win->setParent(parent);
     user_win->setInterfaceName(interface_name);
     user_win->initializeLayout();
+
+    auto &existingWindows = existingInterfaces();
+    existingWindows.erase(std::remove_if(existingWindows.begin(),
+                                         existingWindows.end(),
+                                         [](QPointer<UserSubWindow> &window) {
+                                           return window.isNull();
+                                         }),
+                          existingWindows.end());
+
+    for (auto &window : existingWindows)
+      window->otherUserSubWindowCreated(user_win);
+
+    existingWindows.append(user_win);
+
   } else {
     g_log.error() << "Error creating interface " << iname << "\n";
   }

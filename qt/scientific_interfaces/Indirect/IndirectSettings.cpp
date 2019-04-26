@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSettings)
 
 IndirectSettings::IndirectSettings(QWidget *parent)
-    : IndirectInterface(parent) {
+    : MantidQt::API::UserSubWindow(parent) {
   m_uiForm.setupUi(this);
 }
 
@@ -27,12 +27,11 @@ void IndirectSettings::initLayout() {
           SLOT(closeSettings()));
 }
 
-bool IndirectSettings::restrictInputDataByName() const {
-  return m_presenter->getSetting("restrict-input-by-name").toBool();
-}
-
-bool IndirectSettings::plotErrorBars() const {
-  return m_presenter->getSetting("plot-error-bars").toBool();
+std::map<std::string, QVariant> IndirectSettings::getSettings() const {
+  std::map<std::string, QVariant> settings;
+  settings["RestrictInput"] = m_presenter->getSetting("restrict-input-by-name");
+  settings["ErrorBars"] = m_presenter->getSetting("plot-error-bars");
+  return settings;
 }
 
 void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }

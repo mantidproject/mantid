@@ -9,8 +9,6 @@
 #include "IndirectMolDyn.h"
 #include "IndirectSassena.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -22,14 +20,12 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : IndirectInterface(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
 IndirectSimulation::~IndirectSimulation() {}
 
 void IndirectSimulation::initLayout() {
   m_uiForm.setupUi(this);
-  m_settings->initLayout();
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -56,9 +52,8 @@ void IndirectSimulation::initLayout() {
 
   loadSettings();
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
-          SLOT(settingsClicked()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
 }
@@ -110,40 +105,6 @@ void IndirectSimulation::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Opens the settings dialog
- */
-void IndirectSimulation::settingsClicked() {
-  m_settings->loadSettings();
-  m_settings->show();
-}
-
-/**
- * Slot to open a new browser window and navigate to the help page
- * on the wiki for the currently selected tab.
- */
-void IndirectSimulation::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Simulation"));
-}
-
-/**
- * Slot to show the manage user dicrectories dialog when the user clicks
- * the button on the interface.
- */
-void IndirectSimulation::manageUserDirectories() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message :: The message to display in the message box
- */
-void IndirectSimulation::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectSimulation::documentationPage() const {
+  return "Indirect Simulation";
 }

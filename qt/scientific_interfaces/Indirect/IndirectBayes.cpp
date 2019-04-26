@@ -5,8 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayes.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "Quasi.h"
 #include "ResNorm.h"
 #include "Stretch.h"
@@ -19,10 +17,8 @@ DECLARE_SUBWINDOW(IndirectBayes)
 
 IndirectBayes::IndirectBayes(QWidget *parent)
     : IndirectInterface(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
-  m_settings->initLayout();
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -48,17 +44,13 @@ void IndirectBayes::initLayout() {
 
   loadSettings();
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
-          SLOT(settingsClicked()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
 
-  connect(m_settings.get(), SIGNAL(applySettings()), this,
-          SLOT(applySettings()));
-
   // Needed to initially apply the settings loaded on the settings GUI
-  applySettings();
+  applySettings(getInterfaceSettings());
 }
 
 /**
@@ -105,55 +97,15 @@ void IndirectBayes::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Opens the settings dialog
- */
-void IndirectBayes::settingsClicked() {
-  m_settings->loadSettings();
-  m_settings->show();
-}
-
-/**
- * Slot to open a new browser window and navigate to the help page
- * on the wiki for the currently selected tab.
- */
-void IndirectBayes::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Indirect Bayes"));
-}
-
-/**
- * Slot to show the manage user dicrectories dialog when the user clicks
- * the button on the interface.
- */
-void IndirectBayes::manageUserDirectories() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Updates the settings decided on the Settings Dialog
- */
-void IndirectBayes::applySettings() {
-  auto const filter = m_settings->restrictInputDataByName();
-  auto const errorBars = m_settings->plotErrorBars();
-
+void IndirectBayes::applySettings(std::map<std::string, QVariant> &settings) {
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
-    tab->second->filterInputData(filter);
-    tab->second->setPlotErrorBars(errorBars);
+    tab->second->filterInputData(settings["RestrictInput"].toBool());
+    tab->second->setPlotErrorBars(settings["ErrorBars"].toBool());
   }
 }
 
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message :: The message to display in the message box
- */
-void IndirectBayes::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectBayes::documentationPage() const {
+  return "Indirect Bayes";
 }
 
 IndirectBayes::~IndirectBayes() {}

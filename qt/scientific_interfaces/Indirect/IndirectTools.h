@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTTOOLS_H_
+#include "ui_IndirectTools.h"
 
 #include "IndirectInterface.h"
-#include "IndirectSettings.h"
 #include "IndirectToolsTab.h"
+
 #include "MantidKernel/ConfigService.h"
-#include "ui_IndirectTools.h"
 
 #include <Poco/NObserver.h>
 
@@ -47,16 +47,10 @@ public: // public constructor, destructor and functions
 private slots:
   /// Slot for clicking on the run button
   void runClicked();
-  /// Opens the Indirect settings GUI
-  void settingsClicked();
-  /// Slot for clicking on the hlep button
-  void helpClicked();
-  /// Slot for clicking on the manage directories button
-  void manageUserDirectories();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
 
 private:
+  std::string documentationPage() const override;
+
   /// Load default interface settings for each tab
   void loadSettings();
   /// Called upon a close event.
@@ -65,8 +59,6 @@ private:
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  /// The settings dialog
-  std::unique_ptr<IndirectSettings> m_settings;
   /// Map of tabs indexed by position on the window
   std::map<unsigned int, IndirectToolsTab *> m_tabs;
   /// Change Observer for ConfigService (monitors user directories)

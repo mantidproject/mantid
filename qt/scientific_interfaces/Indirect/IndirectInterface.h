@@ -7,19 +7,38 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTINTERFACE_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTINTERFACE_H_
 
+#include "IndirectSettings.h"
+
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class IndirectInterface : public MantidQt::API::UserSubWindow {
-  // Q_OBJECT
+  Q_OBJECT
 
 public:
   explicit IndirectInterface(QWidget *parent = nullptr);
 
+protected slots:
+  void help();
+  void settings();
+  void manageUserDirectories();
+  void showMessageBox(QString const &message);
+
+protected:
+  std::map<std::string, QVariant> getInterfaceSettings() const;
+
+private slots:
+  void applySettings();
+
 private:
   virtual void initLayout() override = 0;
+  virtual std::string documentationPage() const = 0;
+
+  virtual void applySettings(std::map<std::string, QVariant> &settings);
+
+  std::unique_ptr<IndirectSettings> m_settings;
 };
 
 } // namespace CustomInterfaces

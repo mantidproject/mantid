@@ -13,9 +13,6 @@
 #include "JumpFit.h"
 #include "MSDFit.h"
 
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -23,12 +20,10 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
     : IndirectInterface(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
       m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
   m_uiForm.setupUi(this);
-  m_settings->initLayout();
 
   // Allows us to get a handle on a tab using an enum, for example
   // "m_tabs[ELWIN]".
@@ -41,6 +36,14 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   m_tabs.emplace(IQT_FIT, new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT)));
   m_tabs.emplace(CONV_FIT, new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT)));
   m_tabs.emplace(JUMP_FIT, new JumpFit(m_uiForm.twIDATabs->widget(JUMP_FIT)));
+}
+
+void IndirectDataAnalysis::applySettings(
+    std::map<std::string, QVariant> &settings) {
+  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
+    tab->second->filterInputData(settings["RestrictInput"].toBool());
+    tab->second->setPlotErrorBars(settings["ErrorBars"].toBool());
+  }
 }
 
 /**
@@ -83,17 +86,13 @@ void IndirectDataAnalysis::initLayout() {
           SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
-          SLOT(settingsClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
-          SLOT(openDirectoryDialog()));
-
-  connect(m_settings.get(), SIGNAL(applySettings()), this,
-          SLOT(applySettings()));
+          SLOT(manageUserDirectories()));
 
   // Needed to initially apply the settings loaded on the settings GUI
-  applySettings();
+  applySettings(getInterfaceSettings());
 }
 
 /**
@@ -130,29 +129,8 @@ void IndirectDataAnalysis::tabChanged(int index) {
   m_tabs[index]->setActiveWorkspace();
 }
 
-/**
- * Opens a directory dialog.
- */
-void IndirectDataAnalysis::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Opens the settings dialog.
- */
-void IndirectDataAnalysis::settingsClicked() {
-  m_settings->loadSettings();
-  m_settings->show();
-}
-
-/**
- * Opens the Mantid Wiki web page of the current tab.
- */
-void IndirectDataAnalysis::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect Data Analysis"));
+std::string IndirectDataAnalysis::documentationPage() const {
+  return "Indirect Data Analysis";
 }
 
 /**
@@ -161,29 +139,6 @@ void IndirectDataAnalysis::help() {
 void IndirectDataAnalysis::exportTabPython() {
   unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
   m_tabs[currentTab]->exportPythonScript();
-}
-
-/**
- * Updates the settings decided on the Settings Dialog
- */
-void IndirectDataAnalysis::applySettings() {
-  auto const filter = m_settings->restrictInputDataByName();
-  auto const errorBars = m_settings->plotErrorBars();
-
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->filterInputData(filter);
-    tab->second->setPlotErrorBars(errorBars);
-  }
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message The message to display in the message box
- */
-void IndirectDataAnalysis::showMessageBox(const QString &message) {
-  showInformationBox(message);
 }
 
 } // namespace IDA

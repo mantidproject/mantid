@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
+#include "ui_IndirectDataAnalysis.h"
 
 #include "IndirectInterface.h"
-#include "IndirectSettings.h"
 #include "IndirectTab.h"
-#include "ui_IndirectDataAnalysis.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
@@ -71,24 +70,16 @@ private:
 private slots:
   /// Sets the active workspace in the selected tab
   void tabChanged(int index);
-  /// Opens the Indirect settings GUI
-  void settingsClicked();
   /// Called when the user clicks the Py button
   void exportTabPython();
-  /// Opens a directory dialog.
-  void openDirectoryDialog();
-  /// Opens the Mantid Wiki web page of the current tab.
-  void help();
-  /// Applies the settings for this interface
-  void applySettings();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
 
 private:
+  std::string documentationPage() const override;
+
+  void applySettings(std::map<std::string, QVariant> &settings) override;
+
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;
-  /// The settings dialog
-  std::unique_ptr<IndirectSettings> m_settings;
   /// The settings group
   QString m_settingsGroup;
   /// Integer validator

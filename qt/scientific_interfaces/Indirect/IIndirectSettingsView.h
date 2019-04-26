@@ -42,7 +42,6 @@ public:
   virtual void setCancelEnabled(bool enable) = 0;
 
 signals:
-  void updateRestrictInputByName(std::string const &text);
   void okClicked();
   void applyClicked();
   void cancelClicked();

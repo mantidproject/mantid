@@ -7,9 +7,8 @@
 #include "IndirectTools.h"
 #include "IndirectLoadILL.h"
 #include "IndirectTransmissionCalc.h"
+
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,12 +20,10 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectTools::IndirectTools(QWidget *parent)
     : IndirectInterface(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)),
       m_changeObserver(*this, &IndirectTools::handleDirectoryChange) {}
 
 void IndirectTools::initLayout() {
   m_uiForm.setupUi(this);
-  m_settings->initLayout();
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -50,9 +47,8 @@ void IndirectTools::initLayout() {
 
   loadSettings();
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this,
-          SLOT(settingsClicked()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
 }
@@ -115,42 +111,8 @@ void IndirectTools::runClicked() {
   m_tabs[tabIndex]->runTab();
 }
 
-/**
- * Opens the settings dialog
- */
-void IndirectTools::settingsClicked() {
-  m_settings->loadSettings();
-  m_settings->show();
-}
-
-/**
- * Slot to open a new browser window and navigate to the help page
- * on the wiki for the currently selected tab.
- */
-void IndirectTools::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Indirect Tools"));
-}
-
-/**
- * Slot to show the manage user dicrectories dialog when the user clicks
- * the button on the interface.
- */
-void IndirectTools::manageUserDirectories() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message :: The message to display in the message box
- */
-void IndirectTools::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectTools::documentationPage() const {
+  return "Indirect Tools";
 }
 
 IndirectTools::~IndirectTools() {}
