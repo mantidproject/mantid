@@ -55,6 +55,9 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
   auto times = timeSeriesProperty->timesAsVector();
   // Shift the time
   for (auto it = times.begin(); it != times.end(); ++it) {
+    // There is a known issue which can cause cloneWithTimeShift to be called
+    // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
+    // seconds in DateAndTime::operator+=
     (*it) += timeShift;
   }
   timeSeriesProperty->clear();
