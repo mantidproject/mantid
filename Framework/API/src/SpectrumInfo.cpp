@@ -81,10 +81,10 @@ double SpectrumInfo::l2(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::twoTheta(const size_t index) const {
-  double twoTheta{0.0};
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    twoTheta += m_detectorInfo.twoTheta(detIndex);
-  return twoTheta / static_cast<double>(spectrumDefinition(index).size());
+  V3D avPos = position(index);
+  auto beamLine = samplePosition() - sourcePosition();
+  auto detLine = avPos - samplePosition();
+  return detLine.angle(beamLine);
 }
 
 /** Returns the signed scattering angle 2 theta in radians (angle w.r.t. to beam
