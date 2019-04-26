@@ -41,6 +41,8 @@ public:
   std::string getStringOrDefault(std::string const &propertyName,
                                  std::string const &parameterName,
                                  std::string const &defaultValue) const;
+  std::string getStringOrEmpty(std::string const &propertyName,
+                               std::string const &parameterName) const;
   std::string getString(std::string const &propertyName,
                         std::string const &parameterName) const;
 

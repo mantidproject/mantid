@@ -8,9 +8,20 @@
 #include "Common/OptionDefaults.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Experiment.h"
+#include "PerThetaDefaultsTableValidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
+std::string stringValueOrEmpty(boost::optional<double> value) {
+  return value ? std::to_string(*value) : "";
+}
+}
+
 Experiment
 experimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(instrument);
@@ -42,34 +53,45 @@ experimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
       defaults.getDoubleOrZero("StartOverlap", "TransRunStartOverlap"),
       defaults.getDoubleOrZero("EndOverlap", "TransRunEndOverlap"));
 
+  if (!transmissionRunRange.isValid(false))
+    throw std::invalid_argument("Transmission run overlap range is invalid");
+
   // We currently don't specify stitch parameters in the parameters file
   // although we
   auto stitchParameters = std::map<std::string, std::string>();
 
   // For per-theta defaults, we can only specify defaults for the wildcard row
-  // i.e.
-  // where theta is empty. It probably doesn't make sense to specify
-  // tranmsission runs
-  // so leave that empty.
-  auto theta = boost::none;
-  auto transmissionRuns = TransmissionRunPair();
-  auto qRange = RangeInQ(
-      defaults.getOptionalValue<double>("MomentumTransferMin", "QMin"),
-      defaults.getOptionalValue<double>("MomentumTransferStep", "dQ/Q"),
-      defaults.getOptionalValue<double>("MomentumTransferMax", "QMax"));
-  auto scaleFactor =
+  // i.e.  where theta is empty. It probably doesn't make sense to specify
+  // tranmsission runs so leave that empty.
+  auto const theta = std::string("");
+  auto const firstTransmissionRun = std::string("");
+  auto const secondTransmissionRun = std::string("");
+  auto const qMin = stringValueOrEmpty(defaults.getOptionalValue<double>(
+      "MomentumTransferMin", "QMin"));
+  auto const qMax = stringValueOrEmpty(defaults.getOptionalValue<double>(
+      "MomentumTransferMax", "QMax"));
+  auto const qStep = stringValueOrEmpty(defaults.getOptionalValue<double>(
+      "MomentumTransferStep", "dQ/Q"));
+  auto const maybeScaleFactor =
       defaults.getOptionalValue<double>("ScaleFactor", "ScaleFactor");
-  auto processingInstructions = defaults.getOptionalValue<std::string>(
-      "ProcessingInstructions", "ProcessingInstructions");
-  auto perThetaDefaults = std::vector<PerThetaDefaults>();
-  perThetaDefaults.emplace_back(theta, transmissionRuns, qRange, scaleFactor,
-                                processingInstructions);
-
+  auto const scaleFactor = stringValueOrEmpty(maybeScaleFactor);
+  auto const processingInstructions = defaults.getStringOrEmpty("ProcessingInstructions",
+                                                                "ProcessingInstructions");
+  auto perThetaDefaults = std::vector<std::array<std::string, 8>>();
+  perThetaDefaults.emplace_back(std::array<std::string, 8>{
+      theta,firstTransmissionRun, secondTransmissionRun,
+      qMin, qMax, qStep, scaleFactor, processingInstructions});
+  auto validate = PerThetaDefaultsTableValidator();
+  auto const tolerance = 0.0; // irrelevant because theta is empty
+  auto perThetaValidationResult = validate(perThetaDefaults, tolerance);
+  if (!perThetaValidationResult.isValid())
+    throw std::invalid_argument("Errors were found in the per-angle default values");
+  
   return Experiment(
       analysisMode, reductionType, summationType, includePartialBins, debug,
       std::move(polarizationCorrections), std::move(floodCorrections),
       std::move(transmissionRunRange), std::move(stitchParameters),
-      std::move(perThetaDefaults));
+      std::move(perThetaValidationResult.assertValid()));
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

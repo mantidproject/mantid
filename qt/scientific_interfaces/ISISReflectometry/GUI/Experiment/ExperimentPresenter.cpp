@@ -255,10 +255,9 @@ void ExperimentPresenter::updateViewFromModel() {
   if (m_model.transmissionRunRange()) {
     m_view->setTransmissionStartOverlap(m_model.transmissionRunRange()->min());
     m_view->setTransmissionEndOverlap(m_model.transmissionRunRange()->max());
-    if (m_model.transmissionRunRange()->isValid(false))
-      m_view->showTransmissionRangeValid();
-    else
-      m_view->showTransmissionRangeInvalid();
+  } else {
+    m_view->setTransmissionStartOverlap(0.0);
+    m_view->setTransmissionEndOverlap(0.0);
   }
   m_view->setPolarizationCorrectionType(polarizationCorrectionTypeToString(
       m_model.polarizationCorrections().correctionType()));
@@ -269,9 +268,10 @@ void ExperimentPresenter::updateViewFromModel() {
   else
     m_view->setFloodWorkspace("");
   m_view->setStitchOptions(m_model.stitchParametersString());
-  // The model can't be created with invalid stitch parameters so always set
-  // them
-  // to be valid
+
+  // We don't allow invalid config so reset all state to valid
+  m_view->showAllPerAngleOptionsAsValid();
+  m_view->showTransmissionRangeValid();
   m_view->showStitchParametersValid();
 
   updateWidgetEnabledState();

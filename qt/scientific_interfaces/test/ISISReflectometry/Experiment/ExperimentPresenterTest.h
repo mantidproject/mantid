@@ -525,6 +525,7 @@ public:
     expectInstrumentWithParameters("TransmissionRunRange");
     EXPECT_CALL(m_view, setTransmissionStartOverlap(10.0)).Times(1);
     EXPECT_CALL(m_view, setTransmissionEndOverlap(12.0)).Times(1);
+    EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
