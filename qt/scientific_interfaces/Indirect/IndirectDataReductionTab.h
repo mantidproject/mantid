@@ -92,7 +92,7 @@ private slots:
   void tabExecutionComplete(bool error);
 
 private:
-  virtual void setFileExtensionsByName(bool filter) = 0;
+  virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
 
   IndirectDataReduction *m_idrUI;
   bool m_tabRunning;
