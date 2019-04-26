@@ -172,23 +172,29 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
     user_win->setInterfaceName(interface_name);
     user_win->initializeLayout();
 
-    auto &existingWindows = existingInterfaces();
-    existingWindows.erase(std::remove_if(existingWindows.begin(),
-                                         existingWindows.end(),
-                                         [](QPointer<UserSubWindow> &window) {
-                                           return window.isNull();
-                                         }),
-                          existingWindows.end());
-
-    for (auto &window : existingWindows)
-      window->otherUserSubWindowCreated(user_win);
-
-    existingWindows.append(user_win);
+    notifyExistingInterfaces(user_win);
 
   } else {
     g_log.error() << "Error creating interface " << iname << "\n";
   }
   return user_win;
+}
+
+void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
+  auto &existingWindows = existingInterfaces();
+  existingWindows.erase(std::remove_if(existingWindows.begin(),
+                                       existingWindows.end(),
+                                       [](QPointer<UserSubWindow> &window) {
+                                         return window.isNull();
+                                       }),
+                        existingWindows.end());
+
+  for (auto &window : existingWindows)
+    window->otherUserSubWindowCreated(newWindow);
+
+  newWindow->otherUserSubWindowCreated(existingWindows);
+
+  existingWindows.append(newWindow);
 }
 
 /**

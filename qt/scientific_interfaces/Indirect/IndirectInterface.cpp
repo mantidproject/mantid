@@ -7,6 +7,7 @@
 #include "IndirectInterface.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 using namespace MantidQt::API;
@@ -16,8 +17,8 @@ namespace CustomInterfaces {
 
 IndirectInterface::IndirectInterface(QWidget *parent)
     : UserSubWindow(parent),
-      m_settings(Mantid::Kernel::make_unique<IndirectSettings>(this)) {
-  m_settings->initLayout();
+      m_settings(dynamic_cast<IndirectSettings *>(
+          InterfaceManager().createSubWindow("Settings"))) {
 
   connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
@@ -31,6 +32,7 @@ void IndirectInterface::help() {
 void IndirectInterface::settings() {
   m_settings->loadSettings();
   m_settings->show();
+  m_settings->setFocus();
 }
 
 void IndirectInterface::applySettings() {

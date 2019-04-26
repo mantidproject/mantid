@@ -44,6 +44,12 @@ private slots:
   void closeSettings();
 
 private:
+  void otherUserSubWindowCreated(QPointer<UserSubWindow> window) override;
+  void
+  otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
+
+  void connectIndirectInterface(QPointer<UserSubWindow> window);
+
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
   Ui::IndirectSettings m_uiForm;
 };

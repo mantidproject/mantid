@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettings.h"
+#include "IndirectInterface.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,6 +26,24 @@ void IndirectSettings::initLayout() {
           SIGNAL(applySettings()));
   connect(m_presenter.get(), SIGNAL(closeSettings()), this,
           SLOT(closeSettings()));
+}
+
+void IndirectSettings::otherUserSubWindowCreated(
+    QPointer<UserSubWindow> window) {
+  connectIndirectInterface(window);
+}
+
+void IndirectSettings::otherUserSubWindowCreated(
+    QList<QPointer<UserSubWindow>> &windows) {
+  for (auto &window : windows)
+    connectIndirectInterface(window);
+}
+
+void IndirectSettings::connectIndirectInterface(
+    QPointer<UserSubWindow> window) {
+  if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data()))
+    connect(m_presenter.get(), SIGNAL(applySettings()), indirectInterface,
+            SLOT(applySettings()));
 }
 
 std::map<std::string, QVariant> IndirectSettings::getSettings() const {

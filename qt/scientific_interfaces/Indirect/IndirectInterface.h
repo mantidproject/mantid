@@ -33,8 +33,8 @@ private slots:
   void applySettings();
 
 private:
-  virtual void initLayout() override = 0;
-  virtual std::string documentationPage() const = 0;
+  virtual void initLayout() override{};
+  virtual std::string documentationPage() const { return ""; };
 
   virtual void applySettings(std::map<std::string, QVariant> &settings);
 

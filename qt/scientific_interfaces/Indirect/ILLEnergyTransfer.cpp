@@ -325,10 +325,6 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
   }
 }
 
-void ILLEnergyTransfer::setFileExtensionsByName(bool filter) {
-  UNUSED_ARG(filter);
-}
-
 /**
  * Handle when Run is clicked
  */

@@ -48,7 +48,7 @@ class IndirectDataAnalysis : public IndirectInterface {
 public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "Data Analysis"; }
-  // This interface's categories.
+  /// This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
   explicit IndirectDataAnalysis(QWidget *parent = nullptr);
