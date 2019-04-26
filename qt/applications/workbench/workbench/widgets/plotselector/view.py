@@ -622,14 +622,14 @@ class PlotNameWidget(QWidget):
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
 
-        shown_icon = get_icon('fa.eye')
+        shown_icon = get_icon('mdi.eye')
         self.hide_button = QPushButton(shown_icon, "")
         self.hide_button.setToolTip('Hide')
         self.hide_button.setFlat(True)
         self.hide_button.setMaximumWidth(self.hide_button.iconSize().width() * 5 / 3)
         self.hide_button.clicked.connect(self.toggle_visibility)
 
-        rename_icon = get_icon('fa.edit')
+        rename_icon = get_icon('mdi.square-edit-outline')
         self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setToolTip('Rename')
         self.rename_button.setFlat(True)
@@ -637,7 +637,7 @@ class PlotNameWidget(QWidget):
         self.rename_button.setCheckable(True)
         self.rename_button.toggled.connect(self.rename_button_toggled)
 
-        close_icon = get_icon('fa.close')
+        close_icon = get_icon('mdi.close')
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setToolTip('Delete')
         self.close_button.setFlat(True)
@@ -722,10 +722,10 @@ class PlotNameWidget(QWidget):
         :param is_shown: True if plot is shown, false if hidden
         """
         if is_shown:
-            self.hide_button.setIcon(get_icon('fa.eye'))
+            self.hide_button.setIcon(get_icon('mdi.eye'))
             self.hide_button.setToolTip('Hide')
         else:
-            self.hide_button.setIcon(get_icon('fa.eye', color='lightgrey'))
+            self.hide_button.setIcon(get_icon('mdi.eye', 'lightgrey'))
             self.hide_button.setToolTip('Show')
 
     def rename_plot(self):

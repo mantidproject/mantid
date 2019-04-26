@@ -1,7 +1,7 @@
 include(SipQtTargetFunctions)
 
-set(COMMON_INC_DIR ../../widgets/common/inc)
-set(COMMON_SIP_DIR ../common_sip)
+set(COMMON_INC_DIR ${CMAKE_CURRENT_LIST_DIR}/../../widgets/common/inc)
+set(COMMON_SIP_DIR ${CMAKE_CURRENT_LIST_DIR}/../common_sip)
 set(
   _header_depends
   ${COMMON_SIP_DIR}/SIPVector.h
@@ -89,4 +89,5 @@ if(ENABLE_WORKBENCH)
                      FOLDER Qt5)
 endif()
 
+add_subdirectory(icons)
 add_subdirectory(widgets/instrumentview)

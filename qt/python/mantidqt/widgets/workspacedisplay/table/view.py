@@ -42,8 +42,8 @@ class TableWorkspaceDisplayView(QTableWidget):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
-        self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
-        self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
+        self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
+        self.DELETE_ROW = mantidqt.icons.get_icon("mdi.minus-box-outline")
 
         item_delegate = QStyledItemDelegate(self)
         item_delegate.setItemEditorFactory(PreciseDoubleFactory())
