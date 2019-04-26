@@ -7,7 +7,7 @@
 //-----------------------------------------------
 // Includes
 //-----------------------------------------------
-#include "MantidQtWidgets/Common/UserSubWindowFactoryImpl.h"
+#include "MantidQtWidgets/Common/UserSubWindowFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include <sstream>

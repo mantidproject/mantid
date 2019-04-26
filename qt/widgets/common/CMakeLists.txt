@@ -61,7 +61,7 @@ set(QT5_SRC_FILES
     src/UserFunctionDialog.cpp
     src/UserInputValidator.cpp
     src/UserSubWindow.cpp
-    UserSubWindowFactory.cpp
+    src/UserSubWindowFactory.cpp
     src/VatesViewerInterface.cpp
     src/WidgetScrollbarDecorator.cpp
     src/WorkspaceIcons.cpp

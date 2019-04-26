@@ -24,7 +24,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "AlgorithmDialogFactoryImpl.h"
+#include "AlgorithmDialogFactory.h"
 #include "DllOption.h"
 
 // Could have forward declared this but it makes it easier to use from

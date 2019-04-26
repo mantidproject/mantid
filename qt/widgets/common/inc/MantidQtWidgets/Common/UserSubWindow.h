@@ -25,7 +25,7 @@
 //----------------------------------
 #include "DllOption.h"
 #include "PythonRunner.h"
-#include "UserSubWindowFactoryImpl.h"
+#include "UserSubWindowFactory.h"
 
 #include <QLabel>
 #include <QMainWindow>
