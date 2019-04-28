@@ -10,7 +10,7 @@ import math
 from itertools import product
 import sys
 from mantid.simpleapi import MoveInstrumentComponent, CropWorkspace
-print "use me"
+
 attenuation_correction_pre_2016 = {1.0: 0.007655, -1.0: 1.0, -1.0: 0.005886}  #values for att_pos 2 and 4 shall not make sense; those attenuators have not been in use that time
 attenuation_correction_post_2016 = {1.0: 1.0, 2.0: 0.00955, 3.0: 0.005886, 4.0: 0.00290, 5.0: 0.00062}
 
