@@ -831,8 +831,9 @@ the first two hours"""
                     .format(self._nxspe_psi_angle_log)
                 self.log().error(error_message)
 
-        wsSqwName = prefix + '_divided_sqw' \
-            if isSample and self._doNorm else wsName + '_sqw'
+        wsSqwName = prefix if isSample is True else wsName
+        wsSqwName += '_divided_sqw' if self._doNorm is True else '_sqw'
+
         sapi.SofQW3(InputWorkspace=wsName,
                     QAxisBinning=self._qBins,
                     EMode='Indirect',

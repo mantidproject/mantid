@@ -12,6 +12,8 @@ import sys
 import PyQt4.QtGui as QtGui
 
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import message_box
 
@@ -23,7 +25,7 @@ class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
         load = load_utils.LoadUtils()
         if not load.MuonAnalysisExists:
             return
-        self.transform = TransformWidget(load = load, parent = self)
+        self.transform = TransformWidget(load, FFTWidget, MaxEntWidget, parent = self)
 
         self.setCentralWidget(self.transform.widget)
         self.setWindowTitle("Frequency Domain Analysis")

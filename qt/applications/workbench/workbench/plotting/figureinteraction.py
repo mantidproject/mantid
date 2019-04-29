@@ -101,9 +101,11 @@ class FigureInteraction(object):
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
                 move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif ax.xaxis.contains(event)[0]:
+            elif (ax.xaxis.contains(event)[0] or
+                  any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
                 move_and_show(XAxisEditor(canvas, ax))
-            elif ax.yaxis.contains(event)[0]:
+            elif (ax.yaxis.contains(event)[0] or
+                  any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
                 move_and_show(YAxisEditor(canvas, ax))
 
     def _show_context_menu(self, event):

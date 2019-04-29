@@ -13,8 +13,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/lexical_cast.hpp>
-
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 

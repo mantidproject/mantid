@@ -3,6 +3,8 @@
 set ( TEST_PY_FILES
    FFTModel_test.py
    FFTPresenter_test.py
+   fft_presenter_new_test.py
+   fft_presenter_context_interaction_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
@@ -31,6 +33,7 @@ set ( TEST_PY_FILES
    LoadWidgetView_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
+   max_ent_presenter_load_interaction_test.py
    muon_context_test.py
    muon_data_context_test.py
    muon_gui_context_test.py

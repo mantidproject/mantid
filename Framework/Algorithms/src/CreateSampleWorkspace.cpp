@@ -118,7 +118,7 @@ void CreateSampleWorkspace::init() {
   std::vector<std::string> functionOptions;
   functionOptions.reserve(m_preDefinedFunctionmap.size());
   for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
-    functionOptions.push_back(preDefinedFunction.first);
+    functionOptions.emplace_back(preDefinedFunction.first);
   }
   declareProperty("Function", "One Peak",
                   boost::make_shared<StringListValidator>(functionOptions),
