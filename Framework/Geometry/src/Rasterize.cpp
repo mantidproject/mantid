@@ -104,7 +104,8 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection,
   Track incoming(position, -beamDirection);
 
   shape.interceptSurface(incoming);
-  return incoming.distFromStart();
+
+  return incoming.distInsideObject();
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,

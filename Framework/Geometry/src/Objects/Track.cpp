@@ -233,13 +233,6 @@ void Track::buildLink() {
   m_surfPoints.clear();
 }
 
-double Track::distFromStart() const {
-  return std::accumulate(m_links.begin(), m_links.end(), 0.,
-                         [](double total, const auto &link) {
-                           return total + link.distFromStart;
-                         });
-}
-
 double Track::distInsideObject() const {
   return std::accumulate(m_links.begin(), m_links.end(), 0.,
                          [](double total, const auto &link) {

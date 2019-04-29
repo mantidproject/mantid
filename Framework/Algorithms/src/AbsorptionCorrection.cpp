@@ -459,7 +459,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
       // AbsorptionCorrection::calculateDistances");
     } else // The normal situation
     {
-      L2s[i] = outgoing.distFromStart();
+      L2s[i] = outgoing.distInsideObject();
     }
   }
 }

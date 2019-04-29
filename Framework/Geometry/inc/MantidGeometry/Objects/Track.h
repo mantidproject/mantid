@@ -169,8 +169,6 @@ public:
   const Kernel::V3D &startPoint() const { return m_startPoint; }
   /// Returns the direction as a unit vector
   const Kernel::V3D &direction() const { return m_unitVector; }
-  /// Total distance from track beginning
-  double distFromStart() const;
   /// Total distance covered inside object
   double distInsideObject() const;
   /// Returns an interator to the start of the set of links
