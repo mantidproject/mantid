@@ -23,6 +23,7 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu
 
 # local imports
+from mantid.api import AnalysisDataService as ads
 from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -126,6 +127,7 @@ class FigureInteraction(object):
             self.fit_browser.add_to_menu(menu)
             menu.addSeparator()
         self._add_axes_scale_menu(menu)
+        self._add_normalization_option_menu(menu)
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu):
@@ -140,6 +142,60 @@ class FigureInteraction(object):
                 action.setChecked(True)
             axes_actions.addAction(action)
         menu.addMenu(axes_menu)
+
+    def _add_normalization_option_menu(self, menu):
+        # Check if toggling normalization makes sense
+        axes = self.canvas.figure.get_axes()
+        can_toggle_normalization = self._can_toggle_normalization(axes)
+        if not can_toggle_normalization:
+            return None
+
+        # Create menu
+        norm_menu = QMenu("Normalization", menu)
+        norm_actions_group = QActionGroup(norm_menu)
+        none_action = norm_menu.addAction('None', self._normalize_none)
+        norm_action = norm_menu.addAction('Bin Width', self._normalize_bin_width)
+        for action in [none_action, norm_action]:
+            norm_actions_group.addAction(action)
+            action.setCheckable(True)
+
+        # Update menu state
+        is_normalized = self._is_normalized(axes)
+        if is_normalized:
+            norm_action.setChecked(True)
+            none_action.setChecked(False)
+        else:
+            norm_action.setChecked(False)
+            none_action.setChecked(True)
+
+        menu.addMenu(norm_menu)
+
+    def _is_normalized(self, axes):
+        return axes[0].tracked_workspaces.values()[0][0].is_distribution
+
+    def _normalize_bin_width(self):
+        print('Normalize')
+
+    def _normalize_none(self):
+        print('None')
+
+    def _can_toggle_normalization(self, axes):
+        """
+        Return True if no plotted workspaces are distributions and all curves
+        on the figure are either distributions or non-distributions. Return
+        False otherwise.
+        :return: bool
+        """
+        plotted_as_distribution = []
+        for ax in axes:
+            for workspace_name, artists in ax.tracked_workspaces.items():
+                if not ads.retrieve(workspace_name).isDistribution():
+                    plotted_as_distribution += [a.is_distribution for a in artists]
+                else:
+                    return False
+        if len(set(plotted_as_distribution)) > 1:
+            return False
+        return True
 
     def _get_axes_scale_types(self):
         """Return a 2-tuple containing the axis scale types if all Axes on the figure are the same

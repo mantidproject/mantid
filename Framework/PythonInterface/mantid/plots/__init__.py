@@ -53,6 +53,8 @@ except ImportError:
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
+from mantid.kernel import config
+
 
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
@@ -74,16 +76,19 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb, spec_num=None):
+    def __init__(self, artists, data_replace_cb, is_distribution,
+                 spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
+        :param is_distribution: bool specifying whether the line being plotted is a distribution
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
         self.spec_num = spec_num
+        self.is_distribution = is_distribution
 
     def remove(self, axes):
         """
@@ -239,10 +244,36 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
+            plotted_as_distribution = (workspace.isDistribution() or
+                                       self._on_off_to_bool(config['graph1d.autodistribution']))
+            self.check_axes_distribution_consistency(plotted_as_distribution)
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
+                                                 plotted_as_distribution,
                                                  spec_num))
-
         return artists
+
+    @staticmethod
+    def _on_off_to_bool(on_or_off):
+        if on_or_off.lower() == 'on':
+            return True
+        elif on_or_off.lower() == 'off':
+            return False
+        raise ValueError("Argument must be 'On' or 'Off'!")
+
+    def check_axes_distribution_consistency(self, plotted_as_distribution):
+        """
+        Checks if new workspace to be plotted is consistent with current
+        workspaces on axes in regard to being plotted as distributions.
+        Displays a warning if not.
+        """
+        tracked_ws_distributions = []
+        for artists in self.tracked_workspaces.values():
+            for artist in artists:
+                tracked_ws_distributions.append(artist.is_distribution)
+        if len(tracked_ws_distributions) > 0:
+            if any(tracked_ws_distributions) != plotted_as_distribution:
+                logger.warning("You are overlaying distribution and "
+                               "non-distribution data!")
 
     def remove_workspace_artists(self, workspace):
         """
