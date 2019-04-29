@@ -26,8 +26,8 @@ using namespace Mantid::PhysicalConstants;
 
 namespace { // anonymous
 
-const V3D X_AXIS{ 1.0, 0.0, 0.0 };
-const V3D Z_AXIS{ 0.0, 0.0, 1.0 };
+const V3D X_AXIS{1.0, 0.0, 0.0};
+const V3D Z_AXIS{0.0, 0.0, 1.0};
 
 /* The HRPD sample holders consist of a cuboid void for the sample of
    18x23 mm and some thickness, 0.125mm vanadium foil windows front
@@ -36,11 +36,10 @@ const V3D Z_AXIS{ 0.0, 0.0, 1.0 };
    bank.
  */
 
-constexpr double VAN_WINDOW_THICKNESS{ 0.000125 }; // in m
-constexpr double VAN_RHO{ 0.07192 * 100 };         // in Angstroms-3 * 100
-constexpr double VAN_REF_ATTEN{ -5.08 * VAN_RHO /
-                                NeutronAtom::ReferenceLambda };
-constexpr double VAN_SCATT{ -5.1 * VAN_RHO };
+constexpr double VAN_WINDOW_THICKNESS{0.000125}; // in m
+constexpr double VAN_RHO{0.07192 * 100};         // in Angstroms-3 * 100
+constexpr double VAN_REF_ATTEN{-5.08 * VAN_RHO / NeutronAtom::ReferenceLambda};
+constexpr double VAN_SCATT{-5.1 * VAN_RHO};
 
 namespace PropertyNames {
 const std::string INPUT_WKSP("InputWorkspace");
@@ -52,15 +51,15 @@ const std::string THICKNESS("Thickness");
 const std::string NUM_WL_POINTS("NumberOfWavelengthPoints");
 const std::string EXP_METHOD("ExpMethod");
 const std::string ELE_SIZE("ElementSize"); // is not used
-}
+} // namespace PropertyNames
 
-} // anonymous
+} // namespace
 
 void HRPDSlabCanAbsorption::init() {
-  declareProperty(make_unique<WorkspaceProperty<> >(PropertyNames::INPUT_WKSP,
-                                                    "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<> >(PropertyNames::OUTPUT_WKSP,
-                                                    "", Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP,
+                                                   "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WKSP,
+                                                   "", Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -75,7 +74,7 @@ void HRPDSlabCanAbsorption::init() {
                   "The number density of the sample in number of atoms per "
                   "cubic angstrom if not set with SetSampleMaterial");
 
-  const std::vector<std::string> thicknesses{ "0.2", "0.5", "1.0", "1.5" };
+  const std::vector<std::string> thicknesses{"0.2", "0.5", "1.0", "1.5"};
   declareProperty(PropertyNames::THICKNESS, thicknesses[0],
                   boost::make_shared<StringListValidator>(thicknesses));
 
@@ -113,7 +112,6 @@ void HRPDSlabCanAbsorption::exec() {
      calculated from - I'm taking the centre of the plate (in any
      case this would only make a very small difference)
    */
-
 
   const size_t numHists = workspace->getNumberHistograms();
   const size_t specSize = workspace->blocksize();

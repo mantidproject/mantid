@@ -20,7 +20,7 @@ namespace Mantid {
 namespace PhysicalConstants {
 
 namespace {
-constexpr double INV_FOUR_PI{ 1. / (4. * M_PI) };
+constexpr double INV_FOUR_PI{1. / (4. * M_PI)};
 }
 
 void calculateScatteringLengths(NeutronAtom &atom) {
