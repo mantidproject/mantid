@@ -7,15 +7,15 @@
 #ifndef LOADINSTRUMENTTEST_H_
 #define LOADINSTRUMENTTEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -40,22 +40,23 @@ using Mantid::HistogramData::Points;
 class LoadInstrumentTest : public CxxTest::TestSuite {
 public:
   void testInit() {
+    LoadInstrument loader;
     TS_ASSERT(!loader.isInitialized());
     loader.initialize();
     TS_ASSERT(loader.isInitialized());
   }
 
   void testExecHET() {
-    if (!loader.isInitialized())
-      loader.initialize();
+    LoadInstrument loader;
+    loader.initialize();
+    loader.setChild(true);
 
     // create a workspace with some sample data
-    wsName = "LoadInstrumentTestHET";
     int histogramNumber = 2584;
     int timechannels = 100;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, timechannels, timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(
+        histogramNumber, HistogramData::Points(timechannels, timechannels));
+
     Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
     // loop to create data
     for (int i = 0; i < histogramNumber; i++) {
@@ -72,36 +73,28 @@ public:
       ws2D->dataE(i) = e;
     }
 
-    // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
     // We want to test id the spectra mapping changes
     TS_ASSERT_EQUALS(ws2D->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(ws2D->getSpectrum(256).getSpectrumNo(), 257);
     TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
 
-    loader.setPropertyValue("Filename", "HET_Definition.xml");
+    const std::string instrFilename = "HET_Definition.xml";
+    loader.setPropertyValue("Filename", instrFilename);
     loader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    inputFile = loader.getPropertyValue("Filename");
-    loader.setPropertyValue("Workspace", wsName);
+    loader.setProperty("Workspace", ws2D);
 
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(inputFile));
+    std::string result = loader.getPropertyValue("Filename");
+    const std::string::size_type stripPath = result.find_last_of("\\/");
+    result = result.substr(stripPath + 1, result.size());
+    TS_ASSERT_EQUALS(result, instrFilename);
 
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Workspace"));
-    TS_ASSERT(!result.compare(wsName));
-
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-
+    loader.execute();
     TS_ASSERT(loader.isExecuted());
 
     TS_ASSERT_EQUALS(loader.getPropertyValue("MonitorList"), "601,602,603,604");
 
     // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
     boost::shared_ptr<const Instrument> i =
         output->getInstrument()->baseInstrument();
@@ -161,11 +154,11 @@ public:
     output->setInstrument(instr);
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
     LoadInstrument loadAgain;
-    TS_ASSERT_THROWS_NOTHING(loadAgain.initialize());
-    loadAgain.setPropertyValue("Filename", inputFile);
-    loadAgain.setPropertyValue("Workspace", wsName);
+    loadAgain.initialize();
+    loadAgain.setPropertyValue("Filename", instrFilename);
+    loadAgain.setProperty("Workspace", ws2D);
     loadAgain.setProperty("RewriteSpectraMap", OptionalBool(true));
-    TS_ASSERT_THROWS_NOTHING(loadAgain.execute());
+    loadAgain.execute();
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), i);
 
     // Valid-from/to1951-01-01 00:00:01
@@ -173,45 +166,32 @@ public:
     Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     TS_ASSERT_EQUALS(i->getValidFromDate(), validFrom);
     TS_ASSERT_EQUALS(i->getValidToDate(), validTo);
-
-    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecSLS() {
     LoadInstrument loaderSLS;
-
-    TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
+    loaderSLS.initialize();
+    loaderSLS.setChild(true);
 
     // create a workspace with some sample data
-    wsName = "LoadInstrumentTestSLS";
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
-    // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-    loaderSLS.setPropertyValue("Filename", "SANDALS_Definition.xml");
+    const std::string instrFilename = "SANDALS_Definition.xml";
+    loaderSLS.setPropertyValue("Filename", instrFilename);
     loaderSLS.setProperty("RewriteSpectraMap", OptionalBool(true));
-    inputFile = loaderSLS.getPropertyValue("Filename");
+    loaderSLS.setProperty("Workspace", ws2D);
 
-    loaderSLS.setPropertyValue("Workspace", wsName);
+    std::string result = loaderSLS.getPropertyValue("Filename");
+    const std::string::size_type stripPath = result.find_last_of("\\/");
+    result = result.substr(stripPath + 1, result.size());
+    TS_ASSERT_EQUALS(result, instrFilename);
 
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = loaderSLS.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING(result = loaderSLS.getPropertyValue("Workspace"));
-    TS_ASSERT(!result.compare(wsName));
-
-    TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
-
+    loaderSLS.execute();
     TS_ASSERT(loaderSLS.isExecuted());
 
     // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    MatrixWorkspace_sptr output = loaderSLS.getProperty("Workspace");
 
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IComponent> source = i->getSource();
@@ -239,64 +219,225 @@ public:
     // test of sample shape
     TS_ASSERT(samplepos->isValid(V3D(0.0, 0.0, 0.005) + samplepos->getPos()));
     TS_ASSERT(!samplepos->isValid(V3D(0.0, 0.0, 0.05) + samplepos->getPos()));
-
-    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecNIMROD() {
     LoadInstrument loaderNIMROD;
-
-    TS_ASSERT_THROWS_NOTHING(loaderNIMROD.initialize());
+    loaderNIMROD.initialize();
+    loaderNIMROD.setChild(true);
 
     // create a workspace with some sample data
-    wsName = "LoadInstrumentTestNIMROD";
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
-    // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    loaderNIMROD.setPropertyValue("Filename", "NIM_Definition.xml");
+    const std::string instrFilename = "NIM_Definition.xml";
+    loaderNIMROD.setPropertyValue("Filename", instrFilename);
     loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
-    inputFile = loaderNIMROD.getPropertyValue("Filename");
+    loaderNIMROD.setProperty("Workspace", ws2D);
 
-    loaderNIMROD.setPropertyValue("Workspace", wsName);
+    std::string result = loaderNIMROD.getPropertyValue("Filename");
+    const std::string::size_type stripPath = result.find_last_of("\\/");
+    result = result.substr(stripPath + 1, result.size());
+    TS_ASSERT_EQUALS(result, instrFilename);
 
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loaderNIMROD.getPropertyValue("Filename"));
-    TS_ASSERT(!result.compare(inputFile));
-
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loaderNIMROD.getPropertyValue("Workspace"));
-    TS_ASSERT(!result.compare(wsName));
-
-    TS_ASSERT_THROWS_NOTHING(loaderNIMROD.execute());
-
+    loaderNIMROD.execute();
     TS_ASSERT(loaderNIMROD.isExecuted());
 
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
-
-    const auto &detectorInfo = output->detectorInfo();
+    const auto &detectorInfo = ws2D->detectorInfo();
     const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20201001));
     TS_ASSERT_EQUALS(ptrDet.getName(), "det 1");
     TS_ASSERT_EQUALS(ptrDet.getID(), 20201001);
     TS_ASSERT_DELTA(ptrDet.getPos().X(), -0.0909, 0.0001);
     TS_ASSERT_DELTA(ptrDet.getPos().Y(), 0.3983, 0.0001);
     TS_ASSERT_DELTA(ptrDet.getPos().Z(), 4.8888, 0.0001);
+  }
 
-    AnalysisDataService::Instance().remove(wsName);
+  void testExecNIMRODandRetrieveFromIDS() {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl &IDS = InstrumentDataService::Instance();
+    IDS.clear();
+
+    LoadInstrument loaderNIMROD;
+    loaderNIMROD.initialize();
+    loaderNIMROD.setChild(true);
+
+    // create a workspace with some sample data
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+
+    const std::string instrFilename = "NIM_Definition.xml";
+    loaderNIMROD.setPropertyValue("Filename", instrFilename);
+    loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loaderNIMROD.setProperty("Workspace", ws2D);
+    loaderNIMROD.execute();
+    TS_ASSERT(loaderNIMROD.isExecuted());
+
+    TS_ASSERT_EQUALS(IDS.size(), 1);
+    if (IDS.size() != 1)
+      return;
+    // Retrieve the instrument from the InstrumentDataService
+    Instrument_const_sptr nimrodInst = IDS.getObjects()[0];
+    TS_ASSERT_EQUALS(nimrodInst->getName(), "NIM");
+    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 1521);
+    int a_random_id = 20201001;
+    TS_ASSERT_EQUALS((nimrodInst->getDetector(a_random_id))->getID(),
+                     a_random_id);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().X(),
+                    -0.0909, 0.0001);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Y(),
+                    0.3983, 0.0001);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Z(),
+                    4.8888, 0.0001);
+  }
+
+  void testExecMARIFromInstrName() {
+    LoadInstrument loaderMARI;
+    loaderMARI.initialize();
+    loaderMARI.setChild(true);
+
+    // create a workspace with some sample data
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+
+    const std::string instrName = "MARI";
+    loaderMARI.setPropertyValue("InstrumentName", instrName);
+    loaderMARI.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loaderMARI.setProperty("Workspace", ws2D);
+
+    loaderMARI.execute();
+    TS_ASSERT(loaderMARI.isExecuted());
+
+    std::string result = loaderMARI.getPropertyValue("Filename");
+    const std::string::size_type stripPath = result.find_last_of("\\/");
+    result = result.substr(stripPath + 1, result.size());
+    TS_ASSERT_EQUALS(result, "MARI_Definition.xml");
+
+    auto &componentInfo = ws2D->componentInfo();
+    auto &detectorInfo = ws2D->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "MARI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 921);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(4816, detectorInfo.detectorIDs()[920]);
+
+    const auto &ptrDet1 = detectorInfo.detector(detectorInfo.indexOf(1));
+    TS_ASSERT_EQUALS(ptrDet1.getName(), "monitor");
+    TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
+    TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -3.2500, 0.0001);
+
+    const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
+    TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");
+    TS_ASSERT_EQUALS(ptrDet2.getID(), 4816);
+    TS_ASSERT_DELTA(ptrDet2.getPos().X(), 0.6330, 0.0001);
+    TS_ASSERT_DELTA(ptrDet2.getPos().Y(), 0.6330, 0.0001);
+    TS_ASSERT_DELTA(ptrDet2.getPos().Z(), 3.9211, 0.0001);
+  }
+
+  /// Common initialisation for Nexus loading tests
+  MatrixWorkspace_sptr doLoadNexus(const std::string filename) {
+    LoadInstrument nexusLoader;
+    nexusLoader.initialize();
+    nexusLoader.setChild(true);
+    // Create a workspace
+    // Note that using `auto ws = DataObjects::create<Workspace2D>...` here
+    // prevents us from then setting `loaderLOKI.setProperty("Workspace", ws)`
+    // because the `unique_ptr` will not allow itself to be copied into the
+    // `shared_ptr` as a l-value reference.
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    nexusLoader.setPropertyValue("Filename", filename);
+    nexusLoader.setProperty("Workspace", ws);
+    nexusLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    nexusLoader.execute();
+    TS_ASSERT(nexusLoader.isExecuted());
+    return nexusLoader.getProperty("Workspace");
+  }
+
+  /// Test the Nexus geometry loader from LOKI file
+  void testExecNexusLOKI() {
+    MatrixWorkspace_sptr outputWs = doLoadNexus("LOKI_Definition.hdf5");
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
+  }
+
+  /// Test the Nexus geometry loader from SANS2D file
+  void testExecNexusSANS2D() {
+    MatrixWorkspace_sptr outputWs = doLoadNexus("SANS2D_Definition_Tubes.hdf5");
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "SANS2D");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 122888);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(2, detectorInfo.detectorIDs()[1]);
+  }
+
+  /// Test the Nexus geometry loader from WISH file
+  void testExecNexusWISH() {
+    MatrixWorkspace_sptr outputWs =
+        doLoadNexus("WISH_Definition_10Panels.hdf5");
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "WISH");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 778245);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(2, detectorInfo.detectorIDs()[1]);
+    TS_ASSERT_EQUALS(10707511, detectorInfo.detectorIDs()[778244]);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(778245), std::out_of_range);
+  }
+
+  /// Test the Nexus geometry loader from LOKI name
+  void testExecNexusLOKIFromInstrName() {
+    LoadInstrument loaderLOKI;
+    loaderLOKI.initialize();
+    loaderLOKI.setChild(true);
+    // Create a workspace
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    loaderLOKI.setPropertyValue("InstrumentName", "LOKI");
+    loaderLOKI.setProperty("Workspace", ws);
+    loaderLOKI.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loaderLOKI.execute();
+    TS_ASSERT(loaderLOKI.isExecuted());
+
+    std::string result = loaderLOKI.getPropertyValue("Filename");
+    const std::string::size_type stripPath = result.find_last_of("\\/");
+    result = result.substr(stripPath + 1, result.size());
+    TS_ASSERT_EQUALS(result, "LOKI_Definition.hdf5");
+
+    auto &componentInfo = ws->componentInfo();
+    auto &detectorInfo = ws->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
+  }
+
+  /// Test the Nexus geometry loader from LOKI file
+  void testExecNexusLOKIandRetrieveFromIDS() {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl &IDS = InstrumentDataService::Instance();
+    IDS.clear();
+    MatrixWorkspace_sptr outputWs = doLoadNexus("LOKI_Definition.hdf5");
+    TS_ASSERT_EQUALS(IDS.size(), 1);
+    if (IDS.size() != 1)
+      return;
+    // Retrieve the instrument from the InstrumentDataService
+    Instrument_const_sptr lokiInst = IDS.getObjects()[0];
+    TS_ASSERT_EQUALS(lokiInst->getName(), "LOKI");
+    TS_ASSERT_EQUALS(lokiInst->getNumberDetectors(), 8000);
+    TS_ASSERT_EQUALS((lokiInst->getDetector(1001))->getID(), 1001);
+    TS_ASSERT_EQUALS((lokiInst->getDetector(7777))->getID(), 7777);
   }
 
   void testExecHRP2() {
     // Test Parameter file in instrument folder is used by an IDF file not in
     // the instrument folder
-    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPD_Definition.xml",
+    doTestParameterFileSelection("unit_testing/HRPD_Definition.xml",
                                  "HRPD_Parameters.xml", "S");
   }
 
@@ -305,9 +446,8 @@ public:
     // the instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPD_Definition_Test3.xml",
-        "HRPD_Parameters.xml", "S");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test3.xml",
+                                 "HRPD_Parameters.xml", "S");
   }
 
   void testExecHRP4() {
@@ -315,17 +455,15 @@ public:
     // in the same folder and
     // with the same extension ('_Test4') of its name after the 'Definition' or
     // 'Parameter'.
-    doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPD_Definition_Test4.xml",
-        "IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml", "T");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test4.xml",
+                                 "unit_testing/HRPD_Parameters_Test4.xml", "T");
   }
 
   void testExecHRP5() {
     // Test Parameter file outside instrument folder is used by an IDF file in
     // the same folder
-    doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Definition.xml",
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Parameters.xml", "U");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition.xml",
+                                 "unit_testing/HRPDTEST_Parameters.xml", "U");
   }
 
   void testExecHRP6() {
@@ -335,9 +473,9 @@ public:
     // 'Parameter'
     // even though there is a definition file without an extension in the same
     // folder.
-    doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test6.xml",
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Parameters_Test6.xml", "V");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test6.xml",
+                                 "unit_testing/HRPDTEST_Parameters_Test6.xml",
+                                 "V");
   }
 
   void testExecHRP7() {
@@ -345,9 +483,8 @@ public:
     // same instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test7.xml",
-        "HRPDTEST_Parameters.xml", "U");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test7.xml",
+                                 "HRPDTEST_Parameters.xml", "U");
   }
 
   void testNeutronicPositions() {
@@ -357,8 +494,7 @@ public:
 
     LoadInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/INDIRECT_Definition.xml");
+    loader.setPropertyValue("Filename", "unit_testing/INDIRECT_Definition.xml");
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     loader.setProperty("Workspace", ws);
@@ -517,6 +653,50 @@ public:
     TS_ASSERT(!instLoader.execute())
   }
 
+  void test_failure_if_Filename_not_set() {
+    LoadInstrument instLoader;
+    instLoader.initialize();
+    instLoader.setChild(true);
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    instLoader.setProperty("Workspace", ws);
+    instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    TS_ASSERT_THROWS_EQUALS(
+        instLoader.execute(), Kernel::Exception::FileError & e,
+        std::string(e.what()),
+        "Either the InstrumentName or Filename property of LoadInstrument "
+        "must be specified to load an instrument in \"\"");
+    TS_ASSERT(!instLoader.isExecuted());
+    TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "");
+  }
+
+  void test_failure_if_Filename_not_found() {
+    LoadInstrument instLoader;
+    instLoader.initialize();
+    instLoader.setRethrows(true);
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    instLoader.setProperty("Workspace", ws);
+    instLoader.setPropertyValue("Filename", "Nonsense");
+    instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    TS_ASSERT_THROWS_EQUALS(
+        instLoader.execute(), std::invalid_argument & e, std::string(e.what()),
+        "FileDescriptor() - File 'Nonsense' does not exist");
+    TS_ASSERT(!instLoader.isExecuted());
+    TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "Nonsense");
+  }
+
+  void test_if_Workspace_not_set() {
+    LoadInstrument instLoader;
+    instLoader.initialize();
+    instLoader.setPropertyValue("Filename",
+                                "unit_testing/SMALLFAKE_example_geometry.hdf5");
+    instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
+    instLoader.execute();
+    TS_ASSERT(instLoader.isExecuted());
+    TS_ASSERT_EQUALS(instLoader.getPropertyValue("Workspace"), "Anonymous");
+  }
+
   void test_loading_default_view() {
     // Make sure the IDS is empty
     InstrumentDataServiceImpl &IDS = InstrumentDataService::Instance();
@@ -603,31 +783,22 @@ private:
     InstrumentDataService::Instance().clear();
 
     LoadInstrument loader;
-
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    loader.initialize();
+    loader.setChild(true);
 
     // create a workspace with some sample data
-    wsName = "LoadInstrumentTestForParameterFileSelection";
-    Workspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-
-    // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     // load IDF
     loader.setPropertyValue("Filename", filename);
     loader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    inputFile = loader.getPropertyValue("Filename");
-    loader.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    loader.setProperty("Workspace", ws2D);
+    loader.execute();
     TS_ASSERT(loader.isExecuted());
 
     // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            wsName));
+    MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
     boost::shared_ptr<const Instrument> i = output->getInstrument();
 
@@ -639,7 +810,7 @@ private:
     const auto &paramMap = output->constInstrumentParameters();
 
     // It's "X0" in parameter file
-    // IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
+    // unit_testing/HRPD_Parameters_Test4.xml
     Parameter_sptr param = paramMap.getRecursive(&(*comp), par, "fitting");
     TS_ASSERT(param);
     if (param != nullptr) {
@@ -649,13 +820,7 @@ private:
     } else {
       TS_FAIL("Did not select " + paramFilename + " for " + filename);
     }
-
-    AnalysisDataService::Instance().remove(wsName);
   }
-
-  LoadInstrument loader;
-  std::string inputFile;
-  std::string wsName;
 };
 
 class LoadInstrumentTestPerformance : public CxxTest::TestSuite {
@@ -685,7 +850,7 @@ public:
 
   void test_WISH() { doTest("WISH_Definition.xml", 1); }
 
-  void test_BASIS() { doTest("BASIS_Definition_0-20130119.xml", 5); }
+  void test_BASIS() { doTest("BASIS_Definition_0-2013.xml", 5); }
 
   void test_CNCS() { doTest("CNCS_Definition.xml", 5); }
 

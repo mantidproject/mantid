@@ -50,10 +50,10 @@ bool getOFFline(std::ifstream &file, std::string &line) {
   return true;
 }
 
-void readOFFVertices(std::ifstream &file, uint16_t nVertices,
+void readOFFVertices(std::ifstream &file, uint32_t nVertices,
                      std::vector<V3D> &vertices) {
   std::string line;
-  for (uint16_t i = 0; i < nVertices; i++) {
+  for (uint32_t i = 0; i < nVertices; i++) {
     if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "),
@@ -72,12 +72,12 @@ void readOFFVertices(std::ifstream &file, uint16_t nVertices,
   }
 }
 
-void readOFFTriangles(std::ifstream &file, uint16_t nTriangles,
-                      std::vector<uint16_t> &triangleIndices) {
+void readOFFTriangles(std::ifstream &file, uint32_t nTriangles,
+                      std::vector<uint32_t> &triangleIndices) {
   std::string line;
-  uint16_t t1, t2, t3;
+  uint32_t t1, t2, t3;
   size_t nFaceVertices;
-  for (uint16_t i = 0; i < nTriangles; i++) {
+  for (uint32_t i = 0; i < nTriangles; i++) {
     if (getOFFline(file, line)) {
       std::vector<std::string> tokens;
       boost::split(tokens, line, boost::is_any_of(" "),
@@ -85,9 +85,9 @@ void readOFFTriangles(std::ifstream &file, uint16_t nTriangles,
       if (tokens.size() >= 4) {
         nFaceVertices = boost::lexical_cast<size_t>(tokens[0]);
         if (nFaceVertices == 3) {
-          t1 = boost::lexical_cast<uint16_t>(tokens[1]);
-          t2 = boost::lexical_cast<uint16_t>(tokens[2]);
-          t3 = boost::lexical_cast<uint16_t>(tokens[3]);
+          t1 = boost::lexical_cast<uint32_t>(tokens[1]);
+          t2 = boost::lexical_cast<uint32_t>(tokens[2]);
+          t3 = boost::lexical_cast<uint32_t>(tokens[3]);
         } else {
           throw std::runtime_error("OFF face is not a triangle.");
         }
@@ -105,10 +105,10 @@ void readOFFTriangles(std::ifstream &file, uint16_t nTriangles,
 }
 
 std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
-  std::vector<uint16_t> triangleIndices;
+  std::vector<uint32_t> triangleIndices;
   std::vector<V3D> vertices;
-  uint16_t nVertices;
-  uint16_t nTriangles;
+  uint32_t nVertices;
+  uint32_t nTriangles;
 
   std::string line;
   // Get number of vetrtices and faces
@@ -117,8 +117,8 @@ std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 3) {
       try {
-        nVertices = boost::lexical_cast<uint16_t>(tokens[0]);
-        nTriangles = boost::lexical_cast<uint16_t>(tokens[1]);
+        nVertices = boost::lexical_cast<uint32_t>(tokens[0]);
+        nTriangles = boost::lexical_cast<uint32_t>(tokens[1]);
       } catch (...) {
         throw std::runtime_error("Error in reading numbers of OFF vertices and "
                                  "triangles, which may be too large");
@@ -188,14 +188,14 @@ void LoadSampleShape::exec() {
     outputWS = inputWS->clone();
   }
 
-  std::string filename = getProperty("Filename");
+  const std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());
   if (!file) {
     g_log.error("Unable to open file: " + filename);
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  std::string filetype = filename.substr(filename.size() - 3);
+  const std::string filetype = filename.substr(filename.size() - 3);
 
   boost::shared_ptr<MeshObject> shape = nullptr;
   if (filetype == "off") {
@@ -203,10 +203,10 @@ void LoadSampleShape::exec() {
   } else /* stl */ {
     auto asciiStlReader = LoadAsciiStl(filename);
     auto binaryStlReader = LoadBinaryStl(filename);
-    if (asciiStlReader.isAsciiSTL()) {
-      shape = asciiStlReader.readStl();
-    } else if (binaryStlReader.isBinarySTL()) {
+    if (binaryStlReader.isBinarySTL(filename)) {
       shape = binaryStlReader.readStl();
+    } else if (asciiStlReader.isAsciiSTL(filename)) {
+      shape = asciiStlReader.readStl();
     } else {
       throw Kernel::Exception::ParseError(
           "Could not read file, did not match either STL Format", filename, 0);

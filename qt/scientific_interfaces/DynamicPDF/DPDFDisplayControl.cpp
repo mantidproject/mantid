@@ -14,10 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
-#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
-// 3rd party library headers
-// System #includes
-#include <iostream>
+#include "MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");

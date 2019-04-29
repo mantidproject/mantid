@@ -12,6 +12,7 @@ from six import with_metaclass
 from sans.common.general_functions import create_child_algorithm
 from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
+import mantid.simpleapi as mantid_api
 
 
 class Merger(with_metaclass(ABCMeta, object)):
@@ -28,6 +29,26 @@ class ISIS1DMerger(Merger):
     """
     def __init__(self):
         super(ISIS1DMerger, self).__init__()
+
+    def calculate_scaled_hab_output(self, shift, scale, sample_count_secondary, sample_norm_secondary,
+                                    can_count_secondary, can_norm_secondary):
+        scaled_norm_front = mantid_api.Scale(InputWorkspace=sample_norm_secondary, Factor=1.0/scale, Operation='Multiply',
+                                             StoreInADS=False)
+        shifted_norm_front = mantid_api.Scale(InputWorkspace=sample_norm_secondary, Factor=shift, Operation='Multiply',
+                                              StoreInADS=False)
+        numerator = mantid_api.Plus(LHSWorkspace=sample_count_secondary, RHSWorkspace=shifted_norm_front,
+                                    StoreInADS=False)
+        hab_sample = mantid_api.Divide(LHSWorkspace=numerator, RHSWorkspace=scaled_norm_front, StoreInADS=False)
+
+        if can_count_secondary is not None and can_norm_secondary is not None:
+            scaled_norm_front_can = mantid_api.Scale(InputWorkspace=can_norm_secondary, Factor=1.0/scale,
+                                                     Operation='Multiply', StoreInADS=False)
+            hab_can = mantid_api.Divide(LHSWorkspace=can_count_secondary, RHSWorkspace=scaled_norm_front_can,
+                                        StoreInADS=False)
+            hab_sample = mantid_api.Minus(LHSWorkspace=hab_sample, RHSWorkspace=hab_can, StoreInADS=False)
+            return hab_sample
+        else:
+            return hab_sample
 
     def merge(self, reduction_mode_vs_output_bundles, parent_alg=None):
         """
@@ -101,10 +122,14 @@ class ISIS1DMerger(Merger):
         shift_from_alg = stitch_alg.getProperty("OutShiftFactor").value
         scale_from_alg = stitch_alg.getProperty("OutScaleFactor").value
         merged_workspace = stitch_alg.getProperty("OutputWorkspace").value
+        scaled_HAB_workspace = self.calculate_scaled_hab_output(shift_from_alg, scale_from_alg,
+                                                                sample_count_secondary, sample_norm_secondary,
+                                                                can_count_secondary, can_norm_secondary)
 
         # Return a merge bundle with the merged workspace and the fitted scale and shift factor (they are good
         # diagnostic tools which are desired by the instrument scientists.
-        return MergeBundle(merged_workspace=merged_workspace, shift=shift_from_alg, scale=scale_from_alg)
+        return MergeBundle(merged_workspace=merged_workspace, shift=shift_from_alg, scale=scale_from_alg,
+                           scaled_hab_workspace=scaled_HAB_workspace)
 
 
 class NullMerger(Merger):

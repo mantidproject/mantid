@@ -14,11 +14,17 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 import os.path as osp
+import sys
+
+import mantid
 import pymantidplot
 from pymantidplot import *
 
 # and the old qtiplot stuff
 import pymantidplot.qtiplot
+
+# error early if PyQt4 cannot be used
+import PyQt4
 
 def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     '''This is copied from mantidqt.utils.qt and should be deprecated as

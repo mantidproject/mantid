@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLMatrix.h"
 #include <gsl/gsl_eigen.h>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {

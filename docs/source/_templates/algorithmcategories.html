@@ -1,0 +1,43 @@
+{# Generates a better view for category pages #}
+
+{% extends "layout.html" %}
+
+{% macro list_to_definition_list(item_list) -%}
+{# Output a list in a single column #}
+{# It currently assumes the items in the list are mantiddoc.directives.categories.PageRef classes #}
+  <dl><ul>
+  {% for item in item_list %}
+    <li><dt><a href="{{ item.link(outpath) }}">{{ item.name }}</a></dt><dd> <ul> {{ item.additional_text }}</ul></dd></li>
+  {%- endfor -%}
+  </ul></dl>
+{%- endmacro %}
+
+{%- block body -%}
+    <h1> {{ title }} </h1>
+    {% set header_file = text_page %}
+    {% include header_file ignore missing %}
+    <p>Mantid contains many algorithms for loading, saving and performing operations on a wide variety of data.  The categories below should help you find the algorithm you need.  To help with ensuring the Algorithms are found in the most sensible places, they can be in more than one category.  If you prefer to search, or know the name you can use the <a href='categories/Algorithm Index.html'>Algorithms Index</a>.</p>
+    {% if parentcategory %}
+    <p> {{ parentcategory }} </p>
+    {% endif %}
+    {% if generalcategories %}
+    <h2> General Algorithms </h2>
+    {{ list_to_definition_list(generalcategories) }}
+    <hr>
+    {% endif %}
+    
+    {% if techniquecategories %}
+    <h2> Technique Specific Algorithms  </h2>
+    {{ list_to_definition_list(techniquecategories) }}
+    <hr>
+    {% endif %}    
+    
+    {% if facilitycategories %}
+    <h2> Facility Specific Algorithms  </h2>
+    {{ list_to_definition_list(facilitycategories) }}
+    <hr>
+    {% endif %}
+    
+    <p><b>Complete Index:</b> <a href='categories/Algorithm Index.html'>Algorithms Index</a></p>
+
+{%- endblock -%}

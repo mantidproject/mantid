@@ -7,9 +7,10 @@
 #ifndef ARRAYPROPERTYTEST_H_
 #define ARRAYPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidKernel/ArrayProperty.h"
+#include <array>
+#include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
@@ -47,17 +48,17 @@ public:
     TS_ASSERT(sProp->operator()().empty())
 
     std::vector<int> i(5, 2);
-    ArrayProperty<int> ip("ip", i);
+    ArrayProperty<int> ip("ip", std::move(i));
     TS_ASSERT_EQUALS(ip.operator()().size(), 5)
     TS_ASSERT_EQUALS(ip.operator()()[3], 2)
 
     std::vector<double> d(4, 6.66);
-    ArrayProperty<double> dp("dp", d);
+    ArrayProperty<double> dp("dp", std::move(d));
     TS_ASSERT_EQUALS(dp.operator()().size(), 4)
     TS_ASSERT_EQUALS(dp.operator()()[1], 6.66)
 
     std::vector<std::string> s(3, "yyy");
-    ArrayProperty<std::string> sp("sp", s);
+    ArrayProperty<std::string> sp("sp", std::move(s));
     TS_ASSERT_EQUALS(sp.operator()().size(), 3)
     TS_ASSERT(!sp.operator()()[2].compare("yyy"))
   }
@@ -77,7 +78,8 @@ public:
     // should only be the size of the
     // parent vector that is counted.
     std::vector<std::vector<int>> input{{10}};
-    Property *b = new ArrayProperty<std::vector<int>>("vec_property", input);
+    Property *b =
+        new ArrayProperty<std::vector<int>>("vec_property", std::move(input));
     TS_ASSERT_EQUALS(1, b->size());
     delete b;
   }
@@ -185,15 +187,15 @@ public:
 
   void testValue() {
     std::vector<int> i(3, 3);
-    ArrayProperty<int> ip("ip", i);
+    ArrayProperty<int> ip("ip", std::move(i));
     TS_ASSERT(!ip.value().compare("3,3,3"))
 
     std::vector<double> d(4, 1.23);
-    ArrayProperty<double> dp("dp", d);
+    ArrayProperty<double> dp("dp", std::move(d));
     TS_ASSERT(!dp.value().compare("1.23,1.23,1.23,1.23"))
 
     std::vector<std::string> s(2, "yyy");
-    ArrayProperty<std::string> sp("sp", s);
+    ArrayProperty<std::string> sp("sp", std::move(s));
     TS_ASSERT(!sp.value().compare("yyy,yyy"))
   }
 
@@ -242,6 +244,32 @@ public:
     TS_ASSERT_EQUALS(sProp->setValue(""), "")
     TS_ASSERT(sProp->operator()().empty())
     TS_ASSERT(sProp->isDefault())
+  }
+
+  void test_SetValueFromJson_Accepts_ArrayValues() {
+    const std::array<int, 3> testValues{{1, 2, 3}};
+    Json::Value arrayValue{Json::arrayValue};
+    for (const auto &elem : testValues) {
+      arrayValue.append(elem);
+    }
+
+    ArrayProperty<int> intProp("i");
+    const std::string helpMessage{intProp.setValueFromJson(arrayValue)};
+
+    TS_ASSERT(helpMessage.empty());
+    const auto &propValue = intProp();
+    TS_ASSERT_EQUALS(testValues.size(), propValue.size());
+    for (const auto &elem : testValues) {
+      arrayValue.append(elem);
+    }
+  }
+
+  void test_SetValueFromJson_Returns_Error_StringFor_NonArrayValues() {
+    Json::Value dict;
+    dict["key"] = "value";
+    ArrayProperty<int> intProp("i");
+    const std::string helpMessage{intProp.setValueFromJson(dict)};
+    TS_ASSERT(!helpMessage.empty());
   }
 
   void testAssignmentOperator() {

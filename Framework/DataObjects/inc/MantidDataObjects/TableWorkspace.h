@@ -108,9 +108,9 @@ public:
   /**Get constant access to shared pointer containing workspace porperties */
   API::LogManager_const_sptr getLogs() const override { return m_LogManager; }
 
-  /** get access to column vecotor for index i.
+  /** get access to column vector for index i.
    *
-   *  The operation is unsafe with regards to the operaitons resizing obtained
+   *  The operation is unsafe with regards to the operations resizing obtained
    *vector.
    *   This will destroy all table ws internal coherency. DO NOT ABUSE!
    *  e.g.: resise/reserve are unsafe
@@ -124,7 +124,7 @@ public:
                                "to proper TableCol type");
     }
   }
-  /** get constant access to column vecotor for index i. */
+  /** get constant access to column vector for index i. */
   template <class T> const std::vector<T> &getColVector(size_t index) const {
     auto pTableCol = dynamic_cast<TableColumn<T> *>(m_columns[index].get());
     if (pTableCol)
@@ -134,9 +134,9 @@ public:
                                "cast to proper TableCol type");
     }
   }
-  /** get access to the column vecotor for column with given name .
+  /** get access to the column vector for column with given name .
    *
-   *  The operation is unsafe with regards to the operaitons resizing obtained
+   *  The operation is unsafe with regards to the operations resizing obtained
    *vector.
    *  This will destroy all table ws internal coherency. DO NOT ABUSE!
    *  e.g.: resise/reserve are unsafe
@@ -154,7 +154,7 @@ public:
                                "to proper TableCol type");
     }
   }
-  /** get access to column vecotor for column with given name  */
+  /** get access to column vector for column with given name  */
   template <class T>
   const std::vector<T> &getColVector(const std::string &name) const {
     auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));

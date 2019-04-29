@@ -1197,8 +1197,9 @@ public:
     itIn->next();
     TS_ASSERT_EQUALS(itIn->getLinearIndex(), 3);
     diff = itOut->jumpToNearest(itIn->getCenter());
-    TS_ASSERT_EQUALS(itOut->getLinearIndex(), 3); // 10.5 closer to 12 than 8
-    TS_ASSERT_DELTA(1.5, diff, 1e-4);
+    TS_ASSERT(itOut->isWithinBounds(itOut->getLinearIndex()));
+    TS_ASSERT_EQUALS(itOut->getLinearIndex(), 2); // 10.5 closer to 12 than 8
+    TS_ASSERT_DELTA(2.5, diff, 1e-4);
   }
 
   void test_neighbours_1d_with_width_including_out_of_bounds() {

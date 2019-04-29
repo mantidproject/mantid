@@ -19,6 +19,8 @@ namespace CustomInterfaces {
 IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+
   connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
   connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile,
           SLOT(setEnabled(bool)));
@@ -54,24 +56,29 @@ bool IndirectLoadILL::validate() {
  * script that runs IndirectLoadILL
  */
 void IndirectLoadILL::run() {
+  setRunIsRunning(true);
+
   QString plot("False");
   QString save("None");
 
   QString useMap("False");
   QString rejectZero("False");
 
-  QString filename = m_uiForm.mwRun->getFirstFilename();
-  QFileInfo finfo(filename);
+  QString const filename = m_uiForm.mwRun->getFirstFilename();
+  QFileInfo const finfo(filename);
   QString ext = finfo.suffix().toLower();
 
-  QString instrument = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName();
-  QString reflection = m_uiForm.iicInstrumentConfiguration->getReflectionName();
+  QString const instrument =
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName();
+  QString const analyser =
+      m_uiForm.iicInstrumentConfiguration->getAnalyserName();
+  QString const reflection =
+      m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if (m_uiForm.chkUseMap->isChecked()) {
     useMap = "True";
   }
-  QString mapPath = m_uiForm.mwMapFile->getFirstFilename();
+  QString const mapPath = m_uiForm.mwMapFile->getFirstFilename();
 
   if (m_uiForm.chkRejectZero->isChecked()) {
     rejectZero = "True";
@@ -105,6 +112,7 @@ void IndirectLoadILL::run() {
     {
       pyFunc += "InxStart";
     } else {
+      setRunIsRunning(false);
       emit showMessageBox("Could not find appropriate loading routine for " +
                           filename);
       return;
@@ -119,6 +127,8 @@ void IndirectLoadILL::run() {
                plot + "'," + save + ")";
   }
   runPythonScript(pyInput);
+
+  setRunIsRunning(false);
 }
 
 /**
@@ -147,6 +157,22 @@ void IndirectLoadILL::handleFilesFound() {
     // Check if the first part of the name is in the instruments list
     m_uiForm.iicInstrumentConfiguration->setInstrument(fnameParts[0]);
   }
+}
+
+void IndirectLoadILL::runClicked() { runTab(); }
+
+void IndirectLoadILL::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotOptionsEnabled(!running);
+}
+
+void IndirectLoadILL::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectLoadILL::setPlotOptionsEnabled(bool enabled) {
+  m_uiForm.cbPlot->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces

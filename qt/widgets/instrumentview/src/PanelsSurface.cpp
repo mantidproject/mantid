@@ -119,8 +119,7 @@ calculatePanelNormal(const std::vector<Mantid::Kernel::V3D> &panelCorners) {
   // find the normal
   auto xaxis = panelCorners[1] - panelCorners[0];
   auto yaxis = panelCorners[3] - panelCorners[0];
-  auto normal = xaxis.cross_prod(yaxis);
-  normal.normalize();
+  const auto normal = normalize(xaxis.cross_prod(yaxis));
   return normal;
 }
 
@@ -129,9 +128,8 @@ bool isBankFlat(const ComponentInfo &componentInfo, size_t bankIndex,
                 const Mantid::Kernel::V3D &normal) {
   for (auto tube : tubes) {
     const auto &children = componentInfo.children(tube);
-    auto vector = componentInfo.position(children[0]) -
-                  componentInfo.position(children[1]);
-    vector.normalize();
+    const auto vector = normalize(componentInfo.position(children[0]) -
+                                  componentInfo.position(children[1]));
     if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
       g_log.warning() << "Assembly " << componentInfo.name(bankIndex)
                       << " isn't flat.\n";
@@ -236,6 +234,7 @@ void PanelsSurface::init() {
 
   size_t ndet = m_instrActor->ndetectors();
   m_unwrappedDetectors.resize(ndet);
+  m_detector2bankMap.resize(ndet);
   if (ndet == 0)
     return;
 
@@ -244,8 +243,8 @@ void PanelsSurface::init() {
   spreadBanks();
 
   RectF surfaceRect;
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    RectF rect(m_flatBanks[i]->polygon.boundingRect());
+  for (auto &flatBank : m_flatBanks) {
+    RectF rect(flatBank->polygon.boundingRect());
     surfaceRect.unite(rect);
   }
 
@@ -263,8 +262,9 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
-                            double &, double &) const {
+void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
+                            double & /*v*/, double & /*uscale*/,
+                            double & /*vscale*/) const {
   throw std::runtime_error(
       "Cannot project an arbitrary point to this surface.");
 }
@@ -316,11 +316,12 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
-#pragma omp parallel for
-  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
+#pragma omp parallel for ordered
+  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
+#pragma omp ordered
     info->polygon << QPointF(udet.u, udet.v);
   }
 }
@@ -353,10 +354,10 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   }
 
   info->polygon = QPolygonF(verts);
-  for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
-    const auto &row = componentInfo.children(columns[i]);
-    for (int j = 0; j < static_cast<int>(row.size()); ++j) {
-      addDetector(row[j], ref, index, info->rotation);
+  for (auto column : columns) {
+    const auto &row = componentInfo.children(column);
+    for (auto j : row) {
+      addDetector(j, ref, index, info->rotation);
     }
   }
 }
@@ -371,17 +372,63 @@ void PanelsSurface::processGrid(size_t rootIndex) {
   processStructured(layers[layerIndex]);
 }
 
-void PanelsSurface::processTubes(size_t rootIndex) {
+/// Find an assembly containing detector tubes placed next to each other
+/// and forming a flat surface.
+/// @param rootIndex :: Index of a component that contains at least on tube
+///   as a direct child.
+/// @return Optional index of the bank that contains all of the tubes forming
+///   the surface. If the surface isn't flat return boost::none.
+boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   const auto &componentInfo = m_instrActor->componentInfo();
-  auto bankIndex = componentInfo.parent(
-      rootIndex); // findParentBank(componentInfo, rootIndex);
-  auto name = componentInfo.name(bankIndex);
-  auto tubes = componentInfo.children(bankIndex);
-  auto normal = calculateBankNormal(componentInfo, tubes);
+  const auto bankIndex0 = componentInfo.parent(rootIndex);
+  auto bankIndex = bankIndex0;
+  auto *bankChildren = &componentInfo.children(bankIndex);
+  // The main use case for this method has an assembly containing a set of
+  // individual assemblies each of which has a single tube but together
+  // these tubes make a flat structure.
+  while (bankChildren->size() == 1) {
+    if (!componentInfo.hasParent(bankIndex)) {
+      return boost::none;
+    }
+    bankIndex = componentInfo.parent(bankIndex);
+    bankChildren = &componentInfo.children(bankIndex);
+  }
 
+  auto tubes =
+      (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
+  if (tubes.empty()) {
+    // If tubes is empty then the flat assembly includes the tubes as grand
+    // children. Go down the tree to find all these tubes.
+    for (auto index : *bankChildren) {
+      boost::optional<size_t> tubeIndex = index;
+      while (componentInfo.componentType(tubeIndex.get()) !=
+             ComponentType::OutlineComposite) {
+        auto &children = componentInfo.children(tubeIndex.get());
+        if (children.empty()) {
+          tubeIndex = boost::none;
+          break;
+        }
+        tubeIndex = children[0];
+      }
+      if (tubeIndex) {
+        tubes.emplace_back(tubeIndex.get());
+      }
+    }
+    if (tubes.empty())
+      return bankIndex;
+  }
+
+  // Now we found all the tubes that may form a flat struture.
+  auto name = componentInfo.name(bankIndex);
+  // Use two of the tubes to calculate the normal to the plain of that structure
+  auto normal =
+      tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
+
+  // If some of the tubes are not perpendicular to the normal the structure
+  // isn't flat
   if (normal.nullVector() ||
       !isBankFlat(componentInfo, bankIndex, tubes, normal))
-    return;
+    return boost::none;
 
   // save bank info
   auto index = m_flatBanks.size();
@@ -391,6 +438,8 @@ void PanelsSurface::processTubes(size_t rootIndex) {
   info->startDetectorIndex = componentInfo.children(tubes.front()).front();
   info->endDetectorIndex = componentInfo.children(tubes.back()).back();
 
+  // Now go over all detectors in the tubes and put them onto the unwrapped
+  // surfeace.
   auto pos0 =
       componentInfo.position(componentInfo.children(tubes.front()).front());
   auto pos1 =
@@ -407,10 +456,10 @@ void PanelsSurface::processTubes(size_t rootIndex) {
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
-  for (int i = 0; i < static_cast<int>(tubes.size()); ++i) {
-    const auto &children = componentInfo.children(tubes[i]);
+  for (auto tube : tubes) {
+    const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
-    for (int j = 0; j < static_cast<int>(children.size()); ++j) {
+    for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
       addDetector(children[j], pos0, index, info->rotation);
     }
 
@@ -427,6 +476,7 @@ void PanelsSurface::processTubes(size_t rootIndex) {
     p0 = p2;
     p1 = p3;
   }
+  return bankIndex;
 }
 
 std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
@@ -456,17 +506,14 @@ PanelsSurface::processUnstructured(size_t rootIndex,
     else if (child == children[1]) {
       // at first set the normal to an argbitrary vector orthogonal to
       // the line between the first two detectors
-      y = pos - pos0;
-      y.normalize();
+      y = normalize(pos - pos0);
       setupBasisAxes(y, normal, x);
     } else if (fabs(normal.scalar_prod(pos - pos0)) >
                Mantid::Kernel::Tolerance) {
       if (!normalFound) {
         // when first non-colinear detector is found set the normal
-        x = pos - pos0;
-        x.normalize();
-        normal = x.cross_prod(y);
-        normal.normalize();
+        x = normalize(pos - pos0);
+        normal = normalize(x.cross_prod(y));
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
@@ -501,8 +548,12 @@ PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
   }
 
   if (componentType == ComponentType::OutlineComposite) {
-    processTubes(rootIndex);
-    setBankVisited(componentInfo, parentIndex, visited);
+    const auto bankIndex = processTubes(rootIndex);
+    if (bankIndex) {
+      setBankVisited(componentInfo, bankIndex.get(), visited);
+    } else {
+      setBankVisited(componentInfo, parentIndex, visited);
+    }
     return boost::none;
   }
 
@@ -567,7 +618,7 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
 
 void PanelsSurface::addDetector(size_t detIndex,
                                 const Mantid::Kernel::V3D &refPos, int index,
-                                Mantid::Kernel::Quat &rotation) {
+                                const Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
   auto pos = detectorInfo.position(detIndex);
@@ -661,9 +712,9 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
  * Remove all found flat banks
  */
 void PanelsSurface::clearBanks() {
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    if (m_flatBanks[i])
-      delete m_flatBanks[i];
+  for (auto &flatBank : m_flatBanks) {
+    if (flatBank)
+      delete flatBank;
   }
   m_flatBanks.clear();
 }

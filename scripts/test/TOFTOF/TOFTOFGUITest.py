@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+from qtpy.QtWidgets import QApplication
+import unittest
+
+from mantid.py3compat import mock
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
-from PyQt4 import QtGui
 
-import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 try:
     unicode('test for unicode type')
@@ -25,7 +23,7 @@ except NameError:
 class TOFTOFScriptElementTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = QtGui.QApplication([])
+        cls.app = QApplication([])
 
     def setUp(self):
         self.settingsMock = mock.Mock()

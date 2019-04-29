@@ -17,7 +17,7 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
-                               DetectorType, DataType, FitType)
+                               DetectorType, DataType, FitType, SANSInstrument)
 
 
 class StateGuiModel(object):
@@ -53,13 +53,16 @@ class StateGuiModel(object):
     # FRONT TAB
     # ==================================================================================================================
     # ==================================================================================================================
+    @property
+    def instrument(self):
+        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NoInstrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode Options
     # ------------------------------------------------------------------------------------------------------------------
     @property
     def compatibility_mode(self):
-        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=False)
+        return self.get_simple_element(element_id=OtherId.use_compatibility_mode, default_value=True)
 
     @compatibility_mode.setter
     def compatibility_mode(self, value):
@@ -270,7 +273,7 @@ class StateGuiModel(object):
 
     @property
     def merge_scale(self):
-        return self.get_simple_element(element_id=DetectorId.rescale, default_value="")
+        return self.get_simple_element(element_id=DetectorId.rescale, default_value="1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -278,7 +281,7 @@ class StateGuiModel(object):
 
     @property
     def merge_shift(self):
-        return self.get_simple_element(element_id=DetectorId.shift, default_value="")
+        return self.get_simple_element(element_id=DetectorId.shift, default_value="0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):
@@ -766,14 +769,6 @@ class StateGuiModel(object):
     @transmission_can_wavelength_max.setter
     def transmission_can_wavelength_max(self, value):
         self._set_transmission_fit(data_type=DataType.Can, stop=value)
-
-    @property
-    def show_transmission(self):
-        return self.get_simple_element(element_id=OtherId.show_transmission, default_value=True)
-
-    @show_transmission.setter
-    def show_transmission(self, value):
-        self.set_simple_element(element_id=OtherId.show_transmission, value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Wavelength- and pixel-adjustment files

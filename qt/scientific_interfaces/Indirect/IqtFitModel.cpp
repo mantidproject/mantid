@@ -108,8 +108,8 @@ bool hasConstrainableIntensities(IFunction_sptr function) {
 }
 
 double computeTauApproximation(MatrixWorkspace_sptr workspace) {
-  const auto x = workspace->x(0);
-  const auto y = workspace->y(0);
+  const auto &x = workspace->x(0);
+  const auto &y = workspace->y(0);
 
   if (x.size() > 4)
     return -x[4] / log(y[4]);
@@ -199,6 +199,10 @@ IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
   return IndirectFittingModel::getFittingAlgorithm();
 }
 
+std::vector<std::string> IqtFitModel::getSpectrumDependentAttributes() const {
+  return {};
+}
+
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
   algorithm->setProperty("IgnoreInvalidData", true);
@@ -213,25 +217,25 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiIqtFit_" + m_fitType + "_Result";
-  auto fitString = getFitString(getWorkspace(0));
+    return "MultiIqtFit_" + m_fitType + "_Results";
+  auto const fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
                           0);
 }
 
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
-    return "MultiSimultaneousIqtFit_" + m_fitType + "_Result";
-  auto fitString = getFitString(getWorkspace(0));
+    return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
+  auto const fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
                           "_to_", 0);
 }
 
 std::string IqtFitModel::singleFitOutputName(std::size_t index,
                                              std::size_t spectrum) const {
-  auto fitString = getFitString(getWorkspace(0));
+  auto const fitString = getFitString(getWorkspace(0));
   return createSingleFitOutputName(
-      "%1%" + fitString + "_" + m_fitType + "_s%2%", index, spectrum);
+      "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);
 }
 
 void IqtFitModel::setFitTypeString(const std::string &fitType) {
@@ -281,7 +285,7 @@ IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
       new MultiDomainFunction);
   const auto functionString = function->asString();
   for (auto i = 0u; i < numberOfWorkspaces(); ++i) {
-    auto addDomains = [&](std::size_t) {
+    auto addDomains = [&](std::size_t /*unused*/) {
       const auto index = multiDomainFunction->nFunctions();
       multiDomainFunction->addFunction(createFunction(functionString));
       multiDomainFunction->setDomainIndex(index, index);

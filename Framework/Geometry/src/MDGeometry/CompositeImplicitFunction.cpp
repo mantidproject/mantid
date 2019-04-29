@@ -17,6 +17,8 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 
+#include <numeric>
+
 namespace Mantid {
 namespace Geometry {
 

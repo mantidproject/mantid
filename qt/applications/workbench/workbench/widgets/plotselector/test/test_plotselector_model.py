@@ -9,16 +9,12 @@
 #
 from __future__ import absolute_import, division, print_function
 
-from workbench.plotting.globalfiguremanager import FigureAction
+import unittest
 
+from mantid.py3compat import mock
+from workbench.plotting.globalfiguremanager import FigureAction
 from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
-
-import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class PlotSelectorModelTest(unittest.TestCase):
@@ -80,7 +76,7 @@ class PlotSelectorModelTest(unittest.TestCase):
         self.presenter.update_visibility_icon.assert_called_once_with(42)
 
     def test_notify_unknwon_updates_plot_list_in_presenter(self):
-        self.model.notify(FigureAction.Unknown, -1)
+        self.model.notify(FigureAction.Update, -1)
         self.presenter.update_plot_list.assert_called_once_with()
 
     # ------------------------ Plot Showing ------------------------

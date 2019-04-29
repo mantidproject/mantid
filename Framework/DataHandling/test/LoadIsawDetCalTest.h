@@ -25,7 +25,6 @@
 #include <Poco/File.h>
 #include <cstring>
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 using namespace Mantid::API;
@@ -55,7 +54,6 @@ public:
     if (det != nullptr) {
       const auto detPos = det->getPos();
       const V3D testPos(x, y, z);
-      std::cout << detPos << " " << testPos << std::endl;
       TS_ASSERT_EQUALS(detPos, testPos);
     } else {
       throw std::runtime_error("In checkPosition IComponent is nullptr");
@@ -67,7 +65,6 @@ public:
     if (det != nullptr) {
       const auto detRot = det->getRotation();
       const Quat testRot(w, a, b, c);
-      std::cout << detRot << " " << testRot << std::endl;
       TS_ASSERT_EQUALS(detRot, testRot);
     } else {
       throw std::runtime_error("In checkRotation IComponent is nullptr");
@@ -76,8 +73,7 @@ public:
 
   void testMINITOPAZ() {
     const std::string wsName("testMINITOPAZ");
-    loadEmptyInstrument("IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml",
-                        wsName);
+    loadEmptyInstrument("unit_testing/MINITOPAZ_Definition.xml", wsName);
 
     // generate test file
     std::string inputFile = "test.DetCal";

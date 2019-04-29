@@ -51,7 +51,7 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow {
 
 public:
   /// Name of the interface
-  static std::string name() { return "ISIS SANS"; }
+  static std::string name() { return "Old ISIS SANS (Deprecated)"; }
   // This interface's categories.
   static QString categoryInfo() { return "SANS"; }
 
@@ -75,7 +75,8 @@ signals:
   // signal  to notify mask file loaded
   void userfileLoaded();
   /// signal to send gemoetry information
-  void sendGeometryInformation(QString &, QString &, QString &, QString &);
+  void sendGeometryInformation(QString & /*_t1*/, QString & /*_t2*/,
+                               QString & /*_t3*/, QString & /*_t4*/);
 
 private:
   /// Stores the batch or single run mode selection
@@ -263,7 +264,7 @@ private slots:
   void enableOrDisableDefaultSave();
   /// connected to the Multi-period check box it shows or hides the multi-period
   /// boxes on the file widgets
-  void disOrEnablePeriods(const int);
+  void disOrEnablePeriods(const int /*tickState*/);
   /// Switch mode
   void switchMode();
   /// Paste to batch table
@@ -281,7 +282,7 @@ private slots:
   /// Adds a warning message to the tab title
   void setLoggerTabTitleToWarn();
   /// Handle selection of the transmission
-  void transSelectorChanged(int);
+  void transSelectorChanged(int /*currindex*/);
   void loadTransmissionSettings();
 
   void handleSlicePushButton();

@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0232,R0903
-import stresstesting
+import systemtesting
 from paraview.simple import *
 
 
-class PVPythonTest(stresstesting.MantidStressTest):
+class PVPythonTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         self.assertEqual(GetParaViewVersion().major, 5)

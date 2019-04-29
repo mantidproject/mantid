@@ -44,14 +44,14 @@ Data reduction
 
 #. Open ``Interfaces`` > ``Indirect`` > ``Data reduction``
 #. Make sure ``Instrument`` is set to ``IRIS``
-#. Check the ``Sum spectra`` box
+#. Check the ``Sum Files`` box
 #. In the ``Run files`` box enter ``26184-26185``
 #. Click ``Run``
 #. Check the ``Use Calib File`` box
 #. Change ``File`` to ``Workspace`` and choose the ``_calib`` workspace previously created (From the previous test)
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
-#. Choose ``Plot spectrum``, note the number of spectra, should be 50
+#. Choose ``Plot spectrum``, note the number of spectra, should be 51
 #. Click ``Cancel``
 #. In the ``Data reduction`` GUI, change the setting ``Mode`` to Groups
 #. Set ``Groups`` to 5
@@ -65,7 +65,7 @@ Data reduction
 #. Click ``Run``
 #. Should create a ``_sqw`` workspace
 #. Check ``Rebin in energy``
-#. Set ``Q-Low`` - ``Q-width`` - ``Q-High`` to -0.5, 0.01, 0.5
+#. Set ``E-Low`` - ``E-width`` - ``E-High`` to -0.5, 0.01, 0.5
 #. Click ``Run``
 #. With ``Plot Output`` set as Contour click ``Plot``, this should result in a 2D contour plot
 #. Click ``Manage User Directories`` and set the default save location
@@ -92,7 +92,7 @@ Data analysis Elwin
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
 #. In the main GUI right-click on ``irs26174-26176_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
-#. This should plot two lines of :math:`A^{-2}` vs :math:`Q`
+#. This should plot two lines of :math:`A^2` vs :math:`Q`
 #. Right-click on the ``irs26176_graphite002_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice; you will use this file in the next test
 
 Data analysis MSD
@@ -165,9 +165,10 @@ Data analysis I(Q, T)
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data 
 #. Click ``Run``
-#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 51 table. **NB** keep this workspace for the next test
+#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 6 table. **NB** keep this workspace for the next test
 #. Click ``Plot Current View`` this should plot the same data as the preview window
-#. Click ``Plot Result`` this should give a plot with the title *irs26176_graphite002_iqt*   
+#. Click ``Plot Spectrum`` this should give a plot with the title *irs26176_graphite002_iqt*   
+#. Click ``Plot Tiled`` this should give a tiled plot of spectra between the range specified.
 
 Data analysis I(Q, T) Fit
 -------------------------
@@ -188,10 +189,8 @@ Data analysis I(Q, T) Fit
 #. Click ``Run``
 #. This should produce a fit and a difference plot in the window
 #. Click ``Plot current preview`` this should open a plot with three datasets plotted
-#. Change ``Range`` to 0 - 10
+#. Change ``Range`` to 0 - 5
 #. Click ``Run``
 #. Select Lifetime from the ``Plot Output`` drop-down
-#. Click ``Plot Result`` this should open a new plot with the lifetimes plotted
+#. Click ``Plot`` this should open a new plot with the lifetimes plotted
   
-
-

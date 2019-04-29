@@ -10,10 +10,16 @@ Description
 -----------
 
 **Run numbers**:
-All run numbers provided will be reduced together.
+All run numbers provided will be reduced together as an aggregate sample.
 Example:
 2144-2147,2156 will reduce runs from (and including) 2144 up to
 (and including) 2147, plus 2156.
+
+**Flux Normalization Type**:
+Normalize the number of counts by either: (1) counts recorded in the monitor,
+(2) total proton charge, or (3) run duration. This flux normalization is
+separately applied to the aggregate sample, aggregate vanadium, and
+aggregated background.
 
 **Mask file**: The default file (BASIS_Mask_default_diff.xml) masks all
 inelastic detectors as well as the tips of the diffraction tubes. The file
@@ -25,11 +31,6 @@ workspace of same name plus suffix `_angle` is produced. The latter workspace
 contains intensities versus scattering angle. If background runs are
 provided, these workspaces contain the intensities of the sample minus those
 of the background.
-
-**MonitorNormalization**: intensities will be divided by the integrated
-intensity collected at the monitor. Integration of the histogram of monitor
-intensities versus wavelength over a wavelength range featuring significant
-neutron counts.
 
 **BackgroundRuns**: one or more run numbers to describe the background.
 Background runs are reduced together.

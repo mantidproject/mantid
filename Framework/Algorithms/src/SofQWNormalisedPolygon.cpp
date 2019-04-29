@@ -5,19 +5,271 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTypes/SpectrumDefinition.h"
+
+#include <boost/math/special_functions/pow.hpp>
+
+using Mantid::Geometry::rad2deg;
+using boost::math::pow;
+
+namespace {
+/**
+ * Calculate 2theta for a point in detector's local coordinates.
+ * @param detInfo a detector info
+ * @param detInfoIndex an index to the detector info
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @param point a point in detector's local coordinates
+ * @return 2theta angle in global coordinates, in radians
+ */
+double twoThetaFromLocalPoint(const Mantid::Geometry::DetectorInfo &detInfo,
+                              const size_t detInfoIndex,
+                              const Mantid::Kernel::V3D &samplePos,
+                              const Mantid::Kernel::V3D &beamDir,
+                              Mantid::Kernel::V3D point) {
+  const auto rotation = detInfo.rotation(detInfoIndex);
+  const auto position = detInfo.position(detInfoIndex);
+  rotation.rotate(point);
+  point += position;
+  point -= samplePos;
+  const auto twoTheta = point.angle(beamDir);
+  return twoTheta;
+}
+
+/** Calculate min and max 2theta for cuboid shape.
+ * Calculates the scattering angles for each corner and edge center and
+ * returns the extrema.
+ * @param detInfo a detector info
+ * @param detInfoIndex an index to the detector info
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @param geometry a geometry object describing the cuboid
+ * @return a pair (min(2theta), max(2theta)), units radians
+ */
+std::pair<double, double> cuboidTwoThetaRange(
+    const Mantid::Geometry::DetectorInfo &detInfo, const size_t detInfoIndex,
+    const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir,
+    const Mantid::Geometry::detail::ShapeInfo::CuboidGeometry &geometry) {
+  const auto back = geometry.leftBackBottom - geometry.leftFrontBottom;
+  const auto up = geometry.leftFrontTop - geometry.leftFrontBottom;
+  const auto right = geometry.rightFrontBottom - geometry.leftFrontBottom;
+  const std::array<Mantid::Kernel::V3D, 8> capRing{
+      {geometry.leftFrontBottom, geometry.leftFrontBottom + back * 0.5,
+       geometry.leftBackBottom, geometry.leftBackBottom + up * 0.5,
+       geometry.leftBackBottom + up, geometry.leftFrontTop + back * 0.5,
+       geometry.leftFrontTop, geometry.leftFrontBottom + up * 0.5}};
+  double minTwoTheta{std::numeric_limits<double>::max()};
+  double maxTwoTheta{std::numeric_limits<double>::lowest()};
+  for (int width = 0; width < 2; ++width) {
+    const auto offset = right * static_cast<double>(width);
+    for (const auto &pointInRing : capRing) {
+      auto point = pointInRing;
+      if (width != 0) {
+        point += offset;
+      }
+      const auto current = twoThetaFromLocalPoint(
+          detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
+      minTwoTheta = std::min(minTwoTheta, current);
+      maxTwoTheta = std::max(maxTwoTheta, current);
+    }
+  }
+  const auto beltOffset = right * 0.5;
+  for (size_t beltIndex = 0; beltIndex < capRing.size(); beltIndex += 2) {
+    const auto point = capRing[beltIndex] + beltOffset;
+    const auto current = twoThetaFromLocalPoint(
+        detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
+    minTwoTheta = std::min(minTwoTheta, current);
+    maxTwoTheta = std::max(maxTwoTheta, current);
+  }
+  return std::make_pair(minTwoTheta, maxTwoTheta);
+}
+
+/** Calculate min and max 2theta for cylinder shape.
+ * Calculates the scattering angles at a number of points around the
+ * outer rim at top, center and bottom of the cylinder.
+ * @param detInfo a detector info
+ * @param detInfoIndex an index to the detector info, not detector ID
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @param geometry a geometry object describing the cylinder
+ * @return a pair (min(2theta), max(2theta)), units radians
+ */
+
+std::pair<double, double> cylinderTwoThetaRange(
+    const Mantid::Geometry::DetectorInfo &detInfo, const size_t detInfoIndex,
+    const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir,
+    const Mantid::Geometry::detail::ShapeInfo::CylinderGeometry &geometry) {
+  Mantid::Kernel::V3D basis1{1., 0., 0.};
+  if (geometry.axis.X() != 0. && geometry.axis.Z() != 0) {
+    const auto inverseXZSumSq =
+        1. / (pow<2>(geometry.axis.X()) + pow<2>(geometry.axis.Z()));
+    basis1.setX(std::sqrt(1. - pow<2>(geometry.axis.X()) * inverseXZSumSq));
+    basis1.setY(geometry.axis.X() * std::sqrt(inverseXZSumSq));
+  }
+  const Mantid::Kernel::V3D basis2 = geometry.axis.cross_prod(basis1);
+  const std::array<double, 8> angles{{0., 0.25 * M_PI, 0.5 * M_PI, 0.75 * M_PI,
+                                      M_PI, 1.25 * M_PI, 1.5 * M_PI,
+                                      1.75 * M_PI}};
+  double minTwoTheta{std::numeric_limits<double>::max()};
+  double maxTwoTheta{std::numeric_limits<double>::lowest()};
+  for (const double &angle : angles) {
+    const auto basePoint =
+        geometry.centreOfBottomBase +
+        (basis1 * std::cos(angle) + basis2 * std::sin(angle)) * geometry.radius;
+    for (int i = 0; i < 3; ++i) {
+      const auto point = basePoint + geometry.axis * (0.5 * geometry.height *
+                                                      static_cast<double>(i));
+      const auto current = twoThetaFromLocalPoint(
+          detInfo, detInfoIndex, samplePos, beamDir, std::move(point));
+      minTwoTheta = std::min(minTwoTheta, current);
+      maxTwoTheta = std::max(maxTwoTheta, current);
+    }
+  }
+  return std::make_pair(minTwoTheta, maxTwoTheta);
+}
+
+/**
+ * Calculate the 2theta at bounding box surface for a given direction.
+ * @param detInfo a DetectorInfo object
+ * @param detInfoIndex index of the detector within detInfo
+ * @param samplePos a V3D pointing to the sample position
+ * @param beamDir a unit vector pointing along the beam axis
+ * @param sideDir a unit vector pointing to the chosen direction
+ * @return the 2theta in radians
+ */
+double twoThetaFromBoundingBox(const Mantid::Geometry::DetectorInfo &detInfo,
+                               const size_t detInfoIndex,
+                               const Mantid::Kernel::V3D &samplePos,
+                               const Mantid::Kernel::V3D &beamDir,
+                               const Mantid::Kernel::V3D &sideDir) {
+  const auto shape = detInfo.detector(detInfoIndex).shape();
+  const Mantid::Geometry::BoundingBox bbox = shape->getBoundingBox();
+  const auto maxPoint = bbox.maxPoint();
+  auto side = maxPoint * sideDir;
+  return twoThetaFromLocalPoint(detInfo, detInfoIndex, samplePos, beamDir,
+                                side);
+}
+
+/** Calculate min and max 2theta for a general shape.
+ * The calculation is done using the bounding box. The 2thetas are
+ * computed for the centers of the six faces of the box.
+ * @param detInfo a detector info
+ * @param detInfoIndex an index to the detector info
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @return a pair (min(2theta), max(2theta)), in radians.
+ */
+std::pair<double, double> generalTwoThetaRange(
+    const Mantid::Geometry::DetectorInfo &detInfo, const size_t detInfoIndex,
+    const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &beamDir) {
+  double minTwoTheta{std::numeric_limits<double>::max()};
+  double maxTwoTheta{std::numeric_limits<double>::lowest()};
+  const std::array<Mantid::Kernel::V3D, 6> dirs{
+      {Mantid::Kernel::V3D{1., 0., 0.},
+       {0., 1., 0.},
+       {0., 0., 1.},
+       {-1., 0., 0.},
+       {0., -1., 0.},
+       {0., 0., -1.}}};
+  for (const auto &dir : dirs) {
+    const auto current =
+        twoThetaFromBoundingBox(detInfo, detInfoIndex, samplePos, beamDir, dir);
+    minTwoTheta = std::min(minTwoTheta, current);
+    maxTwoTheta = std::max(maxTwoTheta, current);
+  }
+  return std::make_pair(minTwoTheta, maxTwoTheta);
+}
+
+/**
+ * Calculate the scattering angle extrema for a detector.
+ * The chosen method depends on the detector shape.
+ * @param detInfo a detector info
+ * @param detInfoIndex an index to the detector info
+ * @param samplePos position of the sample
+ * @param beamDir a unit vector pointing in the beam direction
+ * @return a pair (min(2theta), max(2theta)), in radians
+ */
+std::pair<double, double>
+minMaxTwoTheta(const Mantid::Geometry::DetectorInfo &detInfo,
+               const size_t detInfoIndex, const Mantid::Kernel::V3D &samplePos,
+               const Mantid::Kernel::V3D &beamDir) {
+  const auto shape = detInfo.detector(detInfoIndex).shape();
+  const Mantid::Geometry::CSGObject *csgShape;
+  switch (shape->shape()) {
+  case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CYLINDER:
+    csgShape = dynamic_cast<const Mantid::Geometry::CSGObject *>(shape.get());
+    assert(csgShape);
+    return cylinderTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir,
+                                 csgShape->shapeInfo().cylinderGeometry());
+  case Mantid::Geometry::detail::ShapeInfo::GeometryShape::CUBOID:
+    csgShape = dynamic_cast<const Mantid::Geometry::CSGObject *>(shape.get());
+    assert(csgShape);
+    return cuboidTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir,
+                               csgShape->shapeInfo().cuboidGeometry());
+  default:
+    return generalTwoThetaRange(detInfo, detInfoIndex, samplePos, beamDir);
+  }
+}
+
+/** Return the tabulated scattering angle extrema for a detector.
+ * @param detID detector id for which to find the 2thetas
+ * @param detectorIDs list of tabulated detector ids
+ * @param lowers list of min(2theta) corresponding to an id in detectorIDs
+ * @param uppers list of max(2theta) corresponding to an id in detectorIDs
+ * @return a pair (min(2theta), max(2theta)), in radians
+ */
+std::pair<double, double> twoThetasFromTable(
+    const Mantid::detid_t detID, const std::vector<int> &detectorIDs,
+    const std::vector<double> &lowers, const std::vector<double> &uppers) {
+  const auto range = std::equal_range(detectorIDs.cbegin(), detectorIDs.cend(),
+                                      static_cast<int>(detID));
+  if (std::distance(range.first, range.second) > 1) {
+    throw std::invalid_argument(
+        "Duplicate detector IDs in 'DetectorTwoThetaRanges'.");
+  }
+  if (range.first == detectorIDs.cend()) {
+    throw std::invalid_argument("No min/max 2thetas found for detector ID " +
+                                std::to_string(detID));
+  }
+  const auto index = std::distance(detectorIDs.cbegin(), range.first);
+  const auto minmax = std::make_pair(lowers[index], uppers[index]);
+  if (minmax.first <= 0) {
+    throw std::invalid_argument("Non-positive min 2theta for detector ID " +
+                                std::to_string(detID));
+  }
+  if (minmax.first > M_PI) {
+    throw std::invalid_argument("Min 2theta greater than pi for detector ID " +
+                                std::to_string(detID));
+  }
+  if (minmax.second > M_PI) {
+    throw std::invalid_argument("Max 2theta greater than pi for detector ID" +
+                                std::to_string(detID));
+  }
+  if (minmax.first >= minmax.second) {
+    throw std::invalid_argument("Min 2theta larger than max for detector ID " +
+                                std::to_string(detID));
+  }
+  return minmax;
+}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,12 +315,7 @@ void SofQWNormalisedPolygon::init() {
  * Execute the algorithm.
  */
 void SofQWNormalisedPolygon::exec() {
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);
@@ -86,29 +333,30 @@ void SofQWNormalisedPolygon::exec() {
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
-  m_progress = boost::shared_ptr<API::Progress>(
-      new API::Progress(this, 0.0, 1.0, nreports));
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
-  std::vector<double> par =
-      inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
-  if (par.empty()) {
-    // Index theta cache
-    this->initAngularCachesNonPSD(inputWS);
+  // Index theta cache
+  TableWorkspace_sptr twoThetaTable = getProperty("DetectorTwoThetaRanges");
+  if (twoThetaTable) {
+    initAngularCachesTable(*inputWS, *twoThetaTable);
   } else {
-    g_log.debug() << "Offset: " << par[0] << '\n';
-    this->m_detNeighbourOffset = static_cast<int>(par[0]);
-    this->initAngularCachesPSD(inputWS);
+    std::vector<double> par = inputWS->getInstrument()->getNumberParameter(
+        "detector-neighbour-offset");
+    if (par.empty()) {
+      this->initAngularCachesNonPSD(*inputWS);
+    } else {
+      g_log.debug() << "Offset: " << par[0] << '\n';
+      this->m_detNeighbourOffset = static_cast<int>(par[0]);
+      this->initAngularCachesPSD(*inputWS);
+    }
   }
-
   const auto &X = inputWS->x(0);
 
   const auto &inputIndices = inputWS->indexInfo();
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int64_t i = 0; i < static_cast<int64_t>(nHistos);
-       ++i) // signed for openmp
-  {
+  for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
@@ -117,16 +365,8 @@ void SofQWNormalisedPolygon::exec() {
     const auto *det =
         m_EmodeProperties.m_emode == 1 ? nullptr : &spectrumInfo.detector(i);
 
-    const double theta = this->m_theta[i];
-    const double phi = this->m_phi[i];
-    const double thetaWidth = this->m_thetaWidths[i];
-    const double phiWidth = this->m_phiWidths[i];
-
-    // Compute polygon points
-    const double thetaHalfWidth = 0.5 * thetaWidth;
-
-    const double thetaLower = theta - thetaHalfWidth;
-    const double thetaUpper = theta + thetaHalfWidth;
+    const double thetaLower = m_twoThetaLowers[i];
+    const double thetaUpper = m_twoThetaUppers[i];
 
     const auto specNo = static_cast<specnum_t>(inputIndices.spectrumNumber(i));
     std::stringstream logStream;
@@ -144,16 +384,16 @@ void SofQWNormalisedPolygon::exec() {
       const V2D ur(dE_jp1, m_EmodeProperties.q(dE_jp1, thetaUpper, det));
       const V2D ul(dE_j, m_EmodeProperties.q(dE_j, thetaUpper, det));
       if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-        logStream << "Spectrum=" << specNo << ", theta=" << theta
-                  << ",thetaWidth=" << thetaWidth << ", phi=" << phi
-                  << ", phiWidth=" << phiWidth << ". QE polygon: ll=" << ll
-                  << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
+        logStream << "Spectrum=" << specNo
+                  << ", lower theta=" << thetaLower * rad2deg
+                  << ", upper theta=" << thetaUpper * rad2deg
+                  << ". QE polygon: ll=" << ll << ", lr=" << lr << ", ur=" << ur
+                  << ", ul=" << ul << "\n";
       }
 
-      Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
-
-      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
-                                                   *outputWS, m_Qout);
+      using FractionalRebinning::rebinToFractionalOutput;
+      rebinToFractionalOutput(Quadrilateral(ll, lr, ur, ul), inputWS, i, j,
+                              *outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
@@ -178,7 +418,7 @@ void SofQWNormalisedPolygon::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->finalize();
-  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();
@@ -208,25 +448,21 @@ void SofQWNormalisedPolygon::exec() {
  * offset by this precaching step
  */
 void SofQWNormalisedPolygon::initAngularCachesNonPSD(
-    const API::MatrixWorkspace_const_sptr &workspace) {
-  const size_t nhist = workspace->getNumberHistograms();
-  this->m_theta = std::vector<double>(nhist);
-  this->m_thetaWidths = std::vector<double>(nhist);
-  // Force phi widths to zero
-  this->m_phi = std::vector<double>(nhist, 0.0);
-  this->m_phiWidths = std::vector<double>(nhist, 0.0);
+    const MatrixWorkspace &workspace) {
+  const size_t nhist = workspace.getNumberHistograms();
+  constexpr double skipDetector{-1.};
+  m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
+  m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
 
-  auto inst = workspace->getInstrument();
-  const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
+  auto inst = workspace.getInstrument();
+  const auto referenceFrame = inst->getReferenceFrame();
+  const auto beamDir = referenceFrame->vecPointingAlongBeam();
 
-  const auto &spectrumInfo = workspace->spectrumInfo();
-
-  for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
-  {
+  const auto &detectorInfo = workspace.detectorInfo();
+  const auto &spectrumInfo = workspace.spectrumInfo();
+  const auto samplePos = spectrumInfo.samplePosition();
+  for (size_t i = 0; i < nhist; ++i) {
     m_progress->report("Calculating detector angles");
-
-    this->m_theta[i] = -1.0; // Indicates a detector to skip
-    this->m_thetaWidths[i] = -1.0;
 
     // If no detector found, skip onto the next spectrum
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
@@ -241,122 +477,145 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
       continue;
     }
 
-    this->m_theta[i] = spectrumInfo.twoTheta(i);
-
-    /**
-     * Determine width from shape geometry. A group is assumed to contain
-     * detectors with the same shape & r, theta value, i.e. a ring mapped-group
-     * The shape is retrieved and rotated to match the rotation of the detector.
-     * The angular width is computed using the l2 distance from the sample
-     */
-    Kernel::V3D pos;
-    boost::shared_ptr<const IObject>
-        shape; // Defined in its own reference frame with centre at 0,0,0
-    Kernel::Quat rot;
-
+    double minTwoTheta{spectrumInfo.twoTheta(i)};
+    double maxTwoTheta{minTwoTheta};
     if (spectrumInfo.hasUniqueDetector(i)) {
-      pos = det.getPos();
-      shape = det.shape();
-      rot = det.getRotation();
+      const auto detInfoIndex = detectorInfo.indexOf(det.getID());
+      std::tie(minTwoTheta, maxTwoTheta) =
+          minMaxTwoTheta(detectorInfo, detInfoIndex, samplePos, beamDir);
     } else {
-      // assume they all have same shape and same r,theta
-      const auto &group = dynamic_cast<const Geometry::DetectorGroup &>(det);
-      const auto &firstDet = group.getDetectors();
-      pos = firstDet[0]->getPos();
-      shape = firstDet[0]->shape();
-      rot = firstDet[0]->getRotation();
+      const auto &group = dynamic_cast<const DetectorGroup &>(det);
+      const auto ids = group.getDetectorIDs();
+      for (const auto id : ids) {
+        const auto detInfoIndex = detectorInfo.indexOf(id);
+        const auto current =
+            minMaxTwoTheta(detectorInfo, detInfoIndex, samplePos, beamDir);
+        minTwoTheta = std::min(minTwoTheta, current.first);
+        maxTwoTheta = std::max(maxTwoTheta, current.second);
+      }
     }
-
-    double l2(0.0), t(0.0), p(0.0);
-    pos.getSpherical(l2, t, p);
-    BoundingBox bbox = shape->getBoundingBox();
-    auto maxPoint(bbox.maxPoint());
-    rot.rotate(maxPoint);
-    double boxWidth = maxPoint[upDir];
-
-    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
+    m_twoThetaLowers[i] = minTwoTheta;
+    m_twoThetaUppers[i] = maxTwoTheta;
     if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << "Detector at spectrum ="
-                    << workspace->getSpectrum(i).getSpectrumNo()
-                    << ", width=" << m_thetaWidths[i] * 180.0 / M_PI
+      g_log.debug() << "Detector at spectrum = "
+                    << workspace.getSpectrum(i).getSpectrumNo()
+                    << ", lower 2theta = " << m_twoThetaLowers[i] * rad2deg
+                    << ", upper 2theta = " << m_twoThetaUppers[i] * rad2deg
                     << " degrees\n";
     }
   }
 }
 
 /**
- * Function that retrieves the two-theta and azimuthal angles from a given
+ * Function that retrieves the two-theta angle from a given
  * detector. It then looks up the nearest neighbours. Using those detectors,
- * it calculates the two-theta and azimuthal angle widths.
+ * it calculates the two-theta angular widths.
  * @param workspace : the workspace containing the needed detector information
  */
 void SofQWNormalisedPolygon::initAngularCachesPSD(
-    const API::MatrixWorkspace_const_sptr &workspace) {
-  const size_t nHistos = workspace->getNumberHistograms();
-  g_log.debug() << "Number of Histograms: " << nHistos << '\n';
+    const MatrixWorkspace &workspace) {
+  const size_t nHistos = workspace.getNumberHistograms();
 
   bool ignoreMasked = true;
   const int numNeighbours = 4;
-  WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked,
+  WorkspaceNearestNeighbourInfo neighbourInfo(workspace, ignoreMasked,
                                               numNeighbours);
 
-  this->m_theta = std::vector<double>(nHistos);
-  this->m_thetaWidths = std::vector<double>(nHistos);
-  this->m_phi = std::vector<double>(nHistos);
-  this->m_phiWidths = std::vector<double>(nHistos);
+  m_twoThetaLowers.resize(nHistos);
+  m_twoThetaUppers.resize(nHistos);
 
-  const auto &spectrumInfo = workspace->spectrumInfo();
+  const auto &spectrumInfo = workspace.spectrumInfo();
 
   for (size_t i = 0; i < nHistos; ++i) {
     m_progress->report("Calculating detector angular widths");
-    const auto &detector = spectrumInfo.detector(i);
-    g_log.debug() << "Current histogram: " << i << '\n';
-    specnum_t inSpec = workspace->getSpectrum(i).getSpectrumNo();
-    SpectraDistanceMap neighbours = neighbourInfo.getNeighboursExact(inSpec);
 
-    g_log.debug() << "Current ID: " << inSpec << '\n';
+    // If no detector found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+
+    const specnum_t inSpec = workspace.getSpectrum(i).getSpectrumNo();
+    const SpectraDistanceMap neighbours =
+        neighbourInfo.getNeighboursExact(inSpec);
+
     // Convert from spectrum numbers to workspace indices
-    double thetaWidth = -DBL_MAX;
-    double phiWidth = -DBL_MAX;
+    double thetaWidth = std::numeric_limits<double>::lowest();
 
     // Find theta and phi widths
-    double theta = spectrumInfo.twoTheta(i);
-    double phi = detector.getPhi();
+    const double theta = spectrumInfo.twoTheta(i);
 
-    specnum_t deltaPlus1 = inSpec + 1;
-    specnum_t deltaMinus1 = inSpec - 1;
-    specnum_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
-    specnum_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
+    const specnum_t deltaPlus1 = inSpec + 1;
+    const specnum_t deltaMinus1 = inSpec - 1;
+    const specnum_t deltaPlusT = inSpec + this->m_detNeighbourOffset;
+    const specnum_t deltaMinusT = inSpec - this->m_detNeighbourOffset;
 
     for (auto &neighbour : neighbours) {
       specnum_t spec = neighbour.first;
-      g_log.debug() << "Neighbor ID: " << spec << '\n';
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
           spec == deltaMinusT) {
-        const auto &detector_n = spectrumInfo.detector(spec - 1);
-        double theta_n = spectrumInfo.twoTheta(spec - 1) * 0.5;
-        double phi_n = detector_n.getPhi();
+        const double theta_n = spectrumInfo.twoTheta(spec - 1) * 0.5;
 
-        double dTheta = std::fabs(theta - theta_n);
-        double dPhi = std::fabs(phi - phi_n);
-        if (dTheta > thetaWidth) {
-          thetaWidth = dTheta;
-          g_log.information()
-              << "Current ThetaWidth: " << thetaWidth * 180 / M_PI << '\n';
-        }
-        if (dPhi > phiWidth) {
-          phiWidth = dPhi;
-          g_log.information()
-              << "Current PhiWidth: " << phiWidth * 180 / M_PI << '\n';
-        }
+        const double dTheta = std::abs(theta - theta_n);
+        thetaWidth = std::max(thetaWidth, dTheta);
       }
     }
-    this->m_theta[i] = theta;
-    this->m_phi[i] = phi;
-    this->m_thetaWidths[i] = thetaWidth;
-    this->m_phiWidths[i] = phiWidth;
+    m_twoThetaLowers[i] = theta - thetaWidth / 2.;
+    m_twoThetaUppers[i] = theta + thetaWidth / 2.;
+    if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "Detector at spectrum = " << inSpec
+                    << ", width = " << thetaWidth * rad2deg << " degrees\n";
+    }
   }
 }
 
+void SofQWNormalisedPolygon::initAngularCachesTable(
+    const MatrixWorkspace &workspace, const TableWorkspace &angleTable) {
+  constexpr double skipDetector{-1.};
+  const size_t nhist = workspace.getNumberHistograms();
+  m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
+  m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
+  const auto &detIDs = angleTable.getColVector<int>("Detector ID");
+  const auto &lowers = angleTable.getColVector<double>("Min two theta");
+  const auto &uppers = angleTable.getColVector<double>("Max two theta");
+  const auto &spectrumInfo = workspace.spectrumInfo();
+  for (size_t i = 0; i < nhist; ++i) {
+    m_progress->report("Reading detector angles");
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
+      continue;
+    }
+    const auto &det = spectrumInfo.detector(i);
+    try {
+      m_EmodeProperties.getEFixed(det);
+    } catch (std::runtime_error &) {
+      continue;
+    }
+
+    if (spectrumInfo.hasUniqueDetector(i)) {
+      const auto twoThetas =
+          twoThetasFromTable(det.getID(), detIDs, lowers, uppers);
+      m_twoThetaLowers[i] = twoThetas.first;
+      m_twoThetaUppers[i] = twoThetas.second;
+    } else {
+      const auto &group = dynamic_cast<const DetectorGroup &>(det);
+      const auto ids = group.getDetectorIDs();
+      double minTwoTheta{spectrumInfo.twoTheta(i)};
+      double maxTwoTheta{minTwoTheta};
+      for (const auto id : ids) {
+        const auto twoThetas = twoThetasFromTable(id, detIDs, lowers, uppers);
+        minTwoTheta = std::min(minTwoTheta, twoThetas.first);
+        maxTwoTheta = std::max(maxTwoTheta, twoThetas.second);
+      }
+      m_twoThetaLowers[i] = minTwoTheta;
+      m_twoThetaUppers[i] = maxTwoTheta;
+    }
+    if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "Detector at spectrum = "
+                    << workspace.getSpectrum(i).getSpectrumNo()
+                    << ", lower 2theta = " << m_twoThetaLowers[i] * rad2deg
+                    << ", upper 2theta = " << m_twoThetaUppers[i] * rad2deg
+                    << " degrees\n";
+    }
+  }
+}
 } // namespace Algorithms
 } // namespace Mantid

@@ -12,7 +12,7 @@ One test has been removed from the port since it uses the ReductionSingleton.
 
 from __future__ import (absolute_import, division, print_function)
 import mantid  # noqa
-import stresstesting
+import systemtesting
 import os
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
@@ -23,7 +23,7 @@ from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, 
                                                          TransmissionCan, WavRangeReduction, UseCompatibilityMode)
 
 
-class SANS2DAddedEventFilesWithOverlayTest_V2(stresstesting.MantidStressTest):
+class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -62,7 +62,7 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(stresstesting.MantidStressTest):
         os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
-class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(stresstesting.MantidStressTest):
+class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()
@@ -106,7 +106,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(stresstesting.MantidSt
         os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
-class SANS2DAddedEventFilesWithoutOverlayTest_V2(stresstesting.MantidStressTest):
+class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2DTUBES()

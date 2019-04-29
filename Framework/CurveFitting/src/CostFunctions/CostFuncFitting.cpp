@@ -178,6 +178,7 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
   size_t np = m_function->nParams();
   auto covarMatrix = boost::shared_ptr<Kernel::Matrix<double>>(
       new Kernel::Matrix<double>(np, np));
+  m_function->setCovarianceMatrix(covarMatrix);
   size_t ia = 0;
   for (size_t i = 0; i < np; ++i) {
     if (!m_function->isActive(i)) {

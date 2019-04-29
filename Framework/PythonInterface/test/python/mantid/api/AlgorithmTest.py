@@ -9,7 +9,7 @@ import six
 
 import unittest
 import json
-from mantid.api import AlgorithmID, AlgorithmManager
+from mantid.api import AlgorithmID, AlgorithmManager, FrameworkManagerImpl
 from testhelpers import run_algorithm
 
 class AlgorithmTest(unittest.TestCase):
@@ -17,6 +17,7 @@ class AlgorithmTest(unittest.TestCase):
     _load = None
 
     def setUp(self):
+        FrameworkManagerImpl.Instance()
         if self._load is None:
             self.__class__._load = AlgorithmManager.createUnmanaged('Load')
             self._load.initialize()
@@ -48,7 +49,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertRaises(RuntimeError, alg.execute)
 
     def test_execute_succeeds_with_valid_props(self):
-        data = [1.0,2.0,3.0]
+        data = [1.5,2.5,3.5]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
         self.assertEquals(alg.isExecuted(), True)
         self.assertEquals(alg.isRunning(), False)
@@ -59,11 +60,11 @@ class AlgorithmTest(unittest.TestCase):
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
                           '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
 
     def test_execute_succeeds_with_unicode_props(self):
-        data = [1.0,2.0,3.0]
+        data = [1.5,2.5,3.5]
         kwargs = {'child':True}
         unitx = 'Wavelength'
         if six.PY2:
@@ -84,7 +85,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":[1.5,2.5,3.5],"DataY":[1.5,2.5,3.5],'
                           '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
 
     def test_execute_succeeds_with_unicode_kwargs(self):

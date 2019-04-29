@@ -52,10 +52,10 @@ public:
 private slots:
   void algorithmComplete(bool error);
   void handleNewFile();
-  void sliceTwoRanges(QtProperty *, bool);
+  void sliceTwoRanges(QtProperty * /*unused*/, bool /*state*/);
   void sliceCalib(bool state);
-  void rangeSelectorDropped(double, double);
-  void doublePropertyChanged(QtProperty *, double);
+  void rangeSelectorDropped(double /*min*/, double /*max*/);
+  void doublePropertyChanged(QtProperty * /*prop*/, double /*val*/);
   void setDefaultInstDetails();
   void sliceAlgDone(bool error);
   void
@@ -78,6 +78,8 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
+
   Ui::ISISDiagnostics m_uiForm;
 };
 } // namespace CustomInterfaces

@@ -23,24 +23,22 @@ tests scripts on that environment.
 Writing a Test
 ##############
 
-The (python) code for the system tests can be found in the git
+The (Python) code for the system tests can be found in the git
 repository at
-`mantidproject/mantid <http://github.com/mantidproject/mantid>`__, under
+`mantidproject/mantid <https://github.com/mantidproject/mantid>`__, under
 the ``Testing/SystemTests`` directory.
 
-Like their 'stress' equivalents (`stress testing <Stress_Tests>`__),
-system tests inherit from the stresstesting.MantidStressTest class. The
-methods that need to be overridden are ``runTest(self)``, where the
-python code that runs the test should be placed, and ``validate(self)``,
-which should simply return a pair of strings: the name of the final
-workspace that results from the ``runTest`` method and the name of a
-nexus file that should be saved in the ReferenceResults sub-directory in
-the repository. The test code itself is likely to be the output of a
-*Save History* command, though it can be any python code. In the
-unlikely case of files being used during a system test, implement the
-method ``requiredFiles`` which should return a list of filenames without
-paths. The file to validate against should be included as well. If any
-of those files are missing the test will be marked as skipped.
+System tests inherit from the :class:`systemtesting.MantidSystemTest` class. 
+The methods that need to be overridden are ``runTest(self)``, where the Python 
+code that runs the test should be placed, and ``validate(self)``, which should 
+simply return a pair of strings: the name of the final workspace that results 
+from the ``runTest`` method and the name of a nexus file that should be saved 
+in the ``ReferenceResults`` sub-directory in the repository. The test code 
+itself is likely to be the output of a *Save History* command, though it can 
+be any Python code. In the unlikely case of files being used during a system 
+test, implement the method ``requiredFiles`` which should return a list of 
+filenames without paths. The file to validate against should be included as 
+well. If any of those files are missing the test will be marked as skipped.
 
 The tests should be added to the ``Testing/SystemTests/tests/analysis``,
 with the template result going in the ``reference`` sub-folder. It will
@@ -85,7 +83,7 @@ Skipping tests
 Tests can be skipped based on arbitrary criteria by implementing the
 ``skipTests`` method and returning True if your criteria are met, and
 False otherwise. Examples are the availability of a data file or of
-certain python modules (e.g. for the XML validation tests).
+certain Python modules (e.g. for the XML validation tests).
 
 Target Platform Based on Free Memory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,6 +125,13 @@ system test.
 .. code-block:: python
 
    self.tolerance = 0.00000001
+
+By default the tolerance is absolute. It can be changed to relative by another
+flag in the :class:`systemtesting.MantidSystemTest` class.
+
+.. code-block:: python
+
+   self.tolerance_rel_err = True
 
 Disable Some Checks
 -------------------
@@ -228,7 +233,7 @@ would run the tests on 8 cores.
 
 Some tests write or delete in the same directories, using the same file
 names, which causes issues when running in parallel. To resolve this,
-a global list of test modules (= different python files in the
+a global list of test modules (= different Python files in the
 ``Testing/SystemTests/tests/analysis`` directory) is first created.
 Now we scan each test module line by line and list all the data files
 that are used by that module. The possible ways files are being
@@ -240,7 +245,7 @@ i.e. "0123, or strings ending with 4 digits 0123".
 This might over-count, meaning some sequences of 4 digits might not be
 used for a file name specification, but it does not matter if it gets
 identified as a filename as the probability of the same sequence being
-present in another python file is small, and it would therefore not lock
+present in another Python file is small, and it would therefore not lock
 any other tests. A dict is created with an entry for each module name
 that contains the list of files that this module requires.
 An accompanying dict with an entry for each data file stores a lock

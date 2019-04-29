@@ -46,8 +46,7 @@ class LoadMultipleGSS(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("FilePrefix","")
-        intArrayValidator = IntArrayBoundedValidator()
-        intArrayValidator.setLower(0)
+        intArrayValidator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(IntArrayProperty("RunNumbers",[0], validator=intArrayValidator))
         self.declareProperty(FileProperty("Directory", "", action=FileAction.OptionalDirectory))
 

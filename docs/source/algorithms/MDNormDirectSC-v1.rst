@@ -22,7 +22,7 @@ MDBox. A brief introduction to the multi-dimensional data normalization can be f
 
 .. Note::
 
-    As of :ref:`Release 3.14.0 <v3.14.0>`, the algorithm can handle merged MD workspaces. Make sure all original MDEvent workspaces have the same dimensions
+    As of :ref:`Release 4.0.0 <v4.0.0>`, the algorithm can handle merged MD workspaces. Make sure all original MDEvent workspaces have the same dimensions
 
 Usage
 -----

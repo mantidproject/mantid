@@ -19,6 +19,8 @@ public:
 
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const override;
 
+  std::vector<std::string> getSpectrumDependentAttributes() const override;
+
   void setFitTypeString(const std::string &fitType);
 
   void setFitFunction(Mantid::API::IFunction_sptr function) override;

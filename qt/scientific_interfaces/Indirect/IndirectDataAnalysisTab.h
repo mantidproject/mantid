@@ -61,6 +61,9 @@ public:
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
+  /// Sets the active workspace in the selected tab
+  void setActiveWorkspace();
+
 protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
@@ -145,13 +148,13 @@ private:
   void run() override = 0;
   /// Overidden by child class.
   bool validate() override = 0;
-
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
   int m_minSpectrum;

@@ -112,6 +112,8 @@ class MatrixTable(tableBase.NTableWidget):
         assert isinstance(num_rows, int) and num_rows > 0, 'Number of rows larger than 0.'
         assert isinstance(num_cols, int) and num_cols > 0, 'Number of columns larger than 0.'
 
+        self.init_size(4, 4)
+
         # think of reset
         if self.rowCount() != num_rows or self.columnCount() != num_cols:
             errmsg = 'Number of rows to set {0} is not equal to current number of rows {1} or ' \
@@ -568,7 +570,7 @@ class UBMatrixTable(tableBase.NTableWidget):
         Init setup
         :return:
         """
-        # self.init_size(3, 3)
+        self.init_size(3, 3)
 
         for i in range(3):
             for j in range(3):

@@ -101,7 +101,7 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
       boost::dynamic_pointer_cast<TableWorkspace>(peakWorkspace);
   if (peakTable) {
     try {
-      peakCollections.push_back(getPeakCollection(peakTable));
+      peakCollections.emplace_back(getPeakCollection(std::move(peakTable)));
     } catch (const std::runtime_error &) {
       // do nothing
     }
@@ -116,12 +116,12 @@ PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
   if (peakTables) {
     for (size_t i = 0;
          i < static_cast<size_t>(peakTables->getNumberOfEntries()); ++i) {
-      TableWorkspace_sptr peakTable =
+      peakTable =
           boost::dynamic_pointer_cast<TableWorkspace>(peakTables->getItem(i));
 
       if (peakTable) {
         try {
-          peakCollections.push_back(getPeakCollection(peakTable));
+          peakCollections.emplace_back(getPeakCollection(std::move(peakTable)));
         } catch (const std::runtime_error &) {
           // do nothing
         }

@@ -10,9 +10,8 @@ from six.moves import range
 import numpy as np
 import os
 
-from PyQt4.QtGui import QSizePolicy
-
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from qtpy.QtWidgets import QSizePolicy
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 

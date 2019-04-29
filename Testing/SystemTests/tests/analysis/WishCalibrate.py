@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import filecmp
 import numpy as np
 import os
-import stresstesting
+import systemtesting
 import tempfile
 
 import mantid.simpleapi as mantid
@@ -21,7 +21,7 @@ from ideal_tube import IdealTube
 import tube
 
 
-class WishCalibration(stresstesting.MantidStressTest):
+class WishCalibration(systemtesting.MantidSystemTest):
     """
     Runs the WISH calibration script and checks the result produced is sane
     """

@@ -7,16 +7,12 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
 
-  <computeResource name="SCARF@STFC" jobmanagertype="SCARFLSFJobManager">
-    <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
-  </computeResource>
-
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
     <filelocation>
-      <prefix regex="\\\\isis\\inst\$"></prefix>
-      <windows replacement=""></windows>
+      <prefix regex="\\\\isis(?:\.cclrc\.ac\.uk)?\\inst\$"></prefix>
+      <windows replacement="\\\\isis.cclrc.ac.uk\\inst$"></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
     </filelocation>
@@ -137,6 +133,9 @@
   <instrument name="MARI" shortname="MAR">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata>
+      <connection name="kafka_event" address="livedata.isis.cclrc.ac.uk:9092" listener="KafkaEventListener" />
+    </livedata>
     <livedata>
       <connection name="histo" address="NDXMARI:6789" listener="ISISHistoDataListener" />
     </livedata>
@@ -375,8 +374,11 @@
 
 </facility>
 
+<facility name="HFIR" delimiter="_" FileExtensions=".nxs,.nxs.h5,.dat,.xml">
 
-<facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
+   <archive>
+      <archiveSearch plugin="ORNLDataSearch" />
+   </archive>
 
    <timezone>US/Eastern</timezone>
 
@@ -445,17 +447,6 @@
    <computeResource name="Fermi">
      <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
    </computeResource>
-
-   <catalog name="ICat4Catalog">
-     <soapendpoint url="https://icat.sns.gov:8181/ICATService/ICAT"></soapendpoint>
-     <externaldownload url="https://icat.sns.gov/ids/"></externaldownload>
-     <filelocation>
-       <prefix regex=""></prefix>
-       <windows replacement=""></windows>
-       <linux replacement=""></linux>
-       <mac replacement=""></mac>
-     </filelocation>
-   </catalog>
 
    <timezone>US/Eastern</timezone>
 
@@ -700,6 +691,12 @@
     <technique>Reflectometry</technique>
   </instrument>
 
+  <instrument name="PANTHER">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
@@ -851,16 +848,21 @@
 </facility>
 
 <!-- ANSTO -->
-<facility name="ANSTO" FileExtensions=".nxs,.tar">
+<facility name="ANSTO" FileExtensions=".nxs,.tar,.hdf">
   <timezone>Australia/Sydney</timezone>
 
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
   </instrument>
-  
+
   <instrument name="EMUau">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="PELICAN">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Inelastic Neutron Scattering</technique>
   </instrument>
   
 </facility>
@@ -923,6 +925,13 @@
     </livedata>
   </instrument>
 
+</facility>
+<!--  ESS  -->
+<facility name="ESS" FileExtensions=".nxs,.hdf5">
+ <timezone>Europe/Copenhagen</timezone>
+  <instrument name="LOKI">
+    <technique>Small Angle Scattering</technique>
+  </instrument>
 </facility>
 
 </facilities>

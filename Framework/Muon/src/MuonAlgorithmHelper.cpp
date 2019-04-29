@@ -211,9 +211,9 @@ void groupWorkspaces(const std::string &groupName,
 
   if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
-      if (!group->contains(*it)) {
-        group->add(*it);
+    for (const auto &inputWorkspace : inputWorkspaces) {
+      if (!group->contains(inputWorkspace)) {
+        group->add(inputWorkspace);
       }
     }
   } else {
@@ -320,8 +320,8 @@ getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
   MatrixWorkspace_sptr matrixWS;
 
   std::vector<Workspace_sptr> workspaces = ws->getAllItems();
-  for (size_t i = 0; i < workspaces.size(); i++) {
-    matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspaces[i]);
+  for (const auto &workspace : workspaces) {
+    matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
     detectorIDs.insert(detectorIDsSingleWorkspace.begin(),
                        detectorIDsSingleWorkspace.end());
@@ -522,6 +522,10 @@ bool checkValidGroupPairName(const std::string &name) {
   return true;
 }
 
+bool is_alphanumerical_or_underscore(char character) {
+  return (isalpha(character) || isdigit(character) || (character == '_'));
+}
+
 /**
  * Sums the specified periods of the input workspace group
  * @param periodsToSum :: [input] List of period indexes (1-based) to be summed
@@ -605,6 +609,10 @@ void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
   alg->setProperty("LogName", logName);
   alg->setProperty("LogText", logValue);
   alg->execute();
+}
+
+bool isAlphanumericOrUnderscore(char character) {
+  return (isalpha(character) || isdigit(character) || (character == '_'));
 }
 
 } // namespace MuonAlgorithmHelper

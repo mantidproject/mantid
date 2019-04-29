@@ -60,11 +60,11 @@ public:
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWs->blocksize(), 4);
 
-    auto x1 = outWs->x(0);
+    const auto &x1 = outWs->x(0);
     TS_ASSERT_EQUALS(x1[0], 3);
     TS_ASSERT_EQUALS(x1[3], 6);
 
-    auto y1 = outWs->y(0);
+    const auto &y1 = outWs->y(0);
     TS_ASSERT_DELTA(y1[1], -7.0300, 0.0001);
     TS_ASSERT_DELTA(y1[2], -20.0000, 0.0001);
 

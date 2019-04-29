@@ -190,9 +190,7 @@ void SaveGSS::init() {
 
   auto must_be_3 = boost::make_shared<Kernel::ArrayLengthValidator<int>>(3);
   auto precision_range =
-      boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
-  precision_range->setLower(0);
-  precision_range->setUpper(10);
+      boost::make_shared<Kernel::ArrayBoundedValidator<int>>(0, 10);
 
   auto precision_validator = boost::make_shared<Kernel::CompositeValidator>();
   precision_validator->add(must_be_3);
@@ -201,7 +199,8 @@ void SaveGSS::init() {
   std::vector<int> default_precision(3, 9);
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>(
-          "SLOGXYEPrecision", default_precision, precision_validator),
+          "SLOGXYEPrecision", std::move(default_precision),
+          std::move(precision_validator)),
       "Enter 3 integers as the precisions of output X, Y and E for SLOG data "
       "only."
       "Default is (9, 9, 9) if it is left empty.  Otherwise it is not "
@@ -227,9 +226,8 @@ void SaveGSS::exec() {
   m_allDetectorsValid = (isInstrumentValid() && areAllDetectorsValid());
   generateOutFileNames(numOfOutFiles);
   m_outputBuffer.resize(nHist);
-  for (auto &entry : m_outputBuffer) {
-    entry = makeStringStream();
-  }
+  std::generate(m_outputBuffer.begin(), m_outputBuffer.end(),
+                []() { return makeStringStream(); });
 
   // Progress is 2 * number of histograms. One for generating data
   // one for writing out data
@@ -358,22 +356,17 @@ void SaveGSS::generateBankData(
 void SaveGSS::generateBankHeader(std::stringstream &out,
                                  const API::SpectrumInfo &spectrumInfo,
                                  size_t specIndex) const {
-  double l1{0}, l2{0}, twoTheta{0}, difc{0};
   // If we have all valid detectors get these properties else use 0
   if (m_allDetectorsValid) {
-    l1 = spectrumInfo.l1();
-    l2 = spectrumInfo.l2(specIndex);
-    twoTheta = spectrumInfo.twoTheta(specIndex);
-    difc = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) *
-            (l1 + l2)) /
-           (PhysicalConstants::h * 1.e4);
-  }
-
-  if (m_allDetectorsValid) {
+    const auto l1 = spectrumInfo.l1();
+    const auto l2 = spectrumInfo.l2(specIndex);
+    const auto twoTheta = spectrumInfo.twoTheta(specIndex);
+    const auto difc = (2.0 * PhysicalConstants::NeutronMass *
+                       sin(twoTheta * 0.5) * (l1 + l2)) /
+                      (PhysicalConstants::h * 1.e4);
     out << "# Total flight path " << (l1 + l2) << "m, tth "
         << (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
   }
-
   out << "# Data for spectrum :" << specIndex << "\n";
 }
 

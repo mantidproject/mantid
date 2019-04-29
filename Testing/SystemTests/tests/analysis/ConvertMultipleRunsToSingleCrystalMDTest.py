@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 from mantid.simpleapi import ConvertMultipleRunsToSingleCrystalMD, Load, AlgorithmManager, SaveMD
 
 
-class ConvertMultipleRunsToSingleCrystalMDQSampleTest(stresstesting.MantidStressTest):
+class ConvertMultipleRunsToSingleCrystalMDQSampleTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs"]
 
@@ -43,7 +43,7 @@ class ConvertMultipleRunsToSingleCrystalMDQSampleTest(stresstesting.MantidStress
         return True
 
 
-class ConvertMultipleRunsToSingleCrystalMDHKLTest(stresstesting.MantidStressTest):
+class ConvertMultipleRunsToSingleCrystalMDHKLTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ["CORELLI_29782.nxs","CORELLI_29792.nxs",
                 "SingleCrystalDiffuseReduction_UB.mat"]
@@ -55,7 +55,8 @@ class ConvertMultipleRunsToSingleCrystalMDHKLTest(stresstesting.MantidStressTest
                                              SetGoniometer=True,
                                              Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
                                              MinValues=[-4,3,-0.05],
-                                             MaxValues=[0,8,0.05])
+                                             MaxValues=[0,8,0.05],
+                                             QFrame='HKL')
 
     def validate(self):
         results = 'CMRSCMD_output_HKL'

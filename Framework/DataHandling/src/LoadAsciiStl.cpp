@@ -1,15 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAsciiStl.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <string>
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL() {
-  std::ifstream file(m_filename.c_str());
+bool LoadAsciiStl::isAsciiSTL(std::string filename) {
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    // if the file cannot be read then it is not a valid asciiStl File
+    return false;
+  }
   std::string line;
   getline(file, line);
   boost::trim(line);
@@ -22,20 +32,43 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
   getline(file, line);
   m_lineNumber++;
   Kernel::V3D t1, t2, t3;
+  uint32_t vertexCount = 0;
   while (readSTLTriangle(file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {
-      m_triangle.emplace_back(addSTLVertex(t1));
-      m_triangle.emplace_back(addSTLVertex(t2));
-      m_triangle.emplace_back(addSTLVertex(t3));
+      auto vertexPair = std::pair<Kernel::V3D, uint32_t>(t1, vertexCount);
+      auto emplacementResult = vertexSet.insert(vertexPair);
+      if (emplacementResult.second) {
+        vertexCount++;
+      }
+      m_triangle.emplace_back(emplacementResult.first->second);
+      vertexPair = std::pair<Kernel::V3D, uint32_t>(t2, vertexCount);
+      emplacementResult = vertexSet.insert(vertexPair);
+      if (emplacementResult.second) {
+        vertexCount++;
+      }
+      m_triangle.emplace_back(emplacementResult.first->second);
+      vertexPair = std::pair<Kernel::V3D, uint32_t>(t3, vertexCount);
+      emplacementResult = vertexSet.insert(vertexPair);
+      if (emplacementResult.second) {
+        vertexCount++;
+      }
+      m_triangle.emplace_back(emplacementResult.first->second);
     }
   }
-  // Use efficient constructor of MeshObject
-  std::unique_ptr<Geometry::MeshObject> retVal =
-      Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle),
-                                                std::move(m_verticies),
-                                                Mantid::Kernel::Material());
+  changeToVector();
+  Mantid::Kernel::Material material;
+  if (m_setMaterial) {
+    g_logstl.information("Setting Material");
+    ReadMaterial reader;
+    reader.setMaterialParameters(m_params);
+    material = *(reader.buildMaterial());
+  } else {
+    material = Mantid::Kernel::Material();
+  }
+  auto retVal = std::make_unique<Geometry::MeshObject>(
+      std::move(m_triangle), std::move(m_verticies), material);
   return retVal;
 }
 

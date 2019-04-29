@@ -32,7 +32,8 @@ A threshold for the Peak should be defined below which, parts of the
 image are treated as background. The normalization method in combination
 with the threshold may both be used to define a background. We suggest
 keeping the default of VolumeNormalization so that changes in the
-effective bin size do not affect the background filtering.
+effective bin size do not affect the background filtering. NaN is always
+considered background.
 
 This algorithm uses an imaging technique, and it is therefore important
 that the MDHistoWorkspace you are using is binned to a sufficient

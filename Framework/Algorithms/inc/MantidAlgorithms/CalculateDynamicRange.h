@@ -14,9 +14,8 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CalculateDynamicRange
-
-  Calculates the Qmin and Qmax of SANS workspace, sets to sample logs.
-*/
+ * Calculates the Qmin and Qmax of SANS workspace, sets to sample logs.
+ */
 class MANTID_ALGORITHMS_DLL CalculateDynamicRange : public API::Algorithm {
 public:
   const std::string name() const override;
@@ -27,6 +26,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  void calculateQMinMax(API::MatrixWorkspace_sptr, const std::vector<size_t> &,
+                        const std::string &);
 };
 
 } // namespace Algorithms

@@ -71,9 +71,9 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
 }
 
 InstrumentRenderer::~InstrumentRenderer() {
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
+  for (unsigned int i : m_displayListId) {
+    if (i != 0) {
+      glDeleteLists(i, 1);
     }
   }
 }
@@ -359,7 +359,7 @@ void InstrumentRenderer::resetColors() {
   std::function<bool(size_t)> isMasked;
   if (maskWS) {
     isMasked = [&detInfo, &detectorIDs, &maskWS](size_t index) {
-      return maskWS->isMasked(detectorIDs[index]) && detInfo.isMasked(index);
+      return maskWS->isMasked(detectorIDs[index]) || detInfo.isMasked(index);
     };
   } else {
     isMasked = [&detInfo](size_t index) { return detInfo.isMasked(index); };

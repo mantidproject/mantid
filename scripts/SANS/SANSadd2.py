@@ -35,7 +35,8 @@ def add_runs(runs, # noqa: C901
              isOverlay=False,
              time_shifts=None,
              outFile=None,
-             outFile_monitors=None):
+             outFile_monitors=None,
+             save_directory=None):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -138,6 +139,9 @@ def add_runs(runs, # noqa: C901
     # now save the added file
         outFile = lastFile+'-add.'+'nxs' if outFile is None else outFile
         outFile_monitors = lastFile+'-add_monitors.'+'nxs' if outFile_monitors is None else outFile_monitors
+        if save_directory:
+            outFile = save_directory + outFile
+            outFile_monitors = save_directory + outFile_monitors
         sanslog.notice('writing file:   '+outFile)
 
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
@@ -177,7 +181,8 @@ def add_runs(runs, # noqa: C901
     path,base = os.path.split(outFile)
     if path == '' or base not in os.listdir(path):
         # Try the default save directory
-        path = config['defaultsave.directory'] + path
+        path_prefix = save_directory if save_directory else config["defaultsave.directory"]
+        path = path_prefix + path
         # If the path is still an empty string check in the current working directory
         if path == '':
             path = os.getcwd()

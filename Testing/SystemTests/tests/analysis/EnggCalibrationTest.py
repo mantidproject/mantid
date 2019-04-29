@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from six import PY2
 
@@ -32,9 +32,9 @@ def rel_err_less_delta(val, ref, epsilon):
     return check
 
 
-class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
+class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
         # This test makes sure that the pre-calculated values (which are extensively used in the
         # unit tests) are still the same results as we get from the actual calculations
@@ -152,10 +152,10 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         mtd.remove(self.van_bank_curves_name)
 
 
-class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
+class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
     # pylint: disable=too-many-instance-attributes
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         # difc and zero parameters for GSAS
         self.difa = -1
         self.difa_b2 = -1

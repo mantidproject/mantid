@@ -69,6 +69,8 @@ public:
   /// contain.
   unsigned int getCoordType() const override { return sizeof(coord_t); }
 
+  bool isLeaf() const override final { return getNumChildren() == 0; }
+
   ///@return The special ID which specify location of this node in the chain of
   /// ordered boxes (e.g. on a file)
   size_t getID() const override { return m_fileID; }
@@ -338,7 +340,17 @@ public:
     m_inverseVolume = invVolume;
   }
 
+  virtual void calculateGridCaches() {}
+
 protected:
+  /**
+   * Calculates caches if the events are known
+   * @tparam EventIterator :: iterator which points to event in some collection
+   * @param begin :: iterator to start
+   * @param end :: iterator before end (not included)
+   */
+  template <typename EventIterator>
+  void calcCaches(const EventIterator &begin, const EventIterator &end);
   /** Array of MDDimensionStats giving the extents and
    * other stats on the box dimensions.
    */
@@ -387,6 +399,34 @@ public:
 #ifndef __INTEL_COMPILER
 #pragma pack(pop) // Return to default packing size
 #endif
+
+template <typename MDE, size_t nd>
+template <typename EventIterator>
+void MDBoxBase<MDE, nd>::calcCaches(const EventIterator &begin,
+                                    const EventIterator &end) {
+  m_signal = 0;
+  m_errorSquared = 0;
+  m_totalWeight = 0;
+  coord_t *centroid = m_centroid;
+  std::fill_n(centroid, nd, 0.0f);
+  for (auto it = begin; it != end; ++it) {
+    auto evSignal = it->getSignal();
+    m_signal += evSignal;
+    m_errorSquared += it->getErrorSquared();
+    /// Weight processing
+    ++m_totalWeight;
+    for (auto d = 0u; d < nd; d++) {
+      // Total up the coordinate weighted by the signal.
+      centroid[d] += it->getCenter(d) * static_cast<coord_t>(evSignal);
+    }
+  }
+
+  // Normalize by the total signal
+  const coord_t reciprocal = 1.0f / static_cast<coord_t>(m_signal);
+  for (size_t d = 0; d < nd; ++d) {
+    centroid[d] *= reciprocal;
+  }
+}
 
 } // namespace DataObjects
 } // namespace Mantid

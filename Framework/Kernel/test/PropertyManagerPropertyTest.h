@@ -12,6 +12,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManagerProperty.h"
+#include "MantidKernel/PropertyWithValue.tcc"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -112,6 +113,43 @@ public:
     TS_ASSERT(prop()->existsProperty("Prop1"));
   }
 
+  void test_Property_Set_With_Json_String_Declares_Missing_Values() {
+    PropertyManagerProperty prop("Test");
+    const std::string jsonString =
+        R"({"APROP":"equation=12+3","anotherProp":"1.3,2.5"})";
+
+    TS_ASSERT_THROWS_NOTHING(prop.setValue(jsonString));
+
+    auto mgr = prop();
+    TS_ASSERT_EQUALS("equation=12+3",
+                     static_cast<std::string>(mgr->getProperty("APROP")));
+    TS_ASSERT_EQUALS("1.3,2.5",
+                     static_cast<std::string>(mgr->getProperty("anotherProp")));
+  }
+
+  void test_Property_Set_With_Non_Json_ObjectValue_Returns_Help_Msg() {
+    PropertyManagerProperty prop("Test");
+    const std::string helpMsg{prop.setValueFromJson(Json::Value(1))};
+    TS_ASSERT(!helpMsg.empty());
+  }
+
+  void test_Property_Set_With_Json_ObjectValue_Is_Accepted() {
+    const std::string intKey{"k1"}, realKey{"k2"};
+    const int intValue(1);
+    const double realValue(5.3);
+    Json::Value dict(Json::objectValue);
+    dict[intKey] = intValue;
+    dict[realKey] = realValue;
+
+    PropertyManagerProperty prop("Test");
+    prop.setValueFromJson(dict);
+
+    auto propMgr = prop();
+    TS_ASSERT_EQUALS(intValue, static_cast<int>(propMgr->getProperty(intKey)));
+    TS_ASSERT_EQUALS(realValue,
+                     static_cast<double>(propMgr->getProperty(realKey)));
+  }
+
   void test_Property_Set_With_String_Checks_PropertyManager_DataService() {
     using Mantid::Kernel::PropertyManagerDataService;
     auto globalMgr = createPropMgrWithInt();
@@ -163,20 +201,47 @@ public:
     TS_ASSERT_EQUALS("", pmap.value());
   }
 
+  void test_asJson_Gives_Json_ObjectValue() {
+    using Mantid::Kernel::PropertyManager;
+    auto propMgr = boost::make_shared<PropertyManager>();
+    propMgr->declareProperty("IntProp", 1);
+    propMgr->declareProperty("DoubleProp", 15.1);
+    PropertyManagerProperty prop("PMDSTest", propMgr);
+
+    auto jsonVal = prop.valueAsJson();
+
+    TS_ASSERT_EQUALS(2, jsonVal.size());
+    TS_ASSERT_EQUALS(1, jsonVal["IntProp"].asInt());
+    TS_ASSERT_EQUALS(15.1, jsonVal["DoubleProp"].asDouble());
+  }
+
+  void test_Encode_Nested_PropertyManager_As_Nested_Json_Objects() {
+    using Mantid::Kernel::PropertyManager;
+    using Mantid::Kernel::PropertyManagerProperty;
+    auto inner = boost::make_shared<PropertyManager>();
+    inner->declareProperty("IntProp", 2);
+    inner->declareProperty("DoubleProp", 16.1);
+    auto outer = boost::make_shared<PropertyManager>();
+    outer->declareProperty("IntProp", 1);
+    outer->declareProperty(
+        std::make_unique<PropertyManagerProperty>("PropMgr", inner));
+    PropertyManagerProperty prop("PMDSTest", outer);
+
+    auto outerVal = prop.valueAsJson();
+    TS_ASSERT_EQUALS(2, outerVal.size());
+    TS_ASSERT_EQUALS(1, outerVal["IntProp"].asInt());
+    auto innerVal = outerVal["PropMgr"];
+    TS_ASSERT_EQUALS(Json::objectValue, innerVal.type());
+    TS_ASSERT_EQUALS(2, innerVal.size());
+    TS_ASSERT_EQUALS(16.1, innerVal["DoubleProp"].asDouble());
+    TS_ASSERT_EQUALS(2, innerVal["IntProp"].asDouble());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Empty_Name_Is_Not_Accepted() {
     TS_ASSERT_THROWS(PropertyManagerProperty(""), std::invalid_argument);
-  }
-
-  void test_Empty_Property_Set_With_Json_String_Returns_Error() {
-    PropertyManagerProperty prop("Test");
-
-    auto json = createPropMgrWithInt()->asString(true);
-    std::string msg;
-    TS_ASSERT_THROWS_NOTHING(msg = prop.setValue(json));
-    TS_ASSERT(msg.length() > 0);
   }
 
   void test_String_Not_Holding_Valid_Json_or_Global_PM_Name_Returns_Error() {

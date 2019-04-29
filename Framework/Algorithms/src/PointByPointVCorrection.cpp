@@ -10,7 +10,7 @@
 #include "MantidAlgorithms/PointByPointVCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -26,6 +26,7 @@ DECLARE_ALGORITHM(PointByPointVCorrection)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Default constructor
 PointByPointVCorrection::PointByPointVCorrection() : Algorithm() {}
@@ -183,7 +184,7 @@ void PointByPointVCorrection::check_validity(
   if (out != w1 && out != w2) // Create a new workspace only if it is different
                               // from of the input ones.
   {
-    out = API::WorkspaceFactory::Instance().create(w1);
+    out = create<MatrixWorkspace>(*w1);
     setProperty("OutputWorkspace", out);
   } else if (out == w2) {
     g_log.warning("Any masking in the output workspaces will be taken from the "

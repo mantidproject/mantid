@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import mantid
 import unittest
-import stresstesting
+import systemtesting
 
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
@@ -185,9 +185,9 @@ class SANSSaveTest(unittest.TestCase):
         self._remove_file(file_name)
 
 
-class SANSSaveRunnerTest(stresstesting.MantidStressTest):
+class SANSSaveRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

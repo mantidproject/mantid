@@ -115,6 +115,9 @@ void ReflectometryWorkflowBase2::initMonitorProperties() {
                       "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
                       Direction::Input),
                   "Wavelength maximum for integration in angstroms.");
+  // Normalization by integrated monitors
+  declareProperty("NormalizeByIntegratedMonitors", true,
+                  "Normalize by dividing by the integrated monitors.");
 }
 
 /** Initialize properties related to transmission normalization
@@ -148,6 +151,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
+  setPropertyGroup("ScaleRHSWorkspace", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -172,6 +176,10 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
                   "End wavelength (angstroms) for stitching transmission runs "
                   "together. Only used if a second transmission run is "
                   "provided.");
+  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
+                                                       true, Direction::Input),
+                  "Scale the right-hand-side or left-hand-side workspace. "
+                  "Only used if a second transmission run is provided.");
 }
 
 /** Initialize algorithmic correction properties
@@ -552,34 +560,46 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
       this, "StartOverlap", instrument, "TransRunStartOverlap");
   if (startOverlap.is_initialized())
     alg->setProperty("StartOverlap", startOverlap.get());
+
   const auto endOverlap = checkForOptionalInstrumentDefault<double>(
       this, "EndOverlap", instrument, "TransRunEndOverlap");
   if (endOverlap.is_initialized())
     alg->setProperty("EndOverlap", endOverlap.get());
+
   const auto monitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
   if (monitorIndex.is_initialized())
     alg->setProperty("I0MonitorIndex", monitorIndex.get());
+
   const auto backgroundMin = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMin", instrument,
       "MonitorBackgroundMin");
   if (backgroundMin.is_initialized())
     alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.get());
+
   const auto backgroundMax = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMax", instrument,
       "MonitorBackgroundMax");
   if (backgroundMax.is_initialized())
     alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.get());
+
   const auto integrationMin = checkForOptionalInstrumentDefault<double>(
       this, "MonitorIntegrationWavelengthMin", instrument,
       "MonitorIntegralMin");
   if (integrationMin.is_initialized())
     alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.get());
+
   const auto integrationMax = checkForOptionalInstrumentDefault<double>(
       this, "MonitorIntegrationWavelengthMax", instrument,
       "MonitorIntegralMax");
   if (integrationMax.is_initialized())
     alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.get());
+
+  const auto integrationBool = checkForOptionalInstrumentDefault<bool>(
+      this, "NormalizeByIntegratedMonitors", instrument,
+      "NormalizeByIntegratedMonitors");
+  if (integrationBool.is_initialized())
+    alg->setProperty("NormalizeByIntegratedMonitors", integrationBool.get());
 }
 
 /** Finding processing instructions from the parameters file
@@ -648,6 +668,8 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
       alg->setPropertyValue("Params", getPropertyValue("Params"));
+      alg->setProperty("ScaleRHSWorkspace",
+                       getPropertyValue("ScaleRHSWorkspace"));
     }
   }
 
@@ -704,15 +726,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted followed by separator
       converted.append(convertToWorkspaceIndex(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted
@@ -735,15 +757,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator
       converted.append(convertToSpectrumNumber(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted

@@ -116,6 +116,7 @@ class PyChopGui(QMainWindow):
         self.flxedt.setText('%3.2f' % (val))
         nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, 'n_frame') else 1
         self.repfig_nframe_edit.setText(str(nframe))
+        self.repfig_nframe_rep1only.setChecked(False)
         if hasattr(self.engine.chopper_system, 'default_frequencies'):
             cb = [self.widgets['FrequencyCombo']['Combo'], self.widgets['PulseRemoverCombo']['Combo']]
             for idx, freq in enumerate(self.engine.chopper_system.default_frequencies):
@@ -299,6 +300,8 @@ class PyChopGui(QMainWindow):
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
         self.qeaxes.legend().draggable()
+        self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
+        self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qecanvas.draw()
 
     def plot_flux_ei(self, **kwargs):
@@ -467,7 +470,10 @@ class PyChopGui(QMainWindow):
         msg.exec_()
 
     def loadYaml(self):
-        yaml_file = str(QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)'))
+        yaml_file = QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)')
+        if isinstance(yaml_file, tuple):
+            yaml_file = yaml_file[0]
+        yaml_file = str(yaml_file)
         new_folder = os.path.dirname(yaml_file)
         if new_folder != self.folder:
             self.folder = new_folder
@@ -532,23 +538,19 @@ class PyChopGui(QMainWindow):
         if len(self.engine.chopper_system.choppers) > 1:
             self.engine.n_frame = int(self.repfig_nframe_edit.text())
             self.repaxes.clear()
-            self.engine.plotMultiRepFrame(self.repaxes)
+            self.engine.plotMultiRepFrame(self.repaxes, first_rep=self.repfig_nframe_rep1only.isChecked())
             self.repcanvas.draw()
 
-    def genText(self):
-        """
-        Generates text output of the resolution function versus energy transfer and other information.
-        """
-        en = np.linspace(0, 0.95*self.engine.getEi(), 10)
+    def _gen_text_ei(self, ei, obj_in):
+        obj = Instrument(obj_in)
+        obj.setEi(ei)
+        en = np.linspace(0, 0.95*ei, 10)
         try:
             flux = self.engine.getFlux()
             res = self.engine.getResolution(en)
         except ValueError as err:
             self.errormessage(err)
             raise ValueError(err)
-        obj = self.engine
-        instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
-        ei = ei_in
         tsqvan, tsqdic, tsqmodchop = obj.getVanVar()
         v_mod, v_chop = tuple(np.sqrt(tsqmodchop[:2]) * 1e6)
         x0, _, x1, x2, _ = obj.chopper_system.getDistances()
@@ -557,21 +559,13 @@ class PyChopGui(QMainWindow):
             x0 = tsqmodchop[2]
             first_component = 'chopper 1'
         txt = '# ------------------------------------------------------------- #\n'
-        txt += '# Chop calculation for instrument %s\n' % (instname)
-        if obj.isFermi:
-            txt += '#     with chopper %s at %3i Hz\n' % (chtyp, freqs[0])
-        else:
-            txt += '#     in %s mode with:\n' % (chtyp)
-            freq_names = obj.chopper_system.frequency_names
-            for idx in range(len(freq_names)):
-                txt += '#     %s at %3i Hz\n' % (freq_names[idx], freqs[idx])
-        txt += '# ------------------------------------------------------------- #\n'
+        txt += '# Ei = %8.2f meV\n' % (ei)
         txt += '# Flux = %8.2f n/cm2/s\n' % (flux)
         txt += '# Elastic resolution = %6.2f meV\n' % (res[0])
         txt += '# Time width at sample = %6.2f us, of which:\n' % (1e6*np.sqrt(tsqvan))
         for ky, val in list(tsqdic.items()):
             txt += '#     %20s : %6.2f us\n' % (ky, 1e6*np.sqrt(val))
-        txt += '# %s distances:\n' % (instname)
+        txt += '# %s distances:\n' % (obj.instname)
         txt += '#     x0 = %6.2f m (%s to Fermi)\n' % (x0, first_component)
         txt += '#     x1 = %6.2f m (Fermi to sample)\n' % (x1)
         txt += '#     x2 = %6.2f m (sample to detector)\n' % (x2)
@@ -591,6 +585,33 @@ class PyChopGui(QMainWindow):
             approx = (874.78672e-6/x2)*np.sqrt(ef**3 * ((v_mod*((x1/x0)+(x2/x0)*(ei/ef)**1.5))**2
                                                         + (v_chop*(1+(x1/x0)+(x2/x0)*(ei/ef)**1.5))**2))
             txt += '%12.5f %12.5f %12.5f\n' % (en[ii], res[ii], approx)
+        return txt
+
+    def genText(self):
+        """
+        Generates text output of the resolution function versus energy transfer and other information.
+        """
+        multiplot = self.widgets['MultiRepCheck'].isChecked()
+        obj = self.engine
+        if obj.getChopper() is None:
+            self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
+        if obj.getEi() is None:
+            self.setEi()
+        instname, chtyp, freqs, ei_in = tuple([obj.instname, obj.getChopper(), obj.getFrequency(), obj.getEi()])
+        txt = '# ------------------------------------------------------------- #\n'
+        txt += '# Chop calculation for instrument %s\n' % (instname)
+        if obj.isFermi:
+            txt += '#     with chopper %s at %3i Hz\n' % (chtyp, freqs[0])
+        else:
+            txt += '#     in %s mode with:\n' % (chtyp)
+            freq_names = obj.chopper_system.frequency_names
+            for idx in range(len(freq_names)):
+                txt += '#     %s at %3i Hz\n' % (freq_names[idx], freqs[idx])
+        txt += self._gen_text_ei(ei_in, obj)
+        if multiplot:
+            for ei in sorted(self.engine.getAllowedEi()):
+                if np.abs(ei - ei_in) > 0.001:
+                    txt += self._gen_text_ei(ei, obj)
         return txt
 
     def showText(self):
@@ -624,6 +645,8 @@ class PyChopGui(QMainWindow):
         Saves the generated text to a file (opens file dialog).
         """
         fname = QFileDialog.getSaveFileName(self, 'Open file', '')
+        if isinstance(fname, tuple):
+            fname = fname[0]
         fid = open(fname, 'w')
         fid.write(self.genText())
         fid.close()
@@ -827,10 +850,12 @@ class PyChopGui(QMainWindow):
         self.repfig_nframe_edit = QLineEdit('1')
         self.repfig_nframe_button = QPushButton('Replot')
         self.repfig_nframe_button.clicked.connect(lambda: self.plot_frame())
+        self.repfig_nframe_rep1only = QCheckBox('First Rep Only')
         self.repfig_nframe_box = QHBoxLayout()
         self.repfig_nframe_box.addWidget(self.repfig_nframe_label)
         self.repfig_nframe_box.addWidget(self.repfig_nframe_edit)
         self.repfig_nframe_box.addWidget(self.repfig_nframe_button)
+        self.repfig_nframe_box.addWidget(self.repfig_nframe_rep1only)
         self.reptab = QWidget(self.tabs)
         self.repfig_nframe = QWidget(self.reptab)
         self.repfig_nframe.setLayout(self.repfig_nframe_box)

@@ -128,7 +128,7 @@ void LoadSpiceAscii::init() {
   defaultlogformat[2] = "time";
   defaultlogformat[3] = "HH:MM:SS AM";
   declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
-                      "DateAndTimeLog", defaultlogformat),
+                      "DateAndTimeLog", std::move(defaultlogformat)),
                   "Name and format for date and time");
 
   // Output

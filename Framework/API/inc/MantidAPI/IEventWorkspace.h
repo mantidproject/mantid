@@ -62,6 +62,7 @@ protected:
   IEventWorkspace(const IEventWorkspace &) = default;
 
   const std::string toString() const override;
+  IEventList &getSpectrumWithoutInvalidation(const size_t index) override = 0;
 
 private:
   IEventWorkspace *doClone() const override = 0;

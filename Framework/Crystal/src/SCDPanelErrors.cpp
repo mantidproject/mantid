@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/IndexPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -182,11 +183,20 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
 
   setupData();
 
+  boost::shared_ptr<API::Workspace> cloned = m_workspace->clone();
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
-               scaley, m_bank, m_workspace);
+               scaley, m_bank, cloned);
 
   auto inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
+  IAlgorithm_sptr alg =
+      Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
+  alg->initialize();
+  alg->setChild(true);
+  alg->setLogging(false);
+  alg->setProperty("PeaksWorkspace", inputP);
+  alg->setProperty("Tolerance", 0.15);
+  alg->execute();
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice =
       inputP->mutableSample().getOrientedLattice();
@@ -197,6 +207,8 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
     try {
+      if (hkl == V3D(0, 0, 0))
+        throw std::runtime_error("unindexed peak");
       DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
                               hkl, peak.getGoniometerMatrix());
       Units::Wavelength wl;
@@ -209,13 +221,12 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
       out[i * 3 + 1] = Q3[1] - Q2[1];
       out[i * 3 + 2] = Q3[2] - Q2[2];
     } catch (std::runtime_error &) {
-      out[i * 3] = std::numeric_limits<double>::infinity();
-      out[i * 3 + 1] = std::numeric_limits<double>::infinity();
-      out[i * 3 + 2] = std::numeric_limits<double>::infinity();
+      // set penalty for unindexed peaks greater than tolerance
+      out[i * 3] = 0.15;
+      out[i * 3 + 1] = 0.15;
+      out[i * 3 + 2] = 0.15;
     }
   }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate,
-               1.0 / scalex, 1.0 / scaley, m_bank, m_workspace);
 }
 
 /**

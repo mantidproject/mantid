@@ -7,7 +7,7 @@
 #pylint: disable=invalid-name,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 
 from mantid.simpleapi import *
 import ISISCommandInterface as i
@@ -16,7 +16,7 @@ MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
 
-class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
+class SANS2DMinimalBatchReductionSliced(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalBatchReductionSliced, self).__init__()
         config['default.instrument']='SANS2D'
@@ -30,7 +30,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 0.02
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('Instrument')
         return str(mtd['trans_test_rear_1D_1.5_12.5'][0]), 'SANSReductionGUI.nxs'
 

@@ -147,13 +147,11 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   // Dimension limits have to be converted to coord_t, otherwise floating point
   // error will cause valid events to be discarded.
   std::vector<coord_t> dim_min;
+  dim_min.reserve(m_DimMin.size());
+  std::copy(m_DimMin.cbegin(), m_DimMin.cend(), std::back_inserter(dim_min));
   std::vector<coord_t> dim_max;
-  for (auto &v : m_DimMin) {
-    dim_min.push_back(static_cast<coord_t>(v));
-  }
-  for (auto &v : m_DimMax) {
-    dim_max.push_back(static_cast<coord_t>(v));
-  }
+  dim_max.reserve(m_DimMax.size());
+  std::copy(m_DimMax.cbegin(), m_DimMax.cend(), std::back_inserter(dim_max));
 
   Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
                                   m_RotMat[2] * qz);

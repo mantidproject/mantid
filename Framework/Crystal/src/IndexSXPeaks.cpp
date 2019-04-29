@@ -41,28 +41,31 @@ void IndexSXPeaks::init() {
       "Input Peaks Workspace");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "a", -1.0, mustBePositive, Direction::Input),
+                      "a", -1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter a");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "b", -1.0, mustBePositive, Direction::Input),
+                      "b", -1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter b");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "c", -1.0, mustBePositive, Direction::Input),
+                      "c", -1.0, std::move(mustBePositive), Direction::Input),
                   "Lattice parameter c");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "alpha", -1.0, reasonable_angle, Direction::Input),
-                  "Lattice parameter alpha");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "alpha", -1.0, reasonable_angle->clone(), Direction::Input),
+      "Lattice parameter alpha");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "beta", -1.0, reasonable_angle, Direction::Input),
-                  "Lattice parameter beta");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "beta", -1.0, reasonable_angle->clone(), Direction::Input),
+      "Lattice parameter beta");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "gamma", -1.0, reasonable_angle, Direction::Input),
-                  "Lattice parameter gamma");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "gamma", -1.0, std::move(reasonable_angle), Direction::Input),
+      "Lattice parameter gamma");
 
   declareProperty(make_unique<ArrayProperty<int>>("PeakIndices"),
                   "Index of the peaks in the table workspace to be used. If no "
@@ -79,11 +82,11 @@ void IndexSXPeaks::init() {
   extents[3] = range;
   extents[4] = -range;
   extents[5] = range;
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("SearchExtents", extents),
-      "A comma separated list of min, max for each of H, K and L,\n"
-      "Specifies the search extents applied for H K L values "
-      "associated with the peaks.");
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("SearchExtents",
+                                                          std::move(extents)),
+                  "A comma separated list of min, max for each of H, K and L,\n"
+                  "Specifies the search extents applied for H K L values "
+                  "associated with the peaks.");
 }
 
 /**

@@ -4,13 +4,20 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import unicode_literals
 
-import PyQt4.QtGui as QtGui
+from qtpy import QtWidgets
+
+_QAPP = None
 
 
 def mockQapp():
-    qapp = QtGui.QApplication.instance()
-    if qapp is None:
-        return QtGui.QApplication([''])
-    else:
-        return qapp
+    """
+    Constructs a QApplication object if one does not already exist
+    :return: The QApplication object
+    """
+    global _QAPP
+    if _QAPP is None:
+        _QAPP = QtWidgets.QApplication([''])
+
+    return _QAPP

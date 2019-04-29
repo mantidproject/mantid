@@ -36,16 +36,19 @@ public:
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
                              bool showPlotAll = true, bool showTiledOpt = true,
                              bool isAdvanced = false) const;
-  void setSortScheme(MantidItemSortScheme);
-  void setSortOrder(Qt::SortOrder);
+  void setSortScheme(MantidItemSortScheme /*sortScheme*/);
+  void setSortOrder(Qt::SortOrder /*sortOrder*/);
   MantidItemSortScheme getSortScheme() const;
   Qt::SortOrder getSortOrder() const;
-  void logWarningMessage(const std::string &);
+  void logWarningMessage(const std::string & /*msg*/);
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de) override;
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
+
+  /// Action that is executed when a workspace in the tree is double clicked.
+  std::function<void(QString)> m_doubleClickAction = nullptr;
 
 protected:
   void dragMoveEvent(QDragMoveEvent *de) override;

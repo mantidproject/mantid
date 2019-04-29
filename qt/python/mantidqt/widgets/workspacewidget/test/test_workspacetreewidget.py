@@ -12,7 +12,7 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 import sip
 
 

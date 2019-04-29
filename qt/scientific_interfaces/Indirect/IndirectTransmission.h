@@ -35,10 +35,8 @@ public:
   bool validate() override;
 
 private slots:
-  void dataLoaded();
-  void previewPlot();
   void transAlgDone(bool error);
-  void instrumentSet();
+  void setInstrument();
 
   void runClicked();
   void plotClicked();
@@ -55,6 +53,8 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setInstrument(QString const &instrumentName);
+
   Ui::IndirectTransmission m_uiForm;
 };
 

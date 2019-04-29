@@ -11,21 +11,28 @@ Description
 
 Computes the phonon density of states from an inelastic neutron 
 scattering measurement of a powder or polycrystalline sample,
-assuming that all scattering is incoherent, using the formula 
-(Thermodynamic Properties of Solids, eds. Chaplot, Mittal, Choudhury,
-Chapter 3) for the 1-phonon incoherent scattering function:
+assuming that all scattering is incoherent, using the formula
+for the 1-phonon incoherent scattering function [#CHAPLOT]_:
 
-:math:`S^{(1)}_{\mathrm{inc}}(Q,E) = \exp\left(-2\bar{W}(Q)\right) \frac{Q^2}{E} \langle n+\frac{1}{2}\pm\frac{1}{2} \rangle \left[ \sum_k \frac{\sigma_k^{\mathrm{scatt}}}{2m_k} g_k(E) \right]`
+.. math::
 
-where the term in square brackets is the neutron weighted densiy of 
+    S^{(1)}_{\mathrm{inc}}(Q,E) = \exp\left(-2\bar{W}(Q)\right) \frac{Q^2}{E} \langle n+\frac{1}{2}\pm\frac{1}{2} \rangle \left[ \sum_k \frac{\sigma_k^{\mathrm{scatt}}}{2m_k} g_k(E) \right],
+
+where the term in square brackets is the neutron weighted density of 
 states which is calculated by this algorithm, and :math:`g_k(E)` is
 the partial density of states for each component (element or isotope)
 :math:`k` in the material. :math:`m_k` is the relative atomic mass of the
 component.
 
 The average Debye-Waller factor :math:`\exp\left(-2\bar{W}(Q)\right)` is
-calculated using an average mean-square displacement :math:`\langle u \rangle`,
-using :math:`W=Q^2\langle u\rangle/2`. 
+calculated using an average mean-square displacement :math:`\langle u^2 \rangle`,
+using :math:`W=Q^2\langle u^2\rangle/2`. 
+
+The algorithm accepts both :math:`S(Q,E)` workspaces as well as
+:math:`S(2\theta,E)` workspaces. In the latter case :math:`Q` values are
+calculated from :math:`2\theta` and :math:`E` before applying the formula
+above. Note, that ``QSumRange`` is only applicable with :math:`S(Q,E)` while
+``TwoThetaSumRange`` works only for :math:`S(2\theta,E)`.
 
 If the data has been normalised to a Vanadium standard measurement, the
 output of this algorithm is the neutron weighted density of states in
@@ -38,7 +45,7 @@ relative atomic mass.
 Restrictions on the Input Workspace
 ###################################
 
-The input workspace must have units of Momentum Transfer and
+The input workspace must have units of Momentum Transfer or Degrees and
 contain histogram data with common binning on all spectra.
 
 Usage
@@ -64,6 +71,27 @@ measurement of a large Aluminium sample from the neutron training course.
     SetSampleMaterial(ws_sqw,'Al')
     ws_dos = ComputeIncoherentDOS(ws_sqw, Temperature=5, StatesPerEnergy=True)
 
+**ILL  Example using S(2theta, E) as input**
+
+.. plot::
+   :include-source:
+
+    from mantid import mtd
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    
+    ws = DirectILLCollectData('ILL/IN4/087294.nxs')
+    DirectILLReduction(ws, OutputWorkspace='sqw', OutputSofThetaEnergyWorkspace='stw')
+    temperature = ws.run().getProperty('sample.temperature').value
+    dos = ComputeIncoherentDOS('stw',  Temperature=temperature, EnergyBinning='0, Emax')
+    
+    fig, axis = plt.subplots(subplot_kw={'projection':'mantid'})
+    axis.errorbar(dos)
+    axis.set_title('Density of states from $S(2\\theta,W)$')
+    # Uncomment the line below to show the plot.
+    #fig.show()
+    mtd.clear()
+
 **Test Example**
 
 This example uses a generated dataset so that it will run on automated tests
@@ -80,6 +108,11 @@ of the build system where the above datafiles do not exist.
 Output
 
 .. testoutput:: ExGenerated
+
+References
+----------
+
+.. [#CHAPLOT] Thermodynamic Properties of Solids, eds. Chaplot, Mittal, Choudhury, Chapter 3
 
 .. categories::
 

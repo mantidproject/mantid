@@ -386,21 +386,21 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
       }
       // check summed period numbers
       std::vector<int> invalidPeriods;
-      for (auto period : summedPeriods) {
-        if ((period < 1) || (period > numPeriods)) {
-          invalidPeriods.push_back(period);
-        }
-      }
+      std::copy_if(summedPeriods.cbegin(), summedPeriods.cend(),
+                   std::back_inserter(invalidPeriods),
+                   [numPeriods](auto period) {
+                     return period < 1 || period > numPeriods;
+                   });
       if (!invalidPeriods.empty()) {
         errors[propSummedPeriodSet] = buildErrorString(invalidPeriods);
         invalidPeriods.clear();
       }
       // check subtracted period numbers
-      for (auto period : subtractedPeriods) {
-        if ((period < 1) || (period > numPeriods)) {
-          invalidPeriods.push_back(period);
-        }
-      }
+      std::copy_if(subtractedPeriods.cbegin(), subtractedPeriods.cend(),
+                   std::back_inserter(invalidPeriods),
+                   [numPeriods](auto period) {
+                     return period < 1 || period > numPeriods;
+                   });
       if (!invalidPeriods.empty()) {
         errors[propSubtractedPeriodSet] = buildErrorString(invalidPeriods);
       }

@@ -10,7 +10,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from mantidqt.py3compat import is_text_string
+from mantid.py3compat import is_text_string
 from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings
 
@@ -41,19 +41,29 @@ class UserConfig(object):
         default_settings = self._flatten_defaults(defaults)
 
         # put defaults into qsettings if they weren't there already
-        configFileKeys = self.qsettings.allKeys()
-        for key in default_settings.keys():
-            if key not in configFileKeys:
-                self.qsettings.setValue(key, default_settings[key])
+        try:
+            self.set_qsettings_values(default_settings)
+        # the editors/sessiontabs are pickled in config so need to remove them
+        except ValueError:
+            self.qsettings.remove('Editors/SessionTabs')
+            self.set_qsettings_values(default_settings)
 
         # fixup the values of booleans - they do not evaluate correctly when read from the config file
-        # TODO come up with a unit test for this
         for key in self.all_keys():
-            value = self.get(key)
+            try:
+                value = self.get(key)
+            except KeyError:
+                continue
             if value == 'true':
                 self.set(key, True)
             elif value == 'false':
                 self.set(key, False)
+
+    def set_qsettings_values(self, default_settings):
+        configFileKeys = self.qsettings.allKeys()
+        for key in default_settings.keys():
+            if key not in configFileKeys:
+                self.qsettings.setValue(key, default_settings[key])
 
     def all_keys(self, group=None):
         if group is not None:

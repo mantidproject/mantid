@@ -15,6 +15,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidTestHelpers/ONCatHelper.h"
 
 #include <map>
 #include <memory>
@@ -34,6 +35,9 @@ using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::ONCat::ONCat;
 using Mantid::Catalog::ONCat::QueryParameter;
 using Mantid::Kernel::Exception::InternetError;
+using Mantid::TestHelpers::make_mock_oncat_api;
+using Mantid::TestHelpers::make_mock_token_store;
+using Mantid::TestHelpers::make_mock_token_store_already_logged_in;
 using Mantid::Types::Core::DateAndTime;
 
 //----------------------------------------------------------------------
@@ -41,93 +45,6 @@ using Mantid::Types::Core::DateAndTime;
 //----------------------------------------------------------------------
 
 namespace {
-
-using MockResponseMap = std::map<std::string, std::pair<int, std::string>>;
-using MockResponseCallCounts = std::map<std::string, unsigned int>;
-using MockResponseCallMapping =
-    std::pair<const std::basic_string<char>, unsigned int>;
-
-class MockONCatAPI : public Mantid::Kernel::InternetHelper {
-public:
-  MockONCatAPI() = delete;
-  MockONCatAPI(const MockResponseMap &responseMap)
-      : Mantid::Kernel::InternetHelper(), m_responseMap(responseMap),
-        m_responseCallCounts() {
-    for (const auto &mapping : responseMap) {
-      m_responseCallCounts[mapping.first] = 0;
-    }
-  }
-  ~MockONCatAPI() {}
-
-  bool allResponsesCalledOnce() const {
-    return std::all_of(m_responseCallCounts.cbegin(),
-                       m_responseCallCounts.cend(),
-                       [](const MockResponseCallMapping &mapping) {
-                         return mapping.second == 1;
-                       });
-  }
-
-protected:
-  int sendHTTPRequest(const std::string &url,
-                      std::ostream &responseStream) override {
-    return sendHTTPSRequest(url, responseStream);
-  }
-
-  int sendHTTPSRequest(const std::string &url,
-                       std::ostream &responseStream) override {
-    auto mockResponse = m_responseMap.find(url);
-
-    assert(mockResponse != m_responseMap.end());
-    m_responseCallCounts[url] += 1;
-
-    const auto statusCode = mockResponse->second.first;
-    const auto responseBody = mockResponse->second.second;
-
-    // Approximate the behaviour of the actual helper class when a
-    // non-OK response is observed.
-    if (statusCode != HTTPResponse::HTTP_OK) {
-      throw InternetError(responseBody, statusCode);
-    }
-
-    responseStream << responseBody;
-    return statusCode;
-  }
-
-private:
-  MockResponseMap m_responseMap;
-  MockResponseCallCounts m_responseCallCounts;
-};
-
-std::shared_ptr<MockONCatAPI>
-make_mock_oncat_api(const MockResponseMap &responseMap) {
-  return std::make_shared<MockONCatAPI>(responseMap);
-}
-
-class MockTokenStore : public IOAuthTokenStore {
-public:
-  MockTokenStore() : m_token(boost::none) {}
-
-  void setToken(const boost::optional<OAuthToken> &token) override {
-    m_token = token;
-  }
-  boost::optional<OAuthToken> getToken() override { return m_token; }
-
-private:
-  boost::optional<OAuthToken> m_token;
-};
-
-IOAuthTokenStore_uptr make_mock_token_store() {
-  return Mantid::Kernel::make_unique<MockTokenStore>();
-}
-
-IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
-  auto tokenStore = Mantid::Kernel::make_unique<MockTokenStore>();
-  tokenStore->setToken(OAuthToken(
-      "Bearer", 3600, "2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ",
-      "api:read data:read settings:read",
-      boost::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
-  return std::move(tokenStore);
-}
 
 const static std::string DUMMY_URL = "https://not.a.real.url";
 const static std::string DUMMY_CLIENT_ID =
@@ -287,8 +204,8 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    const auto entity = oncat.retrieve("api", "instruments", "HB2C",
-                                       {QueryParameter("facility", "HFIR")});
+    const auto entity =
+        oncat.retrieve("api", "instruments", "HB2C", {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
@@ -311,8 +228,8 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    const auto entity = oncat.retrieve("api", "instruments", "HB2C",
-                                       {QueryParameter("facility", "HFIR")});
+    const auto entity =
+        oncat.retrieve("api", "instruments", "HB2C", {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
@@ -346,7 +263,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     const auto entities =
-        oncat.list("api", "instruments", {QueryParameter("facility", "HFIR")});
+        oncat.list("api", "instruments", {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entities.size(), 2);
     TS_ASSERT_EQUALS(entities[0].id(), std::string("HB2C"));
@@ -369,9 +286,8 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    TS_ASSERT_THROWS(
-        oncat.list("api", "instruments", {QueryParameter("facility", "HFIR")}),
-        TokenRejectedError);
+    TS_ASSERT_THROWS(oncat.list("api", "instruments", {{"facility", "HFIR"}}),
+                     TokenRejectedError);
     TS_ASSERT(!oncat.isUserLoggedIn());
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
@@ -398,8 +314,7 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    oncat.retrieve("api", "instruments", "HB2C",
-                   {QueryParameter("facility", "HFIR")});
+    oncat.retrieve("api", "instruments", "HB2C", {{"facility", "HFIR"}});
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
 

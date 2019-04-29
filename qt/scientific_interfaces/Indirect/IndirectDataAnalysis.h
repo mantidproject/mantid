@@ -65,12 +65,14 @@ private:
   void loadSettings();
 
   /// Called upon a close event.
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
+  /// Sets the active workspace in the selected tab
+  void tabChanged(int index);
   /// Called when the user clicks the Py button
   void exportTabPython();
   /// Opens a directory dialog.

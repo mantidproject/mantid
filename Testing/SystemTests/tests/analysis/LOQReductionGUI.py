@@ -7,7 +7,7 @@
 #pylint: disable=attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import ISISCommandInterface as i
 
@@ -15,7 +15,7 @@ MASKFILE = FileFinder.getFullPath('MaskLOQData.txt')
 BATCHFILE = FileFinder.getFullPath('loq_batch_mode_reduction.csv')
 
 
-class LOQMinimalBatchReduction(stresstesting.MantidStressTest):
+class LOQMinimalBatchReduction(systemtesting.MantidSystemTest):
     def __init__(self):
         super(LOQMinimalBatchReduction, self).__init__()
         config['default.instrument'] = 'LOQ'

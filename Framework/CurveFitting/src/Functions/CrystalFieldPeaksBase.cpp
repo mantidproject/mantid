@@ -455,8 +455,9 @@ std::string CrystalFieldPeaksBaseImpl::name() const {
   return "CrystalFieldPeaksBaseImpl";
 }
 
-void CrystalFieldPeaksBaseImpl::function(const API::FunctionDomain &,
-                                         API::FunctionValues &) const {
+void CrystalFieldPeaksBaseImpl::function(
+    const API::FunctionDomain & /*domain*/,
+    API::FunctionValues & /*values*/) const {
   throw Kernel::Exception::NotImplementedError(
       "Method is intentionally not implemented.");
 }

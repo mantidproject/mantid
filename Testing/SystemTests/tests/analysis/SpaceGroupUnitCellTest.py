@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.geometry import *
 from six import iteritems
 
 
-class SpaceGroupUnitCellTest(stresstesting.MantidStressTest):
+class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
     '''
     This test checks that SpaceGroup.isAllowedUnitCell produces the expected result for each registered space group.
     '''

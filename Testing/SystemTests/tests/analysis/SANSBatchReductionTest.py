@@ -7,7 +7,7 @@
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 from mantid.api import AnalysisDataService
 
 from sans.sans_batch import SANSBatchReduction
@@ -315,9 +315,9 @@ class SANSBatchReductionTest(unittest.TestCase):
             AnalysisDataService.remove(element)
 
 
-class SANSBatchReductionRunnerTest(stresstesting.MantidStressTest):
+class SANSBatchReductionRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

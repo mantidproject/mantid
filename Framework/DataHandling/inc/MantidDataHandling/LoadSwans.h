@@ -43,8 +43,7 @@ private:
   unsigned int getDetectorSize();
 
   // Member variables
-  DataObjects::EventWorkspace_sptr m_ws =
-      boost::make_shared<Mantid::DataObjects::EventWorkspace>();
+  DataObjects::EventWorkspace_sptr m_ws;
   unsigned int m_detector_size = 0;
 
   // Constants:

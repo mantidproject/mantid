@@ -81,8 +81,8 @@ void SANSInstrumentCreationHelper::runLoadInstrument(
   Mantid::DataHandling::LoadInstrument loadInst;
   loadInst.initialize();
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  loadInst.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" +
-                                            instrumentID + "_Definition.xml");
+  loadInst.setPropertyValue("Filename",
+                            "unit_testing/" + instrumentID + "_Definition.xml");
   loadInst.setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
   loadInst.setProperty("RewriteSpectraMap",
                        Mantid::Kernel::OptionalBool(false));

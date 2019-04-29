@@ -93,11 +93,10 @@ endfunction()
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
-    TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR
-    INSTALL_DIR INSTALL_DIR_BASE PRECOMPILED)
+    TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR PRECOMPILED)
   set (multiValueArgs SRC UI MOC
     NOMOC RES DEFS QT4_DEFS QT5_DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
-    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH LINUX_INSTALL_RPATH)
+    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH LINUX_INSTALL_RPATH INSTALL_DIR INSTALL_DIR_BASE)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
   if (PARSED_UNPARSED_ARGUMENTS)
@@ -160,9 +159,11 @@ function (mtd_add_qt_target)
   endif()
 
   if (PARSED_LIBRARY)
-    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS}
+      ${PARSED_MOC} ${PARSED_NOMOC} ${RES_FILES})
   elseif (PARSED_EXECUTABLE)
-    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS}
+      ${PARSED_NOMOC} ${PARSED_NOMOC} ${RES_FILES})
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
@@ -211,20 +212,31 @@ function (mtd_add_qt_target)
   if ( PARSED_EXCLUDE_FROM_ALL )
     set_target_properties ( ${_target} PROPERTIES EXCLUDE_FROM_ALL TRUE )
   else ()
+
     if (PARSED_INSTALL_DIR AND PARSED_INSTALL_DIR_BASE)
       message ( FATAL "Cannot provide both INSTALL_DIR and PARSED_INSTALL_DIR_BASE options" )
     endif()
 
     if (PARSED_INSTALL_DIR)
-      set ( _install_dir ${PARSED_INSTALL_DIR} )
+      list(REMOVE_DUPLICATES PARSED_INSTALL_DIR)
+      set ( _install_dirs ${PARSED_INSTALL_DIR} )
     elseif (PARSED_INSTALL_DIR_BASE)
-      _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _install_dir
-                         ${PARSED_INSTALL_DIR_BASE})
+      list(REMOVE_DUPLICATES PARSED_INSTALL_DIR_BASE)
+
+      set (_install_dirs)
+      foreach( _dir ${PARSED_INSTALL_DIR_BASE} )
+          _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _dir
+                             ${PARSED_INSTALL_DIR_BASE})
+          list( APPEND _install_dirs ${_dir})
+      endforeach ()
     else()
-      set ( _install_dir "" )
+      set ( _install_dirs "" )
       message ( FATAL_ERROR "Target: ${_target} is configured to build but has no install destination" )
     endif()
-    mtd_install_qt_library ( ${PARSED_QT_VERSION} ${_target} "${SYSTEM_PACKAGE_TARGET}" ${_install_dir} )
+
+    foreach( _dir ${_install_dirs})
+        mtd_install_qt_library ( ${PARSED_QT_VERSION} ${_target} "${SYSTEM_PACKAGE_TARGET}" ${_dir} )
+    endforeach ()
   endif ()
 
   # Group into folder for VS
@@ -245,7 +257,7 @@ endfunction()
 #  - install_target_type The type of target that should be installed. See https://cmake.org/cmake/help/latest/command/install.html?highlight=install
 #  - install_dir A relative directory to install_prefix
 function (mtd_install_qt_library qt_version target install_target_type install_dir )
-    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${PACKAGE_WORKBENCH}) )
+    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${ENABLE_WORKBENCH}) )
       install ( TARGETS ${target} ${install_target_type} DESTINATION ${install_dir} )
     endif ()
 endfunction ()

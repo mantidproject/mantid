@@ -171,8 +171,7 @@ size_t EventWorkspace::blocksize() const {
 size_t EventWorkspace::getNumberHistograms() const { return this->data.size(); }
 
 /// Return const reference to EventList at the given workspace index.
-EventList &EventWorkspace::getSpectrum(const size_t index) {
-  invalidateCommonBinsFlag();
+EventList &EventWorkspace::getSpectrumWithoutInvalidation(const size_t index) {
   auto &spec = const_cast<EventList &>(
       static_cast<const EventWorkspace &>(*this).getSpectrum(index));
   spec.setMatrixWorkspace(this, index);
@@ -328,6 +327,8 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
 double EventWorkspace::getEventXMin() const {
   // set to crazy values to start
   double xmin = std::numeric_limits<double>::max();
+  if (this->getNumberEvents() == 0)
+    return xmin;
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
@@ -352,6 +353,8 @@ double EventWorkspace::getEventXMin() const {
 double EventWorkspace::getEventXMax() const {
   // set to crazy values to start
   double xmax = std::numeric_limits<double>::lowest();
+  if (this->getNumberEvents() == 0)
+    return xmax;
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
@@ -373,6 +376,9 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
+  if (this->getNumberEvents() == 0)
+    return;
+
   int64_t numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {
@@ -482,7 +488,7 @@ MantidVec &EventWorkspace::dataDx(const std::size_t index) {
 /// Deprecated, use mutableY() instead. Return the data Y vector at a given
 /// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
-MantidVec &EventWorkspace::dataY(const std::size_t) {
+MantidVec &EventWorkspace::dataY(const std::size_t /*index*/) {
   throw NotImplementedError("EventWorkspace::dataY cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
@@ -491,7 +497,7 @@ MantidVec &EventWorkspace::dataY(const std::size_t) {
 /// Deprecated, use mutableE() instead. Return the data E vector at a given
 /// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
-MantidVec &EventWorkspace::dataE(const std::size_t) {
+MantidVec &EventWorkspace::dataE(const std::size_t /*index*/) {
   throw NotImplementedError("EventWorkspace::dataE cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
@@ -579,6 +585,7 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
   // This is an EventWorkspace, so changing X size is ok as long as we clear
   // the MRU below, i.e., we avoid the size check of Histogram::setBinEdges and
   // just reset the whole Histogram.
+  invalidateCommonBinsFlag();
   for (auto &eventList : this->data)
     eventList->setHistogram(x);
 

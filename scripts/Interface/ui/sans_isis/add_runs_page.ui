@@ -43,7 +43,7 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Output File</string>
+      <string>Save File</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -62,11 +62,44 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="QLabel" name="outputDirectoryLabel">
-        <property name="text">
-         <string>Output Directory:</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="outputDirectoryLabel">
+          <property name="maximumSize">
+           <size>
+            <width>937</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Save Directory:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveDirectoryButton">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a directory to save summed runs into. This directory is different to Mantid's default save directory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Select Save Directory</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="QLineEdit" name="fileNameEdit"/>

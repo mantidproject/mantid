@@ -1315,6 +1315,41 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  void test_maskCondition_allTypes() {
+    // Go through each possible EventType as the input
+    for (int this_type = 0; this_type < 3; this_type++) {
+      this->fake_uniform_data();
+      el.switchTo(static_cast<EventType>(this_type));
+
+      // tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      // How many events did we make?
+      TS_ASSERT_EQUALS(el.getNumberEvents(), 2 * MAX_TOF / BIN_DELTA);
+
+      // Mask out 5-10 milliseconds
+      auto nlen = el.getNumberEvents();
+      std::vector<bool> mask(nlen, true);
+
+      // first check no removal
+      el.maskCondition(mask);
+      TS_ASSERT_EQUALS(el.getNumberEvents(), 2 * MAX_TOF / BIN_DELTA);
+
+      double min = MAX_TOF * 0.25;
+      double max = MAX_TOF * 0.5;
+      for (size_t i = 0; i < nlen; i++) {
+        if ((el.getEvent(i).tof() >= min) && (el.getEvent(i).tof() <= max)) {
+          mask[i] = false;
+        }
+      }
+      el.maskCondition(mask);
+      for (std::size_t i = 0; i < el.getNumberEvents(); i++) {
+        // No tofs in that range
+        TS_ASSERT((el.getEvent(i).tof() < min) || (el.getEvent(i).tof() > max));
+      }
+      TS_ASSERT_EQUALS(el.getNumberEvents(), 0.75 * 2 * MAX_TOF / BIN_DELTA);
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
   void test_getTofs_and_setTofs() {
     // Go through each possible EventType as the input
     for (int this_type = 0; this_type < 3; this_type++) {
@@ -2158,6 +2193,53 @@ public:
     TS_ASSERT_DELTA(el_weight_output.integrate(XMIN, XMAX, true), 2., .0001);
   }
 
+  void test_compressWeightedEvents() {
+    this->fake_uniform_data_weights(WEIGHTED);
+    EventList uniformOut;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(1., &uniformOut));
+    TS_ASSERT_DIFFERS(el, uniformOut);
+
+    // compress again and see that the results are the same as doing it once
+    EventList uniformOut2;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(10., &uniformOut2));
+    TS_ASSERT_THROWS_NOTHING(uniformOut.compressEvents(10., &uniformOut));
+    TS_ASSERT_EQUALS(uniformOut, uniformOut2);
+
+    // test with varying weights
+    this->fake_uniform_data_changing_weights();
+    EventList varyingOut(el);
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(1., &varyingOut));
+    TS_ASSERT_DIFFERS(el, varyingOut);
+
+    // they should give different results because they have different weighting
+    // structures
+    TS_ASSERT_DIFFERS(uniformOut, varyingOut);
+
+    // compress again to see that changing weights works
+    EventList varyingOut2;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(10., &varyingOut2));
+    TS_ASSERT_THROWS_NOTHING(varyingOut.compressEvents(10., &varyingOut));
+    TS_ASSERT_EQUALS(varyingOut, varyingOut2);
+  }
+
+  void test_compressWeightedFatEvents() {
+    this->fake_uniform_data_weights(WEIGHTED);
+    EventList uniformOut;
+    TS_ASSERT_THROWS_NOTHING(
+        el.compressFatEvents(10000., el.getPulseTimeMin(), 30., &uniformOut));
+    TS_ASSERT_DIFFERS(el, uniformOut);
+
+    this->fake_uniform_data_changing_weights();
+    EventList varyingOut(el);
+    TS_ASSERT_THROWS_NOTHING(
+        el.compressFatEvents(10000., el.getPulseTimeMin(), 30., &varyingOut));
+    TS_ASSERT_DIFFERS(el, varyingOut);
+
+    // they should give different results because they have different weighting
+    // structures
+    TS_ASSERT_DIFFERS(uniformOut, varyingOut);
+  }
+
   void test_getEventsFrom() {
     std::vector<TofEvent> *rel;
     TS_ASSERT_THROWS_NOTHING(getEventsFrom(el, rel));
@@ -2522,6 +2604,26 @@ public:
       } else if (eventType == WEIGHTED) {
         el += WeightedEvent(tof, pulsetime, 2.0, 2.5 * 2.5);
       }
+    }
+  }
+
+  void fake_uniform_data_changing_weights() {
+    // Clear the list
+    el = EventList();
+    el.switchTo(WEIGHTED);
+
+    // Create some mostly-reasonable fake data.
+    srand(1234); // Fixed random seed
+    int64_t pulsetime = 0;
+    // 10^6 nanoseconds for pulse time delta
+    const int64_t PULSETIME_DELTA = static_cast<int64_t>(BIN_DELTA / 1000);
+    for (double tof = 100; tof < MAX_TOF; tof += BIN_DELTA / 2) {
+      // add some jitter into the pulse time with rand
+      pulsetime = 10000 * (static_cast<int64_t>(tof) / PULSETIME_DELTA) +
+                  (rand() % 1000);
+      // tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      el += WeightedEvent(tof, pulsetime, 2.0,
+                          tof / 100); // want non-uniform weights
     }
   }
 

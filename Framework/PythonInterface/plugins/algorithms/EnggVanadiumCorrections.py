@@ -147,8 +147,9 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         @param van_integration_ws :: pre-calculated integral of every spectrum for the Vanadium data
         @param van_curves_ws :: pre-calculated per-bank curves from the Vanadium data
         """
+        blocksize = van_curves_ws.blocksize()
         for i in range(0, ws.getNumberHistograms()):
-            scale_factor = van_integration_ws.cell(i, 0) / van_curves_ws.blocksize()
+            scale_factor = van_integration_ws.cell(i, 0) / blocksize
             ws.setY(i, np.divide(ws.dataY(i), scale_factor))
 
     def _apply_pix_by_pix_correction(self, ws, van_curves_ws):

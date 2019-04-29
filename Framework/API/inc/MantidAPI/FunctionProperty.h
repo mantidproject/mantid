@@ -56,11 +56,17 @@ public:
   /// Get the function definition string
   std::string value() const override;
 
+  /// Return a Json::Value object encoding the function string
+  Json::Value valueAsJson() const override;
+
   /// Get the value the property was initialised with -its default value
   std::string getDefault() const override;
 
   /// Set the value of the property.
   std::string setValue(const std::string &value) override;
+
+  /// Set the value of the property as a Json representation
+  std::string setValueFromJson(const Json::Value &value) override;
 
   /// Checks whether the entered function is valid.
   std::string isValid() const override;

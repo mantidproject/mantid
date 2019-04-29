@@ -17,11 +17,9 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 // 3rd party library headers
 #include <QMessageBox>
-// System headers
-#include <iostream>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -96,16 +94,16 @@ void FourierTransform::extractResidualsHistogram(
                               .retrieveWS<Mantid::API::MatrixWorkspace>(
                                   modelWorkspaceName.toStdString());
     if (!modelWorkspace) {
-      std::cout << "Empty modelWorkspace\n";
+      g_log.debug() << "Empty modelWorkspace\n";
     }
     // use modelWorkspace as template for the residuals workspace
     auto residualsWorkspace =
         Mantid::API::WorkspaceFactory::Instance().create(modelWorkspace, 1);
-    residualsWorkspace->dataX(0) = modelWorkspace->dataX(0);
-    residualsWorkspace->dataY(0) =
-        modelWorkspace->dataY(2); // residuals is the third spectrum
-    residualsWorkspace->dataE(0) =
-        modelWorkspace->dataE(0); // errors are coming from experiment
+    residualsWorkspace->setSharedX(0, modelWorkspace->sharedX(0));
+    // residuals is the third spectrum
+    residualsWorkspace->setSharedY(0, modelWorkspace->sharedY(2));
+    // errors are coming from experiment
+    residualsWorkspace->setSharedE(0, modelWorkspace->sharedE(0));
     Mantid::API::AnalysisDataService::Instance().addOrReplace(
         m_residualsName, residualsWorkspace);
   } catch (std::exception &e) {

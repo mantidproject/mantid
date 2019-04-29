@@ -22,7 +22,6 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 class GuiStateDirector(object):
     def __init__(self, table_model, state_gui_model, facility):
-        super(GuiStateDirector, self).__init__()
         self._table_model = table_model
         self._state_gui_model = state_gui_model
         self._facility = facility
@@ -118,3 +117,18 @@ class GuiStateDirector(object):
 
         if "EventSlices" in options.keys():
             state_gui_model.event_slices = options["EventSlices"]
+
+        if "MergeScale" in options.keys():
+            state_gui_model.merge_scale = options["MergeScale"]
+
+        if "MergeShift" in options.keys():
+            state_gui_model.merge_shift = options["MergeShift"]
+
+        if "PhiMin" in options.keys():
+            state_gui_model.phi_limit_min = options["PhiMin"]
+
+        if "PhiMax" in options.keys():
+            state_gui_model.phi_limit_max = options["PhiMax"]
+
+        if "UseMirror" in options.keys():
+            state_gui_model.phi_limit_use_mirror = options["UseMirror"]

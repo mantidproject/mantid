@@ -19,11 +19,11 @@ downcast to the correct leaf type if the export for that class exists in the reg
 The names from the library are not imported by default as it is best if the interface classes
 are used for checks such as isinstance()
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+from __future__ import absolute_import
 
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################
-from . import _dataobjects
-from ._dataobjects import *
+from mantid.utils import import_mantid_cext
+
+import_mantid_cext('._dataobjects', 'mantid.dataobjects', globals())

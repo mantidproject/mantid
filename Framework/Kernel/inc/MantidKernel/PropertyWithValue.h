@@ -38,26 +38,28 @@ namespace Kernel {
 template <typename TYPE> class DLLExport PropertyWithValue : public Property {
 public:
   PropertyWithValue(
-      const std::string &name, const TYPE &defaultValue,
+      std::string name, TYPE defaultValue,
       IValidator_sptr validator = IValidator_sptr(new NullValidator),
       const unsigned int direction = Direction::Input);
-  PropertyWithValue(const std::string &name, const TYPE &defaultValue,
+  PropertyWithValue(std::string name, TYPE defaultValue,
                     const unsigned int direction);
-  PropertyWithValue(const std::string &name, const TYPE &defaultValue,
-                    const std::string defaultValueStr,
+  PropertyWithValue(std::string name, TYPE defaultValue,
+                    const std::string &defaultValueStr,
                     IValidator_sptr validator, const unsigned int direction);
-  PropertyWithValue(const PropertyWithValue &right);
+  PropertyWithValue(const PropertyWithValue<TYPE> &right);
   PropertyWithValue<TYPE> *clone() const override;
 
   void saveProperty(::NeXus::File *file) override;
   std::string value() const override;
   std::string valueAsPrettyStr(const size_t maxLength = 0,
                                const bool collapseLists = true) const override;
+  Json::Value valueAsJson() const override;
   virtual bool operator==(const PropertyWithValue<TYPE> &rhs) const;
   virtual bool operator!=(const PropertyWithValue<TYPE> &rhs) const;
   int size() const override;
   std::string getDefault() const override;
   std::string setValue(const std::string &value) override;
+  std::string setValueFromJson(const Json::Value &value) override;
   std::string setDataItem(const boost::shared_ptr<DataItem> data) override;
   PropertyWithValue &operator=(const PropertyWithValue &right);
   PropertyWithValue &operator+=(Property const *right) override;
@@ -82,10 +84,10 @@ private:
   std::string setValueFromProperty(const Property &right) override;
 
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::true_type &);
+  std::string setTypedValue(const U &value, const std::true_type &);
 
   template <typename U>
-  std::string setTypedValue(const U &value, const boost::false_type &);
+  std::string setTypedValue(const U &value, const std::false_type &);
 
   const TYPE getValueForAlias(const TYPE &alias) const;
 

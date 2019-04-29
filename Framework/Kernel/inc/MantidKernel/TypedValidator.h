@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
-#include <stdexcept>
 #include <typeinfo>
 
 namespace Mantid {

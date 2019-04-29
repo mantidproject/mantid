@@ -57,7 +57,7 @@ public:
     double expectedShift = L1 / std::sqrt(ei * 2. * PhysicalConstants::meV /
                                           PhysicalConstants::NeutronMass);
 
-    TSM_ASSERT_EQUALS("L1 / (L1 + L2)", expectedShift, shift);
+    TSM_ASSERT_DELTA("L1 / (L1 + L2)", expectedShift, shift, 0.0000001);
   }
 };
 

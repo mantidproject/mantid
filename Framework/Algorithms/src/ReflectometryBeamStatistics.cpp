@@ -23,7 +23,7 @@ namespace {
 namespace Prop {
 const std::string DETECTOR_RESOLUTION{"DetectorResolution"};
 const std::string DIRECT_FOREGROUND{"DirectForeground"};
-const std::string DIRECT_WS{"DirectBeamWorkspace"};
+const std::string DIRECT_WS{"DirectLineWorkspace"};
 const std::string FIRST_SLIT_NAME{"FirstSlitName"};
 const std::string FIRST_SLIT_SIZE_LOG{"FirstSlitSizeSampleLog"};
 const std::string PIXEL_SIZE{"PixelSize"};

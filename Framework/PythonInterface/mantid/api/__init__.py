@@ -11,39 +11,35 @@ api
 Defines Python objects that wrap the C++ API namespace.
 
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+from __future__ import absolute_import
 
+###############################################################################
 # Load the C++ library
-from . import _api
-from ._api import *
+###############################################################################
+from mantid.utils import import_mantid_cext
 
-# stdlib imports
-import atexit as _atexit
-
-###############################################################################
-# Start the framework
-###############################################################################
-FrameworkManagerImpl.Instance()
-_atexit.register(FrameworkManagerImpl.Instance().shutdown)
-
-# Declare any additional C++ algorithms defined in this package
-_api._declareCPPAlgorithms()
-
-###############################################################################
-# Make aliases accessible in this namespace
-###############################################################################
-from ._aliases import *
-
-###############################################################################
-# Add importAll member to ADS
-###############################################################################
-from . import _adsimports
+# insert all the classes from _api in the mantid.api namespace
+import_mantid_cext('._api', 'mantid.api', globals())
 
 ###############################################################################
 # Attach additional operators to workspaces
 ###############################################################################
-from . import _workspaceops
+from mantid.api import _workspaceops
+
 _workspaceops.attach_binary_operators_to_workspace()
 _workspaceops.attach_unary_operators_to_workspace()
 _workspaceops.attach_tableworkspaceiterator()
+###############################################################################
+# Add importAll member to ADS.
+#
+# Must be imported AFTER all the api members
+# have been added to the mantid.api namespace above!
+###############################################################################
+from mantid.api import _adsimports
+
+
+###############################################################################
+# Make aliases accessible in this namespace
+###############################################################################
+from mantid.api._aliases import *
+

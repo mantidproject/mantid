@@ -219,8 +219,12 @@ class LoadRun(object):
                                                          monitor_appendix=appendix)
 
         loader_name = ''
+        if isinstance(outWs, WorkspaceGroup):
+            historyWs = outWs[0]
+        else:
+            historyWs = outWs
         try:
-            last_algorithm = outWs.getHistory().lastAlgorithm()
+            last_algorithm = historyWs.getHistory().lastAlgorithm()
             loader_name = last_algorithm.getProperty('LoaderName').value
         except RuntimeError as details:
             sanslog.warning(

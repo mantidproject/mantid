@@ -355,29 +355,18 @@ void MDWSDescription::fillAddProperties(
   size_t nDimPropNames = dimPropertyNames.size();
   if (AddCoord.size() != nDimPropNames)
     AddCoord.resize(nDimPropNames);
+  const auto &runObj = inWS2D->run();
 
   for (size_t i = 0; i < nDimPropNames; i++) {
-    // HACK: A METHOD, Which converts TSP into value, correspondent to time
-    // scale of matrix workspace has to be developed and deployed!
-    Kernel::Property *pProperty =
-        (inWS2D->run().getProperty(dimPropertyNames[i]));
-    Kernel::TimeSeriesProperty<double> *run_property =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);
-    if (run_property) {
-      AddCoord[i] = coord_t(run_property->firstValue());
-    } else {
-      // e.g Ei can be a property and dimension
-      Kernel::PropertyWithValue<double> *proc_property =
-          dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);
-      if (!proc_property) {
-        std::string ERR =
-            " Can not interpret property, used as dimension.\n Property: " +
-            dimPropertyNames[i] +
-            " is neither a time series (run) property "
-            "nor a property with value<double>";
-        throw(std::invalid_argument(ERR));
-      }
-      AddCoord[i] = coord_t(*(proc_property));
+    try {
+      const double value = runObj.getLogAsSingleValue(
+          dimPropertyNames[i], Mantid::Kernel::Math::TimeAveragedMean);
+      AddCoord[i] = static_cast<coord_t>(value);
+    } catch (std::invalid_argument &) {
+      std::string ERR =
+          " Can not interpret property, used as dimension.\n Property: " +
+          dimPropertyNames[i] + " cannot be converted into a double.";
+      throw(std::invalid_argument(ERR));
     }
   }
 }

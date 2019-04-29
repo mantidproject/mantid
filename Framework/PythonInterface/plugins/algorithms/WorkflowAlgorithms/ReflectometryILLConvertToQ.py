@@ -8,10 +8,10 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, ReflectometryMomentumTransfer)
-import numpy
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution, ReflectometryMomentumTransfer)
 import ReflectometryILL_common as common
 
 
@@ -56,9 +56,9 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         """Execute the algorithm."""
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
-        self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = common.WSNameSource(wsPrefix, cleanupMode)
+        self._names = utils.NameSource(wsPrefix, cleanupMode)
 
         ws, directWS = self._inputWS()
 
@@ -101,8 +101,8 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             doc='Enable or disable child algorithm logging.')
         self.declareProperty(
             Prop.CLEANUP,
-            defaultValue=common.WSCleanup.ON,
-            validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
+            defaultValue=utils.Cleanup.ON,
+            validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
             doc='Enable or disable intermediate workspace cleanup.')
         self.declareProperty(
             MatrixWorkspaceProperty(
@@ -217,44 +217,11 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         if self.getProperty(Prop.GROUPING_FRACTION).isDefault:
             return ws
         qFraction = self.getProperty(Prop.GROUPING_FRACTION).value
-        xs = ws.readX(0)
-        ys = ws.readY(0)
-        es = ws.readE(0)
-        dxs = ws.readDx(0)
-        if numpy.any(dxs <= 0.):
-            raise RuntimeError('Cannot proceed: the momentum transfer workspace contains nonpositive Q resolutions.')
-        index = 0
-        start = xs[index]
-        groupedXs = list()
-        groupedYs = list()
-        groupedEs = list()
-        groupedDxs = list()
-
-        while True:
-            width = qFraction * dxs[index]
-            end = xs[index] + width
-            pick = numpy.logical_and(xs >= start, xs < end)
-            pickedXs = xs[pick]
-            if len(pickedXs) > 0:
-                groupedXs.append(numpy.mean(pickedXs))
-                groupedYs.append(numpy.mean(ys[pick]))
-                pickedEs = es[pick]
-                groupedEs.append(numpy.sqrt(numpy.dot(pickedEs, pickedEs)) / len(pickedEs))
-                groupWidth = pickedXs[-1] - pickedXs[0]
-                groupedDxs.append(numpy.sqrt(dxs[index]**2 + (0.68 * groupWidth)**2))
-            start = end
-            if start > xs[-1]:
-                break
-            index = numpy.nonzero(xs > start)[0][0]
         groupedWSName = self._names.withSuffix(extraLabel + 'grouped')
-        groupedWS = CreateWorkspace(
+        groupedWS = GroupToXResolution(
+            InputWorkspace=ws,
             OutputWorkspace=groupedWSName,
-            DataX=groupedXs,
-            DataY=groupedYs,
-            DataE=groupedEs,
-            Dx=groupedDxs,
-            UnitX=ws.getAxis(0).getUnit().unitID(),
-            ParentWorkspace=ws,
+            FractionOfDx=qFraction,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
         return groupedWS

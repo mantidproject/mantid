@@ -56,9 +56,8 @@ Instrument_const_sptr fetchInstrument(WorkspaceGroup const *const groupWS) {
 }
 
 void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
-
+  MatrixWorkspace_sptr lastWS;
   for (size_t i = 0; i < ws->size(); ++i) {
-    MatrixWorkspace_sptr lastWS;
 
     Workspace_sptr item = ws->getItem(i);
 

@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class MuonKerenFittingTest(stresstesting.MantidStressTest):
+class MuonKerenFittingTest(systemtesting.MantidSystemTest):
     '''Tests the Keren fitting function on a real workspace, to check results vs. WiMDA'''
 
     def runTest(self):

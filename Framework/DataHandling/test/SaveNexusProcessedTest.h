@@ -139,12 +139,10 @@ public:
     outputFile = "SaveNexusProcessedTest_testExecOnLoadraw.nxs";
     if (Poco::File(outputFile).exists())
       Poco::File(outputFile).remove();
-    // entryName = "entry4";
     dataName = "spectra";
     title = "A save of a workspace from Loadraw file";
     algToBeTested.setPropertyValue("Filename", outputFile);
 
-    // algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
     algToBeTested.setPropertyValue("Append", "0");
     outputFile = algToBeTested.getPropertyValue("Filename");
@@ -152,9 +150,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(result =
                                  algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
-    // TS_ASSERT_THROWS_NOTHING( result =
-    // algToBeTested.getPropertyValue("EntryName") );
-    // TS_ASSERT( ! result.compare(entryName));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
@@ -189,9 +184,6 @@ public:
         output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
-    // this would make all X's separate
-    // output2D->dataX(22)[3]=0.55;
-    //
     if (!algToBeTested.isInitialized())
       algToBeTested.initialize();
 
@@ -200,7 +192,6 @@ public:
     outputFile = "SaveNexusProcessedTest_testExecOnMuon.nxs";
     if (Poco::File(outputFile).exists())
       Poco::File(outputFile).remove();
-    // entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
     algToBeTested.setPropertyValue("Filename", outputFile);
@@ -208,7 +199,6 @@ public:
     if (Poco::File(outputFile).exists())
       Poco::File(outputFile).remove();
 
-    // algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
     algToBeTested.setPropertyValue("Append", "0");
 
@@ -216,19 +206,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(result =
                                  algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
-    // TS_ASSERT_THROWS_NOTHING( result =
-    // algToBeTested.getPropertyValue("EntryName") );
-    // TS_ASSERT( ! result.compare(entryName));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
 
-    // Nice idea, but confusing (seg-faulted) if algorithm doesn't clean its
-    // state
-    // In reality out algorithms are only call once
-    //    // try writing data again
-    //    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    //    TS_ASSERT( algToBeTested.isExecuted() );
     if (clearfiles)
       Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(
@@ -377,12 +358,10 @@ public:
     // specify name of file to save workspace to
     alg.setPropertyValue("InputWorkspace", "testSpace");
     outputFile = "SaveNexusProcessedTest_testExec.nxs";
-    // entryName = "test";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
     outputFile = alg.getPropertyValue("Filename");
-    // alg.setPropertyValue("EntryName", entryName);
     alg.setPropertyValue("Title", title);
     if (Poco::File(outputFile).exists())
       Poco::File(outputFile).remove();
@@ -830,8 +809,8 @@ public:
   void test_masking() {
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
-    createWorkspace.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("Filename",
+                                     "unit_testing/IDF_for_UNIT_TESTING.xml");
     createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
     createWorkspace.execute();
     auto ws = boost::dynamic_pointer_cast<Workspace2D>(
@@ -868,19 +847,63 @@ public:
     AnalysisDataService::Instance().remove("testSpace");
   }
 
-  void test_nexus_spectraMap() {
+  void test_nexus_spectraDetectorMap() {
     NexusTestHelper th(true);
     th.createFile("MatrixWorkspaceTest.nxs");
     auto ws = makeWorkspaceWithDetectors(100, 50);
-    std::vector<int> spec;
+    std::vector<int> wsIndex;
     for (int i = 0; i < 100; i++) {
       // Give some funny numbers, so it is not the default
       ws->getSpectrum(size_t(i)).setSpectrumNo(i * 11);
       ws->getSpectrum(size_t(i)).setDetectorID(99 - i);
-      spec.push_back(i);
+      wsIndex.emplace_back(i);
     }
     SaveNexusProcessed alg;
-    TS_ASSERT_THROWS_NOTHING(alg.saveSpectraMapNexus(*ws, th.file, spec););
+    TS_ASSERT_THROWS_NOTHING(
+        alg.saveSpectraDetectorMapNexus(*ws, th.file, wsIndex);)
+    TS_ASSERT_THROWS_NOTHING(th.file->openData("detector_index"))
+    std::vector<int32_t> data;
+    TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
+    TS_ASSERT_EQUALS(data.size(), 100)
+    for (size_t i{0}; i < data.size(); ++i) {
+      TS_ASSERT_EQUALS(data[i], i)
+    }
+    TS_ASSERT_THROWS_NOTHING(th.file->closeData())
+    TS_ASSERT_THROWS_NOTHING(th.file->openData("detector_count"))
+    TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
+    TS_ASSERT_EQUALS(data.size(), 100)
+    for (const auto i : data) {
+      TS_ASSERT_EQUALS(i, 1)
+    }
+    TS_ASSERT_THROWS_NOTHING(th.file->closeData())
+    TS_ASSERT_THROWS_NOTHING(th.file->openData("detector_list"))
+    TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
+    TS_ASSERT_EQUALS(data.size(), 100)
+    for (size_t i{0}; i < data.size(); ++i) {
+      TS_ASSERT_EQUALS(data[i], 99 - i)
+    }
+  }
+
+  void test_nexus_spectrumNumbers() {
+    NexusTestHelper th(true);
+    th.createFile("MatrixWorkspaceTest.nxs");
+    auto ws = makeWorkspaceWithDetectors(100, 50);
+    std::vector<int> wsIndex;
+    for (int i = 0; i < 100; i++) {
+      // Give some funny numbers, so it is not the default
+      ws->getSpectrum(size_t(i)).setSpectrumNo(i * 11);
+      wsIndex.emplace_back(i);
+    }
+    SaveNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(
+        alg.saveSpectrumNumbersNexus(*ws, th.file, wsIndex);)
+    TS_ASSERT_THROWS_NOTHING(th.file->openData("spectra"))
+    std::vector<int32_t> data;
+    TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
+    TS_ASSERT_EQUALS(data.size(), 100)
+    for (size_t i{0}; i < data.size(); ++i) {
+      TS_ASSERT_EQUALS(data[i], i * 11)
+    }
   }
 
 private:
@@ -979,13 +1002,11 @@ private:
     // Now set it...
     // specify name of file to save workspace to
     algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
-    // entryName = "test";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
     TS_ASSERT_THROWS_NOTHING(
         algToBeTested.setPropertyValue("Filename", outputFile));
     outputFile = algToBeTested.getPropertyValue("Filename");
-    // algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
     if (Poco::File(outputFile).exists())
       Poco::File(outputFile).remove();
@@ -994,9 +1015,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(result =
                                  algToBeTested.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(outputFile));
-    // TS_ASSERT_THROWS_NOTHING( result =
-    // algToBeTested.getPropertyValue("EntryName") )
-    // TS_ASSERT( ! result.compare(entryName));
 
     // changed so that 1D workspaces are no longer written.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());

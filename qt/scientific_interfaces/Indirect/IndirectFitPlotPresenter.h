@@ -7,29 +7,35 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
 
+#include "DllConfig.h"
+
 #include "IndirectFitPlotModel.h"
 
-#include "IndirectFitPlotView.h"
+#include "IIndirectFitPlotView.h"
 #include "LazyAsyncRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitPlotPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IndirectFitPlotView *view);
+                           IIndirectFitPlotView *view);
 
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
   int getSelectedSpectrumIndex() const;
   bool isCurrentlySelected(std::size_t dataIndex, std::size_t spectrum) const;
 
+  void setFitSingleSpectrumIsFitting(bool fitting);
+  void setFitSingleSpectrumEnabled(bool enable);
+
 public slots:
-  void setStartX(double);
-  void setEndX(double);
+  void setStartX(double /*startX*/);
+  void setEndX(double /*endX*/);
+  void updatePlotSpectrum(int spectrum);
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
   void updateRangeSelectors();
@@ -44,14 +50,14 @@ public slots:
   void disablePlotGuessInSeparateWindow();
 
 signals:
-  void selectedFitDataChanged(std::size_t);
+  void selectedFitDataChanged(std::size_t /*_t1*/);
   void noFitDataSelected();
-  void plotSpectrumChanged(std::size_t);
-  void fitSingleSpectrum(std::size_t, std::size_t);
-  void startXChanged(double);
-  void endXChanged(double);
-  void fwhmChanged(double);
-  void backgroundChanged(double);
+  void plotSpectrumChanged(std::size_t /*_t1*/);
+  void fitSingleSpectrum(std::size_t /*_t1*/, std::size_t /*_t2*/);
+  void startXChanged(double /*_t1*/);
+  void endXChanged(double /*_t1*/);
+  void fwhmChanged(double /*_t1*/);
+  void backgroundChanged(double /*_t1*/);
   void runAsPythonScript(const QString &code, bool noOutput = false);
 
 private slots:
@@ -95,7 +101,7 @@ private:
   std::string getPlotString(std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitPlotModel> m_model;
-  IndirectFitPlotView *m_view;
+  IIndirectFitPlotView *m_view;
 
   bool m_plotGuessInSeparateWindow;
   MantidQt::API::PythonRunner m_pythonRunner;

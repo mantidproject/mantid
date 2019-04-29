@@ -9,14 +9,14 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# system imports
+from contextlib import contextmanager
 
-# third-party library imports
-from mantidqt.widgets.algorithmselector import AlgorithmSelectorWidget
 from qtpy.QtWidgets import QVBoxLayout
 
-# local package imports
+from mantidqt.widgets.algorithmselector import AlgorithmSelectorWidget
 from workbench.plugins.base import PluginWidget
+
+
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
@@ -32,7 +32,17 @@ class AlgorithmSelector(PluginWidget):
         layout.addWidget(self.algorithm_selector)
         self.setLayout(layout)
 
-# ----------------- Plugin API --------------------
+    @contextmanager
+    def block_progress_widget_updates(self):
+        self.algorithm_selector.algorithm_progress_widget.blockUpdates(True)
+        yield
+        self.algorithm_selector.algorithm_progress_widget.blockUpdates(False)
+
+    def refresh(self):
+        """Refreshes the algorithm list"""
+        self.algorithm_selector.refresh()
+
+    # ----------------- Plugin API --------------------
 
     def register_plugin(self):
         self.main.add_dockwidget(self)

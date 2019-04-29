@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
 import os
@@ -18,7 +18,7 @@ from six import with_metaclass
 
 
 #----------------------------------------------------------------------
-class ISISDirectInelasticReduction(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     """A base class for the ISIS direct inelastic tests
 
     The workflow is defined in the runTest() method, simply
@@ -35,8 +35,8 @@ class ISISDirectInelasticReduction(with_metaclass(ABCMeta, stresstesting.MantidS
         - sample_rmm: A float value for the sample rmm or None
         - hard_mask: An hard mask file or None
     """
-    tolerance=0.
-    tolerance_is_reller=True
+    tolerance = 0.
+    tolerance_is_rel_err = True
 
     @abstractmethod
     def get_reference_file(self):
@@ -56,7 +56,7 @@ class ISISDirectInelasticReduction(with_metaclass(ABCMeta, stresstesting.MantidS
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         self.tolerance = 1e-6
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
@@ -76,7 +76,7 @@ class ISISDirectInelasticReduction(with_metaclass(ABCMeta, stresstesting.MantidS
         return isinstance(obj, Workspace)
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         # this is temporary parameter
         self.scale_to_fix_abf=1
 
@@ -465,7 +465,7 @@ class MERLINReduction(ISISDirectInelasticReduction):
 
     def validate(self):
         self.tolerance = 1e-6
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         result = self.get_result_workspace()
@@ -476,9 +476,9 @@ class MERLINReduction(ISISDirectInelasticReduction):
 #
 
 
-class LETReduction(stresstesting.MantidStressTest):
+class LETReduction(systemtesting.MantidSystemTest):
     tolerance = 1e-6
-    tolerance_is_reller=True
+    tolerance_is_rel_err=True
 
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
@@ -500,19 +500,19 @@ class LETReduction(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-6
-        self.tolerance_is_reller=True
+        self.tolerance_is_rel_err = True
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 
         return self.ws_name, "LETReduction.nxs"
 
 
-class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
+class LETReductionEvent2015Multirep(systemtesting.MantidSystemTest):
     """
     written in a hope that most of the stuff find here will eventually find its way into main reduction routines
     """
     tolerance = 1e-6
-    tolerance_is_reller=True
+    tolerance_is_rel_err = True
 
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 20Gb"""
@@ -539,7 +539,7 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-6
-        self.tolerance_is_reller=False
+        self.tolerance_is_rel_err = False
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 

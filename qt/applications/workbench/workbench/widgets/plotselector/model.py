@@ -85,7 +85,7 @@ class PlotSelectorModel(object):
                 self.presenter.set_active_font(plot_number)
         if action == FigureAction.VisibilityChanged:
             self.presenter.update_visibility_icon(plot_number)
-        if action == FigureAction.Unknown:
+        if action == FigureAction.Update:
             self.presenter.update_plot_list()
 
     # ------------------------ Plot Showing ------------------------

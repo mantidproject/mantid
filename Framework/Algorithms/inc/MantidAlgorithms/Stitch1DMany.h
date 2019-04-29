@@ -49,6 +49,8 @@ public:
 private:
   /// Overwrites Algorithm method.
   void init() override;
+  /// Pass groups in as they are to this algorithm
+  bool checkGroups() override { return false; }
   /// Overwrites Algorithm method.
   void exec() override;
 

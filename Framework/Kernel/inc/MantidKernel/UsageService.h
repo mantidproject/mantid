@@ -50,9 +50,9 @@ public:
 class MANTID_KERNEL_DLL UsageServiceImpl {
 public:
   /// Sets the application name that has invoked Mantid
-  void setApplication(const std::string &name);
+  void setApplicationName(const std::string &name);
   /// Returns the application name that has invoked Mantid
-  std::string getApplication() const;
+  std::string getApplicationName() const;
   /// Sets the interval that the timer checks for tasks
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid

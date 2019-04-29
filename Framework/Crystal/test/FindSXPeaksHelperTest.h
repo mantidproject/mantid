@@ -93,7 +93,7 @@ public:
     // GIVEN
     auto workspace = WorkspaceCreationHelper::create1DWorkspaceConstant(
         10 /*size*/, 1.5 /*value*/, 1. /*error*/, true /*isHisto*/);
-    const auto y = workspace->y(0);
+    const auto &y = workspace->y(0);
 
     // WHEN
     auto backgroundStrategy = AbsoluteBackgroundStrategy(2.);
@@ -109,7 +109,7 @@ public:
     // GIVEN
     auto workspace = WorkspaceCreationHelper::create1DWorkspaceConstant(
         10 /*size*/, 1.5 /*value*/, 1. /*error*/, true /*isHisto*/);
-    const auto y = workspace->y(0);
+    const auto &y = workspace->y(0);
 
     // WHEN
     auto backgroundStrategy = PerSpectrumBackgroundStrategy(1.);

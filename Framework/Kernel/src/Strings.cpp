@@ -11,7 +11,6 @@
 #include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -117,6 +116,22 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
     }
   }
   return replaced;
+}
+
+/** Convert all characters in string to lowercase
+ */
+MANTID_KERNEL_DLL std::string toLower(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::tolower);
+  return output;
+}
+
+/** Convert all characters in string to uppercase
+ */
+MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::toupper);
+  return output;
 }
 
 //------------------------------------------------------------------------------------------------

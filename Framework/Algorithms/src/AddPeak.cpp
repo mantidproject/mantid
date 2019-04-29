@@ -79,8 +79,7 @@ void AddPeak::exec() {
     if (run.hasProperty("Ei")) {
       emode = 1; // direct
       if (run.hasProperty("Ei")) {
-        Mantid::Kernel::Property *prop = run.getProperty("Ei");
-        efixed = boost::lexical_cast<double, std::string>(prop->value());
+        efixed = run.getPropertyValueAsType<double>("Ei");
       }
     } else if (det.hasParameter("Efixed")) {
       emode = 2; // indirect
@@ -117,8 +116,8 @@ void AddPeak::exec() {
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::Geometry::IPeak *peak =
-      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2);
+  auto peak = std::unique_ptr<Mantid::Geometry::IPeak>(
+      peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2));
   peak->setDetectorID(detID);
   peak->setGoniometerMatrix(runWS->run().getGoniometer().getR());
   peak->setBinCount(count);
@@ -128,7 +127,6 @@ void AddPeak::exec() {
     peak->setSigmaIntensity(std::sqrt(height));
 
   peaksWS->addPeak(*peak);
-  delete peak;
   // peaksWS->modified();
 }
 

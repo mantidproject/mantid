@@ -5,8 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 try:
     import pathos.multiprocessing as mp
+
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False
@@ -15,11 +17,11 @@ import numpy as np
 import six
 import os
 
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, \
+    WorkspaceGroup
 from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
-from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load, Scale
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
 import AbinsModules
@@ -27,7 +29,6 @@ import AbinsModules
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
 class Abins(PythonAlgorithm):
-
     _ab_initio_program = None
     _vibrational_or_phonon_data_file = None
     _experimental_file = None
@@ -53,6 +54,7 @@ class Abins(PythonAlgorithm):
         return "Calculates inelastic neutron scattering."
 
         # ----------------------------------------------------------------------------------------
+
     def PyInit(self):
 
         # Declare all properties
@@ -63,15 +65,15 @@ class Abins(PythonAlgorithm):
                              doc="An ab initio program which was used for vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
-                             action=FileAction.Load,
-                             direction=Direction.Input,
-                             extensions=["phonon", "out", "outmol", "log", "LOG"]),
+                                          action=FileAction.Load,
+                                          direction=Direction.Input,
+                                          extensions=["phonon", "out", "outmol", "log", "LOG"]),
                              doc="File with the data from a vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
-                             action=FileAction.OptionalLoad,
-                             direction=Direction.Input,
-                             extensions=["raw", "dat"]),
+                                          action=FileAction.OptionalLoad,
+                                          direction=Direction.Input,
+                                          extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
         self.declareProperty(name="TemperatureInKelvin",
@@ -79,7 +81,7 @@ class Abins(PythonAlgorithm):
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
 
-        self.declareProperty(name="BinWidthInWavenumber",  defaultValue=1.0, doc="Width of bins used during rebining.")
+        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0, doc="Width of bins used during rebining.")
 
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
@@ -243,7 +245,7 @@ class Abins(PythonAlgorithm):
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=Scale(wrk, 1.0/self._bin_width, "Multiply"),
+            SaveAscii(InputWorkspace=Scale(wrk, 1.0 / self._bin_width, "Multiply"),
                       Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
@@ -288,7 +290,6 @@ class Abins(PythonAlgorithm):
 
             sub = len(masses[symbol]) > one_m or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > eps
             for m in masses[symbol]:
-
                 result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
                                                 element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
                                                 s_atom_data=s_atom_data, substitution=sub))
@@ -316,7 +317,7 @@ class Abins(PythonAlgorithm):
 
             eps = AbinsModules.AbinsConstants.MASS_EPS
             if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == element_symbol and
-               abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < eps):
+                    abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < eps):
 
                 temp_s_atom_data.fill(0.0)
 
@@ -413,7 +414,6 @@ class Abins(PythonAlgorithm):
         :param workspace: workspace to be filled with S
         """
         if protons_number is not None:
-
             s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
                                                                         nucleons_number=nucleons_number)
 
@@ -456,7 +456,6 @@ class Abins(PythonAlgorithm):
         return cross_section
 
     def _create_total_workspace(self, partial_workspaces=None):
-
         """
         Sets workspace with total S.
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
@@ -493,7 +492,6 @@ class Abins(PythonAlgorithm):
 
     def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None,
                           nucleons_number=None):
-
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
@@ -533,7 +531,6 @@ class Abins(PythonAlgorithm):
         mtd[wrk].setYUnit("Arbitrary Units")
 
     def _check_advanced_parameter(self):
-
         """
         Checks if parameters from AbinsParameters.py are valid. If any parameter is invalid then RuntimeError is thrown
         with meaningful message.
@@ -694,10 +691,10 @@ class Abins(PythonAlgorithm):
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
         if found_filename_ext.lower() != expected_file_extension:
-            return dict(Invalid=True,
-                        Comment=msg_err + "Output from ab initio program " + ab_initio_program + " is expected." +
-                                          " The expected extension of file is ." + expected_file_extension +
-                                          ".  Found: " + found_filename_ext + ". " + msg_rename)
+            comment = "{}Output from ab initio program {} is expected." \
+                      " The expected extension of file is .{}. Found: {}.{}".format(
+                          msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
+            return dict(Invalid=True, Comment=comment)
         else:
             return dict(Invalid=False, Comment="")
 
@@ -837,7 +834,4 @@ class Abins(PythonAlgorithm):
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
 
-try:
-    AlgorithmFactory.subscribe(Abins)
-except ImportError:
-    logger.debug('Failed to subscribe algorithm SimulatedDensityOfStates; The python package may be missing.')
+AlgorithmFactory.subscribe(Abins)

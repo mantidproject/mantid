@@ -9,7 +9,6 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
-#include <ostream>
 #include <string>
 
 namespace Mantid {

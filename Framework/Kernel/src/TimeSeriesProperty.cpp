@@ -10,6 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/make_unique.h"
+#include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
@@ -235,7 +236,7 @@ bool TimeSeriesProperty<TYPE>::operator!=(const Property &right) const {
  * Set name of the property
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::setName(const std::string name) {
+void TimeSeriesProperty<TYPE>::setName(const std::string &name) {
   m_name = name;
 }
 
@@ -843,7 +844,8 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
  */
 template <>
 void TimeSeriesProperty<std::string>::makeFilterByValue(
-    std::vector<SplittingInterval> &, double, double, double, bool) const {
+    std::vector<SplittingInterval> & /*split*/, double /*min*/, double /*max*/,
+    double /*TimeTolerance*/, bool /*centre*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
@@ -907,8 +909,8 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
  */
 template <>
 void TimeSeriesProperty<std::string>::expandFilterToRange(
-    std::vector<SplittingInterval> &, double, double,
-    const TimeInterval &) const {
+    std::vector<SplittingInterval> & /*split*/, double /*min*/, double /*max*/,
+    const TimeInterval & /*range*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
@@ -987,7 +989,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
  */
 template <>
 double TimeSeriesProperty<std::string>::averageValueInFilter(
-    const TimeSplitterType &) const {
+    const TimeSplitterType & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
@@ -1059,7 +1061,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
 template <>
 std::pair<double, double>
 TimeSeriesProperty<std::string>::averageAndStdDevInFilter(
-    const TimeSplitterType &) const {
+    const TimeSplitterType & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
@@ -1437,10 +1439,23 @@ std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
  * @return Nothing in this case
  */
 template <typename TYPE>
-std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
+std::string TimeSeriesProperty<TYPE>::setValue(const std::string & /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from a "
                                        "std::string");
+}
+
+/**
+ * Set the property from a Json value. Throws a NotImplementedError
+ *  @throw Exception::NotImplementedError Not yet implemented
+ * @return Nothing in this case
+ */
+template <typename TYPE>
+std::string
+TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value & /*unused*/) {
+  throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
+                                       "Cannot extract TimeSeries from a "
+                                       "Json::Value");
 }
 
 /**
@@ -1448,8 +1463,8 @@ std::string TimeSeriesProperty<TYPE>::setValue(const std::string &) {
  * @return Nothing in this case
  */
 template <typename TYPE>
-std::string
-TimeSeriesProperty<TYPE>::setDataItem(const boost::shared_ptr<DataItem>) {
+std::string TimeSeriesProperty<TYPE>::setDataItem(
+    const boost::shared_ptr<DataItem> /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from "
                                        "DataItem");
@@ -2438,6 +2453,16 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   saveTimeVector(file);
   file->closeGroup();
 }
+
+/**
+ * @returns the value as a Json object. The string representation is
+ * used as the underlying type
+ */
+template <typename TYPE>
+Json::Value TimeSeriesProperty<TYPE>::valueAsJson() const {
+  return Json::Value(value());
+}
+
 /** Calculate constant step histogram of the time series data.
  * @param tMin    -- minimal time to include in histogram
  * @param tMax    -- maximal time to constrain the histogram data

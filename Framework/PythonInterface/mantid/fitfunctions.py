@@ -768,11 +768,12 @@ def _create_wrapper_function(name):
     return wrapper_function
 
 
-def _attach_wrappers(source_module):
+def _wrappers():
+    wrappers = []
     for name in FunctionFactory.getFunctionNames():
         # Wrap all registered functions which are not in the black list
         if name not in _do_not_wrap:
-            setattr(source_module, name, _create_wrapper_function(name))
+            yield name, _create_wrapper_function(name)
 
 
 _ExportedIFunction1D = IFunction1D

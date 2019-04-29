@@ -115,7 +115,7 @@ void MaskBinsIf::exec() {
       e = it->countStandardDeviation();
       dx = hasDx ? it->centerError() : 0.;
       if (parser.Eval() != 0.) {
-        outputWorkspace->flagMasked(index, bin);
+        outputWorkspace->maskBin(index, bin);
       }
     }
     progress->report();

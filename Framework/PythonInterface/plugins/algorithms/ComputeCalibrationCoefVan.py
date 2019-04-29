@@ -9,15 +9,15 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory,
                         MatrixWorkspaceProperty, Progress, InstrumentValidator,
                         ITableWorkspaceProperty)
-from mantid.kernel import Direction, FloatBoundedValidator, Property
+from mantid.kernel import Direction, FloatBoundedValidator, FloatTimeSeriesProperty, Property
 import numpy as np
 from scipy import integrate
 import scipy as sp
 
 
 class ComputeCalibrationCoefVan(PythonAlgorithm):
-    """ Calculate coefficients to normalize by Vanadium and correct Debye
-        Waller factor
+    """Calculate coefficients to normalize by Vanadium and correct Debye
+       Waller factor
     """
 
     def __init__(self):
@@ -31,22 +31,20 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         self.DebyeT = 389.0         # K, Debye temperature for Vanadium
 
     def category(self):
-        """ Return category
-        """
+        """Return category."""
         return "CorrectionFunctions\\EfficiencyCorrections"
 
     def name(self):
-        """ Return summary
-        """
+        """Return algorithm's name."""
         return "ComputeCalibrationCoefVan"
 
     def summary(self):
+        """Return summary."""
         return ("Calculate coefficients for detector efficiency correction " +
                 "using the Vanadium data.")
 
     def PyInit(self):
-        """ Declare properties
-        """
+        """Declare properties."""
         self.declareProperty(MatrixWorkspaceProperty(
                              "VanadiumWorkspace", "",
                              direction=Direction.Input,
@@ -65,13 +63,12 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                              validator=FloatBoundedValidator(lower=0.0),
                              direction=Direction.Input,
                              doc=("Temperature during the experiment (in " +
-                                  "Kelvins) if the 'temperature' sample log " +
-                                  "is missing or needs to be overriden."))
-        return
+                                  "Kelvins) if temperature is not given in the sample logs " +
+                                  "or needs to be overriden."))
+        self.declareProperty("EnableDWF", True, "Enable or disable the Debye-Waller correction.")
 
     def validateInputs(self):
-        """ Validate the inputs
-        """
+        """Validate the inputs."""
         issues = dict()
         inws = self.getProperty("VanadiumWorkspace").value
         run = inws.getRun()
@@ -100,30 +97,37 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         return issues
 
     def get_temperature(self):
-        """Return the temperature
-        """
-        if not self.getProperty("Temperature").isDefault:
-            return self.getProperty("Temperature").value
+        """Return the temperature."""
+        temperatureProperty = self.getProperty("Temperature")
+        if not temperatureProperty.isDefault:
+            return temperatureProperty.value
+        temperatureLogName = "temperature"
+        instrument = self.vanaws.getInstrument()
+        LOG_ENTRY = "temperature_log_entry"
+        if instrument.hasParameter(LOG_ENTRY, False):
+            temperatureLogName = instrument.getStringParameter(LOG_ENTRY)[0]
         run = self.vanaws.getRun()
-        if not run.hasProperty('temperature'):
+        if not run.hasProperty(temperatureLogName):
             self.log().warning("No Temperature given and the 'temperature' " +
                                "sample log is not present in " +
                                self.vanaws.name() +
-                               " T=293K is assumed for Debye-Waller factor.")
+                               ". T = {}K is assumed for Debye-Waller factor.".format(self.defaultT))
             return self.defaultT
         try:
-            temperature = float(run.getProperty('temperature').value)
+            temperature = run.getProperty(temperatureLogName)
+            if isinstance(temperature, FloatTimeSeriesProperty):
+                temperature = temperature.timeAverageValue()
+            else:
+                temperature = float(temperature.value)
+            return temperature
         except ValueError as err:
             self.log().warning("Error of getting temperature from the " +
-                               "sample log " + err + " T=293K is assumed " +
+                               "sample log " + err + ". T = {}K is assumed ".format(self.defaultT) +
                                "for Debye-Waller factor.")
             return self.defaultT
 
-        return temperature
-
     def PyExec(self):
-        """ Main execution body
-        """
+        """Main execution body."""
 
         # returns workspace instance
         self.vanaws = self.getProperty("VanadiumWorkspace").value
@@ -140,20 +144,21 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         integrate.execute()
         prog_reporter.report("Computing DWFs")
         outws = integrate.getProperty("OutputWorkspace").value
-        # calculate array of Debye-Waller factors
         prog_reporter.report("Applying DWFs")
-        dwf = self.calculate_dwf()
-        for idx in range(nhist):
-            ys = outws.dataY(idx)
-            ys /= dwf[idx]
-            es = outws.dataE(idx)
-            es /= dwf[idx]
+        if self.getProperty('EnableDWF').value:
+            # calculate array of Debye-Waller factors
+            dwf = self.calculate_dwf()
+            for idx in range(nhist):
+                ys = outws.dataY(idx)
+                ys /= dwf[idx]
+                es = outws.dataE(idx)
+                es /= dwf[idx]
         prog_reporter.report("Done")
         self.setProperty("OutputWorkspace", outws)
 
     def calculate_dwf(self):
         """
-        Calculates Debye-Waller factor according to
+        Calculate Debye-Waller factor according to
         Sears and Shelley Acta Cryst. A 47, 441 (1991)
         """
         run = self.vanaws.getRun()
@@ -165,6 +170,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
         # T in K
         temperature = self.get_temperature()
+        self.log().debug('Using T = {}K for the Debye-Waller factor.'.format(temperature))
         # Wavelength, Angstrom
         wlength = float(run.getLogData('wavelength').value)
         # Vanadium mass, kg

@@ -5,11 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ContainerSubtraction.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 using namespace Mantid::API;
 
@@ -34,7 +35,10 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
   connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this,
           SLOT(updateCan()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
+          SLOT(plotSpectrumClicked()));
+  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
+          SLOT(plotContourClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
@@ -82,7 +86,8 @@ void ContainerSubtraction::run() {
 
       if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
         setRunIsRunning(false);
-        setPlotResultEnabled(false);
+        setPlotSpectrumEnabled(false);
+        setPlotContourEnabled(false);
         setSaveResultEnabled(false);
         g_log.error("Cannot apply container corrections using a sample and "
                     "container with different binning.");
@@ -100,6 +105,16 @@ void ContainerSubtraction::run() {
     containerSubtractionComplete();
   }
   setRunIsRunning(false);
+  setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
+}
+
+std::size_t ContainerSubtraction::getOutWsNumberOfSpectra() const {
+  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
+}
+
+MatrixWorkspace_const_sptr
+ContainerSubtraction::getADSWorkspace(std::string const &name) const {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
 }
 
 std::string ContainerSubtraction::createOutputName() {
@@ -333,19 +348,23 @@ void ContainerSubtraction::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void ContainerSubtraction::plotClicked() {
-  setPlotResultIsPlotting(true);
+void ContainerSubtraction::plotSpectrumClicked() {
+  setPlotSpectrumIsPlotting(true);
 
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+  auto const spectrumIndex = getPlotSpectrumIndex();
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumIndex);
 
-    if (plotType == "Spectra" || plotType == "Both")
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+  setPlotSpectrumIsPlotting(false);
+}
 
-    if (plotType == "Contour" || plotType == "Both")
-      plot2D(QString::fromStdString(m_pythonExportWsName));
-  }
-  setPlotResultIsPlotting(false);
+void ContainerSubtraction::plotContourClicked() {
+  setPlotContourIsPlotting(true);
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plot2D(QString::fromStdString(m_pythonExportWsName));
+
+  setPlotContourIsPlotting(false);
 }
 
 void ContainerSubtraction::runClicked() { runTab(); }
@@ -544,13 +563,26 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
   return shiftLog;
 }
 
+void ContainerSubtraction::setPlotSpectrumIndexMax(int maximum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  m_uiForm.spSpectrum->setMaximum(maximum);
+}
+
+int ContainerSubtraction::getPlotSpectrumIndex() {
+  return m_uiForm.spSpectrum->text().toInt();
+}
+
 void ContainerSubtraction::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void ContainerSubtraction::setPlotResultEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotOutput->setEnabled(enabled);
+void ContainerSubtraction::setPlotSpectrumEnabled(bool enabled) {
+  m_uiForm.pbPlotSpectrum->setEnabled(enabled);
+  m_uiForm.spSpectrum->setEnabled(enabled);
+}
+
+void ContainerSubtraction::setPlotContourEnabled(bool enabled) {
+  m_uiForm.pbPlotContour->setEnabled(enabled);
 }
 
 void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
@@ -559,7 +591,8 @@ void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
 
 void ContainerSubtraction::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
+  setPlotSpectrumEnabled(enabled);
+  setPlotContourEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
@@ -568,8 +601,13 @@ void ContainerSubtraction::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void ContainerSubtraction::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+void ContainerSubtraction::setPlotSpectrumIsPlotting(bool plotting) {
+  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
+  setButtonsEnabled(!plotting);
+}
+
+void ContainerSubtraction::setPlotContourIsPlotting(bool plotting) {
+  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
   setButtonsEnabled(!plotting);
 }
 

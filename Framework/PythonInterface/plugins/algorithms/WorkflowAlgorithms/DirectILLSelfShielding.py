@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, IntBoundedValidator,
@@ -28,7 +29,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return [ 'DirectILLApplySelfShielding', 'DirectILLReduction' ]
 
     def name(self):
         """Return the algorithm's name."""
@@ -44,19 +45,19 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
-        subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
+        self._subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsNames = common.NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
+        self._names = utils.NameSource(wsNamePrefix, cleanupMode)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
 
         # Get input workspace.
-        mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
+        mainWS = self._inputWS()
 
         # Self shielding and empty container subtraction, if requested.
-        correctionWS = self._selfShielding(mainWS, wsNames, wsCleanup, subalgLogging)
+        correctionWS = self._selfShielding(mainWS)
 
-        self._finalize(correctionWS, wsCleanup)
+        self._finalize(correctionWS)
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
@@ -80,10 +81,10 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc='A workspace containing the self shielding correction factors.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=common.CLEANUP_ON,
+                             defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([
-                                 common.CLEANUP_ON,
-                                 common.CLEANUP_OFF]),
+                                 utils.Cleanup.ON,
+                                 utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
@@ -128,28 +129,28 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         """Check for issues with user input."""
         return dict()
 
-    def _finalize(self, outWS, wsCleanup):
+    def _finalize(self, outWS):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
-        wsCleanup.cleanup(outWS)
-        wsCleanup.finalCleanup()
+        self._cleanup.cleanup(outWS)
+        self._cleanup.finalCleanup()
 
-    def _inputWS(self, wsNames, wsCleanup, subalgLogging):
+    def _inputWS(self):
         """Return the raw input workspace."""
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
-        wsCleanup.protect(mainWS)
+        self._cleanup.protect(mainWS)
         return mainWS
 
-    def _selfShielding(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _selfShielding(self, mainWS):
         """Return the self shielding corrections."""
-        wavelengthWSName = wsNames.withSuffix('input_in_wavelength')
+        wavelengthWSName = self._names.withSuffix('input_in_wavelength')
         wavelengthWS = ConvertUnits(InputWorkspace=mainWS,
                                     OutputWorkspace=wavelengthWSName,
                                     Target='Wavelength',
                                     EMode='Direct',
-                                    EnableLogging=subalgLogging)
+                                    EnableLogging=self._subalgLogging)
         wavelengthPoints = self.getProperty(common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS).value
-        correctionWSName = wsNames.withSuffix('correction')
+        correctionWSName = self._names.withSuffix('correction')
         useFullInstrument = self.getProperty(common.PROP_SIMULATION_INSTRUMENT).value == common.SIMULATION_INSTRUMENT_FULL
         if useFullInstrument:
             correctionWS = MonteCarloAbsorption(InputWorkspace=wavelengthWS,
@@ -157,7 +158,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                 SparseInstrument=False,
                                                 NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
-                                                EnableLogging=subalgLogging)
+                                                EnableLogging=self._subalgLogging)
         else:
             rows = self.getProperty(common.PROP_SPARSE_INSTRUMENT_ROWS).value
             columns = self.getProperty(common.PROP_SPARSE_INSTRUMENT_COLUMNS).value
@@ -168,13 +169,13 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                 NumberOfDetectorColumns=columns,
                                                 NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
-                                                EnableLogging=subalgLogging)
-        wsCleanup.cleanup(wavelengthWS)
+                                                EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(wavelengthWS)
         correctionWS = ConvertUnits(InputWorkspace=correctionWS,
                                     OutputWorkspace=correctionWSName,
                                     Target='TOF',
                                     EMode='Direct',
-                                    EnableLogging=subalgLogging)
+                                    EnableLogging=self._subalgLogging)
         return correctionWS
 
 

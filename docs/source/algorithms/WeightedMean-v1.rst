@@ -9,9 +9,17 @@
 Description
 -----------
 
-The algorithm calculates the weighted mean of two workspaces. This is useful when working with distributions rather than histograms, particularly when counting statistics are poor and it is possible that the value of one data set is statistically insignificant but differs greatly from the other. In such a case simply calculating the average of the two data sets would produce a spurious result. This algorithm will eventually be modified to take a list of workspaces as an input.
+The algorithm calculates the weighted mean of two workspaces. This is useful when working with distributions rather than histograms, particularly when counting statistics are poor and it is possible that the value of one data set is statistically insignificant but differs greatly from the other. In such a case simply calculating the average of the two data sets would produce a spurious result.
+If each input workspace and the standard deviation are labelled :math:`w_i` and :math:`sigma_i`, respectively, and there
+are *N* workspaces then the weighted mean is computed as:
 
-:math:`y=\frac{\sum\frac{x_i}{\sigma^{2}_i}}{\sum\frac{1}{\sigma^{2}_i}}`
+.. math::
+
+   m = \frac{\sum_{i=0}^{N-1}\frac{w_i}{\sigma^{2}_i}}{\sum_{i=0}^{N-1}\frac{1}{\sigma^{2}_i}}
+
+where *m* is the output workspace. The *x* values are copied from the first input workspace.
+
+The input workspaces must be compatible with respect to size, units, and whether they are distributions or not.
 
 Usage
 -----

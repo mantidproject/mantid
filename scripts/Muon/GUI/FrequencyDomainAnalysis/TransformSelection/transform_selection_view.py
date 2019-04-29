@@ -6,21 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 
 
-class TransformSelectionView(QtGui.QWidget):
+class TransformSelectionView(QtWidgets.QWidget):
 
     """
     Create the transformation selection widget's appearance
     """
     # signals
-    changeMethodSignal = QtCore.pyqtSignal(object)
+    changeMethodSignal = QtCore.Signal(object)
 
     def __init__(self, parent=None):
         super(TransformSelectionView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
-        self.methods = QtGui.QComboBox()
+        self.grid = QtWidgets.QGridLayout(self)
+        self.methods = QtWidgets.QComboBox()
         # default to FFT
         options = ["FFT", "MaxEnt"]
         self.methods.addItems(options)

@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import numpy as np
-from mantid.simpleapi import ApplyDetectorScanEffCorr, CreateWorkspace, CreateSampleWorkspace, Transpose
+from mantid.simpleapi import *
 
 
 class ApplyDetectorScanEffCorrTest(unittest.TestCase):
@@ -66,6 +66,18 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
         for det in range(7*12):
             for bin in range(5):
                 self.assertEquals(calibrated_ws.readY(det)[bin], input_ws.readY(det)[bin] * to_multiply[det][bin])
+
+    def test_masking(self):
+        LoadILLDiffraction(Filename='ILL/D2B/508093.nxs', OutputWorkspace='scan')
+        ExtractMonitors(InputWorkspace='scan', DetectorWorkspace='scan')
+        LoadNexusProcessed(Filename='ILL/D2B/test_calib.nxs', OutputWorkspace='calib')
+        # this will mask tube #9 pixel #127
+        MaskBinsIf(InputWorkspace='calib', OutputWorkspace='calib', Criterion='y>9')
+        ApplyDetectorScanEffCorr(InputWorkspace='scan', DetectorEfficiencyWorkspace='calib', OutputWorkspace='scan')
+        spec = 8*128*25 + 126*25
+        specInfo = mtd['scan'].spectrumInfo()
+        for wsIndex in range(spec, spec+25):
+            self.assertTrue(specInfo.isMasked(spec))
 
 if __name__ == "__main__":
     unittest.main()

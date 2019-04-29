@@ -38,11 +38,12 @@ on run argv
         set sidebar width to 0
         set statusbar visible to false
         set toolbar visible to false
-        set the bounds to { 400, 000, 900, 517 }
+        set the bounds to { 400, 000, 900, 710 }
         set position of item "MantidPlot.app" to { 110, 220 }
         set position of item "Applications" to { 380, 220 }
         set position of item "MantidPython (optional)" to { 380, 400 }
         set position of item "MantidNotebook (optional)" to { 110, 400 }
+        set position of item "MantidWorkbench" to { 110, 580 }
       end tell
       update without registering applications
       delay 5

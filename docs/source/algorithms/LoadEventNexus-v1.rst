@@ -25,10 +25,18 @@ also loaded using :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
 **Monitors** are loaded using :ref:`LoadNexusMonitors
 <algm-LoadNexusMonitors>`.
 
-**Instrument geometry** is loaded using :ref:`LoadIDFFromNexus
-<algm-LoadIDFFromNexus>`. If the instrument geometry is not in the
-file :ref:`LoadInstrument <algm-LoadInstrument>` is used.
+**Instrument geometry**
 
+There are a series of approaches for extracting the instrument geometry. 
+These follow the escalation path as follows:
+
+- Tries to load embedded instrument_xml from the NXinstrument if present 
+  using :ref:`LoadIDFFromNexus <algm-LoadIDFFromNexus>`.
+- Else tries to load embedded nexus geometry from the NXinstrument if present
+- Else tries to load the instrument using the name extracted from NXinstrument 
+
+The latter two possibilities are achieved via 
+:ref:`LoadInstrument <algm-LoadInstrument>`
 
 Optional properties
 ###################

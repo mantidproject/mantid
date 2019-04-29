@@ -141,8 +141,8 @@ Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size,
 Mantid::DataObjects::Workspace2D_sptr
 create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError, bool isHisto = true);
-Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(int nhist,
-                                                        int numBoundaries);
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(size_t nhist,
+                                                        size_t numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123(
@@ -170,7 +170,7 @@ Mantid::API::WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceBinned(int nhist, int numVals, double x0 = 0.0,
+create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
@@ -233,13 +233,7 @@ create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
 void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
               const double lower = -0.5, const double upper = 0.5);
 
-/**
- * Create a test workspace with a fully defined instrument
- * Each spectra will have a cylindrical detector defined 2*cylinder_radius away
- * from the centre of the previous.
- *
- * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
- */
+/// Create a test workspace with a fully defined instrument.
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     int nhist, int nbins, bool includeMonitors = false,
     bool startYNegative = false, bool isHistogram = true,
@@ -271,6 +265,9 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist,
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
                                            int numBins);
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspace123WithMaskedBin(int numHist, int numBins,
+                                  int maskedWorkspaceIndex, int maskedBinIndex);
 
 /** Create an Eventworkspace with an instrument that contains
  * RectangularDetector's */

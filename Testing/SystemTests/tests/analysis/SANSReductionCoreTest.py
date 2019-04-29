@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
-import stresstesting
+import systemtesting
 
 import mantid
 from mantid.api import AlgorithmManager
@@ -35,7 +35,6 @@ class SANSReductionCoreTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", False)
         load_alg.setProperty("SampleScatterWorkspace", EMPTY_NAME)
         load_alg.setProperty("SampleScatterMonitorWorkspace", EMPTY_NAME)
         if state.data.sample_transmission:
@@ -166,7 +165,6 @@ class SANSReductionCoreTest(unittest.TestCase):
 
         # Construct the final state
         state = user_file_director.construct()
-        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
@@ -188,9 +186,9 @@ class SANSReductionCoreTest(unittest.TestCase):
         self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
 
 
-class SANSReductionCoreRunnerTest(stresstesting.MantidStressTest):
+class SANSReductionCoreRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

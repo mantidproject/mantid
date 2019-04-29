@@ -322,39 +322,34 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Plot Output:</string>
+         <string>Spectrum:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="cbPlotOutput">
+       <widget class="QSpinBox" name="spSpectrum">
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <item>
-         <property name="text">
-          <string>Contour</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spectra</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Both</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbPlot">
+       <widget class="QPushButton" name="pbPlotSpectrum">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Plot</string>
+         <string>Plot Spectrum</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlotContour">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Plot Contour</string>
         </property>
        </widget>
       </item>
@@ -395,7 +390,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

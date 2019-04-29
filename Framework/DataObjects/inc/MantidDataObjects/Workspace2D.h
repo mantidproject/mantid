@@ -55,7 +55,10 @@ public:
   std::size_t size() const override;
   std::size_t blocksize() const override;
 
-  Histogram1D &getSpectrum(const size_t index) override;
+  Histogram1D &getSpectrum(const size_t index) override {
+    invalidateCommonBinsFlag();
+    return getSpectrumWithoutInvalidation(index);
+  }
   const Histogram1D &getSpectrum(const size_t index) const override;
 
   /// Generate a new histogram by rebinning the existing histogram.
@@ -99,6 +102,7 @@ private:
   Workspace2D *doClone() const override;
   Workspace2D *doCloneEmpty() const override;
 
+  Histogram1D &getSpectrumWithoutInvalidation(const size_t index) override;
   virtual std::size_t getHistogramNumberHelper() const;
 };
 

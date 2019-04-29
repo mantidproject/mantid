@@ -7,11 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import FunctionFactory, CompositeFunction, IFunction1D
-import numpy as np
+from mantid.api import FrameworkManagerImpl, FunctionFactory, CompositeFunction, IFunction1D
 
 
 class CompositeFunctionTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def test_instance_can_be_created_standalone(self):
         func = CompositeFunction()
@@ -51,7 +54,7 @@ class CompositeFunctionTest(unittest.TestCase):
         func[1].setParameter('A0', 20.0)
         self.assertEqual(func.getParameterValue('f0.A0'), 10.0)
         self.assertEqual(func.getParameterValue('f1.A0'), 20.0)
-        
+
     def test_nested_functions(self):
         s = 'name=FlatBackground,A0=1;(name=FlatBackground,A0=2;name=FlatBackground,A0=3)'
         func = FunctionFactory.createInitialized(s)

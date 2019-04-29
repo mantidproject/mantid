@@ -8,7 +8,7 @@
 """These are more integration tests as they will require that the test data is available
 and that mantid can be imported
 """
-import stresstesting
+import systemtesting
 import numpy as np
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
@@ -162,7 +162,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 # ====================================================================================
 
 
-class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
+class FitSingleSpectrumNoBackgroundTest(systemtesting.MantidSystemTest):
     _fit_results = None
 
     def runTest(self):
@@ -213,7 +213,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 # ====================================================================================
 
 
-class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest):
+class FitSingleSpectrumBivariateGaussianTiesTest(systemtesting.MantidSystemTest):
     """
     Test ensures that internal ties for mass profiles work correctly
     This test ties SigmaX to SigmaY making the multivariate gaussian
@@ -241,7 +241,7 @@ class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest)
 # ====================================================================================
 
 
-class SingleSpectrumBackground(stresstesting.MantidStressTest):
+class SingleSpectrumBackground(systemtesting.MantidSystemTest):
     _fit_results = None
 
     def runTest(self):
@@ -294,7 +294,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 # ====================================================================================
 
 
-class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
+class BankByBankForwardSpectraNoBackground(systemtesting.MantidSystemTest):
     _fit_results = None
 
     def runTest(self):
@@ -343,7 +343,7 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
 # ====================================================================================
 
 
-class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
+class SpectraBySpectraForwardSpectraNoBackground(systemtesting.MantidSystemTest):
     _fit_results = None
 
     def runTest(self):
@@ -392,7 +392,7 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
 # ====================================================================================
 
 
-class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
+class PassPreLoadedWorkspaceToFitTOF(systemtesting.MantidSystemTest):
     _fit_results = None
 
     def runTest(self):
@@ -439,7 +439,7 @@ class PassPreLoadedWorkspaceToFitTOF(stresstesting.MantidStressTest):
 # ====================================================================================
 
 
-class CalculateCumulativeAngleAveragedData(stresstesting.MantidStressTest):
+class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
     _fit_results = None
 
     def runTest(self):

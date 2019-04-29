@@ -64,14 +64,18 @@ if __name__ == "__main__":
                         default=["./MantidSystemTests.db"],
                         help='Required: Path to the SQL database file(s).')
 
+    parser.add_argument('--plotting', dest='plotting',
+                        default="plotly",
+                        help='Plotting toolkit to generate the plots. Options=["plotly", "matplotlib"]')
+
     args = parser.parse_args()
 
-    # Import the manager definition
-    try:
+    if args.plotting == 'plotly':
         import analysis
-    except:
-        # plotly not available, use matplotlib fallback
+    elif args.plotting == 'matplotlib':
         import analysis_mpl as analysis
+    else:
+        raise RuntimeError("Unknown plotting toolkit '{}'".format(args.plotting))
 
     import sqlresults
 

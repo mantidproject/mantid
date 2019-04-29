@@ -76,11 +76,13 @@
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_red</string>
+         <string>_sqw</string>
         </stringlist>
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
          <string>_red.nxs</string>
+         <string>_sqw.nxs</string>
         </stringlist>
        </property>
        <property name="showLoad" stdset="0">
@@ -297,7 +299,7 @@
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Save</string>
+              <string>Save Result</string>
              </property>
             </widget>
            </item>
@@ -320,7 +322,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

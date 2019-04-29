@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIPeakSearchTest(stresstesting.MantidStressTest):
+class POLDIPeakSearchTest(systemtesting.MantidSystemTest):
     '''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
 
     def runTest(self):

@@ -4,19 +4,22 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#ifndef NEXUSGEOMETRYPARSERTEST_H_
+#define NEXUSGEOMETRYPARSERTEST_H_
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidNexusGeometry/NexusGeometryParser.h"
-
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
+
 #include <H5Cpp.h>
 #include <Poco/Glob.h>
 #include <chrono>
@@ -49,7 +52,7 @@ public:
   static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
 
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
-    H5std_string nexusFilename = "SMALLFAKE_example_geometry.hdf5";
+    H5std_string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
     const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
         nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
 
@@ -277,3 +280,4 @@ private:
   std::string m_sans2dHDF5DefinitionPath;
   std::string m_lokiHDF5DefinitionPath;
 };
+#endif

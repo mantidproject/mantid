@@ -60,6 +60,7 @@ class TOFTOFScriptElement(BaseScriptElement):
     # default values
     DEF_prefix     = 'ws'
     DEF_ecFactor   = 1.0
+    DEF_vanEcFactor = 1.0
 
     DEF_binEon     = True
     DEF_binEstart  = 0.0
@@ -100,6 +101,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.vanRuns  = ''
         self.vanCmnt  = ''
         self.vanTemp  = OptionalFloat()
+        self.vanEcFactor = self.DEF_vanEcFactor
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
@@ -150,6 +152,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('van_runs',        self.vanRuns)
         put('van_comment',     self.vanCmnt)
         put('van_temperature', self.vanTemp)
+        put('van_ec_factor',   self.vanEcFactor)
 
         put('ec_runs',     self.ecRuns)
         put('ec_temp',     self.ecTemp)
@@ -225,6 +228,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.vanRuns  = get_str('van_runs')
             self.vanCmnt  = get_str('van_comment')
             self.vanTemp  = get_optFloat('van_temperature')
+            self.vanEcFactor = get_flt('van_ec_factor', self.DEF_vanEcFactor)
 
             self.ecRuns   = get_str('ec_runs')
             self.ecTemp   = get_optFloat('ec_temp')
@@ -535,7 +539,13 @@ class TOFTOFScriptElement(BaseScriptElement):
         # generated script
         self.script = ['']
 
+        self.l("from __future__ import (absolute_import, division, print_function, unicode_literals)")
+        self.l()
+        self.l("# import mantid algorithms, numpy and matplotlib")
+        self.l("from mantid.simpleapi import *")
+        self.l("import matplotlib.pyplot as plt")
         self.l("import numpy as np")
+        self.l()
         self.l("from os.path import join")
         self.l()
         self.l("config['default.facility'] = '{}'"   .format(self.facility_name))
@@ -591,10 +601,16 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
                    .format(scaledEC, wsECNorm))
             self.l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
+            wslist = [scaledEC]
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
-                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
-            self.delete_workspaces([scaledEC])
+                scaledECvan = self.prefix + 'ScaledECvan'
+                self.l("van_ecFactor = {:.3f}" .format(self.vanEcFactor))
+                self.l("{} = Scale({}, Factor=van_ecFactor, Operation='Multiply')"
+                       .format(scaledECvan, wsECNorm))
+                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledECvan))
+                wslist.append(scaledECvan)
+            self.delete_workspaces(wslist)
 
         self.l("# group data for processing")
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm

@@ -19,7 +19,7 @@ public:
     connect(this, SIGNAL(clicked()), this, SLOT(sendClickedSignal()));
   }
 Q_SIGNALS:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
 private Q_SLOTS:
   void sendClickedSignal() { emit buttonClicked(m_property); }
 
@@ -64,7 +64,7 @@ public:
       : ButtonEditorFactory<ParameterPropertyManager>(parent) {}
 
 Q_SIGNALS:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
 };
 
 #endif // BUTTONEDITORFACTORY_H

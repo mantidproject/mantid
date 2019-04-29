@@ -9,17 +9,18 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 #include <climits>
 #include <numeric>
 
@@ -31,6 +32,7 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 /// Enumeration for the different operating modes.
 enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
@@ -168,7 +170,7 @@ void CalculateFlatBackground::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (outputWS != inputWS) {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   // For logging purposes.
@@ -382,8 +384,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
 void CalculateFlatBackground::LinearFit(
     const HistogramData::Histogram &histogram, double &background,
     double &variance, const double startX, const double endX) {
-  MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, histogram.x().size(), histogram.y().size());
+  MatrixWorkspace_sptr WS = create<Workspace2D>(1, histogram);
   WS->setHistogram(0, histogram);
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
 

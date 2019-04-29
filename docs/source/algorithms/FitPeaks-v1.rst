@@ -262,8 +262,11 @@ Algorithm ``FitPeaks`` is designed for various purposes including but not limite
 On the other hand, due to the complexity in peak fitting, users prefer to check the fitting results.
 Therefore, ``FitPeaks`` supports various fexible and informative outputs.
 
+OutputWorkspaces
+################
+
 OutputWorkspace
-###############
+===============
 
 It is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the peak positions expected and fitted.
 
@@ -278,12 +281,33 @@ It is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the pe
   - -4: TODO : find out the answer
   - -5: TODO : find out the answer
 
+OutputPeakParametersWorkspace
+=============================
 
-
-It is a TableWorkspace containing peak parameters.
-According to user's specication, it will contain one parameter, i.e., peak position, or all parameters.
-
+It is an output :py:obj:`MatrixWorkspace <mantid.api.ITableWorkspace>` containing function parameters' fitted values 
+for all peaks that are specified to fit. 
 The order of the peaks will be exactly the sequence of peaks as the order of the given positions of peaks.
+
+If user specifies a subset of spectra to fit, this TableWorksapce will only contain function 
+parameters' value that corresponds to the spectra that are fitted.
+
+OutputParameterFitErrorsWorkspace
+=================================
+
+It is an optional output :py:obj:`MatrixWorkspace <mantid.api.ITableWorkspace>` containing function parameters' fitting error, 
+i.e., uncertainties, for all peaks that are specified to fit.
+The order of the peaks will be exactly the sequence of peaks as the order of the given positions of peaks.
+
+If user specifies a subset of spectra to fit, this TableWorksapce will only contain function 
+parameters' uncertainties that corresponds to the spectra that are fitted.
+
+It has one less column than OutputPeakParametersWorkspace, which is chi2.
+
+FittedPeaksWorkspace
+====================
+
+It is an optional output :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the peaks 
+calculated from fitting result.
 
 
 FittingCostWorkspace

@@ -10,7 +10,6 @@
 from __future__ import absolute_import
 
 # system imports
-import inspect
 import types
 
 # 3rd party imports
@@ -26,7 +25,8 @@ except ImportError:
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
-from mantidqt.utils.async import blocking_async_task
+from mantid.py3compat import getfullargspec
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 
 class InProcessJupyterConsole(RichJupyterWidget):
@@ -37,29 +37,12 @@ class InProcessJupyterConsole(RichJupyterWidget):
         :param args: Positional arguments passed directly to RichJupyterWidget
         :param kwargs: Keyword arguments. The following keywords are understood by this widget:
 
-          - banner: Replace the default banner with this text
-          - startup_code: A code snippet to run on startup. It is also added to the banner to inform the user.
+          - startup_code: A code snippet to run on startup.
 
         the rest are passed to RichJupyterWidget
         """
-        banner = kwargs.pop("banner", "")
         startup_code = kwargs.pop("startup_code", "")
         super(InProcessJupyterConsole, self).__init__(*args, **kwargs)
-
-        # adjust startup banner accordingly
-        # newer ipython has banner1 & banner2 and not just banner
-        two_ptr_banner = hasattr(self, 'banner1')
-        if not banner:
-            banner = self.banner1 if two_ptr_banner else self.banner
-        if startup_code:
-            banner += "\n" + \
-                "The following code has been executed at startup:\n\n" + \
-                startup_code
-        if two_ptr_banner:
-            self.banner1 = banner
-            self.banner2 = ''
-        else:
-            self.banner = banner
 
         # create an in-process kernel
         kernel_manager = QtInProcessKernelManager()
@@ -71,7 +54,7 @@ class InProcessJupyterConsole(RichJupyterWidget):
         shell = kernel.shell
         shell.run_code = async_wrapper(shell.run_code, shell)
 
-        # attach channels, start kenel and run any startup code
+        # attach channels, start kernel and run any startup code
         kernel_client = kernel_manager.client()
         kernel_client.start_channels()
         if startup_code:
@@ -94,11 +77,11 @@ def async_wrapper(orig_run_code, shell_instance):
         periodically until the method finishes
         """
         # ipython 3.0 introduces a third argument named result
-        if len(inspect.getargspec(orig_run_code).args) == 3:
+        if len(getfullargspec(orig_run_code).args) == 3:
             args = (code_obj, result)
         else:
             args = (code_obj,)
-        return blocking_async_task(target=orig_run_code, args=args,
-                                   blocking_cb=QApplication.processEvents)
+        task = BlockingAsyncTaskWithCallback(target=orig_run_code, args=args, blocking_cb=QApplication.processEvents)
+        return task.start()
 
     return types.MethodType(async_run_code, shell_instance)

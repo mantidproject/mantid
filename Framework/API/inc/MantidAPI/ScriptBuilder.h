@@ -31,10 +31,12 @@ namespace API {
 
 class MANTID_API_DLL ScriptBuilder {
 public:
-  ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                std::string versionSpecificity = "old",
-                bool appendTimestamp = false,
-                std::vector<std::string> ignoreTheseAlgs = {});
+  ScriptBuilder(
+      boost::shared_ptr<HistoryView> view,
+      std::string versionSpecificity = "old", bool appendTimestamp = false,
+      std::vector<std::string> ignoreTheseAlgs = {},
+      std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {},
+      bool appendExecCount = false);
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -49,7 +51,8 @@ private:
   const std::string buildCommentString(const AlgorithmHistory &algHistory);
   const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
   const std::string
-  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory);
+  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory,
+                      const std::string &algName);
   void createStringForAlg(
       std::ostringstream &os,
       boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
@@ -59,6 +62,8 @@ private:
   std::string m_versionSpecificity;
   bool m_timestampCommands;
   std::vector<std::string> m_algsToIgnore;
+  std::vector<std::vector<std::string>> m_propertiesToIgnore;
+  bool m_execCount;
 };
 
 } // namespace API

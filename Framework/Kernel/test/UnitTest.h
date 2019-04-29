@@ -1390,10 +1390,102 @@ public:
     }
   }
 
-  /// Test unit Degress
-  void testDegress() {
+  //----------------------------------------------------------------------
+  // Degrees tests
+  //----------------------------------------------------------------------
+
+  void test_that_caption_returns_the_correct_label_for_the_Degrees_unit() {
     TS_ASSERT_EQUALS(degrees.caption(), "Scattering angle");
+  }
+
+  void test_that_unitID_returns_the_correct_ID_for_the_Degrees_unit() {
     TS_ASSERT_EQUALS(degrees.unitID(), "Degrees");
+  }
+
+  void test_that_label_returns_the_correct_unit_for_Degrees() {
+    TS_ASSERT_EQUALS(degrees.label(), "degrees");
+  }
+
+  void test_that_singleToTOF_throws_for_the_Degrees_unit() {
+    TS_ASSERT_THROWS(degrees.singleToTOF(1.0), std::runtime_error);
+  }
+
+  void test_that_singleFromTOF_throws_for_the_Degrees_unit() {
+    TS_ASSERT_THROWS(degrees.singleFromTOF(1.0), std::runtime_error);
+  }
+
+  //----------------------------------------------------------------------
+  // TemperatureKelvin tests
+  //----------------------------------------------------------------------
+
+  void
+  test_that_caption_returns_the_correct_label_for_the_TemperatureKelvin_unit() {
+    TS_ASSERT_EQUALS(temperature.caption(), "Temperature");
+  }
+
+  void
+  test_that_unitID_returns_the_correct_ID_for_the_TemperatureKelvin_unit() {
+    TS_ASSERT_EQUALS(temperature.unitID(), "Temperature");
+  }
+
+  void test_that_label_returns_the_correct_unit_for_TemperatureKelvin() {
+    TS_ASSERT_EQUALS(temperature.label(), "K");
+  }
+
+  void test_that_singleToTOF_throws_for_the_TemperatureKelvin_unit() {
+    TS_ASSERT_THROWS(temperature.singleToTOF(1.0), std::runtime_error);
+  }
+
+  void test_that_singleFromTOF_throws_for_the_TemperatureKelvin_unit() {
+    TS_ASSERT_THROWS(temperature.singleFromTOF(1.0), std::runtime_error);
+  }
+
+  //----------------------------------------------------------------------
+  // Time conversion tests
+  //----------------------------------------------------------------------
+
+  void test_timeConversionValue() {
+    TS_ASSERT_EQUALS(timeConversionValue("second", "second"), 1.0);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "seconds"), 1.0);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "s"), 1.0);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "millisecond"), 1.0e3);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "milliseconds"), 1.0e3);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "ms"), 1.0e3);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "microsecond"), 1.0e6);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "microseconds"), 1.0e6);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "us"), 1.0e6);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "nanosecond"), 1.0e9);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "nanoseconds"), 1.0e9);
+    TS_ASSERT_EQUALS(timeConversionValue("second", "ns"), 1.0e9);
+    TS_ASSERT_EQUALS(timeConversionValue("millisecond", "second"), 1.0e-3);
+    TS_ASSERT_EQUALS(timeConversionValue("microsecond", "second"), 1.0e-6);
+    TS_ASSERT_EQUALS(timeConversionValue("nanosecond", "second"), 1.0e-9);
+    TS_ASSERT_EQUALS(timeConversionValue("millisecond", "microsecond"), 1.0e3);
+    TS_ASSERT_EQUALS(timeConversionValue("millisecond", "nanosecond"), 1.0e6);
+    TS_ASSERT_EQUALS(timeConversionValue("microsecond", "ns"), 1.0e3);
+  }
+
+  bool check_vector_conversion(std::vector<double> &vec, double factor) {
+    std::vector<double> ref({1.0, 2.0, 3.0, 4.0, 5.0});
+    std::transform(ref.begin(), ref.end(), ref.begin(),
+                   [factor](double x) -> double { return x * factor; });
+    return std::equal(vec.begin(), vec.end(), ref.begin());
+  }
+
+  void test_timeConversionVector() {
+    std::vector<double> vec({1.0, 2.0, 3.0, 4.0, 5.0});
+    timeConversionVector(vec, "second", "millisecond");
+    TS_ASSERT(check_vector_conversion(vec, 1.0e3));
+    timeConversionVector(vec, "millisecond", "microseconds");
+    TS_ASSERT(check_vector_conversion(vec, 1.0e6));
+    timeConversionVector(vec, "us", "ns");
+    TS_ASSERT(check_vector_conversion(vec, 1.0e9));
+    timeConversionVector(vec, "nanosecond", "us");
+    TS_ASSERT(check_vector_conversion(vec, 1.0e6));
+    timeConversionVector(vec, "microsecond", "ms");
+    TS_ASSERT(check_vector_conversion(vec, 1.0e3));
+    timeConversionVector(vec, "milliseconds", "s");
+    TS_ASSERT(check_vector_conversion(vec, 1.0));
   }
 
 private:
@@ -1413,6 +1505,7 @@ private:
   Units::SpinEchoLength delta;
   Units::SpinEchoTime tau;
   Units::Degrees degrees;
+  Units::Temperature temperature;
 };
 
 #endif /*UNITTEST_H_*/

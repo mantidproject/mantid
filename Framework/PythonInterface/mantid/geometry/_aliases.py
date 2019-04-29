@@ -11,13 +11,14 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
-from ._geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,
+from mantid.kernel._aliases import lazy_instance_access
+from mantid.geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,
                         SymmetryElementFactoryImpl, PointGroupFactoryImpl)
 
 ###############################################################################
-# Singleton
+# Singletons
 ###############################################################################
-SpaceGroupFactory = SpaceGroupFactoryImpl.Instance()
-SymmetryOperationFactory = SymmetryOperationFactoryImpl.Instance()
-SymmetryElementFactory = SymmetryElementFactoryImpl.Instance()
-PointGroupFactory = PointGroupFactoryImpl.Instance()
+SpaceGroupFactory = lazy_instance_access(SpaceGroupFactoryImpl)
+SymmetryOperationFactory = lazy_instance_access(SymmetryOperationFactoryImpl)
+SymmetryElementFactory = lazy_instance_access(SymmetryElementFactoryImpl)
+PointGroupFactory = lazy_instance_access(PointGroupFactoryImpl)

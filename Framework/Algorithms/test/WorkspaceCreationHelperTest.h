@@ -50,6 +50,20 @@ public:
         1, 2, false, std::set<int64_t>(), false);
     TS_ASSERT(!ws2->hasDx(0));
   }
+
+  void test_create2DWorkspace123WithMaskedBin() {
+    int numHist = 3;
+    int numBins = 4;
+    // mask bin at workspace index 0, bin 1
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspace123WithMaskedBin(
+            numHist, numBins, 0, 1);
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numHist);
+    TS_ASSERT_EQUALS(ws->blocksize(), numBins);
+    TS_ASSERT_EQUALS(ws->hasMaskedBins(0), true);
+    TS_ASSERT_EQUALS(ws->hasMaskedBins(1), false);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_WORKSPACECREATIONHELPERTEST_H_ */

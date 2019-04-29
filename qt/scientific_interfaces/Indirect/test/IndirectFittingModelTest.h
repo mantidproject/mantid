@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITTINGMODELTEST_H_
 #define MANTID_INDIRECTFITTINGMODELTEST_H_
 
@@ -38,10 +44,14 @@ private:
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
-    (void)index;
-    (void)spectrum;
+    UNUSED_ARG(index);
+    UNUSED_ARG(spectrum);
     return "";
   };
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override {
+    return std::vector<std::string>();
+  }
 };
 
 std::unique_ptr<DummyModel> getEmptyModel() {
@@ -59,8 +69,8 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
 
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
                           int const &numberOfSpectra) {
-  (void)model;
-  (void)numberOfSpectra;
+  UNUSED_ARG(model);
+  UNUSED_ARG(numberOfSpectra);
 }
 
 template <typename Name, typename... Names>
@@ -291,7 +301,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void
@@ -320,7 +330,7 @@ public:
 
     model->setExcludeRegion("0,1,6,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,4.0,6.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,4.000,6.000");
   }
 
   void
@@ -331,7 +341,7 @@ public:
     std::string const rangeDelimiter = "_to_";
 
     TS_ASSERT_EQUALS(model->createOutputName(formatString, rangeDelimiter, 0),
-                     "WorkspaceName_s0_Gaussian_Result");
+                     "WorkspaceName_s0_Gaussian_Results");
   }
 
   void
@@ -342,7 +352,7 @@ public:
     std::string const rangeDelimiter = "_to_";
 
     TS_ASSERT_EQUALS(model->createOutputName(formatString, rangeDelimiter, 0),
-                     "Workspace_3456_s0_Gaussian_Result");
+                     "Workspace_3456_s0_Gaussian_Results");
   }
 
   void
@@ -355,13 +365,13 @@ public:
 
     TS_ASSERT_EQUALS(
         model->createOutputName(formatStrings[0], rangeDelimiter, 0),
-        "Workspace_3456_s0_Gaussian_Result");
+        "Workspace_3456_s0_Gaussian_Results");
     TS_ASSERT_EQUALS(
         model->createOutputName(formatStrings[1], rangeDelimiter, 0),
-        "Workspace_3456_f0+s0_MSD_Result");
+        "Workspace_3456_f0+s0_MSD_Results");
     TS_ASSERT_EQUALS(
         model->createOutputName(formatStrings[2], rangeDelimiter, 0),
-        "Workspace_3456_s0_TeixeiraWater_Result");
+        "Workspace_3456_s0_TeixeiraWater_Results");
   }
 
   void
@@ -582,7 +592,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 3, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void
@@ -690,11 +700,6 @@ public:
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {
     auto const model = getModelWithFitOutputData();
     TS_ASSERT(model->getResultLocation(0, 0));
-  }
-
-  void test_that_saveResult_does_not_throw_when_saving_data_from_a_fit() {
-    auto const model = getModelWithFitOutputData();
-    TS_ASSERT_THROWS_NOTHING(model->saveResult());
   }
 
   void

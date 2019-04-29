@@ -11,15 +11,15 @@ This test tries to detect the most common such errors.
 It also detects if a new category is created (i.e. someone uses Utilities instead of Utility)
 """
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import mantid
 import re
 from six import iteritems
 
 
-class SphinxWarnings(stresstesting.MantidStressTest):
+class SphinxWarnings(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.allowedCategories=['Arithmetic',
                                 'CorrectionFunctions',
                                 'Crystal',

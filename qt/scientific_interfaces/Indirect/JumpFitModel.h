@@ -22,8 +22,10 @@ struct JumpFitParameters {
 
 class DLLExport JumpFitModel : public IndirectFittingModel {
 public:
+  using IndirectFittingModel::addWorkspace;
+
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                    const Spectra &) override;
+                    const Spectra & /*spectra*/) override;
   void removeWorkspace(std::size_t index) override;
   void setFitType(const std::string &fitType);
 
@@ -31,6 +33,8 @@ public:
   bool zeroEISF(std::size_t dataIndex) const;
 
   bool isMultiFit() const override;
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override;
 
   std::string getFitParameterName(std::size_t dataIndex,
                                   std::size_t spectrum) const;

@@ -24,9 +24,9 @@ Project Recovery test
 
 --------------
 
-1. Simple tests and Muon-esque workflow
+1. Simple tests
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot 
 - Right-click in the Results Log and set `Log level` to `Debug`
 - The Results Log should be printing `Nothing to save`
 - Run the following command to create a simple workspace:
@@ -75,7 +75,7 @@ Project Recovery test
 
 2. Testing many workspaces
 
-- Open up MantidPlot, ensure that it is the only instance running
+- Open up MantidPlot
 - Run the following script:
 
 .. code-block:: python
@@ -106,7 +106,7 @@ Project Recovery test
 
 3. Testing workspaces of different types
 
-- Open up MantidPlot, ensure that only one instance is running
+- Open up MantidPlot
 - Run the following script:
 
 .. code-block:: python
@@ -207,7 +207,7 @@ Project Recovery test
 
 6. Opening script only
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot
 - Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
@@ -222,14 +222,14 @@ Project Recovery test
 
 7. Not attempting recovery
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot
 - Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
 - Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - You should be presented with the Project Recovery dialog
-- Choose `No`
+- Choose `Start mantid normally`
 - Mantid should open as normal
 - With the Results Log in debug level you should see the project saver starting up again
 
@@ -237,7 +237,7 @@ Project Recovery test
 
 8. Check old history is purged
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot
 
 .. code-block:: python
 

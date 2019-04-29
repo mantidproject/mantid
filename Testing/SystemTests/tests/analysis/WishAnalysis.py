@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class WishAnalysis(stresstesting.MantidStressTest):
+class WishAnalysis(systemtesting.MantidSystemTest):
     """
     Runs the WISH analysis chain on one bank of data
     """

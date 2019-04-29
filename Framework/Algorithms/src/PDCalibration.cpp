@@ -11,15 +11,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -40,6 +42,8 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::API::FileProperty;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
@@ -1198,11 +1202,10 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
   // create workspaces
   size_t numspec = dataws->getNumberHistograms();
   size_t numpeaks = m_peaksInDspacing.size();
-  MatrixWorkspace_sptr peak_pos_ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", numspec, numpeaks, numpeaks);
+  MatrixWorkspace_sptr peak_pos_ws =
+      create<Workspace2D>(numspec, Points(numpeaks));
   MatrixWorkspace_sptr peak_window_ws =
-      API::WorkspaceFactory::Instance().create("Workspace2D", numspec,
-                                               numpeaks * 2, numpeaks * 2);
+      create<Workspace2D>(numspec, Points(numpeaks * 2));
 
   const int64_t NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
   API::Progress prog(this, 0., .2, NUM_HIST);

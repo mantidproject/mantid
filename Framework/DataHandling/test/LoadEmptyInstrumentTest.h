@@ -51,8 +51,7 @@ public:
   ScopedFile createIDFFileObject(const std::string &idf_filename,
                                  const std::string &idf_file_contents) {
     const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/";
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -155,7 +154,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+                            "unit_testing/IDF_for_UNIT_TESTING2.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -443,7 +442,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING4.xml");
+                            "unit_testing/IDF_for_UNIT_TESTING4.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -720,8 +719,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    loader.setPropertyValue("Filename", "unit_testing/DUM_Definition.xml");
     loader.setProperty("MakeEventWorkspace", asEvent);
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyDUMInstrumentTest";
@@ -923,8 +921,9 @@ public:
     AnalysisDataService::Instance().remove(wsName);
 
     loaderEMU2.initialize();
-    loaderEMU2.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
+    loaderEMU2.setRethrows(true);
+    loaderEMU2.setPropertyValue("Filename",
+                                "unit_testing/EMU_for_UNIT_TESTING.XML");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
 
@@ -1022,7 +1021,8 @@ public:
   void test_output_workspace_contains_instrument_with_expected_name() {
     LoadEmptyInstrument alg;
     alg.setChild(true);
-    const std::string inputFile = "SMALLFAKE_example_geometry.hdf5";
+    const std::string inputFile =
+        "unit_testing/SMALLFAKE_example_geometry.hdf5";
     alg.initialize();
     alg.setPropertyValue("Filename", inputFile);
     alg.setPropertyValue("OutputWorkspace", "dummy");
@@ -1035,6 +1035,7 @@ public:
     TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()),
                      "SmallFakeTubeInstrument");
   }
+
   void test_load_loki() {
     LoadEmptyInstrument alg;
     alg.setChild(true);
@@ -1052,8 +1053,28 @@ public:
     TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
     TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
 
-    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0])
-    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
+  }
+
+  void test_load_loki_from_instrument_name() {
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("InstrumentName", "LOKI");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWs =
+        alg.getProperty("OutputWorkspace");
+
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
   }
 
   void test_compare_wish_idf_vs_nexus() {

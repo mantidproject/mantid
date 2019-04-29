@@ -18,6 +18,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <json/value.h>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -81,10 +82,19 @@ public:
     TS_ASSERT_EQUALS(sProp->isValid(), "");
   }
 
-  void test_SetValue() {
+  void test_SetValueFromString() {
     TS_ASSERT_THROWS(iProp->setValue("1"), Exception::NotImplementedError);
     TS_ASSERT_THROWS(dProp->setValue("5.5"), Exception::NotImplementedError);
     TS_ASSERT_THROWS(sProp->setValue("aValue"), Exception::NotImplementedError);
+  }
+
+  void test_SetValueFromJson() {
+    TS_ASSERT_THROWS(iProp->setValueFromJson(Json::Value(1)),
+                     Exception::NotImplementedError);
+    TS_ASSERT_THROWS(dProp->setValueFromJson(Json::Value(5.5)),
+                     Exception::NotImplementedError);
+    TS_ASSERT_THROWS(sProp->setValueFromJson(Json::Value("aValue")),
+                     Exception::NotImplementedError);
   }
 
   void test_AddValue() {

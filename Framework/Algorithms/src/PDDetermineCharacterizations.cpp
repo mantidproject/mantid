@@ -153,13 +153,13 @@ void PDDetermineCharacterizations::init() {
   std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
                                                  "frequency", "skf1.speed"};
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
-                      FREQ_PROP_NAME, defaultFrequencyNames),
+                      FREQ_PROP_NAME, std::move(defaultFrequencyNames)),
                   "Candidate log names for frequency");
 
   std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda",
                                                   "skf12.lambda"};
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
-                      WL_PROP_NAME, defaultWavelengthNames),
+                      WL_PROP_NAME, std::move(defaultWavelengthNames)),
                   "Candidate log names for wave length");
 }
 
@@ -245,7 +245,8 @@ void PDDetermineCharacterizations::getInformationFromTable(
             columnNames.end()) {
           g_log.warning() << "Failed to find container name \"" << canName
                           << "\" in characterizations table \""
-                          << m_characterizations->getName() << "\"\n";
+                          << m_characterizations->getName()
+                          << " - using default container value\n";
         } else {
           const auto canRuns =
               m_characterizations->getRef<std::string>(canName, i);
@@ -308,8 +309,15 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
       }
     }
   }
-  g_log.warning("Failed to determine " + label);
-  return 0.;
+
+  // generate an exception if it gets here because the log wasn't found
+  std::stringstream msg;
+  msg << "Failed to determine " << label << " because none of the logs ";
+  for (auto &name : names) {
+    msg << "\"" << name << "\" ";
+  }
+  msg << "exist";
+  throw std::runtime_error(msg.str());
 }
 
 /// Set the default values in the property manager

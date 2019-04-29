@@ -128,8 +128,7 @@ void AnvredCorrection::exec() {
   if (!m_onlySphericalAbsorption) {
     const API::Run &run = m_inputWS->run();
     if (run.hasProperty("LorentzCorrection")) {
-      Kernel::Property *prop = run.getProperty("LorentzCorrection");
-      bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
+      auto lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "
@@ -362,9 +361,7 @@ void AnvredCorrection::retrieveBaseProperties() {
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
-                        m_amu);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
     auto shape = boost::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAnvredCorrection", neutron, 1.0)));

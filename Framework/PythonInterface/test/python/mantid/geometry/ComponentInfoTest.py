@@ -14,6 +14,7 @@ from mantid.kernel import V3D
 from mantid.kernel import Quat
 from mantid.geometry import CSGObject
 from mantid.simpleapi import *
+from itertools import islice
 
 class ComponentInfoTest(unittest.TestCase):
 
@@ -185,7 +186,16 @@ class ComponentInfoTest(unittest.TestCase):
         info = workspace.componentInfo()
         self.assertEquals(info.size(), 1)
 
-
+    def test_indexOfAny(self):
+        info = self._ws.componentInfo()
+        index = info.indexOfAny(info.name(info.root()))
+        # Root index and the discovered index should be the same
+        self.assertEquals(index, info.root())
+    
+    def test_indexOfAny_throws(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(ValueError):
+            info.indexOfAny('fictitious')
     """
     ----------------------------------------------------------------------------
     Extreme Tests
@@ -474,5 +484,66 @@ class ComponentInfoTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             info.shape(11.32)
 
+    def test_basic_iterator(self):
+        info = self._ws.componentInfo()
+        expected_iterations = len(info) 
+        actual_iterations = len(list(iter(info)))
+        self.assertEquals(expected_iterations, actual_iterations)
+        it = iter(info)
+        self.assertEquals(next(it).index, 0)
+        self.assertEquals(next(it).index, 1)
+        
+    def test_isDetector_via_iterator(self):
+        comp_info = self._ws.componentInfo()
+        n_detectors = len(self._ws.detectorInfo())
+        it = iter(comp_info)
+        self.assertEquals(next(it).isDetector, True)
+        self.assertEquals(next(it).isDetector, True)
+        self.assertEquals(next(it).isDetector, False)
+        self.assertEquals(next(it).isDetector, False)
+
+    def test_position_via_iterator(self):
+        comp_info = self._ws.componentInfo()
+        source_pos = comp_info.sourcePosition()
+        it = iter(comp_info)
+        # basic check on first detector position
+        self.assertTrue(next(it).position.distance(source_pos) > 0)
+        
+    def test_children_via_iterator(self):
+        info = self._ws.componentInfo()
+        it = iter(info)
+        first_det = next(it) 
+        self.assertEquals(type(first_det.children), np.ndarray)
+        self.assertEquals(len(first_det.children), 0)
+        root = next(it)
+        for root in it:
+            continue
+        self.assertEquals(root.index, info.root()) # sanity check
+        self.assertTrue(np.array_equal(root.children, np.array([0,1,2,3,4], dtype='uint64')))
+
+    def test_detectorsInSubtree_via_iterator(self):
+        info = self._ws.componentInfo()
+        it = iter(info)
+        first_det = next(it) 
+        self.assertEquals(type(first_det.detectorsInSubtree), np.ndarray)
+        # For detectors, only contain own index
+        self.assertTrue(np.array_equal(first_det.detectorsInSubtree,np.array([0], dtype='uint64')))
+        root = next(it)
+        for root in it:
+            continue
+        self.assertTrue(np.array_equal(root.detectorsInSubtree, np.array([0,1], dtype='uint64')))
+
+    def test_componentsInSubtree_via_iterator(self):
+        info = self._ws.componentInfo()
+        it = iter(info)
+        first_det = next(it) 
+        self.assertEquals(type(first_det.detectorsInSubtree), np.ndarray)
+        # For detectors, only contain own index
+        self.assertTrue(np.array_equal(first_det.componentsInSubtree,np.array([0], dtype='uint64')))
+        root = next(it)
+        for root in it:
+            continue
+        # All component indices expected including self
+        self.assertTrue(np.array_equal(root.componentsInSubtree, np.array([0,1,2,3,4,5], dtype='uint64')))
 if __name__ == '__main__':
     unittest.main()

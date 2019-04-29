@@ -24,7 +24,7 @@ Usage
     f.write("5      1    256    256 50.1000 49.9000  0.2000  55.33   50.0000   16.7548  -16.7548  0.00011 -0.00002  1.00000  0.00000  1.00000  0.00000\n")
     f.close() 
              
-    iw = LoadEmptyInstrument(Filename="IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml",)
+    iw = LoadEmptyInstrument(Filename="unit_testing/MINITOPAZ_Definition.xml",)
     LoadIsawDetCal(InputWorkspace=iw,FileName=filename)
     bank = iw.getInstrument().getComponentByName("bank1")
     print("Position after LoadDetCal : {}".format(bank.getPos()))

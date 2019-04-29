@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOAD_ASCIISTL_TEST_H_
 #define LOAD_ASCIISTL_TEST_H_
 
@@ -17,7 +23,6 @@ public:
   static LoadAsciiStlTest *createSuite() { return new LoadAsciiStlTest(); }
   static void destroySuite(LoadAsciiStlTest *suite) { delete suite; }
 
-  void testInit() {}
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
     auto Loader = LoadAsciiStl(path);
@@ -67,13 +72,13 @@ public:
   void test_return_false_on_binary_stl() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     auto Loader = LoadAsciiStl(path);
-    TS_ASSERT(!(Loader.isAsciiSTL()));
+    TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
 
   void test_return_false_on_invalid_solid() {
     std::string path = FileFinder::Instance().getFullPath("invalid_solid.stl");
     auto Loader = LoadAsciiStl(path);
-    TS_ASSERT(!(Loader.isAsciiSTL()));
+    TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
 };
 

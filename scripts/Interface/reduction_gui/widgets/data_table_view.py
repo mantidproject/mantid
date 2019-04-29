@@ -8,13 +8,8 @@
 DataTable Widget for data runs.
 """
 from __future__ import (absolute_import, division, print_function)
-try:
-    from qtpy import QtCore, QtWidgets
-except:
-    from PyQt4 import QtCore
-    from PyQt4 import QtGui as QtWidgets
-    QtCore.Signal = QtCore.pyqtSignal
-Qt = QtCore.Qt
+from qtpy import QtCore, QtWidgets
+from qtpy.QtCore import Qt
 
 
 class DataTableModel(QtCore.QAbstractTableModel):

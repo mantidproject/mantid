@@ -4,12 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 import numpy as np
 from mantid.simpleapi import *
 
 
-class ConvertWANDSCDtoQTest(stresstesting.MantidStressTest):
+class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
             return 8000
 
@@ -25,11 +25,11 @@ class ConvertWANDSCDtoQTest(stresstesting.MantidStressTest):
         self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 14)
 
         peak = ConvertWANDSCDtoQTest_peaks.getPeak(0)
-        self.assertTrue(np.allclose(peak.getQSampleFrame(), [2.40072,0.00130686,4.32033]))
+        self.assertTrue(np.allclose(peak.getQSampleFrame(), [2.40072, 0.00357258, 4.32033]))
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         peak = ConvertWANDSCDtoQTest_peaks.getPeak(13)
-        self.assertTrue(np.allclose(peak.getQSampleFrame(), [6.56011,0.00130687,-2.52058]))
+        self.assertTrue(np.allclose(peak.getQSampleFrame(), [6.56011, 0.00357258, -2.52058]))
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
         SetUB('ConvertWANDSCDtoQTest_data', UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"

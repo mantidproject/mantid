@@ -7,17 +7,44 @@ from __future__ import print_function
 from distutils import sysconfig as sc
 import os
 import sys
+import traceback
 
 # get location of mantid this was run with
 mantidpath = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@"
 
+
+def die(msg=None):
+    if msg:
+        print(msg)
+    traceback.print_exc()
+    exit(1)
+
 # check mantid can be loaded in this python
 sys.path.append(mantidpath)
+extra_pypath = None
 try:
-    import mantid
+    import mantid  # noqa
 except ImportError as e:
-    print("Can't import mantid: {}".format(e))
-    exit(1)
+    # check for an error that appears to be python2 only
+    if 'No module named DLFCN' == str(e):
+        print('Looks like "/usr/lib64/python2.7/plat-####/" is missing from sys.path')
+        # can find platform path by comparing to (in vanilla python)
+        # python -c "import sys, pprint; pprint.pprint(sys.path)"
+        for platform_path in ['/usr/lib64/python2.7/plat-linux2/',
+                              '/usr/lib/python2.7/plat-x86_64-linux-gnu']:
+            if os.path.exists(platform_path):
+                print('found "{}" ... adding to system path'.format(platform_path))
+                sys.path.append(platform_path)
+                try:
+                    import DLFCN  # noqa
+                except ImportError:
+                    die('Did not fix import error')
+                print('       {}  ... adding to mantid.pth'.format(' ' * len(platform_path)))
+                extra_pypath = platform_path
+        if not extra_pypath:  # missing path wasn't found
+            die()
+    else:
+        die("Can't import mantid: {}".format(e))
 
 # check that trailing `/` is there
 if not mantidpath.endswith(os.sep):
@@ -28,5 +55,8 @@ pathfile = os.path.join(sc.get_python_lib(plat_specific=True), 'mantid.pth')
 
 print('writing', mantidpath, 'to', pathfile)
 with open(pathfile, 'w') as f:
+    if extra_pypath is not None:
+        f.write(extra_pypath)
+        f.write('\n')
     f.write(mantidpath)
     f.write('\n')

@@ -76,27 +76,29 @@ std::string ADSAdapter::getOldName() const { return m_oldName; }
 std::string ADSAdapter::getNewName() const { return m_newName; }
 
 // ADS Observation methods
-void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
+void ADSAdapter::handleAddWorkspace(
+    Mantid::API::WorkspaceAddNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceLoaded);
 }
 
 void ADSAdapter::handleReplaceWorkspace(
-    Mantid::API::WorkspaceAfterReplaceNotification_ptr) {
+    Mantid::API::WorkspaceAfterReplaceNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::GenericUpdateNotification);
 }
 
 void ADSAdapter::handleDeleteWorkspace(
-    Mantid::API::WorkspacePostDeleteNotification_ptr) {
+    Mantid::API::WorkspacePostDeleteNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceDeleted);
 }
 
-void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr) {
+void ADSAdapter::handleClearADS(
+    Mantid::API::ClearADSNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesCleared);
@@ -113,21 +115,21 @@ void ADSAdapter::handleRenameWorkspace(
 }
 
 void ADSAdapter::handleGroupWorkspaces(
-    Mantid::API::WorkspacesGroupedNotification_ptr) {
+    Mantid::API::WorkspacesGroupedNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesGrouped);
 }
 
 void ADSAdapter::handleUnGroupWorkspace(
-    Mantid::API::WorkspaceUnGroupingNotification_ptr) {
+    Mantid::API::WorkspaceUnGroupingNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspacesUngrouped);
 }
 
 void ADSAdapter::handleWorkspaceGroupUpdate(
-    Mantid::API::GroupUpdatedNotification_ptr) {
+    Mantid::API::GroupUpdatedNotification_ptr /*unused*/) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceGroupUpdated);

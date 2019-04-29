@@ -360,14 +360,10 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
       if (!m_defaultExt.empty()) {
         addExtension(m_defaultExt, exts);
 
-        std::string lower(m_defaultExt);
-        std::transform(m_defaultExt.begin(), m_defaultExt.end(), lower.begin(),
-                       tolower);
+        std::string lower = Mantid::Kernel::Strings::toLower(m_defaultExt);
         addExtension(lower, exts);
 
-        std::string upper(m_defaultExt);
-        std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(),
-                       toupper);
+        std::string upper = Mantid::Kernel::Strings::toUpper(m_defaultExt);
         addExtension(upper, exts);
       }
       for (auto &ext : allowedExts) {

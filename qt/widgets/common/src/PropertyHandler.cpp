@@ -118,8 +118,8 @@ void PropertyHandler::init() {
         throw std::runtime_error(
             "IFunction expected but func function of another type");
       }
-      PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
-      f->setHandler(h);
+      auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
+      f->setHandler(std::move(h));
     }
   }
 
@@ -198,15 +198,14 @@ private:
  */
 void PropertyHandler::initAttributes() {
   std::vector<std::string> attNames = function()->getAttributeNames();
-  for (int i = 0; i < m_attributes.size(); i++) {
-    m_item->property()->removeSubProperty(m_attributes[i]);
+  for (auto &attribute : m_attributes) {
+    m_item->property()->removeSubProperty(attribute);
   }
   m_attributes.clear();
   m_vectorMembers.clear();
-  for (size_t i = 0; i < attNames.size(); i++) {
-    QString aName = QString::fromStdString(attNames[i]);
-    Mantid::API::IFunction::Attribute att =
-        function()->getAttribute(attNames[i]);
+  for (const auto &attName : attNames) {
+    QString aName = QString::fromStdString(attName);
+    Mantid::API::IFunction::Attribute att = function()->getAttribute(attName);
     CreateAttributeProperty tmp(m_browser, this, aName);
     QtProperty *prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
@@ -215,8 +214,8 @@ void PropertyHandler::initAttributes() {
 }
 
 void PropertyHandler::initParameters() {
-  for (int i = 0; i < m_parameters.size(); i++) {
-    m_item->property()->removeSubProperty(m_parameters[i]);
+  for (auto &parameter : m_parameters) {
+    m_item->property()->removeSubProperty(parameter);
   }
   m_parameters.clear();
   for (size_t i = 0; i < function()->nParams(); i++) {
@@ -417,10 +416,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     return nullptr;
   }
 
-  PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
-  f->setHandler(h);
+  auto h = std::make_unique<PropertyHandler>(f, m_cf, m_browser);
   h->setAttribute("StartX", m_browser->startX());
   h->setAttribute("EndX", m_browser->endX());
+  f->setHandler(std::move(h));
 
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
@@ -431,9 +430,10 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
     m_browser->setDefaultBackgroundType(f->name());
   }
   m_browser->setFocus();
-  m_browser->setCurrentFunction(h);
+  auto return_ptr = static_cast<PropertyHandler *>(f->getHandler());
+  m_browser->setCurrentFunction(return_ptr);
 
-  return h;
+  return return_ptr;
 }
 
 // Removes handled function from its parent function and
@@ -644,6 +644,7 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName, parValue);
     m_browser->sendParameterChanged(m_fun.get());
+    m_browser->sendParameterChanged(functionPrefix());
     return true;
   }
   if (m_cf) {
@@ -743,7 +744,7 @@ protected:
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set vector property
-  void apply(const std::vector<double> &) const override {
+  void apply(const std::vector<double> & /*unused*/) const override {
     // this method is supposed to be called when corresponding
     // property value changes but it doesn't have a value because
     // it's a group property
@@ -797,8 +798,30 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   return false;
 }
 
-void PropertyHandler::setAttribute(const QString &attName,
-                                   const double &attValue) {
+/**
+ * Set function attribute value
+ * @param attName :: The name of the attribute
+ * @param attValue :: The value of the attribute
+ */
+void PropertyHandler::setAttribute(
+    QString const &attName, Mantid::API::IFunction::Attribute const &attValue) {
+  auto const attributeType = attValue.type();
+  if (attributeType == "int")
+    setAttribute(attName, attValue.asInt());
+  else if (attributeType == "double")
+    setAttribute(attName, attValue.asDouble());
+  else if (attributeType == "std::string")
+    setAttribute(attName, QString::fromStdString(attValue.asString()));
+}
+
+/**
+ * Sets the function attribute value if it has type double or int
+ * @param attName :: The name of the attribute
+ * @param attValue :: The value of the attribute
+ */
+template <typename AttributeType>
+void PropertyHandler::setAttribute(QString const &attName,
+                                   AttributeType const &attValue) {
   if (m_fun->hasAttribute(attName.toStdString())) {
     try {
       m_fun->setAttribute(attName.toStdString(),
@@ -816,13 +839,18 @@ void PropertyHandler::setAttribute(const QString &attName,
     }
   }
   if (cfun()) {
-    for (size_t i = 0; i < cfun()->nFunctions(); ++i) {
+    for (auto i = 0u; i < cfun()->nFunctions(); ++i) {
       PropertyHandler *h = getHandler(i);
       h->setAttribute(attName, attValue);
     }
   }
 }
 
+/**
+ * Sets the function attribute value if it has type QString
+ * @param attName :: The name of the attribute
+ * @param attValue :: The value of the attribute
+ */
 void PropertyHandler::setAttribute(const QString &attName,
                                    const QString &attValue) {
   const std::string name = attName.toStdString();
@@ -860,14 +888,46 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop) {
 }
 
 /**
+ * Applies the given function to all the attribute properties recursively,
+ * within this context.
+ * @param func :: Function to apply
+ */
+void PropertyHandler::applyToAllAttributes(
+    void (PropertyHandler::*func)(QtProperty *)) {
+  for (auto attribute : m_attributes) {
+    (this->*(func))(attribute);
+  }
+
+  if (m_cf)
+    for (std::size_t i = 0u; i < m_cf->nFunctions(); ++i)
+      getHandler(i)->applyToAllAttributes(func);
+}
+
+/**
+ * Updates all string, double and int attributes which have changed in a
+ * function
+ */
+void PropertyHandler::updateAttributes() {
+  applyToAllAttributes(&PropertyHandler::updateAttribute);
+}
+
+/**
+ * @param attribute :: An attribute of the function
+ */
+void PropertyHandler::updateAttribute(QtProperty *attribute) {
+  auto const attributeValue =
+      function()->getAttribute(attribute->propertyName().toStdString());
+  setAttribute(attribute->propertyName(), attributeValue);
+}
+
+/**
  * Applies given function to all the parameter properties recursively, within
  * this context.
  * @param func :: Function to apply
  */
 void PropertyHandler::applyToAllParameters(
     void (PropertyHandler::*func)(QtProperty *)) {
-  for (int i = 0; i < m_parameters.size(); i++) {
-    QtProperty *prop = m_parameters[i];
+  for (auto prop : m_parameters) {
     (this->*(func))(prop);
   }
 
@@ -894,7 +954,7 @@ void PropertyHandler::clearErrors() {
  * @param prop :: Property of the parameter
  */
 void PropertyHandler::updateParameter(QtProperty *prop) {
-  double parValue =
+  double const parValue =
       function()->getParameter(prop->propertyName().toStdString());
   m_browser->m_parameterManager->setValue(prop, parValue);
 }
@@ -977,10 +1037,11 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     emit m_browser->removePlotSignal(this);
 
     Mantid::API::IFunction_sptr f_old = function();
-    PropertyHandler *h = new PropertyHandler(f, m_parent, m_browser, m_item);
+    std::unique_ptr<PropertyHandler> h =
+        std::make_unique<PropertyHandler>(f, m_parent, m_browser, m_item);
     if (this == m_browser->m_autoBackground) {
       if (dynamic_cast<Mantid::API::IBackgroundFunction *>(f.get())) {
-        m_browser->m_autoBackground = h;
+        m_browser->m_autoBackground = h.get();
         h->fit();
 
       } else {
@@ -990,12 +1051,12 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     if (m_parent) {
       m_parent->replaceFunctionPtr(f_old, f);
     }
-    f->setHandler(h);
     // calculate the baseline
     if (h->pfun()) {
       h->setCentre(h->centre()); // this sets m_ci
       h->calcBase();
     }
+    f->setHandler(std::move(h));
     // at this point this handler does not exist any more. only return is
     // possible
     return f;

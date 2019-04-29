@@ -29,9 +29,8 @@ struct EventFileHeader_Base { // total content should be 16*int (64 bytes)
   int32_t anstohm_version; // ANSTOHM_VERSION server/filler version number that
                            // generated the file
   int32_t pack_format; // typically 0 if packed binary, 1 if unpacked binary.
-  int32_t
-      oob_enabled; // if set, OOB events can be present in the data, otherwise
-                   // only neutron and t0 events are stored
+  int32_t oob_enabled; // if set, OOB events can be present in the data,
+                       // otherwise only neutron and t0 events are stored
   int32_t clock_scale; // the CLOCK_SCALE setting, ns per timestamp unit
   // cppcheck-suppress unusedStructMember
   int32_t spares[16 - 6]; // spares (padding)
@@ -42,11 +41,10 @@ struct EventFileHeader_Packed { // total content should be 16*int (64 bytes)
   int32_t evt_stg_nbits_y;      // number of bits in y datum
   int32_t evt_stg_nbits_v;      // number of bits in v datum
   int32_t evt_stg_nbits_w;      // number of bits in w datum
-  int32_t evt_stg_nbits_wa; // number of bits in wa datum // MJL added 5/15 for
-                            // format 0x00010002
-  int32_t
-      evt_stg_xy_signed; // 0 if x and y are unsigned, 1 if x and y are signed
-                         // ints
+  int32_t evt_stg_nbits_wa;  // number of bits in wa datum // MJL added 5/15 for
+                             // format 0x00010002
+  int32_t evt_stg_xy_signed; // 0 if x and y are unsigned, 1 if x and y are
+                             // signed ints
   // cppcheck-suppress unusedStructMember
   int32_t spares[16 - 6]; // spares (padding)
 };
@@ -91,11 +89,11 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
                    int32_t def_clock_scale, bool use_tx_chopper) {
   // read file headers (base header then packed-format header)
   EventFileHeader_Base hdr_base;
-  if (!loader.read(reinterpret_cast<int8_t *>(&hdr_base), sizeof(hdr_base)))
+  if (!loader.read(reinterpret_cast<char *>(&hdr_base), sizeof(hdr_base)))
     throw std::runtime_error("unable to load EventFileHeader-Base");
 
   EventFileHeader_Packed hdr_packed;
-  if (!loader.read(reinterpret_cast<int8_t *>(&hdr_packed), sizeof(hdr_packed)))
+  if (!loader.read(reinterpret_cast<char *>(&hdr_packed), sizeof(hdr_packed)))
     throw std::runtime_error("unable to load EventFileHeader-Packed");
 
   if (hdr_base.magic_number != EVENTFILEHEADER_BASE_MAGIC_NUMBER)
@@ -185,7 +183,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 
     // read next byte
     uint8_t ch;
-    if (!loader.read(reinterpret_cast<int8_t *>(&ch), 1))
+    if (!loader.read(reinterpret_cast<char *>(&ch), 1))
       break;
 
     int32_t nbits_ch_used = 0; // no bits used initially, 8 to go
@@ -339,11 +337,15 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       }
 
       if (frame_start_event) {
-        // reset timestamp at start of a new frame and pass the absolute time if
-        // it is available resolve the logic for the running time so that that
-        // the absolute time can be used
+        // reset timestamp at start of a new frame
+        // the auxillary time is only available in OOB mode
+        // otherwise, auxillary time = primary time
         primary_time = 0;
         primary_ok = true;
+        if (!oob_en) {
+          auxillary_time = 0;
+          auxillary_ok = true;
+        }
         handler.newFrame();
       }
 

@@ -41,20 +41,19 @@ SelectFunctionDialog::SelectFunctionDialog(
     : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
   m_form->setupUi(this);
 
-  auto registeredFunctions = Mantid::API::FunctionFactory::Instance().getKeys();
+  auto &factory = Mantid::API::FunctionFactory::Instance();
+  auto registeredFunctions = factory.getFunctionNamesGUI();
   // Add functions to each of the categories. If it appears in more than one
   // category then add to both
   // Store in a map. Key = category. Value = vector of fit functions belonging
   // to that category.
   std::map<std::string, std::vector<std::string>> categories;
-  for (size_t i = 0; i < registeredFunctions.size(); ++i) {
-    boost::shared_ptr<Mantid::API::IFunction> f =
-        Mantid::API::FunctionFactory::Instance().createFunction(
-            registeredFunctions[i]);
+  for (const auto &registeredFunction : registeredFunctions) {
+    auto f = factory.createFunction(registeredFunction);
     std::vector<std::string> tempCategories = f->categories();
     for (size_t j = 0; j < tempCategories.size(); ++j) {
       categories[tempCategories[boost::lexical_cast<int>(j)]].push_back(
-          registeredFunctions[i]);
+          registeredFunction);
     }
   }
 

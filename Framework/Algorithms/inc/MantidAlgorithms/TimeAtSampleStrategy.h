@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
- * @brief The Correction struct
+ * @brief The Correction struct to be applied as factor * TOF + offset
  * offset:: TOF offset in unit of TOF
  * factor:  TOF correction factor to multiply with
  */

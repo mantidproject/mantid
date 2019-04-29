@@ -7,12 +7,12 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/RandomPoint.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
@@ -20,16 +20,16 @@
 namespace Mantid {
 namespace Geometry {
 
-MeshObject::MeshObject(const std::vector<uint16_t> &faces,
+MeshObject::MeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Kernel::V3D> &vertices,
-                       const Kernel::Material &material)
+                       const Kernel::Material material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
       m_vertices(vertices), m_material(material) {
 
   initialize();
 }
 
-MeshObject::MeshObject(std::vector<uint16_t> &&faces,
+MeshObject::MeshObject(std::vector<uint32_t> &&faces,
                        std::vector<Kernel::V3D> &&vertices,
                        const Kernel::Material &&material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(std::move(faces)),
@@ -48,7 +48,7 @@ void MeshObject::initialize() {
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material MeshObject::material() const { return m_material; }
+const Kernel::Material &MeshObject::material() const { return m_material; }
 
 /**
  * Returns whether this object has a valid shape
@@ -75,7 +75,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
 
   Kernel::V3D direction(0.0, 0.0, 1.0); // direction to look for intersections
   std::vector<Kernel::V3D> intersectionPoints;
-  std::vector<int> entryExitFlags;
+  std::vector<TrackDirection> entryExitFlags;
 
   getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
@@ -99,7 +99,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
       nearestPointIndex = i;
     }
   }
-  return (entryExitFlags[nearestPointIndex] == -1);
+  return (entryExitFlags[nearestPointIndex] == TrackDirection::LEAVING);
 }
 
 /**
@@ -121,7 +121,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
   // or edge parallel to the first direction or also the second direction.
   for (const auto &direction : directions) {
     std::vector<Kernel::V3D> intersectionPoints;
-    std::vector<int> entryExitFlags;
+    std::vector<TrackDirection> entryExitFlags;
 
     getIntersections(point, direction, intersectionPoints, entryExitFlags);
 
@@ -152,16 +152,16 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   }
 
   std::vector<Kernel::V3D> intersectionPoints;
-  std::vector<int> entryExitFlags;
+  std::vector<TrackDirection> entryExit;
 
   getIntersections(UT.startPoint(), UT.direction(), intersectionPoints,
-                   entryExitFlags);
+                   entryExit);
   if (intersectionPoints.empty())
     return 0; // Quit if no intersections found
 
   // For a 3D mesh, a ray may intersect several segments
   for (size_t i = 0; i < intersectionPoints.size(); ++i) {
-    UT.addPoint(entryExitFlags[i], intersectionPoints[i], *this);
+    UT.addPoint(entryExit[i], intersectionPoints[i], *this);
   }
   UT.buildLink();
 
@@ -175,13 +175,13 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * @param intersectionPoints :: Intersection points (not sorted)
  * @param entryExitFlags :: +1 ray enters -1 ray exits at corresponding point
  */
-void MeshObject::getIntersections(const Kernel::V3D &start,
-                                  const Kernel::V3D &direction,
-                                  std::vector<Kernel::V3D> &intersectionPoints,
-                                  std::vector<int> &entryExitFlags) const {
+void MeshObject::getIntersections(
+    const Kernel::V3D &start, const Kernel::V3D &direction,
+    std::vector<Kernel::V3D> &intersectionPoints,
+    std::vector<TrackDirection> &entryExitFlags) const {
 
   Kernel::V3D vertex1, vertex2, vertex3, intersection;
-  int entryExit;
+  TrackDirection entryExit;
   for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
     if (MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1,
                                                 vertex2, vertex3, intersection,
@@ -390,20 +390,15 @@ Kernel::V3D
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const BoundingBox &activeRegion,
                                   const size_t maxAttempts) const {
-  size_t attempts(0);
-  while (attempts < maxAttempts) {
-    const double r1 = rng.nextValue();
-    const double r2 = rng.nextValue();
-    const double r3 = rng.nextValue();
-    auto pt = activeRegion.generatePointInside(r1, r2, r3);
-    if (this->isValid(pt))
-      return pt;
-    else
-      ++attempts;
-  };
-  throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                           "generate point in object after " +
-                           std::to_string(maxAttempts) + " attempts");
+
+  const auto point =
+      RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
+  if (!point) {
+    throw std::runtime_error("Object::generatePointInObject() - Unable to "
+                             "generate point in object after " +
+                             std::to_string(maxAttempts) + " attempts");
+  }
+  return *point;
 }
 
 /**
@@ -473,6 +468,18 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   return m_handler;
 }
 
+void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
+  for (Kernel::V3D &vertex : m_vertices) {
+    vertex.rotate(rotationMatrix);
+  }
+}
+
+void MeshObject::translate(const Kernel::V3D &translationVector) {
+  for (Kernel::V3D &vertex : m_vertices) {
+    vertex += translationVector;
+  }
+}
+
 /**
  * Updates the geometry handler if needed
  */
@@ -488,9 +495,7 @@ size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 /**
  * get faces
  */
-std::vector<uint32_t> MeshObject::getTriangles() const {
-  return MeshObjectCommon::getTriangles_uint32(m_triangles);
-}
+std::vector<uint32_t> MeshObject::getTriangles() const { return m_triangles; }
 
 /**
  * get number of points
@@ -506,19 +511,28 @@ std::vector<double> MeshObject::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
 }
 
+detail::ShapeInfo::GeometryShape MeshObject::shape() const {
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
+
+const detail::ShapeInfo &MeshObject::shapeInfo() const {
+  throw std::runtime_error("MeshObject::shapeInfo() is not implemented");
+}
+
 /**
  * get info on standard shapes (none for Mesh Object)
  */
 void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                                std::vector<Kernel::V3D> &vectors,
-                               double &myradius, double &myheight) const {
+                               double &innerRadius, double &radius,
+                               double &height) const {
   // In practice, this outputs type = -1,
   // to indicate not a "standard" object (cuboid/cone/cyl/sphere).
   // Retained for possible future use.
   type = detail::ShapeInfo::GeometryShape::NOSHAPE;
   if (m_handler == nullptr)
     return;
-  m_handler->GetObjectGeom(type, vectors, myradius, myheight);
+  m_handler->GetObjectGeom(type, vectors, innerRadius, radius, height);
 }
 
 } // NAMESPACE Geometry

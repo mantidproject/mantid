@@ -13,6 +13,7 @@
 #include <Poco/ActiveMethod.h>
 #include <Poco/ActiveResult.h>
 #include <Poco/Void.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
@@ -305,8 +306,16 @@ void AlgorithmProxy::setChildEndProgress(const double endProgress) const {
  */
 std::string AlgorithmProxy::toString() const {
   const_cast<AlgorithmProxy *>(this)->createConcreteAlg(true);
-  std::string serialized = m_alg->toString();
-  return serialized;
+  return m_alg->toString();
+}
+
+/**
+ * Serialize this object to a Json::Value. Simple routes the call the algorithm
+ * @returns This object serialized as a Json::Value
+ */
+Json::Value AlgorithmProxy::toJson() const {
+  const_cast<AlgorithmProxy *>(this)->createConcreteAlg(true);
+  return m_alg->toJson();
 }
 
 /// Function to return all of the categories that contain this algorithm

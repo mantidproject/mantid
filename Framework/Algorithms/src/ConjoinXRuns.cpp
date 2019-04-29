@@ -11,12 +11,13 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -36,6 +37,8 @@ namespace Algorithms {
 using namespace API;
 using namespace Kernel;
 using namespace RunCombinationOptions;
+using namespace DataObjects;
+using namespace HistogramData;
 
 namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
@@ -45,6 +48,17 @@ static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinXRuns)
+
+const std::string ConjoinXRuns::SUM_MERGE = "conjoin_sample_logs_sum";
+const std::string ConjoinXRuns::TIME_SERIES_MERGE =
+    "conjoin_sample_logs_time_series";
+const std::string ConjoinXRuns::LIST_MERGE = "conjoin_sample_logs_list";
+const std::string ConjoinXRuns::WARN_MERGE = "conjoin_sample_logs_warn";
+const std::string ConjoinXRuns::WARN_MERGE_TOLERANCES =
+    "conjoin_sample_logs_warn_tolerances";
+const std::string ConjoinXRuns::FAIL_MERGE = "conjoin_sample_logs_fail";
+const std::string ConjoinXRuns::FAIL_MERGE_TOLERANCES =
+    "conjoin_sample_logs_fail_tolerances";
 
 //----------------------------------------------------------------------------------------------
 
@@ -146,7 +160,7 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";
       }
-      m_inputWS.push_back(ws);
+      m_inputWS.emplace_back(ws);
     }
   }
 
@@ -199,7 +213,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
         // try if numeric time series, then the size must match to the
         // blocksize
-        const int blocksize = static_cast<int>(ws->blocksize());
+        const int blocksize = static_cast<int>(ws->y(0).size());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
@@ -240,7 +254,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
-  axis.reserve(ws->blocksize());
+  axis.reserve(ws->y(0).size());
   auto &run = ws->run();
   // try time series first
   TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
@@ -296,10 +310,11 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> axis;
   std::vector<double> x;
   std::vector<double> xerrors;
-  spectrum.reserve(m_outWS->blocksize());
-  errors.reserve(m_outWS->blocksize());
-  axis.reserve(m_outWS->blocksize());
-  size_t index = static_cast<size_t>(wsIndex);
+  const size_t index = static_cast<size_t>(wsIndex);
+  const auto ySize = m_outWS->y(index).size();
+  spectrum.reserve(ySize);
+  errors.reserve(ySize);
+  axis.reserve(m_outWS->x(index).size());
   for (const auto &input : m_inputWS) {
     const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
@@ -318,10 +333,10 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
     }
   }
   if (!xerrors.empty())
-    m_outWS->setPointStandardDeviations(index, xerrors);
-  m_outWS->mutableY(index) = spectrum;
-  m_outWS->mutableE(index) = errors;
-  m_outWS->mutableX(index) = axis;
+    m_outWS->setPointStandardDeviations(index, std::move(xerrors));
+  m_outWS->mutableY(index) = std::move(spectrum);
+  m_outWS->mutableE(index) = std::move(errors);
+  m_outWS->mutableX(index) = std::move(axis);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -345,14 +360,6 @@ void ConjoinXRuns::exec() {
   logEntries.sampleLogsFailTolerances =
       getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
-  SampleLogsBehaviour::ParameterName parName = {};
-  parName.SUM_MERGE = "conjoin_sample_logs_sum";
-  parName.TIME_SERIES_MERGE = "conjoin_sample_logs_time_series";
-  parName.LIST_MERGE = "conjoin_sample_logs_list";
-  parName.WARN_MERGE = "conjoin_sample_logs_warn";
-  parName.WARN_MERGE_TOLERANCES = "conjoin_sample_logs_warn_tolerances";
-  parName.FAIL_MERGE = "conjoin_sample_logs_fail";
-  parName.FAIL_MERGE_TOLERANCES = "conjoin_sample_logs_fail_tolerances";
 
   m_inputWS.clear();
 
@@ -363,6 +370,16 @@ void ConjoinXRuns::exec() {
   }
 
   auto first = m_inputWS.front();
+
+  SampleLogsBehaviour::ParameterName parName = {
+      ConjoinXRuns::SUM_MERGE,
+      ConjoinXRuns::TIME_SERIES_MERGE,
+      ConjoinXRuns::LIST_MERGE,
+      ConjoinXRuns::WARN_MERGE,
+      ConjoinXRuns::WARN_MERGE_TOLERANCES,
+      ConjoinXRuns::FAIL_MERGE,
+      ConjoinXRuns::FAIL_MERGE_TOLERANCES};
+
   SampleLogsBehaviour sampleLogsBehaviour =
       SampleLogsBehaviour(first, g_log, logEntries, parName);
   auto it = m_inputWS.begin();
@@ -374,14 +391,14 @@ void ConjoinXRuns::exec() {
   // to be skipped, to compute the size of the output respectively.
   MatrixWorkspace_sptr temp = first->clone();
 
-  size_t outBlockSize = (*it)->blocksize();
+  size_t outBlockSize = (*it)->y(0).size();
   // First sequentially merge the sample logs
   for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
       sampleLogsBehaviour.mergeSampleLogs(*it, temp);
       sampleLogsBehaviour.setUpdatedSampleLogs(temp);
-      outBlockSize += (*it)->blocksize();
+      outBlockSize += (*it)->y(0).size();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error() << "Could not join workspace: " << (*it)->getName()
@@ -412,8 +429,7 @@ void ConjoinXRuns::exec() {
   // now get the size of the output
   size_t numSpec = first->getNumberHistograms();
 
-  m_outWS = WorkspaceFactory::Instance().create(first, numSpec, outBlockSize,
-                                                outBlockSize);
+  m_outWS = create<MatrixWorkspace>(*first, Points(outBlockSize));
 
   // copy over the merged sample logs from the temp
   m_outWS->mutableRun() = temp->run();

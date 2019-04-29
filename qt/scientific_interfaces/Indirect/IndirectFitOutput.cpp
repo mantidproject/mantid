@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutput.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
@@ -135,17 +136,50 @@ std::vector<std::string> getAxisLabels(MatrixWorkspace_sptr workspace,
   return std::vector<std::string>();
 }
 
+std::string cutLastOf(const std::string &str, const std::string &delimiter) {
+  const auto cutIndex = str.rfind(delimiter);
+  if (cutIndex != std::string::npos)
+    return str.substr(0, cutIndex);
+  return str;
+}
+
+bool containsMultipleData(const std::string &name) {
+  return name.substr(0, 5) == "Multi";
+}
+
+std::string constructResultName(const std::string &name,
+                                IndirectFitData const *fitData) {
+  if (containsMultipleData(name)) {
+    const auto formatString = cutLastOf(name, "_Results") + "_%1%_s%2%_Result";
+    return fitData->displayName(formatString, "_to_");
+  } else
+    return cutLastOf(name, "s_1");
+}
+
+void renameWorkspace(std::string const &name, std::string const &newName) {
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->setProperty("InputWorkspace", name);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->execute();
+}
+
 void renameResult(Workspace_sptr resultWorkspace,
                   const std::string &workspaceName) {
-  AnalysisDataService::Instance().rename(resultWorkspace->getName(),
-                                         workspaceName + "_Result");
+  renameWorkspace(resultWorkspace->getName(), workspaceName + "_Result");
 }
 
 void renameResult(Workspace_sptr resultWorkspace,
                   IndirectFitData const *fitData) {
   const auto name = resultWorkspace->getName();
-  const auto newName = fitData->displayName("%1%_s%2%_Result", "_to_");
-  AnalysisDataService::Instance().rename(name, newName);
+  const auto newName = constructResultName(name, fitData);
+  if (newName != name)
+    renameWorkspace(name, newName);
+}
+
+void renameResult(WorkspaceGroup_sptr resultWorkspace,
+                  IndirectFitData const *fitData) {
+  for (auto const &workspace : *resultWorkspace)
+    renameResult(workspace, fitData);
 }
 
 void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,

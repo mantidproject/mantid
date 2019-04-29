@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.api import IFunction1D, FunctionFactory
+from mantid.api import FrameworkManagerImpl, IFunction1D, FunctionFactory
 
 
 class TestFunctionNoAttrs(IFunction1D):
@@ -37,6 +37,10 @@ class TestFunctionCorrectForm(IFunction1D):
 
 
 class FunctionFactoryTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
 
     def test_get_function_factory_does_not_return_None(self):
         self.assertTrue(FunctionFactory is not None)

@@ -92,12 +92,14 @@ def calcEnergy(lines, samDist):
     massN = 1.674927e-27
     for i in range(len(lines)):
         # look at the middle of the time window
-        v = 0.5 * (lines[i][0][0] + lines[i][1][0])
+        x0 = -lines[i][0][1] / lines[i][0][0]
+        x1 = ((samDist-lines[i][0][1]) / lines[i][0][0] + (samDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+        v = samDist / (x1 - x0)
         Ei[i] = (v*1e6)**2 * massN / 2. / 1.60217662e-22
     return Ei
 
 
-def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
+def calcRes(ei, chop_times, lastChopDist, samDist, detDist, guide, slot):
     """
     # for each incident energy work out the moderator and chopper component of the resolution
     """
@@ -109,7 +111,17 @@ def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
     # The chopper opening times are the full opening, for the resolution we want FWHM
     # consequently divide each by a factor of 2 here
     # END IMPORTANT POINT
-    chop_width = [(chop_times[0][1]-chop_times[0][0])/2., (chop_times[1][1]-chop_times[1][0])/2.]
+    #IMPORTANT POINT 2
+    #important point 1 is only valid when guide>=slot
+    #if slot>guide the transmission function is a trapezium and it is more complex
+    #END  IMPORTANT POINT2
+    if guide>=slot:
+        chop_width=[(chop_times[0][1]-chop_times[0][0])/2.,(chop_times[1][1]-chop_times[1][0])/2.]
+    else:
+        totalOpen=(chop_times[1][1]-chop_times[1][0])
+        flat_time=(slot-guide)*totalOpen/slot
+        triangleTime=guide*totalOpen/slot/2. #/2 for FWHM of the triangles
+        chop_width=[(chop_times[0][1]-chop_times[0][0])/2.,(flat_time+triangleTime)]
     for energy in ei:
         lamba = np.sqrt(81.81/energy)
         # this is the experimentally determined FWHM of moderator
@@ -257,7 +269,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     for i in range(nframe):
         t0 = i * uSec / source_rep
         lines = findLine(chop_times[-1], dist[-1], [t0, t0+tmod])
-        lines = checkPath(chop_times[0:-1], lines, dist[:-1], dist[-1])
+        lines = checkPath([np.array(ct)+t0 for ct in chop_times[0:-1]], lines, dist[:-1], dist[-1])
         if lines:
             for line in lines:
                 lines_all.append(line)

@@ -24,6 +24,31 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(AnalysisDataServiceImpl)
 
 namespace {
+std::once_flag INIT_FLAG;
+
+/**
+ * Returns a reference to the AnalysisDataService object, creating it
+ * if necessary. In addition to creating the object the first call also:
+ *   - register AnalysisDataService.clear as an atexit function
+ * @return A reference to the FrameworkManagerImpl instance
+ */
+AnalysisDataServiceImpl &instance() {
+  // start the framework (if necessary)
+  auto &ads = AnalysisDataService::Instance();
+  std::call_once(INIT_FLAG, []() {
+    PyRun_SimpleString("import atexit\n"
+                       "from mantid.api import AnalysisDataService\n"
+                       "atexit.register(lambda: AnalysisDataService.clear())");
+  });
+  return ads;
+}
+
+/**
+ * @param self A reference to the AnalysisDataServiceImpl
+ * @param names The list of names to extract
+ * @param unrollGroups If true unroll the workspace groups
+ * @return a python list of the workspaces in the ADS
+ */
 list retrieveWorkspaces(AnalysisDataServiceImpl &self, const list &names,
                         bool unrollGroups = false) {
   return Converters::ToPyList<Workspace_sptr>()(self.retrieveWorkspaces(
@@ -45,12 +70,18 @@ void export_AnalysisDataService() {
       DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
   pythonClass
-      .def("Instance", &AnalysisDataService::Instance,
+      .def("Instance", instance,
            return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance")
       .def("retrieveWorkspaces", retrieveWorkspaces,
            AdsRetrieveWorkspacesOverloads(
                "Retrieve a list of workspaces by name",
-               (arg("self"), arg("names"), arg("unrollGroups") = false)));
+               (arg("self"), arg("names"), arg("unrollGroups") = false)))
+      .def("addToGroup", &AnalysisDataServiceImpl::addToGroup,
+           (arg("groupName"), arg("wsName")),
+           "Add a workspace in the ADS to a group in the ADS")
+      .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup,
+           (arg("groupName"), arg("wsName")),
+           "Remove a workspace from a group in the ADS");
 }

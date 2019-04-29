@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -107,6 +108,8 @@ public:
 
   // -------------------------------- Parents/Children-Related
   // -------------------------------------------
+  /// Is this node a leaf: getNumChildren() == 0
+  virtual bool isLeaf() const = 0;
   /// Get the total # of unsplit MDBoxes contained.
   virtual size_t getNumMDBoxes() const = 0;
   /// Get the # of children MDBoxBase'es (non-recursive)
@@ -133,6 +136,10 @@ public:
   virtual void getBoxes(std::vector<IMDNode *> &boxes, size_t maxDepth,
                         bool leafOnly,
                         Mantid::Geometry::MDImplicitFunction *function) = 0;
+
+  /// Fill a vector with all the boxes who are satisfying the condition
+  virtual void getBoxes(std::vector<IMDNode *> &outBoxes,
+                        const std::function<bool(IMDNode *)> &cond) = 0;
 
   // -------------------------------- Events-Related
   // -------------------------------------------

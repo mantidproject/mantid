@@ -205,6 +205,7 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
         sudo -H pip install PyYAML==3.10
         # Version matches Windows/RHEL/Ubuntu (trusty)
         sudo -H pip install mock==1.0.1
+        sudo -H pip install requests==2.9.1
 
 8. Install the theme for sphinx
 
@@ -377,6 +378,7 @@ If, while configuring Mantid, cmake complains that it cannot find sip, uninstall
     sudo pip install psutil
     sudo pip install qtawesome
     sudo pip install "matplotlib>=2.1.2"
+    sudo pip install requests==2.9.1 
 
 9. Install h5py
 

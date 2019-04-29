@@ -122,10 +122,14 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
       std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  return std::distance(xData.rawData().begin(), upper + 1);
+
+  if (upper == xData.rawData().end()) {
+    throw std::invalid_argument("Start of range is after data end.");
+  }
+  return std::distance(xData.rawData().begin(), upper);
 }
 /**
- * find the first index in bin edges that is after
+ * find the last index in bin edges that is before
  * the end time.
  * @param xData :: [input] HistogramData as bin edges
  * @param endX :: [input] the end time
@@ -133,8 +137,12 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
  */
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX) {
+
   auto lower =
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
+  if (lower == xData.rawData().begin()) {
+    throw std::invalid_argument("End of range is before data start.");
+  }
   return std::distance(xData.rawData().begin(), lower - 1);
 }
 

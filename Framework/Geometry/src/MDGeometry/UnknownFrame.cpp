@@ -17,11 +17,14 @@ UnknownFrame::UnknownFrame(const Kernel::UnitLabel &unit)
 
 const std::string UnknownFrame::UnknownFrameName = "Unknown frame";
 
-bool UnknownFrame::canConvertTo(const Mantid::Kernel::MDUnit &) const {
+bool UnknownFrame::canConvertTo(
+    const Mantid::Kernel::MDUnit & /*otherUnit*/) const {
   return false; // Cannot convert since it is unknown
 }
 
-bool UnknownFrame::setMDUnit(const Mantid::Kernel::MDUnit &) { return false; }
+bool UnknownFrame::setMDUnit(const Mantid::Kernel::MDUnit & /*newUnit*/) {
+  return false;
+}
 
 std::string UnknownFrame::name() const { return UnknownFrameName; }
 

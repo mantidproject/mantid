@@ -68,7 +68,21 @@ Notes
    mode.
 #. A good guess on the limits can be obtained from the
    :ref:`algm-ConvertToMDMinMaxLocal` algorithm.
-   
+
+Indexed mode
+------------
+
+Setting the `ConverterType` parameter to `Indexed` uses an alternative intermediate data format within `ConvertToMD` which may give significant performance boosts in certain cases.
+
+The performance benefit of this method is dependant on the number of events in the input dataset.
+Once you have data files containing more than 100 million events and have at least 8 cores this method becomes worth enabling.
+For large files (>500 million events) performance scales well with the number of available CPU cores (i.e. using 32 cores will be notably faster than 8 cores).
+
+Use of this method comes with the following restrictions:
+
+#. `SplitInto` should be the power of two (i.e. 2, 4, 8, 16, etc.)
+#. `FileBackEnd` and `TopLevelSplitting` are not applicable and should be disabled
+#. Indexing adds a small numerical error to the event coordinates, the magnitude of this error is listed in the log (`Error with using Morton indexes is`)
 
 How to write custom ConvertToMD plugin
 --------------------------------------
@@ -80,10 +94,7 @@ plugin using `custom ConvertTo MD transformation <http://www.mantidproject.org/W
 Usage examples
 --------------
 
-The examples below demonstrate the usages of the algorithm in most
-common situations. They work with the data files which already used by
-Mantid for different testing tasks.
-
+.. include:: ../usagedata-note.txt
 
 **Example - Convert re-binned MARI 2D workspace to 3D MD workspace for further analysis/merging with data at different temperatures :**
 
@@ -123,7 +134,7 @@ Mantid for different testing tasks.
 
 .. testoutput:: ExConvertToMDNoQ
 
-   Resulting MD workspace has 805 events and 3 dimensions
+   Resulting MD workspace has 802 events and 3 dimensions
    --------------------------------------------
 
 **Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**
@@ -280,6 +291,30 @@ This example produces 3-dimensional dataset, with a temperature axis.
    Target ws  WS_3D  not found in analysis data service
 
    Resulting MD workspace contains 605880 events and 3 dimensions
+
+**Example - Convert to Q-space, indexed version:**
+
+.. code-block:: python
+   :linenos:
+
+   #.. testcode:: ExConvertToMD|Q|
+
+   # load test workspace
+   TOPAZ_3132_event = Load(Filename=r'TOPAZ_3132_event.nxs', ConverterType='Indexed')
+
+   # build peak workspace necessary for IntegrateEllipsoids algorithm to work
+   TOPAZ_3132_md = ConvertToMD(InputWorkspace=TOPAZ_3132_event,QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',\
+   MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='4',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
+
+   # produce some test output
+   print("Resulting MD workspace contains {0} events and {1} dimensions".format(TOPAZ_3132_md.getNEvents(),TOPAZ_3132_md.getNumDims()))
+
+**Output:**
+
+.. testoutput:: ExConvertToMD|Q|
+
+   Resulting MD workspace contains 15329354 events and 3 dimensions
+
 
 .. categories::
 

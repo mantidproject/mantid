@@ -14,7 +14,7 @@
     repository & required to be accessible from any machine that wishes to run the test.
 """
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 
@@ -22,7 +22,7 @@ from mantid.simpleapi import *
 FILE_LOCATIONS = ["/isis/mantid/localtestdata/"]#,"d:/Data/MantidSystemTests/BigData/Dropbox/LoadSQW"]
 
 
-class BuildSQWTest(stresstesting.MantidStressTest):
+class BuildSQWTest(systemtesting.MantidSystemTest):
 
     _startrun = 15058
     _endrun = 15178

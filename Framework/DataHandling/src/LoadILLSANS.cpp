@@ -18,7 +18,9 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Path.h>
 #include <cmath>
@@ -232,11 +234,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
   NXInt dataRear = dataGroup1.openIntData();
   dataRear.load();
   NXData dataGroup2 = firstEntry.openNXData("data2");
-  NXInt dataRight = dataGroup2.openIntData();
-  dataRight.load();
-  NXData dataGroup3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = dataGroup3.openIntData();
+  NXInt dataLeft = dataGroup2.openIntData();
   dataLeft.load();
+  NXData dataGroup3 = firstEntry.openNXData("data3");
+  NXInt dataRight = dataGroup3.openIntData();
+  dataRight.load();
   NXData dataGroup4 = firstEntry.openNXData("data4");
   NXInt dataDown = dataGroup4.openIntData();
   dataDown.load();
@@ -258,7 +260,6 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
       dataUp.dim0() * dataUp.dim1());
 
   g_log.debug("Creating empty workspace...");
-  // TODO : Must put this 2 somewhere else: number of monitors!
   createEmptyWorkspace(numberOfHistograms + N_MONITORS,
                        static_cast<size_t>(dataRear.dim2()));
 
@@ -295,19 +296,53 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     g_log.debug("Source distance computed, moving moderator to Z=-" +
                 std::to_string(m_sourcePos));
     g_log.debug("Getting wavelength bins from the nexus file...");
-    std::string binPathPrefix(instrumentPath + "/tof/tof_wavelength_detector");
+    bool vtof = true;
+    // try VTOF mode
+    try {
+      NXInt channelWidthSum =
+          firstEntry.openNXInt(m_instrumentName + "/tof/chwidth_sum");
+      NXFloat channelWidthTimes =
+          firstEntry.openNXFloat(m_instrumentName + "/tof/chwidth_times");
+      channelWidthSum.load();
+      channelWidthTimes.load();
+      std::string distancePrefix(instrumentPath + "/tof/tof_distance_detector");
+      binningRear = getVariableTimeBinning(firstEntry, distancePrefix + "1",
+                                           channelWidthSum, channelWidthTimes);
+      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "2",
+                                           channelWidthSum, channelWidthTimes);
+      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "3",
+                                            channelWidthSum, channelWidthTimes);
+      binningDown = getVariableTimeBinning(firstEntry, distancePrefix + "4",
+                                           channelWidthSum, channelWidthTimes);
+      binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
+                                         channelWidthSum, channelWidthTimes);
+    } catch (std::runtime_error) {
+      vtof = false;
+    }
+    if (!vtof) {
+      try {
+        // LTOF mode
+        std::string binPathPrefix(instrumentPath +
+                                  "/tof/tof_wavelength_detector");
+        binningRear = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "1");
 
-    binningRear =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "1");
-    binningRight =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "2");
-    binningLeft =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "3");
-    binningDown =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "4");
-    binningUp =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
+        binningLeft = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "2");
+        binningRight = m_loader.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "3");
+        binningDown = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "4");
+        binningUp = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                         binPathPrefix + "5");
+      } catch (std::runtime_error &e) {
+        throw std::runtime_error(
+            "Unable to load the wavelength axes for TOF data " +
+            std::string(e.what()));
+      }
+    }
   }
+
   g_log.debug("Loading the data into the workspace...");
 
   size_t nextIndex =
@@ -627,7 +662,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
     m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
-    nxStat = NXclose(&nxHandle);
+    NXclose(&nxHandle);
   }
 }
 
@@ -704,6 +739,44 @@ void LoadILLSANS::setPixelSize() {
   } else {
     g_log.debug("No pixel size available");
   }
+}
+
+/**
+ * Returns the wavelength axis computed in VTOF mode
+ * @param entry : opened root nexus entry
+ * @param path : path of the detector distance entry
+ * @param sum : loaded channel width sums
+ * @param times : loaded channel width times
+ * @return binning : wavelength bin boundaries
+ */
+std::vector<double>
+LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
+                                    const std::string &path, const NXInt &sum,
+                                    const NXFloat &times) const {
+  const int nBins = sum.dim0();
+  std::vector<double> binCenters;
+  binCenters.reserve(nBins);
+  NXFloat distance = entry.openNXFloat(path);
+  distance.load();
+  for (int bin = 0; bin < nBins; ++bin) {
+    // sum is in nanoseconds, times is in microseconds
+    const double tof = sum[bin] * 1E-9 - times[bin] * 1E-6 / 2.;
+    // velocity in m/s
+    const double velocity = distance[0] / tof;
+    // wavelength in AA
+    const double lambda = PhysicalConstants::h /
+                          PhysicalConstants::NeutronMass / velocity * 1E+10;
+    binCenters.emplace_back(lambda);
+  }
+  std::vector<double> binEdges;
+  binEdges.reserve(nBins + 1);
+  VectorHelper::convertToBinBoundary(binCenters, binEdges);
+  // after conversion to bin edges, the first item might get negative,
+  // which is not physical, set to 0
+  if (binEdges[0] < 0.) {
+    binEdges[0] = 0.;
+  }
+  return binEdges;
 }
 
 } // namespace DataHandling

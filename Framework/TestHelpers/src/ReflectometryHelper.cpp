@@ -64,8 +64,8 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
 
   LoadInstrument instrumentLoader;
   instrumentLoader.initialize();
-  instrumentLoader.setPropertyValue(
-      "Filename", "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
+  instrumentLoader.setPropertyValue("Filename",
+                                    "unit_testing/REFL_Definition.xml");
   instrumentLoader.setProperty("Workspace", workspace);
   instrumentLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
   instrumentLoader.execute();
@@ -73,9 +73,8 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
   if (!paramsType.empty()) {
     LoadParameterFile paramLoader;
     paramLoader.initialize();
-    paramLoader.setPropertyValue("Filename",
-                                 "IDFs_for_UNIT_TESTING/REFL_Parameters_" +
-                                     paramsType + ".xml");
+    paramLoader.setPropertyValue("Filename", "unit_testing/REFL_Parameters_" +
+                                                 paramsType + ".xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();
   }
@@ -143,9 +142,6 @@ void applyPolarizationEfficiencies(WorkspaceGroup_sptr ws) {
   auto Ap = createHistoWS(nBins, startX, endX, {0.8});
   auto Pa = createHistoWS(nBins, startX, endX, {0.7});
   auto Aa = createHistoWS(nBins, startX, endX, {0.6});
-
-  auto Rho = Pa / Pp;
-  auto Alpha = Aa / Ap;
 
   auto Ipp = (Rpp * (Pp + 1.0) * (Ap + 1.0) +
               Raa * (Pp * (-1.0) + 1.0) * (Ap * (-1.0) + 1.0) +

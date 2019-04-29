@@ -9,14 +9,14 @@
     Extract or compute the Q values from reduced QENS data
 """
 from __future__ import (absolute_import, division, print_function)
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 import mantid
 import mantid.simpleapi as sm
 import re
 import numpy as np
 
 
-class GlobalFitTest(MantidStressTest):
+class GlobalFitTest(MantidSystemTest):
     """Global fit of QENS data to the jump-diffusion model by Teixeira
        Fitting model. In this case:
         Convolution( A*Resolution, x*Delta + (1-x)*TeixeiraWaterSQE ) + LinearBackground

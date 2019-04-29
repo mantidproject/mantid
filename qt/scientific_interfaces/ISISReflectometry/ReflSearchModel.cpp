@@ -90,14 +90,16 @@ void ReflSearchModel::addDataFromTable(
 /**
 @return the row count.
 */
-int ReflSearchModel::rowCount(const QModelIndex &) const {
+int ReflSearchModel::rowCount(const QModelIndex & /*parent*/) const {
   return static_cast<int>(m_runs.size());
 }
 
 /**
 @return the number of columns in the model.
 */
-int ReflSearchModel::columnCount(const QModelIndex &) const { return 3; }
+int ReflSearchModel::columnCount(const QModelIndex & /*parent*/) const {
+  return 3;
+}
 
 /**
 Overrident data method, allows consuming view to extract data for an index and

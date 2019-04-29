@@ -195,7 +195,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
  *
  * @return :: true if iterations must be continued, false otherwise
  */
-bool FABADAMinimizer::iterate(size_t) {
+bool FABADAMinimizer::iterate(size_t /*iteration*/) {
 
   if (!m_leastSquares) {
     throw std::runtime_error("Cost function isn't set up.");
@@ -217,36 +217,37 @@ bool FABADAMinimizer::iterate(size_t) {
 
     GSLVector newParameters = m_parameters;
 
-    // Calculate the step from a Gaussian
-    double step = gaussianStep(m_jump[i]);
+    if (!m_fitFunction->isFixed(i)) {
+      // Calculate the step from a Gaussian
+      double step = gaussianStep(m_jump[i]);
 
-    // Calculate the new value of the parameter
-    double newValue = m_parameters.get(i) + step;
+      // Calculate the new value of the parameter
+      double newValue = m_parameters.get(i) + step;
 
-    // Checks if it is inside the boundary constrinctions.
-    // If not, changes it.
-    boundApplication(i, newValue, step);
-    // Obs: As well as checking whether the ties are not contradictory is
-    // too constly, if there are tied parameters that are bounded,
-    // checking that the boundedness is fulfilled for all the parameters
-    // is costly too (extremely costly if the relations get complex,
-    // which is plausible). Therefore it is not yet implemented and
-    // the user should be aware of that.
+      // Checks if it is inside the boundary constrinctions.
+      // If not, changes it.
+      boundApplication(i, newValue, step);
+      // Obs: As well as checking whether the ties are not contradictory is
+      // too constly, if there are tied parameters that are bounded,
+      // checking that the boundedness is fulfilled for all the parameters
+      // is costly too (extremely costly if the relations get complex,
+      // which is plausible). Therefore it is not yet implemented and
+      // the user should be aware of that.
 
-    // Set the new value in order to calculate the new Chi square value
-    if (std::isnan(newValue)) {
-      throw std::runtime_error("Parameter value is NaN.");
+      // Set the new value in order to calculate the new Chi square value
+      if (std::isnan(newValue))
+        throw std::runtime_error("Parameter value is NaN.");
+      newParameters.set(i, newValue);
+
+      // Update the new value through the IFunction
+      m_fitFunction->setParameter(i, newValue);
+
+      // First, it fulfills the other ties, finally the current parameter tie
+      // It notices m_leastSquares (the CostFuncLeastSquares) that we have
+      // modified the parameters
+      tieApplication(i, newParameters, newValue);
+      m_fitFunction->applyTies();
     }
-    newParameters.set(i, newValue);
-
-    // Update the new value through the IFunction
-    m_fitFunction->setParameter(i, newValue);
-
-    // First, it fulfills the other ties, finally the current parameter tie
-    // It notices m_leastSquares (the CostFuncLeastSquares) that we have
-    // modified the parameters
-    tieApplication(i, newParameters, newValue);
-    m_fitFunction->applyTies();
 
     // To track "unmovable" parameters (=> cannot converge)
     if (!m_parChanged[i] && newParameters.get(i) != m_parameters.get(i))

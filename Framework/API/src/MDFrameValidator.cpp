@@ -36,8 +36,8 @@ std::string
 MDFrameValidator::checkValidity(const IMDWorkspace_sptr &workspace) const {
 
   for (size_t index = 0; index < workspace->getNumDims(); ++index) {
-    const auto &frame = workspace->getDimension(index)->getMDFrame();
-    if (frame.name() != m_frameID)
+    const auto dimension = workspace->getDimension(index);
+    if (dimension->getMDFrame().name() != m_frameID)
       return "MDWorkspace must be in the " + m_frameID + " frame.";
   }
 

@@ -15,8 +15,12 @@
 set ( BIN_DIR bin )
 set ( ETC_DIR etc )
 set ( LIB_DIR lib )
-# This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+
 # Separate directory of plugins to be discovered by the ParaView framework
 # These cannot be mixed with our other plugins. Further sub-directories
 # based on the Qt version will also be created by the installation targets
@@ -36,24 +40,21 @@ set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications
 # default shell (bash-like)
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   "#!/bin/sh\n"
-  "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
   "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
-  "PATH=$PATH:$MANTIDPATH\n"
+  "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
 
-  "export MANTIDPATH PV_PLUGIN_PATH PATH\n"
+  "export PV_PLUGIN_PATH PATH\n"
 )
 
 # c-shell
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
   "#!/bin/csh\n"
-  "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
   "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
-  "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
+  "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
 )
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-  ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
   DESTINATION ${ETC_DIR}
 )
 
@@ -66,8 +67,13 @@ print(sc.get_python_lib(plat_specific=True))"
   OUTPUT_VARIABLE PYTHON_SITE
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
   "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+)
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
+  DESTINATION ${ETC_DIR}
+  RENAME mantid.pth
 )
 
 ############################################################################
@@ -154,8 +160,17 @@ if ( TCMALLOC_FOUND )
   string( REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" TCMALLOC_RUNTIME_LIB ${TCMALLOC_RUNTIME_LIB} )
 endif ()
 
-# definitions to preload tcmalloc
-set ( TCMALLOC_DEFINITIONS
+# definitions to preload tcmalloc but not if we are using address sanitizer as this confuses things
+if ( WITH_ASAN )
+  set ( TCMALLOC_DEFINITIONS
+"
+LOCAL_PRELOAD=\${LD_PRELOAD}
+TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
+TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
+)
+else ()
+  # Do not indent the string below as it messes up the formatting in the final script
+  set ( TCMALLOC_DEFINITIONS
 "# Define parameters for tcmalloc
 LOCAL_PRELOAD=${TCMALLOC_RUNTIME_LIB}
 if [ -n \"\${LD_PRELOAD}\" ]; then
@@ -180,9 +195,7 @@ if [ -z \"\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}\" ]; then
 else
     TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}
 fi" )
-
-# chunk of code for fixing MANTIDPATH
-set ( MTD_PATH_DEFINITION "MANTIDPATH=\${INSTALLDIR}/bin" )
+endif()
 
 # chunk of code for launching gdb
 set ( GDB_DEFINITIONS
@@ -192,9 +205,10 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     GDB=\"gdb --args\"
 fi" )
 
-set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$? --directory=\$INSTALLDIR/bin" )
+set ( ERROR_CMD "ErrorReporter/error_dialog_app.py --exitcode=\$?" )
 
-# Local dev version
+##### Local dev version
+set ( PYTHON_ARGS "-Wdefault::DeprecationWarning" )
 if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages" )
 else ()
@@ -232,7 +246,8 @@ configure_file ( ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py"
                   OUTPUT_QUIET ERROR_QUIET )
 
-# Package version
+##### Package version
+unset ( PYTHON_ARGS )
 if ( MAKE_VATES )
   set ( EXTRA_LDPATH "\${INSTALLDIR}/lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
   set ( PV_PYTHON_PATH "\${INSTALLDIR}/lib/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}" )
@@ -242,7 +257,7 @@ else ()
 endif ()
 
 # used by mantidplot and mantidworkbench
-set ( LOCAL_PYPATH "\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
+set ( LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins" )
 set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
 
 if (ENABLE_MANTIDPLOT)
@@ -252,8 +267,8 @@ if (ENABLE_MANTIDPLOT)
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
             DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh )
 endif ()
-if (PACKAGE_WORKBENCH) # will eventually switch to ENABLE_WORKBENCH
-  set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
+if (ENABLE_WORKBENCH)
+  set ( MANTIDWORKBENCH_EXEC workbench-script ) # what the actual thing is called
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )
   install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install

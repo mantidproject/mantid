@@ -15,6 +15,7 @@ from __future__ import (absolute_import, division,
 
 import os as _os
 import sys as _sys
+from traceback import format_exc
 try:
     from importlib.machinery import SourceFileLoader
 except ImportError:
@@ -193,8 +194,8 @@ def load_from_file(filepath):
     try:
         name, module = load_plugin(filepath)
         loaded.append(module)
-    except Exception as exc:
-        logger.warning("Failed to load plugin %s. Error: %s" % (filepath, str(exc)))
+    except Exception:
+        logger.warning("Failed to load plugin %s.\nError: %s" % (filepath, format_exc()))
 
     return loaded
 
@@ -215,20 +216,19 @@ def load_plugin(plugin_path):
 
 #======================================================================================================================
 
-def sync_attrs(source_module, attrs, clients):
+def sync_attrs(source, attrs, clients):
     """
         Syncs the attribute definitions between the
         given list from the source module & list of client modules such
         that the function defintions point to the same
         one
-        @param source_module :: The module containing the "correct"
-                                definitions
+        @param source :: A dictionary containing the real attribute definitions
         @param attrs :: The list of attributes to change in the client modules
         @param clients :: A list of modules whose attribute definitions
                           should be taken from source
     """
     for func_name in attrs:
-        attr = getattr(source_module, func_name)
+        attr = source[func_name]
         for plugin in clients:
             if hasattr(plugin, func_name):
                 setattr(plugin, func_name, attr)

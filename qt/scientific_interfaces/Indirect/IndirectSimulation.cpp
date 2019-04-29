@@ -57,7 +57,6 @@ void IndirectSimulation::initLayout() {
 
   // Connect statements for the buttons shared between all tabs on the Indirect
   // Bayes interface
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
@@ -68,7 +67,7 @@ void IndirectSimulation::initLayout() {
  *
  * @param :: the detected close event
  */
-void IndirectSimulation::closeEvent(QCloseEvent *) {
+void IndirectSimulation::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -108,18 +107,6 @@ void IndirectSimulation::loadSettings() {
   }
 
   settings.endGroup();
-}
-
-/**
- * Slot to run the underlying algorithm code based on the currently selected
- * tab.
- *
- * This method checks the tabs validate method is passing before calling
- * the run method.
- */
-void IndirectSimulation::runClicked() {
-  int tabIndex = m_uiForm.IndirectSimulationTabs->currentIndex();
-  m_simulationTabs[tabIndex]->runTab();
 }
 
 /**

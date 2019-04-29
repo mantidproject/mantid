@@ -125,6 +125,8 @@ void IndirectDiffractionReduction::connectRunButtonValidation(
  * Runs a diffraction reduction when the user clicks Run.
  */
 void IndirectDiffractionReduction::run() {
+  setRunIsRunning(true);
+
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
   if (!m_uiForm.rfSampleFiles->isValid()) {
@@ -177,38 +179,35 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
     deleteGroupingWorkspace();
   }
 
-  if (error) {
+  setRunIsRunning(false);
+
+  if (!error) {
+    // Ungroup the output workspace if generic reducer was used
+    if (AnalysisDataService::Instance().doesExist(
+            "IndirectDiffraction_Workspaces")) {
+      WorkspaceGroup_sptr diffResultsGroup =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+              "IndirectDiffraction_Workspaces");
+
+      m_plotWorkspaces.clear();
+      m_plotWorkspaces = diffResultsGroup->getNames();
+
+      diffResultsGroup->removeAll();
+      AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
+    }
+  } else {
+    setPlotEnabled(false);
+    setSaveEnabled(false);
     showInformationBox(
         "Error running diffraction reduction.\nSee Results Log for details.");
-    return;
   }
-  // Ungroup the output workspace if generic reducer was used
-  if (AnalysisDataService::Instance().doesExist(
-          "IndirectDiffraction_Workspaces")) {
-    WorkspaceGroup_sptr diffResultsGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "IndirectDiffraction_Workspaces");
-
-    m_plotWorkspaces.clear();
-    m_plotWorkspaces = diffResultsGroup->getNames();
-
-    diffResultsGroup->removeAll();
-    AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
-  }
-  // Enable plotting
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.cbPlotType->setEnabled(true);
-  // Enable saving
-  m_uiForm.ckAscii->setEnabled(true);
-  m_uiForm.ckGSS->setEnabled(true);
-  m_uiForm.ckNexus->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
  * Handles plotting result spectra from algorithm chains.
  */
 void IndirectDiffractionReduction::plotResults() {
+  setPlotIsPlotting(true);
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
@@ -242,6 +241,8 @@ void IndirectDiffractionReduction::plotResults() {
   }
 
   runPythonCode(pyInput);
+
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -559,17 +560,18 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
 void IndirectDiffractionReduction::createGroupingWorkspace(
     const std::string &outputWsName) {
-  IAlgorithm_sptr groupingAlg =
+  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
+  auto const numberOfGroups = m_uiForm.spNumberGroups->value();
+  auto const instrument = instrumentConfig->getInstrumentName().toStdString();
+  auto const analyser = instrumentConfig->getAnalyserName().toStdString();
+  auto const componentName = analyser == "diffraction" ? "bank" : analyser;
+
+  auto groupingAlg =
       AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   groupingAlg->initialize();
-
-  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-
-  groupingAlg->setProperty("FixedGroupCount", m_uiForm.spNumberGroups->value());
-  groupingAlg->setProperty("InstrumentName",
-                           instrumentConfig->getInstrumentName().toStdString());
-  groupingAlg->setProperty("ComponentName",
-                           instrumentConfig->getAnalyserName().toStdString());
+  groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
+  groupingAlg->setProperty("InstrumentName", instrument);
+  groupingAlg->setProperty("ComponentName", componentName);
   groupingAlg->setProperty("OutputWorkspace", outputWsName);
 
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
@@ -644,6 +646,8 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
+  m_uiForm.rfCalFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());
@@ -917,5 +921,38 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
     return;
   }
 }
+
+void IndirectDiffractionReduction::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void IndirectDiffractionReduction::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void IndirectDiffractionReduction::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotEnabled(enabled);
+  setSaveEnabled(enabled);
+}
+
+void IndirectDiffractionReduction::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectDiffractionReduction::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
+}
+
+void IndirectDiffractionReduction::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+  m_uiForm.ckAscii->setEnabled(enabled);
+  m_uiForm.ckGSS->setEnabled(enabled);
+  m_uiForm.ckNexus->setEnabled(enabled);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

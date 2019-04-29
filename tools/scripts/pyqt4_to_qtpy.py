@@ -71,31 +71,55 @@ def convert_signal_connect(cmd, linenum):
 
     return '{0}{1}.{2}.connect({3})\n'.format(whitespace, widget_name, signal_call, handler_method)
 
+
 QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
+                     'QtCore.QFile': ('qtpy.QtCore', 'QFile'),
                      'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo'),
+                     'QtCore.QProcess': ('qtpy.QtCore', 'QProcess'),
                      'QtCore.QRegExp': ('qtpy.QtCore', 'QRegExp'),
+                     'QtCore.QSize':  ('qtpy.QtCore', 'QSize'),
                      'QtCore.QSettings': ('qtpy.QtCore', 'QSettings'),
+                     'QtCore.QThread':  ('qtpy.QtCore', 'QThread'),
+                     'QtCore.QUrl': ('qtpy.QtCore', 'QUrl'),
                      'QtGui.QAction': ('qtpy.QtWidgets', 'QAction'),
+                     'QtGui.QAbstractItemView': ('qtpy.QtWidgets', 'QAbstractItemView'),
+                     'QtGui.QApplication': ('qtpy.QtWidgets', 'QApplication'),
+                     'QtGui.QBrush': ('qtpy.QtGui', 'QBrush'),
                      'QtGui.QButtonGroup': ('qtpy.QtWidgets', 'QButtonGroup'),
                      'QtGui.QCheckBox': ('qtpy.QtWidgets', 'QCheckBox'),
+                     'QtGui.QColor': ('qtpy.QtGui', 'QColor'),
                      'QtGui.QComboBox': ('qtpy.QtWidgets', 'QComboBox'),
+                     'QtGui.QCursor': ('qtpy.QtGui', 'QCursor'),
+                     'QtGui.QDesktopServices': ('qtpy.QGui', 'QDesktopServices'),
                      'QtGui.QDialog': ('qtpy.QtWidgets', 'QDialog'),
                      'QtGui.QDoubleValidator': ('qtpy.QtGui', 'QDoubleValidator'),
+                     'QtGui.QDoubleSpinBox': ('qtpy.QtWidgets', 'QDoubleSpinBox'),
                      'QtGui.QFileDialog': ('qtpy.QtWidgets', 'QFileDialog'),
+                     'QtGui.QFont': ('qtpy.QtGui', 'QFont'),
                      'QtGui.QFrame': ('qtpy.QtWidgets', 'QFrame'),
                      'QtGui.QGridLayout': ('qtpy.QtWidgets', 'QGridLayout'),
                      'QtGui.QGroupBox': ('qtpy.QtWidgets', 'QGroupBox'),
+                     'QtGui.QHeaderView': ('qtpy.QtWidgets', 'QHeaderView'),
                      'QtGui.QHBoxLayout': ('qtpy.QtWidgets', 'QHBoxLayout'),
                      'QtGui.QIntValidator': ('qtpy.QtGui', 'QIntValidator'),
                      'QtGui.QMenu': ('qtpy.QtWidgets', 'QMenu'),
                      'QtGui.QLabel': ('qtpy.QtWidgets', 'QLabel'),
                      'QtGui.QLineEdit': ('qtpy.QtWidgets', 'QLineEdit'),
                      'QtGui.QMainWindow': ('qtpy.QtWidgets', 'QMainWindow'),
+                     'QtGui.QPalette': ('qtpy.QtGui', 'QPalette'),
                      'QtGui.QMessageBox': ('qtpy.QtWidgets', 'QMessageBox'),
                      'QtGui.QPushButton': ('qtpy.QtWidgets', 'QPushButton'),
                      'QtGui.QRegExpValidator': ('qtpy.QtGui', 'QRegExpValidator'),
+                     'QtGui.QRadioButton': ('qtpy.QtWidgets', 'QRadioButton'),
+                     'QtGui.QScrollBar': ('qtpy.QtWidgets', 'QScrollBar'),
+                     'QtGui.QStandardItem': ('qtpy.QtGui', 'QStandardItem'),
+                     'QtGui.QStatusBar': ('qtpy.QtWidgets', 'QStatusBar'),
+                     'QtGui.QStyleFactory': ('qtpy.QtWidgets', 'QStyleFactory'),
+                     'QtGui.QTableWidgetSelectionRange': ('qtpy.QtWidgets', 'QTableWidgetSelectionRange'),
+                     'QtGui.QTreeView': ('qtpy.QtWidgets', 'QTreeView'),
                      'QtGui.QSizePolicy': ('qtpy.QtWidgets', 'QSizePolicy'),
                      'QtGui.QSpacerItem': ('qtpy.QtWidgets', 'QSpacerItem'),
+                     'QtGui.QTableWidgetItem': ('qtpy.QtWidgets', 'QTableWidgetItem'),
                      'QtGui.QTabWidget': ('qtpy.QtWidgets', 'QTabWidget'),
                      'QtGui.QTextEdit': ('qtpy.QtWidgets', 'QTextEdit'),
                      'QtGui.QVBoxLayout': ('qtpy.QtWidgets', 'QVBoxLayout'),
@@ -150,6 +174,7 @@ def read_and_convert_pyqt4_functions(filename):
         for line in lines:
             handle.write(line)
     return lines
+
 
 if __name__ == '__main__':
     import argparse

@@ -13,7 +13,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {

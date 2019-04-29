@@ -11,24 +11,23 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
-#include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
+#endif
 
 #include <QDoubleValidator>
 #include <QMap>
 #include <QPair>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 #include <algorithm>
+#include <map>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -64,6 +63,10 @@ public:
   IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
+  /// Plot a spectrum plot of a given workspace
+  void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0,
+                    const bool &errorBars = false);
+
 public slots:
   void runTab();
   void setupTab();
@@ -75,12 +78,14 @@ protected slots:
   virtual void algorithmFinished(bool error);
 
 protected:
-  /// Run the load algorithm with the given file name, output name and spectrum
-  /// range
+  /// Run the load algorithms
   bool loadFile(const QString &filename, const QString &outputName,
-                const int specMin = -1, const int specMax = -1);
+                const int specMin = -1, const int specMax = -1,
+                bool loadHistory = true);
 
   /// Add a SaveNexusProcessed step to the batch queue
+  void addSaveWorkspaceToQueue(const std::string &wsName,
+                               const std::string &filename = "");
   void addSaveWorkspaceToQueue(const QString &wsName,
                                const QString &filename = "");
 
@@ -92,9 +97,8 @@ protected:
   void plotMultipleSpectra(const QStringList &workspaceNames,
                            const std::vector<int> &workspaceIndices);
   /// Plot a spectrum plot with a given ws index
-  void plotSpectrum(const QStringList &workspaceNames, int wsIndex = 0);
-  /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, int wsIndex = 0);
+  void plotSpectrum(const QStringList &workspaceNames,
+                    const int &spectraIndex = 0, const bool &errorBars = false);
 
   /// Plot a spectrum plot with a given spectra range
   void plotSpectrum(const QStringList &workspaceNames, int specStart,

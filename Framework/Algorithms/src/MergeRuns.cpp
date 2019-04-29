@@ -368,8 +368,16 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
   if (rebinParams) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
+  SampleLogsBehaviour::ParameterName parName = {
+      MergeRunsParameter::SUM_MERGE,
+      MergeRunsParameter::TIME_SERIES_MERGE,
+      MergeRunsParameter::LIST_MERGE,
+      MergeRunsParameter::WARN_MERGE,
+      MergeRunsParameter::WARN_MERGE_TOLERANCES,
+      MergeRunsParameter::FAIL_MERGE,
+      MergeRunsParameter::FAIL_MERGE_TOLERANCES};
   Algorithms::SampleLogsBehaviour sampleLogsBehaviour =
-      SampleLogsBehaviour(outWS, g_log, logEntries);
+      SampleLogsBehaviour(outWS, g_log, logEntries, parName);
 
   auto isScanning = outWS->detectorInfo().isScanning();
 
@@ -721,14 +729,17 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
     const DetectorInfo &addeeDetInfo, const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
 
+  auto addeeScanIntervals = addeeDetInfo.scanIntervals();
+  auto newOutScanIntervals = newOutDetInfo.scanIntervals();
+
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
       for (size_t time_index = 0; time_index < newOutDetInfo.scanCount();
            time_index++) {
-        if (addeeDetInfo.scanIntervals()[index.second] ==
-            newOutDetInfo.scanIntervals()[time_index]) {
+        if (addeeScanIntervals[index.second] ==
+            newOutScanIntervals[time_index]) {
           newSpecDef.add(index.first, time_index);
         }
       }

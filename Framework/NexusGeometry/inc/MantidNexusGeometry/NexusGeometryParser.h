@@ -22,6 +22,8 @@ namespace NexusGeometry {
 namespace NexusGeometryParser {
 MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<const Mantid::Geometry::Instrument>
 createInstrument(const std::string &fileName);
+MANTID_NEXUSGEOMETRY_DLL std::string
+getMangledName(const std::string &fileName, const std::string &instName);
 } // namespace NexusGeometryParser
 } // namespace NexusGeometry
 } // namespace Mantid

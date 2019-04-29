@@ -40,8 +40,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
-
 #include <boost/lexical_cast.hpp>
+#include <math.h>
 
 #include <algorithm>
 
@@ -749,7 +749,7 @@ void MuonAnalysis::runLoadCurrent() {
 
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
       instname == "CHRONUS" || instname == "ARGUS") {
-    const QString instDirectory = instname == "CHRONUS" ? "NDW1030" : instname;
+    const QString instDirectory = instname;
     std::string autosavePointsTo = "";
     const std::string autosaveFile =
         "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
@@ -1935,11 +1935,50 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
+  auto upper = m_uiForm.timeAxisFinishAtInput->text().toDouble();
 
-  params["XAxisMin"] =
-      QString::number(m_uiForm.timeAxisStartAtInput->text().toDouble());
-  params["XAxisMax"] =
-      QString::number(m_uiForm.timeAxisFinishAtInput->text().toDouble());
+  Workspace_const_sptr ws_ptr =
+      AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  MatrixWorkspace_const_sptr matrix_workspace =
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
+  const auto &xData = matrix_workspace->x(0);
+
+  auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();
+  if (upper > *max_element(xData.begin(), xData.end())) {
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("Upper bound is beyond data range.\n"
+                            "Setting end time to last time value (minus 1)."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    // subtract a small amount off to prevent a crash from using the exact end
+    upper = *max_element(xData.begin(), xData.end()) - 1.;
+    m_uiForm.timeAxisFinishAtInput->setText(QString::number(upper));
+  }
+  if (upper < *min_element(xData.begin(), xData.end())) {
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("No data in selected range.\n"
+                            "Setting end time to last time value (minus 1)."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    upper = *max_element(xData.begin(), xData.end()) - 1.;
+    m_uiForm.timeAxisFinishAtInput->setText(QString::number(upper));
+  }
+  params["XAxisMax"] = QString::number(upper);
+  if (lower > upper) {
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("Time max is less than time min.\n"
+                            "Will change time min."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    lower = *min_element(xData.begin(), xData.end());
+    m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
+  }
+  if (lower > *max_element(xData.begin(), xData.end())) {
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("No data in selected range.\n"
+                            "Setting start time to first time value."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    lower = *min_element(xData.begin(), xData.end());
+    m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
+  }
+  params["XAxisMin"] = QString::number(lower);
 
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
@@ -1949,10 +1988,6 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
 
     // If any of those is not specified - get min and max by default
     if (min.isEmpty() || max.isEmpty()) {
-      Workspace_sptr ws_ptr =
-          AnalysisDataService::Instance().retrieve(wsName.toStdString());
-      MatrixWorkspace_sptr matrix_workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
       const auto &yData = matrix_workspace->y(0);
 
       if (min.isEmpty())
@@ -2948,7 +2983,7 @@ bool MuonAnalysis::isOverwriteEnabled() {
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *) {
+void MuonAnalysis::hideEvent(QHideEvent * /*unused*/) {
   // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(false);
@@ -2961,7 +2996,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *) {
+void MuonAnalysis::showEvent(QShowEvent * /*unused*/) {
   // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);

@@ -191,7 +191,7 @@
        <item>
         <widget class="QLabel" name="lbPreviewSpectrum">
          <property name="text">
-          <string>Current Spectrum:</string>
+          <string>Preview Spectrum:</string>
          </property>
         </widget>
        </item>
@@ -348,6 +348,39 @@
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Workspace: </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cbPlotContour">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="sizeAdjustPolicy">
+              <enum>QComboBox::AdjustToContents</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbPlotContour">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Plot Contour</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="horizontalSpacer_18">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -389,7 +422,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

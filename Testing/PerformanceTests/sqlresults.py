@@ -252,7 +252,7 @@ def setup_database():
 
 
 ###########################################################################
-# A class to report the results of stress tests to the Mantid Test database
+# A class to report the results of system tests to the Mantid Test database
 # (requires sqlite3 module)
 ###########################################################################
 class SQLResultReporter(reporters.ResultReporter):

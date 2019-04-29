@@ -44,6 +44,7 @@ public:
   QColor getCurveColor(const QString &label) const;
   bool isYLogScale() const;
   void replot();
+
 public slots:
   void clearCurve();
   void setYLogScale();
@@ -52,9 +53,11 @@ public slots:
   // Required to match the interface with MiniPlotQwt but matplotlib
   // handles this for us so it is a noop
   void recalcAxisDivs() {}
+  void zoomOutOnPlot();
+
 signals:
   void showContextMenu();
-  void clickedAt(double, double);
+  void clickedAt(double /*_t1*/, double /*_t2*/);
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
@@ -63,10 +66,6 @@ private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
 
-private slots:
-  void onHomeClicked();
-
-private: // data
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   QPushButton *m_homeBtn;
   std::list<Widgets::MplCpp::Line2D> m_lines;

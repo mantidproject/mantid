@@ -67,6 +67,43 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
+
+// used to terminate SAX process
+class DummyException {
+public:
+  std::string m_validFrom;
+  std::string m_validTo;
+  DummyException(const std::string &validFrom, const std::string &validTo)
+      : m_validFrom(validFrom), m_validTo(validTo) {}
+};
+// SAX content handler for grapping stuff quickly from IDF
+class myContentHandler : public Poco::XML::ContentHandler {
+  void startElement(const XMLString & /*uri*/, const XMLString &localName,
+                    const XMLString & /*qname*/,
+                    const Attributes &attrList) override {
+    if (localName == "instrument" || localName == "parameter-file") {
+      throw DummyException(
+          static_cast<std::string>(attrList.getValue("", "valid-from")),
+          static_cast<std::string>(attrList.getValue("", "valid-to")));
+    }
+  }
+  void endElement(const XMLString & /*uri*/, const XMLString & /*localName*/,
+                  const XMLString & /*qname*/) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar /*ch*/[], int /*start*/,
+                  int /*length*/) override {}
+  void endPrefixMapping(const XMLString & /*prefix*/) override {}
+  void ignorableWhitespace(const XMLChar /*ch*/[], int /*start*/,
+                           int /*length*/) override {}
+  void processingInstruction(const XMLString & /*target*/,
+                             const XMLString & /*data*/) override {}
+  void setDocumentLocator(const Locator * /*loc*/) override {}
+  void skippedEntity(const XMLString & /*name*/) override {}
+  void startPrefixMapping(const XMLString & /*prefix*/,
+                          const XMLString & /*uri*/) override {}
+};
+
 } // namespace
 
 /** Constructor
@@ -525,7 +562,8 @@ void ExperimentInfo::setDetectorGrouping(
  * implementation throws, since no grouping information for update is available
  * when grouping comes from a call to `cacheDetectorGroupings`. This method is
  * overridden in MatrixWorkspace. */
-void ExperimentInfo::updateCachedDetectorGrouping(const size_t) const {
+void ExperimentInfo::updateCachedDetectorGrouping(
+    const size_t /*unused*/) const {
   throw std::runtime_error("ExperimentInfo::updateCachedDetectorGrouping: "
                            "Cannot update -- grouping information not "
                            "available");
@@ -642,6 +680,9 @@ Run &ExperimentInfo::mutableRun() {
 void ExperimentInfo::setSharedRun(Kernel::cow_ptr<Run> run) {
   m_run = std::move(run);
 }
+
+/// Return the cow ptr of the run
+Kernel::cow_ptr<Run> ExperimentInfo::sharedRun() { return m_run; }
 
 /**
  * Get an experimental log either by log name or by type, e.g.
@@ -822,63 +863,6 @@ void ExperimentInfo::setEFixed(const detid_t detID, const double value) {
   pmap.addDouble(det.get(), "Efixed", value);
 }
 
-// used to terminate SAX process
-class DummyException {
-public:
-  std::string m_validFrom;
-  std::string m_validTo;
-  DummyException(const std::string &validFrom, const std::string &validTo)
-      : m_validFrom(validFrom), m_validTo(validTo) {}
-};
-
-// SAX content handler for grapping stuff quickly from IDF
-class myContentHandler : public Poco::XML::ContentHandler {
-  void startElement(const XMLString &, const XMLString &localName,
-                    const XMLString &, const Attributes &attrList) override {
-    if (localName == "instrument") {
-      throw DummyException(
-          static_cast<std::string>(attrList.getValue("", "valid-from")),
-          static_cast<std::string>(attrList.getValue("", "valid-to")));
-    }
-  }
-  void endElement(const XMLString &, const XMLString &,
-                  const XMLString &) override {}
-  void startDocument() override {}
-  void endDocument() override {}
-  void characters(const XMLChar[], int, int) override {}
-  void endPrefixMapping(const XMLString &) override {}
-  void ignorableWhitespace(const XMLChar[], int, int) override {}
-  void processingInstruction(const XMLString &, const XMLString &) override {}
-  void setDocumentLocator(const Locator *) override {}
-  void skippedEntity(const XMLString &) override {}
-  void startPrefixMapping(const XMLString &, const XMLString &) override {}
-};
-
-/** Return from an IDF the values of the valid-from and valid-to attributes
- *
- *  @param IDFfilename :: Full path of an IDF
- *  @param[out] outValidFrom :: Used to return valid-from date
- *  @param[out] outValidTo :: Used to return valid-to date
- */
-void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
-                                    std::string &outValidFrom,
-                                    std::string &outValidTo) {
-  SAXParser pParser;
-  // Create on stack to ensure deletion. Relies on pParser also being local
-  // variable.
-  myContentHandler conHand;
-  pParser.setContentHandler(&conHand);
-
-  try {
-    pParser.parse(IDFfilename);
-  } catch (DummyException &e) {
-    outValidFrom = e.m_validFrom;
-    outValidTo = e.m_validTo;
-  } catch (...) {
-    // should throw some sensible here
-  }
-}
-
 /** Return workspace start date as an ISO 8601 string. If this info not stored
  *in workspace the
  *   method returns current date. This date is used for example to retrieve the
@@ -934,64 +918,90 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
   return date;
 }
 
-/** A given instrument may have multiple IDFs associated with it. This method
- *return an identifier which identify a given IDF for a given instrument.
- * An IDF filename is required to be of the form IDFname + _Definition +
- *Identifier + .xml, the identifier then is the part of a filename that
- *identifies the IDF valid at a given date.
+/** Return from an IDF the values of the valid-from and valid-to attributes
  *
- *  If several IDF files are valid at the given date the file with the most
- *recent from date is selected. If no such files are found the file with the
- *latest from date is selected.
- *
- *  If no file is found for the given instrument, an empty string is returned.
- *
- *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
- *  @param date :: ISO 8601 date
- *  @return full path of IDF
- *
- * @throws Exception::NotFoundError If no valid instrument definition filename
- *is found
+ *  @param IDFfilename :: Full path of an IDF
+ *  @param[out] outValidFrom :: Used to return valid-from date
+ *  @param[out] outValidTo :: Used to return valid-to date
  */
-std::string
-ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
-                                      const std::string &date) {
+void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
+                                    std::string &outValidFrom,
+                                    std::string &outValidTo) {
+  SAXParser pParser;
+  // Create on stack to ensure deletion. Relies on pParser also being local
+  // variable.
+  myContentHandler conHand;
+  pParser.setContentHandler(&conHand);
+
+  try {
+    pParser.parse(IDFfilename);
+  } catch (DummyException &e) {
+    outValidFrom = e.m_validFrom;
+    outValidTo = e.m_validTo;
+  } catch (...) {
+    // should throw some sensible here
+  }
+}
+
+/** Compile a list of files in compliance with name pattern-matching, file
+ * format, and date-stamp constraints
+ *
+ * Ideally, the valid-from and valid-to of any valid file should encapsulate
+ * argument date. If this is not possible, then the file with the most recent
+ * valid-from stamp is selected.
+ *
+ * @param prefix :: the name of a valid file must begin with this pattern
+ * @param fileFormats :: the extension of a valid file must be one of these
+ * formats
+ * @param directoryNames :: search only in these directories
+ * @param date :: the valid-from and valid-to of a valid file should encapsulate
+ * this date
+ * @return list of absolute paths for each valid file
+ */
+std::vector<std::string> ExperimentInfo::getResourceFilenames(
+    const std::string &prefix, const std::vector<std::string> &fileFormats,
+    const std::vector<std::string> &directoryNames, const std::string &date) {
+
   if (date.empty()) {
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
-    // Recursively call this method, but with both parameters.
-    return ExperimentInfo::getInstrumentFilename(instrumentName, now);
+    // Recursively call this method, but with all parameters.
+    return ExperimentInfo::getResourceFilenames(prefix, fileFormats,
+                                                directoryNames, now);
   }
 
-  g_log.debug() << "Looking for instrument XML file for " << instrumentName
-                << " that is valid on '" << date << "'\n";
-  // Lookup the instrument (long) name
-  std::string instrument(
-      Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
+  // Join all the file formats into a single string
+  std::stringstream ss;
+  ss << "(";
+  for (size_t i = 0; i < fileFormats.size(); ++i) {
+    if (i != 0)
+      ss << "|";
+    ss << fileFormats[i];
+  }
+  ss << ")";
+  const std::string allFileFormats = ss.str();
 
-  // Get the search directory for XML instrument definition files (IDFs)
-  const std::vector<std::string> &directoryNames =
-      Kernel::ConfigService::Instance().getInstrumentDirectories();
-
-  boost::regex regex(instrument + "_Definition.*\\.xml",
-                     boost::regex_constants::icase);
+  const boost::regex regex(prefix + ".*\\." + allFileFormats,
+                           boost::regex_constants::icase);
   Poco::DirectoryIterator end_iter;
   DateAndTime d(date);
-  bool foundGoodFile =
-      false; // True if we have found a matching file (valid at the given date)
-  std::string mostRecentIDF; // store most recently starting matching IDF if
-                             // found, else most recently starting IDF.
+
   DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
-                                              // recently starting IDF, if none
-                                              // match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
-                                                      // the most recently
-                                                      // starting matching IDF
+  // recently starting file, if none match
+  DateAndTime refDateGoodFile(
+      "1900-01-31 23:59:00"); // used to help determine the most recently
+
+  // Two files could have the same `from` date so multimap is required.
+  // Sort with newer dates placed at the beginning
+  std::multimap<DateAndTime, std::string, std::greater<DateAndTime>>
+      matchingFiles;
+  bool foundFile = false;
+  std::string mostRecentFile; // path to the file with most recent "valid-from"
   for (const auto &directoryName : directoryNames) {
-    // This will iterate around the directories from user ->etc ->install, and
-    // find the first beat file
+    // Iterate over the directories from user ->etc ->install, and find the
+    // first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
 
@@ -1003,38 +1013,96 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
       if (regex_match(l_filenamePart, regex)) {
         const auto &pathName = filePath.toString();
         g_log.debug() << "Found file: '" << pathName << "'\n";
+
         std::string validFrom, validTo;
         getValidFromTo(pathName, validFrom, validTo);
         g_log.debug() << "File '" << pathName << " valid dates: from '"
                       << validFrom << "' to '" << validTo << "'\n";
-        DateAndTime from(validFrom);
-        // Use a default valid-to date if none was found.
-        DateAndTime to;
+        // Use default valid "from" and "to" dates if none were found.
+        DateAndTime to, from;
+        if (validFrom.length() > 0)
+          from.setFromISO8601(validFrom);
+        else
+          from = refDate;
         if (validTo.length() > 0)
           to.setFromISO8601(validTo);
         else
           to.setFromISO8601("2100-01-01T00:00:00");
 
         if (from <= d && d <= to) {
-          if (from > refDateGoodFile) { // We'd found a matching file more
-                                        // recently starting than any other
-                                        // matching file found
-            foundGoodFile = true;
-            refDateGoodFile = from;
-            mostRecentIDF = pathName;
-          }
+          foundFile = true;
+          matchingFiles.insert(
+              std::pair<DateAndTime, std::string>(from, pathName));
         }
-        if (!foundGoodFile && (from > refDate)) { // Use most recently starting
-                                                  // file, in case we don't find
-                                                  // a matching file.
+        // Consider the most recent file in the absence of matching files
+        if (!foundFile && (from >= refDate)) {
           refDate = from;
-          mostRecentIDF = pathName;
+          mostRecentFile = pathName;
         }
       }
     }
   }
-  g_log.debug() << "IDF selected is " << mostRecentIDF << '\n';
-  return mostRecentIDF;
+
+  // Retrieve the file names only
+  std::vector<std::string> pathNames;
+  if (!matchingFiles.empty()) {
+    pathNames.reserve(matchingFiles.size());
+    for (auto &elem : matchingFiles)
+      pathNames.emplace_back(std::move(elem.second));
+  } else {
+    pathNames.emplace_back(std::move(mostRecentFile));
+  }
+
+  return pathNames;
+}
+
+/** A given instrument may have multiple definition files associated with it.
+ *This method returns a file name which identifies a given instrument definition
+ *for a given instrument.
+ *The instrument geometry can be loaded from either a ".xml" file (old-style
+ *IDF) or a ".hdf5/.nxs" file (new-style nexus).
+ *The filename is required to be of the form InstrumentName + _Definition +
+ *Identifier + extension. The identifier then is the part of a filename that
+ *identifies the instrument definition valid at a given date.
+ *
+ *  If several instrument files files are valid at the given date the file with
+ *the most recent from date is selected. If no such files are found the file
+ *with the latest from date is selected.
+ *
+ *  If no file is found for the given instrument, an empty string is returned.
+ *
+ *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+ *  @param date :: ISO 8601 date
+ *  @return full path of instrument geometry file
+ *
+ * @throws Exception::NotFoundError If no valid instrument definition filename
+ *is found
+ */
+std::string
+ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
+                                      const std::string &date) {
+  const std::vector<std::string> validFormats = {"xml", "nxs", "hdf5"};
+  g_log.debug() << "Looking for instrument file for " << instrumentName
+                << " that is valid on '" << date << "'\n";
+  // Lookup the instrument (long) name
+  const std::string instrument(
+      Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
+
+  // Get the instrument directories for instrument file search
+  const std::vector<std::string> &directoryNames =
+      Kernel::ConfigService::Instance().getInstrumentDirectories();
+
+  // matching files sorted with newest files coming first
+  const std::vector<std::string> matchingFiles = getResourceFilenames(
+      instrument + "_Definition", validFormats, directoryNames, date);
+  std::string instFile;
+  if (!matchingFiles.empty()) {
+    instFile = matchingFiles[0];
+    g_log.debug() << "Instrument file selected is " << instFile << '\n';
+  } else {
+    g_log.debug() << "No instrument file found\n";
+  }
+  return instFile;
 }
 
 /** Return a const reference to the DetectorInfo object.
@@ -1371,6 +1439,14 @@ void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename,
     } else {
       // Really create the instrument
       instr = parser.parseXML(nullptr);
+      // Parse the instrument tree (internally create ComponentInfo and
+      // DetectorInfo). This is an optimization that avoids duplicate parsing
+      // of the instrument tree when loading multiple workspaces with the same
+      // instrument. As a consequence less time is spent and less memory is
+      // used. Note that this is only possible since the tree in `instrument`
+      // will not be modified once we add it to the IDS.
+      instr->parseTreeAndCacheBeamline();
+
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instr);
     }

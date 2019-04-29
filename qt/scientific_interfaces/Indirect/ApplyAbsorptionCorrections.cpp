@@ -5,11 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 
@@ -26,8 +27,6 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
   m_spectra = 0;
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleGeometryChange(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this,
@@ -46,7 +45,10 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
           SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
+          SLOT(plotSpectrumClicked()));
+  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
+          SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
@@ -221,7 +223,8 @@ void ApplyAbsorptionCorrections::run() {
       } else {
         m_batchAlgoRunner->clearQueue();
         setRunIsRunning(false);
-        setPlotResultEnabled(false);
+        setPlotSpectrumEnabled(false);
+        setPlotContourEnabled(false);
         setSaveResultEnabled(false);
         g_log.error("Cannot apply absorption corrections "
                     "using a sample and "
@@ -256,8 +259,9 @@ void ApplyAbsorptionCorrections::run() {
         boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
     // Check for matching binning
-    if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
-                     factorWs->blocksize() != 1)) {
+    const auto factorBlocksize = factorWs->blocksize();
+    if (sampleWs &&
+        (factorBlocksize != sampleWs->blocksize() && factorBlocksize != 1)) {
       int result;
       if (interpolateAll) {
         result = QMessageBox::Yes;
@@ -283,7 +287,8 @@ void ApplyAbsorptionCorrections::run() {
       default:
         m_batchAlgoRunner->clearQueue();
         setRunIsRunning(false);
-        setPlotResultEnabled(false);
+        setPlotSpectrumEnabled(false);
+        setPlotContourEnabled(false);
         setSaveResultEnabled(false);
         g_log.error(
             "ApplyAbsorptionCorrections cannot run with corrections that do "
@@ -302,21 +307,17 @@ void ApplyAbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = QStrSampleWsName.length();
 
-  QString correctionType;
-  switch (m_uiForm.cbGeometry->currentIndex()) {
-  case 0:
-    correctionType = "flt";
-    break;
-  case 1:
-    correctionType = "cyl";
-    break;
-  case 2:
-    correctionType = "anl";
-    break;
+  QString geometryType;
+  if (correctionsWsName.contains("FlatPlate")) {
+    geometryType = "_flt";
+  } else if (correctionsWsName.contains("Annulus")) {
+    geometryType = "_anl";
+  } else if (correctionsWsName.contains("Cylinder")) {
+    geometryType = "_cyl";
   }
 
   QString outputWsName = QStrSampleWsName.left(nameCutIndex);
-  outputWsName += "_" + correctionType + "_Corrected";
+  outputWsName += geometryType + "_Corrected";
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
@@ -352,6 +353,15 @@ void ApplyAbsorptionCorrections::run() {
   // updateContainer();
 }
 
+std::size_t ApplyAbsorptionCorrections::getOutWsNumberOfSpectra() const {
+  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
+}
+
+MatrixWorkspace_const_sptr
+ApplyAbsorptionCorrections::getADSWorkspace(std::string const &name) const {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+}
+
 /**
  * Adds a spline interpolation as a step in the calculation for using legacy
  *correction factor
@@ -384,6 +394,7 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
+  setRunIsRunning(false);
 
   if (!error) {
     if (m_uiForm.ckUseCan->isChecked()) {
@@ -405,8 +416,8 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
-    setRunIsRunning(false);
-    setPlotResultEnabled(false);
+    setPlotSpectrumEnabled(false);
+    setPlotContourEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
@@ -424,6 +435,8 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   setRunIsRunning(false);
 
   if (!error) {
+    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
+
     // Handle preview plot
     plotPreview(m_uiForm.spPreviewSpec->value());
 
@@ -443,7 +456,8 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
       deleteAlg->execute();
     }
   } else {
-    setPlotResultEnabled(false);
+    setPlotSpectrumEnabled(false);
+    setPlotContourEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox("Unable to process corrected workspace.\nSee Results "
                         "Log for more details.");
@@ -506,31 +520,6 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 /**
- * Handles when the type of geometry changes
- *
- * Updates the file extension to search for
- */
-void ApplyAbsorptionCorrections::handleGeometryChange(int index) {
-  QString ext("");
-  switch (index) {
-  case 0:
-    // Geometry is flat
-    ext = "_flt_abs";
-    break;
-  case 1:
-    // Geometry is cylinder
-    ext = "_cyl_abs";
-    break;
-  case 2:
-    // Geometry is annulus
-    ext = "_ann_abs";
-    break;
-  }
-  m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-  m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
-}
-
-/**
  * Replots the preview plot.
  *
  * @param wsIndex Spectrum index to plot
@@ -566,19 +555,23 @@ void ApplyAbsorptionCorrections::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void ApplyAbsorptionCorrections::plotClicked() {
-  setPlotResultIsPlotting(true);
+void ApplyAbsorptionCorrections::plotSpectrumClicked() {
+  setPlotSpectrumIsPlotting(true);
 
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+  auto const spectrumIndex = m_uiForm.spSpectrum->text().toInt();
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumIndex);
 
-    if (plotType == "Spectra" || plotType == "Both")
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+  setPlotSpectrumIsPlotting(false);
+}
 
-    if (plotType == "Contour" || plotType == "Both")
-      plot2D(QString::fromStdString(m_pythonExportWsName));
-  }
-  setPlotResultIsPlotting(false);
+void ApplyAbsorptionCorrections::plotContourClicked() {
+  setPlotContourIsPlotting(true);
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plot2D(QString::fromStdString(m_pythonExportWsName));
+
+  setPlotContourIsPlotting(false);
 }
 
 void ApplyAbsorptionCorrections::runClicked() { runTab(); }
@@ -644,13 +637,26 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
   }
 }
 
+void ApplyAbsorptionCorrections::setPlotSpectrumIndexMax(int maximum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  m_uiForm.spSpectrum->setMaximum(maximum);
+}
+
+int ApplyAbsorptionCorrections::getPlotSpectrumIndex() {
+  return m_uiForm.spSpectrum->text().toInt();
+}
+
 void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void ApplyAbsorptionCorrections::setPlotResultEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotOutput->setEnabled(enabled);
+void ApplyAbsorptionCorrections::setPlotSpectrumEnabled(bool enabled) {
+  m_uiForm.pbPlotSpectrum->setEnabled(enabled);
+  m_uiForm.spSpectrum->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setPlotContourEnabled(bool enabled) {
+  m_uiForm.pbPlotContour->setEnabled(enabled);
 }
 
 void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
@@ -659,7 +665,8 @@ void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
 
 void ApplyAbsorptionCorrections::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
+  setPlotSpectrumEnabled(enabled);
+  setPlotContourEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
@@ -668,8 +675,13 @@ void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void ApplyAbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+void ApplyAbsorptionCorrections::setPlotSpectrumIsPlotting(bool plotting) {
+  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
+  setButtonsEnabled(!plotting);
+}
+
+void ApplyAbsorptionCorrections::setPlotContourIsPlotting(bool plotting) {
+  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
   setButtonsEnabled(!plotting);
 }
 

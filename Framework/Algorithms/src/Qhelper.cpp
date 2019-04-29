@@ -174,7 +174,7 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,
   R = std::sqrt(R);
 
   const double WMin = l_WCutOver * (l_RCut - R);
-  auto Xs = dataWS->x(wsInd);
+  const auto &Xs = dataWS->x(wsInd);
   return std::lower_bound(Xs.begin(), Xs.end(), WMin) - Xs.begin();
 }
 

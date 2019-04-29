@@ -4,9 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Plus.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -22,31 +19,29 @@ DECLARE_ALGORITHM(Plus)
 // ===================================== HISTOGRAM BINARY OPERATIONS
 // ==========================================
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                                  const MantidVec &lhsE, const MantidVec &rhsY,
-                                  const MantidVec &rhsE, MantidVec &YOut,
-                                  MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  std::transform(lhsY.begin(), lhsY.end(), rhsY.begin(), YOut.begin(),
+void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                  const HistogramData::Histogram &rhs,
+                                  HistogramData::HistogramY &YOut,
+                                  HistogramData::HistogramE &EOut) {
+  std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
                  std::plus<double>());
-  std::transform(lhsE.begin(), lhsE.end(), rhsE.begin(), EOut.begin(),
+  std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
                  VectorHelper::SumGaussError<double>());
 }
 
 //---------------------------------------------------------------------------------------------
-void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                                  const MantidVec &lhsE, const double rhsY,
-                                  const double rhsE, MantidVec &YOut,
-                                  MantidVec &EOut) {
-  (void)lhsX; // Avoid compiler warning
-  std::transform(lhsY.begin(), lhsY.end(), YOut.begin(),
+void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
+                                  const double rhsY, const double rhsE,
+                                  HistogramData::HistogramY &YOut,
+                                  HistogramData::HistogramE &EOut) {
+  std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
                  std::bind2nd(std::plus<double>(), rhsY));
   // Only do E if non-zero, otherwise just copy
   if (rhsE != 0)
-    std::transform(lhsE.begin(), lhsE.end(), EOut.begin(),
+    std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
                    std::bind2nd(VectorHelper::SumGaussError<double>(), rhsE));
   else
-    EOut = lhsE;
+    EOut = lhs.e();
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS

@@ -24,7 +24,7 @@ Usage
 .. testcode:: IntegrateFluxExample
 
     # Create an event workspace
-    ws = CreateSampleWorkspace("Event")
+    ws = CreateSampleWorkspace(WorkspaceType="Event", XUnit="Momentum")
     # Integrate all spectra.
     wsOut = IntegrateFlux( ws )
     

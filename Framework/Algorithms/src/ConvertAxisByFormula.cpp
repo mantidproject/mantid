@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -111,10 +110,7 @@ void ConvertAxisByFormula::exec() {
   bool isRefAxis = false;
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
-    CommonBinsValidator sameBins;
-    if (!sameBins.isValid(outputWs).empty()) {
-      isRaggedBins = true;
-    }
+    isRaggedBins = !outputWs->isCommonBins();
     isRefAxis = true;
   }
 

@@ -5,14 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 from mantid.simpleapi import CreateWorkspace, LinearBackground, FlatBackground, Gaussian, CalculateChiSquared, mtd
 from CrystalField.fitting import makeWorkspace
 from PyChop import PyChop2
 import numpy as np
 
 
-class CrystalFieldPythonInterface(MantidStressTest):
+class CrystalFieldPythonInterface(MantidSystemTest):
     """ Runs all the commands in the crystal field python interface documentation file
         This test only checks that the syntax of all the commands are still valid.
         Unit tests for the individual functions / fitting procedure check for correctness.

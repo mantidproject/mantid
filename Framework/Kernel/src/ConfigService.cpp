@@ -166,10 +166,11 @@ ConfigServiceImpl::ConfigServiceImpl()
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
-      m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
+      m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
+      m_isProxySet(false) {
   // getting at system details
-  m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
+  m_pSysConfig =
+      std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
   m_pConf = nullptr;
 
   // Register StdChannel with Poco
@@ -278,10 +279,7 @@ ConfigServiceImpl::ConfigServiceImpl()
  *  Prevents client from calling 'delete' on the pointer handed out by Instance
  */
 ConfigServiceImpl::~ConfigServiceImpl() {
-  // std::cerr << "ConfigService destroyed.\n";
   Kernel::Logger::shutdown();
-  delete m_pSysConfig;
-  delete m_pConf; // potential double delete???
   clearFacilities();
 }
 
@@ -358,13 +356,14 @@ std::string checkForBadConfigOptions(const std::string &filename,
     // Print warning to error channel and comment out offending line
     if (!is_ok) {
       const auto end = line.find("=");
-      std::cerr << "Encontered invalid key \"";
+      g_log.warning() << "Encontered invalid key \"";
       if (end != std::string::npos) {
-        std::cerr << Kernel::Strings::strip(line.substr(0, end));
+        g_log.warning() << Kernel::Strings::strip(line.substr(0, end));
       } else {
-        std::cerr << Kernel::Strings::strip(line);
+        g_log.warning() << Kernel::Strings::strip(line);
       }
-      std::cerr << "\" in " << filename << " on line " << line_num << std::endl;
+      g_log.warning() << "\" in " << filename << " on line " << line_num
+                      << std::endl;
 
       // comment out the property
       resultPropertiesString << '#';
@@ -387,7 +386,7 @@ std::string checkForBadConfigOptions(const std::string &filename,
  */
 void ConfigServiceImpl::loadConfig(const std::string &filename,
                                    const bool append) {
-  delete m_pConf;
+
   if (!append) {
     // remove the previous property string
     m_PropertyString = "";
@@ -420,15 +419,17 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     }
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
-    std::cerr << "Problem loading the configuration file " << filename << " "
-              << e.what() << '\n';
-    std::cerr << "Mantid is unable to start.\n" << std::endl;
+    g_log.error() << "Problem loading the configuration file " << filename
+                  << " " << e.what() << '\n';
+    g_log.error() << "Mantid is unable to start.\n" << std::endl;
     throw;
   }
 
   // use the cached property string to initialise the POCO property file
   std::istringstream istr(m_PropertyString);
-  m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
+  m_pConf =
+      std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(
+          istr);
 }
 
 /**
@@ -462,7 +463,7 @@ void ConfigServiceImpl::configureLogging() {
   try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
-    configurator.configure(m_pConf);
+    configurator.configure(m_pConf.get());
   } catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';
@@ -2009,7 +2010,6 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
-
   // First try the path relative to the current directory. Can throw in some
   // circumstances with extensions that have wild cards
   try {
@@ -2018,9 +2018,13 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
       return fullPath.path();
   } catch (std::exception &) {
   }
-
-  for (const auto &searchPath :
-       Kernel::ConfigService::Instance().getDataSearchDirs()) {
+  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
+  std::vector<std::string> directoryNames = configService.getDataSearchDirs();
+  std::vector<std::string> instrDirectories =
+      configService.getInstrumentDirectories();
+  directoryNames.insert(directoryNames.end(), instrDirectories.begin(),
+                        instrDirectories.end());
+  for (const auto &searchPath : directoryNames) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is not working properly with network drives
 // for example a network drive containing a $

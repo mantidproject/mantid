@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -146,6 +147,18 @@ void FileDescriptor::resetStreamToStart() {
   }
 }
 
+/**
+ * Check if a file is an XML file. For now, a file is considered to be an XML
+ * file if it is of Ascii type and has a ".xml" extension. Future improvements
+ * could include checking inside the file if there are indeed XML tags.
+ *
+ * @returns true if the file is of Ascii type and has a ".xml" extension, false
+ * otherwise
+ */
+bool FileDescriptor::isXML() const {
+  return (this->isAscii() && this->extension() == ".xml");
+}
+
 //----------------------------------------------------------------------------------------------
 // Private methods
 //----------------------------------------------------------------------------------------------
@@ -156,7 +169,8 @@ void FileDescriptor::resetStreamToStart() {
  */
 void FileDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = "." + Poco::Path(filename).getExtension();
+  m_extension = Mantid::Kernel::Strings::toLower(
+      "." + Poco::Path(filename).getExtension());
 
   m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
   if (!m_file)

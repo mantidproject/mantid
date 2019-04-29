@@ -35,13 +35,16 @@ Mantid::Kernel::Logger g_log("ScriptBuilder");
 
 const std::string COMMENT_ALG = "Comment";
 
-ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                             std::string versionSpecificity,
-                             bool appendTimestamp,
-                             std::vector<std::string> ignoreTheseAlgs)
+ScriptBuilder::ScriptBuilder(
+    boost::shared_ptr<HistoryView> view, std::string versionSpecificity,
+    bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
+    std::vector<std::vector<std::string>> ignoreTheseAlgProperties,
+    bool appendExecCount)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs) {}
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs),
+      m_propertiesToIgnore(ignoreTheseAlgProperties),
+      m_execCount(appendExecCount) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -108,6 +111,14 @@ void ScriptBuilder::createStringForAlg(
   os << buildAlgorithmString(*algHistory);
   if (m_timestampCommands) {
     os << " # " << algHistory->executionDate().toISO8601String();
+  }
+
+  if (m_execCount) {
+    if (m_timestampCommands) {
+      os << " execCount: " << algHistory->execCount();
+    } else {
+      os << " # execCount: " << algHistory->execCount();
+    }
   }
 
   os << "\n";
@@ -205,7 +216,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   }
 
   for (auto &propIter : props) {
-    prop = buildPropertyString(*propIter);
+    prop = buildPropertyString(*propIter, name);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -248,11 +259,22 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
  * Build the script output for a single property
  *
  * @param propHistory :: reference to a property history object
+ * @param algName :: reference to the algorithm that the property is from's name
  * @returns std::string for this property
  */
 const std::string ScriptBuilder::buildPropertyString(
-    const Mantid::Kernel::PropertyHistory &propHistory) {
+    const Mantid::Kernel::PropertyHistory &propHistory,
+    const std::string &algName) {
   using Mantid::Kernel::Direction;
+
+  // If the property is to be ignored then return with an empty string
+  if (std::find_if(
+          m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
+          [&propHistory, algName](std::vector<std::string> &c) -> bool {
+            return algName == c[0] && propHistory.name() == c[1];
+          }) != m_propertiesToIgnore.end()) {
+    return "";
+  }
 
   // Create a vector of all non workspace property type names
   std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};

@@ -142,7 +142,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
-    const auto Y = outWS->y(0);
+    const auto &Y = outWS->y(0);
     TS_ASSERT_DELTA(Y[0], 0.0128845, 0.001);
     TS_ASSERT_DELTA(Y[1], 0.0224898, 0.00001);
 
@@ -178,7 +178,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
-    const auto Y = outWS->y(0);
+    const auto &Y = outWS->y(0);
     TS_ASSERT_DELTA(Y[0], -0.01236, 0.001);
     TS_ASSERT_DELTA(Y[1], 0.019186, 0.00001);
   }
@@ -286,7 +286,7 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
 
-    const auto Y = outWs->y(0);
+    const auto &Y = outWs->y(0);
 
     TS_ASSERT_DELTA(Y[0], 0.15214, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.14492, 0.00001);
@@ -319,7 +319,7 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
 
-    const auto Y = outWs->y(0);
+    const auto &Y = outWs->y(0);
 
     TS_ASSERT_DELTA(Y[0], 0.151202, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.144008, 0.00001);
@@ -354,10 +354,10 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 4);
 
-    const auto YDiff = outWs->y(0);
-    const auto EDiff = outWs->e(0);
-    const auto YSum = outWs->y(3);
-    const auto ESum = outWs->e(3);
+    const auto &YDiff = outWs->y(0);
+    const auto &EDiff = outWs->e(0);
+    const auto &YSum = outWs->y(3);
+    const auto &ESum = outWs->e(3);
 
     TS_ASSERT_DELTA(YDiff[0], 0.001135, 0.000001);
     TS_ASSERT_DELTA(EDiff[0], 0.001805, 0.000001);
@@ -394,7 +394,7 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
 
-    const auto Y = outWs->y(0);
+    const auto &Y = outWs->y(0);
     TS_ASSERT_DELTA(Y[0], 0.14700, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.13042, 0.00001);
   }
@@ -428,7 +428,7 @@ public:
 
     // Now we want to test X values (log values) in the output workspace
     // rather than asymmetry (Y values)
-    const auto X = outWs->x(0);
+    const auto &X = outWs->x(0);
 
     TS_ASSERT_DELTA(X[0], 178.740476, 0.00001);
     TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);

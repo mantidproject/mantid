@@ -34,8 +34,12 @@ protected:
 private slots:
   /// Handles completion of the algorithm
   void algorithmComplete(bool error);
+  void runClicked();
 
 private:
+  void setRunIsRunning(bool running);
+  void setRunEnabled(bool enabled);
+
   /// The UI form
   Ui::IndirectTransmissionCalc m_uiForm;
   /// The name of the current instrument

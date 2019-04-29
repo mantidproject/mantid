@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIAnalyseResidualsTest(stresstesting.MantidStressTest):
+class POLDIAnalyseResidualsTest(systemtesting.MantidSystemTest):
     '''This test checks that the residual analysis algorithm for POLDI works correctly.'''
 
     def runTest(self):

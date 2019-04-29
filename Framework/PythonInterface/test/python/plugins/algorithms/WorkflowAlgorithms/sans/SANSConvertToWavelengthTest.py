@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 
+from mantid.api import FrameworkManager
 from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import (create_unmanaged_algorithm)
 from sans.common.constants import EMPTY_NAME
@@ -30,6 +30,11 @@ def provide_workspace(is_event=True):
 
 
 class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     def test_that_event_workspace_and_interpolating_rebin_raises(self):
         workspace = provide_workspace(is_event=True)
         convert_options = {"InputWorkspace": workspace,

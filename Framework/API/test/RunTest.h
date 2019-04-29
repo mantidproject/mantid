@@ -15,7 +15,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
 #include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,7 +36,9 @@ public:
     return "getDefault() is not implemented in this class";
   }
   std::string value() const override { return "Nothing"; }
+  Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {
     return "";
@@ -565,6 +569,29 @@ public:
     TS_ASSERT(run3.hasProperty("int_val"));
     TS_ASSERT(run3.hasProperty("string_val"));
     TS_ASSERT(run3.hasProperty("double_val"));
+  }
+
+  void test_setGoniometerWithLogsUsesTimeSeriesAverage() {
+    Run run;
+
+    auto tsp = std::make_unique<TimeSeriesProperty<double>>("omega");
+    tsp->addValue("2018-01-01T00:00:00", 90.0);
+    tsp->addValue("2018-01-01T00:00:01", 0.0);
+    tsp->addValue("2018-01-01T02:00:00", 0.0);
+    tsp->addValue("2018-01-01T03:00:00", 0.0);
+    run.addProperty(tsp.release());
+
+    addTimeSeriesEntry(run, "chi", 12.3);
+    addTimeSeriesEntry(run, "phi", 45.6);
+
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    run.setGoniometer(gm, true);
+    gm = run.getGoniometer();
+
+    TS_ASSERT_DELTA(gm.getAxis(0).angle, 0.0, 1e-2);
+    TS_ASSERT_EQUALS(gm.getAxis(1).angle, 12.3);
+    TS_ASSERT_EQUALS(gm.getAxis(2).angle, 45.6);
   }
 
   /** Check for loading the old way of saving proton_charge */

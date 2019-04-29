@@ -174,9 +174,6 @@ void IndirectFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
 
-  connect(this, SIGNAL(functionChanged()), this, SLOT(updatePlotGuess()));
-  connect(this, SIGNAL(workspaceNameChanged(const QString &)), this,
-          SLOT(updatePlotGuess()));
   connect(this, SIGNAL(visibilityChanged(bool)), this,
           SLOT(browserVisibilityChanged(bool)));
   connect(this, SIGNAL(customSettingChanged(QtProperty *)), this,
@@ -818,10 +815,11 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
 
 /**
  * Updates the plot guess feature in this indirect fit property browser.
+ * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess() {
-
-  if (getWorkspace() && compositeFunction()->nFunctions() > 0)
+void IndirectFitPropertyBrowser::updatePlotGuess(
+    MatrixWorkspace_const_sptr sampleWorkspace) {
+  if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
   else
     setPeakToolOn(false);
@@ -949,6 +947,10 @@ void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
 
 void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
   FitPropertyBrowser::setWorkspaceIndex(i);
+}
+
+void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {
+  FitPropertyBrowser::setFitEnabled(enable);
 }
 
 /**

@@ -171,6 +171,7 @@ InstrumentBuilder::createInstrument() {
       m_instrument->getName());
   auto *product = m_instrument.release();
   m_instrument = std::move(temp);
+  product->parseTreeAndCacheBeamline();
   // Some older compilers (Apple clang 7) don't support copy construction
   // std::unique_ptr<const T>(const std::ptr<T>&)
   return std::unique_ptr<const Geometry::Instrument>(product);

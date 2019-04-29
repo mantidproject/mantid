@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from SANSUtility import can_load_as_event_workspace
 import os
@@ -31,14 +31,14 @@ def clean_up_workspaces():
             DeleteWorkspace(element)
 
 
-class SANSProcessedEventWorkspaceInFile(stresstesting.MantidStressTest):
+class SANSProcessedEventWorkspaceInFile(systemtesting.MantidSystemTest):
     '''
     Check if a processed nexus file is correctly detected to contain
     an event workspace.
     '''
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):
@@ -62,14 +62,14 @@ class SANSProcessedEventWorkspaceInFile(stresstesting.MantidStressTest):
         return self._success
 
 
-class SANSProcessedHistoWorkspaceInFile(stresstesting.MantidStressTest):
+class SANSProcessedHistoWorkspaceInFile(systemtesting.MantidSystemTest):
     '''
     Check if a processed nexus file is correctly detected to contain
     a histo workspace.
     '''
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

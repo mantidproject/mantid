@@ -7,7 +7,7 @@
 #pylint: disable=no-init,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 
 from mantid import config
 from mantid.api import (FileFinder)
@@ -17,7 +17,7 @@ from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, SANS2D, Se
 import os.path
 
 
-class SANS2DBatchTest_V2(stresstesting.MantidStressTest):
+class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
 
     def runTest(self):
         UseCompatibilityMode()
@@ -40,7 +40,7 @@ class SANS2DBatchTest_V2(stresstesting.MantidStressTest):
         return '5512p7_SANS2DBatch', 'SANS2DBatch.nxs'
 
 
-class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(stresstesting.MantidStressTest):
+class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSystemTest):
     """
     We want to make sure that any settings saved in the PropertyManager objects
     are used across all iterations of the reduction in Batch mode.  The MASKFILE
@@ -71,13 +71,13 @@ class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(stresstesting.MantidStres
             os.remove(path2)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
 
 
-class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(stresstesting.MantidStressTest):
+class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemTest):
     """
     We want to make sure that the BatchMode can remove zero error values
     and replace them with a large default value.
@@ -105,7 +105,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(stresstesting.MantidStressT
         Load(Filename=self._final_output, OutputWorkspace=self._final_workspace)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')

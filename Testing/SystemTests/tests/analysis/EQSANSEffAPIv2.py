@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from reduction_workflow.instruments.sans.hfir_command_interface import SensitivityCorrection, SetTransmission
@@ -14,7 +14,7 @@ from mantid.api import FileFinder
 import os
 
 
-class EQSANSEff(stresstesting.MantidStressTest):
+class EQSANSEff(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         absfile = FileFinder.getFullPath("EQSANS_1466_event_reduction.log")

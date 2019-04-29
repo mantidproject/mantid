@@ -4,6 +4,9 @@
 # dlls
 ###########################################################################
 set (SYSTEM_PACKAGE_TARGET RUNTIME)
+# Also include MSVC runtime libraries when running install commands
+set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
+include (InstallRequiredSystemLibraries)
 
 ###########################################################################
 # Compiler options.
@@ -89,7 +92,7 @@ set ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 # Configure IDE/commandline startup scripts
 ###########################################################################
 set ( WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows )
-configure_file ( ${WINDOWS_BUILDCONFIG}/buildenv.bat.in ${PROJECT_BINARY_DIR}/buildenv.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/thirdpartypaths.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY )
 
 if ( MSVC_VERSION LESS 1911 )
     get_filename_component ( MSVC_VAR_LOCATION "$ENV{VS140COMNTOOLS}/../../VC/" ABSOLUTE)
@@ -101,14 +104,9 @@ else ()
     set ( MSVC_IDE_LOCATION "${MSVC_IDE_LOCATION}/Common7/IDE")
 endif()
 
-if ( ${CMAKE_SYSTEM_VERSION} MATCHES "^8" )
-  set ( SDK_VERSION ${CMAKE_SYSTEM_VERSION} )
-else ()
-  # append patch version to get SDK version
-  set ( SDK_VERSION ${CMAKE_SYSTEM_VERSION}.0 )
-endif ()
-
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycharm.env @ONLY )
+
 # The IDE may not be installed as we could be just using the build tools
 if ( EXISTS ${MSVC_IDE_LOCATION}/devenv.exe )
     configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
@@ -120,7 +118,7 @@ configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pyc
 ###########################################################################
 set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
 # build version
-set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\buildenv.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\thirdpartypaths.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
 
 if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ";${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk" )
@@ -157,6 +155,11 @@ set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
 # This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+
 # Separate directory of plugins to be discovered by the ParaView framework
 # These cannot be mixed with our other plugins. Further sub-directories
 # based on the Qt version will also be created by the installation targets

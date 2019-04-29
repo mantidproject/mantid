@@ -6,27 +6,26 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-import os
+import os, sys
 os.environ["QT_API"] = "pyqt"  # noqa E402
 
 from matplotlib.figure import Figure
 
-from mantid.simpleapi import *
-from mantid import plots
+from mantid import WorkspaceFactory, plots
+from mantid.py3compat import mock
+from Muon.GUI.Common import mock_widget
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 
-from Muon.GUI.Common import mock_widget
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 
 def get_subPlot(name):
-    ws1 = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[4, 5, 6, 7], NSpec=2)
+    data_x, data_y = [1, 2, 3, 4], [4, 5, 6, 7]
+    nspec = 2
+    ws1 = WorkspaceFactory.create("Workspace2D", nspec, len(data_x), len(data_y))
+    for i in range(ws1.getNumberHistograms()):
+        ws1.setX(i, data_x)
+        ws1.setY(i, data_y)
     label1 = "test"
     # create real lines
     fig = Figure()
@@ -37,7 +36,7 @@ def get_subPlot(name):
     subplot.addLine(label1, line1, ws1, 2)
     return subplot, ws1
 
-
+@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
 class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def setUp(self):
@@ -294,6 +293,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
             list(self.view.plots.keys()))
 
 
+@unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
 class PlottingViewPlotFunctionsTests(unittest.TestCase):
 
     def setUp(self):

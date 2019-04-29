@@ -45,7 +45,13 @@ void IndirectDataReductionTab::runTab() {
     m_tabRunning = true;
     emit updateRunButton(false, "disable", "Running...",
                          "Running data reduction...");
-    run();
+    try {
+      run();
+    } catch (std::exception const &ex) {
+      m_tabRunning = false;
+      emit updateRunButton(true, "enable");
+      emit showMessageBox(ex.what());
+    }
   } else {
     g_log.warning("Failed to validate indirect tab input!");
   }
@@ -96,6 +102,39 @@ QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
   return m_idrUI->getInstrumentDetails();
 }
 
+QString
+IndirectDataReductionTab::getInstrumentDetail(QString const &key) const {
+  return getInstrumentDetail(getInstrumentDetails(), key);
+}
+
+QString IndirectDataReductionTab::getInstrumentDetail(
+    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
+  validateInstrumentDetail(key);
+  return instrumentDetails[key];
+}
+
+void IndirectDataReductionTab::validateInstrumentDetail(
+    QString const &key) const {
+  auto const instrumentName = getInstrumentName().toStdString();
+
+  if (instrumentName.empty())
+    throw std::runtime_error(
+        "Please select a valid facility and/or instrument.");
+  else if (!hasInstrumentDetail(key))
+    throw std::runtime_error("Could not find " + key.toStdString() +
+                             " for the " + instrumentName +
+                             " instrument. Please select a valid instrument.");
+}
+
+bool IndirectDataReductionTab::hasInstrumentDetail(QString const &key) const {
+  return hasInstrumentDetail(getInstrumentDetails(), key);
+}
+
+bool IndirectDataReductionTab::hasInstrumentDetail(
+    QMap<QString, QString> const &instrumentDetails, QString const &key) const {
+  return instrumentDetails.contains(key) && !instrumentDetails[key].isEmpty();
+}
+
 /**
  * Returns a pointer to the instrument configuration widget common to all tabs.
  *
@@ -104,6 +143,18 @@ QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails() const {
 MantidWidgets::IndirectInstrumentConfig *
 IndirectDataReductionTab::getInstrumentConfiguration() const {
   return m_idrUI->m_uiForm.iicInstrumentConfiguration;
+}
+
+QString IndirectDataReductionTab::getInstrumentName() const {
+  return getInstrumentConfiguration()->getInstrumentName();
+}
+
+QString IndirectDataReductionTab::getAnalyserName() const {
+  return getInstrumentConfiguration()->getAnalyserName();
+}
+
+QString IndirectDataReductionTab::getReflectionName() const {
+  return getInstrumentConfiguration()->getReflectionName();
 }
 
 /**
@@ -119,11 +170,11 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
     QString instName, QString analyser, QString reflection) {
   // Get any unset parameters
   if (instName.isEmpty())
-    instName = getInstrumentConfiguration()->getInstrumentName();
+    instName = getInstrumentName();
   if (analyser.isEmpty())
-    analyser = getInstrumentConfiguration()->getAnalyserName();
+    analyser = getAnalyserName();
   if (reflection.isEmpty())
-    reflection = getInstrumentConfiguration()->getReflectionName();
+    reflection = getReflectionName();
 
   std::map<std::string, double> ranges;
 
@@ -226,7 +277,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convUnitsAlg->execute();
   MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 
-  const auto tofData = tofWs->x(0);
+  const auto &tofData = tofWs->x(0);
   ranges["peak-start-tof"] = tofData[0];
   ranges["peak-end-tof"] = tofData[2];
   ranges["back-start-tof"] = tofData[3];

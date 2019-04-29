@@ -19,6 +19,7 @@ GNU_DIAG_OFF("conversion")
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
+#include "Kafka/private/Schema/hs00_event_histogram_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
 GNU_DIAG_ON("conversion")
 
@@ -134,6 +135,7 @@ public:
   }
 };
 
+namespace {
 void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
   flatbuffers::FlatBufferBuilder builder;
   std::vector<uint32_t> spec = {5, 4, 3, 2, 1, 2};
@@ -172,12 +174,43 @@ void fakeReceiveAnEventMessage(std::string *buffer) {
                  builder.GetSize());
 }
 
+void fakeReceiveHistoMessage(std::string *buffer) {
+  flatbuffers::FlatBufferBuilder builder;
+  // shape is binedges=2 nspectra=5
+  std::vector<uint32_t> current_shape{3, 5};
+  auto bin_edges = builder.CreateVector(std::vector<double>{0, 1, 2});
+  auto xbins = HistoSchema::CreateArrayDouble(builder, bin_edges);
+  auto bin_metadata = HistoSchema::CreateDimensionMetaData(
+      builder, 3, builder.CreateString("TOF"), builder.CreateString("TOF"),
+      HistoSchema::Array_ArrayDouble, xbins.Union());
+  auto unit_metadata = HistoSchema::CreateDimensionMetaData(
+      builder, 1, builder.CreateString("Counts"));
+
+  auto dim_metadata = builder.CreateVector(
+      std::vector<flatbuffers::Offset<HistoSchema::DimensionMetaData>>{
+          bin_metadata, unit_metadata});
+
+  // Data values are nspectra*nbins
+  auto data_values = builder.CreateVector(
+      std::vector<double>{100, 140, 210, 100, 110, 70, 5, 3, 20, 4});
+  auto data = HistoSchema::CreateArrayDouble(builder, data_values);
+
+  auto messageFlatBuf = HistoSchema::CreateEventHistogram(
+      builder, builder.CreateString("KafkaTesting"), 0, dim_metadata, 0,
+      builder.CreateVector(current_shape), 0, HistoSchema::Array_ArrayDouble,
+      data.Union());
+
+  FinishEventHistogramBuffer(builder, messageFlatBuf);
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
 void fakeReceiveASampleEnvMessage(std::string *buffer) {
   flatbuffers::FlatBufferBuilder builder;
   // Sample environment log
-  auto logDataMessage =
-      CreateLogData(builder, builder.CreateString("fake source"), Value_Int,
-                    CreateInt(builder, 42).Union(), 1495618188000000000L);
+  auto logDataMessage = LogSchema::CreateLogData(
+      builder, builder.CreateString("fake source"), LogSchema::Value_Int,
+      LogSchema::CreateInt(builder, 42).Union(), 1495618188000000000L);
   FinishLogDataBuffer(builder, logDataMessage);
 
   // Copy to provided buffer
@@ -221,7 +254,7 @@ void fakeReceiveARunStopMessage(std::string *buffer,
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                  builder.GetSize());
 }
-
+} // namespace
 // -----------------------------------------------------------------------------
 // Fake ISIS event stream to provide event and sample environment data
 // -----------------------------------------------------------------------------
@@ -291,6 +324,61 @@ public:
       break;
     default:
       fakeReceiveAnEventMessage(message);
+    }
+    m_nextOffset++;
+
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
+  }
+
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
+  }
+
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
+
+private:
+  std::string m_topicName = "topic_name";
+  int m_nextOffset = 0;
+  std::string m_stopTime = "2016-08-31T12:07:52";
+};
+
+// ---------------------------------------------------------------------------------------
+// Fake non-institution-specific histo stream to provide histogram and sample
+// environment data
+// ---------------------------------------------------------------------------------------
+class FakeHistoSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(message);
+
+    switch (m_nextOffset) {
+    case 0:
+      fakeReceiveARunStartMessage(message, 1000, "2016-08-31T12:07:42",
+                                  "HRPDTEST", 1);
+      break;
+    case 2:
+      fakeReceiveARunStopMessage(message, m_stopTime);
+      break;
+    default:
+      fakeReceiveHistoMessage(message);
     }
     m_nextOffset++;
 

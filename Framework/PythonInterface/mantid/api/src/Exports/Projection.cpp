@@ -10,7 +10,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/exec.hpp>
@@ -47,7 +46,7 @@ object createWorkspace() {
   object main = import("__main__");
   object global(main.attr("__dict__"));
   // Add a function to the namespace
-  object result = exec(
+  exec(
       "def createWorkspace(proj, OutputWorkspace=None):\n"
       "  '''Create a TableWorkspace using this projection'''\n"
       "  import inspect\n"

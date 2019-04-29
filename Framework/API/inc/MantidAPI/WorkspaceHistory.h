@@ -61,6 +61,8 @@ public:
   AlgorithmHistory_const_sptr getAlgorithmHistory(const size_t index) const;
   /// Add operator[] access
   AlgorithmHistory_const_sptr operator[](const size_t index) const;
+  /// Add an operator== that compares algorithm historys
+  bool operator==(const WorkspaceHistory &otherHistory) const;
   /// Create an algorithm from a history record at a given index
   boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
   /// Convenience function for retrieving the last algorithm

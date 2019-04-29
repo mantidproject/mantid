@@ -10,6 +10,7 @@ from mantid.api import mtd
 from mantid.kernel import DeltaEModeType, UnitConversion
 import numpy
 from testhelpers import create_algorithm, run_algorithm
+import ReflectometryILL_common as common
 
 
 def _gaussian(x, height, x0, sigma):
@@ -19,7 +20,7 @@ def _gaussian(x, height, x0, sigma):
     return height * numpy.exp(- x * x / sigma2)
 
 
-def _fillTemplateReflectometryWorkspace(ws):
+def _fillTemplateReflectometryWorkspace(ws, XUnit='TOF'):
     """Fill a reflectometry workspace with somewhat sane data."""
     nHistograms = ws.getNumberHistograms()
     binWidth = 57.
@@ -40,46 +41,12 @@ def _fillTemplateReflectometryWorkspace(ws):
     }
     alg = run_algorithm('CreateWorkspace', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
-    ws.getAxis(0).setUnit('TOF')
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'time',
-        'LogText': str(3600),
-        'LogType': 'Number',
-        'LogUnit': 'Sec',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'det.value',
-        'LogText': str(3100),
-        'LogType': 'Number',
-        'LogUnit': 'mm',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'Distance.ChopperGap',
-        'LogText': str(8.2),
-        'LogType': 'Number',
-        'LogUnit': 'cm',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'PSD.time_of_flight_0',
-        'LogText': str(binWidth),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    ws.getAxis(0).setUnit(XUnit)
+    run = ws.run()
+    run.addProperty('time', 3600, 'Sec', True)
+    run.addProperty('det.value', 3100, 'mm', True)
+    run.addProperty('Distance.ChopperGap', 8.2, 'cm', True)
+    run.addProperty('PSD.time_of_flight_0', float(binWidth), True)
     return ws
 
 
@@ -94,14 +61,13 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     xs = numpy.empty(nHistograms*(nBins+1))
     ys = numpy.empty(nHistograms*nBins)
     es = numpy.empty(nHistograms*nBins)
+    spectrumInfo = templateWS.spectrumInfo()
     instrument = templateWS.getInstrument()
-    sample = instrument.getSample()
-    l1 = sample.getDistance(instrument.getSource())
+    l1 = spectrumInfo.l1()
     l2 = float(instrument.getStringParameter('l2')[0])
     tofElastic = UnitConversion.run('Energy', 'TOF', E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
     tofBegin = tofElastic - elasticIndex * binWidth
-    monitor = instrument.getDetector(0)
-    monitorSampleDistance = sample.getDistance(monitor)
+    monitorSampleDistance = 0.5
     tofElasticMonitor = tofBegin + monitorElasticIndex * binWidth
     tofMonitorDetector = UnitConversion.run('Energy', 'TOF', E_i, monitorSampleDistance, l2, 0.0,
                                             DeltaEModeType.Direct, 0.0)
@@ -121,11 +87,11 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
             ys[yIndexOffset+binIndex] = y
             es[yIndexOffset+binIndex] = numpy.sqrt(y)
 
-    fillBins(0, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
-    for histogramIndex in range(1, nHistograms):
-        trueL2 = sample.getDistance(templateWS.getDetector(histogramIndex))
+    for histogramIndex in range(0, nHistograms - 1):
+        trueL2 = spectrumInfo.l2(histogramIndex)
         trueTOF = UnitConversion.run('Energy', 'TOF', E_i, l1, trueL2, 0.0, DeltaEModeType.Direct, 0.0)
         fillBins(histogramIndex, trueTOF, elasticPeakHeight, bkgLevel)
+    fillBins(nHistograms - 1, tofElasticMonitor, 1623 * elasticPeakHeight, bkgMonitor)
     kwargs = {
         'DataX': xs,
         'DataY': ys,
@@ -137,40 +103,18 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
     alg = run_algorithm('CreateWorkspace', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
     ws.getAxis(0).setUnit('TOF')
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'Ei',
-        'LogText': str(E_i),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    run = ws.run()
+    run.addProperty('Ei', float(E_i), True)
     wavelength = UnitConversion.run('Energy', 'Wavelength', E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'wavelength',
-        'LogText': str(float(wavelength)),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    run.addProperty('wavelength', float(wavelength), True)
     pulseInterval = \
         tofMonitorDetector + (monitorElasticIndex - elasticIndex) * binWidth
+    run.addProperty('pulse_interval', float(pulseInterval * 1e-6), True)
+    run.addProperty('Detector.elasticpeak', int(elasticIndex), True)
     kwargs = {
         'Workspace': ws,
-        'LogName': 'pulse_interval',
-        'LogText': str(float(pulseInterval * 1e-6)),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'Detector.elasticpeak',
-        'LogText': str(elasticIndex),
+        'LogName': 'monitor.monsum',
+        'LogText': str(1000),
         'LogType': 'Number',
         'NumberType': 'Int',
         'child': True
@@ -180,7 +124,7 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
         'Workspace': ws,
         'ParameterName': 'default-incident-monitor-spectrum',
         'ParameterType': 'Number',
-        'Value': '1',
+        'Value': str(98305),
         'child': True
     }
     run_algorithm('SetInstrumentParameter', **kwargs)
@@ -188,99 +132,27 @@ def _fillTemplateTOFWorkspace(templateWS, bkgLevel):
 
 
 def add_duration(ws, duration):
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'duration',
-        'LogText': str(float(duration)),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    ws.run().addProperty('duration', float(duration), 'Sec', True)
 
 
 def add_chopper_configuration_D17(ws):
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'VirtualChopper.chopper1_phase_average',
-        'LogText': str(180),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'VirtualChopper.chopper1_speed_average',
-        'LogText': str(1000),
-        'LogType': 'Number',
-        'LogUnit': 'rpm',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'VirtualChopper.chopper2_phase_average',
-        'LogText': str(225),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'VirtualChopper.open_offset',
-        'LogText': str(-0.055),
-        'LogType': 'Number',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    run = ws.run()
+    run.addProperty('VirtualChopper.chopper1_phase_average', 180, True)
+    run.addProperty('VirtualChopper.chopper1_speed_average', 1000, True)
+    run.addProperty('VirtualChopper.chopper2_phase_average', 225, True)
+    run.addProperty('VirtualChopper.open_offset', -0.055, True)
 
 
 def add_flipper_configuration_D17(ws, flipper1, flipper2):
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'Flipper1.stateint',
-        'LogText': str(int(flipper1)),
-        'LogType': 'Number',
-        'NumberType': 'Int',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'Flipper2.stateint',
-        'LogText': str(int(flipper2)),
-        'LogType': 'Number',
-        'NumberType': 'Int',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    run = ws.run()
+    run.addProperty('Flipper1.stateint', int(flipper1), True)
+    run.addProperty('Flipper2.stateint', int(flipper2), True)
 
 
 def add_slit_configuration_D17(ws, slit2Width, slit3Width):
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'VirtualSlitAxis.s2w_actual_width',
-        'LogText': str(float(slit2Width)),
-        'LogType': 'Number',
-        'LogUnit': 'mm',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
-    kwargs = {
-        'Workspace': ws,
-        'LogName': 'VirtualSlitAxis.s3w_actual_width',
-        'LogText': str(float(slit3Width)),
-        'LogType': 'Number',
-        'LogUnit': 'mm',
-        'NumberType': 'Double',
-        'child': True
-    }
-    run_algorithm('AddSampleLog', **kwargs)
+    run = ws.run()
+    run.addProperty('VirtualSlitAxis.s2w_actual_width', float(slit2Width), 'mm', True)
+    run.addProperty('VirtualSlitAxis.s3w_actual_width', float(slit3Width), 'mm', True)
 
 
 def create_poor_mans_d17_workspace():
@@ -325,31 +197,37 @@ def default_test_detectors(ws):
     kwargs = {
         'Workspace': ws,
         'StartWorkspaceIndex': 512,
+        'EndWorkspaceIndex': ws.getNumberHistograms() - 2,
         'child': True
     }
     run_algorithm('MaskDetectors', **kwargs)
     return ws
 
 
-def refl_create_beam_position_ws(beamPosWSName, referenceWS, detectorAngle, beamCentre):
-    args = {
-        'OutputWorkspace': beamPosWSName
-    }
-    alg = create_algorithm('CreateEmptyTableWorkspace', **args)
-    alg.execute()
-    beamPos = mtd[beamPosWSName]
-    beamPos.addColumn('double', 'DetectorAngle')
-    beamPos.addColumn('double', 'DetectorDistance')
-    beamPos.addColumn('double', 'PeakCentre')
-    L2 = referenceWS.getInstrument().getComponentByName('detector').getPos().norm()
-    beamPos.addRow((detectorAngle, L2, beamCentre))
-    return beamPos
+def refl_add_line_position(ws, linePosition):
+    ws.run().addProperty(common.SampleLogs.LINE_POSITION, float(linePosition), True)
+    return ws
 
 
-def refl_preprocess(outputWSName, ws, beamPosWS):
+def refl_add_two_theta(ws, twoTheta):
+    ws.run().addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
+    return ws
+
+
+def refl_preprocess(outputWSName, ws):
     args = {
         'InputWorkspace': ws,
-        'BeamPositionWorkspace': beamPosWS,
+        'OutputWorkspace': outputWSName,
+    }
+    alg = create_algorithm('ReflectometryILLPreprocess', **args)
+    alg.execute()
+    return mtd[outputWSName]
+
+
+def refl_preprocess_with_calibration(outputWSName, ws, directLineWS):
+    args = {
+        'InputWorkspace': ws,
+        'DirectLineWorkspace': directLineWS,
         'OutputWorkspace': outputWSName,
     }
     alg = create_algorithm('ReflectometryILLPreprocess', **args)
@@ -389,7 +267,7 @@ def refl_sum_foreground(outputWSName, sumType, ws, dirFgdWS=None, dirWS=None):
         'OutputWorkspace': outputWSName,
         'SummationType': sumType,
         'DirectForegroundWorkspace': dirFgdWS,
-        'DirectBeamWorkspace': dirWS,
+        'DirectLineWorkspace': dirWS,
         'WavelengthRange': [0.1]
     }
     alg = create_algorithm('ReflectometryILLSumForeground', **args)

@@ -10,7 +10,8 @@
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionView.h"
 
-#include "../General/UserInputValidator.h"
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -22,9 +23,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/** IndirectSpectrumSelectionPresenter
- */
-class DLLExport IndirectSpectrumSelectionPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter
+    : public QObject {
   Q_OBJECT
 public:
   IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,
@@ -33,8 +33,8 @@ public:
   UserInputValidator &validate(UserInputValidator &validator);
 
 signals:
-  void spectraChanged(std::size_t);
-  void maskChanged(std::string const &);
+  void spectraChanged(std::size_t /*_t1*/);
+  void maskChanged(std::string const & /*_t1*/);
   void invalidSpectraString(QString const &errorMessage);
   void invalidMaskBinsString(QString const &errorMessage);
 

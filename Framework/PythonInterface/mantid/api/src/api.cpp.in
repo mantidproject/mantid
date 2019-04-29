@@ -20,22 +20,9 @@
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 
 namespace
 {
-  /**
-   * We don't want to register the C++ algorithms on loading the python module
-   * since we want then be able to control when the various singletons are started if
-   * we are being imported from vanilla Python.
-   * Here we export a single function that can be called after the FrameworkManager
-   * has been started to registered any hard-coded C++ algorithms that are
-   * contained within this module.
-   */
-  void _declareCPPAlgorithms()
-  {
-    Mantid::API::AlgorithmFactory::Instance().subscribe<Mantid::PythonInterface::RunPythonScript>();
-  }
 
   /**
    * Checks if two workspace shared pointers point to the same workspace
@@ -56,9 +43,6 @@ BOOST_PYTHON_MODULE(_api)
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy
   _import_array();
-  
-  // Internal function to declare C++ algorithms that are a part of this module
-  boost::python::def("_declareCPPAlgorithms", &_declareCPPAlgorithms);
 
   // Workspace address comparison
   boost::python::def("isSameWorkspaceObject",

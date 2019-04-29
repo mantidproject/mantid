@@ -22,6 +22,8 @@ public:
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override;
 
+  std::vector<std::string> getSpectrumDependentAttributes() const override;
+
 private:
   std::string getResultXAxisUnit() const override;
 

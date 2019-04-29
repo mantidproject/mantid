@@ -14,7 +14,6 @@
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 
 #include <boost/algorithm/string/join.hpp>
@@ -89,10 +88,10 @@ static const std::string DEFAULT_CLIENT_ID =
  *
  * @return The constructed ONCat object.
  */
-ONCat ONCat::fromMantidSettings(bool authenticate) {
+ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
   if (!authenticate) {
-    return ONCat(DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none,
-                 boost::none);
+    return Mantid::Kernel::make_unique<ONCat>(
+        DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
   }
 
   auto &config = Mantid::Kernel::ConfigService::Instance();
@@ -110,12 +109,12 @@ ONCat ONCat::fromMantidSettings(bool authenticate) {
         << "Falling back to default -- user login required." << std::endl;
   }
 
-  return ONCat(DEFAULT_ONCAT_URL,
-               Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
-               hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS
-                                    : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
-               hasClientCredentials ? client_id : DEFAULT_CLIENT_ID,
-               boost::make_optional(hasClientCredentials, client_secret));
+  return Mantid::Kernel::make_unique<ONCat>(
+      DEFAULT_ONCAT_URL, Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
+      hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS
+                           : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
+      hasClientCredentials ? client_id : DEFAULT_CLIENT_ID,
+      boost::make_optional(hasClientCredentials, client_secret));
 }
 
 ONCat::ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore,
@@ -181,6 +180,8 @@ bool ONCat::isUserLoggedIn() const {
 
   return m_tokenStore->getToken().is_initialized();
 }
+
+std::string ONCat::url() const { return m_url; }
 
 void ONCat::logout() {
   // Currently, ONCat OAuth does *not* allow clients to revoke tokens

@@ -19,6 +19,17 @@ fi
 $CMAKE_EXE --version
 
 ###############################################################################
+# Wraps calls for gui emulation
+###############################################################################
+if [ $(command -v xvfb-run) ]; then
+  X11_RUNNER="xvfb-run"
+  X11_RUNNER_ARGS=--server-args="-screen 0 640x480x24"
+else
+  X11_RUNNER="eval"
+  X11_RUNNER_ARGS=""
+fi
+
+###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
 # It defaults to a MantidExternalData directory within the HOME directory.
@@ -39,6 +50,11 @@ fi
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
 cd $WORKSPACE/build
 
+# Remove (possibly) stale files
+#   build/ExternalData/**: data files will change over time and removing
+#                          the links helps keep it fresh
+rm -rf $WORKSPACE/build/ExternalData
+
 ###############################################################################
 # CMake configuration if it has not already been configured.
 # We use the special flag that only creates the targets for the data
@@ -58,10 +74,22 @@ ${CMAKE_EXE} --build . -- SystemTestData
 ###############################################################################
 # Run the tests
 ###############################################################################
-# Remove any Mantid.user.properties file
-userprops=~/.mantid/Mantid.user.properties
-rm -f $userprops
+# Remove any user settings
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+# Remove GUI qsettings files
+if [[ ${ON_MACOS} == true ]] ; then
+  rm -f $HOME/Library/Preferences/com.mantid.MantidPlot.plist
+  rm -f $HOME/Library/Preferences/org.mantidproject.MantidPlot.plist
+  rm -f "$HOME/Library/Saved Application State/org.mantidproject.MantidPlot.savedState/windows.plist"
+else
+  rm -f ~/.config/Mantid/MantidPlot.conf
+fi
+rm -f ~/.config/mantidproject/mantidworkbench.ini
+
 # Turn off any auto updating on startup
+mkdir -p $userconfig_dir
+userprops=$userconfig_dir/Mantid.user.properties
 echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
 echo "CheckMantidVersion.OnStartup = 0" >> $userprops
@@ -71,5 +99,10 @@ default_save_directory=${WORKSPACE}/build/Testing/SystemTests/scripts/
 find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
+NTHREADS=${BUILD_THREADS:?}
+MAXTHREADS=12
+if [ ${NTHREADS} -gt ${MAXTHREADS} ]; then
+  NTHREADS=${MAXTHREADS}
+fi
 PKGDIR=${WORKSPACE}/build
-python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${BUILD_THREADS:?} $EXTRA_ARGS
+${X11_RUNNER} "${X11_RUNNER_ARGS}" python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${NTHREADS} $EXTRA_ARGS

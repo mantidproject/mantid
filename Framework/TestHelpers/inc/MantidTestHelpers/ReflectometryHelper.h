@@ -19,7 +19,7 @@ using namespace API;
 namespace TestHelpers {
 
 // Create a workspace equipped with fake instrument from
-// IDFs_for_UNIT_TESTING/REFL_Definition.xml IDF.
+// unit_testing/REFL_Definition.xml IDF.
 // @param nBins :: Number of bins in each spectrum.
 // @param startX :: Start value of the x-axis in TOF
 // @param endX :: End value of the x-axis in TOF
@@ -53,10 +53,9 @@ std::vector<MatrixWorkspace_sptr> retrieveOutWS(std::string const &name);
 // original.
 void applyPolarizationEfficiencies(std::string const &name);
 
-MatrixWorkspace_sptr
-createWorkspaceSingle(const double startX = 1, const int nBins = 3,
-                      const double deltaX = 1,
-                      const std::vector<double> &yValues = {1, 2, 3});
+MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
+                                           const double deltaX,
+                                           const std::vector<double> &yValues);
 
 MatrixWorkspace_sptr createWorkspaceSingle(const double startX = 1,
                                            const int nBins = 3,

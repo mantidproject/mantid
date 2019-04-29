@@ -16,6 +16,7 @@
 #include <boost/optional/optional.hpp>
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -197,7 +198,7 @@ public:
   const std::vector<std::string> &getUserSearchDirs() const;
   /// Sets instrument directories
   void setInstrumentDirectories(const std::vector<std::string> &directories);
-  /// Get instrument search directory
+  /// Get instrument search directories
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
   const std::string getInstrumentDirectory() const;
@@ -288,9 +289,9 @@ private:
   // Forward declaration of inner class
   template <class T> class WrappedObject;
   /// the POCO file config object
-  WrappedObject<Poco::Util::PropertyFileConfiguration> *m_pConf;
+  std::unique_ptr<WrappedObject<Poco::Util::PropertyFileConfiguration>> m_pConf;
   /// the POCO system Config Object
-  WrappedObject<Poco::Util::SystemConfiguration> *m_pSysConfig;
+  std::unique_ptr<WrappedObject<Poco::Util::SystemConfiguration>> m_pSysConfig;
 
   /// A set of property keys that have been changed
   mutable std::set<std::string> m_changed_keys;
@@ -315,8 +316,6 @@ private:
   std::vector<std::string> m_UserSearchDirs;
   /// Store a list of instrument directory paths
   std::vector<std::string> m_InstrumentDirs;
-  /// A map of facilities to instruments
-  std::map<std::string, std::vector<std::string>> m_instr_prefixes;
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;

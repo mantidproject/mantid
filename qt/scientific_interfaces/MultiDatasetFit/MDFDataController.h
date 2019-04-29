@@ -55,19 +55,19 @@ public:
 signals:
   void dataTableUpdated();
   void dataSetUpdated(int i);
-  void hasSelection(bool);
-  void spectraRemoved(QList<int>);
+  void hasSelection(bool /*_t1*/);
+  void spectraRemoved(QList<int> /*_t1*/);
   void spectraAdded(int n);
 
 public slots:
-  void setFittingRangeGlobal(bool);
-  void setFittingRange(int, double, double);
+  void setFittingRangeGlobal(bool /*on*/);
+  void setFittingRange(int /*i*/, double /*startX*/, double /*endX*/);
 
 private slots:
   void addWorkspace();
   void workspaceSelectionChanged();
   void removeSelectedSpectra();
-  void updateDataset(int, int);
+  void updateDataset(int /*row*/, int /*unused*/);
 
 private:
   MultiDatasetFit *owner() const;

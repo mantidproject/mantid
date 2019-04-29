@@ -54,6 +54,15 @@ public:
   MuonAnalysisHelperTest() {
     FrameworkManager::Instance(); // So that framework is initialized
   }
+  void test_isNumberInt() { TS_ASSERT(isNumber(QString("12"))); }
+
+  void test_isNumberDouble() { TS_ASSERT(isNumber(QString("1.2"))); }
+  void test_isNumberNegInt() { TS_ASSERT(isNumber(QString("-12"))); }
+  void test_isNumberNegDouble() { TS_ASSERT(isNumber(QString("-1.2"))); }
+  void test_isNumberFail() { TS_ASSERT(!isNumber(QString("ABC"))); }
+  void test_isNumberFailMix() { TS_ASSERT(!isNumber(QString("1BC4"))); }
+  void test_isNumberFailRange() { TS_ASSERT(!isNumber(QString("1-4"))); }
+  void test_isNumberFailRange2() { TS_ASSERT(!isNumber(QString("1 to 4"))); }
 
   void test_getRunLabel_singleWs() {
     std::string label = getRunLabel(createWs("MUSR", 15189));

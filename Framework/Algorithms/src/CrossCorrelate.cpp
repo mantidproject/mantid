@@ -9,13 +9,14 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include <boost/iterator/counting_iterator.hpp>
-
 #include <numeric>
 #include <sstream>
 
@@ -27,6 +28,8 @@ DECLARE_ALGORITHM(CrossCorrelate)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
 
 /// Initialisation method.
 void CrossCorrelate::init() {
@@ -145,7 +148,7 @@ void CrossCorrelate::exec() {
     throw std::runtime_error("Range is not valid");
 
   MatrixWorkspace_sptr out =
-      WorkspaceFactory::Instance().create(inputWS, nspecs, npoints, npoints);
+      create<HistoWorkspace>(*inputWS, nspecs, Points(npoints));
 
   // Calculate the mean value of the reference spectrum and associated error
   // squared
@@ -172,12 +175,14 @@ void CrossCorrelate::exec() {
   // Now copy the other spectra
   bool is_distrib = inputWS->isDistribution();
 
-  std::vector<double> XX(npoints);
-  for (int i = 0; i < npoints; ++i) {
-    XX[i] = static_cast<double>(i - nY + 2);
+  {
+    std::vector<double> XX(npoints);
+    for (int i = 0; i < npoints; ++i) {
+      XX[i] = static_cast<double>(i - nY + 2);
+    }
+    out->mutableX(0) = std::move(XX);
   }
   // Initialise the progress reporting object
-  out->mutableX(0) = XX;
   m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra

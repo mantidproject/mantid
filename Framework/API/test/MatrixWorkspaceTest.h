@@ -471,6 +471,20 @@ public:
     TS_ASSERT_EQUALS(ws.size(), 0);
   }
 
+  void testIsCommonBins() {
+    WorkspaceTester ws;
+    ws.initialize(10, 10, 10);
+    // After initialization, ws should contain a shared HistogramX.
+    TS_ASSERT(ws.isCommonBins());
+    // Modifying the value of one Spectrum will cause this Histogram to detach.
+    // Since the value is identical, isCommonBins is still true.
+    ws.mutableX(0)[0] = 1.;
+    TS_ASSERT(ws.isCommonBins());
+    // Once we change the the value, however, isCommonsBins should return false
+    ws.mutableX(0)[0] = 2.;
+    TS_ASSERT_EQUALS(ws.isCommonBins(), false);
+  }
+
   void test_updateSpectraUsing() {
     WorkspaceTester testWS;
     testWS.initialize(3, 1, 1);
@@ -766,81 +780,6 @@ public:
     wkspace.initialize(1, 4, 3);
     TS_ASSERT_EQUALS(wkspace.blocksize(), 3);
     TS_ASSERT_EQUALS(wkspace.size(), 3);
-  }
-
-  void testBinIndexOf() {
-    WorkspaceTester wkspace;
-    wkspace.initialize(1, 4, 3);
-    // Data is all 1.0s
-    wkspace.dataX(0)[1] = 2.0;
-    wkspace.dataX(0)[2] = 3.0;
-    wkspace.dataX(0)[3] = 4.0;
-
-    TS_ASSERT_EQUALS(wkspace.getNumberHistograms(), 1);
-
-    // First bin
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(1.3), 0);
-    // Bin boundary
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.0), 0);
-    // Mid range
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.5), 1);
-    // Still second bin
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.001), 1);
-    // Last bin
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.1), 2);
-    // Last value
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(4.0), 2);
-
-    // Error handling
-
-    // Bad index value
-    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, 1), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
-
-    // Bad X values
-    TS_ASSERT_THROWS(wkspace.binIndexOf(5.), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
-  }
-
-  void testBinIndexOfDescendingBinning() {
-    WorkspaceTester wkspace;
-    wkspace.initialize(1, 4, 3);
-
-    wkspace.dataX(0)[0] = 5.3;
-    wkspace.dataX(0)[1] = 4.3;
-    wkspace.dataX(0)[2] = 3.3;
-    wkspace.dataX(0)[3] = 2.3;
-
-    TS_ASSERT_EQUALS(wkspace.getNumberHistograms(), 1);
-
-    // First boundary
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.3), 0)
-    // First bin
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(5.2), 0);
-    // Bin boundary
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(4.3), 0);
-    // Mid range
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.8), 1);
-    // Still second bin
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(std::nextafter(3.3, 10.0)), 1);
-    // Last bin
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.1), 2);
-    // Last value
-    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.3), 2);
-
-    // Error handling
-
-    // Bad index value
-    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, 1), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
-
-    // Bad X values
-    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(5.3, 10.0)),
-                     std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(5.4), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)),
-                     std::out_of_range);
-    TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 
   void test_hasGroupedDetectors() {
@@ -1718,7 +1657,296 @@ public:
     checkDetectorSignedTwoTheta(Geometry::X, {{1., -1., -1., 1.}});
   }
 
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_histogram_workspace_when_provided_an_x_value_corresponding_to_the_first_bin() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(1.3), 0);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_a_bin_boundary() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(2.0), 0);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_mid_range() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(2.5), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_only_just_in_the_second_bin() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(2.001), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_in_the_last_bin() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.1), 2);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_the_last_bin_boundary() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(4.0), 2);
+  }
+
+  void
+  test_that_yIndexOfX_throws_when_provided_an_index_which_is_out_of_range_for_ascending_x_values() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.getNumberHistograms(), 1);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), std::out_of_range);
+  }
+
+  void
+  test_that_yIndexOfX_throws_when_provided_x_values_which_are_out_of_range_for_ascending_x_values() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(5.), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(0.), std::out_of_range);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_corresponding_to_the_first_bin() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(5.2), 0);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_corresponding_to_the_first_boundary() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(5.3), 0)
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_a_bin_boundary() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(4.3), 0);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_mid_range() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.8), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_only_just_in_the_second_bin() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(std::nextafter(3.3, 10.0)), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_in_the_last_bin() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.1), 2);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_histogram_workspace_when_provided_an_x_value_which_is_the_last_bin_boundary() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(2.3), 2);
+  }
+
+  void
+  test_that_yIndexOfX_throws_when_provided_an_index_which_is_out_of_range_for_descending_x_values() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.getNumberHistograms(), 1);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.5, -1), std::out_of_range);
+  }
+
+  void
+  test_that_yIndexOfX_throws_when_provided_x_values_which_are_out_of_range_for_descending_x_values() {
+    std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(5.3, 10.0)),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(5.4), std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(std::nextafter(2.3, 0.0)),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(workspace.yIndexOfX(0.), std::out_of_range);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_correct_index_for_a_histogram_workspace_when_the_x_bins_are_in_ascending_order() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.0), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_correct_index_for_a_histogram_workspace_when_the_x_bins_are_in_descending_order() {
+    std::vector<double> const xValues{4.0, 3.0, 2.0, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.0), 0);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_correct_index_for_a_nonHistogram_workspace_when_the_x_bins_are_in_ascending_order() {
+    std::vector<double> const xValues{1.0, 2.0, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.0), 2);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_correct_index_for_a_nonHistogram_workspace_when_the_x_bins_are_in_descending_order() {
+    std::vector<double> const xValues{4.0, 3.0, 2.0, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.0), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(2.0, 0, 0.0005), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance2() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(1.9995, 0, 0.0005), 1);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_ascending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_with_no_tolerance() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(1.9997), 1);
+  }
+
+  void
+  test_that_yIndexOfX_throws_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002),
+                     std::invalid_argument);
+  }
+
+  void
+  test_that_yIndexOfX_throws_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance2() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(1.9992, 0, 0.0002),
+                     std::invalid_argument);
+  }
+
+  void
+  test_that_yIndexOfX_throw_when_passed_an_invalid_x_value_with_no_tolerance_for_an_ascending_vector_of_x_values() {
+    std::vector<double> const xValues{1.0, 1.9997, 3.0, 4.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), std::invalid_argument);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(1.9994, 0, 0.0005), 2);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_within_a_tolerance2() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(1.9999, 0, 0.0005), 2);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_with_no_tolerance() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(1.9997), 2);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(1.9994, 0, 0.0002),
+                     std::invalid_argument);
+  }
+
+  void
+  test_that_yIndexOfX_returns_the_descending_index_for_a_nonHistogram_workspace_when_passed_an_x_value_just_outside_a_tolerance2() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(2.0, 0, 0.0002),
+                     std::invalid_argument);
+  }
+
+  void
+  test_that_yIndexOfX_throw_when_passed_an_invalid_x_value_with_no_tolerance_for_a_descending_vector_of_x_values() {
+    std::vector<double> const xValues{4.0, 3.0, 1.9997, 1.0};
+    auto const workspace = getWorkspaceWithPopulatedX(1, 4, 4, xValues);
+
+    TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), std::invalid_argument);
+  }
+
 private:
+  WorkspaceTester getWorkspaceWithPopulatedX(
+      std::size_t const &nVectors, std::size_t const &xLength,
+      std::size_t const &yLength, std::vector<double> const &xValues) {
+    WorkspaceTester workspace;
+    workspace.initialize(nVectors, xLength, yLength);
+    auto &X = workspace.dataX(0);
+
+    std::copy(xValues.begin(), xValues.end(), X.begin());
+    return workspace;
+  }
+
   void checkDetectorSignedTwoTheta(const Geometry::PointingAlong thetaSignAxis,
                                    const std::array<double, 4> &signs) {
     constexpr size_t numDets{4};

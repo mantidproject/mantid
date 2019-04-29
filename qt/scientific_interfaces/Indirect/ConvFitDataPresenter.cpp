@@ -8,14 +8,24 @@
 #include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataTablePresenter.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/make_unique.h"
+
+namespace {
+using namespace Mantid::API;
+
+bool isWorkspaceLoaded(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
-                                           IndirectFitDataView *view)
+                                           IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
           Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
@@ -30,8 +40,19 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
 }
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
-  m_convModel->setResolution(name.toStdString(),
-                             m_convModel->numberOfWorkspaces() - 1);
+  auto const numberOfWorkspaces = m_convModel->numberOfWorkspaces();
+  auto const index = m_convModel->getWorkspace(0) ? numberOfWorkspaces - 1
+                                                  : numberOfWorkspaces;
+  setModelResolution(name.toStdString(), index);
+}
+
+void ConvFitDataPresenter::setModelResolution(std::string const &name,
+                                              std::size_t const &index) {
+  try {
+    m_convModel->setResolution(name, index);
+  } catch (std::exception const &ex) {
+    displayWarning(ex.what());
+  }
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
@@ -51,7 +72,7 @@ void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
 void ConvFitDataPresenter::addModelData(const std::string &name) {
   IndirectFitDataPresenter::addModelData(name);
   const auto resolution = getView()->getSelectedResolution();
-  if (!resolution.empty())
+  if (!resolution.empty() && isWorkspaceLoaded(resolution))
     m_convModel->setResolution(resolution, 0);
 }
 

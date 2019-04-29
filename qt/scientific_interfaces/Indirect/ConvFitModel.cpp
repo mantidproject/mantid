@@ -19,6 +19,15 @@ using namespace Mantid::API;
 
 namespace {
 
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 boost::optional<std::size_t>
 getFirstInCategory(CompositeFunction_const_sptr composite,
                    const std::string &category) {
@@ -110,28 +119,26 @@ CompositeFunction_sptr addTemperatureCorrection(IFunction_sptr model,
   return applyTemperatureCorrection(model, correction, value);
 }
 
-IAlgorithm_sptr loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
-                                           const std::string &filename) {
-  IAlgorithm_sptr loadParamFile =
-      AlgorithmManager::Instance().create("LoadParameterFile");
-  loadParamFile->setChild(true);
+IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
+                                           std::string const &filename) {
+  auto loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
   loadParamFile->initialize();
-  loadParamFile->setProperty("Workspace", workspace);
+  loadParamFile->setProperty("Workspace", workspaceName);
   loadParamFile->setProperty("Filename", filename);
   return loadParamFile;
 }
 
 void readAnalyserFromFile(const std::string &analyser,
                           MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+  auto const instrument = workspace->getInstrument();
+  auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
-  auto reflection = instrument->getStringParameter("reflection")[0];
-  auto parameterFile = idfDirectory + instrument->getName() + "_" + analyser +
-                       "_" + reflection + "_Parameters.xml";
+  auto const reflection = instrument->getStringParameter("reflection")[0];
+  auto const parameterFile = idfDirectory + instrument->getName() + "_" +
+                             analyser + "_" + reflection + "_Parameters.xml";
 
-  IAlgorithm_sptr loadParamFile =
-      loadParameterFileAlgorithm(workspace, parameterFile);
+  auto loadParamFile =
+      loadParameterFileAlgorithm(workspace->getName(), parameterFile);
   loadParamFile->execute();
 
   if (!loadParamFile->isExecuted())
@@ -142,65 +149,91 @@ void readAnalyserFromFile(const std::string &analyser,
 
 Mantid::Geometry::IComponent_const_sptr
 getAnalyser(MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto analysers = instrument->getStringParameter("analyser");
+  auto const instrument = workspace->getInstrument();
+  auto const analysers = instrument->getStringParameter("analyser");
 
   if (analysers.empty())
     throw std::invalid_argument(
         "Could not load instrument resolution from parameter file");
 
-  auto component = instrument->getComponentByName(analysers[0]);
-  auto resolutionParameters = component->getNumberParameter("resolution");
-  if (nullptr == component || resolutionParameters.empty())
+  auto const component = instrument->getComponentByName(analysers[0]);
+  if (component) {
+    if (component->hasParameter("resolution")) {
+      auto const resolutionParameters =
+          component->getNumberParameter("resolution");
+      if (resolutionParameters.empty())
+        readAnalyserFromFile(analysers[0], workspace);
+    }
+  } else {
     readAnalyserFromFile(analysers[0], workspace);
-  return workspace->getInstrument()->getComponentByName(analysers[0]);
+  }
+  return instrument->getComponentByName(analysers[0]);
 }
 
 boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   try {
-    auto analyser = getAnalyser(workspace);
-    if (analyser != nullptr)
+    auto const analyser = getAnalyser(workspace);
+    if (analyser && analyser->hasParameter("resolution"))
       return analyser->getNumberParameter("resolution")[0];
-    else
-      return workspace->getInstrument()->getNumberParameter("resolution")[0];
-  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+
+    auto const instrument = workspace->getInstrument();
+    if (instrument && instrument->hasParameter("resolution"))
+      return instrument->getNumberParameter("resolution")[0];
+    else if (instrument && instrument->hasParameter("EFixed"))
+      return instrument->getNumberParameter("EFixed")[0] * 0.01;
+
     return boost::none;
-  } catch (const std::invalid_argument &) {
+  } catch (Mantid::Kernel::Exception::NotFoundError const &) {
+    return boost::none;
+  } catch (std::invalid_argument const &) {
     return boost::none;
   }
 }
 
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS) {
-  IAlgorithm_sptr cloneAlg =
-      AlgorithmManager::Instance().create("CloneWorkspace");
+MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS,
+                                    std::string const &outputName) {
+  auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
-  cloneAlg->setChild(true);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inputWS);
-  cloneAlg->setProperty("OutputWorkspace", "__cloned");
+  cloneAlg->setProperty("OutputWorkspace", outputName);
   cloneAlg->execute();
-  Workspace_sptr workspace = cloneAlg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return getADSMatrixWorkspace(outputName);
 }
 
 MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
                                      MatrixWorkspace_sptr rightWS,
-                                     int numHistograms) {
-  IAlgorithm_sptr appendAlg =
-      AlgorithmManager::Instance().create("AppendSpectra");
+                                     int numHistograms,
+                                     std::string const &outputName) {
+  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->setLogging(false);
-  appendAlg->setChild(true);
   appendAlg->initialize();
   appendAlg->setProperty("InputWorkspace1", leftWS);
   appendAlg->setProperty("InputWorkspace2", rightWS);
   appendAlg->setProperty("Number", numHistograms);
-  appendAlg->setProperty("OutputWorkspace", "__appended");
+  appendAlg->setProperty("OutputWorkspace", outputName);
   appendAlg->execute();
-  return appendAlg->getProperty("OutputWorkspace");
+  return getADSMatrixWorkspace(outputName);
 }
 
-MatrixWorkspace_sptr extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
-                                               std::size_t numberOfHistograms) {
+void renameWorkspace(std::string const &name, std::string const &newName) {
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->setLogging(false);
+  renamer->setProperty("InputWorkspace", name);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->execute();
+}
+
+void deleteWorkspace(std::string const &workspaceName) {
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->setLogging(false);
+  deleter->setProperty("Workspace", workspaceName);
+  deleter->execute();
+}
+
+void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
+                               std::size_t numberOfHistograms,
+                               std::string const &outputName) {
   const auto resolutionNumHist = resolution->getNumberHistograms();
   if (resolutionNumHist != 1 && resolutionNumHist != numberOfHistograms) {
     std::string msg(
@@ -208,13 +241,15 @@ MatrixWorkspace_sptr extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
     throw std::runtime_error(msg);
   }
 
-  auto resolutionWS = cloneWorkspace(resolution);
+  auto resolutionWS = cloneWorkspace(resolution, "__cloned");
 
   // Append to cloned workspace if necessary
-  if (resolutionNumHist == 1 && numberOfHistograms > 1)
-    return appendWorkspace(resolutionWS, resolution,
-                           static_cast<int>(numberOfHistograms - 1));
-  return resolutionWS;
+  if (resolutionNumHist == 1 && numberOfHistograms > 1) {
+    appendWorkspace(resolutionWS, resolution,
+                    static_cast<int>(numberOfHistograms - 1), outputName);
+    deleteWorkspace("__cloned");
+  } else
+    renameWorkspace("__cloned", outputName);
 }
 
 void getParameterNameChanges(
@@ -432,7 +467,7 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Result";
+    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
   return createOutputName(
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", 0);
 }
@@ -443,8 +478,9 @@ std::string ConvFitModel::simultaneousFitOutputName() const {
 
 std::string ConvFitModel::singleFitOutputName(std::size_t index,
                                               std::size_t spectrum) const {
-  return createSingleFitOutputName(
-      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
+  return createSingleFitOutputName("%1%_conv_" + m_fitType +
+                                       m_backgroundString + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
@@ -484,8 +520,15 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
+std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
+  /// Q value also depends on spectrum but is automatically updated when
+  /// the WorkspaceIndex is changed
+  return {"WorkspaceIndex"};
+}
+
 void ConvFitModel::setFitFunction(IFunction_sptr function) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto const composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(function);
   m_backgroundIndex = getFirstInCategory(composite, "Background");
   setParameterNameChanges(*function, m_backgroundIndex);
 
@@ -528,8 +571,10 @@ void ConvFitModel::removeWorkspace(std::size_t index) {
 }
 
 void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
-  setResolution(
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name), index);
+  if (!name.empty() && doesExistInADS(name))
+    setResolution(getADSMatrixWorkspace(name), index);
+  else
+    throw std::runtime_error("A valid resolution file needs to be selected.");
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
@@ -548,9 +593,9 @@ void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
 
 void ConvFitModel::addExtendedResolution(std::size_t index) {
   const std::string name = "__ConvFitResolution" + std::to_string(index);
-  AnalysisDataService::Instance().addOrReplace(
-      name, extendResolutionWorkspace(m_resolution[index].lock(),
-                                      getNumberHistograms(index)));
+
+  extendResolutionWorkspace(m_resolution[index].lock(),
+                            getNumberHistograms(index), name);
 
   if (m_extendedResolution.size() > index)
     m_extendedResolution[index] = name;

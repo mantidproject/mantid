@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import FunctionProperty,PythonAlgorithm, IFunction
+from mantid.api import FrameworkManagerImpl, FunctionProperty, PythonAlgorithm, IFunction
 from testhelpers import assertRaisesNothing
 import unittest
 import math
 
+
 class FunctionPropertyTest(unittest.TestCase):
 
-    #------------------------------------------------------------
     class TestFunctionPropAlg(PythonAlgorithm):
         def PyInit(self):
             self.declareProperty(FunctionProperty("fun"))
@@ -28,9 +28,11 @@ class FunctionPropertyTest(unittest.TestCase):
             height=func.getParamValue(0)
             if math.fabs(height - 1.0) > 1e-12:
                 raise RuntimeError("Height does not have the expected value")
-    #------------------------------------------------------------
 
-#---- Success cases ----
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
+
     def test_constructor_succeeds_with_non_empty_string_name(self):
         assertRaisesNothing(self, FunctionProperty, "Function")
 
@@ -50,11 +52,11 @@ class FunctionPropertyTest(unittest.TestCase):
         alg.setRethrows(True)
         assertRaisesNothing(self, alg.execute)
 
-#---- Error cases ----
     def test_invalid_string_value_gives_function_object_as_value(self):
         alg=self.TestFunctionPropAlg()
         alg.initialize()
         self.assertRaises(ValueError, alg.setProperty, "fun", "blah")
+
 
 if __name__ == '__main__':
     unittest.main()

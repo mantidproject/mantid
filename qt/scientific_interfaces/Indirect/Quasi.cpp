@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 using namespace Mantid::API;
 
@@ -39,6 +39,8 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_propTree->addProperty(m_properties["EMax"]);
   m_propTree->addProperty(m_properties["SampleBinning"]);
   m_propTree->addProperty(m_properties["ResBinning"]);
+
+  formatTreeWidget(m_propTree, m_properties);
 
   // Set default values
   m_dblManager->setValue(m_properties["SampleBinning"], 1);
@@ -286,7 +288,7 @@ void Quasi::updateMiniPlot() {
       curveColour = Qt::magenta;
 
     else if (specName.contains("diff.1"))
-      curveColour = Qt::green;
+      curveColour = Qt::blue;
     else if (specName.contains("diff.2"))
       curveColour = Qt::cyan;
 
@@ -336,7 +338,7 @@ void Quasi::plotCurrentPreview() {
     QString QfitWS = QString::fromStdString(fitName + "_");
     QfitWS += QString::number(m_previewSpec);
     if (program == "Lorentzians")
-      plotSpectra(QfitWS, {0, 1, 2, 4});
+      plotSpectra(QfitWS, {0, 1, 2, 3, 4});
     else
       plotSpectra(QfitWS, {0, 1, 2});
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
@@ -493,17 +495,6 @@ void Quasi::plotClicked() {
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
     QString const QprobWS = QString::fromStdString(probWS);
     IndirectTab::plotSpectrum(QprobWS, 1, 2);
-  }
-  if (plot == "Fit" || plot == "All") {
-    std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-    fitName.pop_back();
-    fitName.append("_0");
-    IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
-    QString const QfitWS = QString::fromStdString(fitName);
-    if (program == "Lorentzians")
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
-    else
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2});
   }
 
   auto const resultWS =

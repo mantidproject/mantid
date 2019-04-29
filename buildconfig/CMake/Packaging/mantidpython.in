@@ -9,8 +9,6 @@ THISFILE=$(readlink -f "$0")
 INSTALLDIR=$(dirname $THISFILE)   # directory of executable
 INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
 
-@MTD_PATH_DEFINITION@
-
 @TCMALLOC_DEFINITIONS@
 
 LOCAL_LDPATH=@EXTRA_LDPATH@
@@ -27,22 +25,30 @@ if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
+# Define which qt backend to use
+if [ -n "${QT_API}" ]; then
+    LOCAL_QT_API=${QT_API}
+else
+    LOCAL_QT_API="pyqt" # force to use qt4
+fi
+
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
-    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
 elif [ -n "$1" ] && [ -n "$2" ] && [ "$1" = "-n" ]; then
     ranks=$2
     shift 2
-    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
+    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
 else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
-    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ -c "${IPYTHON_STARTUP}" $*@WRAPPER_POSTFIX@
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ @PYTHON_ARGS@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
 fi
 
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
     TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
+    @MTD_PATH_DEFINITION@ \
     PYTHONPATH=${LOCAL_PYTHONPATH} \
+    QT_API=${LOCAL_QT_API} \
     LD_LIBRARY_PATH=${LOCAL_LDPATH} \
     PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
     exec "$@"
-#

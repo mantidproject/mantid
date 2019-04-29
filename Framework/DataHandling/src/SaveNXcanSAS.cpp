@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -16,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MantidVersion.h"
@@ -417,12 +419,16 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
                                                   sasDataQ);
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr,
                                                   sasDataIdev);
+  Mantid::DataHandling::H5Util::writeStrAttribute(
+      data, sasDataIUncertaintiesAttr, sasDataIdev);
   Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr,
                                                   std::vector<int>{0});
 
   if (workspace->hasDx(0)) {
     Mantid::DataHandling::H5Util::writeStrAttribute(
         data, sasDataQUncertaintyAttr, sasDataQdev);
+    Mantid::DataHandling::H5Util::writeStrAttribute(
+        data, sasDataQUncertaintiesAttr, sasDataQdev);
   }
 
   //-----------------------------------------
@@ -434,6 +440,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   qAttributes.emplace(sasUnitAttr, qUnit);
   if (workspace->hasDx(0)) {
     qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
+    qAttributes.emplace(sasUncertaintiesAttr, sasDataQdev);
   }
 
   writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(), qAttributes);
@@ -446,6 +453,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
   iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
+  iAttributes.emplace(sasUncertaintiesAttr, sasDataIdev);
 
   writeArray1DWithStrAttributes(data, sasDataI, intensity.rawData(),
                                 iAttributes);
@@ -486,13 +494,13 @@ bool areAxesNumeric(Mantid::API::MatrixWorkspace_sptr workspace) {
 class SpectrumAxisValueProvider {
 public:
   explicit SpectrumAxisValueProvider(
-      Mantid::API::MatrixWorkspace_sptr workspace) {
-    m_workspace = workspace;
+      Mantid::API::MatrixWorkspace_sptr workspace)
+      : m_workspace(workspace) {
     setSpectrumAxisValues();
   }
 
-  Mantid::MantidVec::value_type *operator()(Mantid::API::MatrixWorkspace_sptr,
-                                            int index) {
+  Mantid::MantidVec::value_type *
+  operator()(Mantid::API::MatrixWorkspace_sptr /*unused*/, int index) {
     auto isPointData =
         m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
     double value = 0;
@@ -592,6 +600,8 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
                                                   sasDataIAxesAttr2D);
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr,
                                                   sasDataIdev);
+  Mantid::DataHandling::H5Util::writeStrAttribute(
+      data, sasDataIUncertaintiesAttr, sasDataIdev);
   // Write the Q Indices as Int Array
   Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr,
                                                   std::vector<int>{0, 1});
@@ -620,6 +630,7 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
   iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
+  iAttributes.emplace(sasUncertaintiesAttr, sasDataIdev);
 
   auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
     return ws->dataY(index).data();
@@ -667,14 +678,17 @@ void addTransmission(H5::Group &group,
       group, sasTransmissionName, nxTransmissionSpectrumClassAttr,
       sasTransmissionSpectrumClassAttr);
 
-  // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty, @name,
-  // @timestamp
+  // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty,
+  // @T_uncertainties, @name, @timestamp
   Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasSignal,
                                                   sasTransmissionSpectrumT);
   Mantid::DataHandling::H5Util::writeStrAttribute(
       transmission, sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT);
   Mantid::DataHandling::H5Util::writeStrAttribute(
       transmission, sasTransmissionSpectrumTUncertainty,
+      sasTransmissionSpectrumTdev);
+  Mantid::DataHandling::H5Util::writeStrAttribute(
+      transmission, sasTransmissionSpectrumTUncertainties,
       sasTransmissionSpectrumTdev);
   Mantid::DataHandling::H5Util::writeStrAttribute(
       transmission, sasTransmissionSpectrumNameAttr, transmissionName);
@@ -694,6 +708,8 @@ void addTransmission(H5::Group &group,
   transmissionAttributes.emplace(sasUnitAttr, unit);
   transmissionAttributes.emplace(sasUncertaintyAttr,
                                  sasTransmissionSpectrumTdev);
+  transmissionAttributes.emplace(sasUncertaintiesAttr,
+                                 sasTransmissionSpectrumTdev);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumT,
                                 transmissionData.rawData(),
@@ -701,7 +717,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add Tdev with units
-  const auto transmissionErrors = workspace->e(0);
+  const auto &transmissionErrors = workspace->e(0);
   std::map<std::string, std::string> transmissionErrorAttributes;
   transmissionErrorAttributes.emplace(sasUnitAttr, unit);
 
@@ -711,7 +727,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add lambda with units
-  const auto lambda = workspace->x(0);
+  const auto &lambda = workspace->x(0);
   std::map<std::string, std::string> lambdaAttributes;
   auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
   if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
@@ -733,10 +749,12 @@ DECLARE_ALGORITHM(SaveNXcanSAS)
 SaveNXcanSAS::SaveNXcanSAS() {}
 
 void SaveNXcanSAS::init() {
+  auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
+  inputWSValidator->add<API::WorkspaceUnitValidator>("MomentumTransfer");
+  inputWSValidator->add<API::CommonBinsValidator>();
   declareProperty(
       Mantid::Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
-          "InputWorkspace", "", Kernel::Direction::Input,
-          boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
+          "InputWorkspace", "", Kernel::Direction::Input, inputWSValidator),
       "The input workspace, which must be in units of Q");
   declareProperty(Mantid::Kernel::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".h5"),
@@ -789,12 +807,6 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
           workspace)) {
     result.emplace("InputWorkspace",
                    "The InputWorkspace must be a Workspace2D.");
-  }
-
-  // Don't allow ragged workspaces for now
-  if (!API::WorkspaceHelpers::commonBoundaries(*workspace)) {
-    result.emplace("InputWorkspace",
-                   "The InputWorkspace cannot be a ragged workspace.");
   }
 
   // Transmission data should be 1D

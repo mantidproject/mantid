@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-import stresstesting
+import systemtesting
 import os.path
 import numpy as np
 
 
-class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
+class WISHDiffractionFocussingReductionTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return ["WISH00035991.raw", "35922_h00_RW.cal", "35991-foc-h00.nxs"]
@@ -34,7 +34,7 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
         focused_suffix = '-foc-h00'
 
         monitor_id = 4
-        crop_limits = {"XMin": 6000, "XMax": 99900 }
+        crop_limits = {"XMin": 6000, "XMax": 99900}
 
         run_numbers = [35991]
 
@@ -45,7 +45,7 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
         self._focused_workspaces = []
         for runno in run_numbers:
             run_number = str(runno)
-            raw_file = "WISH000" + run_number +'.raw'
+            raw_file = "WISH000" + run_number + '.raw'
 
             LoadRaw(Filename=raw_file, OutputWorkspace=run_number)
             CropWorkspace(InputWorkspace=run_number, OutputWorkspace=run_number, **crop_limits)
@@ -58,8 +58,8 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
             DiffractionFocussing(InputWorkspace=run_number, OutputWorkspace=focused,
                                  GroupingFileName=grouping_filename, PreserveEvents=False)
 
-            focused_xye = os.path.join(output_path, focused +'.dat')
-            focused_nxs = os.path.join(output_path, focused +'.nxs')
+            focused_xye = os.path.join(output_path, focused + '.dat')
+            focused_nxs = os.path.join(output_path, focused + '.nxs')
             SaveFocusedXYE(focused, focused_xye, SplitFiles=False)
             SaveNexusProcessed(InputWorkspace=focused, Filename=focused_nxs)
 
@@ -80,7 +80,7 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
         return ws, "35991-foc-h00.nxs"
 
 
-class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
+class WISHDiffractionFocussingAnalysisTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return ["35979-foc-h00.nxs",
@@ -101,9 +101,9 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
     def runTest(self):
         run_numbers = []
         run_numbers.append(35991)
-        run_numbers.extend(range(35979,35983))
+        run_numbers.extend(range(35979, 35983))
         run_numbers.append(35988)
-        run_numbers.extend(range(35983,35985))
+        run_numbers.extend(range(35983, 35985))
 
         suffix = "-foc-h00"
         integrate_suffix = "-int"
@@ -132,19 +132,19 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
                 integrated_workspace = output_workspace
             else:
                 # single run, use name as is
-                Load(run  + ".nxs", OutputWorkspace=run)
+                Load(run + ".nxs", OutputWorkspace=run)
                 output_workspace = run
                 integrated_workspace = output_workspace + integrate_suffix
 
-            #integrate the run
+            # integrate the run
             Integration(InputWorkspace=output_workspace,
                         OutputWorkspace=integrated_workspace,
                         **integration_range)
-            w1=mtd[integrated_workspace]
+            w1 = mtd[integrated_workspace]
 
             # add to table
             row = [get_log(w1, name) for name in log_names]
-            row.extend([w1.readY(0), w1.readE(0) ])
+            row.extend([w1.readY(0), w1.readE(0)])
             row = list(map(float, row))
             table.addRow(row)
 
@@ -159,7 +159,9 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
     def validate(self):
         self.assertEqual(self.table.rowCount(), 8)
         self.assertEqual(len(self.output_names), 8)
-        return self.table.name() , "WISHDiffractionFocussingResult.nxs"
+        self.tolerance = 1e-5
+        self.tolerance_is_rel_err = True
+        return self.table.name(), "WISHDiffractionFocussingResult.nxs"
 
 
 def create_table(name, columns, num_rows):

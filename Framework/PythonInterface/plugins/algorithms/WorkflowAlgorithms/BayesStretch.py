@@ -106,7 +106,7 @@ class BayesStretch(PythonAlgorithm):
         run_f2py_compatibility_test()
 
         from IndirectBayes import (CalcErange, GetXYE)
-        from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ, CheckHistZero)
+        from IndirectCommon import (CheckXrange, CheckAnalysersOrEFixed, getEfixed, GetThetaQ, CheckHistZero)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
         logger.information('BayesStretch input')
         logger.information('Sample is %s' % self._sam_name)
@@ -122,7 +122,7 @@ class BayesStretch(PythonAlgorithm):
         CheckXrange(self._erange, 'Energy')
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._sam_name, self._res_name)
+        CheckAnalysersOrEFixed(self._sam_name, self._res_name)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._sam_name)
         theta, Q = GetThetaQ(self._sam_name)
@@ -311,7 +311,7 @@ class BayesStretch(PythonAlgorithm):
             unitx.setLabel('beta', '')
             unity.setLabel('sigma', '')
         else:
-            if name[:4] == 'Beta':
+            if name[-4:] == 'Beta':
                 unitx.setLabel('beta', '')
             else:
                 unitx.setLabel('sigma', '')

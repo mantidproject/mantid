@@ -29,7 +29,7 @@ public:
     vertices.emplace_back(V3D(-1, 0, 0));
     vertices.emplace_back(V3D(1, 0, 0));
     vertices.emplace_back(V3D(0, 1, 0));
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
 
     auto obj = createMesh(std::move(triangles), std::move(vertices));
@@ -46,7 +46,7 @@ public:
     vertices.emplace_back(V3D(1, 0, 0));
     vertices.emplace_back(V3D(0, 1, 0));
     vertices.emplace_back(V3D(0, 1, 1));
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2, 1, 3, 2, 3, 0, 2});
 
     auto obj = createMesh(std::move(triangles), std::move(vertices));
@@ -59,8 +59,8 @@ public:
 class NexusShapeFactoryTestPerformance : public CxxTest::TestSuite {
 private:
   std::vector<Eigen::Vector3d> m_vertices;
-  std::vector<uint16_t> m_facesIndices;
-  std::vector<uint16_t> m_windingOrder;
+  std::vector<uint32_t> m_facesIndices;
+  std::vector<uint32_t> m_windingOrder;
 
   template <typename T>
   void appendTo(std::vector<T> &destination, unsigned int value) {
@@ -79,7 +79,7 @@ public:
 
   NexusShapeFactoryTestPerformance() {
     // Make inputs. Repeated squares
-    for (uint16_t i = 0; i < 10000; ++i) {
+    for (uint32_t i = 0; i < 10000; ++i) {
       m_vertices.emplace_back(Eigen::Vector3d(0 + i, 1, 0));
       m_vertices.emplace_back(Eigen::Vector3d(0 + i, 1, 0));
       /*
@@ -89,13 +89,13 @@ public:
        *     x           x     x
        */
 
-      appendTo<uint16_t>(m_facesIndices, (i * 4));
-      appendTo<uint16_t>(m_facesIndices, ((i + 1) * 4));
+      appendTo<uint32_t>(m_facesIndices, (i * 4));
+      appendTo<uint32_t>(m_facesIndices, ((i + 1) * 4));
       if (i % 2 != 0) {
-        appendTo<uint16_t>(m_windingOrder, (i * 2));
-        appendTo<uint16_t>(m_windingOrder, (i * 2 + 1));
-        appendTo<uint16_t>(m_windingOrder, (i * 2 + 2));
-        appendTo<uint16_t>(m_windingOrder, (i * 2 + 3));
+        appendTo<uint32_t>(m_windingOrder, (i * 2));
+        appendTo<uint32_t>(m_windingOrder, (i * 2 + 1));
+        appendTo<uint32_t>(m_windingOrder, (i * 2 + 2));
+        appendTo<uint32_t>(m_windingOrder, (i * 2 + 3));
       }
     }
   }

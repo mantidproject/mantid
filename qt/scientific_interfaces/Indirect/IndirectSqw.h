@@ -31,7 +31,7 @@ public:
   bool validate() override;
 
 private slots:
-  void plotContour();
+  void plotRqwContour();
   void sqwAlgDone(bool error);
 
   void runClicked();

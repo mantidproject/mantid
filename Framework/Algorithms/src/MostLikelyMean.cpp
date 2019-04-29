@@ -5,8 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MostLikelyMean.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include "boost/multi_array.hpp"
@@ -14,9 +15,9 @@
 namespace Mantid {
 namespace Algorithms {
 
+using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::NullValidator;
 using Mantid::Kernel::PropertyWithValue;
 
 // Register the algorithm into the AlgorithmFactory
@@ -43,9 +44,10 @@ const std::string MostLikelyMean::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MostLikelyMean::init() {
-  auto nullValidator = boost::make_shared<NullValidator>();
+  auto lengthValidator = boost::make_shared<ArrayLengthValidator<double>>();
+  lengthValidator->setLengthMin(1);
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(
-                      "InputArray", nullValidator, Direction::Input),
+                      "InputArray", lengthValidator, Direction::Input),
                   "An input array.");
   declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
                       "Output", 0., Direction::Output),
@@ -59,7 +61,7 @@ void MostLikelyMean::exec() {
   const std::vector<double> input = getProperty("InputArray");
   const int size = static_cast<int>(input.size());
   boost::multi_array<double, 2> cov(boost::extents[size][size]);
-  PARALLEL_FOR_IF(true)
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < size; ++i) {
     for (int j = 0; j <= i; ++j) {
       double diff = sqrt(fabs(input[i] - input[j]));

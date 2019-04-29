@@ -100,10 +100,6 @@ void IndirectDataReduction::exportTabPython() {
 void IndirectDataReduction::initLayout() {
   m_uiForm.setupUi(this);
 
-  // Do not allow running until setup  and instrument loading are done
-  emitUpdateRunButton(false, "disable", "Loading UI...",
-                      "Initialising user interface components...");
-
   // Create the tabs
   addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
@@ -122,10 +118,6 @@ void IndirectDataReduction::initLayout() {
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
-
-  // Reset the Run button state when the tab is changed
-  connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this,
-          SLOT(emitUpdateRunButton()));
 
   // Handle instrument configuration changes
   connect(m_uiForm.iicInstrumentConfiguration,
@@ -283,9 +275,9 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   auto component = instrument->getComponentByName(analyser);
 
   // For each parameter we want to get
-  for (auto it = ipfElements.begin(); it != ipfElements.end(); ++it) {
+  for (auto &ipfElement : ipfElements) {
     try {
-      std::string key = *it;
+      std::string key = ipfElement;
 
       QString value = getInstrumentParameterFrom(instrument, key);
 
@@ -297,8 +289,8 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
     // In the case that the parameter does not exist
     catch (Mantid::Kernel::Exception::NotFoundError &nfe) {
       UNUSED_ARG(nfe);
-      g_log.warning() << "Could not find parameter " << *it << " in instrument "
-                      << instrumentName << '\n';
+      g_log.warning() << "Could not find parameter " << ipfElement
+                      << " in instrument " << instrumentName << '\n';
     }
   }
 
@@ -495,15 +487,15 @@ void IndirectDataReduction::filterUiForFacility(QString facility) {
   }
 
   // Add the required tabs
-  for (auto it = enabledTabs.begin(); it != enabledTabs.end(); ++it) {
+  for (auto &enabledTab : enabledTabs) {
     // Connect the insturment changed signal
-    connect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[*it].second,
-            SIGNAL(newInstrumentConfiguration()));
+    connect(this, SIGNAL(newInstrumentConfiguration()),
+            m_tabs[enabledTab].second, SIGNAL(newInstrumentConfiguration()));
 
     // Add the tab
-    m_uiForm.twIDRTabs->addTab(m_tabs[*it].first, *it);
+    m_uiForm.twIDRTabs->addTab(m_tabs[enabledTab].first, enabledTab);
 
-    g_log.debug() << "Adding tab " << (*it).toStdString() << '\n';
+    g_log.debug() << "Adding tab " << enabledTab.toStdString() << '\n';
   }
 
   // Disable instruments as required
@@ -528,17 +520,4 @@ void IndirectDataReduction::openDirectoryDialog() {
  */
 void IndirectDataReduction::showMessageBox(const QString &message) {
   showInformationBox(message);
-}
-
-/**
- * Slot to allow setting the state of the Run button.
- *
- * @param enabled If the button is clickable
- * @param message Message shown on the button
- * @param tooltip Tooltip shown when hovering over button
- */
-void IndirectDataReduction::emitUpdateRunButton(
-    bool enabled, std::string const &enableOutputButtons, QString message,
-    QString tooltip) {
-  emit updateRunButton(enabled, enableOutputButtons, message, tooltip);
 }

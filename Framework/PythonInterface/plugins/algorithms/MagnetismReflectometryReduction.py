@@ -90,17 +90,21 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              "TOF/wavelength range to use with detector binning")
         self.declareProperty("UseWLTimeAxis", False,
                              doc="For const-Q, if true, wavelength will be used as the time axis, otherwise TOF is used")
+        self.declareProperty("ErrorWeightedBackground", True,
+                             doc="If true, use an error weighted average for the background estimate")
         self.declareProperty("CutTimeAxis", True,
                              doc="If true, the TOF/wavelength dimension will be cropped according to the TimeAxisRange property")
         self.declareProperty("RoundUpPixel", True, doc="If True, round up pixel position of the specular reflectivity")
         self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle")
         self.declareProperty("SpecularPixel", 180.0, doc="Pixel position of the specular reflectivity")
+        self.declareProperty("FinalRebin", True, doc="If True, the final reflectivity will be rebinned")
         self.declareProperty("QMin", 0.005, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (rad)")
         self.declareProperty("TimeAxisStep", 40.0,
                              doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
+        self.declareProperty("CleanupBadData", True, doc="If true, we crop the points consistent with R=0")
         self.declareProperty("ConstQTrim", 0.5,
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
@@ -442,13 +446,22 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
 
         name_output_ws = str(workspace)+'_reflectivity'
-        try:
-            q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
-                            OutputWorkspace=name_output_ws)
-        except:
-            raise RuntimeError("Could not rebin with %s" % str(q_range))
+        do_q_rebin = self.getProperty("FinalRebin").value
 
-        AnalysisDataService.remove(str(q_workspace))
+        if do_q_rebin:
+            try:
+                q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
+                                OutputWorkspace=name_output_ws)
+                AnalysisDataService.remove(str(q_workspace))
+            except:
+                logger.error("Could not rebin with %s" % str(q_range))
+                do_q_rebin = False
+
+        # If we either didn't want to rebin or we failed to rebin,
+        # rename the reflectivity workspace and proceed with it.
+        if not do_q_rebin:
+            q_rebin = RenameWorkspace(InputWorkspace=q_workspace,
+                                      OutputWorkspace=name_output_ws)
 
         return q_rebin
 
@@ -473,8 +486,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             if low_q is not None and high_q is not None:
                 break
 
+        cleanup = self.getProperty("CleanupBadData").value
         crop = self.getProperty("CropFirstAndLastPoints").value
-        if low_q is not None and high_q is not None:
+        if cleanup and low_q is not None and high_q is not None:
             # Get rid of first and last Q points to avoid edge effects
             if crop:
                 low_q += 1
@@ -483,18 +497,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             q_rebin = CropWorkspace(InputWorkspace=q_rebin,
                                     OutputWorkspace=str(q_rebin),
                                     XMin=data_x[low_q], XMax=data_x[high_q])
-        else:
+        elif cleanup:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
         # Clean up the workspace for backward compatibility
         data_y = q_rebin.dataY(0)
-        data_e = q_rebin.dataE(0)
-
-        # Values < 1e-12 and values where the error is greater than the value are replaced by 0+-1
-        for i in range(len(data_y)):
-            if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
-                data_y[i]=0.0
-                data_e[i]=1.0
 
         # Sanity check
         if sum(data_y) == 0:
@@ -542,7 +549,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Wavelength uncertainty
         lambda_min = ws.getRun().getProperty("lambda_min").value
         lambda_max = ws.getRun().getProperty("lambda_max").value
-        dq_over_q = min(res) / np.tan(theta)
+        dq_over_q = np.min(res) / np.tan(theta)
 
         data_x = ws.dataX(0)
         data_dx = ws.dataDx(0)
@@ -686,6 +693,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         """
         logger.warning("Processing %s" % str(workspace))
         use_wl_cut = self.getProperty("UseWLTimeAxis").value
+        error_weighted_bck = self.getProperty("ErrorWeightedBackground").value
         constant_q_binning = self.getProperty("ConstantQBinning").value
         tof_step = self.getProperty("TimeAxisStep").value
 
@@ -743,7 +751,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              XPixelMax=int(background_range[1]),
                              YPixelMin=low_res_min,
                              YPixelMax=low_res_max,
-                             ErrorWeighting = True,
+                             ErrorWeighting = error_weighted_bck,
                              SumPixels=True, NormalizeSum=True)
 
             signal = RefRoi(InputWorkspace=workspace, IntegrateY=True,

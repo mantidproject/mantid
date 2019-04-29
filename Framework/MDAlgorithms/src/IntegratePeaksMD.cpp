@@ -334,11 +334,11 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       if (Peak *shapeablePeak = dynamic_cast<Peak *>(&p)) {
 
-        PeakShape *sphere = new PeakShapeSpherical(
+        PeakShape *sphereShape = new PeakShapeSpherical(
             PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
             BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(),
             this->version());
-        shapeablePeak->setPeakShape(sphere);
+        shapeablePeak->setPeakShape(sphereShape);
       }
 
       // Perform the integration into whatever box is contained within.
@@ -381,18 +381,20 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         bgErrorSquared -= interiorErrorSquared;
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * ratio;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * radiusRatio;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius sphere
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * interiorRatio;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       }
@@ -421,7 +423,6 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared,
             signal_fit.mutableRawData());
 
-        Points points(signal_fit.size(), LinearGenerator(0, 1));
         wsProfile2D->setHistogram(i, points, signal_fit);
 
         // Evaluate the signal inside "BackgroundInnerRadius"
@@ -446,34 +447,34 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // are 100% dependent; this is the same as integrating a shell.
         bgErrorSquared -= interiorErrorSquared;
         // Relative volume of peak vs the BackgroundOuterRadius cylinder
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * cylinderLength;
+        const double radiusRatio = (PeakRadius / BackgroundOuterRadius);
+        const double peakVolume = radiusRatio * radiusRatio * cylinderLength;
 
         // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+        const double interiorRatio =
+            (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the
         // BackgroundOuterRadius cylinder
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * cylinderLength;
+        const double bgVolume =
+            1.0 - interiorRatio * interiorRatio * cylinderLength;
 
         // Finally, you will multiply the bg intensity by this to get the
         // estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
+        const double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       } else {
-        Points points(signal_fit.size(), LinearGenerator(0, 1));
         wsProfile2D->setHistogram(i, points, signal_fit);
       }
 
       if (profileFunction == "NoFit") {
-        signal = 0.;
         auto &y = wsProfile2D->y(i);
         // sum signal between range
         signal = y.sum(peakMin, peakMax);
         // sum background outside of range
         background_total += y.sum(0, peakMin);
         background_total += y.sum(peakMax);
-        errorSquared = std::fabs(signal);
+        errorSquared = std::abs(signal);
       } else {
         API::IAlgorithm_sptr findpeaks =
             createChildAlgorithm("FindPeaks", -1, -1, false);
@@ -542,7 +543,7 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             FunctionFactory::Instance().createInitialized(fun_str.str());
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
-        const auto x = wsProfile2D->x(i);
+        const auto &x = wsProfile2D->x(i);
         wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
         wsDiff2D->setSharedX(i, wsProfile2D->sharedX(i));
 
@@ -656,7 +657,7 @@ bool IntegratePeaksMD::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
         Peak p(inst, edge);
         in = (in && p.findDetector());
         if (!in) {
-          return in;
+          return false;
         }
       } catch (...) {
         return false;

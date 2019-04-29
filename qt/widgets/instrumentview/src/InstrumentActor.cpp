@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -121,7 +120,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
 
   // If the instrument is empty, maybe only having the sample and source
   if (detectorInfo().size() == 0) {
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
@@ -182,8 +181,7 @@ void InstrumentActor::setUpWorkspace(
   resetColors();
 
   // set the ragged flag using a workspace validator
-  auto wsValidator = Mantid::API::CommonBinsValidator();
-  m_ragged = !wsValidator.isValid(sharedWorkspace).empty();
+  m_ragged = !sharedWorkspace->isCommonBins();
 }
 
 void InstrumentActor::setupPhysicalInstrumentIfExists() {
@@ -322,7 +320,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(nullptr, "MantidPlot - Warning",
+      QMessageBox::warning(nullptr, "Mantid - Warning",
                            "An error accured when applying the mask.", "OK");
     }
   }
@@ -460,9 +458,17 @@ double InstrumentActor::getIntegratedCounts(size_t index) const {
 void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
                                    std::vector<double> &x,
                                    std::vector<double> &y, size_t size) const {
+  // don't bother if no detectors are supplied
+  if (dets.empty() || size == 0) {
+    x.clear();
+    y.clear();
+    return;
+  }
+
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  if (size > ws->blocksize() || size == 0) {
-    size = ws->blocksize();
+  const auto blocksize = ws->blocksize();
+  if (size > blocksize || size == 0) {
+    size = blocksize;
   }
 
   if (m_ragged) {
@@ -487,15 +493,20 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets,
 void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
                                           std::vector<double> &x,
                                           std::vector<double> &y) const {
+  auto firstWorkspaceIndex = [this](const std::vector<size_t> &dets) {
+    if (dets.empty())
+      return INVALID_INDEX;
+    for (auto i : dets) {
+      auto const index = getWorkspaceIndex(i);
+      if (index != INVALID_INDEX)
+        return index;
+    }
+    return INVALID_INDEX;
+  };
 
-  bool isDataEmpty = dets.empty();
+  auto const wi = firstWorkspaceIndex(dets);
 
-  auto wi = getWorkspaceIndex(dets[0]);
-
-  if (wi == INVALID_INDEX)
-    isDataEmpty = true;
-
-  if (isDataEmpty) {
+  if (wi == INVALID_INDEX) {
     x.clear();
     y.clear();
     return;
@@ -503,7 +514,6 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
 
   // find the bins inside the integration range
   size_t imin, imax;
-
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
@@ -511,8 +521,8 @@ void InstrumentActor::sumDetectorsUniform(const std::vector<size_t> &dets,
   x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   // sum the spectra
-  for (auto det : dets) {
-    auto index = getWorkspaceIndex(det);
+  for (const auto det : dets) {
+    const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
     const auto &Y = ws->y(index);
@@ -536,12 +546,6 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
                                          std::vector<double> &x,
                                          std::vector<double> &y,
                                          size_t size) const {
-  if (dets.empty() || size == 0) {
-    x.clear();
-    y.clear();
-    return;
-  }
-
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   //  create a workspace to hold the data from the selected detectors
   Mantid::API::MatrixWorkspace_sptr dws =
@@ -553,8 +557,8 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
   size_t nSpec = 0; // number of actual spectra to add
   // fill in the temp workspace with the data from the detectors
-  for (auto det : dets) {
-    auto index = getWorkspaceIndex(det);
+  for (const auto det : dets) {
+    const auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
     dws->setHistogram(nSpec, ws->histogram(index));
@@ -598,16 +602,16 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
-    const auto &X = ws->x(0);
-    const auto &Y = ws->y(0);
-    x.assign(X.begin(), X.end());
-    y.assign(Y.begin(), Y.end());
+    const auto &commonX = ws->points(0);
+    const auto &firstY = ws->y(0);
+    x.assign(std::cbegin(commonX), std::cend(commonX));
+    y.assign(std::cbegin(firstY), std::cend(firstY));
 
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
-      const auto &Y = ws->y(i);
-      std::transform(y.begin(), y.end(), Y.begin(), y.begin(),
-                     std::plus<double>());
+      const auto &specY = ws->y(i);
+      std::transform(std::cbegin(y), std::cend(y), std::cbegin(specY),
+                     std::begin(y), std::plus<double>());
     }
   } catch (std::invalid_argument &) {
     // wrong Params for any reason
@@ -795,7 +799,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(nullptr, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "Mantid - Warning",
                          "An error occurred when extracting the mask.", "OK");
   }
 }
@@ -861,11 +865,9 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D &Xfrom,
     }
   } else {
     // Rotation R1 of system (X,Y,Z) around Z by alpha
-    Mantid::Kernel::V3D X1;
     Mantid::Kernel::Quat R1;
 
-    X1 = Zfrom.cross_prod(Zto);
-    X1.normalize();
+    const auto X1 = normalize(Zfrom.cross_prod(Zto));
 
     double sX = Xfrom.scalar_prod(Xto);
     if (fabs(sX - 1) < m_tolerance) {
@@ -929,15 +931,13 @@ void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye,
 
   // Basis vectors of the OpenGL reference frame. Z points into the screen, Y
   // points up.
-  const Mantid::Kernel::V3D X(1, 0, 0);
-  const Mantid::Kernel::V3D Y(0, 1, 0);
-  const Mantid::Kernel::V3D Z(0, 0, 1);
+  constexpr Mantid::Kernel::V3D X(1, 0, 0);
+  constexpr Mantid::Kernel::V3D Y(0, 1, 0);
+  constexpr Mantid::Kernel::V3D Z(0, 0, 1);
 
-  Mantid::Kernel::V3D x, y, z;
-  z = eye;
-  z.normalize();
-  y = up;
-  x = y.cross_prod(z);
+  const auto z = normalize(eye);
+  auto y = up;
+  auto x = y.cross_prod(z);
   if (x.nullVector()) {
     // up || eye
     if (z.X() != 0.0) {
@@ -1115,11 +1115,10 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
       mapCmptToNameVector;
 
   auto paramNames = comp->getParameterNamesByComponent();
-  for (auto itParamName = paramNames.begin(); itParamName != paramNames.end();
-       ++itParamName) {
+  for (auto &itParamName : paramNames) {
     // build the data structure I need Map comp id -> vector of names
-    std::string paramName = itParamName->first;
-    Mantid::Geometry::ComponentID paramCompId = itParamName->second;
+    std::string paramName = itParamName.first;
+    Mantid::Geometry::ComponentID paramCompId = itParamName.second;
     // attempt to insert this will fail silently if the key already exists
     if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
       mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
@@ -1139,9 +1138,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
           "\nParameters from: " + paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(),
                 Mantid::Kernel::CaseInsensitiveStringComparator());
-      for (auto itParamName = compParamNames.begin();
-           itParamName != compParamNames.end(); ++itParamName) {
-        std::string paramName = *itParamName;
+      for (auto paramName : compParamNames) {
         // no need to search recursively as we are asking from the matching
         // component
         std::string paramValue =

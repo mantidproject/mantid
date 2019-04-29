@@ -6,19 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
+from qtpy import QtGui, QtWidgets
+from qtpy.QtCore import Signal, QSettings, QFileInfo
 
-import ui_run_selector_widget
-from PyQt4.QtCore import pyqtSignal
-from mantidqtpython import MantidQt
+from mantidqt.widgets import manageuserdirectories
+from mantidqt.utils.qt import load_ui
+
+Ui_RunSelectorWidget, _ = load_ui(__file__, "run_selector_widget.ui")
 
 
-class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidget):
-    manageDirectories = pyqtSignal()
-    browse = pyqtSignal()
-    addRuns = pyqtSignal()
-    removeRuns = pyqtSignal()
-    removeAllRuns = pyqtSignal()
+class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
+    manageDirectories = Signal()
+    browse = Signal()
+    addRuns = Signal()
+    removeRuns = Signal()
+    removeAllRuns = Signal()
 
     def __init__(self, parent=None):
         super(RunSelectorWidget, self).__init__(parent)
@@ -26,8 +28,8 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         self._connect_signals()
 
     def setupUi(self, other):
-        ui_run_selector_widget.Ui_RunSelectorWidget.setupUi(self, other)
-        self.runList.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        Ui_RunSelectorWidget.setupUi(self, other)
+        self.runList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
     def show_file_picker(self, extensions, search_directories):
         assert(len(extensions) > 0)
@@ -35,13 +37,13 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         default_directory = search_directories[0]
         directory = self._previous_or_default_directory(previous_directories, default_directory)
         file_filter = self._filter_for_extensions(extensions)
-        chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
+        chosen_files = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", directory, file_filter)
         if chosen_files:
             self._store_previous_directory(previous_directories, chosen_files[0])
         return [str(chosen_file) for chosen_file in chosen_files]
 
     def _previous_directory_settings(self):
-        previous_directories = QtCore.QSettings()
+        previous_directories = QSettings()
         previous_directories.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns")
         return previous_directories
 
@@ -49,21 +51,21 @@ class RunSelectorWidget(QtGui.QWidget, ui_run_selector_widget.Ui_RunSelectorWidg
         return settings.value("InPath", default)
 
     def _store_previous_directory(self, settings, path):
-        previous_file = QtCore.QFileInfo(path)
+        previous_file = QFileInfo(path)
         settings.setValue("InPath", previous_file.absoluteDir().absolutePath())
 
     def _filter_for_extensions(self, extensions):
         return "Files ( *" + " *".join(extensions) + ")"
 
     def show_directories_manager(self):
-        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories(self).exec_()
 
     def run_not_found(self):
-        QtGui.QMessageBox.warning(self, "Run Not Found!",
-                                  "Could not find one or more of the runs specified.")
+        QtWidgets.QMessageBox.warning(self, "Run Not Found!",
+                                      "Could not find one or more of the runs specified.")
 
     def invalid_run_query(self, message):
-        QtGui.QMessageBox.warning(self, "Invalid Run Query!", message)
+        QtWidgets.QMessageBox.warning(self, "Invalid Run Query!", message)
 
     def run_list(self):
         return str(self.runLineEdit.text())

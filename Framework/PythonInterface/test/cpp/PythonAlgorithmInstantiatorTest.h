@@ -53,7 +53,9 @@ private:
 
   PythonAlgorithmInstantiator const &instantiator() {
     if (!m_creator) {
-      // Assume this is where the mantid package is too
+      // The mantid package is not copied over for developer builds,
+      // but the PYTHONPATH is set in CMake for each of the test classes in
+      // PythonInterfaceCppTest so they can import mantid.api
       auto code = "from mantid.api import PythonAlgorithm\n"
                   "class PyAlg(PythonAlgorithm):\n"
                   "    def category(self):\n"

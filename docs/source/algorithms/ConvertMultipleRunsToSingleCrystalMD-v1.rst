@@ -11,15 +11,17 @@ Description
 
 This workflow algorithm loads, converts to MDWorkspace and combines a
 series of runs. The resulting workspace is a :ref:`MDWorkspace
-<MDWorkspace>` containing a volume of scattering events. If a
-:ref:`UB matrix <Lattice>` is provided then the MD workspace will be
-in HKL otherwise it will be in Q_sample.
+<MDWorkspace>` containing a volume of scattering events. If a :ref:`UB
+matrix <Lattice>` is provided and `QFrame='HKL'`, then the MD workspace
+will be in HKL otherwise it will be in Q_sample.
 
 This is **not** a correctly normalized workspace, for that look at
 :ref:`SingleCrystalDiffuseReduction
 <algm-SingleCrystalDiffuseReduction>`. The output workspace can be
 used with :ref:`FindPeaksMD <algm-FindPeaksMD>` and from that
-determine the :ref:`UB matrix <Lattice>`.
+determine the :ref:`UB matrix <Lattice>`. The output workspace (if in
+Q sample) can then be used with :ref:`MDNorm <algm-MDNorm>` to
+correctly bin and normalise the data.
 
 The input filename follows the syntax from
 :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`
@@ -113,7 +115,8 @@ Output:
                                         OutputWorkspace='output',
                                         SetGoniometer=True,
                                         Axis0="huber,0,1,0,1",
-                                        UBMatrix=UBfilename)
+                                        UBMatrix=UBfilename,
+                                        QFrame='HKL')
    ws=mtd['output']
    print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
    print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))
@@ -139,7 +142,8 @@ Output:
                                         OutputWorkspace='output',
                                         SetGoniometer=True,
                                         Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
-                                        UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat")
+                                        UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat",
+                                        QFrame='HKL')
    ws=mtd['output']
    print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
    print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))

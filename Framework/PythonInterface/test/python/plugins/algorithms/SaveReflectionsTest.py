@@ -26,7 +26,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
     def _create_peaks_workspace(self):
         """Create a dummy peaks workspace"""
-        path = FileFinder.getFullPath("IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml")
+        path = FileFinder.getFullPath("unit_testing/MINITOPAZ_Definition.xml")
         inst = LoadEmptyInstrument(Filename=path)
         ws = CreatePeaksWorkspace(inst, 0)
         DeleteWorkspace(inst)
@@ -55,14 +55,14 @@ class SaveReflectionsTest(unittest.TestCase):
         return ws
 
     def _create_modulated_peak_table(self):
-        return self._create_indexed_workspace(self._workspace, 5, np.ones((self._workspace.rowCount(), 2)))
+        hklm = np.ones((self._workspace.rowCount(), 2))
+        return self._create_indexed_workspace(self._workspace, 5, hklm)
 
     def _create_indexed_workspace(self, fractional_peaks, ndim, hklm):
         # Create table with the number of columns we need
-        types = ['int', 'long64', 'double', 'double', 'double', 'double',  'double', 'double',
-                 'double', 'double', 'double', 'float', 'str', 'float', 'float', 'V3D', 'V3D', 'int']
         indexed = CreateEmptyTableWorkspace()
         names = fractional_peaks.getColumnNames()
+        types = fractional_peaks.columnTypes()
 
         # Insert the extra columns for the addtional indicies
         for i in range(ndim - 3):
@@ -140,11 +140,15 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_jana_format_modulated(self):
         # Arrange
         workspace = self._create_modulated_peak_table()
+        reference_result = self._get_reference_result("jana_format_modulated.hkl")
         file_name = os.path.join(self._test_dir, "test_jana_modulated.hkl")
         output_format = "Jana"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
+
+        # Assert
+        self.assertTrue(compare_file(reference_result, file_name))
 
     def test_save_GSAS_format(self):
         # Arrange

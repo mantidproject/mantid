@@ -2,7 +2,7 @@
 setlocal enableextensions
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Launch script for command line python
-:: 
+::
 :: Sets the required environment variables for the Python to run correctly.
 :: All variables that are passed to this script are passed directly to
 :: python.exe
@@ -14,12 +14,16 @@ set _BIN_DIR=%_SCRIPT_DIR:~,-1%
 :: Set paths for dependencies, including Python
 @MANTIDPYTHON_PREAMBLE@
 
-set MANTIDPATH=%_BIN_DIR%
-set PYTHONPATH=%MANTIDPATH%;%PYTHONPATH%@PARAVIEW_PYTHON_PATHS@
+set PYTHONPATH=%_BIN_DIR%;%PYTHONPATH%@PARAVIEW_PYTHON_PATHS@
 
 :: Python drivers
 set _PYTHON_EXE=%PYTHONHOME%\python.exe
-set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
+set _JUPYTER_CMD=%PYTHONHOME%\Scripts\jupyter.cmd
+
+:: QtPy should use Qt4 by unless specified
+if "%QT_API%"=="" (
+  set QT_API=pyqt
+)
 
 :: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)
 if "%MPLBACKEND%"=="" (
@@ -38,7 +42,7 @@ if "%1"=="--classic" (
 )
 
 :: Start ipython and pass through all arguments to it
-start "Mantid Python" /B /WAIT %_IPYTHON_CMD% %*
+start "Mantid Python" /B /WAIT %_JUPYTER_CMD% %*
 if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 goto TheEnd
 

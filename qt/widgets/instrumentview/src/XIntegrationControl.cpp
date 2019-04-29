@@ -38,7 +38,7 @@ XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent)
   m_slider->setToolTip("Resize to change integration range");
 }
 
-void XIntegrationScrollBar::resizeEvent(QResizeEvent *) {
+void XIntegrationScrollBar::resizeEvent(QResizeEvent * /*unused*/) {
   if (!m_init) {
     m_slider->resize(width(), height());
     m_init = true;

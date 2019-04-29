@@ -24,6 +24,12 @@ where :math:`F_i = A^{\mathrm{overlap}}_i / A^{\mathrm{old}}_i` is the
 ratio of the overlap area of the new and old bin over the area of the
 old bin.
 
+If the input workspace is not of type: **RebinnedOutput**, and the
+`UseFractionalArea` option is set to `True`, the algorithm
+will assume that the input fraction is unity. This is correct if this
+workspace has not been previously rebinned, but will give incorrect
+error (standard deviation) estimates if it has been rebinned.
+
 Requirements
 ------------
 

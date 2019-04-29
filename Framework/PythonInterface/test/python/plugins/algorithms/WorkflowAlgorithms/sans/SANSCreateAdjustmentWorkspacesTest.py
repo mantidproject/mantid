@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from mantid.api import FrameworkManager
 from sans.test_helper.test_director import TestDirector
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
@@ -21,6 +21,10 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
     test_wav_min = 1.
     test_wav_max = 11.
     test_wav_width = 2.
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
 
     @staticmethod
     def _get_state():
@@ -158,7 +162,9 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             calculated_transmission, unfitted_transmisison = \
                 SANSCreateAdjustmentWorkspacesTest._run_test(serialized_state, sample_data, sample_monitor_data,
                                                              transmission_data, direct_data)
-            raised = False
+        except Exception as e:
+            self.assertFalse(True, "Did not expect an error to be raised. Raised error is: {}".format(str(e)))
+        else:
             # We expect a wavelength adjustment workspace
             self.assertTrue(wavelength_adjustment)
             # We don't expect a pixel adjustment workspace since no files where specified
@@ -166,17 +172,13 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             # We expect a wavelength and pixel adjustment workspace since we set the flag to true and provided a
             # sample data set
             self.assertTrue(wavelength_and_pixel_adjustment)
-            self.assertFalse(calculated_transmission)
-            self.assertFalse(unfitted_transmisison)
-        except:  # noqa
-            raised = True
-        self.assertFalse(raised)
+            self.assertTrue(calculated_transmission)
+            self.assertTrue(unfitted_transmisison)
 
-    def test_that_when_show_transmission_is_true_transmission_runs_are_output(self):
+    def test_that_transmission_runs_are_output(self):
         # Arrange
         state = SANSCreateAdjustmentWorkspacesTest._get_state()
         state.adjustment.wide_angle_correction = True
-        state.adjustment.show_transmission = True
         serialized_state = state.property_manager
         sample_data = SANSCreateAdjustmentWorkspacesTest._get_sample_data()
         sample_monitor_data = SANSCreateAdjustmentWorkspacesTest._get_sample_monitor_data(3.)
@@ -197,7 +199,7 @@ class SANSCreateAdjustmentWorkspacesTest(unittest.TestCase):
             # We expect a wavelength and pixel adjustment workspace since we set the flag to true and provided a
             # sample data set
             self.assertTrue(wavelength_and_pixel_adjustment)
-            # We expect transmission workspaces since show_transmission was set to true
+            # We expect transmission workspaces
             self.assertTrue(calculated_transmission)
             self.assertTrue(unfitted_transmisison)
         except:  # noqa

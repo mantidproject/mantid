@@ -51,7 +51,7 @@ def CalcErange(inWS,ns,erange,binWidth):
     maxIndex = np.where(Xdata==Xin[-1])[0][0]
 
     #reshape array into sublists of bins
-    Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
+    Xin = Xin.reshape((len(Xin)//binWidth, binWidth))
 
     #sum and normalise values in bins
     Xout = [sum(bin_val) * bnorm for bin_val in Xin]
@@ -86,7 +86,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
 
     array_len = 4096                                    # length of Fortran array
     CheckXrange(erange,'Energy')
-    CheckAnalysers(vname,rname)
+    CheckAnalysersOrEFixed(vname,rname)
     nvan,ntc = CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)

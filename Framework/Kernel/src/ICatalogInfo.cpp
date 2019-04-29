@@ -25,7 +25,7 @@ std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
     ret = replacePrefix(path, linuxPrefix(), windowsPrefix());
     ret = replaceAllOccurences(ret, "/", "\\");
   } else {
-    ret = path;
+    ret = replacePrefix(path, catalogPrefix(), windowsPrefix());
   }
 #endif
   return ret;

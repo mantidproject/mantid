@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from mantid.api import FrameworkManager
+from mantid.kernel import config
 
 import os
 import numpy as np
@@ -18,6 +19,11 @@ from sans.common.constants import EMPTY_NAME
 
 
 class SANSCalculateTransmissionTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManager.Instance()
+
     @staticmethod
     def _create_test_wavelength_adjustment_file(file_name):
         test_file = ("  Tue 24-MAR-2015 00:02 Workspace: directbeam_new_hist\n"
@@ -32,7 +38,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
                      "     9.00000    5.000000e-01    5.000000e-01\n"
                      "    11.00000    5.000000e-01    5.000000e-01\n")
 
-        full_file_path = os.path.join(mantid.config.getString('defaultsave.directory'), file_name)
+        full_file_path = os.path.join(config.getString('defaultsave.directory'), file_name)
         if os.path.exists(full_file_path):
             os.remove(full_file_path)
 

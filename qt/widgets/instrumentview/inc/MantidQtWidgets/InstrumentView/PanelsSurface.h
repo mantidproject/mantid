@@ -54,8 +54,9 @@ public:
                 const Mantid::Kernel::V3D &axis);
   ~PanelsSurface() override;
   void init() override;
-  void project(const Mantid::Kernel::V3D &, double &, double &, double &,
-               double &) const override;
+  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
+               double & /*v*/, double & /*uscale*/,
+               double & /*vscale*/) const override;
 
 protected:
   boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
@@ -63,7 +64,7 @@ protected:
 
   void processStructured(size_t rootIndex);
 
-  void processTubes(size_t rootIndex);
+  boost::optional<size_t> processTubes(size_t rootIndex);
 
   void processGrid(size_t rootIndex);
 
@@ -82,7 +83,7 @@ protected:
                                         Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
   void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos,
-                   int index, Mantid::Kernel::Quat &rotation);
+                   int index, const Mantid::Kernel::Quat &rotation);
   // Spread the banks over the projection plane
   void spreadBanks();
   // Find index of the largest bank
@@ -103,8 +104,8 @@ protected:
 
   /// Keep info of the flat banks
   QList<FlatBankInfo *> m_flatBanks;
-  /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
-  QMap<size_t, int> m_detector2bankMap;
+  /// Maps detector indices to indices of FlatBankInfos in m_flatBanks
+  std::vector<int> m_detector2bankMap;
 
   friend struct FlatBankInfo;
 };

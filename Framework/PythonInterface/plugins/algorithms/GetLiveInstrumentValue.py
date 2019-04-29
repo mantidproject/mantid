@@ -58,14 +58,29 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         else:
             return ':CS:SB:'
 
-    def _get_live_value(self):
+    @staticmethod
+    def _caget(pvname, as_string=False):
+        """Retrieve an EPICS PV value"""
         try:
-            from epics import caget
+            from CaChannel import CaChannel, CaChannelException, ca
         except ImportError:
-            raise RuntimeError("PyEpics must be installed to use this algorithm. "
-                               "For details, see https://www.mantidproject.org/PyEpics_In_Mantid")
+            raise RuntimeError("CaChannel must be installed to use this algorithm. "
+                               "For details, see https://www.mantidproject.org/CaChannel_In_Mantid")
+        if as_string:
+            dbr_type = ca.DBR_STRING
+        else:
+            dbr_type = None
+        try:
+            chan = CaChannel(pvname)
+            chan.setTimeout(5.0)
+            chan.searchw()
+            return chan.getw(dbr_type)
+        except CaChannelException as e:
+            raise RuntimeError("Error reading EPICS PV \"{}\": {}".format(pvname, str(e)))
+
+    def _get_live_value(self):
         epicsName = self._prefix() + self._instrument + self._name_prefix() + self._propertyName
-        return caget(epicsName, as_string=True)
+        return self._caget(epicsName, as_string=True)
 
     def _set_output_value(self, value):
         if value is not None:

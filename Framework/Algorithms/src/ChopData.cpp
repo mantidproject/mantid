@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxisValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -18,6 +20,8 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace DataObjects;
+using namespace HistogramData;
 
 DECLARE_ALGORITHM(ChopData)
 
@@ -42,7 +46,7 @@ void ChopData::init() {
 
 void ChopData::exec() {
   // Get the input workspace
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const std::string output = getPropertyValue("OutputWorkspace");
   const double step = getProperty("Step");
   const int chops = getProperty("NChops");
@@ -70,9 +74,8 @@ void ChopData::exec() {
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
     // This will generally be the monitor spectrum.
-    MatrixWorkspace_sptr monitorWS;
-    monitorWS = WorkspaceFactory::Instance().create(inputWS, 1);
-    monitorWS->setHistogram(0, inputWS->histogram(monitorWi));
+    MatrixWorkspace_sptr monitorWS =
+        create<MatrixWorkspace>(*inputWS, 1, inputWS->histogram(monitorWi));
 
     int lowest = 0;
 
@@ -111,7 +114,7 @@ void ChopData::exec() {
     size_t indexLow, indexHigh;
 
     try {
-      indexLow = inputWS->binIndexOf(stepDiff);
+      indexLow = inputWS->yIndexOfX(stepDiff);
       if (indexLow < (nBins + 1)) {
         indexLow++;
       }
@@ -124,7 +127,7 @@ void ChopData::exec() {
     }
 
     try {
-      indexHigh = inputWS->binIndexOf((i + 1) * step);
+      indexHigh = inputWS->yIndexOfX((i + 1) * step);
     } catch (std::out_of_range &) {
       indexHigh = nBins;
     }
@@ -132,8 +135,7 @@ void ChopData::exec() {
     size_t nbins = indexHigh - indexLow;
 
     MatrixWorkspace_sptr workspace =
-        Mantid::API::WorkspaceFactory::Instance().create(inputWS, nHist,
-                                                         nbins + 1, nbins);
+        create<MatrixWorkspace>(*inputWS, BinEdges(nbins + 1));
 
     // Copy over X, Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))

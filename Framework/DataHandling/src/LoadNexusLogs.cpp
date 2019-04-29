@@ -20,6 +20,8 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include <boost/scoped_array.hpp>
 
+#include <algorithm>
+
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
@@ -128,6 +130,59 @@ bool isControlValue(const char &c, const std::string &propName,
     return std::iscntrl(c, locale);
   }
 }
+
+/**
+ * Appends an additional entry to a TimeSeriesProperty which is at the end
+ * time of the run and contains the last value of the property recorded before
+ * the end time.
+ *
+ * This is a workaround to ensure that time series averaging of log values works
+ * correctly for instruments who do not record log values for the entire run.
+ *
+ * If the run does not have an end time or if the last time of the time series
+ * log is the same as the end time the property is left unmodified.
+ *
+ * @param prop :: a pointer to a TimeSeriesProperty to modify
+ * @param run :: handle to the run object containing the end time.
+ */
+void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
+  try {
+    auto tsLog = dynamic_cast<TimeSeriesProperty<double> *>(prop);
+    const auto endTime = run.endTime();
+
+    // First check if it is valid to add a additional log entry
+    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime() ||
+        prop->name() == "proton_charge")
+      return;
+
+    tsLog->addValue(endTime, tsLog->lastValue());
+  } catch (Exception::NotFoundError) {
+    // pass
+  } catch (std::runtime_error) {
+    // pass
+  }
+}
+
+/**
+ * Read the start & end time of the run from the nexus file if they exist.
+ *
+ * @param file :: handle to the nexus file to read from.
+ * @param run :: handle to the run object to set the start & end time for.
+ */
+void readStartAndEndTime(::NeXus::File &file, API::Run &run) {
+  try {
+    // Read the start and end time strings
+    file.openData("start_time");
+    Types::Core::DateAndTime start(file.getStrData());
+    file.closeData();
+    file.openData("end_time");
+    Types::Core::DateAndTime end(file.getStrData());
+    file.closeData();
+    run.setStartAndEndTime(start, end);
+  } catch (::NeXus::Exception &) {
+  }
+}
+
 } // End of anonymous namespace
 
 /// Empty default constructor
@@ -216,6 +271,9 @@ void LoadNexusLogs::exec() {
   } catch (::NeXus::Exception &) {
     // No time. This is not an SNS group
   }
+
+  readStartAndEndTime(file, workspace->mutableRun());
+
   // print out the entry level fields
   std::map<std::string, std::string> entries = file.getEntries();
   std::map<std::string, std::string>::const_iterator iend = entries.end();
@@ -255,14 +313,14 @@ void LoadNexusLogs::exec() {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
       file.openPath("/" + entry_name);
-      std::map<std::string, std::string> entries = file.getEntries();
-      std::map<std::string, std::string>::const_iterator it = entries.begin();
+      entries = file.getEntries();
       std::string eventEntry;
-      for (; it != entries.end(); ++it) {
-        if (it->second == "NXevent_data") {
-          eventEntry = it->first;
-          break;
-        }
+      const auto found =
+          std::find_if(entries.cbegin(), entries.cend(), [](const auto &entry) {
+            return entry.second == "NXevent_data";
+          });
+      if (found != entries.cend()) {
+        eventEntry = found->first;
       }
       this->getLogger().debug()
           << "Opening"
@@ -303,17 +361,6 @@ void LoadNexusLogs::exec() {
       pcharge->setUnits("uAh");
       workspace->mutableRun().addProperty(pcharge, true);
     }
-  }
-  try {
-    // Read the start and end time strings
-    file.openData("start_time");
-    Types::Core::DateAndTime start(file.getStrData());
-    file.closeData();
-    file.openData("end_time");
-    Types::Core::DateAndTime end(file.getStrData());
-    file.closeData();
-    workspace->mutableRun().setStartAndEndTime(start, end);
-  } catch (::NeXus::Exception &) {
   }
 
   if (!workspace->run().hasProperty("gd_prtn_chrg")) {
@@ -423,11 +470,10 @@ void LoadNexusLogs::loadNPeriods(
     file.closeData();
 
     // Add the proton charge vector
-    API::Run &run = workspace->mutableRun();
     const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
     if (!run.hasProperty(protonChargeByPeriodLabel)) {
-      run.addProperty(new ArrayProperty<double>(protonChargeByPeriodLabel,
-                                                protonChargeByPeriod));
+      run.addProperty(new ArrayProperty<double>(
+          protonChargeByPeriodLabel, std::move(protonChargeByPeriod)));
     }
     file.closeGroup();
   } catch (::NeXus::Exception &) {
@@ -499,6 +545,7 @@ void LoadNexusLogs::loadNXLog(
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       Kernel::Property *logValue = createTimeSeries(file, entry_name);
+      appendEndTimeLog(logValue, workspace->run());
       workspace->mutableRun().addProperty(logValue, overwritelogs);
     }
   } catch (::NeXus::Exception &e) {
@@ -539,9 +586,12 @@ void LoadNexusLogs::loadSELog(
         file.closeGroup();
         throw;
       }
+
       logValue = createTimeSeries(file, propName);
+      appendEndTimeLog(logValue, workspace->run());
+
       file.closeGroup();
-    } catch (::NeXus::Exception &e) {
+    } catch (std::exception &e) {
       g_log.warning() << "IXseblock entry '" << entry_name
                       << "' gave an error when loading "
                       << "a time series:'" << e.what() << "'. Skipping entry\n";

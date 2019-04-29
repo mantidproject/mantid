@@ -35,31 +35,19 @@ public:
 
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
-  void updatePlotOptions() override;
   void fitFunctionChanged();
   void customBoolUpdated(const QString &key, bool value);
-  void plotResult();
   void runClicked();
 
 protected:
-  bool shouldEnablePlotResult() override { return true; };
-
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
-
   void setRunIsRunning(bool running) override;
+  void setRunEnabled(bool enable) override;
 
 private:
   void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
 
   void setupFitTab() override;
-
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-
-  void setPlotResultIsPlotting(bool plotting);
 
   IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;

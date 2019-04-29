@@ -9,7 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import numpy
 
 from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget)  # noqa
-from qtpy.QtGui import (QDoubleValidator)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QDesktopServices)  # noqa
+from qtpy.QtCore import QUrl
 
 
 import mantid
@@ -560,11 +561,12 @@ class MainWindow(QMainWindow):
         """
         filename = QFileDialog.getOpenFileName(self, 'Input File Dialog',
                                                self._defaultdir, "Data (*.nxs *.dat);;All files (*)")
+        if isinstance(filename, tuple):
+            filename = filename[0]
 
-        self.ui.lineEdit.setText(str(filename))
+        self.ui.lineEdit.setText(filename)
 
-        info_msg = "Selected file: %s." % str(filename)
-        Logger("Filter_Events").information(info_msg)
+        Logger("Filter_Events").information('Selected file: "{}"'.format(filename))
 
     def load_File(self):
         """ Load the file by file name or run number
@@ -1069,8 +1071,13 @@ class MainWindow(QMainWindow):
         return result
 
     def helpClicked(self):
-        from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("Filter Events")
+        try:
+            from pymantidplot.proxies import showCustomInterfaceHelp
+            showCustomInterfaceHelp("Filter Events")
+        except ImportError:
+            url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html"
+                   "".format("Filter Events"))
+            QDesktopServices.openUrl(QUrl(url))
 
     def _resetGUI(self, resetfilerun=False):
         """ Reset GUI including all text edits and etc.

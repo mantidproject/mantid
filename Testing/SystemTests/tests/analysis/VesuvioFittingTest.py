@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 import platform
@@ -77,7 +77,7 @@ def tolerance():
 #------------------------------------------------------------------------------------------------------------------
 
 
-class VesuvioFittingTest(stresstesting.MantidStressTest):
+class VesuvioFittingTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         do_fit_no_background(k_is_free=False)
@@ -94,7 +94,7 @@ class VesuvioFittingTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------------------------------------
 
 
-class VesuvioFittingWithKFreeTest(stresstesting.MantidStressTest):
+class VesuvioFittingWithKFreeTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         do_fit_no_background(k_is_free=True)
@@ -111,7 +111,7 @@ class VesuvioFittingWithKFreeTest(stresstesting.MantidStressTest):
 #------------------------------------------------------------------------------------------------------------------
 
 
-class VesuvioFittingWithQuadraticBackgroundTest(stresstesting.MantidStressTest):
+class VesuvioFittingWithQuadraticBackgroundTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         do_fit_with_quadratic_background()

@@ -126,9 +126,9 @@ public:
       TS_ASSERT_DELTA(outWS->x(j)[19], 0.3800, Delta);
       TS_ASSERT_DELTA(outWS->x(j)[49], 0.9800, Delta);
       // Test some Y values
-      TS_ASSERT_DELTA(outWS->y(j)[10], 0.0099, Delta);
-      TS_ASSERT_DELTA(outWS->y(j)[19], -0.1195, Delta);
-      TS_ASSERT_DELTA(outWS->y(j)[49], 0.0592, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[10], 0.0130, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[19], -0.1168, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[49], 0.0624, Delta);
       // Test some E values
       TS_ASSERT_DELTA(outWS->e(j)[10], 0.0002, Delta);
       TS_ASSERT_DELTA(outWS->e(j)[19], 0.0003, Delta);

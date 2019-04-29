@@ -12,22 +12,22 @@ and helps the developer to identify issues.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import six
 
 from abc import ABCMeta, abstractmethod
 import os
+from qtpy import QtWidgets
+from six import with_metaclass, PY3
 
-from six import with_metaclass
-from PyQt4 import QtGui
-
+from mantidqt.utils.qt import load_ui
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
-import ui_settings_diagnostic_tab
 
-if six.PY3:
+if PY3:
     unicode = str
 
+Ui_SettingsDiagnosticTab, _ = load_ui(__file__, "settings_diagnostic_tab.ui")
 
-class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_SettingsDiagnosticTab):
+
+class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
     class SettingsDiagnosticTabListener(with_metaclass(ABCMeta, object)):
         """
         Defines the elements which a presenter can listen to for the diagnostic tab
@@ -131,20 +131,20 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
     def fill_tree_widget(self, item, value):
         item.setExpanded(True)
         if type(value) is dict:
-            for key, val in sorted(value.iteritems()):
+            for key, val in sorted(value.items()):
                 if key in self.excluded:
                     continue
-                child = QtGui.QTreeWidgetItem()
+                child = QtWidgets.QTreeWidgetItem()
                 child.setText(0, unicode(key))
                 item.addChild(child)
                 self.fill_tree_widget(child, val)
         elif type(value) is list:
             for val in value:
-                child = QtGui.QTreeWidgetItem()
+                child = QtWidgets.QTreeWidgetItem()
                 child.setText(1, unicode(val))
                 item.addChild(child)
         else:
-            child = QtGui.QTreeWidgetItem()
+            child = QtWidgets.QTreeWidgetItem()
             value = self.clean_class_type(value)
             child.setText(1, unicode(value))
             item.addChild(child)

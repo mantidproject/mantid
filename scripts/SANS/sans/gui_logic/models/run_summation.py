@@ -9,18 +9,25 @@ from ui.sans_isis.work_handler import WorkHandler
 
 
 class RunSummation(object):
-    def __init__(self, work_handler):
+    def __init__(self, work_handler, view=None):
         self._work_handler = work_handler
+        self._view = view
 
     class Listener(WorkHandler.WorkListener):
+        def __init__(self, presenter):
+            self._presenter = presenter
+
         def on_processing_finished(self, result):
-            pass
+            self._presenter.on_processing_finished(result)
 
         def on_processing_error(self, error):
-            pass
+            # currently no different functionality required between
+            # processing finished and processing error,
+            # so call the same method
+            self._presenter.on_processing_finished(error)
 
     def __call__(self, run_selection, settings, base_file_name):
-        self._work_handler.process(RunSummation.Listener(), self.run, 0, run_selection, settings, base_file_name)
+        self._work_handler.process(RunSummation.Listener(self), self.run, 0, run_selection, settings, base_file_name)
 
     def run(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_list(run_selection)
@@ -41,7 +48,8 @@ class RunSummation(object):
             saveAsEvent=save_as_event,
             time_shifts=additional_time_shifts,
             outFile=file_name,
-            outFile_monitors=monitors_file_name)
+            outFile_monitors=monitors_file_name,
+            save_directory=settings.save_directory)
 
     def _run_selection_as_path_list(self, run_selection):
         return [run.file_path() for run in run_selection]
@@ -61,3 +69,7 @@ class RunSummation(object):
 
     def _should_save_as_event_workspaces(self, settings):
         return settings.should_save_as_event_workspaces()
+
+    def on_processing_finished(self, result):
+        if self._view:
+            self._view.enable_sum()

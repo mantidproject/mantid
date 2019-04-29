@@ -8,12 +8,20 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+bool isWorkspaceLoaded(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataView::IndirectFitDataView(QWidget *parent)
-    : QTabWidget(parent), m_dataForm(new Ui::IndirectFitDataForm) {
+    : IIndirectFitDataView(parent), m_dataForm(new Ui::IndirectFitDataForm) {
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();
@@ -105,11 +113,30 @@ IndirectFitDataView::validateMultipleData(UserInputValidator &validator) {
 
 UserInputValidator &
 IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
+  validator = validateSample(validator);
+  if (!isResolutionHidden())
+    validator = validateResolution(validator);
+  return validator;
+}
+
+UserInputValidator &
+IndirectFitDataView::validateSample(UserInputValidator &validator) {
+  const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
   validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
 
-  if (!isResolutionHidden())
-    validator.checkDataSelectorIsValid("Resolution Input",
-                                       m_dataForm->dsResolution);
+  if (!sampleIsLoaded)
+    emit sampleLoaded(QString::fromStdString(getSelectedSample()));
+  return validator;
+}
+
+UserInputValidator &
+IndirectFitDataView::validateResolution(UserInputValidator &validator) {
+  const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
+  validator.checkDataSelectorIsValid("Resolution Input",
+                                     m_dataForm->dsResolution);
+
+  if (!resolutionIsLoaded)
+    emit resolutionLoaded(QString::fromStdString(getSelectedResolution()));
   return validator;
 }
 

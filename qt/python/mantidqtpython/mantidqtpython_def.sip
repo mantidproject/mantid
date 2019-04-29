@@ -5,8 +5,8 @@
 /**************************************************************************/
 
 %Include qwttypes.sip
-%Include vector.sip
-%Include string.sip
+%Include ../common_sip/vector.sip
+%Include ../common_sip/string.sip
 
 %ModuleHeaderCode
 #include "MantidPythonInterface/core/VersionCompat.h"
@@ -207,6 +207,7 @@ bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
 signals:
+void fileEditingFinished();
 void fileFindingFinished();
 void liveButtonPressed(bool);
 };
@@ -1527,7 +1528,47 @@ public:
   virtual std::vector<MantidQt::MantidWidgets::Hint> createHints();
 };
 
+// ---------------------------------
+// WorkspaceWidget and dependencies
+// ---------------------------------
 
+class MantidDisplayBase /Abstract/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+%End
+private:
+  MantidDisplayBase();
+};
+
+class MantidTreeModel : MantidQt::MantidWidgets::MantidDisplayBase {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
+%End
+public:
+  MantidTreeModel();
+private:
+  MantidTreeModel(const MantidQt::MantidWidgets::MantidTreeModel &);
+};
+
+class WorkspaceTreeWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
+%End
+public:
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb /Transfer/, bool viewOnly=false,
+                      QWidget *parent /TransferThis/ = nullptr);
+  void refreshWorkspaces();
+  std::vector<std::string> getSelectedWorkspaceNames() const;
+};
+
+// Implementation to override context menu
+class WorkspaceTreeWidgetSimple : MantidQt::MantidWidgets::WorkspaceTreeWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+%End
+public:
+  WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 

@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
 
-import mantid
 from mantid.kernel import (DateAndTime, BoolTimeSeriesProperty, FloatTimeSeriesProperty, Int64TimeSeriesProperty,
                            StringTimeSeriesProperty)
 from testhelpers import run_algorithm
@@ -64,33 +63,33 @@ class TimeSeriesPropertyTest(unittest.TestCase):
     def test_time_series_double_can_be_extracted(self):
         log_series = self._test_ws.getRun()["TEMP1"]
         self._check_has_time_series_attributes(log_series)
-        self.assertEquals(log_series.size(), self._ntemp)
+        self.assertEqual(log_series.size(), self._ntemp)
         self.assertAlmostEqual(log_series.nthValue(0), -0.00161)
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "f")
+        self.assertEqual(log_series.dtype(), "f")
 
     def test_time_series_int_can_be_extracted(self):
         log_series = self._test_ws.getRun()["raw_frames"]
         self._check_has_time_series_attributes(log_series)
-        self.assertEquals(log_series.size(), self._nframes)
-        self.assertEquals(log_series.nthValue(1), 1436)
+        self.assertEqual(log_series.size(), self._nframes)
+        self.assertEqual(log_series.nthValue(1), 1436)
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "i")
+        self.assertEqual(log_series.dtype(), "i")
 
     def test_time_series_string_can_be_extracted(self):
         log_series = self._test_ws.getRun()["icp_event"]
         self._check_has_time_series_attributes(log_series, list)
-        self.assertEquals(log_series.size(), 4)
-        self.assertEquals(log_series.nthValue(0).strip(), 'CHANGE_PERIOD 1')
+        self.assertEqual(log_series.size(), 4)
+        self.assertEqual(log_series.nthValue(0).strip(), 'CHANGE_PERIOD 1')
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "S61")
+        self.assertEqual(log_series.dtype(), "S61")
 
     def test_time_series_bool_can_be_extracted(self):
         log_series = self._test_ws.getRun()["period 1"]
         self._check_has_time_series_attributes(log_series)
-        self.assertEquals(log_series.size(), 1)
+        self.assertEqual(log_series.size(), 1)
         # Check the dtype return value
-        self.assertEquals(log_series.dtype(), "b")
+        self.assertEqual(log_series.dtype(), "b")
 
     def _check_has_time_series_attributes(self, log, values_type=np.ndarray):
         self.assertTrue(hasattr(log, "value"))
@@ -99,7 +98,7 @@ class TimeSeriesPropertyTest(unittest.TestCase):
 
         values = log.value
         self.assertTrue(isinstance(values, values_type))
-        self.assertEquals(log.size(), len(values))
+        self.assertEqual(log.size(), len(values))
 
         # check the statistics
         stats = log.getStatistics()

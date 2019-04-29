@@ -7,25 +7,33 @@
 """
     Defines a set of aliases to make accessing certain objects easier
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+from __future__ import absolute_import
 
-from ._api import (FrameworkManagerImpl, AnalysisDataServiceImpl,
-                   AlgorithmFactoryImpl, AlgorithmManagerImpl,
-                   FileFinderImpl, FileLoaderRegistryImpl, FunctionFactoryImpl,
-                   WorkspaceFactoryImpl, CatalogManagerImpl)
+from mantid.api import (AlgorithmFactoryImpl, AlgorithmManagerImpl, AnalysisDataServiceImpl, CatalogManagerImpl,
+                        FileFinderImpl, FileLoaderRegistryImpl, FrameworkManagerImpl, FunctionFactoryImpl,
+                        WorkspaceFactoryImpl)
+from mantid.kernel._aliases import lazy_instance_access
 
-###############################################################################
-# Singleton
-###############################################################################
+# Historically the singleton aliases mapped to the instances rather than
+# the class types, i.e. AnalysisDataService is the instance and not the type,
+# which doesn't match the C++ behaviour.
+#
+# Exit handlers are important in some cases as the associated singleton
+# stores references to python objects that need to be cleaned up
+# Without a python-based exit handler the singletons are only cleaned
+# up after main() and this is too late to acquire the GIL to be able to
+# delete the python objects.
+# If you see a segfault late in a python process related to the GIL
+# it is likely an exit handler is missing.
+AnalysisDataService = lazy_instance_access(AnalysisDataServiceImpl)
+AlgorithmFactory = lazy_instance_access(AlgorithmFactoryImpl)
+AlgorithmManager = lazy_instance_access(AlgorithmManagerImpl)
+FileFinder = lazy_instance_access(FileFinderImpl)
+FileLoaderRegistry = lazy_instance_access(FileLoaderRegistryImpl)
+FrameworkManager = lazy_instance_access(FrameworkManagerImpl)
+FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
+WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
+CatalogManager = lazy_instance_access(CatalogManagerImpl)
 
-FrameworkManager = FrameworkManagerImpl.Instance()
-AnalysisDataService = AnalysisDataServiceImpl.Instance()
-mtd = AnalysisDataService #tradition
-AlgorithmFactory = AlgorithmFactoryImpl.Instance()
-AlgorithmManager = AlgorithmManagerImpl.Instance()
-FileFinder = FileFinderImpl.Instance()
-FileLoaderRegistry = FileLoaderRegistryImpl.Instance()
-FunctionFactory = FunctionFactoryImpl.Instance()
-WorkspaceFactory = WorkspaceFactoryImpl.Instance()
-CatalogManager = CatalogManagerImpl.Instance()
+# backwards-compatible
+mtd = AnalysisDataService

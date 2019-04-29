@@ -14,17 +14,19 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
-
-#include "MantidAPI/MultiDomainFunction.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -32,6 +34,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
 
@@ -356,8 +359,11 @@ API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
   size_t ishift = i_maxFitX + 1;
   if (ishift >= vecY.size())
     ysize = vecY.size() - i_minFitX;
-  MatrixWorkspace_sptr purePeakWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
+
+  HistogramBuilder builder;
+  builder.setX(size);
+  builder.setY(ysize);
+  MatrixWorkspace_sptr purePeakWS = create<Workspace2D>(1, builder.build());
 
   auto &vecX = m_dataWS->x(m_wsIndex);
   auto &vecE = m_dataWS->e(m_wsIndex);
@@ -495,7 +501,7 @@ void FitOneSinglePeak::highBkgdFit() {
     size_t numpts = i_maxFitX - i_minFitX;
     size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
-    auto Xdata = m_dataWS->x(m_wsIndex);
+    const auto &Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())
       i_minPeakX = Xdata.size() - 1;
     m_minPeakX = Xdata[i_minPeakX];
@@ -1514,9 +1520,10 @@ void FitPeak::setupOutput(
   size_t sizex = vecoutx.size();
   size_t sizey = vecoutx.size();
 
-  MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", nspec, sizex, sizey));
-
+  HistogramBuilder builder;
+  builder.setX(sizex);
+  builder.setY(sizey);
+  MatrixWorkspace_sptr outws = create<Workspace2D>(nspec, builder.build());
   // Calculate again
   FunctionDomain1DVector domain(vecoutx);
   FunctionValues values(domain);

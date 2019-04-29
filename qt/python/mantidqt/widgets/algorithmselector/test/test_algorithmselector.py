@@ -12,46 +12,41 @@ from __future__ import absolute_import
 from collections import Counter, namedtuple
 
 import qtpy
-from mock import Mock, patch, call
+from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
-from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
+from mantid.api import AlgorithmFactoryImpl
+from mantidqt.utils.qt.testing import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
-mock_get_algorithm_descriptors.return_value = [AlgorithmDescriptorMock(name='Rebin', version=1,
-                                                                       category='Transform', alias=''),
-                                               AlgorithmDescriptorMock(name='Rebin', version=1,
-                                                                       category='Transform\\Rebin', alias=''),
-                                               AlgorithmDescriptorMock(name='Load', version=1,
-                                                                       category='Data', alias=''),
-                                               AlgorithmDescriptorMock(name='DoStuff', version=1,
-                                                                       category='Stuff', alias=''),
-                                               AlgorithmDescriptorMock(name='DoStuff', version=2,
-                                                                       category='Stuff', alias=''),
-                                               ]
+mock_get_algorithm_descriptors.return_value = [
+    AlgorithmDescriptorMock(name='Rebin', version=1,
+                            category='Transform', alias=''),
+    AlgorithmDescriptorMock(name='Rebin', version=1,
+                            category='Transform\\Rebin', alias=''),
+    AlgorithmDescriptorMock(name='Load', version=1,
+                            category='Data', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=1,
+                            category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=2,
+                            category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='ComesFirst', version=1,
+                            category="Sorted", alias=''),
+    AlgorithmDescriptorMock(name='GoesSecond', version=1,
+                            category="Sorted", alias='')
+]
+
+empty_mock_get_algorithm_descriptors = Mock()
+empty_mock_get_algorithm_descriptors.return_value = []
 
 
-class AlgorithmFactoryTest(unittest.TestCase):
-
-    def test_getDescriptors(self):
-        from mantid import AlgorithmFactory
-        descriptors = AlgorithmFactory.getDescriptors(True)
-        self.assertGreater(len(descriptors), 0)
-        d = descriptors[0]
-        self.assertFalse(isinstance(d, AlgorithmDescriptorMock))
-        self.assertTrue(hasattr(d, 'name'))
-        self.assertTrue(hasattr(d, 'alias'))
-        self.assertTrue(hasattr(d, 'category'))
-        self.assertTrue(hasattr(d, 'version'))
-
-
-@patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
+@patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class ModelTest(unittest.TestCase):
 
     def test_get_algorithm_data(self):
@@ -74,8 +69,19 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-@patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
+createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'
+                                  'createDialogFromName')
+
+
+@patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class WidgetTest(GuiTest):
+
+    # def setUp(self):
+    #     self.getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
+    #     AlgorithmFactoryImpl.getDescriptors = mock_get_algorithm_descriptors
+    #
+    # def tearDown(self):
+    #     AlgorithmFactoryImpl.getDescriptors = self.getDescriptors_orig
 
     def _select_in_tree(self, widget, item_label):
         select_item_in_tree(widget.tree, item_label)
@@ -120,7 +126,7 @@ class WidgetTest(GuiTest):
                           "and the default Qt behaviour is used")
         else:
             widget = AlgorithmSelectorWidget()
-            self.assertEquals(widget.search_box.completer().filterMode(), Qt.MatchContains)
+            self.assertEqual(widget.search_box.completer().filterMode(), Qt.MatchContains)
 
     def test_search_box_selection_ignores_tree_selection(self):
         widget = AlgorithmSelectorWidget()
@@ -145,19 +151,57 @@ class WidgetTest(GuiTest):
         self.assertTrue(widget.get_selected_algorithm() is None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
-    def test_execute_on_click(self):
-        with patch('mantidqt.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+    def test_run_dialog_opens_on_execute_button_click(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             widget.execute_button.click()
             createDialog.assert_called_once_with('DoStuff', 2)
 
-    def test_execute_on_return_press(self):
-        with patch('mantidqt.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+    def test_run_dialog_opens_on_return_press(self):
+        with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
             createDialog.assert_called_once_with('DoStuff', 2)
+
+    def test_run_dialog_opens_on_double_click(self):
+        with patch(createDialogFromName_func_name) as createDialog:
+            widget = AlgorithmSelectorWidget()
+            self._select_in_tree(widget, 'Load v.1')
+            selected_item = widget.tree.selectedItems()[0]
+            item_pos = widget.tree.visualItemRect(selected_item).center()
+            QTest.mouseDClick(widget.tree.viewport(), Qt.LeftButton,
+                              Qt.NoModifier, pos=item_pos)
+            createDialog.assert_called_once_with('Load', 1)
+
+    def test_sorting_of_algorithms(self):
+        widget = AlgorithmSelectorWidget()
+        model = AlgorithmSelectorModel(None)
+        top_level = []
+
+        widget._add_tree_items(top_level, model.get_algorithm_data()[1])
+
+        self.assertEquals(top_level[0].text(0), "Data")
+        self.assertEquals(top_level[1].text(0), "Sorted")
+        self.assertEquals(top_level[2].text(0), "Stuff")
+        self.assertEquals(top_level[3].text(0), "Transform")
+
+        second_level = top_level[1].takeChildren()
+        self.assertEquals(second_level[0].text(0), "ComesFirst v.1")
+        self.assertEquals(second_level[1].text(0), "GoesSecond v.1")
+
+    def test_refresh(self):
+        # Set a mock to return an empty descriptor list
+        getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
+        AlgorithmFactoryImpl.getDescriptors = empty_mock_get_algorithm_descriptors
+
+        widget = AlgorithmSelectorWidget()
+        self.assertEqual(0, widget.tree.topLevelItemCount())
+        # put back the original
+        AlgorithmFactoryImpl.getDescriptors = getDescriptors_orig
+        widget.refresh()
+        self.assertEqual(4, widget.tree.topLevelItemCount())
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="PeaksIntegrationSpreadSheet" name="tableWidget_spreadsheet"/>
+    <widget class="QFrame" name="frame_tableWidget_spreadsheet"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

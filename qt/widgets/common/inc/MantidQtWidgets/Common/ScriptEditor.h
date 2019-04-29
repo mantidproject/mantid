@@ -54,7 +54,8 @@ public:
   };
 
 public:
-  ScriptEditor(const QString &lexerName, QWidget *parent = nullptr);
+  ScriptEditor(const QString &lexerName, const QFont &font = QFont(),
+               QWidget *parent = nullptr);
   ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr,
                const QString &settingsGroup = "");
   /// Destructor
@@ -70,7 +71,7 @@ public:
   void writeSettings();
 
   /// Set a new code lexer for this object
-  void setLexer(QsciLexer *) override;
+  void setLexer(QsciLexer * /*codelexer*/) override;
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
   /// Enable the auto complete. Default is for backwards compatability
@@ -96,8 +97,16 @@ public:
   /// Override so that ctrl + mouse wheel will zoom in and out
   void wheelEvent(QWheelEvent *e) override;
 
+  /// Clear keyboard shortcut binding
+  void clearKeyBinding(const QString &keyCombination);
+
   /// Return a pointer to the object responsible for code completion
   inline QsciAPIs *scintillaAPI() const { return m_completer; }
+
+  /// Replace all occurences of a string
+  void replaceAll(const QString &search, const QString &replace, bool regex,
+                  bool caseSensitive, bool matchWords, bool wrap,
+                  bool forward = true);
 
 public slots:
   /// Save the script, opening a dialog
@@ -127,9 +136,9 @@ public slots:
 
 signals:
   /// Inform observers that undo information is available
-  void undoAvailable(bool);
+  void undoAvailable(bool /*_t1*/);
   /// Inform observers that redo information is available
-  void redoAvailable(bool);
+  void redoAvailable(bool /*_t1*/);
   /// Emitted when a zoom in is requested
   void textZoomedIn();
   /// Emitted when a zoom out is requested

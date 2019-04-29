@@ -11,6 +11,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
+#include <numeric>
+
 namespace Mantid {
 namespace Geometry {
 namespace {
@@ -197,12 +199,11 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
  * provided in the instrument definition file
  */
 double DetectorGroup::solidAngle(const V3D &observer) const {
-  double result = 0.0;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    IDetector_const_sptr det = (*it).second;
-    result += det->solidAngle(observer);
-  }
+  double result =
+      std::accumulate(m_detectors.cbegin(), m_detectors.cend(), 0.0,
+                      [&observer](double angle, const auto &det) {
+                        return angle + det.second->solidAngle(observer);
+                      });
   return result;
 }
 
@@ -337,38 +338,42 @@ std::string DetectorGroup::getParameterType(const std::string & /*name*/,
 }
 
 /// Default implementation
-std::vector<double> DetectorGroup::getNumberParameter(const std::string &,
-                                                      bool) const {
+std::vector<double>
+DetectorGroup::getNumberParameter(const std::string & /*pname*/,
+                                  bool /*recursive*/) const {
   return std::vector<double>(0);
 }
 
 /// Default implementation
-std::vector<V3D> DetectorGroup::getPositionParameter(const std::string &,
-                                                     bool) const {
+std::vector<V3D>
+DetectorGroup::getPositionParameter(const std::string & /*pname*/,
+                                    bool /*recursive*/) const {
   return std::vector<V3D>(0);
 }
 
 /// Default implementation
-std::vector<Quat> DetectorGroup::getRotationParameter(const std::string &,
-                                                      bool) const {
+std::vector<Quat>
+DetectorGroup::getRotationParameter(const std::string & /*pname*/,
+                                    bool /*recursive*/) const {
   return std::vector<Quat>(0);
 }
 
 /// Default implementation
-std::vector<std::string> DetectorGroup::getStringParameter(const std::string &,
-                                                           bool) const {
+std::vector<std::string>
+DetectorGroup::getStringParameter(const std::string & /*pname*/,
+                                  bool /*recursive*/) const {
   return std::vector<std::string>(0);
 }
 
 /// Default implementation
-std::vector<int> DetectorGroup::getIntParameter(const std::string &,
-                                                bool) const {
+std::vector<int> DetectorGroup::getIntParameter(const std::string & /*pname*/,
+                                                bool /*recursive*/) const {
   return std::vector<int>(0);
 }
 
 /// Default implementation
-std::vector<bool> DetectorGroup::getBoolParameter(const std::string &,
-                                                  bool) const {
+std::vector<bool> DetectorGroup::getBoolParameter(const std::string & /*pname*/,
+                                                  bool /*recursive*/) const {
   return std::vector<bool>(0);
 }
 
@@ -459,7 +464,8 @@ size_t DetectorGroup::index() const {
   throw std::runtime_error("A DetectorGroup cannot have an index");
 }
 
-size_t DetectorGroup::registerContents(class ComponentVisitor &) const {
+size_t
+DetectorGroup::registerContents(class ComponentVisitor & /*component*/) const {
   throw std::runtime_error("DetectorGroup::registerContents. This should not "
                            "be called. DetectorGroups are not part of the "
                            "instrument. On-the-fly only.");

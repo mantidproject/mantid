@@ -7,8 +7,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.api import AlgorithmProperty, IAlgorithm
+from mantid.api import AlgorithmProperty, FrameworkManagerImpl, IAlgorithm
 from mantid.kernel import Direction
+
 
 class AlgorithmPropertyTest(unittest.TestCase):
 
@@ -18,12 +19,14 @@ class AlgorithmPropertyTest(unittest.TestCase):
         self.assertEquals(Direction.Input, prop.direction)
 
     def test_value_method_returns_an_algorithm_type(self):
+        # load plugins to register CreateWorkspace
+        FrameworkManagerImpl.Instance()
         prop = AlgorithmProperty("TestProperty")
-        prop.valueAsStr = '{"name":"CreateWorkspace","paramters":{"OutputWorkspace":"ws","DataY":"1","DataX":"1","NSpec":"1"}}'
-
+        prop.valueAsStr = '{"name": "CreateWorkspace",' \
+                          '"parameters": {"OutputWorkspace": "ws", "DataY": "1", "DataX": "1","NSpec": "1"}}'
         alg = prop.value
-        self.assertTrue(isinstance(alg,IAlgorithm))
-        self.assertEquals("CreateWorkspace",alg.name())
+        self.assertTrue(isinstance(alg, IAlgorithm))
+        self.assertEqual("CreateWorkspace", alg.name())
 
 
 if __name__ == '__main__':

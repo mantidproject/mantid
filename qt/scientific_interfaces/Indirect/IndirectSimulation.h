@@ -47,8 +47,6 @@ public: // public constructor, destructor and functions
   void initLayout() override;
 
 private slots:
-  /// Slot for clicking on the run button
-  void runClicked();
   /// Slot for clicking on the help button
   void helpClicked();
   /// Slot for clicking on the manage directories button
@@ -60,7 +58,7 @@ private:
   /// Load default interface settings for each tab
   void loadSettings();
   /// Called upon a close event.
-  void closeEvent(QCloseEvent *) override;
+  void closeEvent(QCloseEvent * /*unused*/) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

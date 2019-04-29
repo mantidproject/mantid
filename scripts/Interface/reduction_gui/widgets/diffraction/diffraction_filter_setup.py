@@ -9,18 +9,22 @@
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
+from mantid.kernel import Logger
+from mantid.simpleapi import ExportTimeSeriesLog, Load
+import matplotlib.pyplot as plt
+from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
-
 from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import FilterSetupScript
-import ui.diffraction.ui_diffraction_filter_setup
-import ui.diffraction.ui_filter_info
-
 import os
-
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("FilterSetupWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
 IS_IN_MANTIDPLOT = False
 try:
-    import mantid.simpleapi as api
+    import mantidplot  # noqa
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -42,13 +46,13 @@ class FilterSetupWidget(BaseWidget):
         #print "[FilterSetupWidget.Init]: settings is of type %s.  data type is of type %s.
         #       DBx237. " % (type(settings), type(data_type))
 
-        class FilterSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_filter_setup.Ui_Frame):
+        class FilterSetFrame(QFrame):
             """ Define class linked to UI Frame
             """
 
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/diffraction/diffraction_filter_setup.ui', baseinstance=self)
 
         self._content = FilterSetFrame(self)
         self._layout.addWidget(self._content)
@@ -60,8 +64,7 @@ class FilterSetupWidget(BaseWidget):
             self.set_state(state)
         else:
             self.set_state(FilterSetupScript(self._instrument_name))
-
-        return
+        self.fig = None # handle to the pop-out for sample log figure
 
     def initialize_content(self):
         """ Initialize content/UI
@@ -97,50 +100,43 @@ class FilterSetupWidget(BaseWidget):
 
         # Constraints/Validator
         #   integers
-        # iv0 = QtGui.QIntValidator(self._content.numtimeinterval_edit)
+        # iv0 = QIntValidator(self._content.numtimeinterval_edit)
         # iv0.setBottom(0)
         # self._content.numtimeinterval_edit.setValidator(iv0)
 
-        iv1 = QtGui.QIntValidator(self._content.run_number_edit)
+        iv1 = QIntValidator(self._content.run_number_edit)
         iv1.setBottom(0)
         self._content.run_number_edit.setValidator(iv1)
 
         #   floats
-        dv0 = QtGui.QDoubleValidator(self._content.starttime_edit)
+        dv0 = QDoubleValidator(self._content.starttime_edit)
         dv0.setBottom(0.)
         self._content.starttime_edit.setValidator(dv0)
 
-        dv1 = QtGui.QDoubleValidator(self._content.stoptime_edit)
+        dv1 = QDoubleValidator(self._content.stoptime_edit)
         dv1.setBottom(0.)
         self._content.stoptime_edit.setValidator(dv1)
 
-        dv2 = QtGui.QDoubleValidator(self._content.timintervallength_edit)
+        dv2 = QDoubleValidator(self._content.timintervallength_edit)
         dv2.setBottom(0.)
         self._content.timintervallength_edit.setValidator(dv2)
 
         # Default states
 
         # Connections from action/event to function to handle
-        self.connect(self._content.timefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),
-                     self._filterbytime_statechanged)
+        self._content.timefilter_checkBox.stateChanged.connect(self._filterbytime_statechanged)
 
-        self.connect(self._content.logvaluefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),
-                     self._filterbylogvalue_statechanged)
+        self._content.logvaluefilter_checkBox.stateChanged.connect(self._filterbylogvalue_statechanged)
 
-        self.connect(self._content.load_button, QtCore.SIGNAL("clicked()"),
-                     self._run_number_changed)
+        self._content.load_button.clicked.connect(self._run_number_changed)
 
-        # self.connect(self._content.run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
-        self.connect(self._content.run_number_edit, QtCore.SIGNAL("returnPressed()"), self._run_number_changed)
+        self._content.run_number_edit.returnPressed.connect(self._run_number_changed)
 
-        self.connect(self._content.plot_log_button, QtCore.SIGNAL("clicked()"),
-                     self._plot_log_clicked)
+        self._content.plot_log_button.clicked.connect(self._plot_log_clicked)
 
-        self.connect(self._content.syn_logname_button, QtCore.SIGNAL("clicked()"),
-                     self._sync_logname_clicked)
+        self._content.syn_logname_button.clicked.connect(self._sync_logname_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
-                     self._show_help)
+        self._content.help_button.clicked.connect(self._show_help)
 
         # Validated widgets
         # self._connect_validated_lineedit(self._content.sample_edit)
@@ -280,7 +276,7 @@ class FilterSetupWidget(BaseWidget):
         # 2. Load file
         metawsname = "%s_%s_meta" % (instrument, newrunnumberstr)
         try:
-            metaws = api.Load(Filename=str(eventnxsname), OutputWorkspace=str(metawsname), MetaDataOnly=True)
+            metaws = Load(Filename=str(eventnxsname), OutputWorkspace=str(metawsname), MetaDataOnly=True)
         except ValueError:
             metaws = None
 
@@ -302,7 +298,7 @@ class FilterSetupWidget(BaseWidget):
                 if p.__class__.__name__ == "FloatTimeSeriesProperty":
                     if p.size() > 1:
                         properties.append(p.name)
-                        print(p.name, p.size())
+                        Logger('FilterSetupWidget').information('{}[{}]'.format(p.name, p.size()))
             # ENDFOR p
             properties = sorted(properties)
 
@@ -311,21 +307,16 @@ class FilterSetupWidget(BaseWidget):
                 self._content.log_name_combo.addItem(p)
         # ENDIFELSE
 
-        """
-        now = datetime.now()
-        print("New Run Number = %s.  @ %s" % (newrunnumberstr, str(now)))
-        if newrunnumberstr == "":
-            self._content.log_name_combo.clear()
-        else:
-            self._content.log_name_combo.addItem(newrunnumberstr)
-        """
-
-        return
+    def closeFig(self):
+        if self.fig is not None:
+            plt.close(self.fig)
+        self.fig = None
 
     def _plot_log_clicked(self):
         """ Handling event if plog-log button is clicked.
         The log selected will be plotted in MantidPlot window
         """
+        self.closeFig()
         logname = self._content.log_name_combo.currentText()
 
         msg1 = str("Log %s is selected to be plotted.\n" % (logname))
@@ -339,33 +330,43 @@ class FilterSetupWidget(BaseWidget):
 
         # Get property
         run = self._metaws.getRun()
-        try:
-            run.getProperty(str(logname))
-        except RuntimeError:
+        if str(logname) not in run:
             # Unable to plot
             msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),
                                                                           logname))
             self._content.info_text_browser.setText(str(msg1+msg3))
             return
 
-        # Construct workspace
-        output = api.ExportTimeSeriesLog(InputWorkspace = str(self._metaws),
-                                         OutputWorkspace = str(logname),
-                                         LogName = str(logname),
-                                         IsEventWorkspace = False)
-        #api.DeleteWorkspace(Workspace="PercentStat")
+        if IS_IN_MANTIDPLOT:  # use mantidplot widget
+            # Construct workspace to plot
+            try:
+                logws = ExportTimeSeriesLog(InputWorkspace = str(self._metaws),
+                                            OutputWorkspace = str(logname),
+                                            LogName = str(logname),
+                                            IsEventWorkspace = False)
+            except IndexError:
+                msg4 = str("Error! Workspace %s is unable to convert log %s to workspace. " % (str(self._metaws), str(logname)))
+                self._content.info_text_browser.setText(str(msg1+msg4))
+                return
 
-        try:
-            logws = output
-        except IndexError:
-            msg4 = str("Error! Workspace %s is unable to convert log %s to workspace. " % (str(self._metaws), str(logname)))
-            self._content.info_text_browser.setText(str(msg1+msg4))
-            return
+            # Plot!
+            self.plot(logws, minwidget=self._content.starttime_edit, maxwidget=self._content.stoptime_edit)
+        else:  # use matplotlib
+            stats = run[str(logname)].getStatistics()
 
-        # Plot!
-        self.plot(logws, self._content.starttime_edit, self._content.stoptime_edit)
-
-        return
+            # TODO close window when interface closes
+            # TODO attach x-lines in a separate PR
+            self.fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+            ax.plot(self._metaws, LogName=str(logname), StartFromLog=True)
+            xmin = self._content.starttime_edit.text()
+            if len(xmin) > 0:
+                xmin = float(xmin)
+                ax.plot((xmin, xmin), (stats.minimum, stats.maximum), 'b--')
+            xmax = self._content.stoptime_edit.text()
+            if len(xmax) > 0:
+                xmax = float(xmax)
+                ax.plot((xmax, xmax), (stats.minimum, stats.maximum), 'g--')
+            self.fig.show()
 
     def _filterbytime_statechanged(self):
         """ Handling event if Filter-by-time is selected
@@ -459,17 +460,17 @@ class FilterSetupWidget(BaseWidget):
         xmin = workspace.dataX(0)[0]
         xmax = workspace.dataX(0)[-1]
         if callback is not None:
-            from LargeScaleStructures import data_stitching
+            from LargeScaleStructures import data_stitching  # TODO make this qt4/5 compatible
             data_stitching.RangeSelector.connect([workspace], callback,
                                                  xmin=xmin, xmax=xmax)
 
         return
 
     def _show_help(self):
-        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_filter_info.Ui_Dialog):
+        class HelpDialog(QDialog):
             def __init__(self, parent=None):
-                QtGui.QDialog.__init__(self, parent)
-                self.setupUi(self)
+                QDialog.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/diffraction/filter_info.ui', baseinstance=self)
         dialog = HelpDialog(self)
         dialog.exec_()
 

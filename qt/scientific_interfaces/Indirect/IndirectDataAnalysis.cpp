@@ -53,7 +53,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
 /**
  * @param :: the detected close event
  */
-void IndirectDataAnalysis::closeEvent(QCloseEvent *) {
+void IndirectDataAnalysis::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -78,14 +78,16 @@ void IndirectDataAnalysis::initLayout() {
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // Set up all tabs
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->setupTab();
-    connect(tab->second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
+  for (auto &tab : m_tabs) {
+    tab.second->setupTab();
+    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
             SIGNAL(runAsPythonScript(const QString &, bool)));
-    connect(tab->second, SIGNAL(showMessageBox(const QString &)), this,
+    connect(tab.second, SIGNAL(showMessageBox(const QString &)), this,
             SLOT(showMessageBox(const QString &)));
   }
 
+  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this,
+          SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -121,6 +123,13 @@ void IndirectDataAnalysis::loadSettings() {
     tab->second->loadTabSettings(settings);
 
   settings.endGroup();
+}
+
+/**
+ * Sets the active workspace in the selected tab
+ */
+void IndirectDataAnalysis::tabChanged(int index) {
+  m_tabs[index]->setActiveWorkspace();
 }
 
 /**

@@ -6,15 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import six
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService, AnalysisDataServiceImpl, MatrixWorkspace, Workspace
+from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
+                        FrameworkManagerImpl, MatrixWorkspace, Workspace)
 from mantid import mtd
+
 
 class AnalysisDataServiceTest(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        FrameworkManagerImpl.Instance()
+
     def tearDown(self):
-      AnalysisDataService.Instance().clear()
+        AnalysisDataService.Instance().clear()
 
     def test_len_returns_correct_value(self):
         self.assertEquals(len(AnalysisDataService), 0)
@@ -159,6 +166,35 @@ class AnalysisDataServiceTest(unittest.TestCase):
                 pass
         for name in extra_names:
             mtd.remove(name)
+
+    def test_addToGroup_adds_workspace_to_group(self):
+        from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        CreateSampleWorkspace(OutputWorkspace="ws2")
+        GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="NewGroup")
+        CreateSampleWorkspace(OutputWorkspace="ws3")
+
+        AnalysisDataService.addToGroup("NewGroup", "ws3")
+
+        group = mtd['NewGroup']
+
+        self.assertEquals(group.size(), 3)
+        six.assertCountEqual(self, group.getNames(), ["ws1", "ws2", "ws3"])
+
+    def test_removeFromGroup_removes_workspace_from_group(self):
+        from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        CreateSampleWorkspace(OutputWorkspace="ws2")
+        CreateSampleWorkspace(OutputWorkspace="ws3")
+        GroupWorkspaces(InputWorkspaces="ws1,ws2,ws3", OutputWorkspace="NewGroup")
+
+        AnalysisDataService.removeFromGroup("NewGroup", "ws3")
+
+        group = mtd['NewGroup']
+
+        self.assertEquals(group.size(), 2)
+        six.assertCountEqual(self, group.getNames(), ["ws1", "ws2"])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -83,8 +83,8 @@ The *UseCached* setting will look for appropriate workspaces on the *AnalysisDat
 Move a workspace
 ~~~~~~~~~~~~~~~~
 
-It is possible to perform an initial, instrument-specific move of the selected component. Currently this move mechanism is implemented for **SANS2D**, **LOQ** and **LARMOR**. Other instruments will not be moved.
-If *MoveWorkspace* is selected, then a component and a beam position needs to be selected.
+The algorithm perform an initial, instrument-specific move of the selected component. Currently this move mechanism is implemented for **SANS2D**, **LOQ**, **LARMOR**, and **ZOOM**. Other instruments will not be moved.
+When moving a workspace a component and a beam position.
 
 .. categories::
 

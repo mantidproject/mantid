@@ -69,7 +69,7 @@ void RemoveLogs::exec() {
   std::vector<std::string> logNames;
   logNames.reserve(logData.size());
   for (const auto property : logData) {
-    logNames.push_back(property->name());
+    logNames.emplace_back(property->name());
   }
   for (const auto &name : logNames) {
     auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), name);

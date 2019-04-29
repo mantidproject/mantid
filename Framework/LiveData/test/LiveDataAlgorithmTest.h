@@ -69,7 +69,7 @@ public:
 
   void test_validateInputs() {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     LiveDataAlgorithmImpl alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

@@ -10,11 +10,11 @@ System test for CNCS reduction
 """
 
 import os
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class CNCSReductionTest(stresstesting.MantidStressTest):
+class CNCSReductionTest(systemtesting.MantidSystemTest):
     parFile=''
     groupingFile=''
     nxspeFile=''

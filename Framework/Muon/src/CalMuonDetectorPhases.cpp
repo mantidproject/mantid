@@ -15,8 +15,8 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -30,6 +30,7 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)
@@ -127,7 +128,7 @@ void CalMuonDetectorPhases::exec() {
   double freq = getFrequency(tempWS);
 
   // Create the output workspaces
-  auto tab = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  TableWorkspace_sptr tab = boost::make_shared<TableWorkspace>();
   auto group = boost::make_shared<API::WorkspaceGroup>();
 
   // Get the name of 'DataFitted'
@@ -152,7 +153,7 @@ void CalMuonDetectorPhases::exec() {
  */
 void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                          double freq, std::string groupName,
-                                         API::ITableWorkspace_sptr &resTab,
+                                         API::ITableWorkspace_sptr resTab,
                                          API::WorkspaceGroup_sptr &resGroup) {
 
   int nhist = static_cast<int>(ws->getNumberHistograms());
@@ -172,13 +173,12 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   const static std::string success = "success";
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
     reportProgress(wsIndex, nhist);
-    auto yValues = ws->y(wsIndex);
+    const auto &yValues = ws->y(wsIndex);
     auto emptySpectrum = std::all_of(yValues.begin(), yValues.end(),
                                      [](double value) { return value == 0.; });
     if (emptySpectrum) {
       g_log.warning("Spectrum " + std::to_string(wsIndex) + " is empty");
-      auto tab =
-          API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+      TableWorkspace_sptr tab = boost::make_shared<TableWorkspace>();
       tab->addColumn("str", "Name");
       tab->addColumn("double", "Value");
       tab->addColumn("double", "Error");
@@ -191,7 +191,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
         }
       }
 
-      extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
+      extractDetectorInfo(*tab, *resTab, indexInfo.spectrumNumber(wsIndex));
 
     } else {
       auto fit = createChildAlgorithm("Fit");
@@ -204,11 +204,14 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       fit->execute();
 
       std::string status = fit->getProperty("OutputStatus");
-      if (!fit->isExecuted() || status != success) {
+      if (!fit->isExecuted()) {
         std::ostringstream error;
         error << "Fit failed for spectrum at workspace index " << wsIndex;
         error << ": " << status;
         throw std::runtime_error(error.str());
+      } else if (status != success) {
+        g_log.warning("Fit failed for spectrum at workspace index " +
+                      std::to_string(wsIndex) + ": " + status);
       }
 
       API::MatrixWorkspace_sptr fitOut = fit->getProperty("OutputWorkspace");
@@ -217,7 +220,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
       // Now we have our fitting results stored in tab
       // but we need to extract the relevant information, i.e.
       // the detector phases (parameter 'p') and asymmetries ('A')
-      extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
+      extractDetectorInfo(*tab, *resTab, indexInfo.spectrumNumber(wsIndex));
     }
   }
 }
@@ -229,12 +232,11 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
  * @param spectrumNumber :: [input] Spectrum number
  */
 void CalMuonDetectorPhases::extractDetectorInfo(
-    const API::ITableWorkspace_sptr &paramTab,
-    const API::ITableWorkspace_sptr &resultsTab,
+    API::ITableWorkspace &paramTab, API::ITableWorkspace &resultsTab,
     const Indexing::SpectrumNumber spectrumNumber) {
 
-  double asym = paramTab->Double(0, 1);
-  double phase = paramTab->Double(2, 1);
+  double asym = paramTab.Double(0, 1);
+  double phase = paramTab.Double(2, 1);
   // If asym<0, take the absolute value and add \pi to phase
   // f(x) = A * cos( w * x - p) = -A * cos( w * x - p - PI)
   if (asym < 0) {
@@ -247,7 +249,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
     phase = phase - factor * 2. * M_PI;
   }
   // Copy parameters to new row in results table
-  API::TableRow row = resultsTab->appendRow();
+  API::TableRow row = resultsTab.appendRow();
   row << static_cast<int>(spectrumNumber) << asym << phase;
 }
 
@@ -399,7 +401,7 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   const auto instrument = ws->getInstrument();
   auto loader = Kernel::make_unique<API::GroupingLoader>(instrument);
 
-  if (instrument->getName() == "MUSR") {
+  if (instrument->getName() == "MUSR" || instrument->getName() == "CHRONUS") {
     // Two possibilities for grouping - use workspace log
     auto fieldDir = ws->run().getLogData("main_field_direction");
     if (fieldDir) {
@@ -419,9 +421,9 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
     const std::string name = grouping->groupNames[iGroup];
-    if (name == "fwd") {
+    if (name == "fwd" || name == "left") {
       fwdRange = grouping->groups[iGroup];
-    } else if (name == "bwd" || name == "bkwd") {
+    } else if (name == "bwd" || name == "bkwd" || name == "right") {
       bwdRange = grouping->groups[iGroup];
     }
   }

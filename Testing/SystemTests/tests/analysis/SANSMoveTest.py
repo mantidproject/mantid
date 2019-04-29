@@ -8,12 +8,12 @@
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 
 
 from mantid.api import AlgorithmManager
 from mantid.kernel import (Quat, V3D)
-from sans.algorithm_detail.move_workspaces import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
+from sans.algorithm_detail.move_workspaces import (create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                                    SANSMoveLARMOROldStyle)
 from sans.common.enums import (SANSFacility, DetectorType)
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
@@ -39,9 +39,8 @@ class SANSMoveFactoryTest(unittest.TestCase):
     def _do_test(self, file_name, mover_type):
         # Arrange
         workspace = load_workspace(file_name)
-        move_factory = SANSMoveFactory()
         # Act
-        mover = move_factory.create_mover(workspace)
+        mover = create_mover(workspace)
         # Assert
         self.assertTrue(isinstance(mover, mover_type))
 
@@ -104,8 +103,7 @@ class SANSMoveTest(unittest.TestCase):
 
     @staticmethod
     def _provide_mover(workspace):
-        move_factory = SANSMoveFactory()
-        return move_factory.create_mover(workspace)
+        return create_mover(workspace)
 
     def compare_expected_position(self, expected_position, expected_rotation, component, move_info, workspace):
         position, rotation = SANSMoveTest._get_position_and_rotation(workspace, move_info, component)
@@ -422,9 +420,9 @@ class SANSMoveTest(unittest.TestCase):
                                        component_to_investigate, state.move, workspace)
 
 
-class SANSMoveRunnerTest(stresstesting.MantidStressTest):
+class SANSMoveRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

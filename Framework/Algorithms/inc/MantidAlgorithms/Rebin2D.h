@@ -41,7 +41,7 @@ public:
 
 protected:
   /// Progress reporter
-  boost::shared_ptr<API::Progress> m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 
 private:
   /// Initialise the properties

@@ -8,7 +8,6 @@
 #define MANTID_GEOMETRY_MESHOBJECT2DTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
@@ -16,9 +15,8 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MockRNG.h"
 #include <cmath>
 
 using Mantid::Geometry::MeshObject2D;
@@ -30,36 +28,18 @@ MeshObject2D makeSimpleTriangleMesh() {
   vertices.emplace_back(V3D(-1, 0, 0));
   vertices.emplace_back(V3D(1, 0, 0));
   vertices.emplace_back(V3D(0, 1, 0));
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   triangles.insert(triangles.end(), {0, 1, 2});
   return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
 }
 MeshObject2D makeTrapezoidMesh(const V3D &a, const V3D &b, const V3D &c,
                                const V3D &d) {
   std::vector<V3D> vertices{a, b, c, d};
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   triangles.insert(triangles.end(), {0, 1, 2});
   triangles.insert(triangles.end(), {2, 3, 0});
   return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
 }
-// -----------------------------------------------------------------------------
-// Mock Random Number Generator
-// -----------------------------------------------------------------------------
-class MockRNG : public Mantid::Kernel::PseudoRandomNumberGenerator {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(nextValue, double());
-  MOCK_METHOD2(nextValue, double(double, double));
-  MOCK_METHOD2(nextInt, int(int, int));
-  MOCK_METHOD0(restart, void());
-  MOCK_METHOD0(save, void());
-  MOCK_METHOD0(restore, void());
-  MOCK_METHOD1(setSeed, void(size_t));
-  MOCK_METHOD2(setRange, void(const double, const double));
-  MOCK_CONST_METHOD0(min, double());
-  MOCK_CONST_METHOD0(max, double());
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
 } // namespace
 
 class MeshObject2DTest : public CxxTest::TestSuite {
@@ -108,7 +88,7 @@ public:
     vertices.emplace_back(V3D(0, 0, 0));
     vertices.emplace_back(V3D(1, 0, 0));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(),
                      {0, 1, 1}); // invalid, but doesn't matter for this test
 
@@ -131,7 +111,7 @@ public:
     vertices.emplace_back(V3D(1, 0, 0));
     vertices.emplace_back(V3D(2, 0, 0));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
 
     // Test constructor taking lvalue references
@@ -155,7 +135,7 @@ public:
     vertices.emplace_back(V3D(1, 1, 0));
     vertices.emplace_back(V3D(1, 0, 1));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
 
     // Test constructor taking lvalue references
@@ -176,9 +156,9 @@ public:
     vertices.emplace_back(V3D(-1, 0, 0));
     vertices.emplace_back(V3D(1, 0, 0));
     vertices.emplace_back(V3D(0, 1, 0));
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
-
+#
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material());
     TS_ASSERT(mesh.hasValidShape());
     TS_ASSERT_EQUALS(mesh.volume(), 0);
@@ -224,7 +204,7 @@ public:
         V3D{-halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, -halfSideLength, observerDistance}};
-    std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
+    std::vector<uint32_t> triangles{2, 1, 0, 0, 3, 2};
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material{});
     double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
@@ -249,7 +229,7 @@ public:
         V3D{-halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, -halfSideLength, observerDistance}};
-    std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
+    std::vector<uint32_t> triangles{2, 1, 0, 0, 3, 2};
     // Scaling square uniformly (and reducing distance to origin by same
     // factor), yields same angular area 4pi/6
     V3D scaleFactor{0.5, 0.5, 0.5};
@@ -370,11 +350,12 @@ public:
   void test_GetObjGeom_not_implemented() {
     auto mesh = makeSimpleTriangleMesh();
     std::vector<V3D> vectors;
-    double radius, height;
+    double radius, height, innerRadius;
     Mantid::Geometry::detail::ShapeInfo::GeometryShape shape;
 
-    TS_ASSERT_THROWS(mesh.GetObjectGeom(shape, vectors, radius, height),
-                     std::runtime_error &);
+    TS_ASSERT_THROWS(
+        mesh.GetObjectGeom(shape, vectors, innerRadius, radius, height),
+        std::runtime_error &);
   }
 
   void test_get_material() {

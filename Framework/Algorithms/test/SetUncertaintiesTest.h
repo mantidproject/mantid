@@ -90,7 +90,7 @@ public:
   void test_zero() {
     const auto outWS = runAlg("zero");
 
-    const auto E = outWS->e(0);
+    const auto &E = outWS->e(0);
     for (const auto item : E) {
       TS_ASSERT_EQUALS(item, 0.);
     }
@@ -101,8 +101,8 @@ public:
   void test_sqrt() {
     const auto outWS = runAlg("sqrt");
 
-    const auto E = outWS->e(0);
-    const auto Y = outWS->y(0);
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
     for (size_t i = 0; i < E.size(); ++i) {
       TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
     }
@@ -113,7 +113,7 @@ public:
   void test_oneIfZero() {
     const auto outWS = runAlg("oneIfZero");
 
-    const auto E = outWS->e(0);
+    const auto &E = outWS->e(0);
     for (const auto item : E) {
       TS_ASSERT(item > 0.);
     }

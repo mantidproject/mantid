@@ -59,7 +59,7 @@ void IndirectBayes::initLayout() {}
 /**
  * @param :: the detected close event
  */
-void IndirectBayes::closeEvent(QCloseEvent *) {
+void IndirectBayes::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 

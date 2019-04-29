@@ -14,13 +14,15 @@ import unittest
 
 from qtpy.QtCore import QObject, Qt, Slot
 from qtpy.QtWidgets import QAction, QMenu, QToolBar
+
 try:
     from qtpy.QtCore import SIGNAL
+
     NEW_STYLE_SIGNAL = False
 except ImportError:
     NEW_STYLE_SIGNAL = True
 
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.utils.qt import add_actions, create_action
 
 
@@ -29,6 +31,7 @@ class CreateActionTest(GuiTest):
     def test_parent_and_name_only_required(self):
         class Parent(QObject):
             pass
+
         parent = Parent()
         action = create_action(parent, "Test Action")
         self.assertTrue(isinstance(action, QAction))
@@ -44,6 +47,7 @@ class CreateActionTest(GuiTest):
             @Slot()
             def test_slot(self):
                 pass
+
         recv = Receiver()
         action = create_action(None, "Test Action", on_triggered=recv.test_slot)
         if NEW_STYLE_SIGNAL:
@@ -54,6 +58,12 @@ class CreateActionTest(GuiTest):
     def test_shortcut_is_set_if_given(self):
         action = create_action(None, "Test Action", shortcut="Ctrl+S")
         self.assertEqual("Ctrl+S", action.shortcut())
+
+    def test_multiple_shortcuts_are_set_if_given(self):
+        expected_shortcuts = ("Ctrl+S", "Ctrl+W")
+        action = create_action(None, "Test Action", shortcut=expected_shortcuts)
+        for expected, actual in zip(expected_shortcuts, action.shortcuts()):
+            self.assertEqual(expected, actual.toString())
 
     def test_shortcut_context_used_if_shortcut_given(self):
         action = create_action(None, "Test Action", shortcut="Ctrl+S",

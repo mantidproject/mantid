@@ -93,17 +93,17 @@ public:
   /// Get file problem, empty string means no error.
   QString getProblem() const;
   /// Read settings from the given group
-  void readSettings(const QString &);
+  void readSettings(const QString & /*group*/);
   /// Save settings in the given group
-  void saveSettings(const QString &);
+  void saveSettings(const QString & /*group*/);
   /// Gets if optional
   bool isOptional() const;
   /// Sets if optional
-  void isOptional(bool);
+  void isOptional(bool /*optional*/);
   /// Gets will auto load
   bool willAutoLoad() const;
   /// Sets will auto load
-  void setAutoLoad(bool);
+  void setAutoLoad(bool /*load*/);
   /// Check if the widget will show the load button
   bool willShowLoad();
   /// Set if the load button should be shown
@@ -111,7 +111,7 @@ public:
   /// Gets the load button text
   QString getLoadBtnText() const;
   /// Sets the load button text
-  void setLoadBtnText(const QString &);
+  void setLoadBtnText(const QString & /*text*/);
 
   // These are accessors/modifiers of the child MWRunFiles
   /**
@@ -403,9 +403,9 @@ signals:
 
 protected:
   // Method for handling drop events
-  void dropEvent(QDropEvent *) override;
+  void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent *) override;
+  void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
 
 private slots:
   /// Slot called when the current view is changed
@@ -420,6 +420,8 @@ private slots:
 private:
   /// Attempt to automatically load a file
   void autoLoadFile(const QString &filenames);
+  /// Set the index of the combobox containing the loaded workspace
+  void setWorkspaceSelectorIndex(QString const &workspaceName);
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Algorithm Runner used to run the load algorithm

@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -126,6 +127,44 @@ std::string axisXML(unsigned axisIdx) {
     return "";
   }
 }
+
+/**
+ * Return a property as type double if possible. Checks for either a
+ * double or an int property and casts accordingly
+ * @param args A reference to the property manager
+ * @param name The name of the property
+ * @return The value of the property as a double
+ * @throws Exception::NotFoundError if the property does not exist
+ */
+double getPropertyAsDouble(const Kernel::PropertyManager &args,
+                           const std::string &name) {
+  try {
+    return args.getProperty(name);
+  } catch (std::runtime_error &) {
+    return static_cast<int>(args.getProperty(name));
+  }
+}
+
+/**
+ * Return a property as type vector<double> if possible. Checks for either a
+ * vector<double> or a vector<int> property and casts accordingly
+ * @param args A reference to the property manager
+ * @param name The name of the property
+ * @return The value of the property as a double
+ * @throws Exception::NotFoundError if the property does not exist
+ */
+std::vector<double>
+getPropertyAsVectorDouble(const Kernel::PropertyManager &args,
+                          const std::string &name) {
+  try {
+    return args.getProperty(name);
+  } catch (std::runtime_error &) {
+    std::vector<int> intValues = args.getProperty(name);
+    std::vector<double> dblValues(std::begin(intValues), std::end(intValues));
+    return dblValues;
+  }
+}
+
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -163,8 +202,8 @@ std::map<std::string, std::string> SetSample::validateInputs() {
   auto existsAndNegative = [](const PropertyManager &pm,
                               const std::string &name) {
     if (pm.existsProperty(name)) {
-      const double value = pm.getProperty(name);
-      if (value < 0.0) {
+      const auto value = pm.getPropertyValue(name);
+      if (boost::lexical_cast<double>(value) < 0.0) {
         return true;
       }
     }
@@ -303,8 +342,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
-  workspace->mutableSample().setEnvironment(sampleEnviron.release());
-
+  workspace->mutableSample().setEnvironment(std::move(sampleEnviron));
   return &(workspace->sample().getEnvironment());
 }
 
@@ -337,19 +375,19 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
   // Any arguments in the args dict are assumed to be values that should
   // override the default set by the sampleEnv samplegeometry if it exists
   if (sampleEnv) {
-    if (sampleEnv->container()->hasSampleShape()) {
-      const auto &can = sampleEnv->container();
+    if (sampleEnv->getContainer().hasSampleShape()) {
+      const auto &can = sampleEnv->getContainer();
       Container::ShapeArgs shapeArgs;
       if (args) {
         const auto &props = args->getProperties();
         for (const auto &prop : props) {
           // assume in cm
-          const double val = args->getProperty(prop->name());
+          const double val = getPropertyAsDouble(*args, prop->name());
           shapeArgs.emplace(boost::algorithm::to_lower_copy(prop->name()),
                             val * 0.01);
         }
       }
-      auto shapeObject = can->createSampleShape(shapeArgs);
+      auto shapeObject = can.createSampleShape(shapeArgs);
       // Given that the object is a CSG object, set the object
       // directly on the sample ensuring we preserve the
       // material.
@@ -396,10 +434,12 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
         args, refFrame,
         boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
   } else {
-    throw std::invalid_argument(
-        "Unknown 'Shape' argument provided in "
-        "'Geometry'. Allowed "
-        "values=FlatPlate,CSG,Cylinder,HollowCylinder.");
+    std::stringstream msg;
+    msg << "Unknown 'Shape' argument '" << shape
+        << "' provided in 'Geometry' property. Allowed values are "
+        << ShapeArgs::CSG << ", " << ShapeArgs::FLAT_PLATE << ", "
+        << ShapeArgs::CYLINDER << ", " << ShapeArgs::HOLLOW_CYLINDER;
+    throw std::invalid_argument(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     g_log.debug("XML shape definition:\n" + result + '\n');
@@ -425,9 +465,9 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
     v[refFrame.pointingAlongBeam()] = z;
     return v;
   };
-  const double widthInCM = args.getProperty(ShapeArgs::WIDTH);
-  const double heightInCM = args.getProperty(ShapeArgs::HEIGHT);
-  const double thickInCM = args.getProperty(ShapeArgs::THICK);
+  const double widthInCM = getPropertyAsDouble(args, ShapeArgs::WIDTH);
+  const double heightInCM = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
+  const double thickInCM = getPropertyAsDouble(args, ShapeArgs::THICK);
   // Convert to half-"width" in metres
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
@@ -484,11 +524,14 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                                  const Geometry::ReferenceFrame &refFrame,
                                  bool hollow) const {
   const std::string tag = hollow ? "hollow-cylinder" : "cylinder";
-  double height = args.getProperty(ShapeArgs::HEIGHT);
-  double innerRadius = hollow ? args.getProperty(ShapeArgs::INNER_RADIUS) : 0.0;
-  double outerRadius = hollow ? args.getProperty(ShapeArgs::OUTER_RADIUS)
-                              : args.getProperty("Radius");
-  std::vector<double> centre = args.getProperty(ShapeArgs::CENTER);
+  double height = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
+  double innerRadius =
+      hollow ? getPropertyAsDouble(args, ShapeArgs::INNER_RADIUS) : 0.0;
+  double outerRadius = hollow
+                           ? getPropertyAsDouble(args, ShapeArgs::OUTER_RADIUS)
+                           : getPropertyAsDouble(args, "Radius");
+  std::vector<double> centre =
+      getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;

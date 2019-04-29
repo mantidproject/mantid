@@ -18,7 +18,12 @@ and use it to access the settings
 """
 from __future__ import (absolute_import, unicode_literals)
 
-from workbench.config.user import UserConfig
+# third-party imports
+from qtpy.QtCore import QSettings
+
+# local imports
+from .user import UserConfig
+
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -34,10 +39,15 @@ DEFAULTS = {
     'MainWindow': {
         'size': (1260, 740),
         'position': (10, 10),
+    },
+    'project': {
+        'prompt_save_on_close': True,
+        'prompt_save_editor_modified': True
     }
 }
 
 # -----------------------------------------------------------------------------
 # 'Singleton' instance
 # -----------------------------------------------------------------------------
+QSettings.setDefaultFormat(QSettings.IniFormat)
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)

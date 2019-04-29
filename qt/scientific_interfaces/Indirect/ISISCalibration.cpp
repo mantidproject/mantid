@@ -216,20 +216,18 @@ QString ISISCalibration::backgroundRangeString() const {
          m_properties["CalBackMax"]->valueText();
 }
 
-QString ISISCalibration::instrumentDetectorRangeString() const {
-  const auto details = getInstrumentDetails();
-  return details["spectra-min"] + "," + details["spectra-max"];
+QString ISISCalibration::instrumentDetectorRangeString() {
+  return getInstrumentDetail("spectra-min") + "," +
+         getInstrumentDetail("spectra-max");
 }
 
 QString ISISCalibration::outputWorkspaceName() const {
-  const auto configuration = getInstrumentConfiguration();
   auto name = QFileInfo(m_uiForm.leRunNo->getFirstFilename()).baseName();
-
   if (m_uiForm.leRunNo->getFilenames().size() > 1)
     name += "_multi";
 
-  return name + QString::fromStdString("_") + configuration->getAnalyserName() +
-         configuration->getReflectionName();
+  return name + QString::fromStdString("_") + getAnalyserName() +
+         getReflectionName();
 }
 
 QString ISISCalibration::resolutionDetectorRangeString() const {
@@ -300,7 +298,13 @@ void ISISCalibration::run() {
   const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
   m_outputCalibrationName = outputWorkspaceNameStem + "_calib";
-  m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
+
+  try {
+    m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    return;
+  }
 
   // Initially take the calibration workspace as the result
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
@@ -364,15 +368,27 @@ bool ISISCalibration::validate() {
  * Sets default spectra, peak and background ranges.
  */
 void ISISCalibration::setDefaultInstDetails() {
-  // Get spectra, peak and background details
-  const auto instDetails = getInstrumentDetails();
+  try {
+    setDefaultInstDetails(getInstrumentDetails());
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    showMessageBox(ex.what());
+  }
+}
+
+void ISISCalibration::setDefaultInstDetails(
+    QMap<QString, QString> const &instrumentDetails) {
+  auto const instrument = getInstrumentDetail(instrumentDetails, "instrument");
+  auto const spectraMin =
+      getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
+  auto const spectraMax =
+      getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
 
   // Set the search instrument for runs
-  m_uiForm.leRunNo->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.leRunNo->setInstrumentOverride(instrument);
 
   // Set spectra range
-  setResolutionSpectraRange(instDetails["spectra-min"].toDouble(),
-                            instDetails["spectra-max"].toDouble());
+  setResolutionSpectraRange(spectraMin, spectraMax);
 
   // Set peak and background ranges
   const auto ranges = getRangesFromInstrument();
@@ -381,13 +397,11 @@ void ISISCalibration::setDefaultInstDetails() {
   setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0),
                      getValueOr(ranges, "back-end-tof", 0.0));
 
-  if (instDetails.contains("resolution") &&
-      !instDetails["resolution"].isEmpty()) {
-    m_uiForm.ckCreateResolution->setEnabled(true);
-  } else {
+  auto const hasResolution =
+      hasInstrumentDetail(instrumentDetails, "resolution");
+  m_uiForm.ckCreateResolution->setEnabled(hasResolution);
+  if (!hasResolution)
     m_uiForm.ckCreateResolution->setChecked(false);
-    m_uiForm.ckCreateResolution->setEnabled(false);
-  }
 }
 
 /**
@@ -406,9 +420,12 @@ void ISISCalibration::calPlotRaw() {
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
 
-  auto instDetails = getInstrumentDetails();
-  int specMin = instDetails["spectra-min"].toInt();
-  int specMax = instDetails["spectra-max"].toInt();
+  int const specMin = hasInstrumentDetail("spectra-min")
+                          ? getInstrumentDetail("spectra-min").toInt()
+                          : -1;
+  int const specMax = hasInstrumentDetail("spectra-max")
+                          ? getInstrumentDetail("spectra-max").toInt()
+                          : -1;
 
   if (!loadFile(filename, wsname, specMin, specMax)) {
     emit showMessageBox("Unable to load file.\nCheck whether your file exists "
@@ -703,7 +720,7 @@ void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
 }
 
 IAlgorithm_sptr
-ISISCalibration::calibrationAlgorithm(const QString &inputFiles) const {
+ISISCalibration::calibrationAlgorithm(const QString &inputFiles) {
   auto calibrationAlg =
       AlgorithmManager::Instance().create("IndirectCalibration");
   calibrationAlg->initialize();
@@ -728,15 +745,9 @@ ISISCalibration::resolutionAlgorithm(const QString &inputFiles) const {
   auto resAlg = AlgorithmManager::Instance().create("IndirectResolution", -1);
   resAlg->initialize();
   resAlg->setProperty("InputFiles", inputFiles.toStdString());
-  resAlg->setProperty(
-      "Instrument",
-      getInstrumentConfiguration()->getInstrumentName().toStdString());
-  resAlg->setProperty(
-      "Analyser",
-      getInstrumentConfiguration()->getAnalyserName().toStdString());
-  resAlg->setProperty(
-      "Reflection",
-      getInstrumentConfiguration()->getReflectionName().toStdString());
+  resAlg->setProperty("Instrument", getInstrumentName().toStdString());
+  resAlg->setProperty("Analyser", getAnalyserName().toStdString());
+  resAlg->setProperty("Reflection", getReflectionName().toStdString());
   resAlg->setProperty("RebinParam", rebinString().toStdString());
   resAlg->setProperty("DetectorRange",
                       resolutionDetectorRangeString().toStdString());
@@ -757,18 +768,12 @@ ISISCalibration::resolutionAlgorithm(const QString &inputFiles) const {
 
 IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(
     const QString &inputFiles) const {
-  IAlgorithm_sptr reductionAlg =
-      AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
+  auto reductionAlg =
+      AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
-  reductionAlg->setProperty(
-      "Instrument",
-      getInstrumentConfiguration()->getInstrumentName().toStdString());
-  reductionAlg->setProperty(
-      "Analyser",
-      getInstrumentConfiguration()->getAnalyserName().toStdString());
-  reductionAlg->setProperty(
-      "Reflection",
-      getInstrumentConfiguration()->getReflectionName().toStdString());
+  reductionAlg->setProperty("Instrument", getInstrumentName().toStdString());
+  reductionAlg->setProperty("Analyser", getAnalyserName().toStdString());
+  reductionAlg->setProperty("Reflection", getReflectionName().toStdString());
   reductionAlg->setProperty("InputFiles", inputFiles.toStdString());
   reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   reductionAlg->setProperty("OutputWorkspace",

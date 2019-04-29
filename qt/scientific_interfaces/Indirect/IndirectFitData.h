@@ -150,6 +150,7 @@ public:
                           const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString,
                           std::size_t spectrum) const;
+  std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
   const Spectra &spectra() const;

@@ -77,6 +77,8 @@ public:
   virtual void addPulsetime(const double seconds) = 0;
   /// Mask a given TOF range
   virtual void maskTof(const double tofMin, const double tofMax) = 0;
+  /// Mask the events by the condition vector
+  virtual void maskCondition(const std::vector<bool> &mask) = 0;
   /// Return the list of TOF values
   virtual std::vector<double> getTofs() const = 0;
   /// Return the list of TOF values

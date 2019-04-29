@@ -37,7 +37,7 @@ public:
     loader = new Mantid::DataHandling::LoadEmptyInstrument;
     loader->initialize();
     TS_ASSERT_THROWS_NOTHING(loader->setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml"));
+        "Filename", "unit_testing/MAPS_Definition_Reduced.xml"));
     loader->setPropertyValue("OutputWorkspace", ads_name);
     TS_ASSERT_THROWS_NOTHING(loader->execute());
     TS_ASSERT(loader->isExecuted());

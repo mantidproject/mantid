@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
+from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
@@ -110,14 +110,21 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
     vanadium_splines = None
+    van = "van_{}".format(run_details.vanadium_run_numbers)
     if perform_vanadium_norm:
-        vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
+        if van not in mantid.mtd:
+            vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path,
+                                                OutputWorkspace=van)
+        else:
+            vanadium_splines = mantid.mtd[van]
 
     output = None
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details, vanadium_path=vanadium_splines)
+    if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
+        mantid.DeleteWorkspace(vanadium_splines.OutputWorkspace)
     return output
 
 
@@ -126,16 +133,21 @@ def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
     if instrument.get_instrument_prefix() == "GEM":
         divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
                                 StoreInADS=False)
+        complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, StoreInADS=False)
         # crop based off max between 1000 and 2000 tof as the vanadium peak on Gem will always occur here
-        return _crop_spline_to_percent_of_max(rebinned_spline, divided, spectrum, 1000, 2000)
+        return _crop_spline_to_percent_of_max(rebinned_spline, complete, spectrum, 1000, 2000)
 
-    divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
-    return divided
+    divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline,
+                            StoreInADS=False)
+    complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, OutputWorkspace=spectrum)
+
+    return complete
 
 
 def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
-    if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
+    if hasattr(vanadium_splines, "OutputWorkspace"):
         vanadium_splines = vanadium_splines.OutputWorkspace
+    if type(vanadium_splines) is WorkspaceGroup:  # vanadium splines is a workspacegroup
         num_splines = len(vanadium_splines)
         num_spectra = len(spectra_list)
         if num_splines != num_spectra:
@@ -144,7 +156,7 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
         output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws, instrument)
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
-    output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines)]
+    output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines, instrument)]
     common.remove_intermediate_workspace(vanadium_splines)
     return output_list
 
@@ -154,8 +166,14 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
     vanadium_splines = None
+    van = "van_{}".format(run_details.vanadium_run_numbers)
     if perform_vanadium_norm:
-        vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
+        if van not in mantid.mtd:
+            vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path,
+                                                OutputWorkspace=van)
+        else:
+            vanadium_splines = mantid.mtd[van]
+
     output = None
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)

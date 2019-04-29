@@ -110,8 +110,8 @@ public:
     algorithm->execute();
     MatrixWorkspace_sptr outWorkspace =
         algorithm->getProperty("OutputWorkspace");
-    auto yValues = outWorkspace->y(0);
-    auto eValues = outWorkspace->e(0);
+    const auto &yValues = outWorkspace->y(0);
+    const auto &eValues = outWorkspace->e(0);
     TS_ASSERT_DELTA(yValues[0], 1, 0.0001);
     TS_ASSERT_DELTA(yValues[1], 0, 0.0001);
     TS_ASSERT_DELTA(yValues[4], 0.4831171, 0.0001);

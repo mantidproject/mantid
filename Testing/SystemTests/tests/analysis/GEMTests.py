@@ -4,17 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 #pylint: disable=too-many-instance-attributes
 
 
-class GEMTest(stresstesting.MantidStressTest):
+class GEMTest(systemtesting.MantidSystemTest):
     validate=None
 
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self.gss_file = ''
         self.ref_gss_file = 'GEM58654.gss'
         self.xye_tof_files = []

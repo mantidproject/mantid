@@ -181,8 +181,9 @@ void LoadDaveGrp::setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
                                    const std::vector<double> &yAxis) const {
 
   auto verticalAxis = workspace->getAxis(1);
+  auto sharedX = Kernel::make_cow<HistogramData::HistogramX>(xAxis);
   for (size_t i = 0; i < nGroups; i++) {
-    workspace->mutableX(i) = xAxis;
+    workspace->setSharedX(i, sharedX);
     verticalAxis->setValue(i, yAxis.at(i));
   }
 }

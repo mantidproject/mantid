@@ -4,14 +4,20 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSignal
-import ui_add_runs_page
+from __future__ import absolute_import
+
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal
+
+from mantidqt.utils.qt import load_ui
+
+Ui_AddRunsPage, _ = load_ui(__file__, "add_runs_page.ui")
 
 
-class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
-    sum = pyqtSignal()
-    outFileChanged = pyqtSignal()
+class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
+    sum = Signal()
+    outFileChanged = Signal()
+    saveDirectoryClicked = Signal()
 
     def __init__(self, parent=None):
         super(AddRunsPage, self).__init__(parent)
@@ -21,6 +27,7 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
         self.fileNameEdit.editingFinished.connect(self.outFileChanged)
+        self.saveDirectoryButton.clicked.connect(self.saveDirectoryClicked)
 
     def run_selector_view(self):
         return self.run_selector
@@ -29,11 +36,11 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
         return str(self.fileNameEdit.text())
 
     def set_out_file_directory(self, out_file_directory):
-        self.outputDirectoryLabel.setText("Output Directory: {}".format(out_file_directory))
+        self.outputDirectoryLabel.setText("Save Directory: {}".format(out_file_directory))
 
     def no_save_directory(self):
-        QtGui.QMessageBox.warning(self, "No Save Directory Set!",
-                                  "You must set the mantid output directory before suming files.")
+        QtWidgets.QMessageBox.warning(self, "No Save Directory Set!",
+                                      "You must set the mantid output directory before suming files.")
 
     def set_out_file_name(self, out_file_name):
         self.fileNameEdit.setText(out_file_name)
@@ -53,5 +60,10 @@ class AddRunsPage(QtGui.QWidget, ui_add_runs_page.Ui_AddRunsPage):
     def disable_summation_settings(self):
         self.summation_settings_view().setEnabled(False)
 
+    def display_save_directory_box(self, title, default_path):
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, title, default_path,
+                                                              QtWidgets.QFileDialog.ShowDirsOnly)
+        return filename
+
     def setupUi(self, other):
-        ui_add_runs_page.Ui_AddRunsPage.setupUi(self, other)
+        Ui_AddRunsPage.setupUi(self, other)

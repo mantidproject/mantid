@@ -91,7 +91,7 @@ def get_single_valued_logs_from_workspace(workspace, log_names, log_types, conve
         log_value = get_log_value(run, log_name, log_type)
         log_results.update({log_name: log_value})
     if convert_from_millimeter_to_meter:
-        for key in list(log_results.keys()):
+        for key in log_results:
             log_results[key] /= 1000.
     return log_results
 
@@ -108,7 +108,7 @@ def create_unmanaged_algorithm(name, **kwargs):
     alg.initialize()
     alg.setChild(True)
     alg.setRethrows(True)
-    for key, value in list(kwargs.items()):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 
@@ -125,7 +125,7 @@ def create_managed_non_child_algorithm(name, **kwargs):
     alg.initialize()
     alg.setChild(False)
     alg.setRethrows(True)
-    for key, value in list(kwargs.items()):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 
@@ -142,7 +142,7 @@ def create_child_algorithm(parent_alg, name, **kwargs):
     if parent_alg:
         alg = parent_alg.createChildAlgorithm(name)
         alg.setRethrows(True)
-        for key, value in list(kwargs.items()):
+        for key, value in kwargs.items():
             alg.setProperty(key, value)
     else:
         alg = create_unmanaged_algorithm(name, **kwargs)
@@ -493,9 +493,9 @@ def parse_event_slice_setting(string_to_parse):
         line = re.sub(range_marker_pattern, "", line)
         value = float(line)
         if is_lower_bound:
-            return [value, -1]
+            return [value, -1.]
         else:
-            return [-1, value]
+            return [-1., value]
 
     # Check if the input actually exists.
     if not string_to_parse:

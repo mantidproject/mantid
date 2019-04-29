@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 
@@ -26,18 +26,18 @@ def getSaveDir():
 
 
 def do_cleanup():
-    Files = ["PG3_9829.getn",
-             "PG3_9829.gsa",
-             "PG3_9829.py",
+    Files = ['PG3_9829.getn',
+             'PG3_9829.gsa',
+             'PG3_9829.py',
              'sum_PG3_9829.gsa',
              'sum_PG3_9829.py',
-             "PG3_9830.gsa",
-             "PG3_9830.py",
-             "PG3_4844-1.dat",
-             "PG3_4844.getn",
-             "PG3_4844.gsa",
-             "PG3_4844.py",
-             "PG3_4866.gsa"]
+             'PG3_9830.gsa',
+             'PG3_9830.py',
+             'PG3_4844-1.dat',
+             'PG3_4844.getn',
+             'PG3_4844.gsa',
+             'PG3_4844.py',
+             'PG3_4866.gsa']
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -45,7 +45,7 @@ def do_cleanup():
     return True
 
 
-class PG3Analysis(stresstesting.MantidStressTest):
+class PG3Analysis(systemtesting.MantidSystemTest):
     ref_file  = 'PG3_4844_reference.gsa'
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2011_08_31-HR.txt"
@@ -54,8 +54,7 @@ class PG3Analysis(stresstesting.MantidStressTest):
         return _skip_test()
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredFiles(self):
         files = [self.ref_file, self.cal_file, self.char_file]
@@ -90,7 +89,7 @@ class PG3Analysis(stresstesting.MantidStressTest):
         return ('PG3_4844','PG3_4844_golden')
 
 
-class PG3StripPeaks(stresstesting.MantidStressTest):
+class PG3StripPeaks(systemtesting.MantidSystemTest):
     ref_file = 'PG3_4866_reference.gsa'
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
 
@@ -98,8 +97,7 @@ class PG3StripPeaks(stresstesting.MantidStressTest):
         return _skip_test()
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredFiles(self):
         files = [self.ref_file, self.cal_file]
@@ -196,15 +194,14 @@ class PG3StripPeaks(stresstesting.MantidStressTest):
         return ('PG3_4866','PG3_4866_golden')
 
 
-class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
+class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
     ref_files  = ['PG3_9829_reference.gsa', 'PG3_9830_reference.gsa']
     data_files = ['PG3_9829_event.nxs', 'PG3_9830_event.nxs']
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""
@@ -254,15 +251,14 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         return ('PG3_9829','PG3_9829_golden', 'PG3_9830','PG3_9830_golden')
 
 
-class SumFilesTest(stresstesting.MantidStressTest):
+class SumFilesTest(systemtesting.MantidSystemTest):
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
     ref_file  = 'PG3_9829_sum_reference.gsa'
     data_file = 'PG3_9829_event.nxs'
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return True #do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""
@@ -300,15 +296,14 @@ class SumFilesTest(stresstesting.MantidStressTest):
         return ('PG3_9829','PG3_9829_golden')
 
 
-class ToPDFgetNTest(stresstesting.MantidStressTest):
+class ToPDFgetNTest(systemtesting.MantidSystemTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
     data_file = "PG3_9829_event.nxs"
     getn_file = "PG3_9829.getn"
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""

@@ -59,6 +59,8 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
   friend class DataSelector;
 
 public:
+  using QComboBox::currentIndexChanged;
+
   /// Default Constructor
   WorkspaceSelector(QWidget *parent = nullptr, bool init = true);
   /// Destructor
@@ -74,6 +76,8 @@ public:
   void setOptional(bool optional);
   QStringList getSuffixes() const;
   void setSuffixes(const QStringList &suffix);
+  void setLowerBinLimit(int numberOfBins);
+  void setUpperBinLimit(int numberOfBins);
   QString getValidatingAlgorithm() const;
   void setValidatingAlgorithm(const QString &algName);
   bool isValid() const;
@@ -93,12 +97,13 @@ private:
   bool checkEligibility(const QString &name,
                         Mantid::API::Workspace_sptr object) const;
   bool hasValidSuffix(const QString &name) const;
+  bool hasValidNumberOfBins(Mantid::API::Workspace_sptr object) const;
 
 protected:
   // Method for handling drop events
-  void dropEvent(QDropEvent *) override;
+  void dropEvent(QDropEvent * /*unused*/) override;
   // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent *) override;
+  void dragEnterEvent(QDragEnterEvent * /*unused*/) override;
 
 private:
   /// Poco Observers for ADS Notifications
@@ -123,8 +128,10 @@ private:
   bool m_showHidden;
   // show/hide workspace groups
   bool m_showGroups;
-  bool m_optional; ///< Whether to add an extra empty entry to the combobox
-  // suffix
+  /// Whether to add an extra empty entry to the combobox
+  bool m_optional;
+  /// Allows you to put limits on the size of the workspace i.e. number of bins
+  std::pair<int, int> m_binLimits;
   QStringList m_suffix;
   QString m_algName;
   QString m_algPropName;

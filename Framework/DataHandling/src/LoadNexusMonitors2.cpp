@@ -16,7 +16,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NexusIOHelper.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -426,18 +428,16 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
  **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
-  ::NeXus::File *f = nullptr;
+  std::unique_ptr<::NeXus::File> filePointer;
   try {
-    f = new ::NeXus::File(fname);
-    if (f)
-      f->getEntries();
+    filePointer = std::make_unique<::NeXus::File>(fname);
+    if (filePointer)
+      filePointer->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
                   << "', error description: " << e.what() << '\n';
     res = false;
   }
-  if (f)
-    delete f;
   return res;
 }
 
@@ -674,27 +674,30 @@ bool LoadNexusMonitors2::createOutputWorkspace(
   return useEventMon;
 }
 
-void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file,
+void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
                                                size_t ws_index) {
   // setup local variables
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
-
-  std::vector<uint64_t> event_index;
-  MantidVec time_of_flight;
-  std::string tof_units;
-  MantidVec seconds;
+  std::string tof_units, event_time_zero_units;
 
   // read in the data
-  file.openData("event_index"); // pulse index into tof array
-  file.getData(event_index);
-  file.closeData();
+  auto event_index =
+      NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
+
   file.openData("event_time_offset"); // time of flight
-  file.getDataCoerce(time_of_flight);
+  MantidVec time_of_flight =
+      NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", tof_units);
+  Kernel::Units::timeConversionVector(time_of_flight, tof_units,
+                                      "microseconds");
   file.closeData();
+
   file.openData("event_time_zero"); // pulse time
-  file.getDataCoerce(seconds);
+  MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
+  file.getAttr("units", event_time_zero_units);
+  Kernel::Units::timeConversionVector(seconds, event_time_zero_units,
+                                      "seconds");
   Mantid::Types::Core::DateAndTime pulsetime_offset;
   {
     std::string startTime;
@@ -732,7 +735,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file,
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
 }
 
-void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file,
+void LoadNexusMonitors2::readHistoMonitorEntry(::NeXus::File &file,
                                                size_t ws_index,
                                                size_t numPeriods) {
   // Now, actually retrieve the necessary data

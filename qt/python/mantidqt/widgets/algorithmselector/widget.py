@@ -17,6 +17,7 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
 
+from .algorithm_factory_observer import AlgorithmSelectorFactoryObserver
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 
@@ -37,6 +38,19 @@ def get_name_and_version_from_item_label(item_label):
     return None
 
 
+class AlgorithmTreeWidget(QTreeWidget):
+
+    def __init__(self, parent=None):
+        super(AlgorithmTreeWidget, self).__init__(parent)
+        self.parent = parent
+
+    def mouseDoubleClickEvent(self, mouse_event):
+        if mouse_event.button() == Qt.LeftButton:
+            if self.selectedItems() and not self.selectedItems()[0].child(0):
+                self.parent.execute_algorithm()
+            super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
+
+
 class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
@@ -51,8 +65,22 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.execute_button = None
         self.search_box = None
         self.tree = None
+        self.algorithm_progress_widget = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
+
+        self.afo = AlgorithmSelectorFactoryObserver(self)
+
+    def observeUpdate(self, toggle):
+        """
+        Set whether or not to update AlgorithmSelector if AlgorithmFactory changes
+        :param toggle: A bool. If true, we update AlgorithmSelector
+        """
+        self.afo.observeUpdate(toggle)
+
+    def refresh(self):
+        """Update the algorithms list"""
+        self.presenter.refresh()
 
     def _make_execute_button(self):
         """
@@ -84,7 +112,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Make a tree widget for displaying algorithms in their categories.
         :return: A QTreeWidget
         """
-        tree = QTreeWidget(self)
+        tree = AlgorithmTreeWidget(self)
         tree.setColumnCount(1)
         tree.setHeaderHidden(True)
         tree.itemSelectionChanged.connect(self._on_tree_selection_changed)
@@ -101,7 +129,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         """
         for key, sub_tree in sorted(algorithm_data.items()):
             if key == self.algorithm_key:
-                for name, versions in sub_tree.items():
+                for name, versions in sorted(sub_tree.items()):
                     versions = sorted(versions)
                     default_version_item = QTreeWidgetItem(['{0} v.{1}'.format(name, versions[-1])])
                     item_list.append(default_version_item)
@@ -185,7 +213,11 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         layout = QVBoxLayout()
         layout.addLayout(top_layout)
         layout.addWidget(self.tree)
-        layout.addWidget(AlgorithmProgressWidget())
+
+        self.algorithm_progress_widget = AlgorithmProgressWidget(self)
+        self.algorithm_progress_widget.setAttribute(Qt.WA_DeleteOnClose)
+
+        layout.addWidget(self.algorithm_progress_widget)
         # todo: Without the sizeHint() call the minimum size is not set correctly
         #       This needs some investigation as to why this is.
         layout.sizeHint()

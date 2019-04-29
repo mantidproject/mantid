@@ -63,7 +63,7 @@ public:
   void test_startupMessage() {
     TestableUsageService usageService;
     std::string name = "My testing application name";
-    usageService.setApplication(name);
+    usageService.setApplicationName(name);
     std::string message = usageService.generateStartupMessage();
 
     ::Json::Reader reader;
@@ -162,11 +162,11 @@ public:
   void test_setApplicationName() {
     TestableUsageService usageService;
     // test default first
-    TS_ASSERT_EQUALS(usageService.getApplication(), "python");
+    TS_ASSERT_EQUALS(usageService.getApplicationName(), "python");
 
     std::string name = "My testing application name";
-    usageService.setApplication(name);
-    TS_ASSERT_EQUALS(usageService.getApplication(), name);
+    usageService.setApplicationName(name);
+    TS_ASSERT_EQUALS(usageService.getApplicationName(), name);
   }
 };
 

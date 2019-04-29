@@ -8,13 +8,13 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-import stresstesting
+import systemtesting
 import glob
 
 EXPECTED_EXT = '.expected'
 
 
-class ValidateParameterFiles(stresstesting.MantidStressTest):
+class ValidateParameterFiles(systemtesting.MantidSystemTest):
 
     xsdFile=''
 

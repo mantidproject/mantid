@@ -156,23 +156,25 @@ void LoadDNSSCD::init() {
   v0[2] = 1.;
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "a", 1.0, mustBePositive, Direction::Input),
+                      "a", 1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter a in Angstrom");
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "b", 1.0, mustBePositive, Direction::Input),
+                      "b", 1.0, mustBePositive->clone(), Direction::Input),
                   "Lattice parameter b in Angstrom");
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "c", 1.0, mustBePositive, Direction::Input),
+                      "c", 1.0, std::move(mustBePositive), Direction::Input),
                   "Lattice parameter c in Angstrom");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "alpha", 90.0, reasonableAngle->clone(), Direction::Input),
+      "Angle between b and c in degrees");
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "alpha", 90.0, reasonableAngle, Direction::Input),
-                  "Angle between b and c in degrees");
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "beta", 90.0, reasonableAngle, Direction::Input),
+                      "beta", 90.0, reasonableAngle->clone(), Direction::Input),
                   "Angle between a and c in degrees");
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "gamma", 90.0, reasonableAngle, Direction::Input),
-                  "Angle between a and b in degrees");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "gamma", 90.0, std::move(reasonableAngle), Direction::Input),
+      "Angle between a and b in degrees");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "OmegaOffset", 0.0,
@@ -181,21 +183,23 @@ void LoadDNSSCD::init() {
                   "Angle in degrees between (HKL1) and the beam axis"
                   "if the goniometer is at zero.");
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKL1", u0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("HKL1", std::move(u0),
+                                                 mustBe3D->clone()),
       "Indices of the vector in reciprocal space in the horizontal plane at "
       "angle Omegaoffset, "
       "if the goniometer is at zero.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKL2", v0, mustBe3D),
+      Kernel::make_unique<ArrayProperty<double>>("HKL2", std::move(v0),
+                                                 std::move(mustBe3D)),
       "Indices of a second vector in reciprocal space in the horizontal plane "
       "not parallel to HKL1");
 
   std::vector<double> ttl(2, 0);
   ttl[1] = 180.0;
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("TwoThetaLimits", ttl,
-                                                 mustBe2D),
+      Kernel::make_unique<ArrayProperty<double>>(
+          "TwoThetaLimits", std::move(ttl), std::move(mustBe2D)),
       "Range (min, max) of scattering angles (2theta, in degrees) to consider. "
       "Everything out of this range will be cut.");
 
@@ -212,15 +216,16 @@ void LoadDNSSCD::init() {
 
   auto mustBeIntPositive = boost::make_shared<BoundedValidator<int>>();
   mustBeIntPositive->setLower(0);
-  declareProperty(make_unique<PropertyWithValue<int>>(
-                      "ElasticChannel", 0, mustBeIntPositive, Direction::Input),
-                  "Elastic channel number. Only for TOF data.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>(
+          "ElasticChannel", 0, std::move(mustBeIntPositive), Direction::Input),
+      "Elastic channel number. Only for TOF data.");
 
   auto mustBeNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNegative->setUpper(0.0);
   declareProperty(
-      make_unique<PropertyWithValue<double>>("DeltaEmin", -10.0, mustBeNegative,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double>>(
+          "DeltaEmin", -10.0, std::move(mustBeNegative), Direction::Input),
       "Minimal energy transfer to consider. Should be <=0. Only for TOF data.");
 }
 
@@ -249,8 +254,9 @@ void LoadDNSSCD::loadHuber(ITableWorkspace_sptr tws) {
  */
 Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
   std::vector<double> huber;
-  for (auto ds : m_data)
-    huber.push_back(ds.huber);
+  huber.reserve(m_data.size());
+  for (const auto &ds : m_data)
+    huber.emplace_back(ds.huber);
   // remove dublicates
   std::sort(huber.begin(), huber.end());
   huber.erase(unique(huber.begin(), huber.end()), huber.end());

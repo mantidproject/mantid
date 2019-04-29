@@ -9,7 +9,6 @@
 #include <complex>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <list>
 #include <map>
 #include <set>
@@ -22,6 +21,7 @@
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
@@ -31,6 +31,9 @@
 namespace Mantid {
 
 namespace Geometry {
+namespace {
+Kernel::Logger logger("Quadratic");
+}
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -140,7 +143,7 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
   Kernel::Matrix<double> D(3, 3);
   Kernel::Matrix<double> R(3, 3);
   if (!A.Diagonalise(R, D)) {
-    std::cerr << "Problem with matrix :: distance now guessed at\n";
+    logger.warning() << "Problem with matrix :: distance now guessed at\n";
     return distance(Pt);
   }
 
@@ -263,7 +266,7 @@ int Quadratic::onSurface(const Kernel::V3D &Pt) const
 */
 {
   const double res = eqnValue(Pt);
-  return (fabs(res) > Tolerance) ? 0 : 1;
+  return (std::abs(res) > Tolerance) ? 0 : 1;
 }
 
 void Quadratic::displace(const Kernel::V3D &Pt)
@@ -336,8 +339,8 @@ void Quadratic::print() const
 {
   Surface::print();
   for (int i = 0; i < 10; i++)
-    std::cout << BaseEqn[i] << " ";
-  std::cout << '\n';
+    logger.debug() << BaseEqn[i] << " ";
+  logger.debug() << '\n';
 }
 
 void Quadratic::write(std::ostream &OX) const

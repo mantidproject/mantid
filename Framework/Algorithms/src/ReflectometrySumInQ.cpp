@@ -33,6 +33,29 @@ const static std::string PARTIAL_BINS{"IncludePartialBins"};
 } // namespace Prop
 
 /**
+ * Interpolate the 2theta of a given fractional workspace index.
+ * @param wsIndex a fractional workspace index
+ * @param spectrumInfo a spectrum info
+ * @return the interpolated 2theta in radians
+ */
+double centreTwoTheta(const double wsIndex,
+                      const Mantid::API::SpectrumInfo &spectrumInfo) {
+  double twoTheta;
+  const size_t index{static_cast<size_t>(wsIndex)};
+  if (wsIndex == static_cast<double>(index)) {
+    twoTheta = spectrumInfo.twoTheta(index);
+  } else {
+    // Linear interpolation. Straight from Wikipedia.
+    const double x0{static_cast<double>(index)};
+    const double x1{static_cast<double>(index + 1)};
+    const double y0{spectrumInfo.twoTheta(index)};
+    const double y1{spectrumInfo.twoTheta(index + 1)};
+    twoTheta = (y0 * (x1 - wsIndex) + y1 * (wsIndex - x0)) / (x1 - x0);
+  }
+  return twoTheta;
+}
+
+/**
  * Project a wavelength to given reference angle by keeping the momentum
  * transfer constant.
  * @param wavelength the wavelength to project
@@ -223,19 +246,11 @@ void ReflectometrySumInQ::init() {
   auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
   inputWSValidator->add<API::WorkspaceUnitValidator>("Wavelength");
   inputWSValidator->add<API::InstrumentValidator>();
-  auto mandatoryNonnegativeDouble =
-      boost::make_shared<Kernel::CompositeValidator>();
-  mandatoryNonnegativeDouble->add<Kernel::MandatoryValidator<double>>();
-  auto nonnegativeDouble =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
-  nonnegativeDouble->setLower(0.);
-  mandatoryNonnegativeDouble->add(nonnegativeDouble);
-  auto mandatoryNonnegativeInt =
-      boost::make_shared<Kernel::CompositeValidator>();
-  mandatoryNonnegativeInt->add<Kernel::MandatoryValidator<int>>();
-  auto nonnegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
-  nonnegativeInt->setLower(0);
-  mandatoryNonnegativeInt->add(nonnegativeInt);
+  auto mandatoryNonnegative = boost::make_shared<Kernel::CompositeValidator>();
+  mandatoryNonnegative->add<Kernel::MandatoryValidator<double>>();
+  auto nonnegative = boost::make_shared<Kernel::BoundedValidator<double>>();
+  nonnegative->setLower(0.);
+  mandatoryNonnegative->add(nonnegative);
   declareWorkspaceInputProperties<API::MatrixWorkspace,
                                   API::IndexType::SpectrumNum |
                                       API::IndexType::WorkspaceIndex>(
@@ -246,7 +261,7 @@ void ReflectometrySumInQ::init() {
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A single histogram workspace containing the result of summation in Q.");
   declareProperty(
-      Prop::BEAM_CENTRE, EMPTY_INT(), mandatoryNonnegativeInt,
+      Prop::BEAM_CENTRE, EMPTY_DBL(), mandatoryNonnegative,
       "Fractional workspace index of the specular reflection centre.");
   declareProperty(Prop::IS_FLAT_SAMPLE, true,
                   "If true, the summation is handled as the standard divergent "
@@ -288,7 +303,8 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   }
 
   const auto &spectrumInfo = inWS->spectrumInfo();
-  const int beamCentre = getProperty(Prop::BEAM_CENTRE);
+  const double beamCentre = getProperty(Prop::BEAM_CENTRE);
+  const size_t beamCentreIndex = static_cast<size_t>(beamCentre);
   bool beamCentreFound{false};
   for (const auto i : indices) {
     if (spectrumInfo.isMonitor(i)) {
@@ -300,8 +316,9 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
           "A neighbour to any detector in the index set cannot be a monitor";
       break;
     }
-    if (i == static_cast<size_t>(beamCentre)) {
+    if (i == beamCentreIndex) {
       beamCentreFound = true;
+      break;
     }
   }
   if (!beamCentreFound) {
@@ -325,8 +342,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
 
   // Calculate the number of bins based on the min/max wavelength, using
   // the same bin width as the input workspace
-  const int twoThetaRIdx = getProperty(Prop::BEAM_CENTRE);
-  const auto &edges = detectorWS.binEdges(static_cast<size_t>(twoThetaRIdx));
+  const auto &edges = detectorWS.binEdges(refAngles.referenceWSIndex);
   const double binWidth =
       (edges.back() - edges.front()) / static_cast<double>(edges.size());
   const auto wavelengthRange =
@@ -349,7 +365,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
                                                     std::move(modelHistogram));
 
   // Set the detector IDs and specturm number from the twoThetaR detector.
-  const auto &thetaSpec = detectorWS.getSpectrum(twoThetaRIdx);
+  const auto &thetaSpec = detectorWS.getSpectrum(refAngles.referenceWSIndex);
   auto &outSpec = outputWS->getSpectrum(0);
   outSpec.clearDetectorIDs();
   outSpec.addDetectorIDs(thetaSpec.getDetectorIDs());
@@ -418,9 +434,9 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
  * @param inputIdx [in] :: the index of the input histogram
  * @param twoThetaRange [in] :: the 2theta width of the pixel
  * @param refAngles [in] :: the reference 2theta angles
- * @param inputX [in] :: the input spectrum X values
- * @param inputY [in] :: the input spectrum Y values
- * @param inputE [in] :: the input spectrum E values
+ * @param edges [in] :: the input spectrum bin edges
+ * @param counts [in] :: the input spectrum counts
+ * @param stdDevs [in] :: the input spectrum count standard deviations
  * @param IvsLam [in,out] :: the output workspace
  * @param outputE [in,out] :: the projected E values
  */
@@ -505,16 +521,15 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
 ReflectometrySumInQ::Angles
 ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   Angles a;
-  const int beamCentre = getProperty(Prop::BEAM_CENTRE);
-  const double centreTwoTheta =
-      spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
+  const double beamCentre = getProperty(Prop::BEAM_CENTRE);
   const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
   if (isFlat) {
-    a.horizon = centreTwoTheta / 2.;
+    a.horizon = centreTwoTheta(beamCentre, spectrumInfo) / 2.;
   } else {
     a.horizon = 0.;
   }
-  a.twoTheta = centreTwoTheta;
+  a.referenceWSIndex = static_cast<size_t>(beamCentre);
+  a.twoTheta = spectrumInfo.twoTheta(a.referenceWSIndex);
   a.delta = a.twoTheta - a.horizon;
   return a;
 }

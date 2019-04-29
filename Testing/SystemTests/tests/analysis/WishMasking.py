@@ -11,12 +11,12 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 
 
-class WishMasking(stresstesting.MantidStressTest):
+class WishMasking(systemtesting.MantidSystemTest):
 
         # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):

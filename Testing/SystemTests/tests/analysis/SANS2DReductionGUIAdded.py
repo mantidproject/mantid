@@ -54,7 +54,7 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be
         # almost the same
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 0.35
         self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"

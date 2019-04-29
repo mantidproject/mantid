@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class MuonProcessTest(stresstesting.MantidStressTest):
+class MuonProcessTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
       # Create custom grouping

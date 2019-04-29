@@ -414,8 +414,8 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
 boost::tuple<int, int>
 Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
                               MatrixWorkspace_sptr &workspace) {
-  int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
-  int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
+  int a1 = static_cast<int>(workspace->yIndexOfX(startOverlap));
+  int a2 = static_cast<int>(workspace->yIndexOfX(endOverlap));
   if (a1 == a2) {
     throw std::runtime_error("The Params you have provided for binning yield a "
                              "workspace in which start and end overlap appear "
@@ -437,7 +437,7 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
     {
-      auto e = ws->e(i);
+      const auto &e = ws->e(i);
       auto it = std::find_if(e.begin(), e.end(), isNonzero);
       if (it != e.end()) {
         PARALLEL_CRITICAL(has_non_zero) {

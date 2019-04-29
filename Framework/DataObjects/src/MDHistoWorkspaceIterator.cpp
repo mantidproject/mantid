@@ -168,7 +168,7 @@ void MDHistoWorkspaceIterator::init(
 
   m_begin = beginPos;
   m_pos = m_begin;
-  m_function = function;
+  m_function.reset(function);
 
   m_max = endPos;
   if (m_max > m_ws->getNPoints())
@@ -249,12 +249,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
   delete[] m_index;
   delete[] m_indexMax;
   delete[] m_indexMaker;
-
-  if (m_function)
-    delete m_function;
-  m_function = nullptr;
 }
-
 //----------------------------------------------------------------------------------------------
 /** @return the number of points to be iterated on */
 size_t MDHistoWorkspaceIterator::getDataSize() const {
@@ -284,6 +279,9 @@ MDHistoWorkspaceIterator::jumpToNearest(const VMD &fromLocation) {
   for (size_t d = 0; d < m_nd; ++d) {
     coord_t dExact = getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
     size_t dRound = std::lround(dExact); // Round to nearest bin edge.
+    if (dRound >= m_indexMax[d]) {
+      dRound = m_indexMax[d] - 1;
+    }
     sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) *
               m_binWidth[d] * m_binWidth[d];
     indexes[d] = dRound;

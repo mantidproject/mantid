@@ -73,7 +73,7 @@ signals:
 
 private:
   /// Implementation of algorithm runner
-  bool executeBatchAsyncImpl(const Poco::Void &);
+  bool executeBatchAsyncImpl(const Poco::Void & /*unused*/);
   /// Sets up and executes an algorithm
   bool executeAlgo(ConfiguredAlgorithm algorithm);
 

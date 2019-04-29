@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <iostream>
 #include <locale>
 #include <sstream>
 
 #include "MantidAPI/Expression.h"
 
+#include "MantidKernel/Logger.h"
 #include <MantidKernel/StringTokenizer.h>
 
 namespace Mantid {
@@ -21,7 +21,6 @@ const std::string DEFAULT_OPS_STR[] = {
     ";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
 
 const std::string EMPTY_EXPRESSION_NAME = "EMPTY";
-
 namespace {
 /// Make the full text of the error message
 /// @param msg :: The text of the error message.
@@ -55,6 +54,9 @@ std::string makeErrorMessage(const std::string &msg, const std::string &expr,
   return res.str();
 }
 
+// Get a reference to the logger
+Kernel::Logger logger("Expression");
+
 } // namespace
 
 /// Constructor
@@ -72,7 +74,6 @@ Expression::ParsingError::ParsingError(const std::string &msg)
     : std::runtime_error(msg) {}
 
 Expression::Expression() {
-
   m_operators.reset(new Operators());
   // Define binary operators. Put them in the reverse precedence order (from
   // lower to higher prec.)
@@ -219,14 +220,13 @@ void Expression::tokenize() {
 
   size_t min_prec = 1000;
   size_t is = 0;
-  size_t is1 = 0;
   unsigned int lvl = 0;
-  size_t last = m_expr.size() - 1;
+  const size_t last = m_expr.size() - 1;
   bool inString = false;
   int skip = 0;
   bool canBeBinary = false;
-  bool isNumber =
-      false; // if parser is inside a number (important case is 123.45e+67)
+  // if parser is inside a number (important case is 123.45e+67)
+  bool isNumber = false;
   bool canDotBeAdded = false;
   bool canEBeAdded = false;
   bool canPlusBeAdded = false;
@@ -278,12 +278,7 @@ void Expression::tokenize() {
                                m_expr, i);
           }
         }
-
-        if (is_op_symbol(m_expr[i + 1])) {
-          is1 = i + 2;
-        } else {
-          is1 = i + 1;
-        }
+        auto is1 = i + (is_op_symbol(m_expr[i + 1]) ? 2 : 1);
 
         if (is1 > last) {
           throw ParsingError("Syntax error", m_expr, last);
@@ -413,12 +408,12 @@ std::string Expression::GetOp(size_t i) {
 void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
   if (!m_terms.empty()) {
-    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(\n";
+    logger.debug() << myPads << m_op << '[' << m_funct << ']' << "(\n";
     for (const auto &term : m_terms)
       term.logPrint(myPads);
-    std::cerr << myPads << ")\n";
+    logger.debug() << myPads << ")\n";
   } else
-    std::cerr << myPads << m_op << m_funct << '\n';
+    logger.debug() << myPads << m_op << m_funct << '\n';
 }
 
 void Expression::setFunct(const std::string &name) {

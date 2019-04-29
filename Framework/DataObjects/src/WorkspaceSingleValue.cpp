@@ -53,14 +53,9 @@ void WorkspaceSingleValue::init(const HistogramData::Histogram &histogram) {
 }
 
 /// Return the underlying Histogram1D at the given workspace index.
-Histogram1D &WorkspaceSingleValue::getSpectrum(const size_t /*index*/) {
+Histogram1D &
+WorkspaceSingleValue::getSpectrumWithoutInvalidation(const size_t /*index*/) {
   data.setMatrixWorkspace(this, 0);
-  return data;
-}
-
-/// Return the underlying Histogram1D at the given workspace index.
-const Histogram1D &
-WorkspaceSingleValue::getSpectrum(const size_t /*index*/) const {
   return data;
 }
 

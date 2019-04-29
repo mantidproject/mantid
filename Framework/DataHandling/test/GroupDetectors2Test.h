@@ -451,8 +451,8 @@ public:
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
-    groupAlg.setPropertyValue(
-        "MapFile", "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping.xml");
+    groupAlg.setPropertyValue("MapFile",
+                              "unit_testing/MUSR_Detector_Grouping.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
@@ -497,8 +497,7 @@ public:
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
     groupAlg.setPropertyValue(
-        "MapFile",
-        "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping_dublicate.xml");
+        "MapFile", "unit_testing/MUSR_Detector_Grouping_dublicate.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
@@ -543,8 +542,7 @@ public:
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
     groupAlg.setPropertyValue(
-        "MapFile",
-        "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping_dublicate2.xml");
+        "MapFile", "unit_testing/MUSR_Detector_Grouping_dublicate2.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
@@ -606,6 +604,67 @@ public:
 
     // Result should be 1 + 2  / 2 = 1.5
     TS_ASSERT_EQUALS(output->y(0)[1], 1.5);
+  }
+
+  void testAverageBehaviourWithMaskedBins() {
+    createTestWorkspace(inputWSName, 0);
+    MatrixWorkspace_sptr input =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSName);
+    input->flagMasked(0, 0);
+    GroupDetectors2 gd2;
+    gd2.initialize();
+    gd2.setChild(true);
+    gd2.setRethrows(true);
+    gd2.setPropertyValue("InputWorkspace", inputWSName);
+    gd2.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    gd2.setPropertyValue("WorkspaceIndexList", "0,1");
+    gd2.setPropertyValue("Behaviour", "Average");
+    TS_ASSERT_THROWS_NOTHING(gd2.execute());
+    TS_ASSERT(gd2.isExecuted())
+    MatrixWorkspace_sptr output = gd2.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1)
+    const auto &spectrum = output->getSpectrum(0);
+    const auto &detIds = spectrum.getDetectorIDs();
+    TS_ASSERT_EQUALS(detIds.size(), 2)
+    TS_ASSERT_DIFFERS(detIds.find(0), detIds.end())
+    TS_ASSERT_DIFFERS(detIds.find(1), detIds.end())
+    const auto &y = output->y(0);
+    const auto &e = output->e(0);
+    for (size_t i = 0; i < y.size(); ++i) {
+      const double expectedSignal = i == 0 ? 2. : (1. + 2.) / 2.;
+      TS_ASSERT_EQUALS(y[i], expectedSignal)
+      const double expectedError = i == 0 ? 1. : std::sqrt(2.) / 2.;
+      TS_ASSERT_EQUALS(e[i], expectedError)
+    }
+  }
+
+  void testSumBehaviourWithMaskedBins() {
+    createTestWorkspace(inputWSName, 0);
+    MatrixWorkspace_sptr input =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSName);
+    input->flagMasked(0, 0);
+    GroupDetectors2 gd2;
+    gd2.initialize();
+    gd2.setChild(true);
+    gd2.setRethrows(true);
+    gd2.setPropertyValue("InputWorkspace", inputWSName);
+    gd2.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    gd2.setPropertyValue("WorkspaceIndexList", "0,1");
+    gd2.setPropertyValue("Behaviour", "Sum");
+    TS_ASSERT_THROWS_NOTHING(gd2.execute());
+    TS_ASSERT(gd2.isExecuted())
+    MatrixWorkspace_sptr output = gd2.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1)
+    const auto &y = output->y(0);
+    const auto &e = output->e(0);
+    for (size_t i = 0; i < y.size(); ++i) {
+      const double expectedSignal = i == 0 ? 2. : 1. + 2.;
+      TS_ASSERT_EQUALS(y[i], expectedSignal)
+      const double expectedError = i == 0 ? 1. : std::sqrt(2.);
+      TS_ASSERT_EQUALS(e[i], expectedError)
+    }
   }
 
   void testEvents() {
@@ -1018,11 +1077,36 @@ public:
                     output->y(0)[0], 0.00001);
   }
 
+  void test_masked_detids_get_propagated() {
+    createTestWorkspace(inputWSName, 0);
+    MatrixWorkspace_sptr input =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            inputWSName);
+    input->mutableDetectorInfo().setMasked(0, true);
+    GroupDetectors2 gd2;
+    gd2.initialize();
+    gd2.setChild(true);
+    gd2.setRethrows(true);
+    gd2.setPropertyValue("InputWorkspace", inputWSName);
+    gd2.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    gd2.setPropertyValue("WorkspaceIndexList", "0,1");
+    gd2.setPropertyValue("Behaviour", "Sum");
+    TS_ASSERT_THROWS_NOTHING(gd2.execute());
+    TS_ASSERT(gd2.isExecuted())
+    MatrixWorkspace_sptr output = gd2.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1)
+    const auto &spectrum = output->getSpectrum(0);
+    const auto &ids = spectrum.getDetectorIDs();
+    TS_ASSERT(ids.size() == 2)
+    TS_ASSERT_DIFFERS(ids.find(0), ids.end())
+    TS_ASSERT_DIFFERS(ids.find(1), ids.end())
+  }
+
 private:
   const std::string inputWSName, offsetWSName, outputWSNameBase, inputFile;
-  enum constants { NHIST = 6, NBINS = 4 };
+  enum { NHIST = 6, NBINS = 4 };
 
-  void createTestWorkspace(const std::string &name, const int offset) {
+  static void createTestWorkspace(const std::string &name, const int offset) {
     // Set up a small workspace for testing
     auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -1041,6 +1125,7 @@ private:
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < NHIST; i++) {
       Detector *d = new Detector("det", i, nullptr);
+      d->setPos(1. + static_cast<double>(i) * 0.1, 0., 1.);
       instr->add(d);
       instr->markAsDetector(d);
     }
@@ -1101,48 +1186,63 @@ private:
 
 class GroupDetectors2TestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() override {
-    constexpr int numGroups = 2;
+  static GroupDetectors2TestPerformance *createSuite() {
+    return new GroupDetectors2TestPerformance();
+  }
+  static void destroySuite(GroupDetectors2TestPerformance *suite) {
+    delete suite;
+  }
+
+  GroupDetectors2TestPerformance()
+      : inputEventWs(nullptr), inputMatrixWs(nullptr), groupWs(nullptr), alg() {
+    constexpr int numGroups = 40;
     // This controls speed of test
     constexpr int bankPixelWidth = 30;
+    constexpr int numBins = 1000;
 
-    inputWs = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-        numGroups, bankPixelWidth);
-    AnalysisDataService::Instance().addOrReplace(nxsWSname, inputWs);
-
+    inputEventWs =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+            numGroups, bankPixelWidth);
+    inputMatrixWs =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numGroups, bankPixelWidth, numBins);
     // Create an axis for each pixel.
-    for (size_t pix = 0; pix < inputWs->getNumberHistograms(); pix++) {
-      size_t xAxisSize = inputWs->x(pix).size();
+    for (size_t pix = 0; pix < inputEventWs->getNumberHistograms(); pix++) {
+      size_t xAxisSize = inputEventWs->x(pix).size();
       Mantid::HistogramData::HistogramX axisVals(xAxisSize, 1.0);
-      inputWs->mutableX(pix) = axisVals;
-      inputWs->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
+      inputEventWs->mutableX(pix) = std::move(axisVals);
+      inputEventWs->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
-
     setupGroupWS(numGroups);
 
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", nxsWSname);
-    alg.setPropertyValue("OutputWorkspace", outputws);
-    alg.setPropertyValue("CopyGroupingFromWorkspace", groupWSName);
-
+    alg.setProperty("OutputWorkspace", "_unused_for_child");
+    alg.setProperty("CopyGroupingFromWorkspace", groupWs);
+    alg.setChild(true);
     alg.setRethrows(true);
   }
 
-  void testGroupDetectors2Performance() {
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  void testGroupDetectors2EventPerformance() {
+    alg.setProperty("InputWorkspace", inputEventWs);
+    for (size_t i = 0; i < 100; ++i) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+    }
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove(groupWSName);
-    AnalysisDataService::Instance().remove(nxsWSname);
-    AnalysisDataService::Instance().remove(outputws);
+  void testGroupDetectors2HistogramPerformance() {
+    alg.setProperty("InputWorkspace", inputMatrixWs);
+    for (size_t i = 0; i < 50; ++i) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+    }
   }
+
+  void tearDown() override {}
 
   void setupGroupWS(const size_t numGroups) {
 
     // ------------ Create a grouping workspace to match -------------
-    groupWs = boost::make_shared<GroupingWorkspace>(inputWs->getInstrument());
-    AnalysisDataService::Instance().addOrReplace(groupWSName, groupWs);
+    groupWs =
+        boost::make_shared<GroupingWorkspace>(inputEventWs->getInstrument());
 
     // fill in some groups
     constexpr size_t startingGroupNo = 1;
@@ -1157,11 +1257,8 @@ public:
   }
 
 private:
-  const std::string nxsWSname = "GroupDetectors2TestTarget_ws";
-  const std::string groupWSName = nxsWSname + "_GROUP";
-  const std::string outputws = nxsWSname + "_grouped";
-
-  EventWorkspace_sptr inputWs;
+  EventWorkspace_sptr inputEventWs;
+  MatrixWorkspace_sptr inputMatrixWs;
   GroupingWorkspace_sptr groupWs;
 
   GroupDetectors2 alg;

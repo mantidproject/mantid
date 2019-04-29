@@ -7,9 +7,12 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import ComputeIncoherentDOS, CreateSampleWorkspace, LoadInstrument, ScaleX, Scale, SetSampleMaterial, SofQW3, Transpose
+from mantid.simpleapi import (AddSampleLog, ComputeIncoherentDOS, CreateSampleWorkspace, CreateWorkspace, LoadInstrument, ScaleX, Scale,
+                              SetInstrumentParameter, SetSampleMaterial, SofQW3, Transpose)
 import numpy as np
+from numpy import testing
 from scipy import constants
+import testhelpers
 
 class ComputeIncoherentDOSTest(unittest.TestCase):
 
@@ -27,6 +30,25 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
             ws.setE(i, ws.readE(i)*qq[i]**2)
         return ws
 
+    def compute(self, qs, energyBins, msd=0., temperature=300.):
+        ws = (energyBins[1:] + energyBins[:-1]) / 2.
+        if len(qs) > 1:
+            qs = (qs[:-1] + qs[1:]) / 2.
+        g = qs**-2 * np.exp(2*msd * qs**2) * (1. - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
+        return g
+
+    def computeFromTwoTheta(self, twoThetas, energyBins, msd=0., temperature=300.):
+        ws = (energyBins[1:] + energyBins[:-1]) / 2.
+        if len(twoThetas) > 1:
+            twoThetas = (twoThetas[:-1] + twoThetas[1:]) / 2.
+        twoTheta = np.deg2rad(twoThetas)
+        EFixed = 8.
+        Ei = EFixed * constants.e * 1e-3
+        Ef = (EFixed - ws) * constants.e * 1e-3
+        qs = np.sqrt(2. * constants.m_n / constants.hbar**2 *((Ei + Ef) - 2. * np.sqrt(Ei * Ef) * np.cos(twoTheta))) * 1e-10
+        g = qs**-2 * np.exp(2*msd * qs**2) * (1. - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
+        return g
+
     def convertToWavenumber(self, ws):
         mev2cm = (constants.elementary_charge / 1000) / (constants.h * constants.c * 100)
         u0 = ws.getAxis(0).getUnit().unitID()
@@ -39,6 +61,28 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
             ws = Scale(ws, 1/mev2cm)
             if u0 == 'MomentumTransfer':
                 ws = Transpose(ws)
+        return ws
+
+    def unitySQWSingleHistogram(self, energyBins, qs):
+        EFixed = 8.
+        Ys = np.ones(len(energyBins) - 1)
+        Es = Ys
+        verticalAxis = [str(q) for q in qs]
+        ws = CreateWorkspace(energyBins, Ys, Es, UnitX='DeltaE',
+                             VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=verticalAxis, StoreInADS=False)
+        LoadInstrument(ws, InstrumentName='IN4', RewriteSpectraMap=False, StoreInADS=False)
+        AddSampleLog(ws, LogName='Ei', LogText=str(EFixed), LogType='Number', LogUnit='meV', StoreInADS=False)
+        return ws
+
+    def unitySTwoThetaWSingleHistogram(self, energyBins, qs):
+        EFixed = 8.
+        Ys = np.ones(len(energyBins) - 1)
+        Es = Ys
+        verticalAxis = [str(q) for q in qs]
+        ws = CreateWorkspace(energyBins, Ys, Es, UnitX='DeltaE',
+                             VerticalAxisUnit='Degrees', VerticalAxisValues=verticalAxis, StoreInADS=False)
+        LoadInstrument(ws, InstrumentName='IN4', RewriteSpectraMap=False, StoreInADS=False)
+        AddSampleLog(ws, LogName='Ei', LogText=str(EFixed), LogType='Number', LogUnit='meV', StoreInADS=False)
         return ws
 
     def test_computeincoherentdos(self):
@@ -73,6 +117,141 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         material = ws.sample().getMaterial()
         factor = material.relativeMolecularMass() / (material.totalScatterXSection() * 1000) * 4 * np.pi
         self.assertAlmostEqual(np.max(ws_DOSn.readY(0)) / (np.max(ws_DOS.readY(0))*factor), 1., places=1)
+
+    def test_computation_nontransposed_QW(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        qs = np.array([2.3])
+        ws = self.unitySQWSingleHistogram(energyBins, qs)
+        dos = ComputeIncoherentDOS(ws, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g = self.compute(qs, energyBins)
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i])
+            self.assertAlmostEquals(dos_Es[i], g[i])
+
+    def test_computation_nontransposed_TwoThetaW(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        twoThetas = np.array([17.])
+        ws = self.unitySTwoThetaWSingleHistogram(energyBins, twoThetas)
+        dos = ComputeIncoherentDOS(ws, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g = self.computeFromTwoTheta(twoThetas, energyBins)
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i])
+            self.assertAlmostEquals(dos_Es[i], g[i])
+
+    def test_computation_transposed_TwoThetaW(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        twoThetas = np.array([16.5, 17.5])
+        ws = self.unitySTwoThetaWSingleHistogram(energyBins, twoThetas)
+        ws = Transpose(ws, StoreInADS=False)
+        dos = ComputeIncoherentDOS(ws, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g = self.computeFromTwoTheta(twoThetas, energyBins)
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i])
+            self.assertAlmostEquals(dos_Es[i], g[i])
+
+    def test_computation_transposed_QW(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        qs = np.array([2.15, 2.25])
+        ws = self.unitySQWSingleHistogram(energyBins, qs)
+        ws = Transpose(ws, StoreInADS=False)
+        dos = ComputeIncoherentDOS(ws, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g = self.compute(qs, energyBins)
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i])
+            self.assertAlmostEquals(dos_Es[i], g[i])
+
+    def test_nonzero_MDS(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        qs = np.array([2.3])
+        msd = 5.5
+        ws = self.unitySQWSingleHistogram(energyBins, qs)
+        dos = ComputeIncoherentDOS(ws, MeanSquareDisplacement=msd, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g = self.compute(qs, energyBins, msd=msd)
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i], delta=g[i] * 1e-12)
+            self.assertAlmostEquals(dos_Es[i], g[i], delta=g[i] * 1e-12)
+
+    def test_nondefault_temperature(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        qs = np.array([2.3])
+        temperature = 666.7
+        ws = self.unitySQWSingleHistogram(energyBins, qs)
+        dos = ComputeIncoherentDOS(ws, Temperature=temperature, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g = self.compute(qs, energyBins, temperature=temperature)
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i])
+            self.assertAlmostEquals(dos_Es[i], g[i])
+
+    def test_multiple_histograms(self):
+        energyBins = np.arange(-7., 7., 0.13)
+        qs = np.array([1.1, 1.3, 1.5, 1.7])
+        EFixed = 8.
+        Ys = np.ones(3 * (len(energyBins) - 1))
+        Es = Ys
+        verticalAxis = [str(q) for q in qs]
+        ws = CreateWorkspace(energyBins, Ys, Es, NSpec=3, UnitX='DeltaE',
+                             VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=verticalAxis, StoreInADS=False)
+        LoadInstrument(ws, InstrumentName='IN4', RewriteSpectraMap=False, StoreInADS=False)
+        AddSampleLog(ws, LogName='Ei', LogText=str(EFixed), LogType='Number', LogUnit='meV', StoreInADS=False)
+        dos = ComputeIncoherentDOS(ws, EnergyBinning='Emin, Emax', StoreInADS=False)
+        self.assertEquals(dos.getNumberHistograms(), 1)
+        self.assertEquals(dos.getAxis(0).getUnit().unitID(), 'DeltaE')
+        dos_Xs = dos.readX(0)
+        self.assertEquals(len(dos_Xs), len(energyBins))
+        dos_Ys = dos.readY(0)
+        dos_Es = dos.readE(0)
+        g1 = self.compute(qs[0:2], energyBins)
+        g2 = self.compute(qs[1:3], energyBins)
+        g3 = self.compute(qs[2:4], energyBins)
+        g = (g1 + g2 + g3) / 3
+        gE = np.sqrt(g1**2 + g2**2 + g3**2) / 3
+        np.testing.assert_equal(dos_Xs, energyBins)
+        for i in range(len(dos_Ys)):
+            self.assertAlmostEquals(dos_Ys[i], g[i])
+            self.assertAlmostEquals(dos_Es[i], gE[i])
+
 
 if __name__=="__main__":
     unittest.main()

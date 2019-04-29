@@ -70,10 +70,6 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == nullptr) {
-    throw(Kernel::Exception::NotFoundError(
-        "can not obtain InoputWorkspace for the algorithm to work", ""));
-  }
   // Number of spectra
   const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
 
@@ -101,7 +97,6 @@ void FindDetectorsPar::exec() {
   m_SizesAreLinear = this->getProperty("ReturnLinearRanges");
 
   std::vector<DetParameters> Detectors(nHist);
-  DetParameters AverageDetector;
   this->m_nDetectors = 0;
 
   Progress progress(this, 0.0, 1.0, 100);
@@ -242,13 +237,17 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector &det,
   Geometry::BoundingBox bbox;
   std::vector<Kernel::V3D> coord(3);
 
-  Kernel::V3D er(0, 1, 0), e_th,
-      ez(0, 0, 1); // ez along beamline, which is always oz;
+  // ez along beamline, which is always oz;
+  Kernel::V3D er(0, 1, 0), ez(0, 0, 1);
   if (dist2Det != 0.0)
     er = toDet / dist2Det; // direction to the detector
-  Kernel::V3D e_tg =
-      er.cross_prod(ez); // tangential to the ring and anticloakwise;
-  e_tg.normalize();
+  // tangential to the ring and anticlockwise.
+  Kernel::V3D e_tg = er.cross_prod(ez);
+  if (e_tg.nullVector(1e-12)) {
+    e_tg = V3D(1., 0., 0.);
+  } else {
+    e_tg.normalize();
+  }
   // make orthogonal -- projections are calculated in this coordinate system
   ez = e_tg.cross_prod(er);
 
@@ -545,7 +544,7 @@ size_t FindDetectorsPar::get_my_line(std::ifstream &in, char *buf,
 FileTypeDescriptor
 FindDetectorsPar::get_ASCII_header(std::string const &fileName,
                                    std::ifstream &data_stream) {
-  std::vector<char> BUF(1024);
+  std::vector<char> buffer(1024);
   FileTypeDescriptor file_descriptor;
   file_descriptor.Type = NumFileTypes; // set the autotype to invalid
 
@@ -588,7 +587,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   file_descriptor.line_end = EOL;
   data_stream.seekg(0, std::ios::beg);
 
-  get_my_line(data_stream, &BUF[0], BUF.size(), EOL);
+  get_my_line(data_stream, buffer.data(), buffer.size(), EOL);
   if (!data_stream.good()) {
     g_log.error() << " Error reading the first row of the input data file "
                   << fileName << ", It may be bigger then 1024 symbols\n";
@@ -599,12 +598,13 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   }
 
   // let's find if there is one or more groups of symbols inside of the buffer;
-  int space_to_symbol_change = count_changes(&BUF[0], BUF.size());
+  int space_to_symbol_change = count_changes(buffer.data(), buffer.size());
   if (space_to_symbol_change >
       1) { // more then one group of symbols in the string, spe file
     int nData_records(0), nData_blocks(0);
 
-    int nDatas = sscanf(&BUF[0], " %d %d ", &nData_records, &nData_blocks);
+    int nDatas =
+        sscanf(buffer.data(), " %d %d ", &nData_records, &nData_blocks);
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
     if (nDatas != 2) {
@@ -617,8 +617,8 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
                                          fileName));
     }
     file_descriptor.Type = SPE_type;
-    get_my_line(data_stream, &BUF[0], BUF.size(), EOL);
-    if (BUF[0] != '#') {
+    get_my_line(data_stream, buffer.data(), buffer.size(), EOL);
+    if (buffer.front() != '#') {
       g_log.error()
           << " File " << fileName
           << "iterpreted as SPE does not have symbol # in the second row\n";
@@ -633,13 +633,13 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.data_start_position =
         data_stream.tellg(); // if it is PHX or PAR file then the data begin
                              // after the first line;
-    file_descriptor.nData_records = std::stoi(BUF.data());
+    file_descriptor.nData_records = std::stoi(buffer.data());
     file_descriptor.nData_blocks = 0;
 
     // let's ifendify now if is PHX or PAR file;
-    data_stream.getline(&BUF[0], BUF.size(), EOL);
+    data_stream.getline(buffer.data(), buffer.size(), EOL);
 
-    int space_to_symbol_change = count_changes(&BUF[0], BUF.size());
+    space_to_symbol_change = count_changes(buffer.data(), buffer.size());
     if (space_to_symbol_change == 6 ||
         space_to_symbol_change == 5) { // PAR file
       file_descriptor.Type = PAR_type;
@@ -660,14 +660,12 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
 /*!
  *  function to load PHX or PAR file
  *  the file should be already opened and the FILE_TYPE structure properly
- * defined using
- *  get_ASCII_header function
+ *  defined using get_ASCII_header function
  */
-static std::vector<char> BUF(1024, 0);
 void FindDetectorsPar::load_plain(std::ifstream &stream,
                                   std::vector<double> &Data,
                                   FileTypeDescriptor const &FILE_TYPE) {
-
+  std::vector<char> BUF(1024, 0);
   char par_format[] = " %g %g %g %g %g";
   char phx_format[] = " %g %g %g %g %g %g";
   float data_buf[7];
@@ -705,7 +703,7 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
 
   int nRead_Data(0);
   for (unsigned int i = 0; i < FILE_TYPE.nData_records; i++) {
-    stream.getline(&BUF[0], BUF.size(), EOL);
+    stream.getline(BUF.data(), BUF.size(), EOL);
     if (!stream.good()) {
       g_log.error() << " error reading input file\n";
       throw(std::invalid_argument(" error reading input file"));
@@ -713,13 +711,14 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
 
     switch (FILE_TYPE.Type) {
     case (PAR_type): {
-      nRead_Data = sscanf(&BUF[0], format, data_buf, data_buf + 1, data_buf + 2,
-                          data_buf + 3, data_buf + 4);
+      nRead_Data = sscanf(BUF.data(), format, data_buf, data_buf + 1,
+                          data_buf + 2, data_buf + 3, data_buf + 4);
       break;
     }
     case (PHX_type): {
-      nRead_Data = sscanf(&BUF[0], format, data_buf, data_buf + 1, data_buf + 2,
-                          data_buf + 3, data_buf + 4, data_buf + 5);
+      nRead_Data =
+          sscanf(BUF.data(), format, data_buf, data_buf + 1, data_buf + 2,
+                 data_buf + 3, data_buf + 4, data_buf + 5);
       break;
     }
     default: {

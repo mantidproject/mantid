@@ -81,9 +81,8 @@ void EstimateResolutionDiffraction::init() {
   auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
-  declareProperty(
-      "DeltaTOF", 0., positiveDeltaTOF,
-      "DeltaT as the resolution of TOF with unit microsecond (10^-6m).");
+  declareProperty("DeltaTOF", 0., positiveDeltaTOF,
+                  "DeltaT as the resolution of TOF with unit microsecond");
 
   auto positiveWavelength = boost::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);

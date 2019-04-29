@@ -99,12 +99,9 @@ class MuonMaxent(PythonAlgorithm):
             "InnerIterations",
             10,
             doc="Number of loops to optimise the spectrum")
-        valid = FloatBoundedValidator(lower=0)
-        valid.setLowerExclusive(True)
         self.declareProperty(
             "DefaultLevel",
             0.1,
-            validator=valid,
             doc="Default Level")
         self.declareProperty(
             "Factor",
@@ -143,6 +140,40 @@ class MuonMaxent(PythonAlgorithm):
                 direction=Direction.Output,
                 optional=PropertyMode.Optional),
             doc="Convergence of phases (optional)")
+
+    def validateInputs(self):
+        issues = dict()
+        first = self.getProperty("FirstGoodTime").value
+        last = self.getProperty("LastGoodTime").value
+
+        if first >= last:
+            issues[
+                "FirstGoodTime"] = "FirstGoodTime must be smaller than LastGoodTime"
+        if first < 0:
+            issues["FirstGoodTime"] = "FirstGoodTime must be positive or zero"
+        field = self.getProperty("MaxField").value
+        if field <= 0:
+            issues["MaxField"] = "MaxField must be a positive non-zero number"
+        outer = self.getProperty("OuterIterations").value
+        if outer <= 0:
+            issues[
+                "OuterIterations"] = "OuterIterations must be a positive non-zero number"
+        inner = self.getProperty("InnerIterations").value
+        if inner <= 0:
+            issues[
+                "InnerIterations"] = "InnerIterations must be a positive non-zero number"
+
+        default = self.getProperty("DefaultLevel").value
+        if default <= 0.0:
+            issues[
+                "DefaultLevel"] = "DefaultLevel (A) must be a positive non-zero number"
+
+        factor = self.getProperty("Factor").value
+        if factor <= 0.0:
+            issues[
+                "Factor"] = "Factor (Lagrange multiplier) must be a positive non-zero number"
+
+        return issues
 
     def checkRValues(self, rg9, rg0, xv, mylog):
         if(rg9 - rg0 < 4):
@@ -240,7 +271,7 @@ class MuonMaxent(PythonAlgorithm):
                     phaseLabel = name
                 if name_lower in {"detid", "spectrum number"}:
                     IDLabel = name
-                if name_lower in{"asymmetry", "asymm",  "asym"}:
+                if name_lower in{"asymmetry", "asymm", "asym"}:
                     asymmLabel = name
             if phaseLabel is None:
                 raise ValueError(
@@ -269,7 +300,12 @@ class MuonMaxent(PythonAlgorithm):
                         filePHASE[row[IDLabel] - 1 - offset] = row[phaseLabel]
         return filePHASE
 
-    def phaseConvergenceTable(self,POINTS_ngroups,deadDetectors,OuterIter,filePHASE):
+    def phaseConvergenceTable(
+       self,
+       POINTS_ngroups,
+       deadDetectors,
+       OuterIter,
+       filePHASE):
         if not self.getProperty("PhaseConvergenceTable").isDefault:
             phaseconvWS = WorkspaceFactory.create(
                 "Workspace2D",
@@ -411,7 +447,11 @@ class MuonMaxent(PythonAlgorithm):
             mylog)
         #
         # debugging
-        phaseconvWS = self.phaseConvergenceTable(POINTS_ngroups,deadDetectors,OuterIter,filePHASE)
+        phaseconvWS = self.phaseConvergenceTable(
+            POINTS_ngroups,
+            deadDetectors,
+            OuterIter,
+            filePHASE)
         # do the work! Lots to pass in and out
         (MISSCHANNELS_mm, RUNDATA_fnorm, RUNDATA_hists, MAXPAGE_f, FAC_factor, FAC_facfake, FAC_ratio,
          DETECT_a, DETECT_b, DETECT_c, DETECT_d, DETECT_e, PULSESHAPE_convol, SENSE_taud, FASE_phase, SAVETIME_ngo,
@@ -438,6 +478,7 @@ class MuonMaxent(PythonAlgorithm):
             YLength=MAXPAGE_n)
         outSpec.dataX(0)[:] = fchan
         outSpec.dataY(0)[:] = MAXPAGE_f
+        outSpec.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
         self.setProperty("OutputWorkspace", outSpec)
         # revised dead times
         if(not self.getProperty("OutputDeadTimeTable").isDefault):

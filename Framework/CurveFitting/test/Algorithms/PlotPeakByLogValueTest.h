@@ -539,34 +539,20 @@ public:
     TS_ASSERT(fits);
 
     if (fits->size() > 0) {
-      // Get the Fit algorithm history
       auto fit = fits->getItem(0);
-      const auto &wsHistory = fit->getHistory();
-      const auto &child = wsHistory.getAlgorithmHistory(0);
-      TS_ASSERT_EQUALS(child->name(), "Fit");
-      const auto &properties = child->getProperties();
-
-      // Check max iterations property
-      PropertyNameIs maxIterationsCheck("MaxIterations");
-      auto prop = std::find_if(properties.begin(), properties.end(),
-                               maxIterationsCheck);
-      TS_ASSERT_EQUALS((*prop)->value(), "50");
-
-      // Check minimizer property
-      PropertyNameIs minimizerCheck("Minimizer");
-      prop = std::find_if(properties.begin(), properties.end(), minimizerCheck);
-      TS_ASSERT_EQUALS((*prop)->value(),
-                       "Levenberg-Marquardt,AbsError=0.01,RelError=1");
+      TS_ASSERT_EQUALS(fit->history().size(), 0);
+      TS_ASSERT_EQUALS(fit->getName(), "PlotPeakResult_Workspaces_1");
     }
 
     AnalysisDataService::Instance().clear();
   }
 
-  void test_histogram_fit() {
+  void test_parameters_are_correct_for_a_histogram_fit() {
     createHistogramWorkspace("InputWS", 10, -10.0, 10.0);
 
     PlotPeakByLogValue alg;
     alg.initialize();
+    alg.setAlwaysStoreInADS(false);
     alg.setProperty("EvaluationType", "Histogram");
     alg.setPropertyValue("Input", "InputWS,v1:3");
     alg.setPropertyValue("OutputWorkspace", "out");
@@ -574,23 +560,10 @@ public:
     alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
     alg.execute();
 
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_0_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
-    }
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_1_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 1.1, 1e-15);
-    }
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_2_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 0.6, 1e-15);
-    }
+    ITableWorkspace_sptr params = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
+    TS_ASSERT_DELTA(params->Double(1, 1), 1.1, 1e-15);
+    TS_ASSERT_DELTA(params->Double(2, 1), 0.6, 1e-15);
 
     AnalysisDataService::Instance().clear();
   }

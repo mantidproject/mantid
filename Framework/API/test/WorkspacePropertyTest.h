@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
+#include <json/value.h>
 
 // Property implementations
 #include "MantidAPI/WorkspaceProperty.tcc"
@@ -37,6 +38,14 @@ class WorkspacePropertyTest : public CxxTest::TestSuite {
     const std::string id() const override { return "WorkspacePropTest"; }
   };
 
+  using WorkspacePropertyWorkspace = WorkspaceProperty<Workspace>;
+  using WorkspacePropertyWorkspace_uptr =
+      std::unique_ptr<WorkspacePropertyWorkspace>;
+
+  using WorkspacePropertyWorkspaceTester2 = WorkspaceProperty<WorkspaceTester2>;
+  using WorkspacePropertyWorkspaceTester2_uptr =
+      std::unique_ptr<WorkspacePropertyWorkspaceTester2>;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -47,32 +56,23 @@ public:
 
   WorkspacePropertyTest() {
     AnalysisDataService::Instance().clear();
-    wsp1 =
-        new WorkspaceProperty<Workspace>("workspace1", "ws1", Direction::Input);
-    wsp2 =
-        new WorkspaceProperty<Workspace>("workspace2", "", Direction::Output);
-    wsp3 = new WorkspaceProperty<WorkspaceTester2>("workspace3", "ws3",
-                                                   Direction::InOut);
-    // Two optional properties of different types
-    wsp4 = new WorkspaceProperty<Workspace>("workspace4", "", Direction::Input,
-                                            PropertyMode::Optional);
-    wsp5 = new WorkspaceProperty<WorkspaceTester2>(
-        "workspace5", "", Direction::Input, PropertyMode::Optional);
-    wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest", "",
-                                            Direction::Output);
     WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
         "WorkspacePropertyTest");
     WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
         "WorkspacePropertyTest2");
-  }
-
-  ~WorkspacePropertyTest() override {
-    delete wsp1;
-    delete wsp2;
-    delete wsp3;
-    delete wsp4;
-    delete wsp5;
-    delete wsp6;
+    wsp1 = std::make_unique<WorkspacePropertyWorkspace>("workspace1", "ws1",
+                                                        Direction::Input);
+    wsp2 = std::make_unique<WorkspacePropertyWorkspace>("workspace2", "",
+                                                        Direction::Output);
+    wsp3 = std::make_unique<WorkspacePropertyWorkspaceTester2>(
+        "workspace3", "ws3", Direction::InOut);
+    // Two optional properties of different types
+    wsp4 = std::make_unique<WorkspacePropertyWorkspace>(
+        "workspace4", "", Direction::Input, PropertyMode::Optional);
+    wsp5 = std::make_unique<WorkspacePropertyWorkspaceTester2>(
+        "workspace5", "", Direction::Input, PropertyMode::Optional);
+    wsp6 = std::make_unique<WorkspacePropertyWorkspace>("InvalidNameTest", "",
+                                                        Direction::Output);
   }
 
   void testConstructor() {
@@ -84,6 +84,12 @@ public:
     TS_ASSERT_EQUALS(wsp1->value(), "ws1")
     TS_ASSERT_EQUALS(wsp2->value(), "")
     TS_ASSERT_EQUALS(wsp3->value(), "ws3")
+  }
+
+  void testValueAsJson() {
+    TS_ASSERT_EQUALS("ws1", wsp1->valueAsJson().asString());
+    TS_ASSERT_EQUALS("", wsp2->valueAsJson().asString());
+    TS_ASSERT_EQUALS("ws3", wsp3->valueAsJson().asString());
   }
 
   void testIsValueSerializable() {
@@ -103,10 +109,17 @@ public:
     TS_ASSERT_EQUALS(wsp1->setValue(""),
                      "Enter a name for the Input/InOut workspace")
     TS_ASSERT_EQUALS(wsp1->value(), "")
+    TS_ASSERT_EQUALS(wsp1->setValueFromJson(Json::Value("")),
+                     "Enter a name for the Input/InOut workspace")
+    TS_ASSERT_EQUALS(wsp1->value(), "")
+
     TS_ASSERT_EQUALS(
         wsp1->setValue("newValue"),
         "Workspace \"newValue\" was not found in the Analysis Data Service")
-
+    TS_ASSERT_EQUALS(wsp1->value(), "newValue")
+    TS_ASSERT_EQUALS(
+        wsp1->setValueFromJson(Json::Value("newValue")),
+        "Workspace \"newValue\" was not found in the Analysis Data Service")
     TS_ASSERT_EQUALS(wsp1->value(), "newValue")
     wsp1->setValue("ws1");
   }
@@ -396,12 +409,12 @@ public:
   }
 
 private:
-  WorkspaceProperty<Workspace> *wsp1;
-  WorkspaceProperty<Workspace> *wsp2;
-  WorkspaceProperty<WorkspaceTester2> *wsp3;
-  WorkspaceProperty<Workspace> *wsp4;
-  WorkspaceProperty<WorkspaceTester2> *wsp5;
-  WorkspaceProperty<Workspace> *wsp6;
+  WorkspacePropertyWorkspace_uptr wsp1;
+  WorkspacePropertyWorkspace_uptr wsp2;
+  WorkspacePropertyWorkspaceTester2_uptr wsp3;
+  WorkspacePropertyWorkspace_uptr wsp4;
+  WorkspacePropertyWorkspaceTester2_uptr wsp5;
+  WorkspacePropertyWorkspace_uptr wsp6;
 };
 
 #endif /*WORKSPACEPROPERTYTEST_H_*/

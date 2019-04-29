@@ -2,6 +2,8 @@
 # PYUNITTEST_ADD_TEST (public macro to add unit tests)
 #   Adds a set of python tests based upon the unittest module
 #
+#   The variable PYUNITTEST_PYTHONPATH_EXTRA can be defined with
+#   extra paths to add to PYTHONPATH during the tests
 #   Parameters:
 #       _test_src_dir_base :: A base directory when added to the relative test paths gives
 #                             an absolute path to that test. This directory is added to the
@@ -17,26 +19,31 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
   endif()
+
   set ( _test_runner ${_module_dir}/mantidpython )
   if ( WIN32 )
     set ( _test_runner ${_test_runner}.bat )
   endif ()
-  set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+
+  if ( NOT PYUNITTEST_RUNNER )
+    set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+  else ()
+    set ( _test_runner_module ${PYUNITTEST_RUNNER} )
+  endif()
+
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};$ENV{PYTHONPATH} )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH} )
     # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:$ENV{PYTHONPATH} )
+    string ( REPLACE ";" ":" _python_path "${PYUNITTEST_PYTHONPATH_EXTRA}" )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH} )
   endif()
   # Define the environment
   list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
   if ( PYUNITTEST_QT_API )
     list ( APPEND _test_environment "QT_API=${PYUNITTEST_QT_API}" )
-  endif()
-  if ( PYUNITTEST_TESTRUNNER_IMPORT_MANTID )
-    list ( APPEND _test_environment "TESTRUNNER_IMPORT_MANTID=1" )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel

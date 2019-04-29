@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class CompressEventsTesting(stresstesting.MantidStressTest):
+class CompressEventsTesting(systemtesting.MantidSystemTest):
     event_files = ["PG3_4844_event.nxs"] # /SNS/PG3/IPTS-2767/0/ for 2.5 hours
 
     def requiredFiles(self):
@@ -42,6 +42,6 @@ class CompressEventsTesting(stresstesting.MantidStressTest):
                 compressfull = integral.readY(0)[0]
 
                 if not (totalEvents == compress10s == compress1h == compressfull):
-                    # TODO use new style formatting
-                    msg = '%s - total=%f 10s=%f 1h=%f full=%f' % (name, totalEvents, compress10s, compress1h, compressfull)
+                    msg = '{} total={:.0f} 10s={:.0f} 1h={:.0f} full={:.0f}'.format(name, totalEvents, compress10s,
+                                                                                    compress1h, compressfull)
                     raise RuntimeError(msg)

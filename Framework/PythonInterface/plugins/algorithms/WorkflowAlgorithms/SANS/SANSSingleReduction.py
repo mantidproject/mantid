@@ -18,6 +18,7 @@ from sans.common.general_functions import (create_child_algorithm, does_can_work
 from sans.algorithm_detail.single_execution import (run_core_reduction, get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request, run_optimized_for_can)
 from sans.algorithm_detail.bundles import ReductionSettingBundle
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 
 class SANSSingleReduction(DistributedDataProcessorAlgorithm):
@@ -38,6 +39,9 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
                              doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
                                  "Depending on your concrete reduction, this could provide a significant"
                                  " performance boost")
+
+        self.declareProperty("SaveCan", False, direction=Direction.Input,
+                             doc="When enabled, the unsubtracted can and sam workspaces are added to the ADS.")
 
         # Sample Scatter Workspaces
         self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '',
@@ -112,26 +116,18 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         self.setPropertyGroup("OutputWorkspaceMerged", 'Output')
 
         # CAN output
-        # We want to output the can workspaces since they can be persited in the case of optimizations
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCan', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanCount', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can count output workspace for the low-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanNorm', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can norm output workspace for the low-angle bank, provided there is one.')
-
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCan', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanCount', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABSample', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can count output workspace for the high-angle bank, provided there is one.')
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanNorm', '',
+                             doc='The sample output workspace for the low-angle bank, provided there is one.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABSample', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
-                             doc='The can norm output workspace for the high-angle bank, provided there is one.')
+                             doc='The sample output workspace for the high-angle bank, provided there is one')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceCalculatedTransmission', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The calculated transmission workspace')
@@ -145,11 +141,28 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The unfitted transmission workspace for the can')
         self.setPropertyGroup("OutputWorkspaceLABCan", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceLABCanNorm", 'Can Output')
         self.setPropertyGroup("OutputWorkspaceHABCan", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceHABCanCount", 'Can Output')
-        self.setPropertyGroup("OutputWorkspaceHABCanNorm", 'Can Output')
+        self.setPropertyGroup("OutputWorkspaceLABSample", 'Can Output')
+        self.setPropertyGroup("OutputWorkspaceHABSample", 'Can Output')
+
+        # Output CAN Count and Norm for optimizations
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanNorm', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The can norm output workspace for the low-angle bank, provided there is one.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLABCanCount', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The can count output workspace for the low-angle bank, provided there is one.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanCount', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The can count output workspace for the high-angle bank, provided there is one.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHABCanNorm', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
+                             doc='The can norm output workspace for the high-angle bank, provided there is one.')
+
+        self.setPropertyGroup("OutputWorkspaceLABCanCount", 'Opt Output')
+        self.setPropertyGroup("OutputWorkspaceLABCanNorm", 'Opt Output')
+        self.setPropertyGroup("OutputWorkspaceHABCanCount", 'Opt Output')
+        self.setPropertyGroup("OutputWorkspaceHABCanNorm", 'Opt Output')
 
     def PyExec(self):
         # Get state
@@ -165,6 +178,7 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
 
         # Run core reductions
         use_optimizations = self.getProperty("UseOptimizations").value
+        save_can = self.getProperty("SaveCan").value
 
         # Create the reduction core algorithm
         reduction_name = "SANSReductionCore"
@@ -180,7 +194,6 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         output_bundles = []
         output_parts_bundles = []
         output_transmission_bundles = []
-
         for reduction_setting_bundle in reduction_setting_bundles:
             progress.report("Running a single reduction ...")
             # We want to make use of optimizations here. If a can workspace has already been reduced with the same can
@@ -195,16 +208,7 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
             output_parts_bundles.append(output_parts_bundle)
             output_transmission_bundles.append(output_transmission_bundle)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Deal with merging
-        # --------------------------------------------------------------------------------------------------------------
         reduction_mode_vs_output_workspaces = {}
-        # Merge if required with stitching etc.
-        if overall_reduction_mode is ReductionMode.Merged:
-            progress.report("Merging reductions ...")
-            merge_bundle = get_merge_bundle_for_merge_request(output_parts_bundles, self)
-            self.set_shift_and_scale_output(merge_bundle)
-            reduction_mode_vs_output_workspaces.update({ReductionMode.Merged: merge_bundle.merged_workspace})
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with non-merged
@@ -213,6 +217,18 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         progress.report("Final clean up...")
         output_workspaces_non_merged = get_final_output_workspaces(output_bundles, self)
         reduction_mode_vs_output_workspaces.update(output_workspaces_non_merged)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Deal with merging
+        # --------------------------------------------------------------------------------------------------------------
+        # Merge if required with stitching etc.
+        if overall_reduction_mode is ReductionMode.Merged:
+            progress.report("Merging reductions ...")
+            merge_bundle = get_merge_bundle_for_merge_request(output_parts_bundles, self)
+            self.set_shift_and_scale_output(merge_bundle)
+            reduction_mode_vs_output_workspaces.update({ReductionMode.Merged: merge_bundle.merged_workspace})
+            scaled_HAB = strip_end_nans(merge_bundle.scaled_hab_workspace, self)
+            reduction_mode_vs_output_workspaces.update({ISISReductionMode.HAB: scaled_HAB})
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the output workspaces
@@ -230,9 +246,11 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         if use_optimizations:
             self.set_reduced_can_workspace_on_output(output_bundles, output_parts_bundles)
 
-        if state.adjustment.show_transmission:
-            self.set_transmission_workspaces_on_output(output_transmission_bundles,
-                                                       state.adjustment.calculate_transmission.fit)
+        if save_can:
+            self.set_can_and_sam_on_output(output_bundles)
+
+        self.set_transmission_workspaces_on_output(output_transmission_bundles,
+                                                   state.adjustment.calculate_transmission.fit)
 
     def validateInputs(self):
         errors = dict()
@@ -399,6 +417,45 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
                     else:
                         raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
                                            " be set with a partial can.".format(reduction_mode))
+
+    def set_can_and_sam_on_output(self, output_bundles):
+        '''
+        Sets the reduced can and sam workspaces.
+        These can be:
+        1. LAB Can
+        2. HAB Can
+        3. LAB Sample
+        4. HAB Sample
+        Cans are also output for optimization, so check for double output.
+        :param output_bundles: a list of output_bundles
+        '''
+
+        for output_bundle in output_bundles:
+            if output_bundle.data_type is DataType.Can:
+                reduction_mode = output_bundle.reduction_mode
+                output_workspace = output_bundle.output_workspace
+
+                if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
+                    if reduction_mode is ISISReductionMode.LAB:
+                        self.setProperty("OutputWorkspaceLABCan", output_workspace)
+                    elif reduction_mode is ISISReductionMode.HAB:
+                        self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a can.".format(reduction_mode))
+
+            elif output_bundle.data_type is DataType.Sample:
+                reduction_mode = output_bundle.reduction_mode
+                output_workspace = output_bundle.output_workspace
+
+                if output_workspace is not None:
+                    if reduction_mode is ISISReductionMode.LAB:
+                        self.setProperty("OutputWorkspaceLABSample", output_workspace)
+                    elif reduction_mode is ISISReductionMode.HAB:
+                        self.setProperty("OutputWorkspaceHABSample", output_bundle.output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a sample.".format(reduction_mode))
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
         for transmission_bundle in transmission_bundles:

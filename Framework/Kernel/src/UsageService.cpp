@@ -68,6 +68,7 @@ UsageServiceImpl::UsageServiceImpl()
     : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
       m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
       m_application("python"),
+      m_startTime(Types::Core::DateAndTime::getCurrentTime()),
       m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
@@ -78,15 +79,16 @@ UsageServiceImpl::UsageServiceImpl()
   } else {
     m_url = url.get();
     g_log.debug() << "Root usage reporting url is " << m_url << "\n";
-  }
-  m_startTime = Types::Core::DateAndTime::getCurrentTime();
+  };
 }
 
-void UsageServiceImpl::setApplication(const std::string &name) {
+void UsageServiceImpl::setApplicationName(const std::string &name) {
   m_application = name;
 }
 
-std::string UsageServiceImpl::getApplication() const { return m_application; }
+std::string UsageServiceImpl::getApplicationName() const {
+  return m_application;
+}
 
 void UsageServiceImpl::setInterval(const uint32_t seconds) {
   // set the ticks target to by 24 hours / interval
@@ -183,7 +185,7 @@ void UsageServiceImpl::sendFeatureUsageReport(const bool synchronous = false) {
   }
 }
 
-void UsageServiceImpl::timerCallback(Poco::Timer &) {
+void UsageServiceImpl::timerCallback(Poco::Timer & /*unused*/) {
   m_timerTicks++;
   if (m_timerTicks > m_timerTicksTarget) {
     // send startup report
