@@ -130,7 +130,7 @@ constructKwargs(boost::optional<std::vector<int>> spectrum_nums,
   }
 }
 
-Python::Object plot(std::vector<std::string> workspaces,
+Python::Object plot(const std::vector<std::string> &workspaces,
                     boost::optional<std::vector<int>> spectrum_nums,
                     boost::optional<std::vector<int>> wksp_indices,
                     boost::optional<Python::Object> fig,

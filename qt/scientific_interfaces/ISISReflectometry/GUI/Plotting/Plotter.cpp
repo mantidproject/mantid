@@ -55,7 +55,7 @@ void Plotter::reflectometryPlot(
 
   std::vector<int> wksp_indices = {0};
   plot(workspaces, boost::none, wksp_indices, boost::none, boost::none,
-       ax_properties, workspaces[0], false, true);
+       ax_properties, window_title, false, true);
 #endif
 }
 
