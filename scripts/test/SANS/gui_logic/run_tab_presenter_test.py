@@ -1049,5 +1049,6 @@ class RunTabPresenterTest(unittest.TestCase):
     def get_file_information_mock():
         return SANSFileInformationMock(instrument=SANSInstrument.SANS2D)
 
+
 if __name__ == '__main__':
     unittest.main()

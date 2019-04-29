@@ -28,7 +28,7 @@ from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_default_file, load_property, set_setting,
+                                       load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
@@ -571,21 +571,19 @@ class SANSDataProcessorGui(QMainWindow,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
-        set_setting(self.__generic_settings, self.__user_file_key, self.get_user_file_path())
+        self.gui_properties_handler.update_default("user_file", self.get_user_file_path())
 
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        set_setting(self.__generic_settings, self.__user_file_key, "")
+        self.gui_properties_handler.update_default("user_file", "")
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):
         """
         Load a default user file, called on view set-up
         """
-        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
-
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
