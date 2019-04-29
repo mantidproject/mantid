@@ -55,7 +55,7 @@ def _configurematplotlib(params):
 def _chooseylabel(workspace, axes):
     """Set the correct y label for profile axes."""
     yUnitLabel = workspace.YUnitLabel()
-    if yUnitLabel == "X''(Q,E)":
+    if yUnitLabel == "Dynamic susceptibility":
         axes.set_ylabel(r"$\chi''(Q,E)$")
     elif yUnitLabel == 'g^{neutron}(E) (arb. units)':
         axes.set_ylabel(r'$g(E)$')
@@ -615,8 +615,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 if wsStr == '':
                     wsStr = str(wsCount)
                 quantityStr = _clearmath(quantity)
-                unitStr = _clearmath(unit)
-                wsName = 'cut_{}_{}={}+-{}{}'.format(wsStr, quantityStr, cut, width, unitStr)
+                wsName = 'cut_{}_{}={}+-{}'.format(wsStr, quantityStr, cut, width,)
                 if keepCutWorkspaces:
                     cutWSList.append(wsName)
                 line = LineProfile(ws, cut, width, Direction=direction,
@@ -726,7 +725,6 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
     qHorizontal = workspace.getAxis(0).getUnit().name() == 'q'
     isSusceptibility = workspace.YUnitLabel() == 'Dynamic susceptibility'
-    print(workspace.YUnit())
     figure, axes = subplots()
     if QMin is None:
         QMin = 0.
