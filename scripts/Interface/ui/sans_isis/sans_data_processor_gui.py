@@ -198,6 +198,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
         self.__user_file_key = "user_file"
+        self.__batch_file_key = "batch_file"
         self.__mask_file_input_path_key = "mask_files"
         self.__output_mode_key = "output_mode"
         self.__save_can_key = "save_can"
@@ -616,7 +617,7 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
