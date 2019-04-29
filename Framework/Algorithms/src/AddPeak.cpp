@@ -78,9 +78,7 @@ void AddPeak::exec() {
     double efixed = 0.0;
     if (run.hasProperty("Ei")) {
       emode = 1; // direct
-      if (run.hasProperty("Ei")) {
-        efixed = run.getPropertyValueAsType<double>("Ei");
-      }
+      efixed = run.getPropertyValueAsType<double>("Ei");
     } else if (det.hasParameter("Efixed")) {
       emode = 2; // indirect
       try {

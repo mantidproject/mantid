@@ -308,7 +308,6 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;
   std::vector<double> axis;
-  std::vector<double> x;
   std::vector<double> xerrors;
   const size_t index = static_cast<size_t>(wsIndex);
   const auto ySize = m_outWS->y(index).size();
@@ -324,7 +323,7 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
       const auto &x = input->x(index);
       axis.insert(axis.end(), x.begin(), x.end());
     } else {
-      x = m_axisCache[input->getName()];
+      const auto &x = m_axisCache[input->getName()];
       axis.insert(axis.end(), x.begin(), x.end());
     }
     if (input->hasDx(index)) {
