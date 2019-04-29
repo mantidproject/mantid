@@ -33,5 +33,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                    ${PYTHON_LIBRARIES}
                  MTD_QT_LINK_LIBS
                    MantidQtWidgetsMplCpp
+                   MantidQtWidgetsCommon
                  PARENT_DEPENDENCIES
                    GUITests)

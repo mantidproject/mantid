@@ -9,13 +9,12 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
-#include "MantidQtWidgets/MplCpp/Python/Sip.h"
 
 #include <QWidget>
 
 using MantidQt::Widgets::MplCpp::backendModule;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 class SipTest : public CxxTest::TestSuite {
 public:
@@ -25,23 +24,28 @@ public:
 public:
   // ----------------- success tests ---------------------
   void testExtractWithSipWrappedTypeSucceeds() {
-    Python::Object mplBackend{backendModule()};
-    Python::Object fig{
-        Python::NewRef(PyImport_ImportModule("matplotlib.figure"))
+    MantidQt::Widgets::Common::Python::Object mplBackend{backendModule()};
+    MantidQt::Widgets::Common::Python::Object fig{
+        MantidQt::Widgets::Common::Python::NewRef(
+            PyImport_ImportModule("matplotlib.figure"))
             .attr("Figure")()};
-    Python::Object pyCanvas{mplBackend.attr("FigureCanvasQT")(fig)};
+    MantidQt::Widgets::Common::Python::Object pyCanvas{
+        mplBackend.attr("FigureCanvasQT")(fig)};
     QWidget *w{nullptr};
-    TS_ASSERT_THROWS_NOTHING(w = Python::extract<QWidget>(pyCanvas));
+    TS_ASSERT_THROWS_NOTHING(
+        w = MantidQt::Widgets::Common::Python::extract<QWidget>(pyCanvas));
     TS_ASSERT(w);
   }
 
   // ----------------- failure tests ---------------------
 
   void testExtractWithNonSipTypeThrowsException() {
-    const Python::Object nonSipType{
-        Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
+    const MantidQt::Widgets::Common::Python::Object nonSipType{
+        MantidQt::Widgets::Common::Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
     struct Foo;
-    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType), std::runtime_error);
+    TS_ASSERT_THROWS(
+        MantidQt::Widgets::Common::Python::extract<Foo>(nonSipType),
+        std::runtime_error);
   }
 };
 

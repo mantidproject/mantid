@@ -13,9 +13,8 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::PythonInterface::PythonException;
-using MantidQt::Widgets::MplCpp::Colormap;
-using MantidQt::Widgets::MplCpp::Python::Object;
 using MantidQt::Widgets::MplCpp::cmapExists;
+using MantidQt::Widgets::MplCpp::Colormap;
 using MantidQt::Widgets::MplCpp::getCMap;
 
 class ColormapTest : public CxxTest::TestSuite {
@@ -46,7 +45,8 @@ public:
   }
 
   void testConstructionWithNonColorMapObjectThrows() {
-    TS_ASSERT_THROWS(Colormap cmap(Object{}), std::invalid_argument);
+    TS_ASSERT_THROWS(Colormap cmap(MantidQt::Widgets::Common::Python::Object{}),
+                     std::invalid_argument);
   }
 };
 
