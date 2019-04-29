@@ -14,7 +14,7 @@
 #include <boost/python/object.hpp>
 
 /**
- * @file The intetion of this module is to centralize the access
+ * The intetion of this module is to centralize the access
  * to boost::python so that it is not scattered throughout this library. In
  * theory updating to a different wrapper library would just require altering
  * this file.

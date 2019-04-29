@@ -667,7 +667,8 @@ set(INC_FILES
   inc/MantidQtWidgets/Common/Batch/ExtractSubtrees.h
   inc/MantidQtWidgets/Common/Batch/FindSubtreeRoots.h
   inc/MantidQtWidgets/Common/Batch/BuildSubtreeItems.h
-  inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h)
+  inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
+  inc/MantidQtWidgets/Common/Python/Object.h)
 
 set(UI_FILES
     inc/MantidQtWidgets/Common/ManageUserDirectories.ui
