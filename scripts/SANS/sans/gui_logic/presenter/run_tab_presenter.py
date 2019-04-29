@@ -1293,22 +1293,17 @@ class RunTabPresenter(object):
     @staticmethod
     def _create_batch_entry_from_row(row):
         batch_file_keywords = ["sample_sans",
-                               "output_as",
                                "sample_trans",
                                "sample_direct_beam",
                                "can_sans",
                                "can_trans",
                                "can_direct_beam",
+                               "output_as",
                                "user_file"]
-
-        loop_range = min(len(row), len(batch_file_keywords))
-        new_row = [''] * (2 * loop_range)
-
-        for i in range(loop_range):
-            key = batch_file_keywords[i]
-            value = row[i]
-            new_row[2*i] = key
-            new_row[2*i + 1] = value
+        new_row = []
+        for key, value in zip(batch_file_keywords, row):
+            new_row.append(key)
+            new_row.append(value)
 
         return new_row
 

@@ -247,7 +247,6 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
   w.iter = w.iter + 1;
   inform.iter = w.iter;
 
-  double rho = -NLLS::ONE; // intialize rho as a negative value
   bool success = false;
   int no_reductions = 0;
   double normFnew = 0.0;
@@ -279,7 +278,7 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
     //             m_k(0)  - m_k(d)         predicted_reduction
     //
     // if model is good, rho should be close to one
-    rho = calculateRho(w.normF, normFnew, md, options);
+    auto rho = calculateRho(w.normF, normFnew, md, options);
     if (!std::isfinite(rho) || rho <= options.eta_successful) {
       if ((w.use_second_derivatives) && (options.model == 3) &&
           (no_reductions == 1)) {
@@ -886,7 +885,6 @@ void solveSubproblemMain(int n, double radius, double f,
   inform.x_norm = ZERO;
   inform.obj = f;
   inform.hard_case = false;
-  double delta_lambda = ZERO;
 
   //  Check that arguments are OK
   if (n < 0) {
@@ -1090,7 +1088,7 @@ void solveSubproblemMain(int n, double radius, double f,
 
     //  compute the Newton correction (for beta = - 1)
 
-    delta_lambda = -(pi_beta(0) - pow((radius), beta)) / pi_beta(1);
+    auto delta_lambda = -(pi_beta(0) - pow((radius), beta)) / pi_beta(1);
 
     DoubleFortranVector lambda_new(3);
     int n_lambda = 1;
@@ -1182,7 +1180,8 @@ void solveSubproblemMain(int n, double radius, double f,
 
     //  check that the best Taylor improvement is significant
 
-    if (fabs(delta_lambda) < EPSILON_MCH * std::max(ONE, fabs(lambda))) {
+    if (std::abs(delta_lambda) <
+        EPSILON_MCH * std::max(ONE, std::abs(lambda))) {
       break;
     }
 

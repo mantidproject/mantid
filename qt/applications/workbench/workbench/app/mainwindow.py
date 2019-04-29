@@ -175,6 +175,9 @@ class MainWindow(QMainWindow):
         self.project = None
         self.project_recovery = None
 
+        # Interface Runner
+        self.executioner = None
+
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -335,9 +338,11 @@ class MainWindow(QMainWindow):
         add_actions(self.help_menu, self.help_menu_actions)
 
     def launch_custom_gui(self, filename):
-        executioner = PythonCodeExecution()
-        executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
-        executioner.execute(open(filename).read(), filename)
+        if self.executioner is None:
+            self.executioner = PythonCodeExecution()
+            self.executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
+
+        self.executioner.execute(open(filename).read(), filename)
 
     def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
