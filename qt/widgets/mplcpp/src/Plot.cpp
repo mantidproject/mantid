@@ -28,7 +28,7 @@ namespace {
  * @return Python::Object Python List
  */
 template <class T>
-PyObject *constructPythonListFromVectorOfTypeT(T vector,
+PyObject *constructPythonListFromVectorOfTypeT(const T &vector,
                                                std::string pythonType) {
   const auto vectorSize = vector.size();
   PyObject *pythonList = PyList_New(vectorSize);
@@ -40,7 +40,7 @@ PyObject *constructPythonListFromVectorOfTypeT(T vector,
   return pythonList;
 }
 PyObject *
-constructPythonListFromVectorOfStrings(std::vector<std::string> vector) {
+constructPythonListFromVectorOfStrings(const std::vector<std::string> &vector) {
   const auto vectorSize = vector.size();
   PyObject *pythonList = PyList_New(vectorSize);
   for (auto i = 0u; i < vectorSize; ++i) {
@@ -52,7 +52,7 @@ constructPythonListFromVectorOfStrings(std::vector<std::string> vector) {
   return pythonList;
 }
 
-Python::Object constructArgs(std::vector<std::string> workspaces) {
+Python::Object constructArgs(const std::vector<std::string> &workspaces) {
   return Python::NewRef(
       Py_BuildValue("(O)", constructPythonListFromVectorOfStrings(workspaces)));
 }
