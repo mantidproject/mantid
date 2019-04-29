@@ -15,7 +15,6 @@ our custom window.
 import collections
 import math
 import numpy as np
-import six
 
 # 3rd party imports
 try:
