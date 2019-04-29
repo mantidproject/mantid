@@ -25,6 +25,7 @@ from matplotlib.projections import register_projection
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
+from mantid.plots.utility import MantidAxKwargs
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D

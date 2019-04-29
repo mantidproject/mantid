@@ -9,30 +9,27 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.plots.utility import MantidAxType
 import collections
-import sys
-
 import matplotlib
 import matplotlib.collections as mcoll
 import matplotlib.colors
 import matplotlib.dates as mdates
 import matplotlib.image as mimage
 import numpy
-from skimage.transform import resize
-from scipy.interpolate import interp1d
+import sys
 
 import mantid.api
 import mantid.kernel
+import mantid.plots.modest_image
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
     get_wksp_index_dist_and_label, check_resample_to_regular_grid
-
-import mantid.plots.modest_image
+from mantid.plots.utility import MantidAxType, MantidAxKwargs
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
+
 
 # ================================================
 # Private 2D Helper functions
@@ -165,6 +162,8 @@ def errorbar(axes, workspace, *args, **kwargs):
                   and axis=MantidAxType.SPECTRUM to plot a spectrum.
                   The default value is axis=1, plotting spectra by default.
 
+    :param errors_visible: Whether the erorrs plotted for the line are actually visible or hidden.
+
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
@@ -173,7 +172,14 @@ def errorbar(axes, workspace, *args, **kwargs):
     x, y, dy, dx, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                               with_dy=True, with_dx=False)
     _setLabels1D(axes, workspace)
-    return axes.errorbar(x, y, dy, dx, *args, **kwargs)
+    # extract the errors visible kwarg before the
+    # original errorbar call or it will fail due to unknown kwarg
+    errors_visible = kwargs.pop(MantidAxKwargs.ERRORS_VISIBLE, True)
+
+    errorbar_container = axes.errorbar(x, y, dy, dx, *args, **kwargs)
+    errorbar_container[2][0].set_visible(errors_visible)
+
+    return errorbar_container
 
 
 def scatter(axes, workspace, *args, **kwargs):
