@@ -105,9 +105,8 @@ Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeInfo,
   const double c2 = geometry.radius * geometry.radius;
   const double r{std::sqrt(c1 + (c2 - c1) * r2)};
   const double z{geometry.height * r3};
-  const Kernel::V3D basis1{geometry.axis};
   const Kernel::V3D alongAxis{geometry.axis * z};
-  auto localPoint = localPointInCylinder(basis1, alongAxis, polar, r);
+  auto localPoint = localPointInCylinder(geometry.axis, alongAxis, polar, r);
   return localPoint + geometry.centreOfBottomBase;
 }
 
