@@ -51,7 +51,6 @@ constructPythonListFromVectorOfStrings(std::vector<std::string> vector) {
   }
   return pythonList;
 }
-} // namespace
 
 Python::Object constructArgs(std::vector<std::string> workspaces) {
   return Python::NewRef(
@@ -129,6 +128,7 @@ constructKwargs(boost::optional<std::vector<int>> spectrum_nums,
         pythonAxProperties.ptr(), "window_title", pythonWindowTitle.ptr()));
   }
 }
+} // namespace
 
 Python::Object plot(const std::vector<std::string> &workspaces,
                     boost::optional<std::vector<int>> spectrum_nums,
@@ -139,8 +139,7 @@ Python::Object plot(const std::vector<std::string> &workspaces,
                     boost::optional<std::string> window_title, bool errors,
                     bool overplot) {
   GlobalInterpreterLock lock;
-  PyObject *functionsString =
-      PyString_FromString("mantidqt.plotting.functions");
+  PyObject *functionsString = Py_BuildValue("s", "mantidqt.plotting.functions");
   PyObject *funcsModule = PyImport_Import(functionsString);
   PyObject *plotFunc = PyObject_GetAttrString(funcsModule, "plot");
   auto args = constructArgs(workspaces);
