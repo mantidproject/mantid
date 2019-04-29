@@ -166,10 +166,11 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
   // If it's a contour plot, make a histo workspace.
   const auto xMode = graphType == Type::Contour ? Histogram::XMode::BinEdges
                                                 : Histogram::XMode::Points;
-  const auto xSize = graphType == Type::Contour ? firstWS->blocksize() + 1
-                                                : firstWS->blocksize();
+  const auto firstBlocksize = firstWS->blocksize();
+  const auto xSize =
+      graphType == Type::Contour ? firstBlocksize + 1 : firstBlocksize;
   matrixWS = Mantid::API::WorkspaceFactory::Instance().create(
-      firstWS, nWorkspaces, xSize, firstWS->blocksize());
+      firstWS, nWorkspaces, xSize, firstBlocksize);
   matrixWS->setYUnitLabel(firstWS->YUnitLabel());
 
   // For each workspace in group, add data and log values

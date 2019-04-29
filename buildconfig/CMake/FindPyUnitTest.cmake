@@ -24,11 +24,16 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   if ( WIN32 )
     set ( _test_runner ${_test_runner}.bat )
   endif ()
-  set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+
+  if ( NOT PYUNITTEST_RUNNER )
+    set ( _test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py )
+  else ()
+    set ( _test_runner_module ${PYUNITTEST_RUNNER} )
+  endif()
 
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA}$ENV{PYTHONPATH} )
+    set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH} )
     # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()

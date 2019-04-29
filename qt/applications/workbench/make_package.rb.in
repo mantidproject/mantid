@@ -1,0 +1,389 @@
+#!/usr/bin/env ruby
+#This loop changes the linking from /usr/local/lib to @rpath
+
+print `pwd`
+require 'pathname'
+
+def copyFile(file)
+  p "copying file #{file}"
+  output = system("cp #{file} Contents/MacOS/")
+  if output != true
+    exit 1
+  end
+end
+
+def copyOptionalFile(file)
+  if File.exist?(file)
+    p "copying optional file #{file}"
+    output = system("cp #{file} Contents/MacOS/")
+  end
+end
+
+def addPythonLibrary(input, output)
+  p "copying directory #{input} to #{output}"
+  output = system("rsync -a -L --exclude=.pyc #{input} #{output}")
+  if output != true
+    exit 1
+  end
+end
+
+def addPythonLibrariesInDirectory(input, output)
+  p "copying directory #{input} to #{output}"
+  output = system("rsync -a -L --exclude=.pyc #{input}/* #{output}")
+  if output != true
+    exit 1
+  end
+end
+
+# Find the qscintilla2 library. This is different depending
+# on what library you have installed from homebrew.
+def findQScintilla2(lib_dir)
+    pathname = lib_dir+"libqscintilla2_qt5.dylib"
+    if File.file?(pathname)
+        return pathname
+    else
+        p 'Could not file the libqscintilla2 library'
+        exit 1
+    end
+end
+
+def findBoostPythonMT(lib_dir)
+    [lib_dir, "usr/local/opt"].each do |dir|
+        if File.file?(dir+"libboost_python-mt.dylib")
+            return "libboost_python-mt.dylib"
+        elsif File.file?(dir+"libboost_python27-mt.dylib")
+            return "libboost_python27-mt.dylib"
+        end
+    end
+end
+
+lib_dir = Pathname.new("/usr/local/lib")
+openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
+ParaView_dir = Pathname.new("@ParaView_DIR@")
+
+#filenames with path for all shared libraries used by MantidPlot and its dependencies.
+library_filenames = ["libboost_regex-mt.dylib",
+                     "libboost_date_time-mt.dylib",
+                     "libboost_serialization-mt.dylib",
+                     "libboost_filesystem-mt.dylib",
+                     "libboost_system-mt.dylib",
+                     "libgsl.dylib",
+                     "libgslcblas.dylib",
+                     "libjsoncpp.dylib",
+                     "libmuparser.dylib",
+                     "libNeXus.dylib",
+                     "libNeXusCPP.dylib",
+                     "libPocoFoundation.dylib",
+                     "libPocoUtil.dylib",
+                     "libPocoXML.dylib",
+                     "libPocoNet.dylib",
+                     "libPocoCrypto.dylib",
+                     "libPocoNetSSL.dylib",
+                     "libTKernel.dylib",
+                     "libTKBO.dylib",
+                     "libTKernel.dylib",
+                     "libTKShHealing.dylib",
+                     "libTKPrim.dylib",
+                     "libTKMesh.dylib",
+                     "libTKBRep.dylib",
+                     "libTKGeomAlgo.dylib",
+                     "libTKTopAlgo.dylib",
+                     "libTKMath.dylib",
+                     "libTKG2d.dylib",
+                     "libTKG3d.dylib",
+                     "libTKGeomBase.dylib",
+                     "libmxml.dylib",
+                     "libhdf5.dylib",
+                     "libhdf5_hl.dylib",
+                     "libhdf5_cpp.dylib",
+                     "libhdf5_hl_cpp.dylib",
+                     "libmfhdf.dylib",
+                     "libdf.dylib",
+                     "libsz.dylib",
+                     "libjpeg.dylib",
+                     "libssl.dylib",
+                     "libcrypto.dylib",
+                     "libtbb.dylib",
+                     "libtbbmalloc.dylib",
+                     "libtbbmalloc_proxy.dylib",
+                     "librdkafka.dylib",
+                     "librdkafka++.dylib"]
+
+poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
+if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
+  library_filenames << "libPocoJSON.dylib"
+end
+
+if("@OPENMP_FOUND@" == "TRUE")
+  if not File.file?("/usr/lib/libomp.dylib")
+      # assume we're using system llvm
+      library_filenames << "libc++.dylib"
+  end
+  library_filenames << "libomp.dylib"
+end
+
+qscintilla2_lib = findQScintilla2("/usr/local/opt/qscintilla2/lib/")
+library_filenames << qscintilla2_lib
+library_filenames << findBoostPythonMT(lib_dir)
+
+#This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
+library_filenames.each do |filename|
+  if filename.include? "libssl.dylib"
+    copyFile(openssl_dir+filename)
+  elsif  filename.include? "libcrypto.dylib"
+    copyFile(openssl_dir+filename)
+  elsif filename.include? "libomp.dylib" or filename.include? "libc++.dylib"
+      if File.file?(lib_dir+"libomp.dylib")
+        # using system llvm
+        copyFile(lib_dir+filename)
+      elsif
+        # using homebrew llvm
+        copyFile("/usr/local/opt/llvm/lib/"+filename)
+      end
+  elsif File.file?(filename)
+    copyFile(filename)
+    filename = File.basename(filename)
+  else
+    copyFile(lib_dir+filename)
+  end
+  `chmod +w Contents/MacOS/#{filename}`
+  `install_name_tool -id @rpath/#{filename} Contents/MacOS/#{filename}`
+end
+
+# use install_tool_name to add an @rpath for the libraries
+Dir["Contents/MacOS/**/*.so"].each do |library|
+  dependencies = `otool -L #{library}`
+  print library, "\n"
+  `install_name_tool -add_rpath @loader_path/../MacOS #{library} > /dev/null 2>&1`
+end
+
+#use install_name_tool to change dependencies from /usr/local to libraries in the package.
+search_patterns = ["**/*.dylib","**/*.so"]
+search_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    dependencies = `otool -L #{library}`
+    dependencies.split("\n").each do |dependency|
+      currentname = dependency.strip.split(" ")
+      name_split_on_slash = currentname[0].strip.split("/")
+      name_split_on_period = name_split_on_slash[-1].split(".")
+      prefix = name_split_on_period[0]+"."
+      library_filenames.each do |filename|
+        basename = File.basename(filename,"dylib")
+        if prefix == basename
+          `install_name_tool -change #{currentname[0]} @rpath/#{basename+"dylib"} #{library}`
+        end
+      end
+    end
+  end
+end
+
+#We'll use macdeployqt to fix qt dependencies.
+# Remove the qt4 libraries in the mantidqt package
+Qt_Executables = "-executable=Contents/MacOS/#{File.basename(qscintilla2_lib)} "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt5.so "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/widgets/instrumentview/_instrumentviewqt5.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtCore.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtGui.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtOpenGl.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtSql.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtSvg.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtWidgets.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtXml.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtPrintSupport.so "
+Qt_Executables << "-executable=Contents/MacOS/PyQt5/Qt.so "
+
+`/usr/local/opt/qt5/bin/macdeployqt ../MantidWorkbench.app #{Qt_Executables} > /dev/null 2>&1`
+
+if Dir.exist?("Contents/PlugIns")
+  #Fix remaining QT-related linking issues.
+  Dir["Contents/PlugIns/**/*.dylib"].each do |library|
+    basename =  File.basename(library)
+    `chmod +w #{library}`
+    `install_name_tool -id @rpath/#{basename} #{library}`
+  end
+else
+  p "Contents/PlugIns not created by macdeployqt."
+  exit 1
+end
+
+#Homebrew recently switched the linking from /usr/local/lib/* to /usr/local/opt/qt/lib/*
+#This attempts to determine the correct path to pass to install_name_tool.
+def find_linking_directories(patterns, lib_name, lib_path)
+    linking_dir = []
+    Dir[patterns[0]].each do |library|
+        dependencies = `otool -L #{library}`
+        dependencies.split("\n").each do |dependency|
+            if dependency.match(lib_name)
+                if dependency.match(lib_path)
+                    linking_dir << lib_path
+                else
+                    linking_dir << '/usr/local/lib'
+                end
+            end
+        end
+    end
+    return linking_dir
+end
+
+#change id of all libraries that match patterns
+def change_id(patterns, lib_path)
+    patterns.each do |pattern|
+        Dir[pattern].each do |library|
+            basename =  File.basename(library)
+            `chmod +w #{lib_path}/#{basename}`
+            `install_name_tool -id @rpath/#{basename} #{lib_path}/#{basename}`
+        end
+    end
+end
+
+pyqt5_patterns = ["**/PyQt5/*.so"]
+change_id(pyqt5_patterns, "Contents/MacOS/PyQt5/")
+Qt_linking_dir = find_linking_directories(pyqt5_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"/usr/local/opt/qt@5/lib")
+
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtCore.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtWidgets.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtGui.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtOpenGl.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtSql.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtSvg.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtXml.so`
+`install_name_tool -change #{Qt_linking_dir[0]}/QtCore.framework/Versions/5/Qt @loader_path/../../Frameworks/QtCore.framework/Versions/5/Qt Contents/MacOS/PyQt5/QtPrintSupport.so`
+
+# We only need one copy of openssl
+`install_name_tool -change @loader_path/../../../libssl.1.0.0.dylib @loader_path/../../../../MacOS/libssl.dylib Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork`
+`install_name_tool -change @loader_path/../../../libcrypto.1.0.0.dylib @loader_path/../../../../MacOS/libcrypto.dylib Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork`
+# `rm Contents/Frameworks/libssl.1.0.0.dylib`
+# `rm Contents/Frameworks/libcrypto.1.0.0.dylib`
+
+#change id of all libraries that match patterns
+def change_id(patterns, lib_path)
+    patterns.each do |pattern|
+        Dir[pattern].each do |library|
+            basename =  File.basename(library)
+            `chmod +w #{lib_path}/#{basename}`
+            `install_name_tool -id @rpath/#{basename} #{lib_path}/#{basename}`
+        end
+    end
+end
+
+#Homebrew recently switched the linking from /usr/local/lib/* to /usr/local/opt/qt/lib/*
+#This attempts to determine the correct path to pass to install_name_tool.
+def find_linking_directories(patterns, lib_name, lib_path)
+    linking_dir = []
+    Dir[patterns[0]].each do |library|
+        dependencies = `otool -L #{library}`
+        dependencies.split("\n").each do |dependency|
+            if dependency.match(lib_name)
+                if dependency.match(lib_path)
+                    linking_dir << lib_path
+                else
+                    linking_dir << '/usr/local/lib'
+                end
+            end
+        end
+    end
+    return linking_dir
+end
+
+
+#Copy over python libraries not included with OSX.
+#currently missing epics
+python_exe = `which python`
+system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
+homebrew_pip_site_packages = "/usr/local/lib/python2.7/site-packages"
+if python_exe.start_with?("/usr/local")
+  pip_site_packages = homebrew_pip_site_packages
+elsif python_exe.start_with?("/usr/bin")
+  pip_site_packages = "/Library/Python/2.7/site-packages"
+else
+  p "Unknown python distribution at #{python_exe}"
+end
+
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
+               "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
+               "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
+               "skimage","psutil"]
+directories.each do |directory|
+  module_dir = "#{pip_site_packages}/#{directory}"
+  if !File.exist?(module_dir)
+    module_dir = "#{system_python_extras}/#{directory}"
+    if !File.exist?(module_dir)
+      p "Cannot find python module #{directory} to copy into bundle"
+      exit 1
+    end
+  end
+  addPythonLibrary(module_dir,"Contents/MacOS/")
+end
+
+# older versions of psutil had _psutil shared libraries outside of the package
+copyOptionalFile("#{pip_site_packages}/_psutil_osx.so")
+copyOptionalFile("#{pip_site_packages}/_psutil_posix.so")
+
+# Some versions of mpltool_kits are missing their __init__ file
+mpltoolkit_init = "Contents/MacOS/mpl_toolkits/__init__.py"
+if !File.exist?(mpltoolkit_init)
+  p "Creating missing #{mpltoolkit_init}"
+  `touch #{mpltoolkit_init}`
+end
+
+files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py","six.py"]
+files.each do |file|
+  copyFile("#{pip_site_packages}/#{file}")
+end
+
+# mistune.so isn't present in v0.7
+copyOptionalFile("#{pip_site_packages}/mistune.so")
+
+# ---------------------------------------------
+# H5Py section
+# ---------------------------------------------
+h5py_path = homebrew_pip_site_packages
+h5py_directories = ["h5py"]
+h5py_directories.each do |directory|
+  addPythonLibrary("#{h5py_path}/#{directory}","Contents/MacOS/")
+end
+
+h5py_patterns = ["**/h5py/*.so"]
+change_id(h5py_patterns, "Contents/MacOS/h5py/")
+
+h5py_linking_dir = find_linking_directories(h5py_patterns, 'lib/libhdf5', '/usr/local/opt/hdf5/lib')
+
+h5py_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    basename =  File.basename(library)
+    dependencies = `otool -L #{library}`
+    dependencies.split("\n").each do |dependency|
+        currentname = dependency.strip.split(" ")
+        filename = currentname[0]
+        if filename.include? "libhdf5"
+          name_split_on_slash = filename.strip.split("/")
+          filename_no_dir = name_split_on_slash[-1]
+          parts = filename_no_dir.strip.split(".")
+          loader_filename = parts[0] + "." + parts[2]
+          `install_name_tool -add_rpath @loader_path/../ Contents/MacOS/h5py/#{basename} > /dev/null 2>&1`
+          `install_name_tool -change #{h5py_linking_dir[0]}/#{filename_no_dir} @rpath/#{loader_filename} Contents/MacOS/h5py/#{basename}`
+       end
+    end
+  end
+end
+
+`mkdir Contents/MacOS/bin`
+`cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`
+
+#Lastly check for any libraries in the package linking against homebrew libraries.
+search_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    dependencies = `otool -L #{library}`
+    dependencies.split("\n").each do |dependency|
+      if dependency.include? "/usr/local/"
+        p "issue with library: #{library} linked against: #{dependency}"
+        exit 1
+      end
+      if dependency.include? "@loader_path/libTK"
+        p "issue with library: #{library} linked against: #{dependency}"
+        p "Is an OpenCascade library missing?"
+        exit 1
+      end
+    end
+  end
+end

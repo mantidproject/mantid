@@ -80,10 +80,10 @@ public:
   virtual std::string saveToProject() const override;
 
 signals:
-  void executeAlgorithm(const QString &, const QString &);
+  void executeAlgorithm(const QString & /*_t1*/, const QString & /*_t2*/);
 
 public slots:
-  void changedIntegrationRange(double, double);
+  void changedIntegrationRange(double /*unused*/, double /*unused*/);
 
 protected slots:
   void setActivity();
@@ -111,13 +111,13 @@ protected slots:
   void sumDetsToWorkspace();
   void saveIncludeGroupToFile();
   void saveExcludeGroupToFile();
-  void showSaveMenuTooltip(QAction *);
+  void showSaveMenuTooltip(QAction * /*action*/);
   void toggleMaskGroup();
   void enableApplyButtons();
-  void doubleChanged(QtProperty *);
+  void doubleChanged(QtProperty * /*prop*/);
 
 protected:
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
 
   void clearProperties();
   void setProperties();
@@ -139,7 +139,8 @@ protected:
 
 private:
   /// Save masks applied to the view but not to the workspace
-  bool saveMaskViewToProject(const std::string &name) const;
+  bool saveMaskViewToProject(const std::string &name,
+                             const std::string &projectPath = "") const;
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace
@@ -207,6 +208,9 @@ protected:
   QMap<QtProperty *, QString> m_doublePropertyMap;
   QMap<QString, QtProperty *> m_pointPropertyMap;
   QMap<QtProperty *, QString> m_pointComponentsMap;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

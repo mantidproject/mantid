@@ -23,6 +23,8 @@ JumpFitAddWorkspaceDialog::JumpFitAddWorkspaceDialog(QWidget *parent)
   connect(m_uiForm.cbParameterType,
           SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitParameterTypeChanged(const QString &)));
+  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SIGNAL(addData()));
+  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
 }
 
 std::string JumpFitAddWorkspaceDialog::workspaceName() const {

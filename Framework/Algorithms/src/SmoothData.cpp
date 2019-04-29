@@ -28,14 +28,13 @@ void SmoothData::init() {
       make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                        Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
-  std::vector<int> npts0;
-  npts0.push_back(3);
+  std::vector<int> npts0{3};
   auto min = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("NPoints", npts0, min,
-                                              Direction::Input),
+      Kernel::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
+                                              std::move(min), Direction::Input),
       "The number of points to average over (minimum 3). If an even number is\n"
       "given, it will be incremented by 1 to make it odd (default value 3)");
   declareProperty(
@@ -67,7 +66,6 @@ void SmoothData::exec() {
 
   Progress progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
-  // Loop over all the spectra in the workspace
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms());
        ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -77,6 +75,7 @@ void SmoothData::exec() {
       if (group < 0)
         npts = 3;
       else
+        // group is never 0. We can safely subtract.
         npts = nptsGroup[group - 1];
     }
     if (npts >= vecSize) {
@@ -127,7 +126,7 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
     if (group <= 0)
       return -1;
     ++it;
-    for (; it != dets.end(); ++it) // Loop other all other udets
+    for (; it != dets.end(); ++it) // Loop all other udets
     {
       if (udet2group.at(*it) != group)
         return -1;

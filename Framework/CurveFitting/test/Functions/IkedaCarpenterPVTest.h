@@ -66,7 +66,7 @@ public:
   void test_intensity() {
     IkedaCarpenterPV fn;
     fn.initialize();
-    fn.setParameter("I", 67.2548);
+    fn.setParameter("I", 811.0867);
     fn.setParameter("Alpha0", 1.6);
     fn.setParameter("Alpha1", 1.5);
     fn.setParameter("Beta0", 31.9);

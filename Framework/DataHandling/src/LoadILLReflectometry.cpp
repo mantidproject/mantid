@@ -15,8 +15,9 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -64,7 +65,7 @@ constexpr double mmToMeter(const double x) { return x * 1.e-3; }
  */
 Mantid::API::ITableWorkspace_sptr
 createPeakPositionTable(const PeakInfo &info) {
-  auto table = Mantid::API::WorkspaceFactory::Instance().createTable();
+  auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
   table->addColumn("double", "DetectorAngle");
   table->addColumn("double", "DetectorDistance");
   table->addColumn("double", "PeakCentre");
@@ -279,6 +280,8 @@ void LoadILLReflectometry::exec() {
   placeSlits();
   // When other components are in-place
   convertTofToWavelength();
+  // Add sample logs loader.two_theta and Facility
+  addSampleLogs();
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 } // exec
@@ -329,16 +332,13 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
   if (m_instrument == Supported::D17) {
     m_detectorAngleName = "dan.value";
-    m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
-    m_offsetName = "open_offset";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
-    m_offsetName = "openOffset";
     // FIGARO: find out which of the four choppers are used
     NXFloat firstChopper =
         entry.openNXFloat("instrument/ChopperSetting/firstChopper");
@@ -388,9 +388,9 @@ void LoadILLReflectometry::initWorkspace(
   }
   // create the workspace
   try {
-    m_localWorkspace = WorkspaceFactory::Instance().create(
-        "Workspace2D", m_numberOfHistograms + monitorsData.size(),
-        m_numberOfChannels + 1, m_numberOfChannels);
+    m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(
+        m_numberOfHistograms + monitorsData.size(),
+        HistogramData::BinEdges(m_numberOfChannels + 1));
   } catch (std::out_of_range &) {
     throw std::runtime_error(
         "Workspace2D cannot be created, check number of histograms (" +
@@ -402,7 +402,6 @@ void LoadILLReflectometry::initWorkspace(
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
-  m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
 }
 
 /**
@@ -514,8 +513,12 @@ std::vector<double> LoadILLReflectometry::getXValues() {
           chop1Phase = 0.0;
       }
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
-      const double openOffset =
-          doubleFromRun(m_offsetFrom + "." + m_offsetName);
+      double openOffset;
+      if (m_localWorkspace->run().hasProperty(
+              m_offsetFrom + ".open_offset")) // Valid from 2018.
+        openOffset = doubleFromRun(m_offsetFrom + ".open_offset");
+      else // Figaro 2017 / 2018
+        openOffset = doubleFromRun(m_offsetFrom + ".openOffset");
       if (m_instrument == Supported::D17 && chop1Speed != 0.0 &&
           chop2Speed != 0.0 && chop2Phase != 0.0) {
         // virtual chopper entries are valid
@@ -585,19 +588,22 @@ void LoadILLReflectometry::loadData(
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
     // write data
+    specnum_t spectrumNumber = 0;
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
       const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
       m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
+      m_localWorkspace->getSpectrum(j).setSpectrumNo(spectrumNumber);
       progress.report();
       for (size_t im = 0; im < nb_monitors; ++im) {
         const int *monitor_p = monitorsData[im].data();
-        const HistogramData::Counts counts(monitor_p,
-                                           monitor_p + m_numberOfChannels);
+        const HistogramData::Counts monitorCounts(
+            monitor_p, monitor_p + m_numberOfChannels);
         m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges,
-                                       std::move(counts));
+                                       std::move(monitorCounts));
         progress.report();
       }
+      ++spectrumNumber;
     }
   } else
     g_log.debug("Vector of x values is empty");
@@ -616,7 +622,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
-  stat = NXclose(&nxfileID);
+  NXclose(&nxfileID);
 }
 
 /**
@@ -707,6 +713,18 @@ double LoadILLReflectometry::reflectometryPeak() {
   return centre;
 }
 
+/// Add sample logs reduction.two_theta and Facility
+void LoadILLReflectometry::addSampleLogs() {
+  // Add two theta to the sample logs
+  m_localWorkspace->mutableRun().addProperty("loader.two_theta",
+                                             m_detectorAngle);
+  m_localWorkspace->mutableRun()
+      .getProperty("loader.two_theta")
+      ->setUnits("degree");
+  // Add Facility to the sample logs
+  m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
+}
+
 /** Compute the detector rotation angle around origin and optionally set the
  *  OutputBeamPosition property.
  *  @return a rotation angle
@@ -723,18 +741,17 @@ double LoadILLReflectometry::detectorRotation() {
     p.peakCentre = peakCentre;
     setProperty("OutputBeamPosition", createPeakPositionTable(p));
   }
-  const double userAngle = getProperty("BraggAngle");
-  const double offset =
-      offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
-  m_log.debug() << "Beam offset angle: " << offset << '\n';
-  if (userAngle != EMPTY_DBL()) {
+  if (!isDefault("BraggAngle")) {
     if (posTable) {
       g_log.notice()
           << "Ignoring DirectBeamPosition, using BraggAngle instead.";
     }
-    return 2 * userAngle - offset;
-  }
-  if (!posTable) {
+    const double userAngle = getProperty("BraggAngle");
+    const double offset =
+        offsetAngle(peakCentre, PIXEL_CENTER, m_detectorDistance);
+    m_log.debug() << "Beam offset angle: " << offset << '\n';
+    return 2. * userAngle - offset;
+  } else if (!posTable) {
     const double deflection = collimationAngle();
     if (deflection != 0) {
       g_log.debug() << "Using incident deflection angle (degrees): "
@@ -748,8 +765,9 @@ double LoadILLReflectometry::detectorRotation() {
   m_log.debug() << "Direct beam offset angle: " << dbOffset << '\n';
   const double detectorAngle =
       m_detectorAngle - dbPeak.detectorAngle - dbOffset;
-  m_log.debug() << "Direct beam calibrated detector angle: " << detectorAngle
-                << '\n';
+
+  m_log.debug() << "Direct beam calibrated detector angle (degrees): "
+                << detectorAngle << '\n';
   return detectorAngle;
 }
 
@@ -812,7 +830,7 @@ void LoadILLReflectometry::placeSlits() {
   double slit1ToSample{0.0};
   double slit2ToSample{0.0};
   if (m_instrument == Supported::FIGARO) {
-    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
     const double offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
     // For the moment, the position information for S3 is missing in the
     // NeXus files of FIGARO. Using a hard-coded distance; should be fixed
@@ -847,9 +865,8 @@ void LoadILLReflectometry::placeSource() {
 
 /// Return the incident neutron deflection angle.
 double LoadILLReflectometry::collimationAngle() const {
-  return m_instrument == Supported::FIGARO
-             ? doubleFromRun("CollAngle.actual_coll_angle")
-             : 0.;
+  return m_instrument == Supported::FIGARO ? doubleFromRun(m_sampleAngleName)
+                                           : 0.;
 }
 
 /// Return the detector center angle.
@@ -902,7 +919,7 @@ double LoadILLReflectometry::sampleDetectorDistance() const {
   const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
   const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
   const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
-  const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+  const double deflectionAngle = doubleFromRun(m_sampleAngleName);
   return std::hypot(beamY - sht1, beamZ) -
          m_sampleZOffset / std::cos(degToRad(deflectionAngle));
 }
@@ -932,7 +949,7 @@ double LoadILLReflectometry::sourceSampleDistance() const {
   } else {
     const double chopperDist =
         mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    const double deflectionAngle = doubleFromRun("CollAngle.actual_coll_angle");
+    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
     return chopperDist + m_sampleZOffset / std::cos(degToRad(deflectionAngle));
   }
 }

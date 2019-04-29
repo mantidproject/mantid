@@ -35,6 +35,14 @@ public:
   public:
     const_iterator(const IndexSet &indexSet, const size_t index)
         : m_indexSet(indexSet), m_index(index) {}
+    const_iterator &operator=(const const_iterator &other) {
+      if (&m_indexSet != &other.m_indexSet) {
+        throw std::invalid_argument(
+            "Cannot assign iterators from different IndexSet objects.");
+      }
+      m_index = other.m_index;
+      return *this;
+    }
 
   private:
     friend class boost::iterator_core_access;
@@ -91,6 +99,8 @@ public:
     return m_indices[index];
   }
 
+  bool isContiguous() const noexcept;
+
 protected:
   ~IndexSet() = default;
 
@@ -137,6 +147,20 @@ IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
     throw std::runtime_error("IndexSet: duplicate indices are not allowed");
   m_indices = indices;
   m_size = m_indices.size();
+}
+
+/**
+ * Check if the index range is contiguous and in ascending order.
+ */
+template <class T> bool IndexSet<T>::isContiguous() const noexcept {
+  if (!m_isRange || m_indices.size() > 1) {
+    for (size_t i = 0; i < m_indices.size() - 1; ++i) {
+      if (m_indices[i] + 1 != m_indices[i + 1]) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 } // namespace detail

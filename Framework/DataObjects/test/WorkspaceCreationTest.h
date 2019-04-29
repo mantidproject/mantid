@@ -9,6 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
@@ -417,6 +418,30 @@ public:
     TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
     check_indices_no_detectors(*ws);
     check_zeroed_data(*ws);
+  }
+
+  void test_create_parent_numeric_vertical_axis() {
+    constexpr size_t parentNhist{3};
+    const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
+    NumericAxis *parentAxis = new NumericAxis({-1.5, -0.5, 2.3});
+    parent->replaceAxis(1, parentAxis);
+    constexpr size_t nhist{2};
+    const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
+    auto axis = ws->getAxis(1);
+    TS_ASSERT_DIFFERS(dynamic_cast<NumericAxis *>(axis), nullptr)
+    TS_ASSERT_EQUALS(axis->length(), nhist);
+  }
+
+  void test_create_parent_bin_edge_vertical_axis() {
+    constexpr size_t parentNhist{3};
+    const auto parent = create<Workspace2D>(parentNhist, Histogram(Points{1}));
+    BinEdgeAxis *parentAxis = new BinEdgeAxis({-1.5, -0.5, 2.3, 3.4});
+    parent->replaceAxis(1, parentAxis);
+    constexpr size_t nhist{2};
+    const auto ws = create<Workspace2D>(*parent, nhist, parent->histogram(0));
+    auto axis = ws->getAxis(1);
+    TS_ASSERT_DIFFERS(dynamic_cast<BinEdgeAxis *>(axis), nullptr)
+    TS_ASSERT_EQUALS(axis->length(), nhist + 1);
   }
 
   void test_create_drop_events() {

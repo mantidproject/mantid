@@ -23,15 +23,11 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
   m_uiForm.setupUi(parent);
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this,
-          SLOT(instrumentSet()));
+          SLOT(setInstrument()));
 
   // Update the preview plot when the algorithm is complete
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(transAlgDone(bool)));
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString)), this,
-          SLOT(dataLoaded()));
-  connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this,
-          SLOT(dataLoaded()));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
@@ -71,7 +67,7 @@ void IndirectTransmission::run() {
 
 bool IndirectTransmission::validate() {
   // Check if we have an appropriate instrument
-  QString currentInst = getInstrumentConfiguration()->getInstrumentName();
+  QString currentInst = getInstrumentName();
   if (currentInst != "IRIS" && currentInst != "OSIRIS")
     return false;
 
@@ -84,30 +80,6 @@ bool IndirectTransmission::validate() {
     return false;
 
   return true;
-}
-
-void IndirectTransmission::dataLoaded() {
-  if (validate())
-    previewPlot();
-}
-
-void IndirectTransmission::previewPlot() {
-  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_transmission";
-
-  IAlgorithm_sptr transAlg =
-      AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
-  transAlg->initialize();
-
-  transAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
-  transAlg->setProperty("CanWorkspace", canWsName.toStdString());
-  transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
-
-  // Set the workspace name for Python script export
-  m_pythonExportWsName = sampleWsName.toStdString() + "_Trans";
-
-  runAlgorithm(transAlg);
 }
 
 void IndirectTransmission::transAlgDone(bool error) {
@@ -134,12 +106,17 @@ void IndirectTransmission::transAlgDone(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void IndirectTransmission::instrumentSet() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+void IndirectTransmission::setInstrument() {
+  try {
+    setInstrument(getInstrumentDetail("instrument"));
+  } catch (std::exception const &ex) {
+    showMessageBox(ex.what());
+  }
+}
 
-  // Set the search instrument for runs
-  m_uiForm.dsSampleInput->setInstrumentOverride(instDetails["instrument"]);
-  m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
+void IndirectTransmission::setInstrument(QString const &instrumentName) {
+  m_uiForm.dsSampleInput->setInstrumentOverride(instrumentName);
+  m_uiForm.dsCanInput->setInstrumentOverride(instrumentName);
 }
 
 /**

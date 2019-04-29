@@ -16,12 +16,14 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/EstimatePolynomial.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -36,6 +38,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::Histogram;
 using namespace std;
@@ -705,16 +708,17 @@ void FitPeaks::processInputFitRanges() {
               << " with the number of peaks " << m_numPeaksToFit << " to fit.";
         throw std::invalid_argument(errss.str());
       }
+      const auto &peakWindowX = m_peakWindowWorkspace->x(wi);
 
       // check window range against peak center
       size_t window_index = window_index_start + wi;
       size_t center_index = window_index - center_index_start;
+      const auto &peakCenterX = m_peakCenterWorkspace->x(center_index);
 
       for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-        double left_w_bound =
-            m_peakWindowWorkspace->x(wi)[ipeak * 2]; // TODO getting on y
-        double right_w_bound = m_peakWindowWorkspace->x(wi)[ipeak * 2 + 1];
-        double center = m_peakCenterWorkspace->x(center_index)[ipeak];
+        double left_w_bound = peakWindowX[ipeak * 2]; // TODO getting on y
+        double right_w_bound = peakWindowX[ipeak * 2 + 1];
+        double center = peakCenterX[ipeak];
         if (!(left_w_bound < center && center < right_w_bound)) {
           std::stringstream errss;
           errss << "Workspace index " << wi
@@ -1286,7 +1290,7 @@ void FitPeaks::calculateFittedPeaks(
 
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
-      auto vec_x = m_fittedPeakWS->x(static_cast<size_t>(iws));
+      const auto &vec_x = m_fittedPeakWS->x(static_cast<size_t>(iws));
       std::pair<double, double> peakwindow =
           getPeakFitWindow(static_cast<size_t>(iws), ipeak);
       std::vector<double>::const_iterator start_x_iter =
@@ -1873,8 +1877,10 @@ FitPeaks::createMatrixWorkspace(const std::vector<double> &vec_x,
   size_t size = vec_x.size();
   size_t ysize = vec_y.size();
 
-  MatrixWorkspace_sptr matrix_ws =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
+  HistogramBuilder builder;
+  builder.setX(std::move(size));
+  builder.setY(std::move(ysize));
+  MatrixWorkspace_sptr matrix_ws = create<Workspace2D>(1, builder.build());
 
   auto &dataX = matrix_ws->mutableX(0);
   auto &dataY = matrix_ws->mutableY(0);
@@ -1894,8 +1900,8 @@ void FitPeaks::generateOutputPeakPositionWS() {
   // create output workspace for peak positions: can be partial spectra to input
   // workspace
   size_t num_hist = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
-  m_outputPeakPositionWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", num_hist, m_numPeaksToFit, m_numPeaksToFit);
+  m_outputPeakPositionWorkspace =
+      create<Workspace2D>(num_hist, Points(m_numPeaksToFit));
   // set default
   for (size_t wi = 0; wi < num_hist; ++wi) {
     // convert to workspace index of input data workspace
@@ -1924,8 +1930,8 @@ void FitPeaks::setupParameterTableWorkspace(
   // add columns
   table_ws->addColumn("int", "wsindex");
   table_ws->addColumn("int", "peakindex");
-  for (size_t iparam = 0; iparam < param_names.size(); ++iparam)
-    table_ws->addColumn("double", param_names[iparam]);
+  for (const auto &param_name : param_names)
+    table_ws->addColumn("double", param_name);
   if (with_chi2)
     table_ws->addColumn("double", "chi2");
 
@@ -1960,8 +1966,8 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   std::vector<std::string> param_vec;
   if (m_rawPeaksTable) {
     std::vector<std::string> peak_params = m_peakFunction->getParameterNames();
-    for (size_t i = 0; i < peak_params.size(); ++i)
-      param_vec.push_back(peak_params[i]);
+    for (const auto &peak_param : peak_params)
+      param_vec.push_back(peak_param);
   } else {
     param_vec.emplace_back("centre");
     param_vec.emplace_back("width");
@@ -1973,8 +1979,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     param_vec.emplace_back(m_bkgdFunction->parameterName(iparam));
 
   // parameter value table
-  m_fittedParamTable =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_fittedParamTable = boost::make_shared<TableWorkspace>();
   setupParameterTableWorkspace(m_fittedParamTable, param_vec, true);
 
   // for error workspace
@@ -1986,8 +1991,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     m_fitErrorTable = nullptr;
   } else {
     // create table and set up parameter table
-    m_fitErrorTable =
-        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    m_fitErrorTable = boost::make_shared<TableWorkspace>();
     setupParameterTableWorkspace(m_fitErrorTable, param_vec, false);
   }
 
@@ -2007,17 +2011,8 @@ void FitPeaks::generateCalculatedPeaksWS() {
     return;
   }
 
-  // create a wokspace with same number of input matrix workspace
-  m_fittedPeakWS = API::WorkspaceFactory::Instance().create(m_inputMatrixWS);
-  for (size_t iws = 0; iws < m_fittedPeakWS->getNumberHistograms(); ++iws) {
-    auto out_vecx = m_fittedPeakWS->histogram(iws).x();
-    auto in_vecx = m_inputMatrixWS->histogram(iws).x();
-    for (size_t j = 0; j < out_vecx.size(); ++j) {
-      m_fittedPeakWS->dataX(iws)[j] = in_vecx[j];
-    }
-  }
-
-  return;
+  // create a wokspace with same size as in the input matrix workspace
+  m_fittedPeakWS = create<Workspace2D>(*m_inputMatrixWS);
 }
 
 //----------------------------------------------------------------------------------------------

@@ -95,6 +95,32 @@ class DirectILLCollectDataTest(unittest.TestCase):
         originalEs = inWS.extractE()
         numpy.testing.assert_almost_equal(es, originalEs[:-1, :] / duration)
 
+    def testNormalisationToTimeWhenMonitorCountsAreTooLow(self):
+        outWSName = 'outWS'
+        duration = 3612.3
+        logs = mtd[self._TEST_WS_NAME].mutableRun()
+        logs.addProperty('duration', duration, True)
+        monsum = 10
+        logs.addProperty('monitor.monsum', monsum, True)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'FlatBkg': 'Flat Bkg OFF',
+            'IncidentEnergyCalibration': 'Energy Calibration OFF',
+            'Normalisation': 'Normalisation Monitor',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        inWS = mtd[self._TEST_WS_NAME]
+        ys = outWS.extractY()
+        originalYs = inWS.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs[:-1, :] / duration)
+        es = outWS.extractE()
+        originalEs = inWS.extractE()
+        numpy.testing.assert_almost_equal(es, originalEs[:-1, :] / duration)
+
     def testRawWorkspaceOutput(self):
         outWSName = 'outWS'
         rawWSName = 'rawWS'

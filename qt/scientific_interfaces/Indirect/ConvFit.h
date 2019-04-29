@@ -27,30 +27,19 @@ public:
 protected slots:
   void setModelResolution(const QString &resolutionName);
   void runClicked();
-  void saveClicked();
-  void plotClicked();
-  void updatePlotOptions() override;
   void fitFunctionChanged();
 
 protected:
   void setRunIsRunning(bool running) override;
-  void setFitSingleSpectrumIsFitting(bool fitting) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
+  void setRunEnabled(bool enable) override;
 
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  void setPlotResultIsPlotting(bool plotting);
-  void setButtonsEnabled(bool enabled);
-  void setRunEnabled(bool enabled);
-  void setFitSingleSpectrumEnabled(bool enabled);
-
   std::string fitTypeString() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
-
   // ShortHand Naming for fit functions
   QHash<QString, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;

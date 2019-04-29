@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "BASIS" valid-from = "2010-07-15T00:00:00">
+<parameter-file instrument = "BASIS" valid-from = "2019-01-01 00:00:00">
 
 <component-link name = "BASIS">
 
@@ -38,6 +38,14 @@
 
   <parameter name="reflection" type="string">
     <value val="111" />
+  </parameter>
+
+  <!-- Moderator Tzero/LambdaZero Parameters  -->
+  <parameter name="Moderator.TimeZero.Gradient">
+    <value val="12.925"/>
+  </parameter>
+  <parameter name="Moderator.TimeZero.Intercept">
+    <value val="0.0"/>
   </parameter>
 
 </component-link>

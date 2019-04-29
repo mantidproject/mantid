@@ -126,6 +126,13 @@ system test.
 
    self.tolerance = 0.00000001
 
+By default the tolerance is absolute. It can be changed to relative by another
+flag in the :class:`systemtesting.MantidSystemTest` class.
+
+.. code-block:: python
+
+   self.tolerance_rel_err = True
+
 Disable Some Checks
 -------------------
 

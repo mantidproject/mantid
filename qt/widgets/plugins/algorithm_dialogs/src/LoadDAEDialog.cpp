@@ -24,9 +24,9 @@ DECLARE_DIALOG(LoadDAEDialog)
 class NoDeleting {
 public:
   /// Does nothing
-  void operator()(void *) {}
+  void operator()(void * /*unused*/) {}
   /// Does nothing
-  void operator()(const void *) {}
+  void operator()(const void * /*unused*/) {}
 };
 
 LoadDAEDialog::LoadDAEDialog(QWidget *parent)

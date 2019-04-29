@@ -10,12 +10,14 @@
 #include "MantidAPI/SingleCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -157,11 +159,9 @@ bool MonIDPropChanger::monitorIdReader(
 
 bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
                                        const size_t timeIndex) {
-
-  for (const auto &spec : specDef)
-    if (spec.second != timeIndex)
-      return false;
-  return true;
+  return std::none_of(
+      specDef.cbegin(), specDef.cend(),
+      [timeIndex](const auto &spec) { return spec.second != timeIndex; });
 }
 
 // Register with the algorithm factory
@@ -414,7 +414,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = WorkspaceHelpers::commonBoundaries(*inputWorkspace);
+  m_commonBins = inputWorkspace->isCommonBins();
 
   // Check the monitor spectrum or workspace and extract into new workspace
   m_monitor = sepWS ? getMonitorWorkspace(inputWorkspace)
@@ -686,7 +686,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     if (inputEvent) {
       outputWorkspace = inputWorkspace->clone();
     } else
-      outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+      outputWorkspace = create<MatrixWorkspace>(*inputWorkspace);
   }
   auto outputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
@@ -694,6 +694,7 @@ void NormaliseToMonitor::normaliseBinByBin(
   const auto &inputSpecInfo = inputWorkspace->spectrumInfo();
   const auto &monitorSpecInfo = m_monitor->spectrumInfo();
 
+  const auto specLength = inputWorkspace->blocksize();
   for (auto &workspaceIndex : m_workspaceIndexes) {
     // Get hold of the monitor spectrum
     const auto &monX = m_monitor->binEdges(workspaceIndex);
@@ -708,7 +709,6 @@ void NormaliseToMonitor::normaliseBinByBin(
       this->normalisationFactor(monX, monY, monE);
 
     const size_t numHists = inputWorkspace->getNumberHistograms();
-    auto specLength = inputWorkspace->blocksize();
     // Flag set when a division by 0 is found
     bool hasZeroDivision = false;
     Progress prog(this, 0.0, 1.0, numHists);

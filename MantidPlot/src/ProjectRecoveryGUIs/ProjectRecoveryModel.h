@@ -35,7 +35,6 @@ private:
   void fillFirstRow();
   void fillRow(const Poco::Path &path, const std::string &checkpointName);
   void updateCheckpointTried(const std::string &checkpointName);
-  bool checkRecoverWasASuccess(const std::string &projectFile);
   void createThreadAndManage(const Poco::Path &checkpoint);
   std::vector<std::vector<std::string>> m_rows;
   MantidQt::ProjectRecovery *m_projRec;

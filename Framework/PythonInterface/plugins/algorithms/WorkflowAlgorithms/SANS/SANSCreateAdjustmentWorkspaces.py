@@ -136,9 +136,8 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
         if wave_length_and_pixel_adjustment_workspace:
             self.setProperty("OutputWorkspaceWavelengthAndPixelAdjustment", wave_length_and_pixel_adjustment_workspace)
 
-        if state.adjustment.show_transmission:
-            self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
-            self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
+        self.setProperty("CalculatedTransmissionWorkspace", calculated_transmission_workspace)
+        self.setProperty("UnfittedTransmissionWorkspace", unfitted_transmission_workspace)
 
     def _get_wavelength_and_pixel_adjustment_workspaces(self, state,
                                                         monitor_normalization_workspace,

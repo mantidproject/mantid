@@ -138,8 +138,10 @@ void MDHistoWorkspace::init(
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
   std::vector<IMDDimension_sptr> dim2;
   dim2.reserve(dimensions.size());
-  for (auto &dimension : dimensions)
-    dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimension));
+  std::transform(dimensions.cbegin(), dimensions.cend(),
+                 std::back_inserter(dim2), [](const auto dimension) {
+                   return boost::dynamic_pointer_cast<IMDDimension>(dimension);
+                 });
   this->init(dim2);
   m_nEventsContributed = 0;
 }
@@ -592,10 +594,9 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
     }
 
     ++it;
-    coord_t linePos = 0;
     for (; it != boundaries.cend(); ++it) {
       // This is our current position along the line
-      linePos = *it;
+      const coord_t linePos = *it;
 
       // This is the full position at this boundary
       VMD pos = start + (dir * linePos);

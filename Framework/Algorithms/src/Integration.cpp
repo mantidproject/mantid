@@ -10,9 +10,12 @@
 #include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -29,6 +32,7 @@ DECLARE_ALGORITHM(Integration)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 
 /** Initialisation method.
  *
@@ -156,9 +160,9 @@ void Integration::exec() {
   }
 
   // Create the 2D workspace (with 1 bin) for the output
-  MatrixWorkspace_sptr outputWorkspace =
-      API::WorkspaceFactory::Instance().create(
-          localworkspace, maxWsIndex - minWsIndex + 1, 2, 1);
+
+  MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(
+      *localworkspace, maxWsIndex - minWsIndex + 1, BinEdges(2));
   auto rebinned_input =
       boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
   auto rebinned_output =
@@ -264,7 +268,8 @@ void Integration::exec() {
         sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
         if (distmin > 0)
           Fmin = F[distmin - 1];
-        Fmax = F[distmax];
+        Fmax = F[static_cast<std::size_t>(distmax) < F.size() ? distmax
+                                                              : F.size() - 1];
       }
       if (!is_distrib) {
         // Sum the Y, and sum the E in quadrature
@@ -423,12 +428,10 @@ std::map<std::string, std::string> Integration::validateInputs() {
     }
   }
   if (!isEmpty(minRange)) {
-    for (const auto x : maxRanges) {
-      if (x < minRange) {
-        issues["RangeUpperList"] =
-            "RangeUpperList has a value lower than RangeLower.";
-        break;
-      }
+    if (std::any_of(maxRanges.cbegin(), maxRanges.cend(),
+                    [minRange](const auto x) { return x < minRange; })) {
+      issues["RangeUpperList"] =
+          "RangeUpperList has a value lower than RangeLower.";
     }
   }
   return issues;

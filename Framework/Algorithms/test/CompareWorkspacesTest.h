@@ -1009,6 +1009,33 @@ public:
     TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Log mismatch");
   }
 
+  void testSameLogsButInDifferentOrder() {
+    MatrixWorkspace_sptr ws1 =
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1);
+    MatrixWorkspace_sptr ws2 = ws1->clone();
+    ws1->mutableRun().addProperty("property1", 1);
+    ws1->mutableRun().addProperty("property2", 2);
+    // Add same properties to ws2 but in reverse order.
+    ws2->mutableRun().addProperty("property2", 2);
+    ws2->mutableRun().addProperty("property1", 1);
+    CompareWorkspaces compare;
+    compare.initialize();
+    compare.setChild(true);
+    compare.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace1", ws1))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", ws2))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckType", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckAxes", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckSpectraMap", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckInstrument", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckMasking", false))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckSample", true))
+    TS_ASSERT_THROWS_NOTHING(compare.execute())
+    TS_ASSERT(compare.isExecuted())
+    const bool workspacesMatch = compare.getProperty("Result");
+    TS_ASSERT(workspacesMatch)
+  }
+
   void test_Input_With_Two_Groups_That_Are_The_Same_Matches() {
     // Create a group
     const std::string groupName("TestGroup");

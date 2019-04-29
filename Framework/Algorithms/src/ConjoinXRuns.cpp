@@ -11,12 +11,13 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -36,6 +37,8 @@ namespace Algorithms {
 using namespace API;
 using namespace Kernel;
 using namespace RunCombinationOptions;
+using namespace DataObjects;
+using namespace HistogramData;
 
 namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
@@ -157,7 +160,7 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";
       }
-      m_inputWS.push_back(ws);
+      m_inputWS.emplace_back(ws);
     }
   }
 
@@ -210,7 +213,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
         // try if numeric time series, then the size must match to the
         // blocksize
-        const int blocksize = static_cast<int>(ws->blocksize());
+        const int blocksize = static_cast<int>(ws->y(0).size());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
@@ -251,7 +254,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
-  axis.reserve(ws->blocksize());
+  axis.reserve(ws->y(0).size());
   auto &run = ws->run();
   // try time series first
   TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
@@ -305,12 +308,12 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;
   std::vector<double> axis;
-  std::vector<double> x;
   std::vector<double> xerrors;
-  spectrum.reserve(m_outWS->blocksize());
-  errors.reserve(m_outWS->blocksize());
-  axis.reserve(m_outWS->blocksize());
-  size_t index = static_cast<size_t>(wsIndex);
+  const size_t index = static_cast<size_t>(wsIndex);
+  const auto ySize = m_outWS->y(index).size();
+  spectrum.reserve(ySize);
+  errors.reserve(ySize);
+  axis.reserve(m_outWS->x(index).size());
   for (const auto &input : m_inputWS) {
     const auto &y = input->y(index);
     spectrum.insert(spectrum.end(), y.begin(), y.end());
@@ -320,7 +323,7 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
       const auto &x = input->x(index);
       axis.insert(axis.end(), x.begin(), x.end());
     } else {
-      x = m_axisCache[input->getName()];
+      const auto &x = m_axisCache[input->getName()];
       axis.insert(axis.end(), x.begin(), x.end());
     }
     if (input->hasDx(index)) {
@@ -329,10 +332,10 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
     }
   }
   if (!xerrors.empty())
-    m_outWS->setPointStandardDeviations(index, xerrors);
-  m_outWS->mutableY(index) = spectrum;
-  m_outWS->mutableE(index) = errors;
-  m_outWS->mutableX(index) = axis;
+    m_outWS->setPointStandardDeviations(index, std::move(xerrors));
+  m_outWS->mutableY(index) = std::move(spectrum);
+  m_outWS->mutableE(index) = std::move(errors);
+  m_outWS->mutableX(index) = std::move(axis);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -387,14 +390,14 @@ void ConjoinXRuns::exec() {
   // to be skipped, to compute the size of the output respectively.
   MatrixWorkspace_sptr temp = first->clone();
 
-  size_t outBlockSize = (*it)->blocksize();
+  size_t outBlockSize = (*it)->y(0).size();
   // First sequentially merge the sample logs
   for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
       sampleLogsBehaviour.mergeSampleLogs(*it, temp);
       sampleLogsBehaviour.setUpdatedSampleLogs(temp);
-      outBlockSize += (*it)->blocksize();
+      outBlockSize += (*it)->y(0).size();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error() << "Could not join workspace: " << (*it)->getName()
@@ -425,8 +428,7 @@ void ConjoinXRuns::exec() {
   // now get the size of the output
   size_t numSpec = first->getNumberHistograms();
 
-  m_outWS = WorkspaceFactory::Instance().create(first, numSpec, outBlockSize,
-                                                outBlockSize);
+  m_outWS = create<MatrixWorkspace>(*first, Points(outBlockSize));
 
   // copy over the merged sample logs from the temp
   m_outWS->mutableRun() = temp->run();

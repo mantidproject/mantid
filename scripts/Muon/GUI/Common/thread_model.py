@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal as Signal
-from PyQt4.QtCore import pyqtSlot
+from qtpy import QtWidgets, QtCore
+from qtpy.QtCore import Signal
+from qtpy.QtCore import Slot
 from Muon.GUI.Common.message_box import warning
 
 
@@ -38,7 +38,7 @@ class ThreadModelWorker(QtCore.QObject):
 
     # This decorator is needed for the method to be successfully run on another thread.
     # https://stackoverflow.com/questions/20752154/pyqt-connecting-a-signal-to-a-slot-to-start-a-background-operation/20818401#20818401
-    @pyqtSlot()
+    @Slot()
     def run(self):
         self.signals.started.emit()
         try:
@@ -56,12 +56,12 @@ class ThreadModelWorker(QtCore.QObject):
             QtCore.QThread.currentThread().quit()
 
 
-class ThreadModel(QtGui.QWidget):
+class ThreadModel(QtWidgets.QWidget):
     """
     A wrapper to allow threading with
     the MaxEnt models.
     """
-    exceptionSignal = QtCore.pyqtSignal(str)
+    exceptionSignal = QtCore.Signal(str)
 
     def __init__(self, model):
         super(ThreadModel, self).__init__()

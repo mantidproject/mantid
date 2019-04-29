@@ -4,15 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4.QtCore import QRunnable, pyqtSlot, pyqtSignal, QObject
+from qtpy.QtCore import QRunnable, Slot, Signal, QObject
+
 import traceback
 import sys
 # Following https://martinfitzpatrick.name/article/multithreading-pyqt-applications-with-qthreadpool/
 
 
 class WorkerSignals(QObject):
-    finished = pyqtSignal()
-    error = pyqtSignal(tuple)
+    finished = Signal()
+    error = Signal(tuple)
 
 
 class Worker(QRunnable):
@@ -29,7 +30,7 @@ class Worker(QRunnable):
 
         self.result = None
 
-    @pyqtSlot()
+    @Slot()
     def run(self):
         """
         Async runner

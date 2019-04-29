@@ -47,7 +47,7 @@ add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
 )
 
-#Linking errors on Ubuntu 18.04 with --enable-new-dtags 
+#Linking errors on Ubuntu 18.04 with --enable-new-dtags
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   string(APPEND CMAKE_MODULE_LINKER_FLAGS " -Wl,--disable-new-dtags" )
   string(APPEND CMAKE_EXE_LINKER_FLAGS " -Wl,--disable-new-dtags" )
@@ -76,9 +76,9 @@ option(WITH_ASAN "Enable address sanitizer" OFF)
 if(WITH_ASAN)
   message(STATUS "enabling address sanitizer")
   add_compile_options(-fno-omit-frame-pointer -fno-common -fsanitize=address)
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address -lasan" )
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -lasan" )
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address -lasan" )
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address" )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
 endif()
 
 option(WITH_UBSAN "Enable undefined behavior sanitizer" OFF)
@@ -113,5 +113,22 @@ if( CMAKE_COMPILER_IS_GNUCXX )
     )
     set( CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc" )
     set( CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++" )
+  endif()
+endif()
+
+option (COLORED_COMPILER_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
+
+if(COLORED_COMPILER_OUTPUT)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fdiagnostics-color=always)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-fcolor-diagnostics)
+  endif()
+else()
+  # disables the color output on diagnostics
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fdiagnostics-color=never)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-fno-color-diagnostics)
   endif()
 endif()

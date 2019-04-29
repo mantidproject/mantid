@@ -101,7 +101,12 @@ def main(argv):
         raise ValueError("Test path '{}' is not a file".format(pathname))
 
     # Add the directory of the test to the Python path
-    sys.path.insert(0, os.path.dirname(pathname))
+    dirname = os.path.dirname(pathname)
+    # if the directory ends with 'tests' add the parent directory as well
+    # this is used in the external project PyStoG
+    sys.path.insert(0, dirname)
+    if os.path.split(dirname)[-1] == 'tests':
+        sys.path.insert(1, os.path.split(dirname)[0])
 
     # Load the test and copy over any module variables so that we have
     # the same environment defined here

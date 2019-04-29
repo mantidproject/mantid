@@ -138,8 +138,8 @@ DECLARE_ALGORITHM(MuonGroupingAsymmetry)
 
 void MuonGroupingAsymmetry::init() {
   const std::string emptyString("");
-  const std::vector<int> defaultGrouping = {1};
-  const std::vector<int> defaultPeriods = {1};
+  std::vector<int> defaultGrouping = {1};
+  std::vector<int> defaultPeriods = {1};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
@@ -160,7 +160,7 @@ void MuonGroupingAsymmetry::init() {
                   Direction::Input);
 
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "Grouping", defaultGrouping,
+                      "Grouping", std::move(defaultGrouping),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
@@ -181,7 +181,7 @@ void MuonGroupingAsymmetry::init() {
                   Direction::Input);
 
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "SummedPeriods", defaultPeriods,
+                      "SummedPeriods", std::move(defaultPeriods),
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "A list of periods to sum in multiperiod data.");
   declareProperty(

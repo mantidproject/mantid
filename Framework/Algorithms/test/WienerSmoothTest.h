@@ -610,8 +610,8 @@ private:
 
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
 
-      auto outX = ws->x(i);
-      auto outE = ws->e(i);
+      const auto &outX = ws->x(i);
+      const auto &outE = ws->e(i);
 
       TS_ASSERT(std::equal(outX.begin(), outX.end(), inX.begin()));
       TS_ASSERT(std::equal(outE.begin(), outE.end(), inE.begin()));

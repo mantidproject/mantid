@@ -16,7 +16,7 @@ worker, or the worker finishing its task) using the nested class WorkListener.
 """
 from __future__ import absolute_import
 
-from PyQt4.QtCore import pyqtSlot, QThreadPool
+from qtpy.QtCore import Slot, QThreadPool
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 import functools
@@ -63,14 +63,14 @@ class WorkHandler(object):
                              "WorkListener but rather {}".format(type(listener)))
         self._listener.update({process_id: {'id': id, 'listener': listener}})
 
-    @pyqtSlot()
+    @Slot()
     def on_finished(self, process_id):
         if process_id not in self._worker:
             return
         result = self._worker.pop(process_id)['worker'].result
         self._listener.pop(process_id)['listener'].on_processing_finished(result)
 
-    @pyqtSlot()
+    @Slot()
     def on_error(self, process_id, error):
         if process_id not in self._worker:
             return

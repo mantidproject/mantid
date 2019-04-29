@@ -34,6 +34,11 @@ if NOT DEFINED MANTID_DATA_STORE (
 md %WORKSPACE%\build
 cd %WORKSPACE%\build
 
+:: Remove (possibly) stale files
+::   build/ExternalData/**: data files will change over time and removing
+::                          the links helps keep it fresh
+rmdir /S /Q %WORKSPACE%\build\ExternalData
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration if it has not already been configured.
 :: We use the special flag that only creates the targets for the data
@@ -62,6 +67,12 @@ if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 set USERPROPS_RELEASE=C:\MantidInstall\bin\Mantid.user.properties
 set USERPROPS_NIGHTLY=C:\MantidNightlyInstall\bin\Mantid.user.properties
 del /Q %USERPROPS_RELEASE% %USERPROPS_NIGHTLY%
+:: Remove user settings
+set CONFIGDIR=%APPDATA%\mantidproject
+rmdir /S /Q %CONFIGDIR%
+:: Create the directory to avoid any race conditions
+mkdir %CONFIGDIR%\mantid
+
 :: Turn off any auto updating on startup
 echo UpdateInstrumentDefinitions.OnStartup = 0 > %USERPROPS_RELEASE%
 echo usagereports.enabled = 0 >> %USERPROPS_RELEASE%
@@ -75,5 +86,8 @@ echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS_NIGHTLY%
 set PKGDIR=%WORKSPACE%\build
 :: A completely clean build will not have Mantid installed but will need Python to
 :: run the testing setup scripts. Assume it is in the PATH
+set NTHREADS=%BUILD_THREADS%
+set MAXTHREADS=12
+if %NTHREADS% gtr %MAXTHREADS% set NTHREADS=%MAXTHREADS%
 set PYTHON_EXE=python.exe
-%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% -j %BUILD_THREADS% %EXTRA_ARGS%
+%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% -j %NTHREADS% %EXTRA_ARGS%

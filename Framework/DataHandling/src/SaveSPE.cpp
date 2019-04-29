@@ -10,7 +10,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/HistogramE.h"
@@ -114,11 +113,6 @@ void SaveSPE::exec() {
   using namespace Mantid::API;
   // Retrieve the input workspace
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument("The input workspace must have common binning");
-  }
 
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");

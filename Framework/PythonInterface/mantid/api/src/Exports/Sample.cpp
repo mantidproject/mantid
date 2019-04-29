@@ -62,8 +62,9 @@ void export_Sample() {
       .def("getHeight", &Sample::getHeight, arg("self"),
            "Return the height in mm")
       .def("getWidth", &Sample::getWidth, arg("self"), "Return the width in mm")
-      .def("getMaterial", (&Sample::getMaterial), arg("self"),
-           "The material the sample is composed of")
+      .def("getMaterial", &Sample::getMaterial, arg("self"),
+           "The material the sample is composed of",
+           return_value_policy<reference_existing_object>())
       .def("setGeometryFlag", &Sample::setGeometryFlag,
            (arg("self"), arg("geom_id")), "Set the geometry flag.")
       .def("setThickness", &Sample::setThickness, (arg("self"), arg("thick")),

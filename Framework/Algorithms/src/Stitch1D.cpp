@@ -107,10 +107,9 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
     // Copy over the data
     auto &sourceY = source->mutableY(i);
     auto &sourceE = source->mutableE(i);
-
-    for (int i = a1; i < a2; ++i) {
-      sourceY[i] = 0;
-      sourceE[i] = 0;
+    for (int binIndex = a1; binIndex < a2; ++binIndex) {
+      sourceY[binIndex] = 0;
+      sourceE[binIndex] = 0;
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -446,8 +445,8 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
 boost::tuple<int, int>
 Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
                               MatrixWorkspace_sptr &workspace) {
-  int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
-  int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
+  int a1 = static_cast<int>(workspace->yIndexOfX(startOverlap));
+  int a2 = static_cast<int>(workspace->yIndexOfX(endOverlap));
   if (a1 == a2) {
     throw std::runtime_error("The Params you have provided for binning yield a "
                              "workspace in which start and end overlap appear "
@@ -469,7 +468,7 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
     {
-      auto e = ws->e(i);
+      const auto &e = ws->e(i);
       auto it = std::find_if(e.begin(), e.end(), isNonzero);
       if (it != e.end()) {
         PARALLEL_CRITICAL(has_non_zero) {
@@ -588,11 +587,11 @@ void Stitch1D::exec() {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
     if (scaleRHS) {
-      auto scaleRHS = lhsOverlapIntegrated / rhsOverlapIntegrated;
-      scaleWorkspace(rhs, scaleRHS, rhsWS);
+      auto scalingFactors = lhsOverlapIntegrated / rhsOverlapIntegrated;
+      scaleWorkspace(rhs, scalingFactors, rhsWS);
     } else {
-      auto scaleLHS = rhsOverlapIntegrated / lhsOverlapIntegrated;
-      scaleWorkspace(lhs, scaleLHS, lhsWS);
+      auto scalingFactors = rhsOverlapIntegrated / lhsOverlapIntegrated;
+      scaleWorkspace(lhs, scalingFactors, lhsWS);
     }
   }
   // Provide log information about the scale factors used in the calculations.

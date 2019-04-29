@@ -19,7 +19,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <fstream>
-#include <iostream>
 #include <set>
 
 using namespace Mantid::API;
@@ -397,6 +396,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
       continue;
     if (line.substr(0, 1) == "#")
       continue;
+    g_log.debug(line);
     // parse the line
     std::vector<std::string> splitted;
     boost::split(splitted, line, boost::is_any_of("\t "),
@@ -523,10 +523,10 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
 
   // first line must be version string
   std::string line = Strings::getLine(file);
-  boost::smatch result;
-  if (boost::regex_search(line, result, VERSION_REG_EXP) &&
-      result.size() == 2) {
-    g_log.debug() << "Found version " << result[1] << "\n";
+  boost::smatch versionSearch;
+  if (boost::regex_search(line, versionSearch, VERSION_REG_EXP) &&
+      versionSearch.size() == 2) {
+    g_log.debug() << "Found version " << versionSearch[1] << "\n";
   } else {
     file.close();
     throw Exception::ParseError(
@@ -539,21 +539,22 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   for (Strings::getLine(file, line); !file.eof();
        Strings::getLine(file, line)) {
     linenum += 1;
+    line = Strings::strip(line);
     if (line.empty())
       continue;
     if (line.substr(0, 1) == "#")
       continue;
+    g_log.debug(line);
 
-    boost::smatch result;
+    boost::smatch v1TableSearch;
     // all instances of table headers
-    if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
-      if (result.size() == 2) {
-        line = Strings::strip(result[1]);
+    if (boost::regex_search(line, v1TableSearch, V1_TABLE_REG_EXP)) {
+      if (v1TableSearch.size() == 2) {
+        line = Strings::strip(v1TableSearch[1]);
         Kernel::StringTokenizer tokenizer(
             line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-        for (const auto &token : tokenizer) {
-          columnNames.push_back(token);
-        }
+        std::move(tokenizer.begin(), tokenizer.end(),
+                  std::back_inserter(columnNames));
       }
     } else {
       if (columnNames.empty()) // should never happen
@@ -563,9 +564,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       Kernel::StringTokenizer tokenizer(
           line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       std::vector<std::string> valuesAsStr;
-      for (const auto &token : tokenizer) {
-        valuesAsStr.push_back(token);
-      }
+      std::move(tokenizer.begin(), tokenizer.end(),
+                std::back_inserter(valuesAsStr));
       if (valuesAsStr.size() < columnNames.size() + INFO_OFFSET_V1) {
         std::stringstream msg;
         msg << "Number of data columns (" << valuesAsStr.size()
@@ -574,10 +574,11 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
         throw Exception::ParseError(msg.str(), filename, linenum);
       }
 
-      const int row = findRow(wksp, valuesAsStr);
+      const int rowIndex = findRow(wksp, valuesAsStr);
 
-      if (row >= 0) {
-        updateRow(wksp, static_cast<size_t>(row), columnNames, valuesAsStr);
+      if (rowIndex >= 0) {
+        updateRow(wksp, static_cast<size_t>(rowIndex), columnNames,
+                  valuesAsStr);
       } else {
         // add the row
         API::TableRow row = wksp->appendRow();

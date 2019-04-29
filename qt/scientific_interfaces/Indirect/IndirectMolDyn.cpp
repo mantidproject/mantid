@@ -6,13 +6,22 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMolDyn.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QString>
 
 using namespace Mantid::API;
+
+namespace {
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,9 +35,13 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent)
           SLOT(setEnabled(bool)));
   connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(versionSelected(const QString &)));
-  // Handle plotting and saving
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
 }
 
 void IndirectMolDyn::setup() {}
@@ -71,38 +84,44 @@ bool IndirectMolDyn::validate() {
  * Collect the settings on the GUI and run the MolDyn algorithm.
  */
 void IndirectMolDyn::run() {
+  setRunIsRunning(true);
+
   // Get filename and base filename (for naming output workspace group)
-  QString filename = m_uiForm.mwRun->getFirstFilename();
-  QFileInfo fi(filename);
-  QString baseName = fi.baseName();
+  auto const filename = m_uiForm.mwRun->getFirstFilename();
+  auto const baseName = QFileInfo(filename).baseName();
+  auto const functionNames = m_uiForm.leFunctionNames->text().toStdString();
+  bool const symmetrise = m_uiForm.ckSymmetrise->isChecked();
+  bool const cropEnergy = m_uiForm.ckCropEnergy->isChecked();
+  bool const resolution = m_uiForm.ckResolution->isChecked();
 
   // Setup algorithm
-  IAlgorithm_sptr molDynAlg = AlgorithmManager::Instance().create("MolDyn");
+  auto molDynAlg = AlgorithmManager::Instance().create("MolDyn");
   molDynAlg->setProperty("Data", filename.toStdString());
-  molDynAlg->setProperty("Functions",
-                         m_uiForm.leFunctionNames->text().toStdString());
-  molDynAlg->setProperty("SymmetriseEnergy",
-                         m_uiForm.ckSymmetrise->isChecked());
+  molDynAlg->setProperty("Functions", functionNames);
+  molDynAlg->setProperty("SymmetriseEnergy", symmetrise);
   molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
 
   // Set energy crop option
-  if (m_uiForm.ckCropEnergy->isChecked())
-    molDynAlg->setProperty(
-        "MaxEnergy",
-        QString::number(m_uiForm.dspMaxEnergy->value()).toStdString());
+  if (cropEnergy) {
+    auto const maxEnergy = QString::number(m_uiForm.dspMaxEnergy->value());
+    molDynAlg->setProperty("MaxEnergy", maxEnergy.toStdString());
+  }
 
   // Set instrument resolution option
-  if (m_uiForm.ckResolution->isChecked())
-    molDynAlg->setProperty(
-        "Resolution",
-        m_uiForm.dsResolution->getCurrentDataName().toStdString());
+  if (resolution) {
+    auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName();
+    molDynAlg->setProperty("Resolution", resolutionName.toStdString());
+  }
 
   runAlgorithm(molDynAlg);
+}
 
-  // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.cbPlot->setEnabled(true);
+void IndirectMolDyn::algorithmComplete(bool error) {
+  setRunIsRunning(false);
+  if (error) {
+    setPlotEnabled(false);
+    setSaveEnabled(false);
+  }
 }
 
 /**
@@ -124,32 +143,34 @@ void IndirectMolDyn::versionSelected(const QString &version) {
   bool version4(version == "4");
   m_uiForm.mwRun->isForDirectory(version4);
 }
+
+void IndirectMolDyn::runClicked() { runTab(); }
+
 /**
  * Handle plotting of mantid workspace
  */
 void IndirectMolDyn::plotClicked() {
+  setPlotIsPlotting(true);
 
-  QString filename = m_uiForm.mwRun->getFirstFilename();
-  QFileInfo fi(filename);
-  QString baseName = fi.baseName();
+  QString const filename = m_uiForm.mwRun->getFirstFilename();
+  QString const baseName = QFileInfo(filename).baseName();
 
   if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
 
-    WorkspaceGroup_sptr diffResultsGroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            baseName.toStdString());
+    auto const diffResultsGroup = getADSWorkspaceGroup(baseName.toStdString());
+    auto const names = diffResultsGroup->getNames();
+    auto const plotType = m_uiForm.cbPlot->currentText();
 
-    auto names = diffResultsGroup->getNames();
-    auto plotType = m_uiForm.cbPlot->currentText();
-
-    for (const auto &wsName : names) {
+    for (auto const &name : names) {
       if (plotType == "Spectra" || plotType == "Both")
-        plotSpectrum(QString::fromStdString(wsName));
+        plotSpectrum(QString::fromStdString(name));
 
       if (plotType == "Contour" || plotType == "Both")
-        plot2D(QString::fromStdString(wsName));
+        plot2D(QString::fromStdString(name));
     }
   }
+
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -164,6 +185,35 @@ void IndirectMolDyn::saveClicked() {
   if (checkADSForPlotSaveWorkspace(baseName.toStdString(), false))
     addSaveWorkspaceToQueue(baseName);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectMolDyn::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void IndirectMolDyn::setPlotIsPlotting(bool running) {
+  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot");
+  setButtonsEnabled(!running);
+}
+
+void IndirectMolDyn::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotEnabled(enabled);
+  setSaveEnabled(enabled);
+}
+
+void IndirectMolDyn::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectMolDyn::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlot->setEnabled(enabled);
+}
+
+void IndirectMolDyn::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces

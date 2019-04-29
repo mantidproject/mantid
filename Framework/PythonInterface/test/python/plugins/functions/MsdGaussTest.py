@@ -21,7 +21,7 @@ class MsdGaussTest(unittest.TestCase):
 
     def test_function_output(self):
         input = np.array([[0, 1], [2, 3]])
-        expected = np.array([[1., 0.95122942], [0.81873075, 0.63762815]])
+        expected = np.array([[1., 0.99170129], [0.9672161, 0.92774349]])
         tolerance = 0.000001
         status, output = check_output("MsdGauss", input, expected, tolerance, Height=1.0, Msd=0.05)
 

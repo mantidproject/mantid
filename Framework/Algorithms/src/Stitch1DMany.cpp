@@ -267,6 +267,7 @@ void Stitch1DMany::exec() {
       // Iterate over each period
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
         std::vector<MatrixWorkspace_sptr> inMatrix;
+        inMatrix.reserve(m_inputWSMatrix.size());
         for (const auto &ws : m_inputWSMatrix)
           inMatrix.emplace_back(ws[i]);
 

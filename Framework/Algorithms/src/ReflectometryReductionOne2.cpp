@@ -24,7 +24,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -520,6 +519,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("Params", getPropertyValue("Params"));
     alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
     alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setProperty("ScaleRHSWorkspace",
+                     getPropertyValue("ScaleRHSWorkspace"));
     alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
     alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
     alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
@@ -837,7 +838,7 @@ double ReflectometryReductionOne2::findIvsLamRangeMin(
   const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
 
   // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdx);
+  const auto &xValues = detectorWS->x(spIdx);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
   double dummy = 0.0;
@@ -856,7 +857,7 @@ double ReflectometryReductionOne2::findIvsLamRangeMax(
   const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
 
   // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdx);
+  const auto &xValues = detectorWS->x(spIdx);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
 

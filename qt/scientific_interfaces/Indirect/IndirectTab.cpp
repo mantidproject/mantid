@@ -15,7 +15,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QMessageBox>
 
@@ -30,7 +30,19 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
+
+std::string castToString(int value) {
+  return boost::lexical_cast<std::string>(value);
 }
+
+template <typename Predicate>
+void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
+                   std::string const &value, Predicate const &condition) {
+  if (condition)
+    algorithm->setPropertyValue(propName, value);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -136,26 +148,20 @@ void IndirectTab::exportPythonScript() {
  * @return If the algorithm was successful
  */
 bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
-                           const int specMin, const int specMax) {
-  Algorithm_sptr load =
-      AlgorithmManager::Instance().createUnmanaged("Load", -1);
-  load->initialize();
+                           const int specMin, const int specMax,
+                           bool loadHistory) {
+  const auto algName = loadHistory ? "Load" : "LoadNexusProcessed";
 
-  load->setProperty("Filename", filename.toStdString());
-  load->setProperty("OutputWorkspace", outputName.toStdString());
+  auto loader = AlgorithmManager::Instance().createUnmanaged(algName, -1);
+  loader->initialize();
+  loader->setProperty("Filename", filename.toStdString());
+  loader->setProperty("OutputWorkspace", outputName.toStdString());
+  setPropertyIf(loader, "SpectrumMin", castToString(specMin), specMin != -1);
+  setPropertyIf(loader, "SpectrumMax", castToString(specMax), specMax != -1);
+  setPropertyIf(loader, "LoadHistory", loadHistory ? "1" : "0", !loadHistory);
+  loader->execute();
 
-  if (specMin != -1)
-    load->setPropertyValue("SpectrumMin",
-                           boost::lexical_cast<std::string>(specMin));
-
-  if (specMax != -1)
-    load->setPropertyValue("SpectrumMax",
-                           boost::lexical_cast<std::string>(specMax));
-
-  load->execute();
-
-  // If reloading fails we're out of options
-  return load->isExecuted();
+  return loader->isExecuted();
 }
 
 /**
@@ -167,19 +173,23 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
  */
 void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName,
                                           const QString &filename) {
+  addSaveWorkspaceToQueue(wsName.toStdString(), filename.toStdString());
+}
+
+void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName,
+                                          const std::string &filename) {
   // Setup the input workspace property
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName.toStdString();
+  saveProps["InputWorkspace"] = wsName;
 
   // Setup the algorithm
-  IAlgorithm_sptr saveAlgo =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
+  auto saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saveAlgo->initialize();
 
-  if (filename.isEmpty())
-    saveAlgo->setProperty("Filename", wsName.toStdString() + ".nxs");
+  if (filename.empty())
+    saveAlgo->setProperty("Filename", wsName + ".nxs");
   else
-    saveAlgo->setProperty("Filename", filename.toStdString());
+    saveAlgo->setProperty("Filename", filename);
 
   // Add the save algorithm to the batch
   m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
@@ -260,19 +270,19 @@ void IndirectTab::plotMultipleSpectra(
  * @param spectraIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int spectraIndex) {
-  if (workspaceNames.isEmpty())
-    return;
+                               const int &spectraIndex, const bool &errorBars) {
+  if (!workspaceNames.isEmpty()) {
+    const QString errors = errorBars ? "True" : "False";
 
-  QString pyInput = "from mantidplot import plotSpectrum\n";
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+    pyInput += "plotSpectrum(['";
+    pyInput += workspaceNames.join("','");
+    pyInput += "'], ";
+    pyInput += QString::number(spectraIndex);
+    pyInput += ", error_bars=" + errors + ")\n";
 
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(spectraIndex);
-  pyInput += ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
+    m_pythonRunner.runPythonCode(pyInput);
+  }
 }
 
 /**
@@ -281,14 +291,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  *
  * @param workspaceName Names of workspace to plot
  * @param spectraIndex Workspace Index of spectrum to plot
+ * @param errorBars Is true if you want to plot the error bars
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int spectraIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, spectraIndex);
+void IndirectTab::plotSpectrum(const QString &workspaceName,
+                               const int &spectraIndex, const bool &errorBars) {
+  if (!workspaceName.isEmpty()) {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, spectraIndex, errorBars);
+  }
 }
 
 /**

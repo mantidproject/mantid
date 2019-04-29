@@ -119,6 +119,87 @@ public:
     VectorColumnTestHelper<int> col;
     TS_ASSERT(!col.isNumber());
   }
+
+  void test_equals() {
+    VectorColumnTestHelper<int> col;
+
+    col.resize(3);
+
+    col.read(0, "1,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+    auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
+
+    TS_ASSERT(col.equals(*compare, 0));
+  }
+
+  void test_equals_failure() {
+    VectorColumnTestHelper<int> col;
+    VectorColumnTestHelper<int> col2;
+
+    col.resize(3);
+    col2.resize(3);
+
+    col.read(0, "1,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+    auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
+    col2.read(0, "1,2,3");
+    col2.read(1, "3,4,5");
+    col2.read(2, "7,8,9,11");
+    TS_ASSERT(!col2.equals(*compare, 0));
+  }
+
+  void test_equals_tolerance() {
+    VectorColumnTestHelper<int> col;
+    VectorColumnTestHelper<int> col2;
+
+    col.resize(3);
+    col2.resize(3);
+
+    col.read(0, "1,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+    auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
+    col2.read(0, "1,2,2");
+    col2.read(1, "3,4,5");
+    col2.read(2, "7,8,9,11");
+    TS_ASSERT(col2.equals(*compare, 1));
+  }
+
+  void test_equals_tolerance_fail() {
+    VectorColumnTestHelper<int> col;
+    VectorColumnTestHelper<int> col2;
+
+    col.resize(3);
+    col2.resize(3);
+
+    col.read(0, "1,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+    auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
+    col2.read(0, "1,2,2");
+    col2.read(1, "3,4,5");
+    col2.read(2, "7,8,9,12");
+    TS_ASSERT(!col2.equals(*compare, 1));
+  }
+
+  void test_equalsRelErr() {
+    VectorColumnTestHelper<int> col;
+    VectorColumnTestHelper<int> col2;
+
+    col.resize(3);
+    col2.resize(3);
+
+    col.read(0, "100,2,3");
+    col.read(1, "3,4,5");
+    col.read(2, "7,8,9,10");
+    auto compare = std::unique_ptr<Mantid::API::Column>(col.clone());
+    col2.read(0, "90,2,2");
+    col2.read(1, "3,4,5");
+    col2.read(2, "7,8,9,11");
+    TS_ASSERT(col2.equalsRelErr(*compare, 1));
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_VECTORCOLUMNTEST_H_ */

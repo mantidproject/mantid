@@ -10,7 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
 using namespace Mantid::API;
 
@@ -169,6 +169,11 @@ void ALCBaselineModellingPresenter::updateDataCurve() {
   assert(data);
   m_view->setDataCurve(*(QwtHelper::curveDataFromWs(data, 0)),
                        QwtHelper::curveErrorsFromWs(data, 0));
+  // Delete all section selectors
+  int noRows = m_view->noOfSectionRows() - 1;
+  for (int j = noRows; j > -1; --j) {
+    removeSection(j);
+  }
 }
 
 void ALCBaselineModellingPresenter::updateCorrectedCurve() {

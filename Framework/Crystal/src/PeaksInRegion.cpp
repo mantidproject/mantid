@@ -48,8 +48,8 @@ void PeaksInRegion::init() {
   extents[0] = -50;
   extents[1] = +50;
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Extents", extents,
-                                                 mandatoryExtents),
+      Kernel::make_unique<ArrayProperty<double>>("Extents", std::move(extents),
+                                                 std::move(mandatoryExtents)),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default +-50 in "
       "each dimension.");
@@ -85,8 +85,8 @@ bool PeaksInRegion::pointOutsideAnyExtents(const V3D &testPoint) const {
          testPoint[2] < m_extents[4] || testPoint[2] > m_extents[5];
 }
 
-bool PeaksInRegion::pointInsideAllExtents(const V3D &testPoint,
-                                          const Mantid::Kernel::V3D &) const {
+bool PeaksInRegion::pointInsideAllExtents(
+    const V3D &testPoint, const Mantid::Kernel::V3D & /*peakCenter*/) const {
   return testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1] &&
          testPoint[1] >= m_extents[2] && testPoint[1] <= m_extents[3] &&
          testPoint[2] >= m_extents[4] && testPoint[2] <= m_extents[5];

@@ -9,13 +9,13 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -28,6 +28,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::Types::Core::DateAndTime;
 
 using namespace std;
@@ -247,12 +248,7 @@ void ExportTimeSeriesLog::setupWorkspace2D(
     outsize = static_cast<size_t>(numentries);
 
   // Create 2D workspace
-  m_outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", nspec, outsize,
-                                          outsize));
-  if (!m_outWS)
-    throw runtime_error(
-        "Unable to create a Workspace2D casted to MatrixWorkspace.");
+  m_outWS = create<Workspace2D>(nspec, Points(outsize));
 
   auto &vecX = m_outWS->mutableX(0);
   auto &vecY = m_outWS->mutableY(0);

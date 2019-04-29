@@ -14,25 +14,36 @@ from __future__ import absolute_import
 import weakref
 
 # 3rdparty imports
-from qtpy.QtCore import QEvent, Signal
+from qtpy.QtCore import QEvent, Qt, Signal, Slot
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QMainWindow
 
 # local imports
-from .figuretype import figure_type, FigureType
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.widgets.observers.observing_view import ObservingView
 
 
-class FigureWindow(QMainWindow):
+class FigureWindow(QMainWindow, ObservingView):
     """A MainWindow that will hold plots"""
     activated = Signal()
     closing = Signal()
     visibility_changed = Signal()
+    show_context_menu = Signal()
+    close_signal = Signal()
 
     def __init__(self, canvas, parent=None):
         QMainWindow.__init__(self, parent=parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
+        self.close_signal.connect(self._run_close)
         self.setAcceptDrops(True)
+
+    @Slot()
+    def _run_close(self):
+        self.close()
 
     def event(self, event):
         if event.type() == QEvent.WindowActivate:
@@ -42,6 +53,7 @@ class FigureWindow(QMainWindow):
     def closeEvent(self, event):
         self.closing.emit()
         QMainWindow.closeEvent(self, event)
+        self.deleteLater()
 
     def hideEvent(self, event):
         self.visibility_changed.emit()
@@ -71,7 +83,8 @@ class FigureWindow(QMainWindow):
         :param event: A QDropEvent containing the MIME
                       data of the action
         """
-        self._plot_on_here(event.mimeData().text().split('\n'))
+        workspace_names = event.mimeData().text().split('\n')
+        self._plot_on_here(workspace_names)
         QMainWindow.dropEvent(self, event)
 
     # private api
@@ -88,7 +101,7 @@ class FigureWindow(QMainWindow):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from workbench.plotting.functions import pcolormesh_from_names, plot_from_names
+        from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
 
         fig = self._canvas.figure
         fig_type = figure_type(fig)

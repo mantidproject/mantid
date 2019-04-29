@@ -95,10 +95,10 @@ void RRFMuon::exec() {
   // Put results into output workspace
   // Real RRF polarization
   outputWs->setSharedX(0, inputWs->sharedX(0));
-  outputWs->mutableY(0) = rrfRe;
+  outputWs->mutableY(0) = std::move(rrfRe);
   // Imaginary RRF polarization
   outputWs->setSharedX(1, inputWs->sharedX(1));
-  outputWs->mutableY(1) = rrfIm;
+  outputWs->mutableY(1) = std::move(rrfIm);
 
   // Set output workspace
   setProperty("OutputWorkspace", outputWs);

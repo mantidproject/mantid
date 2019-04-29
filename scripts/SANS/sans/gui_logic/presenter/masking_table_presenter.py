@@ -13,16 +13,21 @@ import copy
 
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
-
-try:
-    import mantidplot
-except ImportError:
-    pass
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from ui.sans_isis.work_handler import WorkHandler
+
+from qtpy import PYQT4
+if PYQT4:
+    try:
+        import mantidplot
+        IN_MANTIDPLOT = True
+    except ImportError:
+        IN_MANTIDPLOT = False
+else:
+    from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 masking_information = namedtuple("masking_information", "first, second, third")
 
@@ -85,6 +90,15 @@ def perform_load(serialized_state):
 def perform_move(state, workspace):
     serialized_state = state.property_manager
     move_name = "SANSMove"
+
+    zero_options = {"SANSState": serialized_state,
+                    "Workspace": workspace,
+                    "MoveType": "SetToZero",
+                    "Component": ""}
+    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
+    zero_alg.execute()
+    workspace = zero_alg.getProperty("Workspace").value
+
     move_options = {"SANSState": serialized_state,
                     "Workspace": workspace,
                     "MoveType": "InitialMove"}
@@ -148,7 +162,6 @@ class MaskingTablePresenter(object):
             self._presenter.on_processing_error_masking_display(error)
 
     def __init__(self, parent_presenter):
-        super(MaskingTablePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
@@ -156,7 +169,7 @@ class MaskingTablePresenter(object):
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
-        state = self.get_state(row_index, file_lookup=False)
+        state = self.get_state(row_index, file_lookup=False, suppress_warnings=True)
         if state:
             self.display_masking_information(state)
 
@@ -234,8 +247,9 @@ class MaskingTablePresenter(object):
         self._view.update_rows([])
         self.display_masking_information(state=None)
 
-    def get_state(self, index, file_lookup=True):
-        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup)
+    def get_state(self, index, file_lookup=True, suppress_warnings=False):
+        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup,
+                                                        suppress_warnings=suppress_warnings)
 
     @staticmethod
     def _append_single_spectrum_mask(spectrum_mask, container, detector_name, prefix):
@@ -464,5 +478,9 @@ class MaskingTablePresenter(object):
     @staticmethod
     def _display(masked_workspace):
         if masked_workspace and AnalysisDataService.doesExist(masked_workspace.name()):
-            instrument_win = mantidplot.getInstrumentView(masked_workspace.name())
-            instrument_win.show()
+            if PYQT4:
+                instrument_win = mantidplot.getInstrumentView(masked_workspace.name())
+                instrument_win.show()
+            else:
+                instrument_win = InstrumentViewPresenter(masked_workspace)
+                instrument_win.view.show()

@@ -14,17 +14,19 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
-
-#include "MantidAPI/MultiDomainFunction.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -32,6 +34,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
 
@@ -356,8 +359,11 @@ API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
   size_t ishift = i_maxFitX + 1;
   if (ishift >= vecY.size())
     ysize = vecY.size() - i_minFitX;
-  MatrixWorkspace_sptr purePeakWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
+
+  HistogramBuilder builder;
+  builder.setX(size);
+  builder.setY(ysize);
+  MatrixWorkspace_sptr purePeakWS = create<Workspace2D>(1, builder.build());
 
   auto &vecX = m_dataWS->x(m_wsIndex);
   auto &vecE = m_dataWS->e(m_wsIndex);
@@ -495,7 +501,7 @@ void FitOneSinglePeak::highBkgdFit() {
     size_t numpts = i_maxFitX - i_minFitX;
     size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
-    auto Xdata = m_dataWS->x(m_wsIndex);
+    const auto &Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())
       i_minPeakX = Xdata.size() - 1;
     m_minPeakX = Xdata[i_minPeakX];
@@ -1498,25 +1504,24 @@ void FitPeak::setupOutput(
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
   auto &vecX = m_dataWS->x(m_wsIndex);
-  size_t i_minFitX = getIndex(vecX, m_minFitX);
-  size_t i_maxFitX = getIndex(vecX, m_maxFitX);
+  const size_t i_minFitX = getIndex(vecX, m_minFitX);
+  const size_t i_maxFitX = getIndex(vecX, m_maxFitX);
 
   // Data workspace
-  size_t nspec = 3;
+  const size_t nspec = 3;
   // Get a vector for fit window
 
-  size_t vecsize = i_maxFitX - i_minFitX + 1;
-  vector<double> vecoutx(vecsize);
+  vector<double> vecoutx(i_maxFitX - i_minFitX + 1);
   for (size_t i = i_minFitX; i <= i_maxFitX; ++i)
     vecoutx[i - i_minFitX] = vecX[i];
 
   // Create workspace
-  size_t sizex = vecoutx.size();
-  size_t sizey = vecoutx.size();
-
-  MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", nspec, sizex, sizey));
-
+  const size_t sizex = vecoutx.size();
+  const auto sizey = sizex;
+  HistogramBuilder builder;
+  builder.setX(sizex);
+  builder.setY(sizey);
+  MatrixWorkspace_sptr outws = create<Workspace2D>(nspec, builder.build());
   // Calculate again
   FunctionDomain1DVector domain(vecoutx);
   FunctionValues values(domain);
@@ -1550,8 +1555,8 @@ void FitPeak::setupOutput(
   // Parameter vector
   vector<double> vec_fitpeak;
   vec_fitpeak.reserve(m_peakParameterNames.size());
-  for (auto &peakParameterName : m_peakParameterNames) {
-    vec_fitpeak.push_back(m_peakFunc->getParameter(peakParameterName));
+  for (const auto &peakParameterName : m_peakParameterNames) {
+    vec_fitpeak.emplace_back(m_peakFunc->getParameter(peakParameterName));
   }
 
   setProperty("FittedPeakParameterValues", vec_fitpeak);
@@ -1560,7 +1565,7 @@ void FitPeak::setupOutput(
   vector<double> vec_fitbkgd;
   vec_fitpeak.reserve(m_bkgdParameterNames.size());
   for (auto &bkgdParameterName : m_bkgdParameterNames) {
-    vec_fitbkgd.push_back(m_bkgdFunc->getParameter(bkgdParameterName));
+    vec_fitbkgd.emplace_back(m_bkgdFunc->getParameter(bkgdParameterName));
   }
 
   setProperty("FittedBackgroundParameterValues", vec_fitbkgd);

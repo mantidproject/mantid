@@ -20,7 +20,8 @@ default.instrument =
 Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS_v2_experimental.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py
+
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py
 
 # Directory containing the above startup scripts
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
@@ -50,21 +51,18 @@ UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/man
 # Whether to check for newer mantid versions on startup
 CheckMantidVersion.OnStartup = @CHECK_FOR_NEW_MANTID_VERSION@
 CheckMantidVersion.GitHubReleaseURL = https://api.github.com/repos/mantidproject/mantid/releases/latest
-CheckMantidVersion.DownloadURL = http://download.mantidproject.org
+CheckMantidVersion.DownloadURL = https://download.mantidproject.org
 
 # Whether to report usage statistics back to central server
 usagereports.enabled = @ENABLE_USAGE_REPORTS@
-errorreports.rooturl = http://errorreports.mantidproject.org
-usagereports.rooturl = http://reports.mantidproject.org
+errorreports.rooturl = https://errorreports.mantidproject.org
+usagereports.rooturl = https://reports.mantidproject.org
 
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
 
 # Where to load Mask files (that are shipped with Mantid) from
 maskFiles.directory = @MANTID_ROOT@/instrument/masks
-
-# Where to load OpenCL kernel files
-openclKernelFiles.directory = @MANTID_ROOT@/Framework/GPUAlgorithms/src
 
 # Where to load colormap files (.map)
 colormaps.directory = @COLORMAPS_FOLDER@
@@ -123,6 +121,8 @@ MultiThreaded.MaxCores = 0
 curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
+# Functions excluded from use by the guis
+curvefitting.guiExclude=CrystalFieldFunction;CrystalFieldHeatCapacity;CrystalFieldMagnetisation;CrystalFieldMoment;CrystalFieldMultiSpectrum;CrystalFieldPeaks;CrystalFieldSpectrum;CrystalFieldSusceptibility
 
 #Defines whether or not the sliceViewer will show NonOrthogonal view as a default
 sliceviewer.nonorthogonal=false

@@ -18,18 +18,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
-  A presenter.
-*/
-class DLLExport JumpFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
+    : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  JumpFitDataPresenter(JumpFitModel *model, IndirectFitDataView *view,
+  JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter);
-
-signals:
-  void updateAvailableFitTypes();
 
 private slots:
   void hideParameterComboBoxes();
@@ -50,8 +45,7 @@ private slots:
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-  void dialogExecuted(IAddWorkspaceDialog const *dialog,
-                      QDialog::DialogCode result) override;
+  void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);

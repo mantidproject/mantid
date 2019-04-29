@@ -172,22 +172,73 @@ ReflectometryReductionOneAuto2::validateInputs() {
   return results;
 }
 
+std::string ReflectometryReductionOneAuto2::getRunNumberForWorkspaceGroup(
+    WorkspaceGroup_const_sptr group) {
+  // Return the run number for the first child workspace
+  if (!group)
+    throw std::runtime_error("Invalid workspace group type");
+
+  if (group->getNumberOfEntries() < 1)
+    throw std::runtime_error("Cannot run algorithm on empty group");
+
+  auto childWs = group->getItem(0);
+  auto childMatrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(childWs);
+
+  if (!childMatrixWs)
+    throw std::runtime_error("Child workspace is not a MatrixWorkspace");
+
+  return getRunNumber(*childMatrixWs);
+}
+
+// Get output workspace names from the user-specified properties, or default
+// names if the properties were not specified
+auto ReflectometryReductionOneAuto2::getOutputWorkspaceNames()
+    -> WorkspaceNames {
+  WorkspaceNames result;
+  MatrixWorkspace_const_sptr matrixWs = getProperty("InputWorkspace");
+
+  std::string runNumber;
+  if (matrixWs) {
+    runNumber = getRunNumber(*matrixWs);
+  } else {
+    // Casting to WorkspaceGroup doesn't work - I think because InputWorkspace
+    // is declared as a MatrixWorkspace - so get it from the ADS instead
+    auto groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        getPropertyValue("InputWorkspace"));
+    runNumber = getRunNumberForWorkspaceGroup(groupWs);
+  }
+
+  if (isDefault("OutputWorkspaceBinned"))
+    result.iVsQBinned = OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber;
+  else
+    result.iVsQBinned = getPropertyValue("OutputWorkspaceBinned");
+
+  if (isDefault("OutputWorkspace"))
+    result.iVsQ = OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber;
+  else
+    result.iVsQ = getPropertyValue("OutputWorkspace");
+
+  if (isDefault("OutputWorkspaceWavelength"))
+    result.iVsLam = OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber;
+  else
+    result.iVsLam = getPropertyValue("OutputWorkspaceWavelength");
+
+  return result;
+}
+
 // Set default names for output workspaces
 void ReflectometryReductionOneAuto2::setDefaultOutputWorkspaceNames() {
   bool const isDebug = getProperty("Debug");
-  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
-  auto const runNumber = getRunNumber(*ws);
+  auto outputNames = getOutputWorkspaceNames();
+
   if (isDefault("OutputWorkspaceBinned")) {
-    setPropertyValue("OutputWorkspaceBinned",
-                     OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX + runNumber);
+    setPropertyValue("OutputWorkspaceBinned", outputNames.iVsQBinned);
   }
   if (isDefault("OutputWorkspace")) {
-    setPropertyValue("OutputWorkspace",
-                     OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+    setPropertyValue("OutputWorkspace", outputNames.iVsQ);
   }
   if (isDebug && isDefault("OutputWorkspaceWavelength")) {
-    setPropertyValue("OutputWorkspaceWavelength",
-                     OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+    setPropertyValue("OutputWorkspaceWavelength", outputNames.iVsLam);
   }
 }
 
@@ -402,14 +453,25 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
+  // Set the unbinned output workspace in Q, cropped to the min/max q
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", IvsQ);
+  auto const params = getRebinParams(IvsQ, theta);
+  auto IvsQC = IvsQ;
+  if (!(params.qMinIsDefault() && params.qMaxIsDefault()))
+    IvsQC = cropQ(IvsQ, params);
+  setProperty("OutputWorkspace", IvsQC);
 
-  std::vector<double> params;
-  MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
+  // Set the binned output workspace in Q
+  if (params.hasQStep()) {
+    MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, params);
+    setProperty("OutputWorkspaceBinned", IvsQB);
+  } else {
+    g_log.error("NRCalculateSlitResolution failed. Workspace in Q will not be "
+                "rebinned. Please provide dQ/Q.");
+    setProperty("OutputWorkspaceBinned", IvsQC);
+  }
 
-  setProperty("OutputWorkspaceBinned", IvsQB);
-
+  // Set the output workspace in wavelength, if debug outputs are enabled
   bool const isDebug = getProperty("Debug");
   if (isDebug || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
@@ -418,11 +480,10 @@ void ReflectometryReductionOneAuto2::exec() {
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
-  if (!params.empty()) {
-    setProperty("MomentumTransferMin", params[0]);
-    setProperty("MomentumTransferStep", -params[1]);
-    setProperty("MomentumTransferMax", params[2]);
-  }
+  setProperty("MomentumTransferMin", params.qMin());
+  setProperty("MomentumTransferMax", params.qMax());
+  if (params.hasQStep())
+    setProperty("MomentumTransferStep", -params.qStep());
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
 }
@@ -603,18 +664,26 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
   }
 }
 
-/** Rebin and scale a workspace in Q.
+auto ReflectometryReductionOneAuto2::getRebinParams(
+    MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
+  bool qMinIsDefault = true, qMaxIsDefault = true;
+  auto const qMin = getPropertyOrDefault("MomentumTransferMin",
+                                         inputWS->x(0).front(), qMinIsDefault);
+  auto const qMax = getPropertyOrDefault("MomentumTransferMax",
+                                         inputWS->x(0).back(), qMaxIsDefault);
+  return RebinParams(qMin, qMinIsDefault, qMax, qMaxIsDefault,
+                     getQStep(inputWS, theta));
+}
+
+/** Get the binning step the final output workspace in Q
  *
  * @param inputWS :: the workspace in Q
  * @param theta :: the angle of this run
- * @param params :: [output] rebin parameters
- * @return :: the output workspace
+ * @return :: the rebin step in Q, or none if it could not be found
  */
-MatrixWorkspace_sptr
-ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
-                                              const double theta,
-                                              std::vector<double> &params) {
-
+boost::optional<double>
+ReflectometryReductionOneAuto2::getQStep(MatrixWorkspace_sptr inputWS,
+                                         const double theta) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
   if (!qStepProp->isDefault()) {
@@ -635,29 +704,30 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
-      g_log.error(
-          "NRCalculateSlitResolution failed. Workspace in Q will not be "
-          "rebinned. Please provide dQ/Q.");
-      return inputWS;
+      return boost::none;
     }
     qstep = calcRes->getProperty("Resolution");
     qstep = -qstep;
   }
+  return qstep;
+}
 
-  auto qmin =
-      getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
-  auto qmax = getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
-
-  params.push_back(qmin);
-  params.push_back(qstep);
-  params.push_back(qmax);
-
+/** Rebin and scale a workspace in Q.
+ *
+ * @param inputWS :: the workspace in Q
+ * @param params :: A vector containing the three rebin parameters (min, step
+ * and max)
+ * @return :: the output workspace
+ */
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
+                                              RebinParams const &params) {
   // Rebin
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
   algRebin->setProperty("InputWorkspace", inputWS);
   algRebin->setProperty("OutputWorkspace", inputWS);
-  algRebin->setProperty("Params", params);
+  algRebin->setProperty("Params", params.asVector());
   algRebin->execute();
   MatrixWorkspace_sptr IvsQ = algRebin->getProperty("OutputWorkspace");
 
@@ -677,16 +747,35 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
   return IvsQ;
 }
 
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto2::cropQ(MatrixWorkspace_sptr inputWS,
+                                      RebinParams const &params) {
+  IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
+  algCrop->initialize();
+  algCrop->setProperty("InputWorkspace", inputWS);
+  algCrop->setProperty("OutputWorkspace", inputWS);
+  if (!params.qMinIsDefault())
+    algCrop->setProperty("XMin", params.qMin());
+  if (!params.qMaxIsDefault())
+    algCrop->setProperty("XMax", params.qMax());
+  algCrop->execute();
+  MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
+  return IvsQ;
+}
+
 /**
  * @brief Get the Property Or return a default given value
  *
- * @param propertyName
- * @param defaultValue
+ * @param propertyName : the name of the property to get
+ * @param defaultValue : the default value to use if the property is not set
+ * @param isDefault [out] : true if the default value was used
  */
 double ReflectometryReductionOneAuto2::getPropertyOrDefault(
-    const std::string &propertyName, const double defaultValue) {
+    const std::string &propertyName, const double defaultValue,
+    bool &isDefault) {
   Property *property = getProperty(propertyName);
-  if (property->isDefault())
+  isDefault = property->isDefault();
+  if (isDefault)
     return defaultValue;
   else
     return getProperty(propertyName);
@@ -709,29 +798,29 @@ bool ReflectometryReductionOneAuto2::checkGroups() {
 }
 
 void ReflectometryReductionOneAuto2::setOutputWorkspaces(
-    std::vector<std::string> &IvsLamGroup, std::string const &outputIvsLam,
-    std::vector<std::string> &IvsQGroup, std::string const &outputIvsQBinned,
-    std::vector<std::string> &IvsQUnbinnedGroup,
-    std::string const &outputIvsQ) {
+    WorkspaceNames const &outputGroupNames,
+    std::vector<std::string> &IvsLamGroup,
+    std::vector<std::string> &IvsQBinnedGroup,
+    std::vector<std::string> &IvsQGroup) {
   // Group the IvsQ and IvsLam workspaces
   Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
   groupAlg->setChild(false);
   groupAlg->setRethrows(true);
   if (!IvsLamGroup.empty()) {
     groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
-    groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+    groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsLam);
     groupAlg->execute();
   }
-  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQ);
+  groupAlg->setProperty("InputWorkspaces", IvsQBinnedGroup);
+  groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsQBinned);
   groupAlg->execute();
-  groupAlg->setProperty("InputWorkspaces", IvsQUnbinnedGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
+  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
+  groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsQ);
   groupAlg->execute();
 
-  setPropertyValue("OutputWorkspace", outputIvsQ);
-  setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
-  setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+  setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
+  setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
+  setPropertyValue("OutputWorkspaceWavelength", outputGroupNames.iVsLam);
 }
 
 /** Process groups. Groups are processed differently depending on transmission
@@ -753,14 +842,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   // Get our input workspace group
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
-  // Get name of IvsQ workspace (native binning)
-  const std::string outputIvsQ = getPropertyValue("OutputWorkspace");
-  // Get name of IvsQ (native binning) workspace
-  const std::string outputIvsQBinned =
-      getPropertyValue("OutputWorkspaceBinned");
-  // Get name of IvsLam workspace
-  const std::string outputIvsLam =
-      getPropertyValue("OutputWorkspaceWavelength");
+  // Get the output workspace names
+  auto const output = getOutputWorkspaceNames();
 
   // Create a copy of ourselves
   Algorithm_sptr alg =
@@ -814,15 +897,15 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
   }
 
-  std::vector<std::string> IvsQGroup, IvsQUnbinnedGroup, IvsLamGroup;
+  std::vector<std::string> IvsQBinnedGroup, IvsQGroup, IvsLamGroup;
 
   // Execute algorithm over each group member
   for (size_t i = 0; i < group->size(); ++i) {
 
-    const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsQName = output.iVsQ + "_" + std::to_string(i + 1);
     const std::string IvsQBinnedName =
-        outputIvsQBinned + "_" + std::to_string(i + 1);
-    const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
+        output.iVsQBinned + "_" + std::to_string(i + 1);
+    const std::string IvsLamName = output.iVsLam + "_" + std::to_string(i + 1);
 
     alg->setProperty("InputWorkspace", group->getItem(i)->getName());
     alg->setProperty("Debug", true);
@@ -836,7 +919,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     alg->execute();
 
     IvsQGroup.push_back(IvsQName);
-    IvsQUnbinnedGroup.push_back(IvsQBinnedName);
+    IvsQBinnedGroup.push_back(IvsQBinnedName);
     if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
       IvsLamGroup.push_back(IvsLamName);
     }
@@ -848,14 +931,14 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   groupAlg->setRethrows(true);
   if (!IvsLamGroup.empty()) {
     groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
-    groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+    groupAlg->setProperty("OutputWorkspace", output.iVsLam);
     groupAlg->execute();
   }
-  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQ);
+  groupAlg->setProperty("InputWorkspaces", IvsQBinnedGroup);
+  groupAlg->setProperty("OutputWorkspace", output.iVsQBinned);
   groupAlg->execute();
-  groupAlg->setProperty("InputWorkspaces", IvsQUnbinnedGroup);
-  groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
+  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
+  groupAlg->setProperty("OutputWorkspace", output.iVsQ);
   groupAlg->execute();
 
   // Set other properties so they can be updated in the Reflectometry interface
@@ -868,21 +951,20 @@ bool ReflectometryReductionOneAuto2::processGroups() {
                    alg->getPropertyValue("MomentumTransferStep"));
   setPropertyValue("ScaleFactor", alg->getPropertyValue("ScaleFactor"));
 
-  setOutputWorkspaces(IvsLamGroup, outputIvsLam, IvsQGroup, outputIvsQBinned,
-                      IvsQUnbinnedGroup, outputIvsQ);
+  setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
   if (!polarizationAnalysisOn) {
     // No polarization analysis. Reduction stops here
     return true;
   }
 
-  applyPolarizationCorrection(outputIvsLam);
+  applyPolarizationCorrection(output.iVsLam);
 
   // Polarization correction may have changed the number of workspaces in the
   // groups
   IvsLamGroup.clear();
+  IvsQBinnedGroup.clear();
   IvsQGroup.clear();
-  IvsQUnbinnedGroup.clear();
 
   // Now we've overwritten the IvsLam workspaces, we'll need to recalculate
   // the IvsQ ones
@@ -890,11 +972,11 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
 
-  auto outputIvsLamNames = workspaceNamesInGroup(outputIvsLam);
+  auto outputIvsLamNames = workspaceNamesInGroup(output.iVsLam);
   for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
-    const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsQName = output.iVsQ + "_" + std::to_string(i + 1);
     const std::string IvsQBinnedName =
-        outputIvsQBinned + "_" + std::to_string(i + 1);
+        output.iVsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLamNames[i];
 
     // Find the spectrum processing instructions for ws index 0
@@ -907,15 +989,14 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
     alg->execute();
+    IvsQBinnedGroup.push_back(IvsQBinnedName);
     IvsQGroup.push_back(IvsQName);
-    IvsQUnbinnedGroup.push_back(IvsQBinnedName);
     if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
       IvsLamGroup.push_back(IvsLamName);
     }
   }
 
-  setOutputWorkspaces(IvsLamGroup, outputIvsLam, IvsQGroup, outputIvsQBinned,
-                      IvsQUnbinnedGroup, outputIvsQ);
+  setOutputWorkspaces(output, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
 
   return true;
 }

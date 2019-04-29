@@ -61,7 +61,8 @@ private:
 };
 
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
-  bool operator()(const std::pair<std::size_t, std::size_t> &) const {
+  bool
+  operator()(const std::pair<std::size_t, std::size_t> & /*unused*/) const {
     return false;
   }
   bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
@@ -116,8 +117,10 @@ std::vector<std::string> splitStringBy(std::string const &str,
 }
 
 std::string getSpectraRange(std::string const &string) {
-  auto bounds = splitStringBy(string, "-");
-  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
+  auto const bounds = splitStringBy(string, "-");
+  return std::stoull(bounds[0]) > std::stoull(bounds[1])
+             ? bounds[1] + "-" + bounds[0]
+             : string;
 }
 
 std::string rearrangeSpectraSubString(std::string const &string) {
@@ -224,14 +227,14 @@ std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
 }
 
 double convertBoundToDoubleAndFormat(std::string const &str) {
-  return std::round(std::stod(str) * 10) / 10;
+  return std::round(std::stod(str) * 1000) / 1000;
 }
 
 std::string constructExcludeRegionString(std::vector<double> const &bounds) {
   std::string excludeRegion;
   for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    auto splitDouble = splitStringBy(std::to_string(*it), ".");
-    excludeRegion += splitDouble[0] + "." + splitDouble[1].front();
+    auto const splitDouble = splitStringBy(std::to_string(*it), ".");
+    excludeRegion += splitDouble[0] + "." + splitDouble[1].substr(0, 3);
     excludeRegion += it == bounds.end() - 1 ? "" : ",";
   }
   return excludeRegion;
@@ -276,7 +279,7 @@ IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
 std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
-  const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
+  const auto workspaceName = getBasename();
   const auto spectraString =
       boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
 
@@ -291,12 +294,16 @@ IndirectFitData::displayName(const std::string &formatString,
 
 std::string IndirectFitData::displayName(const std::string &formatString,
                                          std::size_t spectrum) const {
-  const auto workspaceName = cutLastOf(workspace()->getName(), "_red");
+  const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
   formatted = tryPassFormatArgument(formatted, std::to_string(spectrum));
   return formatted.str();
+}
+
+std::string IndirectFitData::getBasename() const {
+  return cutLastOf(workspace()->getName(), "_red");
 }
 
 Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {

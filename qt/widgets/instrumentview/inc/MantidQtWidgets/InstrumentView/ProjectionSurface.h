@@ -94,7 +94,7 @@ public:
   /// draw the surface onto a normal widget
   virtual void drawSimple(QWidget *widget) const;
   /// called when the gl widget gets resized
-  virtual void resize(int, int);
+  virtual void resize(int /*unused*/, int /*unused*/);
   /// redraw surface without recalulationg of colours, etc
   virtual void updateView(bool picking = true);
   /// full update and redraw of the surface
@@ -102,13 +102,13 @@ public:
   /// returns the bounding rectangle in the real coordinates
   virtual RectF getSurfaceBounds() const { return m_viewRect; }
 
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
-  virtual void wheelEvent(QWheelEvent *);
-  virtual void keyPressEvent(QKeyEvent *);
-  virtual void enterEvent(QEvent *);
-  virtual void leaveEvent(QEvent *);
+  virtual void mousePressEvent(QMouseEvent * /*e*/);
+  virtual void mouseMoveEvent(QMouseEvent * /*e*/);
+  virtual void mouseReleaseEvent(QMouseEvent * /*e*/);
+  virtual void wheelEvent(QWheelEvent * /*e*/);
+  virtual void keyPressEvent(QKeyEvent * /*e*/);
+  virtual void enterEvent(QEvent * /*e*/);
+  virtual void leaveEvent(QEvent * /*e*/);
 
   /// return true if any of the detectors have been selected
   virtual bool hasSelection() const;
@@ -264,8 +264,8 @@ public:
 signals:
 
   // detector selection
-  void singleComponentTouched(size_t);
-  void singleComponentPicked(size_t);
+  void singleComponentTouched(size_t /*_t1*/);
+  void singleComponentPicked(size_t /*_t1*/);
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString &type,
@@ -284,16 +284,17 @@ signals:
   // peaks
   void peaksWorkspaceAdded();
   void peaksWorkspaceDeleted();
-  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
-                  const Mantid::Geometry::IPeak *);
-  void comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                                    std::vector<Mantid::Geometry::IPeak *>> &);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> & /*_t1*/,
+                  const Mantid::Geometry::IPeak * /*_t2*/);
+  void comparePeaks(
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                      std::vector<Mantid::Geometry::IPeak *>> & /*_t1*/);
 
   // other
   void redrawRequired(); ///< request redrawing of self
   void updateInfoText(); ///< request update of the info string at bottom of
   /// InstrumentWindow
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*_t1*/);
 
 protected slots:
 
@@ -385,6 +386,9 @@ private:
   /// Set when the picking image must be redrawn regardless of the interaction
   /// mode
   mutable bool m_redrawPicking;
+
+  friend class InstrumentWidgetEncoder;
+  friend class InstrumentWidgetDecoder;
 };
 
 using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;

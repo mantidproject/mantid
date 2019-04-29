@@ -8,14 +8,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -27,6 +27,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -56,6 +57,12 @@ void ModeratorTzeroLinear::init() {
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or "
                   "histogram data, in units of time-of-flight");
+  declareProperty("Gradient", EMPTY_DBL(),
+                  "Wavelength dependent TOF shift, units in microsec/Angstrom. "
+                  "Overrides the value stored in the instrument object");
+  declareProperty("Intercept", EMPTY_DBL(),
+                  "TOF shift, units in microseconds. Overrides the value"
+                  "stored in the instrument object");
   // declare the output workspace
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -92,24 +99,39 @@ void ModeratorTzeroLinear::exec() {
 
   // gradient, intercept constants
   try {
+
+    // determine which Gradient to use
     const std::vector<double> gradientParam =
         m_instrument->getNumberParameter("Moderator.TimeZero.gradient");
-    if (gradientParam.empty())
+    const double gradientParamManual = getProperty("Gradient");
+    if (gradientParam.empty() && gradientParamManual == EMPTY_DBL())
       throw Exception::InstrumentDefinitionError(
           "Unable to retrieve Moderator Time Zero parameters (gradient)",
           inputWS->getTitle());
-    m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
+    if (gradientParamManual != EMPTY_DBL()) {
+      m_gradient = gradientParamManual;
+    } else {
+      m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
+    }
     // conversion factor for gradient from microsecond/Angstrom to meters
     double convfactor =
         1.0e4 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
     m_gradient *= convfactor; //[gradient] = meter
+
+    // determine which Intercept to use
     const std::vector<double> interceptParam =
         m_instrument->getNumberParameter("Moderator.TimeZero.intercept");
-    if (interceptParam.empty())
+    const double interceptParamManual = getProperty("Intercept");
+    if (interceptParam.empty() && interceptParamManual == EMPTY_DBL())
       throw Exception::InstrumentDefinitionError(
           "Unable to retrieve Moderator Time Zero parameters (intercept)",
           inputWS->getTitle());
-    m_intercept = interceptParam[0]; //[intercept]=microsecond
+    if (interceptParamManual != EMPTY_DBL()) {
+      m_intercept = interceptParamManual;
+    } else {
+      m_intercept = interceptParam[0]; //[intercept]=microsecond
+    }
+
     g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient
                   << "intercept=" << m_intercept << '\n';
   } catch (Exception::NotFoundError &) {
@@ -133,7 +155,7 @@ void ModeratorTzeroLinear::exec() {
   // Check whether input = output to see whether a new workspace is required.
   if (outputWS != inputWS) {
     // Create new workspace for output from old
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = create<MatrixWorkspace>(*inputWS);
   }
 
   // do the shift in X

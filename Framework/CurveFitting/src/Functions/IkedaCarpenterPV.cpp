@@ -160,12 +160,10 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues,
     }
 
     // note if a version of convertValue was added which allows a double* as
-    // first argument
-    // then could avoid copying above plus only have to resize m_wavelength when
-    // its size smaller than nData
+    // first argument then could avoid copying above plus only have to resize
+    // m_wavelength when its size smaller than nData
     API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
     if (mws) {
-      API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
       Instrument_const_sptr instrument = mws->getInstrument();
       Geometry::IComponent_const_sptr sample = instrument->getSample();
       if (sample != nullptr) {
@@ -286,7 +284,7 @@ void IkedaCarpenterPV::constFunction(double *out, const double *xValues,
     std::complex<double> zs =
         std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
     std::complex<double> zu = (1 - k) * zs;
-    std::complex<double> zv = (1 - k) * zs;
+    std::complex<double> zv = (1 + k) * zs;
     std::complex<double> zr =
         std::complex<double>(-beta * diff, 0.5 * beta * gamma);
 
@@ -370,7 +368,7 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
     std::complex<double> zs =
         std::complex<double>(-alpha * diff, 0.5 * alpha * gamma);
     std::complex<double> zu = (1 - k) * zs;
-    std::complex<double> zv = (1 - k) * zs;
+    std::complex<double> zv = (1 + k) * zs;
     std::complex<double> zr =
         std::complex<double>(-beta * diff, 0.5 * beta * gamma);
 
@@ -389,8 +387,9 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
   }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *, const double *,
-                                          const size_t) {
+void IkedaCarpenterPV::functionDerivLocal(API::Jacobian * /*jacobian*/,
+                                          const double * /*xValues*/,
+                                          const size_t /*nData*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "functionDerivLocal is not implemented for IkedaCarpenterPV.");
 }
@@ -407,10 +406,6 @@ double IkedaCarpenterPV::intensity() const {
   API::PeakFunctionIntegrator integrator;
   API::IntegrationResult result =
       integrator.integrate(*this, interval.first, interval.second);
-
-  if (!result.success) {
-    return 0.0;
-  }
 
   return result.result;
 }

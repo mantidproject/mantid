@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <iostream>
 
 using namespace std;
 
@@ -884,8 +883,6 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
       throw std::runtime_error(errss.str());
     }
 
-    // Split line
-    std::vector<std::string> veccounts;
     boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
 
     // check number of counts per column should not exceeds number of pixels

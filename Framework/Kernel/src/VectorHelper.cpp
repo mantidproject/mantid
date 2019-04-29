@@ -391,7 +391,7 @@ void convertToBinCentre(const std::vector<double> &bin_edges,
  */
 void convertToBinBoundary(const std::vector<double> &bin_centers,
                           std::vector<double> &bin_edges) {
-  const std::vector<double>::size_type n = bin_centers.size();
+  const auto n = bin_centers.size();
 
   // Special case empty input: output is also empty
   if (n == 0) {

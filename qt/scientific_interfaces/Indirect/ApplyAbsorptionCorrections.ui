@@ -98,30 +98,66 @@
       <string>Options</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="ckRebinContainer">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Rebin Container to sample</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="ckUseCan">
+        <property name="text">
+         <string>Use Container:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="ckScaleCan">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Scale Container by factor:</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="1">
-       <layout class="QHBoxLayout" name="loScaleFactor">
+       <layout class="QHBoxLayout" name="loShiftFactor">
         <item>
-         <widget class="QDoubleSpinBox" name="spCanScale">
+         <widget class="QDoubleSpinBox" name="spCanShift">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="decimals">
            <number>5</number>
           </property>
+          <property name="minimum">
+           <double>-999.990000000000009</double>
+          </property>
           <property name="maximum">
            <double>999.990000000000009</double>
           </property>
           <property name="singleStep">
-           <double>0.100000000000000</double>
+           <double>0.010000000000000</double>
           </property>
           <property name="value">
-           <double>1.000000000000000</double>
+           <double>0.000000000000000</double>
           </property>
          </widget>
         </item>
        </layout>
       </item>
-      <item row="1" column="1">
+      <item row="0" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsContainer" native="true">
         <property name="enabled">
          <bool>false</bool>
@@ -155,85 +191,30 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <layout class="QHBoxLayout" name="loShiftFactor">
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="loScaleFactor">
         <item>
-         <widget class="QDoubleSpinBox" name="spCanShift">
+         <widget class="QDoubleSpinBox" name="spCanScale">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="decimals">
            <number>5</number>
           </property>
-          <property name="minimum">
-           <double>-999.990000000000009</double>
-          </property>
           <property name="maximum">
            <double>999.990000000000009</double>
           </property>
           <property name="singleStep">
-           <double>0.010000000000000</double>
+           <double>0.100000000000000</double>
           </property>
           <property name="value">
-           <double>0.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QCheckBox" name="ckScaleCan">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Scale Container by factor:</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="cbGeometry">
-        <item>
-         <property name="text">
-          <string>Flat Plate</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Cylinder</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Annulus</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbGeometry">
-        <property name="text">
-         <string>Geometry:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QCheckBox" name="ckRebinContainer">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Rebin Container to sample</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
        <widget class="QCheckBox" name="ckShiftCan">
         <property name="enabled">
          <bool>false</bool>
@@ -243,13 +224,6 @@
         </property>
         <property name="checked">
          <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="ckUseCan">
-        <property name="text">
-         <string>Use Container:</string>
         </property>
        </widget>
       </item>
@@ -456,7 +430,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

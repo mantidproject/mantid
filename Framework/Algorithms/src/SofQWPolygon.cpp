@@ -42,17 +42,12 @@ void SofQWPolygon::init() { SofQW::createCommonInputProperties(*this); }
  */
 void SofQWPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
 
   // Progress reports & cancellation
-  const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms() *
-                                            inputWS->blocksize()));
-  m_progress = boost::shared_ptr<API::Progress>(
-      new API::Progress(this, 0.0, 1.0, nreports));
+  const auto blocksize = inputWS->blocksize();
+  const size_t nreports(
+      static_cast<size_t>(inputWS->getNumberHistograms() * blocksize));
+  m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
   // Compute input caches
   this->initCachedValues(inputWS);
 
@@ -61,7 +56,7 @@ void SofQWPolygon::exec() {
           *inputWS, getProperty("QAxisBinning"), m_Qout,
           getProperty("EAxisBinning"), m_EmodeProperties);
   setProperty("OutputWorkspace", outputWS);
-  const size_t nenergyBins = inputWS->blocksize();
+  const size_t nenergyBins = blocksize;
 
   const size_t nTheta = m_thetaPts.size();
   const auto &X = inputWS->x(0);
@@ -126,7 +121,7 @@ void SofQWPolygon::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS,
-                                                    m_progress);
+                                                    m_progress.get());
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();

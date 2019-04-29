@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFDatasetPlotData.h"
-#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
+#include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"

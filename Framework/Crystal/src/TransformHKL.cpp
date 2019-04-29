@@ -41,8 +41,8 @@ void TransformHKL::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, std::move(mustBePositive), Direction::Input),
       "Indexing Tolerance (0.15)");
 
   std::vector<double> identity_matrix(9, 0.0);
@@ -53,8 +53,8 @@ void TransformHKL::init() {
   auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("HKLTransform",
-                                                 identity_matrix, threeBythree),
+      Kernel::make_unique<ArrayProperty<double>>(
+          "HKLTransform", std::move(identity_matrix), std::move(threeBythree)),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 
@@ -106,12 +106,11 @@ void TransformHKL::exec() {
         hkl_tran_string);
   }
   if (det < 0) {
-    std::ostringstream str_stream;
-    str_stream << hkl_tran;
-    std::string hkl_tran_string = str_stream.str();
+    std::ostringstream error_stream;
+    error_stream << hkl_tran;
     throw std::runtime_error(
         "ERROR: The determinant of the matrix is negative.\n" +
-        hkl_tran_string);
+        str_stream.str());
   }
   double tolerance = this->getProperty("Tolerance");
 

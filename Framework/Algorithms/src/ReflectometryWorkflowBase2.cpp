@@ -151,6 +151,7 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
+  setPropertyGroup("ScaleRHSWorkspace", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -175,6 +176,10 @@ void ReflectometryWorkflowBase2::initStitchProperties() {
                   "End wavelength (angstroms) for stitching transmission runs "
                   "together. Only used if a second transmission run is "
                   "provided.");
+  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
+                                                       true, Direction::Input),
+                  "Scale the right-hand-side or left-hand-side workspace. "
+                  "Only used if a second transmission run is provided.");
 }
 
 /** Initialize algorithmic correction properties
@@ -663,6 +668,8 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
       alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
       alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
       alg->setPropertyValue("Params", getPropertyValue("Params"));
+      alg->setProperty("ScaleRHSWorkspace",
+                       getPropertyValue("ScaleRHSWorkspace"));
     }
   }
 
@@ -719,15 +726,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted followed by separator
       converted.append(convertToWorkspaceIndex(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted
@@ -750,15 +757,15 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
-  for (auto i = 0u; i < instructions.size(); ++i) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator
       converted.append(convertToSpectrumNumber(currentNumber, ws));
-      converted.push_back(instructions[i]);
+      converted.push_back(instruction);
       currentNumber = "";
     } else {
-      currentNumber.push_back(instructions[i]);
+      currentNumber.push_back(instruction);
     }
   }
   // Add currentNumber onto converted

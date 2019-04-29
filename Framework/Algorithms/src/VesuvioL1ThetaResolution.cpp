@@ -145,9 +145,10 @@ void VesuvioL1ThetaResolution::exec() {
     m_l1DistributionWs->setYUnitLabel("Events");
 
     // Set X axis
-    auto xAxis = m_l1DistributionWs->getAxis(0);
-    xAxis->setUnit("Label");
-    auto labelUnit = boost::dynamic_pointer_cast<Units::Label>(xAxis->unit());
+    auto distributionXAxis = m_l1DistributionWs->getAxis(0);
+    distributionXAxis->setUnit("Label");
+    auto labelUnit =
+        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("l1");
   }
@@ -160,9 +161,10 @@ void VesuvioL1ThetaResolution::exec() {
     m_thetaDistributionWs->setYUnitLabel("Events");
 
     // Set X axis
-    auto xAxis = m_thetaDistributionWs->getAxis(0);
-    xAxis->setUnit("Label");
-    auto labelUnit = boost::dynamic_pointer_cast<Units::Label>(xAxis->unit());
+    auto distributionXAxis = m_thetaDistributionWs->getAxis(0);
+    distributionXAxis->setUnit("Label");
+    auto labelUnit =
+        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("theta");
   }

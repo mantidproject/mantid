@@ -19,6 +19,13 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         self.assertFalse(validator.hasLower())
         self.assertFalse(validator.hasUpper())
 
+    def test_exclusive_constructor(self):
+        validator = FloatArrayBoundedValidator(lower=-1., upper=3., exclusive=True)
+        self.assertEquals(validator.lower(), -1.)
+        self.assertEquals(validator.upper(), 3.)
+        self.assertTrue(validator.isLowerExclusive())
+        self.assertTrue(validator.isUpperExclusive())
+
     def test_set_members_alter_bounds(self):
         validator = FloatArrayBoundedValidator()
         self.assertFalse(validator.hasLower())

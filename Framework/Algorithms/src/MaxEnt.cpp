@@ -8,13 +8,17 @@
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyPositiveValues.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -32,6 +36,8 @@ using Mantid::HistogramData::Points;
 
 using namespace API;
 using namespace Kernel;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaxEnt)
@@ -363,14 +369,10 @@ void MaxEnt::exec() {
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
   for (size_t s = 0; s < nHist; s++) {
-    auto errors = inWS->e(s).rawData();
-
-    size_t npoints = errors.size();
-    for (size_t i = 0; i < npoints; i++) {
-      if (errors[i] <= 0.0) {
-        throw std::invalid_argument(
-            "Input data must have all errors non-zero.");
-      }
+    const auto &errors = inWS->e(s);
+    if (std::any_of(errors.cbegin(), errors.cend(),
+                    [](const auto error) { return error <= 0.; })) {
+      throw std::invalid_argument("Input data must have all errors non-zero.");
     }
   }
 
@@ -425,18 +427,19 @@ void MaxEnt::exec() {
     nSpecConcat = nImageSpec;
     nImageSpec = 1;
   }
-  outImageWS = WorkspaceFactory::Instance().create(inWS, 2 * nImageSpec,
-                                                   npoints, npoints);
+  outImageWS = create<MatrixWorkspace>(*inWS, 2 * nImageSpec, Points(npoints));
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
     outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
-  outDataWS = WorkspaceFactory::Instance().create(inWS, 2 * nDataSpec, npointsX,
-                                                  npoints);
+  HistogramBuilder builder;
+  builder.setX(npointsX);
+  builder.setY(npoints);
+  builder.setDistribution(inWS->isDistribution());
+  outDataWS = create<MatrixWorkspace>(*inWS, 2 * nDataSpec, builder.build());
+
   for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
     outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
-  outEvolChi =
-      WorkspaceFactory::Instance().create(inWS, nImageSpec, nIter, nIter);
-  outEvolTest =
-      WorkspaceFactory::Instance().create(inWS, nImageSpec, nIter, nIter);
+  outEvolChi = create<MatrixWorkspace>(*inWS, nImageSpec, Points(nIter));
+  outEvolTest = create<MatrixWorkspace>(*inWS, nImageSpec, Points(nIter));
 
   npoints = complexImage ? npoints * 2 : npoints;
   std::vector<size_t> iterationCounts;
@@ -787,11 +790,11 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
     const std::vector<double> &image, double background, double distEps) {
 
-  double sum = 0.;
-  for (double point : image)
-    sum += fabs(point);
+  const double pointSum = std::accumulate(
+      image.cbegin(), image.cend(), 0.,
+      [](const auto sum, const auto point) { return sum + std::abs(point); });
 
-  size_t dim = coeffs.s2.size().first;
+  const size_t dim = coeffs.s2.size().first;
 
   double dist = 0.;
 
@@ -802,10 +805,10 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     dist += delta[k] * sum;
   }
 
-  if (dist > distEps * sum / background) {
+  if (dist > distEps * pointSum / background) {
     auto newDelta = delta;
     for (size_t k = 0; k < delta.size(); k++) {
-      newDelta[k] *= sqrt(distEps * sum / dist / background);
+      newDelta[k] *= sqrt(distEps * pointSum / dist / background);
     }
     return newDelta;
   }

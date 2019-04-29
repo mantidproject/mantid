@@ -52,7 +52,7 @@ public:
   void setPeaksWorkspace(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
 signals:
-  void peaksSorted(const std::string &, const bool);
+  void peaksSorted(const std::string & /*_t1*/, const bool /*_t2*/);
 
 private:
   using ColumnNameType = QString;

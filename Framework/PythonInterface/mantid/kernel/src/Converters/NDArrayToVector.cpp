@@ -64,15 +64,10 @@ template <typename DestElementType> struct CopyToImpl {
                   PyArrayObject *arr) {
     // Use the iterator API to iterate through the array
     // and assign each value to the corresponding vector
-    typedef union {
-      DestElementType *output;
-      void *input;
-    } npy_union;
-    npy_union data;
     object iter(handle<>(Converters::Impl::func_PyArray_IterNew(arr)));
     do {
-      data.input = PyArray_ITER_DATA(iter.ptr());
-      *first++ = *data.output;
+      void *data = PyArray_ITER_DATA(iter.ptr());
+      *first++ = *static_cast<DestElementType *>(data);
       PyArray_ITER_NEXT(iter.ptr());
     } while (PyArray_ITER_NOTDONE(iter.ptr()));
   }
@@ -133,7 +128,7 @@ NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value)
  * @return A vector of the DestElementType created from the numpy array
  */
 template <typename DestElementType>
-const typename NDArrayToVector<DestElementType>::TypedVector
+typename NDArrayToVector<DestElementType>::TypedVector
 NDArrayToVector<DestElementType>::operator()() {
   std::vector<DestElementType> cvector(
       PyArray_SIZE((PyArrayObject *)m_arr.ptr()));

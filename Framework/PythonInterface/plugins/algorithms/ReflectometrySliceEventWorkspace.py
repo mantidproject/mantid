@@ -78,7 +78,15 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
         alg.setProperty("ExcludeSpecifiedLogs", False)
         alg.setProperty("TimeSeriesPropertyLogs", 'proton_charge')
         alg.execute()
-        return mtd[self._output_ws_group_name]
+        # Ensure the run number for the child workspaces is stored in the
+        # sample logs as a string (FilterEvents converts it to a double).
+        group = mtd[self._output_ws_group_name]
+        for ws in group:
+            if ws.run().hasProperty('run_number'):
+                run_number = int(ws.run()['run_number'].value)
+                AddSampleLog(Workspace=ws, LogName='run_number', LogType='String',
+                             LogText=str(run_number))
+        return group
 
     def _scale_monitors_for_each_slice(self, sliced_ws_group):
         """Create a group workspace which contains a copy of the monitors workspace for

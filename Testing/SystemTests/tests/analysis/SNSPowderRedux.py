@@ -26,18 +26,18 @@ def getSaveDir():
 
 
 def do_cleanup():
-    Files = ["PG3_9829.getn",
-             "PG3_9829.gsa",
-             "PG3_9829.py",
+    Files = ['PG3_9829.getn',
+             'PG3_9829.gsa',
+             'PG3_9829.py',
              'sum_PG3_9829.gsa',
              'sum_PG3_9829.py',
-             "PG3_9830.gsa",
-             "PG3_9830.py",
-             "PG3_4844-1.dat",
-             "PG3_4844.getn",
-             "PG3_4844.gsa",
-             "PG3_4844.py",
-             "PG3_4866.gsa"]
+             'PG3_9830.gsa',
+             'PG3_9830.py',
+             'PG3_4844-1.dat',
+             'PG3_4844.getn',
+             'PG3_4844.gsa',
+             'PG3_4844.py',
+             'PG3_4866.gsa']
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -54,8 +54,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
         return _skip_test()
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredFiles(self):
         files = [self.ref_file, self.cal_file, self.char_file]
@@ -98,8 +97,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         return _skip_test()
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredFiles(self):
         files = [self.ref_file, self.cal_file]
@@ -203,8 +201,7 @@ class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
     data_files = ['PG3_9829_event.nxs', 'PG3_9830_event.nxs']
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""
@@ -261,8 +258,7 @@ class SumFilesTest(systemtesting.MantidSystemTest):
     data_file = 'PG3_9829_event.nxs'
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return True #do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""
@@ -307,8 +303,7 @@ class ToPDFgetNTest(systemtesting.MantidSystemTest):
     getn_file = "PG3_9829.getn"
 
     def cleanup(self):
-        do_cleanup()
-        return True
+        return do_cleanup()
 
     def requiredMemoryMB(self):
         """Requires 3Gb"""

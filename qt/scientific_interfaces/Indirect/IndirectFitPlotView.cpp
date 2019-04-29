@@ -176,10 +176,6 @@ void IndirectFitPlotView::enablePlotGuess(bool enable) {
   m_plotForm->ckPlotGuess->setEnabled(enable);
 }
 
-void IndirectFitPlotView::enableFitSingleSpectrum(bool enable) {
-  m_plotForm->pbFitSingle->setEnabled(enable);
-}
-
 void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
   if (!enable)
     m_plotForm->spPlotSpectrum->setValue(0);
@@ -192,6 +188,10 @@ void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
 
 void IndirectFitPlotView::setFitSingleSpectrumText(QString const &text) {
   m_plotForm->pbFitSingle->setText(text);
+}
+
+void IndirectFitPlotView::setFitSingleSpectrumEnabled(bool enable) {
+  m_plotForm->pbFitSingle->setEnabled(enable);
 }
 
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }

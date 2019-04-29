@@ -17,8 +17,8 @@
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>

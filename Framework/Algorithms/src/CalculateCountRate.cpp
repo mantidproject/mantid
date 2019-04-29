@@ -6,6 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateCountRate.h"
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -15,14 +22,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_unique.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
-#include "MantidDataObjects/Workspace2D.h"
 #include <numeric>
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -232,13 +235,13 @@ void CalculateCountRate::calcRateLog(
     Buff[nThread].assign(m_numLogSteps, 0);
 #pragma omp for
     for (int64_t i = 0; i < nHist; ++i) {
-      auto nThread = PARALLEL_THREAD_NUMBER;
+      const auto loopThread = PARALLEL_THREAD_NUMBER;
       PARALLEL_START_INTERUPT_REGION
 
       // Get a const event list reference. eventInputWS->dataY() doesn't work.
       const DataObjects::EventList &el = InputWorkspace->getSpectrum(i);
-      el.generateCountsHistogramPulseTime(dTRangeMin, dTRangeMax, Buff[nThread],
-                                          m_XRangeMin, m_XRangeMax);
+      el.generateCountsHistogramPulseTime(
+          dTRangeMin, dTRangeMax, Buff[loopThread], m_XRangeMin, m_XRangeMax);
       if (this->buildVisWS()) {
         this->histogramEvents(el, pVisWS_locks.get());
       }
@@ -263,7 +266,7 @@ void CalculateCountRate::calcRateLog(
     if (!countNormalization.empty() && this->buildVisWS()) {
 #pragma omp for
       for (int64_t j = 0; j < int64_t(m_visNorm.size()); j++) {
-        this->normalizeVisWs(j);
+        m_visWs->mutableY(j) /= m_visNorm[j];
       }
     }
   }
@@ -308,18 +311,6 @@ void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
   }
 }
 
-/** Normalize single spectrum of the normalization workspace using prepared
- *  normzlization log
- @param wsIndex -- appropriate visualization workspace index to normalize
-                   the spectrum
- */
-void CalculateCountRate::normalizeVisWs(int64_t wsIndex) {
-
-  auto &Y = m_visWs->mutableY(wsIndex);
-  for (auto &yv : Y) {
-    yv /= m_visNorm[wsIndex];
-  }
-}
 /** Disable normalization using normalization log.
 Helper function to avoid code duplication.
 @param NormLogError -- error to print if normalization log is disabled*/
@@ -621,9 +612,7 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
   int numXBins = getProperty("XResolution");
   std::string RangeUnits = getProperty("RangeUnits");
 
-  m_visWs = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", numTBins,
-                                               numXBins + 1, numXBins));
+  m_visWs = create<Workspace2D>(numTBins, BinEdges(numXBins + 1));
   m_visWs->setTitle(visWSName);
 
   double Xmax = m_XRangeMax;

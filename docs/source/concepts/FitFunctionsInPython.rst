@@ -204,6 +204,21 @@ Also one can put parameters into the function when evaluating.
 
 This enables one to fit the functions with ``scipy.optimize.curve_fit``.  
 
+Errors
+------
+
+The errors assoicated with a given parameter can be accessed using the ``getError`` method.
+``getError`` takes either the parameter name or index as input. For example to get the error
+on ``A1`` in the above polynomial, the code is:
+
+.. code:: python
+
+    # Find the parameter error by index
+    error_A1 = p.getError(1)
+    # Find the parameter error by name
+    error_A1 = p.getError('A1')
+
+
 Plotting
 --------
 Functions may be plotted by calling the ``plot`` method of the function.

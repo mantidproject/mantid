@@ -6,9 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <iostream>
+
 #include <limits>
 
 #ifdef ENABLE_OPENCASCADE
@@ -37,7 +38,9 @@ GNU_DIAG_ON("cast-qual")
 namespace Mantid {
 
 namespace Geometry {
-
+namespace {
+Kernel::Logger logger("Plane");
+}
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -139,9 +142,9 @@ int Plane::setPlane(const Kernel::V3D &P, const Kernel::V3D &N)
   @retval 0 :: success
 */
 {
-  NormV = N;
-  NormV.normalize();
-  if (NormV.norm2() == 0.0) {
+  try {
+    NormV = normalize(N);
+  } catch (std::runtime_error &) {
     throw std::invalid_argument("Attempt to create Plane with zero normal");
   }
   Dist = P.scalar_prod(NormV);
@@ -210,8 +213,8 @@ int Plane::side(const Kernel::V3D &A) const
   @retval 0 :: A is on the plane itself (within tolerence)
 */
 {
-  double Dp = NormV.scalar_prod(A) - Dist;
-  if (Tolerance < fabs(Dp))
+  const double Dp = NormV.scalar_prod(A) - Dist;
+  if (Tolerance < std::abs(Dp))
     return (Dp > 0) ? 1 : -1;
   return 0;
 }
@@ -236,7 +239,7 @@ void Plane::print() const
 */
 {
   Quadratic::print();
-  std::cout << "NormV == " << NormV << " : " << Dist << '\n';
+  logger.debug() << "NormV == " << NormV << " : " << Dist << '\n';
 }
 
 std::size_t Plane::planeType() const

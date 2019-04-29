@@ -11,8 +11,7 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
-from ._kernel import (ConfigServiceImpl, Logger, UnitFactoryImpl,
-                      UsageServiceImpl, PropertyManagerDataServiceImpl)
+from mantid.kernel import (ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl)
 
 
 def lazy_instance_access(cls):
@@ -30,6 +29,7 @@ def lazy_instance_access(cls):
     :param cls: The singleton class type
     :return: A new LazySingletonHolder wrapping cls
     """
+
     class LazySingletonHolder(object):
         """
         Delays construction of a singleton instance until the

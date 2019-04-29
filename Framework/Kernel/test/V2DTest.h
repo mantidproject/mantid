@@ -53,15 +53,6 @@ public:
     TS_ASSERT_EQUALS(second.Y(), first.Y());
   }
 
-  void test_That_Index_Operator_Throws_For_Index_Out_Of_Range() {
-    using namespace Mantid::Kernel::Exception;
-    V2D point(5, 10);
-    TS_ASSERT_THROWS_NOTHING(point[0]);
-    TS_ASSERT_THROWS_NOTHING(point[1]);
-    TS_ASSERT_THROWS(point[2], IndexError);
-    TS_ASSERT_THROWS(point[-1], IndexError);
-  }
-
   void test_That_Index_Operator_Gives_Back_The_Correct_Value() {
     V2D point(5, 10);
     TS_ASSERT_EQUALS(point[0], 5.0);

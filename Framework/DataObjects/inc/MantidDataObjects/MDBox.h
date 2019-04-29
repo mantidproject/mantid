@@ -49,6 +49,7 @@ public:
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth = 0,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
+
   MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth = 0,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
@@ -63,6 +64,12 @@ public:
             &extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
+
+  using EventIterator = typename std::vector<MDE>::const_iterator;
+  MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+            &extentsVector,
+        EventIterator begin, EventIterator end);
 
   MDBox(const MDBox<MDE, nd> &other, Mantid::API::BoxController *const otherBC);
 
@@ -202,6 +209,9 @@ public:
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
                 bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
+
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes,
+                const std::function<bool(API::IMDNode *)> &cond) final override;
   //------------------------------------------------------------------------------------------------------------------------------------
   void transformDimensions(std::vector<double> &scaling,
                            std::vector<double> &offset) override;

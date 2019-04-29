@@ -1125,6 +1125,7 @@ private:
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < NHIST; i++) {
       Detector *d = new Detector("det", i, nullptr);
+      d->setPos(1. + static_cast<double>(i) * 0.1, 0., 1.);
       instr->add(d);
       instr->markAsDetector(d);
     }
@@ -1209,7 +1210,7 @@ public:
     for (size_t pix = 0; pix < inputEventWs->getNumberHistograms(); pix++) {
       size_t xAxisSize = inputEventWs->x(pix).size();
       Mantid::HistogramData::HistogramX axisVals(xAxisSize, 1.0);
-      inputEventWs->mutableX(pix) = axisVals;
+      inputEventWs->mutableX(pix) = std::move(axisVals);
       inputEventWs->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
     setupGroupWS(numGroups);

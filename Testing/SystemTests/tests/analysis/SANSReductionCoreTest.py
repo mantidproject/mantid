@@ -35,7 +35,6 @@ class SANSReductionCoreTest(unittest.TestCase):
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", False)
         load_alg.setProperty("SampleScatterWorkspace", EMPTY_NAME)
         load_alg.setProperty("SampleScatterMonitorWorkspace", EMPTY_NAME)
         if state.data.sample_transmission:
@@ -166,7 +165,6 @@ class SANSReductionCoreTest(unittest.TestCase):
 
         # Construct the final state
         state = user_file_director.construct()
-        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)

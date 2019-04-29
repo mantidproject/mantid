@@ -57,7 +57,8 @@ makeProperty(::NeXus::File *file, const std::string &name,
       return Mantid::Kernel::make_unique<PropertyWithValue<NumT>>(name,
                                                                   values[0]);
     } else {
-      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(name, values);
+      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(
+          name, std::move(values));
     }
   } else {
     auto prop = Mantid::Kernel::make_unique<TimeSeriesProperty<NumT>>(name);
@@ -161,9 +162,8 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
     // Convert time in seconds to DateAndTime
     Types::Core::DateAndTime start(startStr);
     times.reserve(timeSec.size());
-    for (double time : timeSec) {
-      times.push_back(start + time);
-    }
+    std::transform(timeSec.cbegin(), timeSec.cend(), std::back_inserter(times),
+                   [&start](const auto &time) { return start + time; });
   }
 
   file->openData("value");

@@ -221,20 +221,23 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfo httpProxy;
   CFDictionaryRef dict = SCDynamicStoreCopyProxies(nullptr);
   if (!dict) {
-    logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL");
+    logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL. No "
+                 "proxy information retrieved");
+    return httpProxy;
   }
 
   // Query the proxy pac first.
   ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString, logger);
 
   bool foundHttpProxy = false;
-  for (const auto &proxyInfo : info) {
-    if (proxyInfo.isHttpProxy()) {
-      foundHttpProxy = true;
-      httpProxy = proxyInfo;
-      break;
-    }
+  auto proxyIt =
+      std::find_if(info.cbegin(), info.cend(),
+                   [](const auto &proxy) { return proxy.isHttpProxy(); });
+  if (proxyIt != info.cend()) {
+    foundHttpProxy = true;
+    httpProxy = *proxyIt;
   }
+
   // Query the http proxy settings second.
   if (!foundHttpProxy) {
     ProxyInfo tempProxy = httpProxyFromSystem(dict);

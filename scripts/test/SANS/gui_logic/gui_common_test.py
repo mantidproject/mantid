@@ -8,10 +8,13 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-import mantid
-
+from mantid.py3compat import mock
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_selection,
-                                       get_string_for_gui_from_reduction_mode)
+                                       get_string_for_gui_from_reduction_mode,
+                                       get_batch_file_dir_from_path,
+                                       add_dir_to_datasearch,
+                                       remove_dir_from_datasearch,
+                                       SANSGuiPropertiesHandler)
 from sans.common.enums import (SANSInstrument, ISISReductionMode)
 
 
@@ -66,6 +69,69 @@ class GuiCommonTest(unittest.TestCase):
         self.do_test_reduction_mode_string(SANSInstrument.LARMOR, ISISReductionMode.LAB, "DetectorBench")
         self.do_test_reduction_mode_string(SANSInstrument.NoInstrument, ISISReductionMode.LAB, "LAB")
         self.do_test_reduction_mode_string(SANSInstrument.NoInstrument, ISISReductionMode.HAB, "HAB")
+
+    def test_that_batch_file_dir_returns_none_if_no_forwardslash(self):
+        a_path = "test_batch_file_path.csv"
+        result = get_batch_file_dir_from_path(a_path)
+        self.assertEqual("", result, "Expected empty string. Returned value was {}".format(result))
+
+    def test_correct_batch_file_dir_returned(self):
+        a_path = "A/Test/Path/batch_file.csv"
+        result = get_batch_file_dir_from_path(a_path)
+
+        expected_result = "A/Test/Path/"
+        self.assertEqual(result, expected_result)
+
+    def test_datasearch_directories_updated(self):
+        current_dirs = "A/Path/"
+        batch_file = "A/Path/To/Batch/File/batch_file.csv"
+        _, result = add_dir_to_datasearch(batch_file, current_dirs)
+
+        expected_result = "A/Path/;A/Path/To/Batch/File/"
+        self.assertEqual(expected_result, result)
+
+    def test_empty_string_not_added_to_datasearch_directories(self):
+        current_dirs = "A/Path/"
+        batch_file = "batch_file.csv"
+        _, result = add_dir_to_datasearch(batch_file, current_dirs)
+
+        expected_result = "A/Path/"
+        self.assertEqual(expected_result, result)
+
+    def test_existing_directory_not_added_to_datasearch_directories(self):
+        current_dirs = "A/Path/;A/Path/Already/Added/"
+        batch_file = "A/Path/Already/Added/batch_file.csv"
+        _, result = add_dir_to_datasearch(batch_file, current_dirs)
+
+        expected_result = "A/Path/;A/Path/Already/Added/"
+        self.assertEqual(expected_result, result)
+
+    def test_directories_unchanged_when_removing_empty_string(self):
+        current_dirs = "A/Path/;Another/Path/"
+        file_to_remove = ""
+        result = remove_dir_from_datasearch(file_to_remove, current_dirs)
+
+        expected_result = "A/Path/;Another/Path/"
+        self.assertEqual(result, expected_result)
+
+    def test_correct_directory_removed(self):
+        current_dirs = "A/Path/;Another/Path/;A/Final/Path/"
+        file_to_remove = "Another/Path/"
+        result = remove_dir_from_datasearch(file_to_remove, current_dirs)
+
+        expected_result = "A/Path/;A/Final/Path/"
+        self.assertEqual(expected_result, result)
+
+
+class SANSGuiPropertiesHandlerTest(unittest.TestCase):
+    @staticmethod
+    def test_that_default_functions_are_called_on_initialisation():
+        with mock.patch.object(SANSGuiPropertiesHandler, "_load_property", lambda x, y, z: "default_value"):
+            default_property_setup_mock = mock.Mock()
+            default_values_input = {"a_default_property": (default_property_setup_mock, str)}
+            SANSGuiPropertiesHandler(default_values_input)
+
+            default_property_setup_mock.assert_called_once_with("default_value")
 
 
 if __name__ == '__main__':

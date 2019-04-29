@@ -90,7 +90,9 @@ public:
       uint64_t /* Size */) override { /*Not directly loadable */
   }
   //-------------------------------------------------------------------------------------------------------
-
+  // Setters for cached values
+  void setNPoints(const uint64_t &n) { nPoints = n; }
+  //-------------------------------------------------------------------------------------------------------
   /** Uses the cached value of points stored in the grid box
    *  @return the total number of points (events) in this box  (in memory and
    * in file if present)     */
@@ -122,6 +124,9 @@ public:
   void getBoxes(std::vector<API::IMDNode *> &outBoxes, size_t maxDepth,
                 bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function) override;
+
+  void getBoxes(std::vector<API::IMDNode *> &outBoxes,
+                const std::function<bool(API::IMDNode *)> &cond) final override;
 
   const API::IMDNode *getBoxAtCoord(const coord_t *coords) override;
 
@@ -175,6 +180,8 @@ public:
   void splitAllIfNeeded(Kernel::ThreadScheduler *ts = nullptr) override;
 
   void refreshCache(Kernel::ThreadScheduler *ts = nullptr) override;
+
+  void calculateGridCaches() override final;
 
   bool getIsMasked() const override;
   /// Setter for masking the box

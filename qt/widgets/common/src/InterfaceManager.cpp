@@ -11,7 +11,8 @@
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/GenericDialog.h"
 #include "MantidQtWidgets/Common/InterfaceFactory.h"
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/MantidHelpWindow.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
@@ -26,6 +27,7 @@
 
 using namespace MantidQt::API;
 using Mantid::Kernel::AbstractInstantiator;
+using MantidQt::MantidWidgets::MantidHelpWindow;
 
 namespace {
 // static logger
@@ -33,6 +35,9 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 
 // Load libraries once
 std::once_flag DLLS_LOADED;
+
+// Track if message saying offline help is unavailable has been shown
+bool offlineHelpMsgDisplayed = false;
 } // namespace
 
 // initialise VATES factory
@@ -230,7 +235,11 @@ void InterfaceManager::registerHelpWindowFactory(
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   if (m_helpViewer == nullptr) {
-    g_log.error("InterfaceManager::createHelpWindow is null.");
+    if (!offlineHelpMsgDisplayed) {
+      g_log.information(
+          "Offline help is not available in this version of Workbench.");
+      offlineHelpMsgDisplayed = true;
+    }
     return nullptr;
   } else {
     MantidHelpInterface *interface =
@@ -271,4 +280,15 @@ void InterfaceManager::showFitFunctionHelp(const QString &name) {
 void InterfaceManager::showCustomInterfaceHelp(const QString &name) {
   auto window = createHelpWindow();
   window->showCustomInterface(name);
+}
+
+void InterfaceManager::showWebPage(const QString &url) {
+  MantidDesktopServices::openUrl(url);
+}
+
+void InterfaceManager::closeHelpWindow() {
+  if (MantidHelpWindow::helpWindowExists()) {
+    auto window = createHelpWindow();
+    window->shutdown();
+  }
 }

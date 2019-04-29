@@ -211,12 +211,25 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow([3, 4])
         self.assertEquals(table.rowCount(), 2)
 
+    def test_column_types(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type="int",name="index")
+        table.addColumn(type="str",name="value")
+        table.addColumn(type="V3D",name="position")
+
+        types = table.columnTypes()
+
+        self.assertEqual(types[0], "int")
+        self.assertEqual(types[1], "str")
+        self.assertEqual(types[2], "V3D")
+
+
     def test_convert_to_dict(self):
         from mantid.kernel import V3D
         expected_output = {
-            'index': [1, 2], 
-            'value': ['10', '100'], 
-            'position': [V3D(0, 0, 1), V3D(1, 0, 0)] 
+            'index': [1, 2],
+            'value': ['10', '100'],
+            'position': [V3D(0, 0, 1), V3D(1, 0, 0)]
         }
 
         table = WorkspaceFactory.createTable()

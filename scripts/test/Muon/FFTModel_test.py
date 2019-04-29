@@ -4,16 +4,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
-
-from  Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-
 import unittest
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 
 
 class FFTModelTest(unittest.TestCase):
@@ -67,6 +61,7 @@ class FFTModelTest(unittest.TestCase):
         inputs["FFT"]=empty
         empty["newTable"]=True
         empty["axis"]="x"
+        empty["InputWorkspace"]="MuonAnalysis"
         empty["Instrument"]="MUSR"
         inputs["phaseTable"]=empty
         self.wrapper.loadData(inputs)
@@ -86,6 +81,7 @@ class FFTModelTest(unittest.TestCase):
         empty["newTable"]=False
         empty["axis"]="x"
         empty["Instrument"]="MUSR"
+        empty["InputWorkspace"]="MuonAnalysis"
         inputs["phaseTable"]=empty
         self.wrapper.loadData(inputs)
         self.wrapper.execute()

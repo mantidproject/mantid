@@ -239,8 +239,12 @@ void InstrumentWidgetRenderTab::setupColorMapWidget() {
           SLOT(changeNthPower(double)));
   connect(m_colorBarWidget, SIGNAL(minValueChanged(double)), m_instrWidget,
           SLOT(changeColorMapMinValue(double)));
+  connect(m_colorBarWidget, SIGNAL(minValueEdited(double)), m_instrWidget,
+          SLOT(disableColorMapAutoscaling()));
   connect(m_colorBarWidget, SIGNAL(maxValueChanged(double)), m_instrWidget,
           SLOT(changeColorMapMaxValue(double)));
+  connect(m_colorBarWidget, SIGNAL(maxValueEdited(double)), m_instrWidget,
+          SLOT(disableColorMapAutoscaling()));
 }
 
 void InstrumentWidgetRenderTab::setupUnwrappedControls(
@@ -576,7 +580,7 @@ void InstrumentWidgetRenderTab::enableGL(bool on) {
   enable3DSurface(on);
 }
 
-void InstrumentWidgetRenderTab::showEvent(QShowEvent *) {
+void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
   auto surface = getSurface();
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);

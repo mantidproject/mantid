@@ -13,7 +13,7 @@
 #include <cmath>
 #include <gsl/gsl_blas.h>
 #include <iomanip>
-#include <iostream>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 
@@ -191,11 +191,9 @@ double GSLVector::norm() const { return sqrt(norm2()); }
 
 /// Get vector's norm squared
 double GSLVector::norm2() const {
-  double res = 0.0;
-  for (double el : m_data) {
-    res += el * el;
-  }
-  return res;
+  return std::accumulate(
+      m_data.cbegin(), m_data.cend(), 0.,
+      [](double sum, double element) { return sum + element * element; });
 }
 
 /// Calculate the dot product

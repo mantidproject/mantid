@@ -7,6 +7,9 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyWithValueJSON.h"
+
+#include <json/value.h>
 
 #include <sstream>
 
@@ -55,6 +58,13 @@ std::string PropertyManagerProperty::value() const {
 }
 
 /**
+ * Create a Json::Value objectValue from the PropertyManager
+ */
+Json::Value PropertyManagerProperty::valueAsJson() const {
+  return (*this)()->asJson(true);
+}
+
+/**
  *
  * @return The string representation of the default value
  */
@@ -88,7 +98,9 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
   }
   std::ostringstream msg;
   try {
-    value->setProperties(strValue);
+    const std::unordered_set<std::string> ignored;
+    bool createMissing{true};
+    value->setProperties(strValue, ignored, createMissing);
     m_dataServiceKey.clear();
   } catch (std::invalid_argument &exc) {
     msg << "Error setting value from string.\n"
@@ -100,6 +112,29 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
     msg << "Error setting value from string.\n" << exc.what();
   }
   return msg.str();
+}
+
+/**
+ * Sets the value of the property from a Json object
+ * @param value A Json objectValue
+ * @return An empty string indicating success otherwise a help message
+ * indicating what error has occurred
+ */
+std::string
+PropertyManagerProperty::setValueFromJson(const Json::Value &value) {
+  if (value.type() == Json::objectValue) {
+    try {
+      *this = createPropertyManager(value);
+      return "";
+    } catch (std::exception &exc) {
+      return std::string("Attempt to set Json value to property failed: ") +
+             exc.what();
+    }
+  } else {
+    return std::string("Attempt to set incorrect Json type to "
+                       "PropertyManager. Expected objectValue, found " +
+                       std::to_string(value.type()));
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -114,10 +149,9 @@ IPropertyManager::getValue<PropertyManager_sptr>(
   if (prop) {
     return *prop;
   } else {
-    std::string message =
-        "Attempt to assign property " + name +
-        " to incorrect type. Expected shared_ptr<PropertyManager>.";
-    throw std::runtime_error(message);
+    throw std::runtime_error(
+        std::string("Attempt to assign property ") + name +
+        " to incorrect type. Expected shared_ptr<PropertyManager>.");
   }
 }
 

@@ -7,14 +7,6 @@
     <value val="indirect"/>
   </parameter>
 
-  <!-- Moderator Tzero/LambdaZero Parameters  -->
-  <parameter name="Moderator.TimeZero.Gradient">
-    <value val="11.967"/>
-  </parameter>
-  <parameter name="Moderator.TimeZero.Intercept">
-    <value val="-5.0"/>
-  </parameter>
-
   <!-- These properties are necessary for use in the Indirect CTE interface. -->
   <parameter name="analysers" type="string">
     <value val="silicon,diffraction" />
@@ -25,7 +17,7 @@
   </parameter>
 
   <parameter name="refl-silicon" type="string">
-    <value val="111,311" />
+    <value val="111,311,333" />
   </parameter>
 
   <!-- Reduction workflow parameters under this line -->

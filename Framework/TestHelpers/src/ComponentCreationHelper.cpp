@@ -17,6 +17,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -31,15 +32,15 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V2D.h"
 #include "MantidKernel/make_unique.h"
 
-#include "MantidGeometry/IDetector.h"
 #include <Poco/Path.h>
 #include <boost/make_shared.hpp>
-#include <boost/shared_array.hpp>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V2D;
 using Mantid::Kernel::V3D;
 
 namespace ComponentCreationHelper {
@@ -83,6 +84,39 @@ void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
   instrument->add(source);
   instrument->markAsSource(source);
 }
+//----------------------------------------------------------------------------------------------
+
+/**
+ * Return the XML for a hollow cylinder
+ */
+std::string hollowCylinderXML(double innerRadius, double outerRadius,
+                              double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
+  std::ostringstream xml;
+  xml << "<hollow-cylinder id=\"" << id << "\">"
+      << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
+      << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\"/>"
+      << "<axis x=\"" << axis.X() << "\" y=\"" << axis.Y() << "\" z=\""
+      << axis.Z() << "\"/>"
+      << "<inner-radius val=\"" << innerRadius << "\" />"
+      << "<outer-radius val=\"" << outerRadius << "\" />"
+      << "<height val=\"" << height << "\" />"
+      << "</hollow-cylinder>";
+  return xml.str();
+}
+
+/**
+ * Create a hollow cylinder object
+ */
+boost::shared_ptr<CSGObject>
+createHollowCylinder(double innerRadius, double outerRadius, double height,
+                     const V3D &baseCentre, const V3D &axis,
+                     const std::string &id) {
+  return ShapeFactory().createShape(hollowCylinderXML(
+      innerRadius, outerRadius, height, baseCentre, axis, id));
+}
 
 void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
   // Define a sample as a simple sphere
@@ -122,10 +156,10 @@ boost::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre,
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
 boost::shared_ptr<CSGObject>
-createCuboid(double x_side_length, double y_side_length, double z_side_length) {
-  double szX = x_side_length;
-  double szY = (y_side_length == -1.0 ? szX : y_side_length);
-  double szZ = (z_side_length == -1.0 ? szX : z_side_length);
+createCuboid(double xHalfLength, double yHalfLength, double zHalfLength) {
+  const double szX = xHalfLength;
+  const double szY = (yHalfLength == -1.0 ? szX : yHalfLength);
+  const double szZ = (zHalfLength == -1.0 ? szX : zHalfLength);
   std::ostringstream xmlShapeStream;
   xmlShapeStream << " <cuboid id=\"detector-shape\"> "
                  << "<left-front-bottom-point x=\"" << szX << "\" y=\"" << -szY
@@ -136,6 +170,50 @@ createCuboid(double x_side_length, double y_side_length, double z_side_length) {
                  << "\" z=\"" << -szZ << "\"  /> "
                  << "<right-front-bottom-point  x=\"" << szX << "\" y=\"" << szY
                  << "\" z=\"" << -szZ << "\"  /> "
+                 << "</cuboid>";
+
+  std::string xmlCuboidShape(xmlShapeStream.str());
+  ShapeFactory shapeCreator;
+  auto cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+  return cuboidShape;
+}
+
+/**
+ * Create a cuboid shape rotated around (0, 0, 1) axis and centered at the
+ * origin.
+ * @param xHalfLength thickness
+ * @param yHalfLength width
+ * @param zHalfLength height
+ * @param angle rotation angle in radians
+ * @return a pointer to the cuboid shape
+ */
+boost::shared_ptr<CSGObject> createCuboid(double xHalfLength,
+                                          double yHalfLength,
+                                          double zHalfLength, double angle) {
+  const V2D leftFront{xHalfLength, -yHalfLength};
+  const V2D leftBack{-xHalfLength, -yHalfLength};
+  const V2D rightFront{xHalfLength, yHalfLength};
+  const double sn{std::sin(angle)};
+  const double cs{std::cos(angle)};
+  const V2D rotatedLF{leftFront.X() * cs - leftFront.Y() * sn,
+                      leftFront.X() * sn + leftFront.Y() * cs};
+  const V2D rotatedLB{leftBack.X() * cs - leftBack.Y() * sn,
+                      leftBack.X() * sn + leftBack.Y() * cs};
+  const V2D rotatedRF{rightFront.X() * cs - rightFront.Y() * sn,
+                      rightFront.X() * sn + rightFront.Y() * cs};
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream << " <cuboid id=\"detector-shape\"> "
+                 << "<left-front-bottom-point x=\"" << rotatedLF.X()
+                 << "\" y=\"" << rotatedLF.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
+                 << "<left-front-top-point  x=\"" << rotatedLF.X() << "\" y=\""
+                 << rotatedLF.Y() << "\" z=\"" << zHalfLength << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << rotatedLB.X()
+                 << "\" y=\"" << rotatedLB.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << rotatedRF.X()
+                 << "\" y=\"" << rotatedRF.Y() << "\" z=\"" << -zHalfLength
+                 << "\"  /> "
                  << "</cuboid>";
 
   std::string xmlCuboidShape(xmlShapeStream.str());
@@ -162,15 +240,6 @@ boost::shared_ptr<CompAssembly> createTestAssemblyOfFourCylinders() {
   }
 
   return bank;
-}
-
-/**
- * Create an object component that has a defined shape
- */
-ObjComponent *createSingleObjectComponent() {
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-  return new ObjComponent("pixel", pixelShape);
 }
 
 /**
@@ -282,10 +351,10 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
   std::vector<boost::shared_ptr<const IDetector>> groupMembers;
   groupMembers.reserve(vecOfDetectors.size());
   for (auto &det : vecOfDetectors) {
-    groupMembers.push_back(boost::shared_ptr<const IDetector>(std::move(det)));
+    groupMembers.emplace_back(std::move(det));
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers);
+  return boost::make_shared<DetectorGroup>(std::move(groupMembers));
 }
 
 Instrument_sptr createTestInstrumentCylindrical(
@@ -381,7 +450,7 @@ createCylInstrumentWithVerticalOffsetsSpecified(
   return instrument;
 }
 
-/** create instrument with cylindrical detecotrs located in specific positions
+/** create instrument with cylindrical detectors located in specific positions
  *
  *
  */
@@ -494,11 +563,10 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
- *pixels*pixels in size,
- * a source and spherical sample shape.
+ * pixels*pixels in size, a source and spherical sample shape.
  *
  * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to
- *(pixels*0.008, pixels*0.008, Z)
+ * (pixels*0.008, pixels*0.008, Z)
  * Pixels are 4 mm wide.
  *
  * @param num_banks :: number of rectangular banks to create
@@ -530,8 +598,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
- *pixels*pixels in size,
- * a source and spherical sample shape.
+ * pixels*pixels in size, a source and spherical sample shape.
  *
  * Banks are centered at (1*banknum, 0, 0) and are facing 0,0.
  * Pixels are 4 mm wide.
@@ -586,8 +653,8 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
 
 /**
  * createOneDetectorInstrument, creates the most simple possible definition of
- *an instrument in which we can extract a valid L1 and L2 distance for unit
- *calculations.
+ * an instrument in which we can extract a valid L1 and L2 distance for unit
+ * calculations.
  *
  * Beam direction is along X,
  * Up direction is Y

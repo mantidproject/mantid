@@ -4,7 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <iostream>
 #include <sstream>
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -19,9 +18,11 @@
 #include "MantidEVWorker.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
 #include <exception>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -159,6 +160,7 @@ bool MantidEVWorker::isEventWorkspace(const std::string &event_ws_name) {
  *  @param det_cal_file     Fully qualified name of the .DetCal file.
  *  @param det_cal_file2    Fully qualified name of the second .DetCal
  *                          file for the second panel on SNAP.
+ *  @param axisCORELLI      Which axis for phi for CORELLI goniometer
  *
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
@@ -168,7 +170,7 @@ bool MantidEVWorker::loadAndConvertToMD(
     const std::string &md_ws_name, const double modQ, const double minQ,
     const double maxQ, const bool do_lorentz_corr, const bool load_data,
     const bool load_det_cal, const std::string &det_cal_file,
-    const std::string &det_cal_file2) {
+    const std::string &det_cal_file2, const std::string &axisCORELLI) {
   try {
     IAlgorithm_sptr alg;
     if (load_data) {
@@ -183,8 +185,7 @@ bool MantidEVWorker::loadAndConvertToMD(
         alg->setProperty("FilterByTofMin", 500.0);
         alg->setProperty("FilterByTofMax", 16666.0);
       }
-      alg->setProperty("LoadMonitors", true);
-
+      alg->setProperty("LoadMonitors", false);
       if (!alg->execute())
         return false;
 
@@ -196,6 +197,14 @@ bool MantidEVWorker::loadAndConvertToMD(
 
         if (!alg->execute())
           return false;
+      } else if (axisCORELLI.compare(
+                     "Select Goniometer Axis for CORELLI only") != 0) {
+        const auto &ADS = AnalysisDataService::Instance();
+        Mantid::API::MatrixWorkspace_sptr ev_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        double phi = ev_ws->run().getLogAsSingleValue(
+            axisCORELLI, Mantid::Kernel::Math::TimeAveragedMean);
+        ev_ws->mutableRun().mutableGoniometer().setRotationAngle(0, phi);
       }
 
       if (load_det_cal) {
@@ -357,13 +366,15 @@ bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
  *                        the average intensity will be considered.
  *  @param minQPeaks   Filter with ModQ min
  *  @param maxQPeaks  Filter with ModQmax
+ *  @param file_name  Filename for monitors
  *  @return true if FindPeaksMD completed successfully.
  */
 bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
                                const std::string &md_ws_name,
                                const std::string &peaks_ws_name, double max_abc,
                                size_t num_to_find, double min_intensity,
-                               double minQPeaks, double maxQPeaks) {
+                               double minQPeaks, double maxQPeaks,
+                               const std::string &file_name) {
   try {
     // Estimate a lower bound on the distance between
     // based on the maximum real space cell edge
@@ -377,21 +388,36 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
     const auto &ADS = AnalysisDataService::Instance();
 
     if (alg->execute()) {
-      Mantid::API::MatrixWorkspace_sptr mon_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
-      IAlgorithm_sptr int_alg =
-          AlgorithmManager::Instance().create("Integration");
-      int_alg->setProperty("InputWorkspace", mon_ws);
-      int_alg->setProperty("RangeLower", 1000.0);
-      int_alg->setProperty("RangeUpper", 12500.0);
-      int_alg->setProperty("OutputWorkspace",
-                           ev_ws_name + "_integrated_monitor");
-      int_alg->execute();
-      Mantid::API::MatrixWorkspace_sptr int_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
-      double monitor_count = int_ws->y(0)[0];
-      std::cout << "Beam monitor counts used for scaling = " << monitor_count
-                << "\n";
+      double monitor_count = 0;
+      try {
+        IAlgorithm_sptr mon_alg =
+            AlgorithmManager::Instance().create("LoadNexusMonitors");
+        mon_alg->setProperty("Filename", file_name);
+        mon_alg->setProperty("OutputWorkspace", ev_ws_name + "__monitors");
+        mon_alg->execute();
+
+        Mantid::API::MatrixWorkspace_sptr mon_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
+        IAlgorithm_sptr int_alg =
+            AlgorithmManager::Instance().create("Integration");
+        int_alg->setProperty("InputWorkspace", mon_ws);
+        int_alg->setProperty("RangeLower", 1000.0);
+        int_alg->setProperty("RangeUpper", 12500.0);
+        int_alg->setProperty("OutputWorkspace",
+                             ev_ws_name + "_integrated_monitor");
+        int_alg->execute();
+        Mantid::API::MatrixWorkspace_sptr int_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
+        monitor_count = int_ws->y(0)[0];
+        g_log.notice() << "Beam monitor counts used for scaling = "
+                       << monitor_count << "\n";
+      } catch (...) {
+        Mantid::API::MatrixWorkspace_sptr ev_ws =
+            ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+        monitor_count = ev_ws->run().getProtonCharge() * 1000.0;
+        g_log.notice() << "Beam proton charge used for scaling = "
+                       << monitor_count << "\n";
+      }
 
       IPeaksWorkspace_sptr peaks_ws =
           ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
@@ -908,10 +934,10 @@ bool MantidEVWorker::sphereIntegrate(
     alg->setProperty("SplitThreshold", 200);
     alg->setProperty("MaxRecursionDepth", 10);
     alg->setProperty("MinRecursionDepth", 7);
-    std::cout << "Making temporary MD workspace\n";
+    g_log.debug() << "Making temporary MD workspace\n";
     if (!alg->execute())
       return false;
-    std::cout << "Made temporary MD workspace...OK\n";
+    g_log.debug() << "Made temporary MD workspace...OK\n";
 
     alg = AlgorithmManager::Instance().create("IntegratePeaksMD");
     alg->setProperty("InputWorkspace", temp_MD_ws_name);
@@ -928,19 +954,19 @@ bool MantidEVWorker::sphereIntegrate(
     alg->setProperty("ProfileFunction", cylinder_profile_fit);
     alg->setProperty("AdaptiveQBackground", adaptiveQBkg);
     alg->setProperty("AdaptiveQMultiplier", adaptiveQMult);
-    std::cout << "Integrating temporary MD workspace\n";
+    g_log.debug() << "Integrating temporary MD workspace\n";
 
     bool integrate_OK = alg->execute();
     auto &ADS = AnalysisDataService::Instance();
-    std::cout << "Removing temporary MD workspace\n";
+    g_log.debug() << "Removing temporary MD workspace\n";
     ADS.remove(temp_MD_ws_name);
 
     if (integrate_OK) {
-      std::cout << "Integrated temporary MD workspace...OK\n";
+      g_log.debug() << "Integrated temporary MD workspace...OK\n";
       return true;
     }
 
-    std::cout << "Integrated temporary MD workspace FAILED\n";
+    g_log.debug() << "Integrated temporary MD workspace FAILED\n";
     return false;
   } catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
@@ -990,7 +1016,7 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
     alg->setProperty("Params", rebin_param_str);
     alg->setProperty("PreserveEvents", true);
 
-    std::cout << "Rebinning event workspace\n";
+    g_log.debug() << "Rebinning event workspace\n";
     if (!alg->execute())
       return false;
 
@@ -1002,19 +1028,19 @@ bool MantidEVWorker::fitIntegrate(const std::string &peaks_ws_name,
     alg->setProperty("MatchingRunNo", true);
     alg->setProperty("NBadEdgePixels", (int)n_bad_edge_pix);
 
-    std::cout << "Integrating temporary Rebinned workspace\n";
+    g_log.debug() << "Integrating temporary Rebinned workspace\n";
 
     bool integrate_OK = alg->execute();
     auto &ADS = AnalysisDataService::Instance();
-    std::cout << "Removing temporary Rebinned workspace\n";
+    g_log.debug() << "Removing temporary Rebinned workspace\n";
     ADS.remove(temp_FIT_ws_name);
 
     if (integrate_OK) {
-      std::cout << "Integrated temporary FIT workspace...OK\n";
+      g_log.debug() << "Integrated temporary FIT workspace...OK\n";
       return true;
     }
 
-    std::cout << "Integrated temporary FIT workspace FAILED\n";
+    g_log.debug() << "Integrated temporary FIT workspace FAILED\n";
   } catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;
@@ -1068,14 +1094,14 @@ bool MantidEVWorker::ellipsoidIntegrate(const std::string &peaks_ws_name,
     alg->setProperty("BackgroundOuterSize", outer_size);
     alg->setProperty("OutputWorkspace", peaks_ws_name);
 
-    std::cout << "Running IntegrateEllipsoids\n";
+    g_log.debug() << "Running IntegrateEllipsoids\n";
 
     if (alg->execute()) {
-      std::cout << "IntegrateEllipsoids Executed OK\n";
+      g_log.debug() << "IntegrateEllipsoids Executed OK\n";
       return true;
     }
 
-    std::cout << "IntegrateEllipsoids FAILED\n";
+    g_log.debug() << "IntegrateEllipsoids FAILED\n";
   } catch (std::exception &e) {
     g_log.error() << "Error:" << e.what() << '\n';
     return false;

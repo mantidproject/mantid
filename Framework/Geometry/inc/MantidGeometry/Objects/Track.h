@@ -14,6 +14,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Tolerance.h"
+#include <iosfwd>
 #include <list>
 
 namespace Mantid {
@@ -68,32 +69,43 @@ struct MANTID_GEOMETRY_DLL Link {
                            //@}
 };
 
+// calculations should prefer throwing a std::domain_error rather than using
+// INVALID
+enum class TrackDirection { LEAVING = -1, INVALID = 0, ENTERING = 1 };
+
+inline bool operator<(const TrackDirection left, const TrackDirection right) {
+  return static_cast<int>(left) < static_cast<int>(right);
+}
+
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
+                                             TrackDirection direction);
+
 /**
  * Stores a point of intersection along a track. The component intersected
  * is linked using its ComponentID.
  *
  * Ordering for IntersectionPoint is special since we need that when dist is
- *close
- * that the +/- flag is taken into
- * account.
+ * close that the +/- flag is taken into account.
  */
 struct IntersectionPoint {
   /**
    * Constuctor
-   * @param flag :: Indicates the direction of travel of the track with respect
-   * to the object: +1 is entering, -1 is leaving.
+   * @param direction :: Indicates the direction of travel of the track with
+   * respect to the object: +1 is entering, -1 is leaving.
    * @param end :: The end point for this partial segment
    * @param distFromStartOfTrack :: Total distance from start of track
    * @param compID :: An optional unique ID marking the component intersected.
    * (Default=NULL)
    * @param obj :: A reference to the object that was intersected
    */
-  inline IntersectionPoint(const int flag, const Kernel::V3D &end,
+  inline IntersectionPoint(const TrackDirection direction,
+                           const Kernel::V3D &end,
                            const double distFromStartOfTrack,
                            const IObject &obj,
                            const ComponentID compID = nullptr)
-      : directionFlag(flag), endPoint(end), distFromStart(distFromStartOfTrack),
-        object(&obj), componentID(compID) {}
+      : direction(direction), endPoint(end),
+        distFromStart(distFromStartOfTrack), object(&obj), componentID(compID) {
+  }
 
   /**
    * A IntersectionPoint is less-than another if either
@@ -108,17 +120,17 @@ struct IntersectionPoint {
   inline bool operator<(const IntersectionPoint &other) const {
     const double diff = fabs(distFromStart - other.distFromStart);
     return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart
-                                      : directionFlag < other.directionFlag;
+                                      : direction < other.direction;
   }
 
   /** @name Attributes. */
   //@{
-  int directionFlag;       ///< Directional flag
-  Kernel::V3D endPoint;    ///< Point
-  double distFromStart;    ///< Total distance from track begin
-  const IObject *object;   ///< The object that was intersected
-  ComponentID componentID; ///< Unique component ID
-                           //@}
+  TrackDirection direction; ///< Directional flag
+  Kernel::V3D endPoint;     ///< Point
+  double distFromStart;     ///< Total distance from track begin
+  const IObject *object;    ///< The object that was intersected
+  ComponentID componentID;  ///< Unique component ID
+                            //@}
 };
 
 /**
@@ -138,7 +150,7 @@ public:
   /// Constructor
   Track(const Kernel::V3D &startPt, const Kernel::V3D &unitVector);
   /// Adds a point of intersection to the track
-  void addPoint(const int directionFlag, const Kernel::V3D &endPoint,
+  void addPoint(const TrackDirection direction, const Kernel::V3D &endPoint,
                 const IObject &obj, const ComponentID compID = nullptr);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint,

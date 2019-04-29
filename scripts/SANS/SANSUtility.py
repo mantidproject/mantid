@@ -255,6 +255,8 @@ def getBinsBoundariesFromWorkspace(ws_reference):
 
 def getFilePathFromWorkspace(ws):
     ws_pointer = getWorkspaceReference(ws)
+    if isinstance(ws_pointer, WorkspaceGroup):
+        ws_pointer = ws_pointer[0]
     file_path = None
 
     try:
@@ -705,7 +707,7 @@ def get_number_of_periods_from_file(file_name):
     if hasattr(full_file_path, '__iter__'):
         full_file_path = full_file_path[0]
     try:
-        with h5.File(full_file_path) as h5_file:
+        with h5.File(full_file_path, 'r') as h5_file:
             first_entry = h5_file["raw_data_1"]
             period_group = first_entry["periods"]
             proton_charge_data_set = period_group["proton_charge"]
@@ -726,7 +728,7 @@ def check_if_is_event_data(file_name):
     full_file_path = FileFinder.findRuns(file_name)
     if hasattr(full_file_path, '__iter__'):
         file_name = full_file_path[0]
-    with h5.File(file_name) as h5_file:
+    with h5.File(file_name, 'r') as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
@@ -752,7 +754,7 @@ def is_nexus_file(file_name):
         file_name = full_file_path[0]
     is_nexus = True
     try:
-        with h5.File(file_name) as h5_file:
+        with h5.File(file_name, 'r') as h5_file:
             keys = list(h5_file.keys())
             nexus_test = "raw_data_1" in keys or "mantid_workspace_1" in keys
             is_nexus = True if nexus_test else False
@@ -1546,7 +1548,7 @@ def can_load_as_event_workspace(filename):
         try:
             # We only check the first entry in the root
             # and check for event_eventworkspace in the next level
-            with h5.File(filename) as h5f:
+            with h5.File(filename, 'r') as h5f:
                 try:
                     rootKeys = list(h5f.keys()) # python3 fix
                     entry0 = h5f[rootKeys[0]]
@@ -1771,7 +1773,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
     def get_measurement_time(self, filename_full):
         measurement_time = ''
         try:
-            with h5.File(filename_full) as h5f:
+            with h5.File(filename_full, 'r') as h5f:
                 try:
                     rootKeys =  list(h5f.keys())
                     entry0 = h5f[rootKeys[0]]

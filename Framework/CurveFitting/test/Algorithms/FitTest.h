@@ -1611,7 +1611,7 @@ public:
     TS_ASSERT(fit.isInitialized());
     fit.setProperty(
         "Function",
-        "name=IkedaCarpenterPV, I=1000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
+        "name=IkedaCarpenterPV, I=3000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
     fit.setProperty("InputWorkspace", ws);
     fit.setPropertyValue("StartX", "30");
     fit.setPropertyValue("EndX", "100");
@@ -1631,13 +1631,13 @@ public:
 
     IFunction_sptr out = fit.getProperty("Function");
     // test that all parameters are non-negative
-    TS_ASSERT_DELTA(out->getParameter("I"), 3101.7067, 1.0);
+    TS_ASSERT_DELTA(out->getParameter("I"), 3140.1444, 40.0);
     TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.02);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.005);
-    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 40.0000, 10.0);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 45.8482, 0.2);
+    TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 100.921, 1.0);
     TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.05, 0.05);
-    TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("X0"), 50.0, 0.2);
   }
 
   void test_Function_IkedaCarpenterPV_FullInstrument_DeltaE() {
@@ -2059,7 +2059,7 @@ public:
     auto ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
     FunctionDomain1DVector x(-10, 10, nbins);
-    ws->dataX(0) = x.toVector();
+    ws->mutableX(0) = x.toVector();
     {
       Fit fit;
       fit.initialize();
@@ -2070,7 +2070,7 @@ public:
       fit.execute();
       auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           "out_Workspace");
-      auto y = res->y(1);
+      const auto &y = res->y(1);
       TS_ASSERT_DIFFERS(y.front(), 0.0);
       TS_ASSERT_DIFFERS(y.back(), 0.0);
     }
@@ -2085,7 +2085,7 @@ public:
       fit.execute();
       auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           "out_Workspace");
-      auto y = res->y(1);
+      const auto &y = res->y(1);
       for (size_t i = 0; i < 25; ++i) {
         TS_ASSERT_EQUALS(y[i], 0.0);
         TS_ASSERT_EQUALS(y[nbins - i - 1], 0.0);

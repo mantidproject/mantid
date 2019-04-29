@@ -54,42 +54,42 @@ public:
   void testLessthan() {
     Triple<int> A(1, 2, 3);
     Triple<int> B(0, 1, 2);
-    TS_ASSERT_EQUALS(A < B, 0);
-    TS_ASSERT_EQUALS(B < A, 1);
+    TS_ASSERT(!(A < B));
+    TS_ASSERT(B < A);
   }
 
   void testGreaterThan() {
     Triple<int> A(1, 2, 3);
     Triple<int> B(0, 1, 2);
-    TS_ASSERT_EQUALS(A > B, 1);
-    TS_ASSERT_EQUALS(B > A, 0);
+    TS_ASSERT(A > B);
+    TS_ASSERT(!(B > A));
   }
 
   void testEquality() {
     Triple<int> A(1, 2, 3);
     Triple<int> B(0, 1, 2);
     Triple<int> C(1, 2, 3);
-    TS_ASSERT_EQUALS(A == B, 0);
-    TS_ASSERT_EQUALS(A == C, 1);
+    TS_ASSERT(!(A == B));
+    TS_ASSERT(A == C);
   }
 
   void testDTriple() {
     DTriple<int, int, std::string> A, B;
-    TS_ASSERT_EQUALS(A == B, 1);
-    TS_ASSERT_EQUALS(A < B, 0);
-    TS_ASSERT_EQUALS(A > B, 0);
+    TS_ASSERT(A == B);
+    TS_ASSERT(!(A < B));
+    TS_ASSERT(!(A > B));
     DTriple<int, int, std::string> C(1, 2, "test");
     A = C;
-    TS_ASSERT_EQUALS(A == C, 1);
-    TS_ASSERT_EQUALS(A == B, 0);
-    TS_ASSERT_EQUALS(A < B, 0);
-    TS_ASSERT_EQUALS(A > B, 1);
+    TS_ASSERT(A == C);
+    TS_ASSERT(!(A == B));
+    TS_ASSERT(!(A < B));
+    TS_ASSERT(A > B);
     DTriple<int, int, std::string> D(2, 3, "rest");
     B = D;
-    TS_ASSERT_EQUALS(B == D, 1);
-    TS_ASSERT_EQUALS(A == B, 0);
-    TS_ASSERT_EQUALS(A < B, 1);
-    TS_ASSERT_EQUALS(A > B, 0);
+    TS_ASSERT(B == D);
+    TS_ASSERT(!(A == B));
+    TS_ASSERT(A < B);
+    TS_ASSERT(!(A > B));
   }
 };
 

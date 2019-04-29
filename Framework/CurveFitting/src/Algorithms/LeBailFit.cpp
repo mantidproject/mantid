@@ -482,7 +482,7 @@ void LeBailFit::execPatternCalculation() {
   bool resultphysical = calculateDiffractionPattern(
       m_dataWS->x(m_wsIndex), m_dataWS->y(m_wsIndex), true, true, emptyvec,
       vecY, rfactor);
-  m_outputWS->mutableY(CALDATAINDEX) = vecY;
+  m_outputWS->mutableY(CALDATAINDEX) = std::move(vecY);
 
   // Calculate background
   m_outputWS->mutableY(INPUTBKGDINDEX) =
@@ -587,7 +587,7 @@ void LeBailFit::execRefineBackground() {
       m_outputWS->mutableY(INPUTPUREPEAKINDEX)[i] =
           m_dataWS->y(m_wsIndex)[i] - values[i];
     }
-    map<string, double> parammap = convertToDoubleMap(m_funcParameters);
+    parammap = convertToDoubleMap(m_funcParameters);
     m_lebailFunction->setProfileParameterValues(parammap);
     calculateDiffractionPattern(m_outputWS->x(INPUTPUREPEAKINDEX),
                                 m_outputWS->y(INPUTPUREPEAKINDEX), false, true,
@@ -610,11 +610,11 @@ void LeBailFit::execRefineBackground() {
         bestR = newR;
         storeBackgroundParameters(m_bestBkgdParams);
 
-        stringstream bufss;
-        bufss << "Temp best background parameter ";
+        stringstream ss;
+        ss << "Temp best background parameter ";
         for (size_t i = 0; i < m_bestBkgdParams.size(); ++i)
-          bufss << "[" << i << "] = " << m_bestBkgdParams[i] << ", ";
-        g_log.information(bufss.str());
+          ss << "[" << i << "] = " << m_bestBkgdParams[i] << ", ";
+        g_log.information(ss.str());
       }
     }
 
@@ -659,8 +659,8 @@ void LeBailFit::execRefineBackground() {
 
   //   (3: peak without background, 4: input background)
   // m_backgroundFunction->function(domain, values);
-  m_outputWS->mutableY(CALBKGDINDEX) = backgroundvalues;
-  m_outputWS->mutableY(CALPUREPEAKINDEX) = valueVec;
+  m_outputWS->mutableY(CALBKGDINDEX) = std::move(backgroundvalues);
+  m_outputWS->mutableY(CALPUREPEAKINDEX) = std::move(valueVec);
 
   // 5. Output background to table workspace
   auto outtablews = boost::make_shared<TableWorkspace>();
@@ -2054,10 +2054,6 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
       ::transform(values.begin(), values.end(), veccalbkgd.begin(),
                   values.begin(), ::plus<double>());
     }
-  }
-
-  // Calculate Rwp
-  if (outputwithbkgd) {
     rfactor = getRFactor(m_dataWS->y(m_wsIndex).rawData(), values,
                          m_dataWS->e(m_wsIndex).rawData());
   } else {
@@ -2182,7 +2178,6 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
 
       newvalue = param.curvalue + stepsize;
     } else {
-      newvalue = DBL_MAX;
       throw runtime_error("Unrecoganized walk style. ");
     }
 

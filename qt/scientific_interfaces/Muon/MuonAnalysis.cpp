@@ -749,7 +749,7 @@ void MuonAnalysis::runLoadCurrent() {
 
   if (instname == "EMU" || instname == "HIFI" || instname == "MUSR" ||
       instname == "CHRONUS" || instname == "ARGUS") {
-    const QString instDirectory = instname == "CHRONUS" ? "NDW1030" : instname;
+    const QString instDirectory = instname;
     std::string autosavePointsTo = "";
     const std::string autosaveFile =
         "\\\\" + instDirectory.toStdString() + "\\data\\autosave.run";
@@ -2983,7 +2983,7 @@ bool MuonAnalysis::isOverwriteEnabled() {
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *) {
+void MuonAnalysis::hideEvent(QHideEvent * /*unused*/) {
   // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(false);
@@ -2996,7 +2996,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *) {
+void MuonAnalysis::showEvent(QShowEvent * /*unused*/) {
   // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);

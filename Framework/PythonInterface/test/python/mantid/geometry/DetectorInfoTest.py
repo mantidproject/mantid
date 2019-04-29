@@ -109,7 +109,19 @@ class DetectorInfoTest(unittest.TestCase):
         self.assertEquals(type(info.rotation(0)), Quat)
         self.assertEquals(type(info.rotation(1)), Quat)
 
+    def test_l2(self):
+        det_info = self._ws.detectorInfo()
+        sample_pos = self._ws.componentInfo().samplePosition()
+        l2_calc = det_info.position(0).distance(sample_pos)
+        self.assertEquals(det_info.l2(0), l2_calc)
 
+    def test_l1(self):
+        source_pos = self._ws.componentInfo().sourcePosition()
+        sample_pos = self._ws.componentInfo().samplePosition()
+        l1_calc = sample_pos.distance(source_pos)
+        det_info = self._ws.detectorInfo()
+        self.assertEquals(det_info.l1(), l1_calc)
+        
     """
     ---------------
     Iteration
@@ -121,6 +133,9 @@ class DetectorInfoTest(unittest.TestCase):
         expected_iterations = len(info) 
         actual_iterations = len(list(iter(info)))
         self.assertEquals(expected_iterations, actual_iterations)
+        it = iter(info)
+        self.assertEquals(next(it).index, 0)
+        self.assertEquals(next(it).index, 1)
 
     def test_iterator_for_monitors(self):
         info = self._ws.detectorInfo()
@@ -155,6 +170,10 @@ class DetectorInfoTest(unittest.TestCase):
                 self.assertTrue(pos.Y() > lastY)
             lastY = pos.Y()
 
+    def test_iterator_for_l2(self):
+        info = self._ws.detectorInfo()
+        for item in info:
+            self.assertTrue(item.l2 > 0)
 
     """
     ----------------------------------------------------------------------------

@@ -21,6 +21,11 @@ using Mantid::Kernel::V3D;
 using MantidQt::MantidWidgets::detail::GridTextureFace;
 namespace {
 
+class RectangularDetectorShapeError : public std::runtime_error {
+public:
+  RectangularDetectorShapeError() : std::runtime_error("") {}
+};
+
 class Corners {
 public:
   Corners() {}
@@ -164,10 +169,9 @@ void drawGridOutlineFace(const Corners &corners, const V3D &basePos,
 
 void setBankNormal(const V3D &pos1, const V3D &pos2, const V3D &basePos) {
   // Set the bank normal to facilitate lighting effects
-  auto vec1 = pos1 - basePos;
-  auto vec2 = pos2 - basePos;
-  auto normal = vec1.cross_prod(vec2);
-  normal.normalize();
+  const auto vec1 = pos1 - basePos;
+  const auto vec2 = pos2 - basePos;
+  const auto normal = normalize(vec1.cross_prod(vec2));
   glNormal3f(static_cast<GLfloat>(normal.X()), static_cast<GLfloat>(normal.Y()),
              static_cast<GLfloat>(normal.Z()));
 }
@@ -216,7 +220,13 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
   glBegin(GL_QUADS);
 
   // Set the bank normal to facilitate lighting effects
-  setBankNormal(corners.bottomRight(), corners.topLeft(), basePos);
+  try {
+    setBankNormal(corners.bottomRight() + bottomRightOffset,
+                  corners.topLeft() + topLeftOffset, basePos);
+  } catch (std::runtime_error &) {
+    glEnd();
+    throw RectangularDetectorShapeError();
+  }
 
   glTexCoord2f(0.0, 0.0);
   addVertex(corners.bottomLeft() - basePos + bottomLeftOffset);
@@ -236,8 +246,8 @@ void render2DTexture(const Corners &corners, size_t nX, size_t nY,
   if (glGetError() > 0)
     g_log.error() << "OpenGL error in rendering texture. \n";
 
-  glDisable(
-      GL_TEXTURE_2D); // stop texture mapping - not sure if this is necessary.
+  // stop texture mapping
+  glDisable(GL_TEXTURE_2D);
 }
 
 std::tuple<double, double, double> findSteps(const std::vector<V3D> &points) {
@@ -450,10 +460,20 @@ void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
   auto xstep = shapeInfo.points()[0].X() - shapeInfo.points()[1].X();
   auto ystep = shapeInfo.points()[1].Y() - shapeInfo.points()[2].Y();
 
-  render2DTexture(c, bank.nX, bank.nY, V3D((xstep * -0.5), (ystep * -0.5), 0.0),
-                  V3D((xstep * 0.5), (ystep * -0.5), 0.0),
-                  V3D((xstep * 0.5), (ystep * 0.5), 0.0),
-                  V3D((xstep * -0.5), (ystep * 0.5), 0.0), c.bottomLeft());
+  try {
+    render2DTexture(c, bank.nX, bank.nY,
+                    V3D((xstep * -0.5), (ystep * -0.5), 0.0),
+                    V3D((xstep * 0.5), (ystep * -0.5), 0.0),
+                    V3D((xstep * 0.5), (ystep * 0.5), 0.0),
+                    V3D((xstep * -0.5), (ystep * 0.5), 0.0), c.bottomLeft());
+  } catch (RectangularDetectorShapeError &) {
+    g_log.warning() << "Cannot display rectangular detector bank "
+                    << compInfo.name(index) << '\n';
+    if (xstep == 0.0)
+      g_log.warning() << "Detector step in x direction is zero.\n";
+    if (ystep == 0.0)
+      g_log.warning() << "Detector step in y direction is zero.\n";
+  }
 }
 
 void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
@@ -473,16 +493,15 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
   for (size_t x = 0; x < colWidth; x += 3) {
     auto index = x / 3;
     const auto &column = compInfo.children(columns[index]);
-    for (size_t y = 0; y < column.size(); ++y) {
-      extractHexahedron(compInfo.shape(column[y]), hex);
-      auto rot = compInfo.rotation(column[y]);
+    for (auto y : column) {
+      extractHexahedron(compInfo.shape(y), hex);
+      auto rot = compInfo.rotation(y);
       rotateHexahedron(hex, rot);
       offsetHexahedronPosition(hex, -basePos);
-      offsetHexahedronPosition(hex, compInfo.position(column[y]));
+      offsetHexahedronPosition(hex, compInfo.position(y));
 
-      glColor3ub((GLubyte)color[column[y]].red(),
-                 (GLubyte)color[column[y]].green(),
-                 (GLubyte)color[column[y]].blue());
+      glColor3ub((GLubyte)color[y].red(), (GLubyte)color[y].green(),
+                 (GLubyte)color[y].blue());
       glVertex3f(static_cast<GLfloat>(hex[0].X()),
                  static_cast<GLfloat>(hex[0].Y()), 0);
       glVertex3f(static_cast<GLfloat>(hex[1].X()),

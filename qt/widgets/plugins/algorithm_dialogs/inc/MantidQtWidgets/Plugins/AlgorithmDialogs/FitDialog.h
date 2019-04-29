@@ -61,7 +61,7 @@ public:
 private slots:
   /// Override the help button clicked method
   // void helpClicked();
-  void workspaceChanged(const QString &);
+  void workspaceChanged(const QString & /*unused*/);
   void functionChanged();
   /// Create InputWorkspaceWidgets and populate the tabs of the tab widget
   void createInputWorkspaceWidgets();

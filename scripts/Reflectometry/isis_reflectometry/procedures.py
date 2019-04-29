@@ -290,7 +290,7 @@ def removeoutlayer(wksp):
                 a1.dataE(i)[j] = 0.0
 
 
-def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPeriod, downPeriod,  # noqa: C901
+def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPeriod, downPeriod,
                existingP0, SEConstants, gparams, convertToSEL, lnPOverLam, diagnostics="0", removeoutlayer="0",
                floodfile="none"):
     nlist = parseNameList(nameList)
@@ -315,50 +315,8 @@ def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPer
     if len(gparams) == 5:
         mapfile = gparams[4]
 
-    for i in nlist:
-        a1 = mtd[i + "_1"]
-        nspec = a1.getNumberHistograms()
-        if nspec == 1030 and minSp != 3:
-            GroupDetectors(InputWorkspace=i, OutputWorkspace=i, MapFile=mapfile)
-        ConvertUnits(i, i, "Wavelength", AlignBins=1)
-        Rebin(i, i, reb)
-        if removeoutlayer != "0":
-            removeoutlayer(i + "_1")
-            removeoutlayer(i + "_2")
-        CropWorkspace(i, i + "mon", StartWorkspaceIndex=mon_spec, EndWorkspaceIndex=mon_spec)
-        if nspec == 245:
-            CropWorkspace(i, i + "2ddet", StartWorkspaceIndex=4, EndWorkspaceIndex=243)
-            if floodfile != "none":
-                floodnorm(i + "2ddet", floodfile)
-        if nspec == 1030:
-            CropWorkspace(i, i + "2ddet", StartWorkspaceIndex=3, EndWorkspaceIndex=124)
-        if int(maxSpec) > int(minSpec):
-            SumSpectra(i, i + "det", StartWorkspaceIndex=minSp, EndWorkspaceIndex=maxSp)
-        else:
-            CropWorkspace(i, i + "det", StartWorkspaceIndex=minSp, EndWorkspaceIndex=maxSp)
-
-        Divide(i + "det", i + "mon", i + "norm")
-        if nspec > 4 and minSp != 3:
-            Divide(i + "2ddet", i + "mon", i + "2dnorm")
-        DeleteWorkspace(i + "mon")
-        if diagnostics == "0":
-            DeleteWorkspace(i + "det")
-        DeleteWorkspace(i)
-        Minus(i + "norm_" + upPeriod, i + "norm_" + downPeriod, "num")
-        Plus(i + "norm_2", i + "norm_1", "den")
-        Divide("num", "den", i + "pol")
-        ReplaceSpecialValues(i + "pol", i + "pol", 0.0, 0.0, 0.0, 0.0)
-        if nspec > 4 and minSp != 3:
-            # print i+"2dnorm_"+upPeriod
-            # print i+"2dnorm_"+downPeriod
-            Minus(i + "2dnorm_" + upPeriod, i + "2dnorm_" + downPeriod, "num")
-            Plus(i + "2dnorm_2", i + "2dnorm_1", "den")
-            Divide("num", "den", i + "2dpol")
-            ReplaceSpecialValues(i + "2dpol", i + "2dpol", 0.0, 0.0, 0.0, 0.0)
-        # DeleteWorkspace(i+"norm_2")
-        # DeleteWorkspace(i+"norm_1")
-        DeleteWorkspace("num")
-        DeleteWorkspace("den")
+    nspec = _loop_through_name_list(diagnostics, downPeriod, floodfile, mapfile, maxSp, maxSpec, minSp, minSpec,
+                                    mon_spec, nlist, reb, removeoutlayer, upPeriod)
 
     if existingP0 != "2":
         for i in P0nlist:
@@ -397,6 +355,85 @@ def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPer
 
     SEConstList = parseNameList(SEConstants)
     k = 0
+    _process_sesans_workspace(SEConstList, convertToSEL, k, lnPOverLam, nlist)
+
+    if nspec > 4 and minSp != 3:
+        k = 0
+        _process_2dsesans_workspace(SEConstList, convertToSEL, k, lnPOverLam, nlist)
+
+
+def _loop_through_name_list(diagnostics, downPeriod, floodfile, mapfile, maxSp, maxSpec, minSp, minSpec, mon_spec,
+                            nlist, reb, removeoutlayer, upPeriod):
+    for i in nlist:
+        a1 = mtd[i + "_1"]
+        nspec = a1.getNumberHistograms()
+        if nspec == 1030 and minSp != 3:
+            GroupDetectors(InputWorkspace=i, OutputWorkspace=i, MapFile=mapfile)
+        ConvertUnits(i, i, "Wavelength", AlignBins=1)
+        Rebin(i, i, reb)
+        if removeoutlayer != "0":
+            removeoutlayer(i + "_1")
+            removeoutlayer(i + "_2")
+        CropWorkspace(i, i + "mon", StartWorkspaceIndex=mon_spec, EndWorkspaceIndex=mon_spec)
+        if nspec == 245:
+            CropWorkspace(i, i + "2ddet", StartWorkspaceIndex=4, EndWorkspaceIndex=243)
+            if floodfile != "none":
+                floodnorm(i + "2ddet", floodfile)
+        if nspec == 1030:
+            CropWorkspace(i, i + "2ddet", StartWorkspaceIndex=3, EndWorkspaceIndex=124)
+        if int(maxSpec) > int(minSpec):
+            SumSpectra(i, i + "det", StartWorkspaceIndex=minSp, EndWorkspaceIndex=maxSp)
+        else:
+            CropWorkspace(i, i + "det", StartWorkspaceIndex=minSp, EndWorkspaceIndex=maxSp)
+
+        Divide(i + "det", i + "mon", i + "norm")
+        if nspec > 4 and minSp != 3:
+            Divide(i + "2ddet", i + "mon", i + "2dnorm")
+        DeleteWorkspace(i + "mon")
+        if diagnostics == "0":
+            DeleteWorkspace(i + "det")
+        DeleteWorkspace(i)
+        Minus(i + "norm_" + upPeriod, i + "norm_" + downPeriod, "num")
+        Plus(i + "norm_2", i + "norm_1", "den")
+        Divide("num", "den", i + "pol")
+        ReplaceSpecialValues(i + "pol", i + "pol", 0.0, 0.0, 0.0, 0.0)
+        if nspec > 4 and minSp != 3:
+            Minus(i + "2dnorm_" + upPeriod, i + "2dnorm_" + downPeriod, "num")
+            Plus(i + "2dnorm_2", i + "2dnorm_1", "den")
+            Divide("num", "den", i + "2dpol")
+            ReplaceSpecialValues(i + "2dpol", i + "2dpol", 0.0, 0.0, 0.0, 0.0)
+        DeleteWorkspace("num")
+        DeleteWorkspace("den")
+    return nspec
+
+
+def _process_2dsesans_workspace(SEConstList, convertToSEL, k, lnPOverLam, nlist):
+    for i in nlist:
+        if lnPOverLam == "2":
+            CloneWorkspace(InputWorkspace=i + "2dSESANS", OutputWorkspace=i + "2dSESANS_P")
+        a1 = mtd[i + "2dSESANS"]
+        nspec = a1.getNumberHistograms()
+        for l in range(nspec):
+            x = a1.readX(l)
+            for j in range(len(x) - 1):
+                lam = ((a1.readX(l)[j] + a1.readX(l)[j + 1]) / 2.0) / 10.0
+                p = a1.readY(l)[j]
+                _e = a1.readE(l)[j]
+                if lnPOverLam == "2":
+                    if p > 0.0:
+                        a1.dataY(l)[j] = log(p) / ((lam * 1.0e-9) ** 2)
+                        a1.dataE(l)[j] = (_e / p) / ((lam * 1.0e-9) ** 2)
+                    else:
+                        a1.dataY(l)[j] = 0.0
+                        a1.dataE(l)[j] = 0.0
+            for j in range(len(x)):
+                if convertToSEL == "2":
+                    lam = a1.readX(l)[j]
+                    a1.dataX(l)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
+        k = k + 1
+
+
+def _process_sesans_workspace(SEConstList, convertToSEL, k, lnPOverLam, nlist):
     for i in nlist:
         if lnPOverLam == "2":
             CloneWorkspace(InputWorkspace=i + "SESANS", OutputWorkspace=i + "SESANS_P")
@@ -417,35 +454,7 @@ def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPer
             if convertToSEL == "2":
                 lam = a1.readX(0)[j]
                 a1.dataX(0)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
-                # print str(lam)+" "+str(1.0e-2*float(SEConstList[k])*lam*lam)
         k = k + 1
-
-    if nspec > 4 and minSp != 3:
-        k = 0
-        for i in nlist:
-            if lnPOverLam == "2":
-                CloneWorkspace(InputWorkspace=i + "2dSESANS", OutputWorkspace=i + "2dSESANS_P")
-            a1 = mtd[i + "2dSESANS"]
-            nspec = a1.getNumberHistograms()
-            for l in range(nspec):
-                x = a1.readX(l)
-                for j in range(len(x) - 1):
-                    lam = ((a1.readX(l)[j] + a1.readX(l)[j + 1]) / 2.0) / 10.0
-                    p = a1.readY(l)[j]
-                    _e = a1.readE(l)[j]
-                    if lnPOverLam == "2":
-                        if p > 0.0:
-                            a1.dataY(l)[j] = log(p) / ((lam * 1.0e-9) ** 2)
-                            a1.dataE(l)[j] = (_e / p) / ((lam * 1.0e-9) ** 2)
-                        else:
-                            a1.dataY(l)[j] = 0.0
-                            a1.dataE(l)[j] = 0.0
-                for j in range(len(x)):
-                    if convertToSEL == "2":
-                        lam = a1.readX(l)[j]
-                        a1.dataX(l)[j] = 1.0e-2 * float(SEConstList[k]) * lam * lam
-                        # print str(lam)+" "+str(1.0e-2*float(SEConstList[k])*lam*lam)
-            k = k + 1
 
 
 def nrCalcSEConst(RFFrequency, poleShoeAngle):

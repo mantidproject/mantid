@@ -13,9 +13,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
 #include "MantidKernel/make_unique.h"
-
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -29,30 +27,13 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
-MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-std::size_t numberOfColumns(Workspace_sptr workspace) {
-  return convertToMatrixWorkspace(workspace)->y(0).size();
-}
-
-bool isWorkspacePlottable(Workspace_sptr workspace) {
-  return numberOfColumns(workspace) > 1;
-}
-
-bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {
-  for (auto const &workspace : *workspaceGroup)
-    if (isWorkspacePlottable(workspace))
-      return true;
-  return false;
-}
-
-bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
-  if (workspaceGroup)
-    return containsPlottableWorkspace(workspaceGroup);
-  else
-    return false;
+WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
 }
 
 void updateParameters(
@@ -71,10 +52,10 @@ void updateParameters(
 void updateAttributes(
     IFunction_sptr function, std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-  for (auto i = 0u; i < attributeNames.size(); ++i) {
-    auto const value = attributes.find(attributeNames[i]);
+  for (const auto &attributeName : attributeNames) {
+    auto const value = attributes.find(attributeName);
     if (value != attributes.end())
-      function->setAttribute(attributeNames[i], value->second);
+      function->setAttribute(attributeName, value->second);
   }
 }
 
@@ -84,11 +65,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
- * Constructor.
- *
- * @param parent :: the parent widget (an IndirectDataAnalysis object).
- */
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
                                                QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
@@ -135,8 +111,6 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SIGNAL(functionChanged()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(updatePlotOptions()));
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateResultOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
@@ -156,7 +130,10 @@ void IndirectFitAnalysisTab::setup() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
   connect(m_dataPresenter.get(), SIGNAL(updateAvailableFitTypes()), this,
-          SLOT(updateAvailableFitTypes()));
+          SIGNAL(updateAvailableFitTypes()));
+
+  connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this,
+          SLOT(plotSelectedSpectra()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -305,6 +282,12 @@ void IndirectFitAnalysisTab::setSpectrumSelectionView(
   m_spectrumPresenter =
       Mantid::Kernel::make_unique<IndirectSpectrumSelectionPresenter>(
           m_fittingModel.get(), view);
+}
+
+void IndirectFitAnalysisTab::setOutputOptionsView(
+    IIndirectFitOutputOptionsView *view) {
+  m_outOptionsPresenter =
+      Mantid::Kernel::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(
@@ -470,7 +453,7 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX,
   }
 }
 
-void IndirectFitAnalysisTab::tableExcludeChanged(const std::string &,
+void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
                                                  std::size_t dataIndex,
                                                  std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum))
@@ -752,13 +735,13 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-  enableFitAnalysisButtons(true);
-  enablePlotResult(error);
-  setSaveResultEnabled(!error);
+  setRunIsRunning(false);
+  m_plotPresenter->setFitSingleSpectrumIsFitting(false);
+  enableFitButtons(true);
+  enableOutputOptions(!error);
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
-  updatePlotOptions();
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
@@ -879,83 +862,58 @@ void IndirectFitAnalysisTab::updatePlotGuess() {
 }
 
 /**
- * Saves the result workspace in the default save directory.
+ * Plots the spectra corresponding to the selected parameters
  */
-void IndirectFitAnalysisTab::saveResult() { m_fittingModel->saveResult(); }
+void IndirectFitAnalysisTab::plotSelectedSpectra() {
+  enableFitButtons(false);
+  plotSelectedSpectra(m_outOptionsPresenter->getSpectraToPlot());
+  enableFitButtons(true);
+  m_outOptionsPresenter->setPlotting(false);
+}
 
 /**
- * Plots the result workspace with the specified name, using the specified
- * plot type. Plot type can either be 'None', 'All' or the name of a
- * parameter. In the case of 'None', nothing will be plotted. In the case of
- * 'All', everything will be plotted. In the case of a parameter name, only
- * the spectra created from that parameter will be plotted.
- *
- * @param plotType    The plot type specifying what to plot.
+ * Plots the spectra corresponding to the selected parameters
+ * @param spectra :: a vector of spectra to plot from a group workspace
  */
-void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
-  const auto resultWorkspaces = m_fittingModel->getResultWorkspace();
-  if (resultWorkspaces) {
-    if (plotType.compare("All") == 0)
-      plotAll(resultWorkspaces);
-    else
-      plotParameter(resultWorkspaces, plotType.toStdString());
-  }
+void IndirectFitAnalysisTab::plotSelectedSpectra(
+    std::vector<SpectrumToPlot> const &spectra) {
+  for (auto const &spectrum : spectra)
+    plotSpectrum(spectrum.first, spectrum.second, true);
+  m_outOptionsPresenter->clearSpectraToPlot();
 }
 
-void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::WorkspaceGroup_sptr workspaces) {
-  for (auto const &workspace : *workspaces)
-    plotAll(convertToMatrixWorkspace(workspace));
+/**
+ * Plots a spectrum with the specified index in a workspace
+ * @workspaceName :: the workspace containing the spectrum to plot
+ * @index :: the index in the workspace
+ * @errorBars :: true if you want error bars to be plotted
+ */
+void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
+                                          std::size_t const &index,
+                                          bool errorBars) {
+  IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
+                            static_cast<int>(index), errorBars);
 }
 
-void IndirectFitAnalysisTab::plotParameter(
-    Mantid::API::WorkspaceGroup_sptr workspaces, std::string const &parameter) {
-  for (auto const &workspace : *workspaces)
-    plotParameter(convertToMatrixWorkspace(workspace), parameter);
+/**
+ * Gets the name used for the base of the result workspaces
+ */
+std::string IndirectFitAnalysisTab::getOutputBasename() const {
+  return m_fittingModel->getOutputBasename();
 }
 
-void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
-  auto const numberOfDataPoints = workspace->blocksize();
-  if (numberOfDataPoints > 1)
-    plotSpectrum(workspace);
-  else
-    showMessageBox(
-        "The plotting of data in one of the result workspaces failed:\n\n "
-        "Workspace has only one data point");
+/**
+ * Gets the Result workspace from a fit
+ */
+WorkspaceGroup_sptr IndirectFitAnalysisTab::getResultWorkspace() const {
+  return m_fittingModel->getResultWorkspace();
 }
 
-void IndirectFitAnalysisTab::plotParameter(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::string &parameterToPlot) {
-  auto const numberOfDataPoints = workspace->blocksize();
-  if (numberOfDataPoints > 1)
-    plotSpectrum(workspace, parameterToPlot);
-  else
-    showMessageBox(
-        "The plotting of data in one of the result workspaces failed:\n\n "
-        "Workspace has only one data point");
-}
-
-void IndirectFitAnalysisTab::plotSpectrum(
-    Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::string &parameterToPlot) {
-  const auto name = QString::fromStdString(workspace->getName());
-  const auto labels = IndirectTab::extractAxisLabels(workspace, 1);
-  for (const auto &parameter : m_fittingModel->getFitParameterNames()) {
-    if (boost::contains(parameter, parameterToPlot)) {
-      auto it = labels.find(parameter);
-      if (it != labels.end())
-        IndirectTab::plotSpectrum(name, static_cast<int>(it->second));
-    }
-  }
-}
-
-void IndirectFitAnalysisTab::plotSpectrum(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
-  const auto name = QString::fromStdString(workspace->getName());
-  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    IndirectTab::plotSpectrum(name, static_cast<int>(i));
+/**
+ * Gets the names of the Fit Parameters
+ */
+std::vector<std::string> IndirectFitAnalysisTab::getFitParameterNames() const {
+  return m_fittingModel->getFitParameterNames();
 }
 
 /**
@@ -968,7 +926,9 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
   if (validate()) {
-    enableFitAnalysisButtons(false);
+    m_plotPresenter->setFitSingleSpectrumIsFitting(true);
+    enableFitButtons(false);
+    enableOutputOptions(false);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -979,7 +939,9 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  */
 void IndirectFitAnalysisTab::executeFit() {
   if (validate()) {
-    enableFitAnalysisButtons(false);
+    setRunIsRunning(true);
+    enableFitButtons(false);
+    enableOutputOptions(false);
     runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
   }
 }
@@ -1005,14 +967,65 @@ bool IndirectFitAnalysisTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() {
-  enableFitAnalysisButtons(false);
+  setRunIsRunning(true);
+  enableFitButtons(false);
+  enableOutputOptions(false);
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 
-void IndirectFitAnalysisTab::enableFitAnalysisButtons(bool enable) {
-  setRunIsRunning(!enable);
-  setFitSingleSpectrumIsFitting(!enable);
+/**
+ * Enables or disables the 'Run', 'Fit Single Spectrum' and other related
+ * buttons
+ * @param enable :: true to enable buttons
+ */
+void IndirectFitAnalysisTab::enableFitButtons(bool enable) {
+  setRunEnabled(enable);
+  m_plotPresenter->setFitSingleSpectrumEnabled(enable);
   m_fitPropertyBrowser->setFitEnabled(enable);
+}
+
+/**
+ * Enables or disables the output options. It also sets the current result and
+ * PDF workspaces to be plotted
+ * @param enable :: true to enable buttons
+ */
+void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
+  if (enable) {
+    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
+    setPDFWorkspace(getOutputBasename() + "_PDFs");
+    m_outOptionsPresenter->setPlotTypes("Result Group");
+  } else
+    m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
+
+  m_outOptionsPresenter->setPlotEnabled(
+      enable && m_outOptionsPresenter->isSelectedGroupPlottable());
+  m_outOptionsPresenter->setEditResultEnabled(enable);
+  m_outOptionsPresenter->setSaveEnabled(enable);
+}
+
+/**
+ * Sets the active PDF workspace within the output options if one exists for the
+ * current run
+ * @param workspaceName :: the name of the PDF workspace if it exists
+ */
+void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
+  auto const fabMinimizer = m_fitPropertyBrowser->minimizer() == "FABADA";
+  auto const enablePDFOptions = doesExistInADS(workspaceName) && fabMinimizer;
+
+  if (enablePDFOptions) {
+    m_outOptionsPresenter->setPDFWorkspace(getADSGroupWorkspace(workspaceName));
+    m_outOptionsPresenter->setPlotWorkspaces();
+  } else
+    m_outOptionsPresenter->removePDFWorkspace();
+  m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enablePDFOptions);
+}
+
+/**
+ * Sets the visiblity of the output options Edit Result button
+ * @param visible :: true to make the edit result button visible
+ */
+void IndirectFitAnalysisTab::setEditResultVisible(bool visible) {
+  m_outOptionsPresenter->setEditResultVisible(visible);
 }
 
 void IndirectFitAnalysisTab::setAlgorithmProperties(
@@ -1069,69 +1082,17 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 }
 
 /**
- * Updates the specified combo box, with the available plot options.
- *
- * @param cbPlotType  The combo box.
- */
-void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
-  setPlotOptions(cbPlotType, m_fittingModel->getFitParameterNames());
-}
-
-void IndirectFitAnalysisTab::enablePlotResult(bool error) {
-  if (!error)
-    setPlotResultEnabled(
-        isGroupPlottable(m_fittingModel->getResultWorkspace()));
-  else
-    setPlotResultEnabled(!error);
-}
-
-/**
- * Fills the specified combo box, with the specified parameters.
- *
- * @param cbPlotType  The combo box.
- * @param parameters  The parameters.
- */
-void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const std::vector<std::string> &parameters) const {
-  cbPlotType->clear();
-  QSet<QString> plotOptions;
-
-  for (const auto &parameter : parameters) {
-    auto plotOption = QString::fromStdString(parameter);
-    auto index = plotOption.lastIndexOf(".");
-    if (index >= 0)
-      plotOption = plotOption.remove(0, index + 1);
-    plotOptions << plotOption;
-  }
-  setPlotOptions(cbPlotType, plotOptions);
-}
-
-/**
- * Fills the specified combo box, with the specified options.
- *
- * @param cbPlotType  The combo box.
- * @param parameters  The options.
- */
-void IndirectFitAnalysisTab::setPlotOptions(
-    QComboBox *cbPlotType, const QSet<QString> &options) const {
-  cbPlotType->clear();
-
-  QStringList plotList;
-  if (!options.isEmpty())
-    plotList << "All";
-  plotList.append(options.toList());
-  cbPlotType->addItems(plotList);
-}
-
-/**
  * Updates whether the options for plotting and saving fit results are
  * enabled/disabled.
  */
 void IndirectFitAnalysisTab::updateResultOptions() {
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
                                                      getSelectedSpectrum());
-  setPlotResultEnabled(isFit);
-  setSaveResultEnabled(isFit);
+  if (isFit)
+    m_outOptionsPresenter->setResultWorkspace(getResultWorkspace());
+  m_outOptionsPresenter->setPlotEnabled(isFit);
+  m_outOptionsPresenter->setEditResultEnabled(isFit);
+  m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 
 } // namespace IDA

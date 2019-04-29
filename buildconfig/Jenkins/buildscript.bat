@@ -181,7 +181,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERS% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
@@ -201,9 +201,12 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :: This prevents race conditions when creating the user config directory
 set USERPROPS=bin\%BUILD_CONFIG%\Mantid.user.properties
 del %USERPROPS%
-set CONFIGDIR=%APPDATA%\mantidproject\mantid
+set CONFIGDIR=%APPDATA%\mantidproject
 rmdir /S /Q %CONFIGDIR%
-mkdir %CONFIGDIR%
+:: remove old MantidPlot state (sets errorlevel on failure but we don't check so script continues)
+reg delete HKCU\Software\Mantid /f
+:: create the config directory to avoid any race conditions
+mkdir %CONFIGDIR%\mantid
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
 

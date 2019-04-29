@@ -15,14 +15,17 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-namespace NeXus {
-class File;
-}
-
 #include <set>
 #include <string>
 #include <vector>
 
+namespace NeXus {
+class File;
+}
+
+namespace Json {
+class Value;
+}
 namespace std {
 class typeinfo;
 }
@@ -133,11 +136,19 @@ public:
   /// Returns the value of the property as a pretty printed string
   virtual std::string valueAsPrettyStr(const size_t maxLength = 0,
                                        const bool collapseLists = true) const;
+  /// Returns the value of the property as a Json::Value
+  virtual Json::Value valueAsJson() const = 0;
   /// Whether the string returned by value() can be used for serialization.
   virtual bool isValueSerializable() const { return true; }
   /// Set the value of the property via a string.  If the value is unacceptable
   /// the value is not changed but a string is returned
   virtual std::string setValue(const std::string &) = 0;
+  /// Set the value of the property via a Json object.  If the value is
+  /// unacceptable the value is not changed but a string is returned
+  /// A const char * can be implicitly converted to both Json::Value
+  /// and std::string so using simple setValue for both functions
+  /// causes an abiguity error
+  virtual std::string setValueFromJson(const Json::Value &) = 0;
   /// Set the value of the property via a reference to another property.
   virtual std::string setValueFromProperty(const Property &right) = 0;
   /// Set the value of the property via a DataItem pointer.  If the value is
@@ -150,7 +161,7 @@ public:
   /** Is Multiple Selection Allowed
    *  @return true if multiple selection is allowed
    */
-  virtual bool isMultipleSelectionAllowed() { return false; };
+  virtual bool isMultipleSelectionAllowed() { return false; }
 
   virtual std::vector<std::string> allowedValues() const;
 
@@ -196,8 +207,8 @@ public:
 
 protected:
   /// Constructor
-  Property(const std::string &name, const std::type_info &type,
-           const unsigned int direction = Direction::Input);
+  Property(std::string name, const std::type_info &type,
+           unsigned int direction = Direction::Input);
   /// Copy constructor
   Property(const Property &right);
   /// The name of the property

@@ -10,7 +10,7 @@
 #include <QtGlobal>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/MplCpp/MantidColorMap.h"
 #endif

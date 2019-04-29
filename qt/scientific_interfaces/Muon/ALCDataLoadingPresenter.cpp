@@ -14,7 +14,7 @@
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 #include "MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>
@@ -266,8 +266,8 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
-  for (auto it = properties.begin(); it != properties.end(); ++it) {
-    logs.push_back((*it)->name());
+  for (auto property : properties) {
+    logs.push_back(property->name());
   }
   m_view->setAvailableLogs(logs);
 
@@ -325,10 +325,13 @@ void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
 bool ALCDataLoadingPresenter::checkCustomGrouping() {
   bool groupingOK = true;
   if (m_view->detectorGroupingType() == "Custom") {
-    auto detectors =
-        Mantid::Kernel::Strings::parseRange(m_view->getForwardGrouping());
-    const auto backward =
-        Mantid::Kernel::Strings::parseRange(m_view->getBackwardGrouping());
+    auto detectors = Mantid::Kernel::Strings::parseRange(
+        isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
+    const auto backward = Mantid::Kernel::Strings::parseRange(
+        isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
+    if (!groupingOK) {
+      return groupingOK;
+    }
     detectors.insert(detectors.end(), backward.begin(), backward.end());
     for (const int det : detectors) {
       if (det < 0 || det > static_cast<int>(m_numDetectors)) {
@@ -339,5 +342,23 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
   }
   return groupingOK;
 }
+/**
+ * Check basic group string is valid
+ * i.e. does not contain letters or start with , or -
+ * @param group :: the string of the grouping
+ * @param isValid :: bool to say if the string is valid
+ * @returns :: True if grouping OK, false if bad
+ */
+std::string
+ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group,
+                                               bool &isValid) {
+  if (!std::isdigit(group[0]) ||
+      std::any_of(std::begin(group), std::end(group), ::isalpha)) {
+    isValid = false;
+    return "";
+  }
+  return group;
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

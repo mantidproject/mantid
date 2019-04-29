@@ -10,6 +10,14 @@ from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadL
 from mantid.kernel import *
 from mantid.api import *
 
+import numpy as np
+
+
+def workspaces_have_same_size(workspaces):
+    first_size = len(workspaces[0].readY(0))
+    differently_sized_workspaces = [workspace for workspace in workspaces[1:] if len(workspace.readY(0)) != first_size]
+    return len(differently_sized_workspaces) == 0
+
 
 def _normalize_by_index(workspace, index):
     """
@@ -19,15 +27,28 @@ def _normalize_by_index(workspace, index):
     @param workspace    The workspace to normalize.
     @param index        The index of the y-value to normalize by.
     """
+    number_of_histograms = workspace.getNumberHistograms()
 
-    num_hist = workspace.getNumberHistograms()
+    for idx in range(0, number_of_histograms):
+        y_values = workspace.readY(idx)
+        y_errors = workspace.readE(idx)
 
-    # Normalize each spectrum in the workspace
-    for idx in range(0, num_hist):
-        y_vals = workspace.readY(idx)
-        scale = 1.0 / y_vals[index]
-        y_vals_scaled = scale * y_vals
-        workspace.setY(idx, y_vals_scaled)
+        # Avoid divide by zero
+        if y_values[index] == 0.0:
+            scale = np.reciprocal(1.0e-8)
+        else:
+            scale = np.reciprocal(y_values[index])
+
+        # Normalise y values
+        y_values_normalised = scale * y_values
+
+        # Propagate y errors: C = A / B ; dC = sqrt( (dA/B)^2 + (A*dB/B^2)^2 )
+        a = (y_errors*scale)
+        b = (y_values*y_errors[index]*(scale ** 2))
+        y_errors_propagated = np.sqrt(a ** 2 + b ** 2)
+
+        workspace.setY(idx, y_values_normalised)
+        workspace.setE(idx, y_errors_propagated)
 
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
@@ -171,6 +192,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_workspace = q_workspaces[0]
             q2_workspace = q2_workspaces[0]
         else:
+            if not workspaces_have_same_size(q_workspaces) or not workspaces_have_same_size(q2_workspaces):
+                raise RuntimeError('The ElasticWindow algorithm produced differently sized workspaces. Please check '
+                                   'the input files are compatible.')
             q_workspace = _append_all(q_workspaces)
             q2_workspace = _append_all(q2_workspaces)
 

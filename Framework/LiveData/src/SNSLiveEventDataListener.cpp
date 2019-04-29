@@ -143,8 +143,6 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 // and it doesn't check the return value.  (It does, however, trap the Poco
 // exceptions.)
 {
-  bool rv = false; // assume failure
-
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
@@ -170,8 +168,8 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
       RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
 
-  rv = m_isConnected = true;
-  return rv;
+  m_isConnected = true;
+  return true;
 }
 
 /// Test to see if the object has connected to the SMS daemon
@@ -588,15 +586,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::GeometryPkt &pkt) {
         }
       }
     }
-  }
-
-  // Check to see if we can complete the initialzation steps
-  if (!m_workspaceInitialized) {
     if (readyForInitPart2()) {
       initWorkspacePart2();
     }
   }
-
   return false;
 }
 
@@ -616,15 +609,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamlineInfoPkt &pkt) {
   if (!m_workspaceInitialized) {
     // We need the instrument name
     m_instrumentName = pkt.longName();
-  }
-
-  // Check to see if we can complete the initialzation steps
-  if (!m_workspaceInitialized) {
     if (readyForInitPart2()) {
       initWorkspacePart2();
     }
   }
-
   return false;
 }
 

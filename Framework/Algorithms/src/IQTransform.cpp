@@ -12,14 +12,20 @@
 #include "MantidAPI/IncreasingAxisValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -118,7 +124,7 @@ void IQTransform::exec() {
   // Create the output workspace
   const size_t length = tmpWS->blocksize();
   MatrixWorkspace_sptr outputWS =
-      WorkspaceFactory::Instance().create(inputWS, 1, length, length);
+      create<MatrixWorkspace>(*inputWS, 1, Points(length));
   m_label->setLabel("");
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).

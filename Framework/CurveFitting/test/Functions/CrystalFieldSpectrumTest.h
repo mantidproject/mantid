@@ -874,8 +874,8 @@ private:
     FunctionDomain1DVector x(x0, x1, nbins);
     FunctionValues y(x);
     fun.function(x, y);
-    ws->dataX(0) = x.toVector();
-    ws->dataY(0) = y.toVector();
+    ws->mutableX(0) = x.toVector();
+    ws->mutableY(0) = y.toVector();
     return ws;
   }
 };

@@ -17,6 +17,12 @@ class DummyClass(object):
     pass
 
 
+@string_convertible
+@serializable_enum("TypeA", "TypeB", "TypeC")
+class IncorrectClass(object):
+    pass
+
+
 class SANSFileInformationTest(unittest.TestCase):
     def test_that_can_create_enum_value_and_is_sub_class_of_base_type(self):
         type_a = DummyClass.TypeA
@@ -34,6 +40,18 @@ class SANSFileInformationTest(unittest.TestCase):
 
     def test_that_raises_run_time_error_if_string_is_not_known(self):
         self.assertRaises(RuntimeError, DummyClass.from_string, "TypeD")
+
+    def test_that_has_member_handles_strings(self):
+        self.assertTrue(DummyClass.has_member("TypeA"))
+        self.assertFalse(DummyClass.has_member("TypeD"))
+
+    def test_that_has_member_handles_enums(self):
+        a_variable = DummyClass.TypeA
+        incorrect_variable = IncorrectClass.TypeA
+
+        self.assertTrue(DummyClass.has_member(a_variable))
+        self.assertFalse(DummyClass.has_member(incorrect_variable))
+
 
 if __name__ == '__main__':
     unittest.main()

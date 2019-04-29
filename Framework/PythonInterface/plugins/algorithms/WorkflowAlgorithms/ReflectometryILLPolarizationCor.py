@@ -8,11 +8,11 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, mtd, WorkspaceGroupProperty)
 from mantid.kernel import (CompositeValidator, Direction, StringArrayLengthValidator, StringArrayMandatoryValidator, StringArrayProperty,
                            StringListValidator)
 from mantid.simpleapi import (LoadILLPolarizationFactors, PolarizationEfficiencyCor, RebinToWorkspace)
-import ReflectometryILL_common as common
 
 
 class Prop:
@@ -54,9 +54,9 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
         """Execute the algorithm."""
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
-        self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = common.WSNameSource(wsPrefix, cleanupMode)
+        self._names = utils.NameSource(wsPrefix, cleanupMode)
 
         wss = self._inputWS()
 
@@ -86,8 +86,8 @@ class ReflectometryILLPolarizationCor(DataProcessorAlgorithm):
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
                              doc='Enable or disable child algorithm logging.')
         self.declareProperty(Prop.CLEANUP,
-                             defaultValue=common.WSCleanup.ON,
-                             validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
+                             defaultValue=utils.Cleanup.ON,
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
         self.declareProperty(FileProperty(Prop.EFFICIENCY_FILE,
                                           defaultValue='',

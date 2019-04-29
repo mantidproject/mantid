@@ -108,11 +108,17 @@ double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index,
                      const Mantid::API::SpectrumInfo &spectrumInfo) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
+  double twotheta;
+  try {
+    twotheta = spectrumInfo.twoTheta(index);
+  } catch (std::runtime_error &) {
+    // Choose an arbitrary angle if detector 2theta determination fails.
+    twotheta = 0.;
+  }
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
   const double factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
-      spectrumInfo.l1(), spectrumInfo.l2(index), spectrumInfo.twoTheta(index),
-      offset);
+      spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
   return 1. / factor;
 }
 

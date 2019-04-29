@@ -19,6 +19,7 @@ procedure in a sensible manner to code generated automatically.
    :maxdepth: 1
 
    MantidStandards
+   CPPModernization
    CPPStandards
    UnitTestStandards
    PythonStandards
@@ -42,3 +43,4 @@ Guidelines
    :maxdepth: 1
 
    Libraries
+   AdditionalPythonCode

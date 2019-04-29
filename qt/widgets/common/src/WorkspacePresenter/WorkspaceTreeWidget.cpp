@@ -420,7 +420,12 @@ WorkspaceTreeWidget::SaveFileType WorkspaceTreeWidget::getSaveFileType() const {
   return m_saveFileType;
 }
 
-void WorkspaceTreeWidget::saveWorkspace(SaveFileType type) {
+void WorkspaceTreeWidget::saveWorkspace(const std::string &wsName,
+                                        SaveFileType type) {
+  QHash<QString, QString> presets;
+  if (!wsName.empty()) {
+    presets["InputWorkspace"] = QString::fromStdString(wsName);
+  }
   int version = -1;
   std::string algorithmName;
 
@@ -436,7 +441,7 @@ void WorkspaceTreeWidget::saveWorkspace(SaveFileType type) {
   }
 
   m_mantidDisplayModel->showAlgorithmDialog(
-      QString::fromStdString(algorithmName), version);
+      QString::fromStdString(algorithmName), presets, nullptr, version);
 }
 
 void WorkspaceTreeWidget::saveWorkspaces(const StringList &wsNames) {
@@ -546,9 +551,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
     }
 
     // make children of visible groups visible
-    for (auto itGroup = visibleGroups.begin(); itGroup != visibleGroups.end();
-         ++itGroup) {
-      QTreeWidgetItem *group = (*itGroup);
+    for (auto group : visibleGroups) {
       for (int i = 0; i < group->childCount(); i++) {
         QTreeWidgetItem *child = group->child(i);
         if (child->isHidden()) {
@@ -1142,7 +1145,8 @@ void WorkspaceTreeWidget::onClickDeleteWorkspaces() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 }
 
-void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item, int) {
+void WorkspaceTreeWidget::clickedWorkspace(QTreeWidgetItem *item,
+                                           int /*unused*/) {
   Q_UNUSED(item);
 }
 
@@ -1391,12 +1395,12 @@ void WorkspaceTreeWidget::saveToProgram() {
       (Mantid::Kernel::ConfigService::Instance().getKeys(
           ("workspace.sendto." + programKeysAndDetails.find("name")->second)));
 
-  for (size_t i = 0; i < programKeys.size(); i++) {
+  for (const auto &programKey : programKeys) {
     // Assign a key to its value using the map
-    programKeysAndDetails[programKeys[i]] =
+    programKeysAndDetails[programKey] =
         (Mantid::Kernel::ConfigService::Instance().getString(
             ("workspace.sendto." + programKeysAndDetails.find("name")->second +
-             "." + programKeys[i])));
+             "." + programKey)));
   }
 
   // Check to see if mandatory information is included

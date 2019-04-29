@@ -4,20 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+import unittest
 
+from mantid.py3compat import mock
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
-
-import unittest
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class FFTPresenterTest(unittest.TestCase):
@@ -27,6 +21,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.load.getCurrentWS = mock.Mock(
             return_value=["TEST00000001", ["fwd", "bkwd"]])
         self.load.getRunName = mock.MagicMock(return_value="MUSR00023456")
+        self.load.version = 1
         self.load.hasDataChanged = mock.MagicMock(return_value=False)
         self.view = mock.create_autospec(fft_view.FFTView, spec_set=True)
         # signals
@@ -193,14 +188,14 @@ class FFTPresenterTest(unittest.TestCase):
         self.view.isComplex = mock.Mock(return_value=True)
         self.view.isRaw = mock.Mock(return_value=True)
         self.presenter.handleButton()
-        assert(self.view.initFFTInput.call_count == 1)
-        assert(self.view.addFFTComplex.call_count == 1)
-        assert(self.view.addFFTShift.call_count == 1)
-        assert(self.view.addRaw.call_count == 3)
-        assert(self.view.setPhaseBox.call_count == 1)
-        assert(self.view.getFirstGoodData.call_count == 0)
-        assert(self.view.getLastGoodData.call_count == 0)
-        assert(self.presenter.thread.start.call_count == 1)
+        self.assertEquals(self.view.initFFTInput.call_count, 1)
+        self.assertEquals(self.view.addFFTComplex.call_count,1)
+        self.assertEquals(self.view.addFFTShift.call_count, 1)
+        self.assertEquals(self.view.addRaw.call_count, 3)
+        self.assertEquals(self.view.setPhaseBox.call_count, 1)
+        self.assertEquals(self.view.getFirstGoodData.call_count, 0)
+        self.assertEquals(self.view.getLastGoodData.call_count, 0)
+        self.assertEquals(self.presenter.thread.start.call_count, 1)
 
     def test_buttonNoShiftRawAndNoIm(self):
         self.view.isAutoShift = mock.Mock(return_value=False)

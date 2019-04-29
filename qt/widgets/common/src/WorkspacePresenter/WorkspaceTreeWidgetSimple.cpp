@@ -28,15 +28,16 @@ namespace MantidWidgets {
 WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
                                                      QWidget *parent)
     : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
-      m_plotSpectrum(new QAction("spectrum...", this)),
-      m_overplotSpectrum(new QAction("overplot spectrum...", this)),
-      m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),
+      m_plotSpectrum(new QAction("Spectrum...", this)),
+      m_overplotSpectrum(new QAction("Overplot spectrum...", this)),
+      m_plotSpectrumWithErrs(new QAction("Spectrum with errors...", this)),
       m_overplotSpectrumWithErrs(
-          new QAction("overplot spectrum with errors...", this)),
-      m_plotColorfill(new QAction("colorfill", this)),
-      m_sampleLogs(new QAction("Sample Logs", this)),
+          new QAction("Overplot spectrum with errors...", this)),
+      m_plotColorfill(new QAction("Colorfill", this)),
+      m_sampleLogs(new QAction("Show Sample Logs", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
-      m_showData(new QAction("Show Data", this)) {
+      m_showData(new QAction("Show Data", this)),
+      m_showAlgorithmHistory(new QAction("Show History", this)) {
 
   // Replace the double click action on the MantidTreeWidget
   m_tree->m_doubleClickAction = [&](QString wsName) {
@@ -59,6 +60,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
   connect(m_tree, SIGNAL(itemSelectionChanged()), this,
           SIGNAL(treeSelectionChanged()));
+  connect(m_showAlgorithmHistory, SIGNAL(triggered()), this,
+          SLOT(onShowAlgorithmHistoryClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -101,15 +104,23 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       menu->addMenu(plotSubMenu);
       menu->addSeparator();
       menu->addAction(m_showData);
+      menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_showInstrument);
       m_showInstrument->setEnabled(
           matrixWS->getInstrument() &&
           !matrixWS->getInstrument()->getName().empty());
-      menu->addSeparator();
+      menu->addAction(m_sampleLogs);
+    } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
+      menu->addAction(m_showData);
+      menu->addAction(m_showAlgorithmHistory);
+    } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
+      menu->addAction(m_showAlgorithmHistory);
+      menu->addAction(m_sampleLogs);
     }
+
+    menu->addSeparator();
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
-    menu->addAction(m_sampleLogs);
 
     menu->addSeparator();
     menu->addAction(m_delete);
@@ -146,8 +157,13 @@ void WorkspaceTreeWidgetSimple::onSampleLogsClicked() {
 void WorkspaceTreeWidgetSimple::onShowInstrumentClicked() {
   emit showInstrumentClicked(getSelectedWorkspaceNamesAsQList());
 }
+
 void WorkspaceTreeWidgetSimple::onShowDataClicked() {
   emit showDataClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onShowAlgorithmHistoryClicked() {
+  emit showAlgorithmHistoryClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

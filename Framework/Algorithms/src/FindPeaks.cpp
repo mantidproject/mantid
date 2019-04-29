@@ -11,8 +11,8 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FitPeak.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -290,7 +290,7 @@ void FindPeaks::processAlgorithmProperties() {
 /** Generate a table workspace for output peak parameters
  */
 void FindPeaks::generateOutputPeakParameterTable() {
-  m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outPeakTableWS = boost::make_shared<TableWorkspace>();
   m_outPeakTableWS->addColumn("int", "spectrum");
 
   if (m_rawPeaksTable) {
@@ -1061,8 +1061,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
     /// name. This should be fixed but it causes different behaviour which
     /// breaks several unit tests. The issue to deal with this is #13950. Other
     /// related issues are #13667, #15978 and #19773.
-    int fitresult = peaklisttablews->Int(0, 6);
-    g_log.information() << "fitresult=" << fitresult << "\n";
+    const int hiddenFitresult = peaklisttablews->Int(0, 6);
+    g_log.information() << "fitresult=" << hiddenFitresult << "\n";
   }
 
   // Local check whether FindPeakBackground gives a reasonable value
@@ -1142,7 +1142,7 @@ std::string FindPeaks::estimatePeakParameters(
     const std::vector<double> &vecbkgdparvalues, size_t &iobscentre,
     double &height, double &fwhm, double &leftfwhm, double &rightfwhm) {
   // Search for maximum considering background
-  double bg0 = vecbkgdparvalues[0];
+  const double bg0 = vecbkgdparvalues[0];
   double bg1 = 0;
   double bg2 = 0;
   if (vecbkgdparvalues.size() >= 2) {
@@ -1153,7 +1153,7 @@ std::string FindPeaks::estimatePeakParameters(
 
   // Starting value
   iobscentre = i_min;
-  double tmpx = vecX[i_min];
+  const double tmpx = vecX[i_min];
   height = vecY[i_min] - (bg0 + bg1 * tmpx + bg2 * tmpx * tmpx);
   double lowest = height;
 
@@ -1163,8 +1163,8 @@ std::string FindPeaks::estimatePeakParameters(
 
   // Searching
   for (size_t i = i_min + 1; i <= i_max; ++i) {
-    double tmpx = vecX[i];
-    double tmpheight = vecY[i] - (bg0 + bg1 * tmpx + bg2 * tmpx * tmpx);
+    const double x = vecX[i];
+    const double tmpheight = vecY[i] - (bg0 + bg1 * x + bg2 * x * x);
 
     if (tmpheight > height) {
       iobscentre = i;

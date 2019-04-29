@@ -164,8 +164,10 @@ public:
     ocyl.setParent(&parent);
     // Check original track misses
     TS_ASSERT_EQUALS(ocyl.interceptSurface(track), 0);
-    // Create a new test track going from the origin down the line y = -x
-    Track track2(V3D(0, 0, 0), V3D(0, 1, -1));
+    // Create a new test track going from the origin down the line z = -y
+    V3D dir(0., 1., -1.);
+    dir.normalize();
+    Track track2(V3D(0, 0, 0), dir);
     TS_ASSERT_EQUALS(ocyl.interceptSurface(track2), 1);
     Track::LType::const_iterator it2 = track2.cbegin();
     if (it2 == track2.cend())
@@ -347,14 +349,14 @@ public:
     TS_ASSERT_EQUALS(itscale->entryPoint, V3D(-6.4, 0.0, 0.0));
     TS_ASSERT_EQUALS(itscale->exitPoint, V3D(2.4, 0.0, 0.0));
 
-    Track trackScaleY(V3D(0.0, -2, 0), V3D(0, 2.0, 0));
+    Track trackScaleY(V3D(0.0, -2, 0), V3D(0, 1.0, 0));
     TS_ASSERT_EQUALS(ocyl->interceptSurface(trackScaleY), 1);
     Track::LType::const_iterator itscaleY = trackScaleY.cbegin();
     TS_ASSERT_EQUALS(itscaleY->distFromStart, 2.5);
     TS_ASSERT_EQUALS(itscaleY->entryPoint, V3D(0.0, -0.5, 0.0));
     TS_ASSERT_EQUALS(itscaleY->exitPoint, V3D(0.0, 0.5, 0.0));
 
-    Track trackScaleW(V3D(0, 0, -5), V3D(0, 0, 5));
+    Track trackScaleW(V3D(0, 0, -5), V3D(0, 0, 1));
     TS_ASSERT_EQUALS(ocyl->interceptSurface(trackScaleW), 1);
     Track::LType::const_iterator itscaleW = trackScaleW.cbegin();
     TS_ASSERT_DELTA(itscaleW->distFromStart, 6.5, 1e-6);

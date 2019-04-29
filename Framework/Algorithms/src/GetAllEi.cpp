@@ -9,8 +9,8 @@
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
@@ -31,7 +31,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using namespace HistogramData;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 DECLARE_ALGORITHM(GetAllEi)
 
 /// Empty default constructor
@@ -383,8 +384,7 @@ void GetAllEi::exec() {
   std::sort(peaks.begin(), peaks.end());
 
   // finalize output
-  auto result_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                                            nPeaks, nPeaks);
+  auto result_ws = create<Workspace2D>(1, Points(nPeaks));
 
   HistogramX peaks_positions(peaks.size());
   std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
@@ -399,7 +399,7 @@ void GetAllEi::exec() {
 
   result_ws->setPoints(0, peaks_positions);
 
-  setProperty("OutputWorkspace", result_ws);
+  setProperty("OutputWorkspace", std::move(result_ws));
 }
 /**Auxiliary method to print guess chopper energies in debug mode
  *
@@ -537,7 +537,6 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       this->calcDerivativeAndCountZeros(binsAvrg, SAvrg, der1Avrg, peaks);
   size_t nHills =
       this->calcDerivativeAndCountZeros(binsAvrg, der1Avrg, der2Avrg, hillsPos);
-  size_t nPrevHills = 2 * nHills;
   if (nPeaks == 1) {
     foundRealPeakPos = true;
     realPeakPos = peaks[0];
@@ -548,7 +547,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   while ((nPeaks > 1 || nHills > 2) && (!iterations_fail)) {
     Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, &binsAvrg,
                                         0, ind_max - ind_min, &binsAvrg1);
-    nPrevHills = nHills;
+    const auto nPrevHills = nHills;
 
     nPeaks =
         this->calcDerivativeAndCountZeros(binsAvrg1, SAvrg1, der1Avrg, peaks);

@@ -4,15 +4,28 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui, QtCore
-import ui_errorreport
-from PyQt4.QtCore import pyqtSignal
-from mantidqtpython import MantidQt
+from __future__ import (absolute_import, print_function)
+
+import qtpy  # noqa
+
+if qtpy.PYQT5:
+    from ErrorReporter import resources_qt5  # noqa
+elif qtpy.PYQT4:
+    from ErrorReporter import resources_qt4  # noqa
+else:
+    raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
+
+from qtpy import QtCore, QtGui, QtWidgets # noqa: E402
+from qtpy.QtCore import Signal # noqa: E402
+from qtpy.QtWidgets import QMessageBox # noqa: E402
+from mantidqt.utils.qt import load_ui # noqa: E402
+
+ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
 
-class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
-    action = pyqtSignal(bool, int, str, str, str)
-    quit_signal = pyqtSignal()
+class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
+    action = Signal(bool, int, str, str, str)
+    quit_signal = Signal()
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -23,21 +36,21 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
             self.adjustSize()
         self.setFixedSize(self.width(), self.height())
 
-        self.quit_signal.connect(QtGui.QApplication.instance().quit)
+        self.quit_signal.connect(QtWidgets.QApplication.instance().quit)
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
-        self.requestTextBrowser.anchorClicked.connect(MantidQt.API.MantidDesktopServices.openUrl)
+        self.requestTextBrowser.anchorClicked.connect(QtGui.QDesktopServices.openUrl)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
 
-#  The options on what to do after closing the window (exit/continue)
-        self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
+        #  The options on what to do after closing the window (exit/continue)
+        self.radioButtonContinue.setChecked(True)  # Set continue to be checked by default
 
-#  These are the options along the bottom
+        #  These are the options along the bottom
         self.fullShareButton.clicked.connect(self.fullShare)
         self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
@@ -45,7 +58,7 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
-    def quit (self):
+    def quit(self):
         self.quit_signal.emit()
 
     def fullShare(self):
@@ -81,18 +94,14 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
             self.nonIDShareButton.setEnabled(False)
 
     def display_message_box(self, title, message, details):
-        msg = QtGui.QMessageBox(self)
-        msg.setIcon(QtGui.QMessageBox.Warning)
-
-        message_length = len(message)
-
-        # This is to ensure that the QMessage box is wide enough to display nicely.
-        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(message)
         msg.setWindowTitle(title)
         msg.setDetailedText(details)
-        msg.setStandardButtons(QtGui.QMessageBox.Ok)
-        msg.setDefaultButton(QtGui.QMessageBox.Ok)
-        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.setEscapeButton(QMessageBox.Ok)
         msg.exec_()
 
     def set_report_callback(self, callback):

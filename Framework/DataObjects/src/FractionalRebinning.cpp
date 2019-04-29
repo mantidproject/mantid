@@ -29,9 +29,9 @@ struct AreaInfo {
  * implementation uses the shoelace formula but requires the last element to
  * be the same as the first element. Also note that it returns 2x the area!
  */
-template <class T> double polyArea(T &) { return 0.; }
+template <class T> double polyArea(const T & /*unused*/) { return 0.; }
 template <class T, class... Ts>
-double polyArea(T &v1, T &v2, Ts &&... vertices) {
+double polyArea(const T &v1, const T &v2, Ts &&... vertices) {
   return v2.X() * v1.Y() - v2.Y() * v1.X() +
          polyArea(v2, std::forward<Ts>(vertices)...);
 }
@@ -319,7 +319,6 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
   double area(0.);
   ConvexPolygon poly;
   areaInfos.reserve(nx * ny);
-  size_t vertBits = 0;
   size_t yj0, yj1;
   for (size_t xi = x_start; xi < x_end; ++xi) {
     const size_t xj = xi - x_start;
@@ -347,7 +346,7 @@ void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
         // Checks if this bin is not completely outside new quadrilateral
       } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) &&
                  yAxis[yi] <= std::max(nul.Y(), nur.Y())) {
-        vertBits = 0;
+        size_t vertBits = 0;
         if (nll.Y() >= yAxis[yi] && nll.Y() <= yAxis[yi + 1])
           vertBits |= LL_IN;
         if (nul.Y() >= yAxis[yi] && nul.Y() <= yAxis[yi + 1])
@@ -478,13 +477,11 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
     const double vlo = yAxis[yi];
     const double vhi = yAxis[yi + 1];
     for (size_t xi = x_start; xi < x_end; ++xi) {
-      const V2D ll(xAxis[xi], vlo);
-      const V2D lr(xAxis[xi + 1], vlo);
-      const V2D ur(xAxis[xi + 1], vhi);
-      const V2D ul(xAxis[xi], vhi);
-      const Quadrilateral outputQ(ll, lr, ur, ul);
       intersectOverlap.clear();
-      if (intersection(outputQ, inputQ, intersectOverlap)) {
+      if (intersection(
+              Quadrilateral(V2D(xAxis[xi], vlo), V2D(xAxis[xi + 1], vlo),
+                            V2D(xAxis[xi + 1], vhi), V2D(xAxis[xi], vhi)),
+              inputQ, intersectOverlap)) {
         areaInfos.emplace_back(xi, yi, intersectOverlap.area());
       }
     }
@@ -499,17 +496,16 @@ void calcGeneralIntersections(const std::vector<double> &xAxis,
  * @param progress An optional progress object. Reported to once per bin.
  */
 void normaliseOutput(MatrixWorkspace_sptr outputWS,
-                     MatrixWorkspace_const_sptr inputWS,
-                     boost::shared_ptr<Progress> progress) {
+                     MatrixWorkspace_const_sptr inputWS, Progress *progress) {
   const bool removeBinWidth(inputWS->isDistribution() &&
                             outputWS->id() != "RebinnedOutput");
   for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
     const auto &outputX = outputWS->x(i);
     auto &outputY = outputWS->mutableY(i);
     auto &outputE = outputWS->mutableE(i);
+    if (progress)
+      progress->report("Calculating errors");
     for (size_t j = 0; j < outputY.size(); ++j) {
-      if (progress)
-        progress->report("Calculating errors");
       double eValue = std::sqrt(outputE[j]);
       if (removeBinWidth) {
         const double binWidth = outputX[j + 1] - outputX[j];
@@ -537,6 +533,12 @@ void rebinToOutput(const Quadrilateral &inputQ,
                    const MatrixWorkspace_const_sptr &inputWS, const size_t i,
                    const size_t j, MatrixWorkspace &outputWS,
                    const std::vector<double> &verticalAxis) {
+  const auto &inY = inputWS->y(i);
+  // Check once whether the signal
+  if (std::isnan(inY[j])) {
+    return;
+  }
+
   const auto &X = outputWS.x(0).rawData();
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
@@ -544,7 +546,6 @@ void rebinToOutput(const Quadrilateral &inputQ,
                              x_end))
     return;
 
-  const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
   // It seems to be more efficient to construct this once and clear it before
   // each calculation in the loop
@@ -553,19 +554,16 @@ void rebinToOutput(const Quadrilateral &inputQ,
     const double vlo = verticalAxis[y];
     const double vhi = verticalAxis[y + 1];
     for (size_t xi = x_start; xi < x_end; ++xi) {
-      const V2D ll(X[xi], vlo);
-      const V2D lr(X[xi + 1], vlo);
-      const V2D ur(X[xi + 1], vhi);
-      const V2D ul(X[xi], vhi);
-      const Quadrilateral outputQ(ll, lr, ur, ul);
-
-      double yValue = inY[j];
-      if (std::isnan(yValue)) {
-        continue;
-      }
       intersectOverlap.clear();
-      if (intersection(outputQ, inputQ, intersectOverlap)) {
-        const double weight = intersectOverlap.area() / inputQ.area();
+      if (intersection(Quadrilateral(V2D(X[xi], vlo), V2D(X[xi + 1], vlo),
+                                     V2D(X[xi + 1], vhi), V2D(X[xi], vhi)),
+                       inputQ, intersectOverlap)) {
+        const double overlapArea = intersectOverlap.area();
+        if (overlapArea == 0.) {
+          continue;
+        }
+        const double weight = overlapArea / inputQ.area();
+        double yValue = inY[j];
         yValue *= weight;
         double eValue = inE[j];
         if (inputWS->isDistribution()) {
@@ -576,6 +574,9 @@ void rebinToOutput(const Quadrilateral &inputQ,
         }
         eValue = eValue * eValue * weight;
         PARALLEL_CRITICAL(overlap_sum) {
+          // The mutable calls must be in the critical section
+          // so that any calls from omp sections can write to the
+          // output workspace safely
           outputWS.mutableY(y)[xi] += yValue;
           outputWS.mutableE(y)[xi] += eValue;
         }
@@ -667,8 +668,14 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
   const double variance = error * error;
   for (const auto &ai : areaInfos) {
+    if (ai.weight == 0.) {
+      continue;
+    }
     const double weight = ai.weight / inputQArea;
     PARALLEL_CRITICAL(overlap) {
+      // The mutable calls must be in the critical section
+      // so that any calls from omp sections can write to the
+      // output workspace safely
       outputWS.mutableY(ai.wsIndex)[ai.binIndex] += signal * weight;
       outputWS.mutableE(ai.wsIndex)[ai.binIndex] += variance * weight;
       outputWS.dataF(ai.wsIndex)[ai.binIndex] += weight * inputWeight;

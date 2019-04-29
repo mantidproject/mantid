@@ -50,10 +50,6 @@ DECLARE_ALGORITHM(CreateSampleWorkspace)
  */
 CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(nullptr) {}
 
-/** Destructor
- */
-CreateSampleWorkspace::~CreateSampleWorkspace() { delete m_randGen; }
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSampleWorkspace::name() const {
   return "CreateSampleWorkspace";
@@ -122,7 +118,7 @@ void CreateSampleWorkspace::init() {
   std::vector<std::string> functionOptions;
   functionOptions.reserve(m_preDefinedFunctionmap.size());
   for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
-    functionOptions.push_back(preDefinedFunction.first);
+    functionOptions.emplace_back(preDefinedFunction.first);
   }
   declareProperty("Function", "One Peak",
                   boost::make_shared<StringListValidator>(functionOptions),
@@ -225,7 +221,7 @@ void CreateSampleWorkspace::exec() {
     if (isRandom) {
       seedValue = static_cast<int>(std::time(nullptr));
     }
-    m_randGen = new Kernel::MersenneTwister(seedValue);
+    m_randGen = std::make_unique<Kernel::MersenneTwister>(seedValue);
   }
 
   int numPixels = numBanks * bankPixelWidth * bankPixelWidth;

@@ -49,6 +49,15 @@ private:
     // check the sum of all detector counts against Nexus file entry detsum
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"),
                      detCounts(output))
+    // spectrum number starts with 0
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 0)
+    // detector IDs start with 0
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getDetectorIDs(),
+                     std::set<Mantid::detid_t>{0})
+    // sample log entry must exist
+    TS_ASSERT(output->run().hasProperty("loader.two_theta"))
+    TS_ASSERT_EQUALS(output->run().getProperty("loader.two_theta")->units(),
+                     "degree")
   }
 
   static double detCounts(MatrixWorkspace_sptr output) {

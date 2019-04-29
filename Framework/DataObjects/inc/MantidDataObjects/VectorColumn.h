@@ -14,6 +14,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <cmath>
 namespace Mantid {
 namespace DataObjects {
 
@@ -120,6 +121,55 @@ public:
     UNUSED_ARG(i);
     UNUSED_ARG(value);
     throw std::runtime_error("VectorColumn is not assignable from double.");
+  }
+
+  /// Reference to the data.
+  const std::vector<std::vector<Type>> &data() const { return m_data; }
+
+  bool equals(const Column &otherColumn, double tolerance) const override {
+    if (!possibleToCompare(otherColumn)) {
+      return false;
+    }
+    const auto &otherColumnTyped =
+        static_cast<const VectorColumn<Type> &>(otherColumn);
+    const auto &otherData = otherColumnTyped.data();
+    for (size_t i = 0; i < m_data.size(); i++) {
+      if (m_data[i].size() != otherData[i].size()) {
+        return false;
+      }
+      for (size_t j = 0; j < m_data[i].size(); j++) {
+        if (fabs((double)m_data[i][j] - (double)otherData[i][j]) > tolerance) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  bool equalsRelErr(const Column &otherColumn,
+                    double tolerance) const override {
+    if (!possibleToCompare(otherColumn)) {
+      return false;
+    }
+    const auto &otherColumnTyped =
+        static_cast<const VectorColumn<Type> &>(otherColumn);
+    const auto &otherData = otherColumnTyped.data();
+    for (size_t i = 0; i < m_data.size(); i++) {
+      if (m_data[i].size() != otherData[i].size()) {
+        return false;
+      }
+      for (size_t j = 0; j < m_data[i].size(); j++) {
+        double num = fabs((double)m_data[i][j] - (double)otherData[i][j]);
+        double den =
+            (fabs((double)m_data[i][j]) + fabs((double)otherData[i][j])) / 2;
+        if (den < tolerance && num > tolerance) {
+          return false;
+        } else if (num / den > tolerance) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
 protected:

@@ -51,6 +51,9 @@ public:
     double attenuationXSection = EMPTY_DBL();
     /// The total scattering cross section to set, defaults to EMPTY_DBL()
     double scatteringXSection = EMPTY_DBL();
+    /// A flag indicating the unit of sampleNumberDensity
+    Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
+        Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
   };
   /**
    * Validate the parameters to build the material from, this returns
@@ -59,14 +62,14 @@ public:
    * @param params A struct containing all the parameters to be set.
    * @returns A map containing the relevent failure messages, if any.
    */
-  static ValidationErrors validateInputs(MaterialParameters params);
+  static ValidationErrors validateInputs(const MaterialParameters &params);
   /**
    * Set the parameters to build the material to the builder,
    * taking into account which values were and weren't set.
    *
    * @param params A struct containing all the parameters to be set.
    */
-  void setMaterialParameters(MaterialParameters params);
+  void setMaterialParameters(const MaterialParameters &params);
   /**
    * Construct the material,
    *
@@ -84,8 +87,10 @@ private:
   void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
                    const int massNumber);
 
-  void setNumberDensity(const double rho_m, const double rho,
-                        const double zParameter, const double unitCellVolume);
+  void
+  setNumberDensity(const double rho_m, const double rho,
+                   const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
+                   const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
                          double attenuationXSection, double scatteringXSection);
 

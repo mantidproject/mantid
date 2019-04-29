@@ -250,11 +250,10 @@ PoldiIndexKnownCompounds::getPeakCollections(
 std::vector<std::string> PoldiIndexKnownCompounds::getWorkspaceNames(
     const std::vector<Workspace_sptr> &workspaces) const {
   std::vector<std::string> names;
-
+  names.reserve(workspaces.size());
   for (const auto &workspace : workspaces) {
-    names.push_back(workspace->getName());
+    names.emplace_back(workspace->getName());
   }
-
   return names;
 }
 

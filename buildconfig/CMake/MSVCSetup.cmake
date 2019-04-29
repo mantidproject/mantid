@@ -102,6 +102,8 @@ else ()
 endif()
 
 configure_file ( ${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY )
+configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycharm.env @ONLY )
+
 # The IDE may not be installed as we could be just using the build tools
 if ( EXISTS ${MSVC_IDE_LOCATION}/devenv.exe )
     configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY )
@@ -150,6 +152,11 @@ set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
 # This is the root of the plugins directory
 set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+
 # Separate directory of plugins to be discovered by the ParaView framework
 # These cannot be mixed with our other plugins. Further sub-directories
 # based on the Qt version will also be created by the installation targets

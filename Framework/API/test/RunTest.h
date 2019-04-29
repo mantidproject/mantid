@@ -15,7 +15,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
 #include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,7 +36,9 @@ public:
     return "getDefault() is not implemented in this class";
   }
   std::string value() const override { return "Nothing"; }
+  Json::Value valueAsJson() const override { return Json::Value(); }
   std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromJson(const Json::Value &) override { return ""; }
   std::string setValueFromProperty(const Property &) override { return ""; }
   std::string setDataItem(const boost::shared_ptr<DataItem>) override {
     return "";

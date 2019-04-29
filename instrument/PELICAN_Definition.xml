@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WARNING: this file was automatically generated and any changes will be lost when it is regenerated. -->
+<!-- see http://www.mantidproject.org/IDF -->
+<instrument
+  xmlns="http://www.mantidproject.org/IDF/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+  name="PELICAN"
+  valid-from="1900-01-31 23:59:59">
+  <!-- DEFAULTS -->
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="y-"/>
+  </defaults>
+  <!-- SOURCE -->
+  <type name="Aperture" is="Source"/>
+  <component name="aperture" type="Aperture">
+    <location x="0.0" y="0.0" z="-0.695"/>
+  </component>
+  <!-- SAMPLE -->
+  <type name="SampleHolder" is="SamplePos"/>
+  <component name="sampleHolder" type="SampleHolder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <!-- MONITORS -->
+  <type name="MonitorPixel" is="Monitor">
+    <cylinder id="cyl">
+      <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.025"/>
+      <height val="0.1"/>
+    </cylinder>
+    <algebra val="cyl"/>
+  </type>
+  <component name="monitorPanel" type="MonitorPixel" idlist="monitor_ids">
+    <location x="0.0" y="-0.050" z="-1.60" name="monitor_000"/>
+    <location x="0.0" y="-0.050" z="-1.65" name="monitor_001"/>
+    <location x="0.0" y="-0.050" z="-1.70" name="monitor_002"/>
+    <location x="0.0" y="-0.050" z="-1.75" name="monitor_003"/>
+    <location x="0.0" y="-0.050" z="-1.80" name="monitor_004"/>
+    <location x="0.0" y="-0.050" z="-1.85" name="monitor_005"/>
+    <location x="0.0" y="-0.050" z="-1.90" name="monitor_006"/>
+    <location x="0.0" y="-0.050" z="-1.95" name="monitor_007"/>
+  </component>
+  <idlist idname="monitor_ids">
+    <id start="12800" end="12807" />
+  </idlist>
+  <!-- DETECTORS -->
+  <type name="Pixel" is="Detector">
+    <cylinder id="cyl">
+      <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.0127"/>
+      <height val="0.015625"/>
+    </cylinder>
+    <algebra val="cyl"/>
+  </type>
+  <type name="Tube" outline="yes">
+    <component type="Pixel">
+      <locations y="-0.500000000" y-end="+0.484375000" n-elements="64" />
+    </component>
+  </type>
+  <type name="Panel">
+    <component type="Tube">
+      <location x="+0.092068"/>
+      <location x="+0.065763"/>
+      <location x="+0.039458"/>
+      <location x="+0.013153"/>
+      <location x="-0.013153"/>
+      <location x="-0.039458"/>
+      <location x="-0.065763"/>
+      <location x="-0.092068"/>
+    </component>
+  </type>
+  <type name="PanelAssembly">
+    <component type="Panel">
+      <location r="+2.400000" t="+60.300000" name="Panel_0"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+55.275000" name="Panel_1"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+50.250000" name="Panel_2"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+45.225000" name="Panel_3"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+40.200000" name="Panel_4"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+35.175000" name="Panel_5"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+30.150000" name="Panel_6"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+25.125000" name="Panel_7"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+20.100000" name="Panel_8"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+15.075000" name="Panel_9"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+10.050000" name="Panel_10"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="+5.025000" name="Panel_11"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-0.000000" name="Panel_12"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-5.025000" name="Panel_13"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-10.050000" name="Panel_14"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-15.075000" name="Panel_15"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-20.100000" name="Panel_16"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-25.125000" name="Panel_17"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-30.150000" name="Panel_18"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-35.175000" name="Panel_19"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-40.200000" name="Panel_20"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-45.225000" name="Panel_21"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-50.250000" name="Panel_22"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-55.275000" name="Panel_23"><facing x="0" y="0" z="0"/> </location>
+      <location r="+2.400000" t="-60.300000" name="Panel_24"><facing x="0" y="0" z="0"/> </location>
+    </component>
+  </type>
+  <type name="PanelStth">
+    <component name="panelStth" type="PanelAssembly">
+      <location>
+        <parameter name="roty">
+          <logfile id="DetectorTankAngle" eq="value"/>
+        </parameter>
+      </location>
+    </component>
+  </type>
+  <component name="panelFinal" type="PanelStth" idlist="direct_ids">
+    <location/>
+  </component>
+  <idlist idname="direct_ids">
+    <id start="0" end="12799" />
+  </idlist>
+</instrument>

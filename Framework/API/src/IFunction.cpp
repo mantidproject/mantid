@@ -66,13 +66,7 @@ struct TieNode {
 /**
  * Destructor
  */
-IFunction::~IFunction() {
-  m_attrs.clear();
-  if (m_handler) {
-    delete m_handler;
-    m_handler = nullptr;
-  }
-}
+IFunction::~IFunction() { m_attrs.clear(); }
 
 /**
  * Virtual copy constructor
@@ -406,9 +400,9 @@ void IFunction::removeConstraint(const std::string &parName) {
 void IFunction::setConstraintPenaltyFactor(const std::string &parName,
                                            const double &c) {
   size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getLocalIndex()) {
-      (**it).setPenaltyFactor(c);
+  for (auto &constraint : m_constraints) {
+    if (iPar == constraint->getLocalIndex()) {
+      constraint->setPenaltyFactor(c);
       return;
     }
   }
@@ -558,8 +552,8 @@ std::vector<std::string> IFunction::getParameterNames() const {
 /** Set a function handler
  * @param handler :: A new handler
  */
-void IFunction::setHandler(FunctionHandler *handler) {
-  m_handler = handler;
+void IFunction::setHandler(std::unique_ptr<FunctionHandler> handler) {
+  m_handler = std::move(handler);
   if (handler && handler->function().get() != this) {
     throw std::runtime_error("Function handler points to a different function");
   }
@@ -592,17 +586,17 @@ namespace {
 class AttType : public IFunction::ConstAttributeVisitor<std::string> {
 protected:
   /// Apply if string
-  std::string apply(const std::string &) const override {
+  std::string apply(const std::string & /*str*/) const override {
     return "std::string";
   }
   /// Apply if int
-  std::string apply(const int &) const override { return "int"; }
+  std::string apply(const int & /*i*/) const override { return "int"; }
   /// Apply if double
-  std::string apply(const double &) const override { return "double"; }
+  std::string apply(const double & /*d*/) const override { return "double"; }
   /// Apply if bool
-  std::string apply(const bool &) const override { return "bool"; }
+  std::string apply(const bool & /*i*/) const override { return "bool"; }
   /// Apply if vector
-  std::string apply(const std::vector<double> &) const override {
+  std::string apply(const std::vector<double> & /*unused*/) const override {
     return "std::vector<double>";
   }
 };
@@ -1359,7 +1353,7 @@ std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(m_attrs.size());
   for (const auto &attr : m_attrs) {
-    names.push_back(attr.first);
+    names.emplace_back(attr.first);
   }
   return names;
 }

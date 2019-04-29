@@ -440,5 +440,21 @@ void ComponentInfo::merge(const ComponentInfo &other) {
   m_componentInfo->merge(*other.m_componentInfo);
 }
 
+ComponentInfoIt ComponentInfo::begin() {
+  return ComponentInfoIt(*this, 0, size());
+}
+
+ComponentInfoIt ComponentInfo::end() {
+  return ComponentInfoIt(*this, size(), size());
+}
+
+const ComponentInfoConstIt ComponentInfo::cbegin() {
+  return ComponentInfoConstIt(*this, 0, size());
+}
+
+const ComponentInfoConstIt ComponentInfo::cend() {
+  return ComponentInfoConstIt(*this, size(), size());
+}
+
 } // namespace Geometry
 } // namespace Mantid

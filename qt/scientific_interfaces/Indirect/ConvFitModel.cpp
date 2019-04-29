@@ -24,6 +24,10 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
 boost::optional<std::size_t>
 getFirstInCategory(CompositeFunction_const_sptr composite,
                    const std::string &category) {
@@ -145,30 +149,43 @@ void readAnalyserFromFile(const std::string &analyser,
 
 Mantid::Geometry::IComponent_const_sptr
 getAnalyser(MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto analysers = instrument->getStringParameter("analyser");
+  auto const instrument = workspace->getInstrument();
+  auto const analysers = instrument->getStringParameter("analyser");
 
   if (analysers.empty())
     throw std::invalid_argument(
         "Could not load instrument resolution from parameter file");
 
-  auto component = instrument->getComponentByName(analysers[0]);
-  auto resolutionParameters = component->getNumberParameter("resolution");
-  if (nullptr == component || resolutionParameters.empty())
+  auto const component = instrument->getComponentByName(analysers[0]);
+  if (component) {
+    if (component->hasParameter("resolution")) {
+      auto const resolutionParameters =
+          component->getNumberParameter("resolution");
+      if (resolutionParameters.empty())
+        readAnalyserFromFile(analysers[0], workspace);
+    }
+  } else {
     readAnalyserFromFile(analysers[0], workspace);
-  return workspace->getInstrument()->getComponentByName(analysers[0]);
+  }
+  return instrument->getComponentByName(analysers[0]);
 }
 
 boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   try {
-    auto analyser = getAnalyser(workspace);
-    if (analyser != nullptr)
+    auto const analyser = getAnalyser(workspace);
+    if (analyser && analyser->hasParameter("resolution"))
       return analyser->getNumberParameter("resolution")[0];
-    else
-      return workspace->getInstrument()->getNumberParameter("resolution")[0];
-  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+
+    auto const instrument = workspace->getInstrument();
+    if (instrument && instrument->hasParameter("resolution"))
+      return instrument->getNumberParameter("resolution")[0];
+    else if (instrument && instrument->hasParameter("EFixed"))
+      return instrument->getNumberParameter("EFixed")[0] * 0.01;
+
     return boost::none;
-  } catch (const std::invalid_argument &) {
+  } catch (Mantid::Kernel::Exception::NotFoundError const &) {
+    return boost::none;
+  } catch (std::invalid_argument const &) {
     return boost::none;
   }
 }
@@ -450,7 +467,7 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Result";
+    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
   return createOutputName(
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", 0);
 }
@@ -461,8 +478,9 @@ std::string ConvFitModel::simultaneousFitOutputName() const {
 
 std::string ConvFitModel::singleFitOutputName(std::size_t index,
                                               std::size_t spectrum) const {
-  return createSingleFitOutputName(
-      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", index, spectrum);
+  return createSingleFitOutputName("%1%_conv_" + m_fitType +
+                                       m_backgroundString + "_s%2%_Results",
+                                   index, spectrum);
 }
 
 Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
@@ -553,7 +571,10 @@ void ConvFitModel::removeWorkspace(std::size_t index) {
 }
 
 void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
-  setResolution(getADSMatrixWorkspace(name), index);
+  if (!name.empty() && doesExistInADS(name))
+    setResolution(getADSMatrixWorkspace(name), index);
+  else
+    throw std::runtime_error("A valid resolution file needs to be selected.");
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,

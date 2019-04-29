@@ -121,13 +121,16 @@ public:
   void addLogData(Kernel::Property *p) {
     addLogData(std::unique_ptr<Kernel::Property>(p));
   }
+
   /**
    * Add a log entry
    * @param p :: A pointer to the property containing the log entry
+   * @param overwrite :: Overwrite existing if requested
    */
-  void addLogData(std::unique_ptr<Kernel::Property> p) {
-    addProperty(std::move(p));
+  void addLogData(std::unique_ptr<Kernel::Property> p, bool overwrite = false) {
+    addProperty(std::move(p), overwrite);
   }
+
   /**
    * Access a single log entry
    * @param name :: The name of the log entry to retrieve

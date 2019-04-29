@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindEPP.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/make_unique.h"
 
 #include <cmath>
@@ -17,6 +17,7 @@ namespace Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindEPP)
@@ -189,7 +190,7 @@ void FindEPP::fitGaussian(int64_t index) {
  */
 void FindEPP::initWorkspace() {
 
-  m_outWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outWS = boost::make_shared<TableWorkspace>();
 
   const std::vector<std::string> columns = {
       "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
@@ -205,9 +206,7 @@ void FindEPP::initWorkspace() {
   const size_t numberSpectra = m_inWS->getNumberHistograms();
   m_progress = make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
 
-  for (size_t i = 0; i < numberSpectra; ++i) {
-    m_outWS->appendRow();
-  }
+  m_outWS->setRowCount(numberSpectra);
 }
 
 } // namespace Algorithms

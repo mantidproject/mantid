@@ -9,17 +9,19 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# system imports
 import unittest
 
-# third-party library imports
-
-# local imports
-from mantidqt.utils.qt.test import GuiTest
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
+MANTID_API_IMPORT = "from mantid.simpleapi import *\n"
+PERMISSION_BOX_FUNC = ('mantidqt.widgets.codeeditor.scriptcompatibility.'
+                       'permission_box_to_prepend_import')
 
-class MultiPythonFileInterpreterTest(GuiTest):
+
+class MultiPythonFileInterpreterTest(GuiTest, QtWidgetFinder):
 
     def test_default_contains_single_editor(self):
         widget = MultiPythonFileInterpreter()
@@ -30,6 +32,28 @@ class MultiPythonFileInterpreterTest(GuiTest):
         self.assertEqual(1, widget.editor_count)
         widget.append_new_editor()
         self.assertEqual(2, widget.editor_count)
+
+    def test_open_file_in_new_tab_import_added(self):
+        test_string = "Test file\nLoad()"
+        widget = MultiPythonFileInterpreter()
+        mock_open_func = mock.mock_open(read_data=test_string)
+        with mock.patch(widget.__module__ + '.open', mock_open_func, create=True):
+            with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
+                widget.open_file_in_new_tab(test_string)
+        self.assertEqual(widget.current_editor().editor.isModified(), True,
+                         msg="Script not marked as modified.")
+        self.assertIn(MANTID_API_IMPORT, widget.current_editor().editor.text(),
+                      msg="'simpleapi' import not added to script.")
+
+    def test_open_file_in_new_tab_no_import_added(self):
+        test_string = "Test file\n"
+        widget = MultiPythonFileInterpreter()
+        mock_open_func = mock.mock_open(read_data=test_string)
+        with mock.patch(widget.__module__ + '.open', mock_open_func, create=True):
+            with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
+                widget.open_file_in_new_tab(test_string)
+        self.assertNotIn(MANTID_API_IMPORT,
+                         widget.current_editor().editor.text())
 
 
 if __name__ == '__main__':

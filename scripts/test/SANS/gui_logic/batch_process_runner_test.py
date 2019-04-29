@@ -5,16 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
-import unittest
-import sys
-from sans.common.enums import (OutputMode)
-from PyQt4.QtCore import QThreadPool
 
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+from qtpy.QtCore import QThreadPool
+import unittest
+
+from mantid.py3compat import mock
+from sans.common.enums import (OutputMode)
+from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 
 
 class BatchProcessRunnerTest(unittest.TestCase):

@@ -49,7 +49,7 @@ MDNormDirectSC::MDNormDirectSC()
     : m_normWS(), m_inputWS(), m_hmin(0.0f), m_hmax(0.0f), m_kmin(0.0f),
       m_kmax(0.0f), m_lmin(0.0f), m_lmax(0.0f), m_dEmin(0.f), m_dEmax(0.f),
       m_Ei(0.), m_ki(0.), m_kfmin(0.), m_kfmax(0.), m_hIntegrated(true),
-      m_kIntegrated(true), m_lIntegrated(true), m_dEIntegrated(false),
+      m_kIntegrated(true), m_lIntegrated(true), m_dEIntegrated(true),
       m_rubw(3, 3), m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_hX(),
       m_kX(), m_lX(), m_eX(), m_samplePos(), m_beamDir() {}
 
@@ -206,14 +206,12 @@ void MDNormDirectSC::cacheInputs() {
         "sample");
   }
   m_samplePos = sample->getPos();
-  m_beamDir = m_samplePos - source->getPos();
-  m_beamDir.normalize();
+  m_beamDir = normalize(m_samplePos - source->getPos());
 
   double originaldEmin = exptInfoZero.run().getBinBoundaries().front();
   double originaldEmax = exptInfoZero.run().getBinBoundaries().back();
   if (exptInfoZero.run().hasProperty("Ei")) {
-    Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
-    m_Ei = boost::lexical_cast<double>(eiprop->value());
+    m_Ei = exptInfoZero.run().getPropertyValueAsType<double>("Ei");
     if (m_Ei <= 0) {
       throw std::invalid_argument("Ei stored in the workspace is not positive");
     }

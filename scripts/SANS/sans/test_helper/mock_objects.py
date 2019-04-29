@@ -6,21 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import)
 
+from functools import (partial)
+
+from mantid.py3compat import mock
+from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
+from sans.test_helper.test_director import TestDirector
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
-from sans.test_helper.test_director import TestDirector
-from functools import (partial)
-
-import sys
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 def create_mock_settings_diagnostic_tab():
@@ -37,6 +33,8 @@ def create_mock_masking_table():
 
 def create_mock_beam_centre_tab():
     view = mock.create_autospec(BeamCentre, spec_set=False)
+    view.r_min_line_edit = mock.Mock()
+    view.r_max_line_edit = mock.Mock()
     return view
 
 
@@ -90,8 +88,8 @@ def add_listener_mock(listener):
     mock_listener_list.append(listener)
 
 
-def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = ""):
-    get_cell_mock_with_path = partial(get_cell_mock, user_file_path = row_user_file_path)
+def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""):
+    get_cell_mock_with_path = partial(get_cell_mock, user_file_path=row_user_file_path)
 
     view = mock.create_autospec(SANSDataProcessorGui, spec_set=False)
     view.get_user_file_path = mock.Mock(return_value=user_file_path)
@@ -116,6 +114,9 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     view.diagnostic_page = diagnostic_page
 
     view.halt_process_flag = mock.MagicMock()
+
+    # Mock objects used in the properties handler
+    view.user_file_line_edit = mock.Mock()
 
     # ---------------------
     # Mocking properties
@@ -236,11 +237,11 @@ class FakeState(object):
         return self.dummy_state
 
 
-def get_state_for_row_mock(row_index, file_lookup=True):
+def get_state_for_row_mock(row_index, file_lookup=True, suppress_warnings=False):
     return FakeState() if row_index == 3 else ""
 
 
-def get_state_for_row_mock_with_real_state(row_index, file_lookup=True):
+def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress_warnings=False):
     _ = row_index  # noqa
     test_director = TestDirector()
     return test_director.construct()

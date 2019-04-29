@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidUI.h"
 #include "AlgorithmDockWidget.h"
-#include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
 #include "ImportWorkspaceDlg.h"
 #include "MantidMDCurve.h"
@@ -48,6 +47,7 @@
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
+#include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
@@ -3381,8 +3381,7 @@ void MantidUI::drawColorFillPlots(const QStringList &wsNames,
  * @param wsName :: The name of the workspace which provides data for the plot
  * @param curveType :: The type of curve
  * @param window :: An optional pointer to a plot window. If not NULL the window
- * is cleared
- *                      and reused
+ * is cleared and reused
  * @param hidden
  * @returns A pointer to the created plot
  */
@@ -3394,6 +3393,16 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
           getWorkspace(wsName));
   if (!workspace)
     return nullptr;
+
+  // Check if an axis is a String, if so then throw log without this, it will
+  // cause MantidPlot to get into an error loop forcing users to terminate.
+  for (auto i = 0u; i < workspace->numberOfAxis(); ++i) {
+    if (workspace->getAxis(i)->isText()) {
+      g_log.error("Colorfill Plot - Cannot plot a workspace which has an axis "
+                  "of type text.");
+      return nullptr;
+    }
+  }
 
   ScopedOverrideCursor waitCursor;
 

@@ -1,8 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITDATACREATIONHELPER_H_
 #define MANTID_INDIRECTFITDATACREATIONHELPER_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidHistogramData/BinEdges.h"
 
 #include <string>
@@ -13,11 +22,38 @@
 
 namespace Mantid {
 namespace IndirectFitDataCreationHelper {
+/// Commonly used constant variables
+int const START_X_COLUMN(2);
+int const END_X_COLUMN(3);
+int const EXCLUDE_REGION_COLUMN(4);
 
 /// Functions used in the creation of workspaces
-Mantid::API::MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra);
+Mantid::API::MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra,
+                                                  int const &numberOfBins = 10);
 Mantid::API::MatrixWorkspace_sptr createInstrumentWorkspace(int const &xLength,
                                                             int const &yLength);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithTextAxis(int const &numberOfSpectra,
+                            std::vector<std::string> const &labels,
+                            int const &numberOfBins = 10);
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithBinValues(int const &numberOfSpectra,
+                             std::vector<double> const &labels,
+                             int const &numberOfBins = 10);
+Mantid::API::WorkspaceGroup_sptr
+createGroupWorkspace(std::size_t const &numberOfWorkspaces,
+                     int const &numberOfSpectra, int const &numberOfBins = 10);
+Mantid::API::WorkspaceGroup_sptr
+createGroupWorkspaceWithTextAxes(std::size_t const &numberOfWorkspaces,
+                                 std::vector<std::string> const &labels,
+                                 int const &numberOfSpectra,
+                                 int const &numberOfBins = 10);
+
+Mantid::API::TextAxis *getTextAxis(int const &numberOfSpectra,
+                                   std::vector<std::string> const &labels);
+Mantid::API::NumericAxis *getNumericAxis(int const &numberOfLabels,
+                                         std::vector<double> const &values);
+
 Mantid::API::MatrixWorkspace_sptr
 setWorkspaceEFixed(Mantid::API::MatrixWorkspace_sptr workspace,
                    int const &xLength);

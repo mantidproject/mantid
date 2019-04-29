@@ -41,11 +41,10 @@ namespace { // anonymous namespace
 
 class ConversionFactors {
 public:
-  explicit ConversionFactors(ITableWorkspace_const_sptr table) {
-    m_difcCol = table->getColumn("difc");
-    m_difaCol = table->getColumn("difa");
-    m_tzeroCol = table->getColumn("tzero");
-
+  explicit ConversionFactors(ITableWorkspace_const_sptr table)
+      : m_difcCol(table->getColumn("difc")),
+        m_difaCol(table->getColumn("difa")),
+        m_tzeroCol(table->getColumn("tzero")) {
     this->generateDetidToRow(table);
   }
 
@@ -111,12 +110,7 @@ const std::string AlignDetectors::summary() const {
 }
 
 /// (Empty) Constructor
-AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {
-  this->tofToDmap = nullptr;
-}
-
-/// Destructor
-AlignDetectors::~AlignDetectors() { delete this->tofToDmap; }
+AlignDetectors::AlignDetectors() : m_numberOfSpectra(0) {}
 
 void AlignDetectors::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

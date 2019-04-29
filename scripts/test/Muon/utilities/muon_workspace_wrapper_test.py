@@ -178,15 +178,6 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         self.assertEqual(workspace_handle.name, "new_name")
 
-    def test_that_running_show_twice_with_different_names_causes_the_workspace_to_be_moved(self):
-        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
-
-        workspace_handle.show("name1")
-        workspace_handle.show("name2")
-
-        self.assertFalse(simpleapi.mtd.doesExist("name1"))
-        self.assertTrue(simpleapi.mtd.doesExist("name2"))
-
     def test_that_cannot_change_name_when_workspace_in_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
@@ -195,23 +186,17 @@ class MuonWorkspaceTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             workspace_handle.name = "new_name"
 
-    def test_that_hiding_workspace_more_than_once_has_no_effect_but_raises_RuntimeWarning(self):
+    def test_that_hiding_workspace_more_than_once_has_no_effect(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         workspace_handle.hide()
 
-        with self.assertRaises(RuntimeWarning):
-            workspace_handle.hide()
-
-    def test_that_if_workspace_deleted_from_ADS_then_hide_raises_a_RuntimeWarning(self):
+    def test_that_if_workspace_deleted_from_ADS_then_hide_does_nothing(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         simpleapi.mtd.clear()
-
-        with self.assertRaises(RuntimeWarning):
-            workspace_handle.hide()
 
     def test_that_hiding_workspace_deletes_groups_which_are_left_empty(self):
         # TODO

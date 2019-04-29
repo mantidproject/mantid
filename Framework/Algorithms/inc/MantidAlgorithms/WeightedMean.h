@@ -7,10 +7,8 @@
 #ifndef MANTID_ALGORITHMS_WEIGHTEDMEAN_H_
 #define MANTID_ALGORITHMS_WEIGHTEDMEAN_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAlgorithms/BinaryOperation.h"
+#include "MantidAlgorithms/CommutativeBinaryOperation.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -27,7 +25,7 @@ namespace Algorithms {
     @author Robert Dalgliesh, ISIS, RAL
     @date 12/1/2010
  */
-class DLLExport WeightedMean : public BinaryOperation {
+class DLLExport WeightedMean : public CommutativeBinaryOperation {
 public:
   const std::string name() const override { return "WeightedMean"; }
   /// Summary of algorithms purpose
@@ -42,14 +40,14 @@ public:
 
 private:
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const MantidVec &rhsY,
-                              const MantidVec &rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override;
-  void performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
-                              const MantidVec &lhsE, const double rhsY,
-                              const double rhsE, MantidVec &YOut,
-                              MantidVec &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const HistogramData::Histogram &rhs,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override;
+  void performBinaryOperation(const HistogramData::Histogram &lhs,
+                              const double rhsY, const double rhsE,
+                              HistogramData::HistogramY &YOut,
+                              HistogramData::HistogramE &EOut) override;
   bool
   checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                      const API::MatrixWorkspace_const_sptr rhs) const override;

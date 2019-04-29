@@ -59,10 +59,9 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   const auto nz = normal[2];
   const auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
   const auto denom = normal.norm();
-  const static double tolerance =
-      1e-9; // Fixed Tolerance. Too expensive to calculate
-            // based on machine uncertaintly for each
-            // vertex.
+  const static double tolerance = 1e-9; // Fixed Tolerance. Too expensive to
+                                        // calculate based on machine
+                                        // uncertaintly for each vertex.
 
   for (const auto &vertex : vertices) {
     auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k) / denom;
@@ -108,7 +107,7 @@ namespace {
  * @param vertex3 :: Third vertex of triangle
  * @returns true if the specified triangle exists
  */
-bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
+bool getTriangle(const size_t index, const std::vector<uint32_t> &triangles,
                  const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
                  Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
   bool triangleExists = index < triangles.size() / 3;
@@ -146,7 +145,7 @@ bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
 /**
  * Constructor
  */
-MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
+MeshObject2D::MeshObject2D(const std::vector<uint32_t> &faces,
                            const std::vector<Kernel::V3D> &vertices,
                            const Kernel::Material &material)
     : m_triangles(faces), m_vertices(vertices), m_material(material) {
@@ -156,7 +155,7 @@ MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
 /**
  * Move constructor
  */
-MeshObject2D::MeshObject2D(std::vector<uint16_t> &&faces,
+MeshObject2D::MeshObject2D(std::vector<uint32_t> &&faces,
                            std::vector<Kernel::V3D> &&vertices,
                            const Kernel::Material &&material)
     : m_triangles(std::move(faces)), m_vertices(std::move(vertices)),
@@ -207,10 +206,11 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
 
   static const double tolerance = 1e-9;
   if (distanceToPlane(point) < tolerance) {
-    for (size_t i = 0; i < m_vertices.size(); i += 3) {
+    for (size_t i = 0; i < m_triangles.size(); i += 3) {
 
-      if (MeshObjectCommon::isOnTriangle(point, m_vertices[i],
-                                         m_vertices[i + 1], m_vertices[i + 2]))
+      if (MeshObjectCommon::isOnTriangle(point, m_vertices[m_triangles[i]],
+                                         m_vertices[m_triangles[i + 1]],
+                                         m_vertices[m_triangles[i + 2]]))
         return true;
     }
   }
@@ -244,7 +244,7 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
   // fails
   if (t >= 0) {
     Kernel::V3D intersection;
-    int entryExit;
+    TrackDirection entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
       if (MeshObjectCommon::rayIntersectsTriangle(
               ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
@@ -356,18 +356,18 @@ int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
   return this->isValid(point) ? 1 : 0;
 }
 
-Kernel::V3D
-MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
-                                    const size_t) const {
+Kernel::V3D MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const size_t /*unused*/) const {
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
   // use the bounding box
   throw std::runtime_error("Not implemented.");
 }
 
-Kernel::V3D
-MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
-                                    const BoundingBox &, const size_t) const {
+Kernel::V3D MeshObject2D::generatePointInObject(
+    Kernel::PseudoRandomNumberGenerator & /*rng*/,
+    const BoundingBox & /*activeRegion*/, const size_t /*unused*/) const {
 
   // How this would work for a finite plane is not clear. Points within the
   // plane can of course be generated, but most implementations of this method
@@ -375,7 +375,7 @@ MeshObject2D::generatePointInObject(Kernel::PseudoRandomNumberGenerator &,
   throw std::runtime_error("Not implemented");
 }
 
-const Kernel::Material MeshObject2D::material() const { return m_material; }
+const Kernel::Material &MeshObject2D::material() const { return m_material; }
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 
@@ -393,16 +393,21 @@ std::vector<double> MeshObject2D::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
 }
 
-std::vector<uint32_t> MeshObject2D::getTriangles() const {
+std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
 
-  return MeshObjectCommon::getTriangles_uint32(m_triangles);
+detail::ShapeInfo::GeometryShape MeshObject2D::shape() const {
+  // should be consistent with MeshObject2D::GetObjectGeom
+  return detail::ShapeInfo::GeometryShape::NOSHAPE;
+}
+
+const detail::ShapeInfo &MeshObject2D::shapeInfo() const {
+  throw std::runtime_error("MeshObject2D::shapeInfo() is not implemented");
 }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
-                                 std::vector<Kernel::V3D> &, double &,
+                                 std::vector<Kernel::V3D> &, double &, double &,
                                  double &) const {
-
-  throw std::runtime_error("Not implemented");
+  throw std::runtime_error("MeshObject2D::GetObjectGeom is not implemented");
 }
 
 void MeshObject2D::draw() const {

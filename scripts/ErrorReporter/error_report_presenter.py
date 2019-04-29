@@ -4,17 +4,24 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import ErrorReporter, UsageService, ConfigService
-from mantid.kernel import Logger
-from ErrorReporter.retrieve_recovery_files import zip_recovery_directory, remove_recovery_file
+from __future__ import (absolute_import, print_function)
+
+import os
+
 import requests
+
+from ErrorReporter.retrieve_recovery_files import zip_recovery_directory
+from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
 
 class ErrorReporterPresenter(object):
-    def __init__(self, view, exit_code):
+    SENDING_ERROR_MESSAGE = 'There was an error when sending the report.\nPlease contact mantid-help@mantidproject.org directly'
+
+    def __init__(self, view, exit_code, application='mantidplot'):
         self.error_log = Logger("error")
         self._view = view
         self._exit_code = exit_code
+        self._application = application
         self._view.set_report_callback(self.error_handler)
 
     def do_not_share(self, continue_working=True):
@@ -31,13 +38,21 @@ class ErrorReporterPresenter(object):
 
     def share_all_information(self, continue_working, name, email, text_box):
         uptime = UsageService.getUpTime()
-        zip_recovery_file, file_hash = zip_recovery_directory()
-        status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash
-                                             , text_box=text_box)
-        self.error_log.notice("Sent complete information")
-        if status == 201:
-            self._upload_recovery_file(zip_recovery_file=zip_recovery_file)
-        remove_recovery_file(zip_recovery_file)
+        try:
+            recovery_archive, file_hash = zip_recovery_directory()
+        except Exception as exc:
+            self.error_log.information("Error creating recovery archive: {}. No recovery information will be sent")
+            recovery_archive, file_hash = None, ""
+        status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email,
+                                             file_hash=file_hash, text_box=text_box)
+        self.error_log.notice("Sent full information")
+        if status == 201 and recovery_archive:
+            self._upload_recovery_file(recovery_archive=recovery_archive)
+            try:
+                os.remove(recovery_archive)
+            except OSError as exc:
+                self.error_log.information("Unable to remove zipped recovery information: {}".format(str(exc)))
+
         self._handle_exit(continue_working)
         return status
 
@@ -62,25 +77,37 @@ class ErrorReporterPresenter(object):
         else:
             self.error_log.error("Continue working.")
 
-    def _upload_recovery_file(self, zip_recovery_file):
+    def _upload_recovery_file(self, recovery_archive):
         url = ConfigService['errorreports.rooturl']
         url = '{}/api/recovery'.format(url)
-        files = {'file': open('{}.zip'.format(zip_recovery_file), 'rb')}
-        response = requests.post(url, files=files)
+        self.error_log.notice("Sending recovery file to address: {}".format(url))
+        files = {'file': open('{}'.format(recovery_archive), 'rb')}
+        try:
+            # timeout after 20 seconds to match the C++ error reporter timeout
+            response = requests.post(url, files=files, timeout=20)
+        except Exception as e:
+            self.error_log.error(
+                "Failed to send recovery data. Could not establish connection to URL: {}.\n\nFull trace:\n\n{}".format(
+                    url, e))
+            return
+
+        # if this is reached, the connection was successful and some response was received
         if response.status_code == 201:
-            self.error_log.notice("Uploaded recovery file to server HTTP response {}".format(response.status_code))
+            self.error_log.notice("Uploaded recovery file to server. HTTP response {}".format(response.status_code))
+        elif response.status_code == 413:
+            self.error_log.notice(
+                "Data was too large, and was not accepted by the server. HTTP response {}".format(response.status_code))
         else:
-            self.error_log.error("Failed to send recovery data HTTP response {}".format(response.status_code))
+            self.error_log.error("Failed to send recovery data. HTTP response {}".format(response.status_code))
 
     def _send_report_to_server(self, share_identifiable=False, name='', email='', file_hash='', uptime='', text_box=''):
         errorReporter = ErrorReporter(
-            "mantidplot", uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box),
+            self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box),
             str(file_hash))
         status = errorReporter.sendErrorReport()
 
         if status != 201:
-            self._view.display_message_box('Error contacting server', 'There was an error when sending the report.'
-                                                                      'Please contact mantid-help@mantidproject.org directly',
+            self._view.display_message_box('Error contacting server', self.SENDING_ERROR_MESSAGE,
                                            'http request returned with status {}'.format(status))
             self.error_log.error("Failed to send error report http request returned status {}".format(status))
 
@@ -88,3 +115,6 @@ class ErrorReporterPresenter(object):
 
     def show_view(self):
         self._view.show()
+
+    def show_view_blocking(self):
+        self._view.exec_()

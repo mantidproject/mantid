@@ -66,11 +66,12 @@ void RayTracerTester::exec() {
     prog.report();
     double az = double(iaz) * M_PI * 2.0 / double(NumAzimuth);
     for (int iz = 0; iz < NumZenith; iz++) {
-      double zen = double(iz) * M_PI / double(NumZenith);
-      double x = cos(az);
-      double z = sin(az);
-      double y = cos(zen);
+      const double zen = double(iz) * M_PI / double(NumZenith);
+      const double x = cos(az);
+      const double z = sin(az);
+      const double y = cos(zen);
       V3D beam(x, y, z);
+      beam.normalize();
 
       // Create a ray tracer
       tracker.traceFromSample(beam);

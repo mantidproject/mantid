@@ -19,8 +19,6 @@ from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, Delete
                               CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
 
 
-
-
 class PlotFunctionsTest(unittest.TestCase):
 
     @classmethod
@@ -123,6 +121,26 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.pcolorfast(ax, self.ws2d_point_uneven, vmin=-1)
         funcs.imshow(ax, self.ws2d_histo)
 
+    def _do_update_colorplot_datalimits(self, color_func):
+        fig, ax = plt.subplots()
+        mesh = color_func(ax, self.ws2d_histo)
+        ax.set_xlim(-0.05, 0.05)
+        ax.set_ylim(-0.05, 0.05)
+        funcs.update_colorplot_datalimits(ax, mesh)
+        self.assertAlmostEqual(10.0, ax.get_xlim()[0])
+        self.assertAlmostEqual(30.0, ax.get_xlim()[1])
+        #self.assertAlmostEqual(4.0, ax.get_ylim()[0])
+        #self.assertAlmostEqual(8.0, ax.get_ylim()[1])
+
+    def test_update_colorplot_datalimits_for_pcolormesh(self):
+        self._do_update_colorplot_datalimits(funcs.pcolormesh)
+
+    def test_update_colorplot_datalimits_for_pcolor(self):
+        self._do_update_colorplot_datalimits(funcs.pcolor)
+
+    def test_update_colorplot_datalimits_for_imshow(self):
+        self._do_update_colorplot_datalimits(funcs.imshow)
+
     def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
         table = CreateEmptyTableWorkspace()
         _, ax = plt.subplots()
@@ -135,6 +153,22 @@ class PlotFunctionsTest(unittest.TestCase):
         self.assertRaises(AttributeError, funcs.pcolor, ax, table)
         self.assertRaises(AttributeError, funcs.pcolormesh, ax, table)
         self.assertRaises(AttributeError, funcs.pcolorfast, ax, table)
+
+    def test_1d_indices(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws_MD_2d, indices=(slice(None), 0, 0))
+        funcs.plot(ax, self.ws_MD_2d, indices=(0, slice(None), 0))
+        funcs.plot(ax, self.ws_MD_2d, indices=(0, 0, slice(None)))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, indices=(0, slice(None), slice(None)))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
+
+    def test_1d_slicepoint(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(None, 0, 0))
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, None, 0))
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, 0, None))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, slicepoint=(0, None, None))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
 
 
 if __name__ == '__main__':

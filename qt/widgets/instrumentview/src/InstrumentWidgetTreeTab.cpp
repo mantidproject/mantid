@@ -62,7 +62,7 @@ void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
 /**
  * Update surface when tab becomes visible.
  */
-void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
+void InstrumentWidgetTreeTab::showEvent(QShowEvent * /*unused*/) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
 

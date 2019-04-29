@@ -9,7 +9,10 @@
 
 #include "ui_IndirectFitDataView.h"
 
-#include "../General/UserInputValidator.h"
+#include "IIndirectFitDataView.h"
+
+#include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QTabWidget>
 
@@ -17,44 +20,36 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitDataView : public QTabWidget {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataView : public IIndirectFitDataView {
   Q_OBJECT
 public:
-  IndirectFitDataView(QWidget *parent);
+  IndirectFitDataView(QWidget *parent = nullptr);
   ~IndirectFitDataView() override = default;
 
-  QTableWidget *getDataTable() const;
-  bool isMultipleDataTabSelected() const;
-  bool isResolutionHidden() const;
-  void setResolutionHidden(bool hide);
-  void disableMultipleDataTab();
+  QTableWidget *getDataTable() const override;
+  virtual bool isMultipleDataTabSelected() const override;
+  bool isResolutionHidden() const override;
+  void setResolutionHidden(bool hide) override;
+  void disableMultipleDataTab() override;
 
-  std::string getSelectedSample() const;
-  std::string getSelectedResolution() const;
+  virtual std::string getSelectedSample() const override;
+  std::string getSelectedResolution() const override;
 
-  QStringList getSampleWSSuffices() const;
-  QStringList getSampleFBSuffices() const;
-  QStringList getResolutionWSSuffices() const;
-  QStringList getResolutionFBSuffices() const;
+  virtual QStringList getSampleWSSuffices() const override;
+  virtual QStringList getSampleFBSuffices() const override;
+  QStringList getResolutionWSSuffices() const override;
+  QStringList getResolutionFBSuffices() const override;
 
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
+  virtual void setSampleWSSuffices(const QStringList &suffices) override;
+  virtual void setSampleFBSuffices(const QStringList &suffices) override;
+  virtual void setResolutionWSSuffices(const QStringList &suffices) override;
+  virtual void setResolutionFBSuffices(const QStringList &suffices) override;
 
-  void readSettings(const QSettings &settings);
-  UserInputValidator &validate(UserInputValidator &validator);
+  void readSettings(const QSettings &settings) override;
+  UserInputValidator &validate(UserInputValidator &validator) override;
 
 public slots:
-  void displayWarning(const std::string &warning);
-
-signals:
-  void sampleLoaded(const QString &);
-  void resolutionLoaded(const QString &);
-  void addClicked();
-  void removeClicked();
-  void multipleDataViewSelected();
-  void singleDataViewSelected();
+  void displayWarning(const std::string &warning) override;
 
 protected slots:
   void emitViewSelected(int index);

@@ -43,6 +43,7 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
   auto newFlood =
       WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
   auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
+  auto const floodBlocksize = flood->blocksize();
   const ISpectrum *missingSpectrum = nullptr;
   for (size_t i = 0; i < table->size(); ++i) {
     auto const j = (*table)[i];
@@ -50,8 +51,8 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input,
       if (missingSpectrum) {
         newFlood->getSpectrum(i).copyDataFrom(*missingSpectrum);
       } else {
-        newFlood->dataY(i).assign(flood->blocksize(), 1.0);
-        newFlood->dataE(i).assign(flood->blocksize(), 0.0);
+        newFlood->dataY(i).assign(floodBlocksize, 1.0);
+        newFlood->dataE(i).assign(floodBlocksize, 0.0);
         missingSpectrum = &newFlood->getSpectrum(i);
       }
     } else {

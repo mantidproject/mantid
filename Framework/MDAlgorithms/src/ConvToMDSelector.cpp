@@ -9,7 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidMDAlgorithms/ConvToMDEventsWS.h"
+#include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 #include "MantidMDAlgorithms/ConvToMDHistoWS.h"
 
 namespace Mantid {
@@ -20,6 +20,10 @@ enum wsType {
   EventWS,    //< event workspace
   Undefined   //< unknown initial state
 };
+
+ConvToMDSelector::ConvToMDSelector(ConvToMDSelector::ConverterType tp)
+    : converterType(tp) {}
+
 /** function which selects the convertor depending on workspace type and
 (possibly, in a future) some workspace properties
 * @param inputWS      -- the sp to workspace which has to be processed
@@ -54,22 +58,39 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
       existingWsConvType = Matrix2DWS;
   }
 
+  boost::shared_ptr<ConvToMDBase> res;
   // select a converter, which corresponds to the workspace type
   if ((existingWsConvType == Undefined) ||
       (existingWsConvType != inputWSType)) {
     switch (inputWSType) {
     case (EventWS):
-      return boost::make_shared<ConvToMDEventsWS>();
+      // check if user set a property to use indexing
+      if (converterType == ConvToMDSelector::DEFAULT)
+        res = boost::make_shared<ConvToMDEventsWS>();
+      else
+        res = boost::make_shared<ConvToMDEventsWSIndexing>();
+      break;
     case (Matrix2DWS):
-      return boost::make_shared<ConvToMDHistoWS>();
+      res = boost::make_shared<ConvToMDHistoWS>();
+      break;
     default:
       throw(std::logic_error("ConvToDataObjectsSelector: requested converter "
                              "for unknown ws type"));
     }
-
-  } else { // existing converter is suitable for the workspace
-    return currentSolver;
+  } else {
+    // existing converter is suitable for the workspace
+    // in case of Event workspace check if user set a property to use indexing
+    if (inputWSType == EventWS) {
+      if (converterType == ConvToMDSelector::DEFAULT)
+        res = boost::make_shared<ConvToMDEventsWS>();
+      else
+        res = boost::make_shared<ConvToMDEventsWSIndexing>();
+    } else {
+      res = boost::make_shared<ConvToMDHistoWS>();
+    }
   }
+
+  return res;
 }
 } // namespace MDAlgorithms
 } // namespace Mantid
