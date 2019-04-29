@@ -24,50 +24,78 @@ using namespace API;
 using namespace Geometry;
 using namespace Mantid::PhysicalConstants;
 
+namespace { // anonymous
+
+const V3D X_AXIS{ 1.0, 0.0, 0.0 };
+const V3D Z_AXIS{ 0.0, 0.0, 1.0 };
+
+/* The HRPD sample holders consist of a cuboid void for the sample of
+   18x23 mm and some thickness, 0.125mm vanadium foil windows front
+   and back, and an aluminium surround of total width 40mm, meaning
+   that there is 11mm of Al to be traversed en route to the 90 degree
+   bank.
+ */
+
+constexpr double VAN_WINDOW_THICKNESS{ 0.000125 }; // in m
+constexpr double VAN_RHO{ 0.07192 * 100 };         // in Angstroms-3 * 100
+constexpr double VAN_REF_ATTEN{ -5.08 * VAN_RHO /
+                                NeutronAtom::ReferenceLambda };
+constexpr double VAN_SCATT{ -5.1 * VAN_RHO };
+
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string SAMPLE_ATTEN_XS("SampleAttenuationXSection");
+const std::string SAMPLE_SCATT_XS("SampleScatteringXSection");
+const std::string SAMPLE_NUM_DENS("SampleNumberDensity");
+const std::string THICKNESS("Thickness");
+const std::string NUM_WL_POINTS("NumberOfWavelengthPoints");
+const std::string EXP_METHOD("ExpMethod");
+const std::string ELE_SIZE("ElementSize"); // is not used
+}
+
+} // anonymous
+
 void HRPDSlabCanAbsorption::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<> >(PropertyNames::INPUT_WKSP,
+                                                    "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<> >(PropertyNames::OUTPUT_WKSP,
+                                                    "", Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("SampleAttenuationXSection", EMPTY_DBL(), mustBePositive,
+  declareProperty(PropertyNames::SAMPLE_ATTEN_XS, EMPTY_DBL(), mustBePositive,
                   "The ABSORPTION cross-section for the sample material in "
                   "barns if not set with SetSampleMaterial");
-  declareProperty("SampleScatteringXSection", EMPTY_DBL(), mustBePositive,
+  declareProperty(PropertyNames::SAMPLE_SCATT_XS, EMPTY_DBL(), mustBePositive,
                   "The scattering cross-section (coherent + incoherent) for "
                   "the sample material in barns if not set with "
                   "SetSampleMaterial");
-  declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+  declareProperty(PropertyNames::SAMPLE_NUM_DENS, EMPTY_DBL(), mustBePositive,
                   "The number density of the sample in number of atoms per "
                   "cubic angstrom if not set with SetSampleMaterial");
 
-  std::vector<std::string> thicknesses(4);
-  thicknesses[0] = "0.2";
-  thicknesses[1] = "0.5";
-  thicknesses[2] = "1.0";
-  thicknesses[3] = "1.5";
-  declareProperty("Thickness", "0.2",
+  const std::vector<std::string> thicknesses{ "0.2", "0.5", "1.0", "1.5" };
+  declareProperty(PropertyNames::THICKNESS, thicknesses[0],
                   boost::make_shared<StringListValidator>(thicknesses));
 
   auto positiveInt = boost::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
   declareProperty(
-      "NumberOfWavelengthPoints", int64_t(EMPTY_INT()), positiveInt,
+      PropertyNames::NUM_WL_POINTS, int64_t(EMPTY_INT()), positiveInt,
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
 
   std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
-      "ExpMethod", "Normal",
+      PropertyNames::EXP_METHOD, exp_options[0],
       boost::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
   auto moreThanZero = boost::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
-  declareProperty("ElementSize", 1.0, moreThanZero,
+  declareProperty(PropertyNames::ELE_SIZE, 1.0, moreThanZero,
                   "The size of one side of an integration element cube in mm");
 }
 
@@ -86,17 +114,6 @@ void HRPDSlabCanAbsorption::exec() {
      case this would only make a very small difference)
    */
 
-  /* The HRPD sample holders consist of a cuboid void for the sample of
-     18x23 mm and some thickness, 0.125mm vanadium foil windows front
-     and back, and an aluminium surround of total width 40mm, meaning
-     that there is 11mm of Al to be traversed en route to the 90 degree
-     bank.
-   */
-
-  const double vanWinThickness = 0.000125; // in m
-  const double vanRho = 0.07192 * 100;     // in Angstroms-3 * 100
-  const double vanRefAtten = -5.08 * vanRho / 1.798;
-  const double vanScat = -5.1 * vanRho;
 
   const size_t numHists = workspace->getNumberHistograms();
   const size_t specSize = workspace->blocksize();
@@ -111,13 +128,13 @@ void HRPDSlabCanAbsorption::exec() {
     }
 
     // Get detector position
-    V3D detectorPos = spectrumInfo.position(i);
+    const V3D detectorPos = spectrumInfo.position(i);
 
     const int detID = spectrumInfo.detector(i).getID();
     double angleFactor;
     // If the low angle or backscattering bank, want angle wrt beamline
     if (detID < 900000) {
-      double theta = detectorPos.angle(V3D(0.0, 0.0, 1.0));
+      double theta = detectorPos.angle(Z_AXIS);
       angleFactor = 1.0 / std::abs(cos(theta));
     }
     // For 90 degree bank need it wrt X axis
@@ -132,31 +149,32 @@ void HRPDSlabCanAbsorption::exec() {
       const double lambda = lambdas[j];
 
       // Front vanadium window - 0.5-1% effect, increasing with lambda
-      Y[j] *= exp(vanWinThickness * ((vanRefAtten * lambda) + vanScat));
+      Y[j] *=
+          exp(VAN_WINDOW_THICKNESS * ((VAN_REF_ATTEN * lambda) + VAN_SCATT));
 
       // 90 degree bank aluminium sample holder
       if (detID > 900000) {
         // Below values are for aluminium
         Y[j] *= exp(-angleFactor * 0.011 * 6.02 *
-                    ((0.231 * lambda / 1.798) + 1.503));
+                    ((0.231 * lambda / NeutronAtom::ReferenceLambda) + 1.503));
       } else // Another vanadium window
       {
-        Y[j] *= exp(angleFactor * vanWinThickness *
-                    ((vanRefAtten * lambda) + vanScat));
+        Y[j] *= exp(angleFactor * VAN_WINDOW_THICKNESS *
+                    ((VAN_REF_ATTEN * lambda) + VAN_SCATT));
       }
     }
 
     progress.report();
   }
 
-  setProperty("OutputWorkspace", workspace);
+  setProperty(PropertyNames::OUTPUT_WKSP, workspace);
 }
 
 API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
-  MatrixWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
-  double sigma_atten = getProperty("SampleAttenuationXSection"); // in barns
-  double sigma_s = getProperty("SampleScatteringXSection");      // in barns
-  double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  MatrixWorkspace_sptr m_inputWS = getProperty(PropertyNames::INPUT_WKSP);
+  double sigma_atten = getProperty(PropertyNames::SAMPLE_ATTEN_XS); // in barns
+  double sigma_s = getProperty(PropertyNames::SAMPLE_SCATT_XS);     // in barns
+  double rho = getProperty(PropertyNames::SAMPLE_NUM_DENS); // in Angstroms-3
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
   if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
@@ -185,8 +203,9 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   childAlg->setProperty<double>("ScatteringXSection", sigma_s);
   childAlg->setProperty<double>("SampleNumberDensity", rho);
   childAlg->setProperty<int64_t>("NumberOfWavelengthPoints",
-                                 getProperty("NumberOfWavelengthPoints"));
-  childAlg->setProperty<std::string>("ExpMethod", getProperty("ExpMethod"));
+                                 getProperty(PropertyNames::NUM_WL_POINTS));
+  childAlg->setProperty<std::string>("ExpMethod",
+                                     getProperty(PropertyNames::EXP_METHOD));
   // The height and width of the sample holder are standard for HRPD
   const double HRPDCanHeight = 2.3;
   const double HRPDCanWidth = 1.8;
@@ -194,8 +213,8 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   childAlg->setProperty("SampleWidth", HRPDCanWidth);
   // Valid values are 0.2,0.5,1.0 & 1.5 - would be nice to have a numeric list
   // validator
-  const std::string thickness = getPropertyValue("Thickness");
-  childAlg->setPropertyValue("SampleThickness", thickness);
+  childAlg->setPropertyValue("SampleThickness",
+                             getPropertyValue(PropertyNames::THICKNESS));
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
