@@ -1049,8 +1049,6 @@ size_t split_path(const std::string &path,
     }
     // reprocess up-references;
     if (folder == "..") {
-      if (folder.size() != 2)
-        throw(std::invalid_argument("path contains wrong path group"));
       ic--;
       if (ic < 0)
         throw(std::invalid_argument("path contains relative references to a "
