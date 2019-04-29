@@ -119,7 +119,7 @@ QIcon IconicFont::getIcon(const QStringList &iconNames,
   }
   actualOptions = options;
   for (auto i = 0; i < iconNames.size(); ++i) {
-    addValuesToOptions(actualOptions, iconNames, i);
+    addValuesToOptions(actualOptions, iconNames);
   }
 
   return this->iconByPainter(&m_painter, actualOptions);
@@ -149,18 +149,18 @@ QFont IconicFont::getFont(const QString &prefix, const int drawSize) {
   return font;
 }
 
-QString IconicFont::findCharecterFromCharMap(const QString &prefix,
-                                             const QString &charecter) const {
-  return m_charmap[prefix][charecter].toString();
+QString IconicFont::findCharacterFromCharMap(const QString &prefix,
+                                             const QString &character) const {
+  return m_charmap[prefix][character].toString();
 }
 
 void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options,
-                                    const QStringList iconNames,
+                                    const QStringList &iconNames,
                                     unsigned int vectorIndex) {
   const auto iconName = iconNames[vectorIndex];
   auto splitValues = iconName.split('.', QString::SkipEmptyParts);
   const auto prefix = splitValues.at(0);
-  const auto charecter = splitValues.at(1);
+  const auto character = splitValues.at(1);
 
   const auto foundFontForPrefix = m_fontnames[prefix];
   if (foundFontForPrefix.isNull()) {
@@ -170,15 +170,15 @@ void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options,
             .toStdString());
   }
 
-  if (findCharecterFromCharMap(prefix, charecter).isNull()) {
+  if (findCharacterFromCharMap(prefix, character).isNull()) {
     throw std::invalid_argument(
-        ("The icon: \"" + prefix + "." + charecter +
+        ("The icon: \"" + prefix + "." + character +
          "\" is not a icon currently availible in the library")
             .toStdString());
   }
 
   options[vectorIndex].insert(QString("prefix"), QVariant(prefix));
-  options[vectorIndex].insert(QString("charecter"), QVariant(charecter));
+  options[vectorIndex].insert(QString("character"), QVariant(character));
 }
 
 } // namespace Icons

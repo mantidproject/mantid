@@ -46,9 +46,8 @@ private:
                 const QString &charmapFilename);
   QIcon iconByPainter(CharIconPainter *painter,
                       QList<QHash<QString, QVariant>> &options);
-  void addValuesToOptions(QList<QHash<QString, QVariant>> &options,
-                          const QStringList iconNames,
-                          unsigned int vectorIndex);
+  void addValuesToOptions(const QString &iconName,
+                          const QStringList &iconNames);
 
   QHash<QString, QString> m_fontnames;
 

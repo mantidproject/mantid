@@ -37,26 +37,28 @@ if(ENABLE_MANTIDPLOT)
   )
 endif()
 
-mtd_add_qt_library (TARGET_NAME MantidQtIcons
-  QT_VERSION 5
-  SRC ${SRC_FILES}
-  NOMOC ${INC_FILES}
-  DEFS
-    IN_MANTIDQT_ICONS
-  INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/inc
-  LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${JSONCPP_LIBRARIES}
-  INSTALL_DIR_BASE
-    ${PLUGINS_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../../Contents/MacOS
-  LINUX_INSTALL_RPATH
-    "\$ORIGIN/../../${LIB_DIR}"
-)
+if (ENABLE_WORKBENCH)
+  mtd_add_qt_library (TARGET_NAME MantidQtIcons
+    QT_VERSION 5
+    SRC ${SRC_FILES}
+    NOMOC ${INC_FILES}
+    DEFS
+      IN_MANTIDQT_ICONS
+    INCLUDE_DIRS
+      ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${POCO_LIBRARIES}
+      ${Boost_LIBRARIES}
+      ${JSONCPP_LIBRARIES}
+    INSTALL_DIR_BASE
+      ${PLUGINS_DIR}
+    OSX_INSTALL_RPATH
+      @loader_path/../../Contents/MacOS
+    LINUX_INSTALL_RPATH
+      "\$ORIGIN/../../${LIB_DIR}"
+  )
+endif()
 
 set ( QT5_TEST_FILES
   test/IconTest.h      
