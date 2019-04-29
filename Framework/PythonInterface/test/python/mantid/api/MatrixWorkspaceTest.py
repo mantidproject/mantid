@@ -428,6 +428,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_isCommonBins(self):
         self.assertTrue(self._test_ws.isCommonBins())
 
+    def test_isCommonLogBins(self):
+        self.assertFalse(self._test_ws.isCommonLogBins())
+
     def test_hasMaskedBins(self):
         numBins = 10
         numHist=11
