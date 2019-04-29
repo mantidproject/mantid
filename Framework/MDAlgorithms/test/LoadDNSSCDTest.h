@@ -171,8 +171,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("NormalizationWorkspace", normWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"))
@@ -222,8 +221,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filenames", m_fileName))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", outWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("NormalizationWorkspace", normWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"))
@@ -250,7 +248,8 @@ public:
 
     // test dimensions
     std::vector<std::string> v = {"Scattering Angle", "Omega", "TOF"};
-    std::vector<double> extentMins = {20.0 / 2.0, 0.0, 424.668};  // this might fail if L1 will change
+    std::vector<double> extentMins = {
+        20.0 / 2.0, 0.0, 424.668}; // this might fail if L1 will change
     std::vector<double> extentMaxs = {55.0 / 2.0, 360.0, 20000};
     for (auto i = 0; i < 3; i++) {
       auto dim = iws->getDimension(i);
@@ -319,7 +318,6 @@ public:
 
     AnalysisDataService::Instance().remove(outWSName);
   }
-
 
   void test_RawWS() {
     // test whether the metadata were loaded correctly

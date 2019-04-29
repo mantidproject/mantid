@@ -101,7 +101,8 @@ DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadDNSSCD::LoadDNSSCD() : m_columnSep("\t, ;"), m_nDims(4), m_tof_max(20000.0) {}
+LoadDNSSCD::LoadDNSSCD()
+    : m_columnSep("\t, ;"), m_nDims(4), m_tof_max(20000.0) {}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -343,7 +344,8 @@ void LoadDNSSCD::exec() {
         "Error: cannot merge data with different TOF channel numbers.");
 
   std::string load_as = getProperty("LoadAs");
-  if (load_as == "raw") m_nDims = 3;
+  if (load_as == "raw")
+    m_nDims = 3;
 
   m_OutWS = MDEventFactory::CreateMDWorkspace(m_nDims, "MDEvent");
   m_OutWS->addExperimentInfo(expinfo);
@@ -631,7 +633,6 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   setProperty("NormalizationWorkspace", normWS);
 }
 
-
 //----------------------------------------------------------------------------------------------
 /// Fill output workspace with raw data theta, omega, tof space
 ///
@@ -689,9 +690,9 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   std::vector<double> extentMaxs = {theta_max, 360.0, m_tof_max};
 
   // Get MDFrame of HKL type with RLU
-  //auto unitFactory = makeMDUnitFactoryChain();
-  //auto unit = unitFactory->create(Units::Symbol::RLU.ascii());
-  //Mantid::Geometry::HKL frame(unit);
+  // auto unitFactory = makeMDUnitFactoryChain();
+  // auto unit = unitFactory->create(Units::Symbol::RLU.ascii());
+  // Mantid::Geometry::HKL frame(unit);
   const Kernel::UnitLabel unitLabel("Degrees");
   Mantid::Geometry::GeneralFrame frame("Scattering Angle", unitLabel);
 
@@ -758,25 +759,26 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
           PARALLEL_START_INTERUPT_REGION
           double signal = ds.signal[i][channel];
           signal_t error = std::sqrt(signal);
-          double tof2 (tof2_elastic);
+          double tof2(tof2_elastic);
           if (nchannels > 1) {
-              tof2 = static_cast<double>(channel) * ds.chwidth + 0.5 * ds.chwidth; // bin centers
+            tof2 = static_cast<double>(channel) * ds.chwidth +
+                   0.5 * ds.chwidth; // bin centers
           }
           double omega = (ds.huber - ds.deterota);
 
           std::vector<Mantid::coord_t> datapoint(3);
           datapoint[0] = static_cast<float>(theta);
           datapoint[1] = static_cast<float>(omega);
-          datapoint[2] = static_cast<float>(tof1+tof2);
+          datapoint[2] = static_cast<float>(tof1 + tof2);
           PARALLEL_CRITICAL(addValues) {
-              inserter.insertMDEvent(
-                  static_cast<float>(signal), static_cast<float>(error * error),
-                  static_cast<uint16_t>(runindex), detid, datapoint.data());
+            inserter.insertMDEvent(
+                static_cast<float>(signal), static_cast<float>(error * error),
+                static_cast<uint16_t>(runindex), detid, datapoint.data());
 
-              norm_inserter.insertMDEvent(
-                  static_cast<float>(norm_signal),
-                  static_cast<float>(norm_error * norm_error),
-                  static_cast<uint16_t>(runindex), detid, datapoint.data());
+            norm_inserter.insertMDEvent(
+                static_cast<float>(norm_signal),
+                static_cast<float>(norm_error * norm_error),
+                static_cast<uint16_t>(runindex), detid, datapoint.data());
           }
           PARALLEL_END_INTERUPT_REGION
         }
@@ -786,7 +788,6 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   }
   setProperty("NormalizationWorkspace", normWS);
 }
-
 
 void LoadDNSSCD::read_data(const std::string fname,
                            std::map<std::string, std::string> &str_metadata,
