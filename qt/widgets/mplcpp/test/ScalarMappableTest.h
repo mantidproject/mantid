@@ -15,10 +15,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-using MantidQt::Widgets::MplCpp::getCMap;
 using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::PowerNorm;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
+using MantidQt::Widgets::MplCpp::getCMap;
 
 class ScalarMappableTest : public CxxTest::TestSuite {
 public:
