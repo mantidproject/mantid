@@ -35,6 +35,7 @@ Removed
 
 Data Objects
 ------------
+- Added method `isCommonLogBins` to check if the `MatrixWorkspace` contains common X bins with logarithmic spacing.
 
 Python
 ------
