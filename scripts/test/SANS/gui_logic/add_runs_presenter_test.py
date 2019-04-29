@@ -447,10 +447,8 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
         self.presenter.set_output_directory = mock.Mock()
 
         self.presenter._handle_output_directory_changed()
-        self.assertEqual(self.presenter.gui_properties_handler.update_default.call_count, 1,
-                         "Expected SANSGuiPropertiesHandler update_default to be called once when "
-                         "_handle_output_directory_changed was called. It was called {} "
-                         "times instead.".format(self.presenter.gui_properties_handler.update_default.call_count))
+        self.presenter.gui_properties_handler.update_default.assert_called_once_with("add_runs_output_directory",
+                                                                                     new_dir_name + os.sep)
 
     def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
         default_dir = os.path.join("default", "save", "directory")

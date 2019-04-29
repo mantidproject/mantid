@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from qtpy.QtCore import (QSettings)  # noqa
-from qtpy.QtWidgets import (QFileDialog)  # noqa
+from qtpy.QtCore import QSettings
+from qtpy.QtWidgets import QFileDialog
 
 from mantid.kernel import Logger
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType

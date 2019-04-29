@@ -309,10 +309,11 @@ class RunTabPresenter(object):
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
 
-            self._view.gui_properties_handler = SANSGuiPropertiesHandler({"user_file": (self._view.set_out_default_user_file,
-                                                                                        str)},
-                                                                         line_edits={"user_file":
-                                                                                     self._view.user_file_line_edit})
+            self._view.gui_properties_handler = SANSGuiPropertiesHandler(
+                                                    {"user_file": (self._view.set_out_default_user_file,
+                                                                   str)},
+                                                    line_edits={"user_file":
+                                                                self._view.user_file_line_edit})
 
     def on_user_file_load(self):
         """

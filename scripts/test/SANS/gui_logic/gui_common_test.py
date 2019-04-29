@@ -124,18 +124,14 @@ class GuiCommonTest(unittest.TestCase):
 
 
 class SANSGuiPropertiesHandlerTest(unittest.TestCase):
-    def test_that_default_functions_are_called_on_initialisation(self):
+    @staticmethod
+    def test_that_default_functions_are_called_on_initialisation():
         with mock.patch.object(SANSGuiPropertiesHandler, "_load_property", lambda x, y, z: "default_value"):
             default_property_setup_mock = mock.Mock()
             default_values_input = {"a_default_property": (default_property_setup_mock, str)}
             SANSGuiPropertiesHandler(default_values_input)
 
-            calls = default_property_setup_mock.call_args_list
-            self.assertEqual(len(calls), 1)
-
-            args = calls[0][0]
-            self.assertEqual(len(args), 1)
-            self.assertEqual(args[0], "default_value")
+            default_property_setup_mock.assert_called_once_with("default_value")
 
 
 if __name__ == '__main__':
