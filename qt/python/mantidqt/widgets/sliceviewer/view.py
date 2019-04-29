@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QWidget, QVBoxLayout
 from qtpy.QtCore import Qt
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
+from MPLwidgets import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from .dimensionwidget import DimensionWidget
 
 
