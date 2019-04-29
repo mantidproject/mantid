@@ -19,8 +19,9 @@ from mantid.api import (AlgorithmFactory,
 from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
                            IntArrayProperty, IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
-                              Divide, ExtractMonitors, FindReflectometryLines, LoadAndMerge, Minus, mtd,
-                              NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect, Transpose)
+                              Divide, ExtractMonitors, FindReflectometryLines, GravityCorrection, LoadAndMerge, Minus,
+                              mtd, NormaliseToMonitor, RebinToWorkspace, Scale, SpecularReflectionPositionCorrect,
+                              Transpose)
 import numpy
 import ReflectometryILL_common as common
 
@@ -114,6 +115,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ws = self._inputWS()
 
         self._instrumentName = ws.getInstrument().getName()
+
+        if self._instrumentName == "FIGARO":
+            ws = self._gravityCorrection(ws)
 
         ws, monWS = self._extractMonitors(ws)
 
@@ -335,6 +339,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         lowRange = [lowEndIndex - sign * 0.5, lowStartIndex - sign * 0.5]
         highRange = [highEndIndex + sign * 0.5, highStartIndex + sign * 0.5]
         return highRange + lowRange
+
+    def _gravityCorrection(self, ws):
+        """Perform gravity correction"""
+        gravityWSName = self._names.withSuffix('gravity_corrected')
+        correctedWS = GravityCorrection(
+            InputWorkspace=ws,
+            OutputWorkspace=gravityWSName,
+            EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return correctedWS
 
     def _workspaceIndexDirection(self, ws):
         """Return 1 if workspace indices increase with Bragg angle, otherwise return -1."""

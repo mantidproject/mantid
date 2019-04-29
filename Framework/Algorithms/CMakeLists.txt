@@ -161,7 +161,7 @@ set(SRC_FILES
     src/GetEiMonDet3.cpp
     src/GetQsInQENSData.cpp
     src/GetTimeSeriesLogInformation.cpp
-    src/GravityCorrection.cpp
+    scr/GravityCorrection.cpp
     src/GravitySANSHelper.cpp
     src/GroupToXResolution.cpp
     src/GroupWorkspaces.cpp
@@ -502,6 +502,7 @@ set(INC_FILES
     inc/MantidAlgorithms/GetEiMonDet3.h
     inc/MantidAlgorithms/GetQsInQENSData.h
     inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
+    inc/MantidAlgorithms/GravityCorrection.h
     inc/MantidAlgorithms/GravitySANSHelper.h
     inc/MantidAlgorithms/GroupToXResolution.h
     inc/MantidAlgorithms/GroupWorkspaces.h
@@ -681,7 +682,6 @@ set(INC_FILES
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h)
->>>>>>> master
 
 set(SRC_UNITY_IGNORE_FILES
     src/AlignDetectors.cpp
@@ -695,320 +695,6 @@ if(UNITY_BUILD)
   enable_unity_build(Algorithms SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-<<<<<<< HEAD
-set ( TEST_FILES
-	AddLogDerivativeTest.h
-	AddNoteTest.h
-	AddPeakTest.h
-	AddSampleLogTest.h
-	AddTimeSeriesLogTest.h
-	AlignDetectorsTest.h
-	AnnularRingAbsorptionTest.h
-	AnyShapeAbsorptionTest.h
-	AppendSpectraTest.h
-	ApplyCalibrationTest.h
-	ApplyDetailedBalanceTest.h
-	ApplyTransmissionCorrectionTest.h
-	AverageLogDataTest.h
-	Bin2DPowderDiffractionTest.h
-	BinaryOperateMasksTest.h
-	BinaryOperationTest.h
-	CalculateCarpenterSampleCorrectionTest.h
-	CalculateCountRateTest.h
-	CalculateDIFCTest.h
- 	CalculateDynamicRangeTest.h
-	CalculateEfficiencyTest.h
-	CalculateFlatBackgroundTest.h
-	CalculateIqtTest.h
-	CalculatePolynomialBackgroundTest.h
-	CalculateSlitsTest.h
-	CalculateTransmissionBeamSpreaderTest.h
-	CalculateTransmissionTest.h
-	CalculateZscoreTest.h
-	CarpenterSampleCorrectionTest.h
-	ChainedOperatorTest.h
-	ChangeBinOffsetTest.h
-	ChangeLogTimeTest.h
-	ChangePulsetime2Test.h
-	ChangePulsetimeTest.h
-	ChangeTimeZeroTest.h
-	CheckWorkspacesMatchTest.h
-	ChopDataTest.h
-	ClearCacheTest.h
-	ClearInstrumentParametersTest.h
-	ClearMaskFlagTest.h
-	ClearMaskedSpectraTest.h
-	CloneWorkspaceTest.h
-	CommentTest.h
-	CommutativeBinaryOperationTest.h
-	CompareWorkspacesTest.h
-	ConjoinWorkspacesTest.h
-	ConjoinXRunsTest.h
-	ConvertAxesToRealSpaceTest.h
-	ConvertAxisByFormulaTest.h
-	ConvertDiffCalTest.h
-	ConvertEmptyToTofTest.h
-	ConvertFromDistributionTest.h
-	ConvertSpectrumAxis2Test.h
-	ConvertSpectrumAxisTest.h
-	ConvertTableToMatrixWorkspaceTest.h
-	ConvertToConstantL2Test.h
-	ConvertToDistributionTest.h
-	ConvertToEventWorkspaceTest.h
-	ConvertToHistogramTest.h
-	ConvertToMatrixWorkspaceTest.h
-	ConvertToPointDataTest.h
-	ConvertUnitsTest.h
-	ConvertUnitsUsingDetectorTableTest.h
-	CopyDetectorMappingTest.h
-	CopyInstrumentParametersTest.h
-	CopyLogsTest.h
-	CopySampleTest.h
-	CorelliCrossCorrelateTest.h
-	CorrectKiKfTest.h
-	CorrectTOFAxisTest.h
-	CorrectToFileTest.h
-	CreateCalFileByNamesTest.h
-	CreateDummyCalFileTest.h
-	CreateEPPTest.h
-	CreateFlatEventWorkspaceTest.h
-	CreateGroupingWorkspaceTest.h
-	CreateLogPropertyTableTest.h
-	CreateLogTimeCorrectionTest.h
-	CreatePSDBleedMaskTest.h
-	CreatePeaksWorkspaceTest.h
-	CreateSampleWorkspaceTest.h
-	CreateSingleValuedWorkspaceTest.h
-	CreateTransmissionWorkspace2Test.h
-	CreateTransmissionWorkspaceAuto2Test.h
-	CreateTransmissionWorkspaceAutoTest.h
-	CreateTransmissionWorkspaceTest.h
-	CreateUserDefinedBackgroundTest.h
-	CreateWorkspaceTest.h
-	CropToComponentTest.h
-	CropWorkspaceTest.h
-	CrossCorrelateTest.h
-	CuboidGaugeVolumeAbsorptionTest.h
-	CylinderAbsorptionTest.h
-	DeleteLogTest.h
-	DeleteWorkspaceTest.h
-	DeleteWorkspacesTest.h
-	DetectorEfficiencyCorTest.h
-	DetectorEfficiencyCorUserTest.h
-	DetectorEfficiencyVariationTest.h
-	DetectorGridDefinitionTest.h
-	DiffractionEventCalibrateDetectorsTest.h
-	DiffractionFocussing2Test.h
-	DiffractionFocussingTest.h
-	DirectILLTubeBackgroundTest.h
-	DivideTest.h
-	EditInstrumentGeometryTest.h
-	ElasticWindowTest.h
-	EstimateDivergenceTest.h
-	EstimateResolutionDiffractionTest.h
-	ExponentialCorrectionTest.h
-	ExponentialTest.h
-	ExportTimeSeriesLogTest.h
-	ExtractFFTSpectrumTest.h
-	ExtractMaskTest.h
-	ExtractMaskToTableTest.h
-	ExtractSingleSpectrumTest.h
-	ExtractSpectra2Test.h
-	ExtractSpectraTest.h
-	ExtractUnmaskedSpectraTest.h
-	FFTDerivativeTest.h
-	FFTSmooth2Test.h
-	FFTTest.h
-	FilterBadPulsesTest.h
-	FilterByLogValueTest.h
-	FilterByTime2Test.h
-	FilterByTimeTest.h
-	FilterByXValueTest.h
-	FilterEventsTest.h
-	FindCenterOfMassPosition2Test.h
-	FindCenterOfMassPositionTest.h
-	FindDeadDetectorsTest.h
-	FindDetectorsOutsideLimitsTest.h
-	FindEPPTest.h
-	FindPeakBackgroundTest.h
-	FindPeaksTest.h
-	FindReflectometryLines2Test.h
-	FitPeakTest.h
-	FitPeaksTest.h
-	FixGSASInstrumentFileTest.h
-	FlatPlateAbsorptionTest.h
-	GeneralisedSecondDifferenceTest.h
-	GenerateEventsFilterTest.h
-	GenerateIPythonNotebookTest.h
-	GeneratePeaksTest.h
-	GeneratePythonScriptTest.h
-	GetAllEiTest.h
-	GetDetOffsetsMultiPeaksTest.h
-	GetDetectorOffsetsTest.h
-	GetEiMonDet2Test.h
-	GetEiTest.h
-	GetEiV1Test.h
-	GetQsInQENSDataTest.h
-	GetTimeSeriesLogInformationTest.h
-        GravityCorrectionTest.h
-	GroupWorkspacesTest.h
-	HRPDSlabCanAbsorptionTest.h
-	He3TubeEfficiencyTest.h
-	HyspecScharpfCorrectionTest.h
-	IQTransformTest.h
-	IdentifyNoisyDetectorsTest.h
-	IndirectFitDataCreationHelperTest.h
-	IntegrateByComponentTest.h
-	IntegrateEPPTest.h
-	IntegrationTest.h
-	InterpolatingRebinTest.h
-	InterpolationOptionTest.h
-	InvertMaskTest.h
-	LineProfileTest.h
-	LogarithmTest.h
-	LorentzCorrectionTest.h
-	MCAbsorptionStrategyTest.h
-	MCInteractionVolumeTest.h
-	MagFormFactorCorrectionTest.h
-	MaskBinsFromTableTest.h
-	MaskBinsIfTest.h
-	MaskBinsTest.h
-	MaskDetectorsIfTest.h
-	MaskInstrumentTest.h
-	MaxEnt/MaxentCalculatorTest.h
-	MaxEnt/MaxentEntropyNegativeValuesTest.h
-	MaxEnt/MaxentEntropyPositiveValuesTest.h
-	MaxEnt/MaxentSpaceComplexTest.h
-	MaxEnt/MaxentSpaceRealTest.h
-	MaxEnt/MaxentTransformFourierTest.h
-	MaxEnt/MaxentTransformMultiFourierTest.h
-	MaxEntTest.h
-	MaxMinTest.h
-	MayersSampleCorrectionStrategyTest.h
-	MayersSampleCorrectionTest.h
-	MedianDetectorTestTest.h
-	MergeRunsTest.h
-	MinusTest.h
-	ModeratorTzeroLinearTest.h
-	ModeratorTzeroTest.h
-	MonitorEfficiencyCorUserTest.h
-	MonteCarloAbsorptionTest.h
-	MostLikelyMeanTest.h
-	MultiplyRangeTest.h
-	MultiplyTest.h
-	MuonWorkspaceCreationHelperTest.h
-	NRCalculateSlitResolutionTest.h
-	NormaliseByCurrentTest.h
-	NormaliseByDetectorTest.h
-	NormaliseToMonitorTest.h
-	OneMinusExponentialCorTest.h
-	PDCalibrationTest.h
-	PDDetermineCharacterizationsTest.h
-	PDFFourierTransformTest.h
-	PaddingAndApodizationTest.h
-	PauseTest.h
-	PerformIndexOperationsTest.h
-	PlusTest.h
-	PointByPointVCorrectionTest.h
-	PoissonErrorsTest.h
-	PolarizationCorrectionFredrikzeTest.h
-	PolarizationCorrectionWildesTest.h
-	PolarizationEfficiencyCorTest.h
-	PolynomialCorrectionTest.h
-	PowerLawCorrectionTest.h
-	PowerTest.h
-	Q1D2Test.h
-	Q1DWeightedTest.h
-	QxyTest.h
-	RadiusSumTest.h
-	RayTracerTesterTest.h
-	ReadGroupsFromFileTest.h
-	RealFFTTest.h
-	Rebin2DTest.h
-	RebinByPulseTimesTest.h
-	RebinByTimeAtSampleTest.h
-	RebinTest.h
-	RebinToWorkspaceTest.h
-	RebunchTest.h
-	RectangularBeamProfileTest.h
-	ReflectometryBeamStatisticsTest.h
-	ReflectometryMomentumTransferTest.h
-	ReflectometryReductionOne2Test.h
-	ReflectometryReductionOneAuto2Test.h
-	ReflectometrySumInQTest.h
-	RegroupTest.h
-	RemoveBackgroundTest.h
-	RemoveBinsTest.h
-	RemoveLowResTOFTest.h
-	RemoveMaskedSpectraTest.h
-	RemovePromptPulseTest.h
-	RemoveWorkspaceHistoryTest.h
-	RenameWorkspaceTest.h
-	RenameWorkspacesTest.h
-	ReplaceSpecialValuesTest.h
-	ResampleXTest.h
-	ResetNegativesTest.h
-	ResizeRectangularDetectorTest.h
-	RingProfileTest.h
-	RunCombinationHelperTest.h
-	SampleLogsBehaviourTest.h
-	SANSCollimationLengthEstimatorTest.h
-	SassenaFFTTest.h
-	ScaleTest.h
-	ScaleXTest.h
-	SetInstrumentParameterTest.h
-	SetUncertaintiesTest.h
-	ShiftLogTimeTest.h
-	SignalOverErrorTest.h
-	SmoothDataTest.h
-	SmoothNeighboursTest.h
-	SofQCommonTest.h
-	SofQWCentreTest.h
-	SofQWCutTest.h
-	SofQWNormalisedPolygonTest.h
-	SofQWPolygonTest.h
-	SofQWTest.h
-	SolidAngleTest.h
-	SortEventsTest.h
-	SortXAxisTest.h
-	SparseInstrumentTest.h
-	SpatialGroupingTest.h
-	SpecularReflectionCalculateTheta2Test.h
-	SpecularReflectionCalculateThetaTest.h
-	SpecularReflectionPositionCorrect2Test.h
-	SpecularReflectionPositionCorrectTest.h
-	SphericalAbsorptionTest.h
-	Stitch1DManyTest.h
-	Stitch1DTest.h
-	StripPeaksTest.h
-	StripVanadiumPeaks2Test.h
-	StripVanadiumPeaksTest.h
-	SumEventsByLogValueTest.h
-	SumNeighboursTest.h
-	SumOverlappingTubesTest.h
-	SumRowColumnTest.h
-	SumSpectraTest.h
-	TOFSANSResolutionByPixelCalculatorTest.h
-	TOFSANSResolutionByPixelTest.h
-	TimeAtSampleStrategyDirectTest.h
-	TimeAtSampleStrategyElasticTest.h
-	TimeAtSampleStrategyIndirectTest.h
-	TransposeTest.h
-	UnGroupWorkspaceTest.h
-	UnaryOperationTest.h
-	UnwrapMonitorTest.h
-	UnwrapMonitorsInTOFTest.h
-	UnwrapSNSTest.h
-	VesuvioL1ThetaResolutionTest.h
-	WeightedMeanOfWorkspaceTest.h
-	WeightedMeanTest.h
-	WeightingStrategyTest.h
-	WienerSmoothTest.h
-	WorkflowAlgorithmRunnerTest.h
-	WorkspaceCreationHelperTest.h
-	WorkspaceGroupTest.h
-)
-=======
 set(TEST_FILES
     AddLogDerivativeTest.h
     AddNoteTest.h
@@ -1166,6 +852,7 @@ set(TEST_FILES
     GetEiV1Test.h
     GetQsInQENSDataTest.h
     GetTimeSeriesLogInformationTest.h
+    GravityCorrectionTest.h
     GroupToXResolutionTest.h
     GroupWorkspacesTest.h
     HRPDSlabCanAbsorptionTest.h
@@ -1327,7 +1014,6 @@ set(TEST_FILES
     WorkflowAlgorithmRunnerTest.h
     WorkspaceCreationHelperTest.h
     WorkspaceGroupTest.h)
->>>>>>> master
 
 set(TEST_PY_FILES NormaliseToUnityTest.py)
 
