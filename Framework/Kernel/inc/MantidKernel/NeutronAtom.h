@@ -23,7 +23,7 @@ namespace PhysicalConstants {
 struct MANTID_KERNEL_DLL NeutronAtom {
 
   /// The reference wavelength value for absorption cross sections
-  static const double ReferenceLambda;
+  static constexpr double ReferenceLambda{ 1.7982 };
 
   NeutronAtom(const uint16_t z, const double coh_b_real,
               const double inc_b_real, const double coh_xs, const double inc_xs,

@@ -19,11 +19,8 @@ namespace Mantid {
 
 namespace PhysicalConstants {
 
-/// Reference wavelength for absorption cross section values.
-const double NeutronAtom::ReferenceLambda = 1.7982;
-
 namespace {
-const double INV_FOUR_PI = 1. / (4. * M_PI);
+constexpr double INV_FOUR_PI{ 1. / (4. * M_PI) };
 }
 
 void calculateScatteringLengths(NeutronAtom &atom) {
