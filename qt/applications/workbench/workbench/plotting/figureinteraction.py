@@ -19,6 +19,7 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu
 
 # third party imports
+from mantid.plots import MantidAxes
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from workbench.plotting.toolbar import ToolbarStateManager
@@ -40,8 +41,6 @@ class FigureInteraction(object):
     this currently only works with Qt canvas types.
     """
 
-    MPL_NOLEGEND = "_nolegend_"
-
     def __init__(self, fig_manager):
         """
         Registers handlers for events of interest
@@ -60,8 +59,6 @@ class FigureInteraction(object):
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
-
-        # self.MPL_NOLEGEND = self.canvas.figure.axes[0].MPL_NOLEGEND
 
     @property
     def nevents(self):
@@ -132,7 +129,8 @@ class FigureInteraction(object):
         menu.exec_(QCursor.pos())
 
     def _toggle_all_error_bars(self):
-        containers = self.canvas.figure.axes[0].containers
+        ax = self.canvas.figure.axes[0]  # type: MantidAxes
+        containers = ax.containers
 
         # iterate over all error containers to
         # toggle error bar on lines that have errors already
@@ -140,8 +138,8 @@ class FigureInteraction(object):
             # extract the line reference from the container
             line = container[0]
 
-            if line.get_label() == self.MPL_NOLEGEND:
-                self._toggle_error_bar_for(self._find_errorbar_container(line))
+            if line.get_label() == MantidAxes.MPL_NOLEGEND:
+                self._toggle_error_bar_for(ax.find_errorbar_container(line))
 
         lines = self.canvas.figure.axes[0].lines
         # Iterate over all lines to add new error bars.
@@ -156,7 +154,7 @@ class FigureInteraction(object):
             # line doesn't have errors, add them
             # this will remove the line from the current index,
             # and move the next one to the current index
-            if line.get_label() != self.MPL_NOLEGEND:
+            if line.get_label() != MantidAxes.MPL_NOLEGEND:
                 self._add_errorbar_for(index)
             else:
                 # the line has errors, move forwards in the iteration
@@ -210,15 +208,9 @@ class FigureInteraction(object):
         error_line = errorbar_container.lines[2][0]
         error_line.set_visible(not error_line.get_visible())
 
-    def _find_errorbar_container(self, line):
-        containers = self.canvas.figure.axes[0].containers
-
-        for container in containers:
-            if line == container[0]:
-                return container
-
     def _add_error_bars_menu(self, menu):
-        lines = self.canvas.figure.axes[0].lines
+        ax = self.canvas.figure.axes[0]  # type: MantidAxes
+        lines = ax.lines
 
         # if there's more than one line plotted, then
         # add a sub menu, containing an action to hide the
@@ -231,9 +223,9 @@ class FigureInteraction(object):
             menu.addMenu(error_bars_menu)
 
             for index, line in enumerate(lines):
-                if line.get_label() == self.MPL_NOLEGEND:
+                if line.get_label() == MantidAxes.MPL_NOLEGEND:
                     # this line has an errorbar, which contains the label in the legend
-                    error_line = self._find_errorbar_container(line)
+                    error_line = ax.find_errorbar_container(line)
                     label = error_line.get_label()
                     # simply toggles the visibility of the error line
                     error_bars_menu.addAction(label,

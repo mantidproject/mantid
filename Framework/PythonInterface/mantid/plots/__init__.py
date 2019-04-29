@@ -16,15 +16,15 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 from __future__ import (absolute_import, division, print_function)
 
 from collections import Iterable
+from matplotlib import cbook
+from matplotlib.axes import Axes
+from matplotlib.colors import Colormap
+from matplotlib.container import Container
+from matplotlib.projections import register_projection
 
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
-from matplotlib import cbook
-from matplotlib.axes import Axes
-from matplotlib.container import Container
-from matplotlib.projections import register_projection
-from matplotlib.colors import Colormap
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -43,6 +43,7 @@ except ImportError:
     # where there are multiple versions of matplotlib installed across the
     # system.
     import sys
+
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
@@ -59,6 +60,7 @@ def plot_decorator(func):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
         return func_value
+
     return wrapper
 
 
@@ -67,6 +69,7 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
+
     def __init__(self, artists, data_replace_cb, spec_num=None):
         """
         Initialize an instance
@@ -134,6 +137,10 @@ class MantidAxes(Axes):
     # Enumerators for plotting directions
     HORIZONTAL = BIN = 0
     VERTICAL = SPECTRUM = 1
+
+    # label for a line that signifies the lack of label on it
+    # present for lines with errors, where the label is in the errorbar container
+    MPL_NOLEGEND = "_nolegend_"
 
     # Store information for any workspaces attached to this axes instance
     tracked_workspaces = None
@@ -219,8 +226,10 @@ class MantidAxes(Axes):
         Checks the known artist containers to see if anything exists within them
         :return: True if no artists exist, false otherwise
         """
+
         def _empty(container):
             return len(container) == 0
+
         return (_empty(axes.lines) and _empty(axes.images) and
                 _empty(axes.collections) and _empty(axes.containers))
 
@@ -496,6 +505,7 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions.imshow,
                                               artists, workspace, **kwargs)
+
             workspace = args[0]
             return self.track_workspace_artist(workspace,
                                                plotfunctions.imshow(self, *args, **kwargs),
@@ -518,6 +528,7 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions_func,
                                               artists, workspace, **kwargs)
+
             workspace = args[0]
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(workspace,
@@ -700,6 +711,44 @@ class MantidAxes(Axes):
                                                plotfunctions.tricontourf(self, *args, **kwargs))
         else:
             return Axes.tricontourf(self, *args, **kwargs)
+
+    def legend(self, *args, **kwargs):
+        """
+        In the case where there are no arguments to the legend function,
+        but errors are present on the plot, we make our own legend order
+        to prevent MPL always appending errors on the bottom of the legend.
+
+        Make our own labels if:
+          -> no args are provided
+          -> any errors are plotted
+
+        If there are no args or no errors, we back out to use the original MPL implementation
+        """
+        if len(args) == 0 or len(self.containers) == 0:
+            handles = []
+            labels = []
+            for line in self.lines:
+                # the line is an error line, and the label must be extracted from the ErrorContainer
+                if line.get_label() == self.MPL_NOLEGEND:
+                    errorbar = self.find_errorbar_container(line)
+
+                    handle = errorbar
+                    label = errorbar.get_label()
+                else:
+                    handle = line
+                    label = line.get_label()
+
+                handles.append(handle)
+                labels.append(label)
+
+            return Axes.legend(self, handles, labels)
+        else:
+            return Axes.legend(self, *args, **kwargs)
+
+    def find_errorbar_container(self, line):
+        for container in self.containers:
+            if line == container[0]:
+                return container
 
     # ------------------ Private api --------------------------------------------------------
 
