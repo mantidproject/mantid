@@ -4,17 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui
 import os
 import unittest
+from PyQt4 import QtGui
 
 from mantid.py3compat import mock
-from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
+
 from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
@@ -37,10 +37,10 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonLoadData()
-        self.context = MuonDataContext(self.data)
+        setup_context_for_tests(self)
+
         self.view = LoadRunWidgetView(parent=self.obj)
-        self.model = LoadRunWidgetModel(self.data, self.context)
+        self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()

@@ -102,11 +102,9 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   const auto sourcePos = spectrumInfo.sourcePosition();
   const auto detPos = spectrumInfo.position(m_wsIndex);
   // Normalized beam direction
-  auto beamDir = samplePos - sourcePos;
-  beamDir.normalize();
+  const auto beamDir = normalize(samplePos - sourcePos);
   // Normalized detector direction
-  auto detDir = (detPos - samplePos);
-  detDir.normalize();
+  const auto detDir = normalize(detPos - samplePos);
   m_unitWaveVector = beamDir - detDir;
   m_qConvention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
@@ -252,7 +250,7 @@ AbsoluteBackgroundStrategy::AbsoluteBackgroundStrategy(const double background)
     : m_background(background) {}
 
 bool AbsoluteBackgroundStrategy::isBelowBackground(
-    const double intensity, const HistogramData::HistogramY &) const {
+    const double intensity, const HistogramData::HistogramY & /*y*/) const {
   return intensity < m_background;
 }
 
@@ -545,9 +543,9 @@ SimpleReduceStrategy::SimpleReduceStrategy(
     const CompareStrategy *compareStrategy)
     : ReducePeakListStrategy(compareStrategy) {}
 
-std::vector<SXPeak>
-SimpleReduceStrategy::reduce(const std::vector<SXPeak> &peaks,
-                             Mantid::Kernel::ProgressBase &) const {
+std::vector<SXPeak> SimpleReduceStrategy::reduce(
+    const std::vector<SXPeak> &peaks,
+    Mantid::Kernel::ProgressBase & /*progress*/) const {
   // If the peaks are empty then do nothing
   if (peaks.empty()) {
     return peaks;

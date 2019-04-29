@@ -77,12 +77,12 @@ void ResetNegatives::exec() {
     g_log.information() << "No values are negative. Copying InputWorkspace to "
                            "OutputWorkspace\n";
     if (inputWS != outputWS) {
-      IAlgorithm_sptr alg =
+      IAlgorithm_sptr clone =
           this->createChildAlgorithm("CloneWorkspace", .1, 1.);
-      alg->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
-      alg->executeAsChildAlg();
+      clone->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
+      clone->executeAsChildAlg();
 
-      Workspace_sptr temp = alg->getProperty("OutputWorkspace");
+      Workspace_sptr temp = clone->getProperty("OutputWorkspace");
       setProperty("OutputWorkspace",
                   boost::dynamic_pointer_cast<MatrixWorkspace>(temp));
     }

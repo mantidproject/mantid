@@ -390,8 +390,7 @@ double Qxy::getQminFromWs(const API::MatrixWorkspace &inputWorkspace) {
   double qmin = 0;
   const API::Run &run = inputWorkspace.run();
   if (run.hasProperty("qmin")) {
-    Kernel::Property *prop = run.getProperty("Qmin");
-    qmin = boost::lexical_cast<double, std::string>(prop->value());
+    qmin = run.getPropertyValueAsType<double>("Qmin");
   } else {
     g_log.warning() << "Could not retrieve Qmin from run object.\n";
   }

@@ -206,9 +206,7 @@ void FindEPP::initWorkspace() {
   const size_t numberSpectra = m_inWS->getNumberHistograms();
   m_progress = make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
 
-  for (size_t i = 0; i < numberSpectra; ++i) {
-    m_outWS->appendRow();
-  }
+  m_outWS->setRowCount(numberSpectra);
 }
 
 } // namespace Algorithms

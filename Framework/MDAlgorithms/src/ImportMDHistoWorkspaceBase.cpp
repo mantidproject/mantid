@@ -196,12 +196,9 @@ ImportMDHistoWorkspaceBase::validateInputs() {
  */
 bool ImportMDHistoWorkspaceBase::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (const auto &targetFrame : targetFrames) {
-    if (targetFrame == frame) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(
+      targetFrames.cbegin(), targetFrames.cend(),
+      [&frame](const auto &targetFrame) { return targetFrame == frame; });
 }
 
 } // namespace MDAlgorithms

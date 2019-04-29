@@ -7,8 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QObject>
 #include <QTabWidget>
@@ -51,8 +51,8 @@ public slots:
   virtual void displayWarning(std::string const &warning) = 0;
 
 signals:
-  void sampleLoaded(QString const &);
-  void resolutionLoaded(QString const &);
+  void sampleLoaded(QString const & /*_t1*/);
+  void resolutionLoaded(QString const & /*_t1*/);
   void addClicked();
   void removeClicked();
   void multipleDataViewSelected();

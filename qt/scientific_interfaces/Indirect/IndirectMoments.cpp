@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMoments.h"
 
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>

@@ -24,7 +24,6 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
@@ -505,8 +504,8 @@ LoadMuonNexus2::loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex) {
       const auto detIndex = dataGroup.openNXInt("detector_index");
       const auto detCount = dataGroup.openNXInt("detector_count");
       const auto detList = dataGroup.openNXInt("detector_list");
-      const int nSpectra = detIndex.dim0();
-      for (int i = 0; i < nSpectra; ++i) {
+      const int nDet = detIndex.dim0();
+      for (int i = 0; i < nDet; ++i) {
         const int start = detIndex[i];
         const int nDetectors = detCount[i];
         std::set<int> detIDs;

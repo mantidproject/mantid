@@ -62,7 +62,6 @@ void TransposeMD::init() {
                   "An input workspace.");
 
   auto axisValidator = boost::make_shared<ArrayBoundedValidator<int>>();
-  axisValidator->clearUpper();
   axisValidator->setLower(0);
 
   declareProperty(

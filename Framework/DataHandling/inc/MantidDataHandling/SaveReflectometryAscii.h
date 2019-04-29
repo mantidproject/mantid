@@ -10,7 +10,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 

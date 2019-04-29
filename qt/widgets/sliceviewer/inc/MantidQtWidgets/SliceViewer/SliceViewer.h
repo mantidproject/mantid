@@ -18,9 +18,9 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/SyncedCheckboxes.h"
-#include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include "MantidQtWidgets/LegacyQwt/SafeQwtPlot.h"
+#include "MantidQtWidgets/Plotting/Qwt/ColorBarWidget.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Plotting/Qwt/SafeQwtPlot.h"
 #include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidQtWidgets/SliceViewer/LineOverlay.h"
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
@@ -119,7 +119,7 @@ public:
   QwtDoubleInterval getYLimits() const;
   void setXYCenter(double x, double y);
   void openFromXML(const QString &xml);
-  void toggleLineMode(bool);
+  void toggleLineMode(bool /*lineMode*/);
   void setNormalization(Mantid::API::MDNormalization norm, bool update = true);
   Mantid::API::MDNormalization getNormalization() const;
   void setColorBarAutoScale(bool autoscale);
@@ -161,9 +161,9 @@ signals:
   /// Signal emitted when the slice point moves
   void changedSlicePoint(Mantid::Kernel::VMD slicePoint);
   /// Signal emitted when the LineViewer should be shown/hidden.
-  void showLineViewer(bool);
+  void showLineViewer(bool /*_t1*/);
   /// Signal emitted when the PeaksViewer should be shown/hidden.
-  void showPeaksViewer(bool);
+  void showPeaksViewer(bool /*_t1*/);
   /// Signal emitted when someone uses setWorkspace() on SliceViewer
   void workspaceChanged();
   /// Signal emitted when someone wants to see the options dialog
@@ -174,7 +174,7 @@ public slots:
   void helpLineViewer();
   void helpPeaksViewer();
   void setFastRender(bool fast);
-  void showInfoAt(double, double);
+  void showInfoAt(double /*x*/, double /*y*/);
   // Change in view slots
   void checkForHKLDimension();
   void switchQWTRaster(bool useNonOrthogonal);
@@ -186,8 +186,8 @@ public slots:
   void zoomInSlot();
   void zoomOutSlot();
   void zoomRectSlot(const QwtDoubleRect &rect);
-  void panned(int, int);
-  void magnifierRescaled(double);
+  void panned(int /*unused*/, int /*unused*/);
+  void magnifierRescaled(double /*unused*/);
 
   // Color scale slots
   void setColorScaleAutoFull();
@@ -210,10 +210,10 @@ public slots:
   void setNonOrthogonalbtn();
   void disableOrthogonalAnalysisTools(bool checked);
   // Synced checkboxes
-  void LineMode_toggled(bool);
-  void SnapToGrid_toggled(bool);
-  void RebinMode_toggled(bool);
-  void autoRebin_toggled(bool);
+  void LineMode_toggled(bool /*checked*/);
+  void SnapToGrid_toggled(bool /*checked*/);
+  void RebinMode_toggled(bool /*checked*/);
+  void autoRebin_toggled(bool /*checked*/);
 
   // Dynamic rebinning
   void rebinParamsChanged();

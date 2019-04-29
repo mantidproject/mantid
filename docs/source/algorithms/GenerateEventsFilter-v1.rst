@@ -32,6 +32,15 @@ and
 are of the resolution of pulse time. It is also enhanced to process the fast
 frequency sample logs, which can be even faster than chopper frequencies.
 
+Input Workspace
+###############
+
+This algorithm mainly uses the information retrieved from sample logs to create 
+event splitters.
+Therefore, EventWorkspace is only required if the run end time cannot be determined by sample logs. 
+For example, proton charge log cannot be found.
+
+
 Workspace to store event splitters
 ##################################
 
@@ -232,6 +241,8 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
+**Example - Generate event filter by temperature value**
+
 The following is a contrived example to show how one would use the algorithm to split
 up an :ref:`EventWorkspace <EventWorkspace>` by a temperature
 log. The resulting workspaces would then be fed to
@@ -265,6 +276,48 @@ Output:
     Number of rows in first TableWorkspace = 6
     Number of columns in second TableWorkspace = 2
     Number of rows in second TableWorkspace = 9
+
+
+**Example - Generate event filter by temperature value with an empty workspace**
+
+The following is a contrived example to show how one would use the algorithm to 
+generate event splitters from an empty workspace, which has sample logs in run object,
+by a temperature log. 
+The resulting workspaces would then be fed to
+:ref:`FilterEvents <algm-FilterEvents>`
+for further processing.
+
+.. testcode:: Ex
+
+    ws = CreateWorkspace(DataX=[0], DataY=[0], NSpec=1, OutputWorkspace='ws')
+    ws = LoadNexusLogs(ws, "CNCS_7860_event.nxs")
+    # The InformationWorkspace name is mandatory
+    ws2 = GenerateEventsFilter(InputWorkspace='ws', InformationWorkspace="info", UnitOfTime="Nanoseconds",
+                               Logname="SampleTemp", MinimumLogValue=279.9, MaximumLogValue=279.98,
+                               LogValueInterval=0.01)
+    # The first workspace is the SplittersWorkspace and the second is the InformationWorkspace
+    print("Number of workspaces = {}".format(len(ws2)))
+    print("First workspace type = {}".format(ws2[0].id()))
+    print("Second workspace type = {}".format(ws2[1].id()))
+    print("Number of columns in first TableWorkspace = {}".format(ws2[0].columnCount()))
+    print("Number of rows in first TableWorkspace = {}".format(ws2[0].rowCount()))
+    print("Number of columns in second TableWorkspace = {}".format(ws2[1].columnCount()))
+    print("Number of rows in second TableWorkspace = {}".format(ws2[1].rowCount()))
+
+
+Output:
+
+.. testoutput:: Ex
+
+    Number of workspaces = 2
+    First workspace type = TableWorkspace
+    Second workspace type = TableWorkspace
+    Number of columns in first TableWorkspace = 3
+    Number of rows in first TableWorkspace = 6
+    Number of columns in second TableWorkspace = 2
+    Number of rows in second TableWorkspace = 9
+
+
 
 .. categories::
 

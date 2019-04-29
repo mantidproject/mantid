@@ -84,10 +84,10 @@ public slots:
   void setHWHMMinimum(double maximum) override;
 
 private slots:
-  void emitPlotSpectrumChanged(int);
+  void emitPlotSpectrumChanged(int /*spectrum*/);
   void emitPlotSpectrumChanged(const QString &spectrum);
-  void emitSelectedFitDataChanged(int);
-  void emitPlotGuessChanged(int);
+  void emitSelectedFitDataChanged(int /*index*/);
+  void emitPlotGuessChanged(int /*doPlotGuess*/);
 
 private:
   std::string getSpectrumText() const;

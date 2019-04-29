@@ -52,10 +52,10 @@ void updateParameters(
 void updateAttributes(
     IFunction_sptr function, std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-  for (auto i = 0u; i < attributeNames.size(); ++i) {
-    auto const value = attributes.find(attributeNames[i]);
+  for (const auto &attributeName : attributeNames) {
+    auto const value = attributes.find(attributeName);
     if (value != attributes.end())
-      function->setAttribute(attributeNames[i], value->second);
+      function->setAttribute(attributeName, value->second);
   }
 }
 
@@ -453,7 +453,7 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX,
   }
 }
 
-void IndirectFitAnalysisTab::tableExcludeChanged(const std::string &,
+void IndirectFitAnalysisTab::tableExcludeChanged(const std::string & /*unused*/,
                                                  std::size_t dataIndex,
                                                  std::size_t spectrum) {
   if (isRangeCurrentlySelected(dataIndex, spectrum))
@@ -998,7 +998,7 @@ void IndirectFitAnalysisTab::enableOutputOptions(bool enable) {
     m_outOptionsPresenter->setMultiWorkspaceOptionsVisible(enable);
 
   m_outOptionsPresenter->setPlotEnabled(
-      enable && m_outOptionsPresenter->isResultGroupPlottable());
+      enable && m_outOptionsPresenter->isSelectedGroupPlottable());
   m_outOptionsPresenter->setEditResultEnabled(enable);
   m_outOptionsPresenter->setSaveEnabled(enable);
 }

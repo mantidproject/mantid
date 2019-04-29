@@ -63,16 +63,16 @@ public:
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     ShapeInfo::GeometryShape objType;
-    double radius(-1.0), height(-1.0);
+    double radius(-1.0), height(-1.0), innerRadius(0.0);
     std::vector<V3D> pts;
     auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original.GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, innerRadius, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
     // The copy should be a primitive object with a GeometryHandler
-    copy.GetObjectGeom(objType, pts, radius, height);
+    copy.GetObjectGeom(objType, pts, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
     auto handlerCopy = copy.getGeometryHandler();
@@ -89,17 +89,17 @@ public:
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     ShapeInfo::GeometryShape objType;
-    double radius(-1.0), height(-1.0);
+    double radius(-1.0), height(-1.0), innerRadius(0.0);
     std::vector<V3D> pts;
     auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original.GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, innerRadius, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
-    lhs.GetObjectGeom(objType, pts, radius, height);
+    lhs.GetObjectGeom(objType, pts, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
@@ -786,6 +786,47 @@ public:
     TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
   }
 
+  void testGeneratePointInsideHollowCylinder() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randR{0.55};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+
+    constexpr double innerRadius{0.29};
+    constexpr double radius{0.3};
+    constexpr double height{0.5};
+    const V3D axis{0., 0., 1.};
+    const V3D bottomCentre{
+        -1.,
+        2.,
+        -3.,
+    };
+    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
+        innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = hollowCylinder->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    point -= bottomCentre;
+    constexpr double tolerance{1e-10};
+    const double polarAngle{2. * M_PI * randT};
+    const double c1 = std::pow(innerRadius, 2);
+    const double c2 = std::pow(radius, 2);
+    const double radialLength{std::sqrt(c1 + (c2 - c1) * randR)};
+    const double axisLength{height * randZ};
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
@@ -906,30 +947,30 @@ public:
     // approx WISH cylinder
     // We intentionally exclude the cylinder end caps so they this should
     // produce 0
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
                     satol);
     // Other end
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.0,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.497, 0.0, 0.0)),
+                    0.0, satol);
 
     // Side values
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0.1)), 0.00301186,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -0.1)), 0.00301186,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0.1)),
+                    0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -0.1)),
+                    0.00301186, satol);
     // Sweep in the axis of the cylinder angle to see if the solid angle
     // decreases (as we are excluding the end caps)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0.1, 0.0, 0.1)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0.1, 0.0, 0.1)),
                     0.00100267, satol);
 
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.999, 0.0, 0.0)),
                     4 * M_PI, satol);
 
     // surface points
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0.0, 0.0)), 2 * M_PI,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0.0, 0.0)),
+                    2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.997, 0.0, 0.0)),
                     2 * M_PI, satol);
   }
 
@@ -946,17 +987,17 @@ public:
     //
     // tests for Triangulated cube
     //
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(1.0, 0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(1.0, 0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 1.0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 1.0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, -1.0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, -1.0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 1.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 1.0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -1.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -1.0)),
                     M_PI * 2.0 / 3.0, satol);
   }
 
@@ -967,8 +1008,9 @@ public:
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     double expected = M_PI * 2.0 / 3.0;
     V3D scaleFactor(2.0, 2.0, 2.0);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2.0, 0, 0), scaleFactor),
-                    expected, satol);
+    TS_ASSERT_DELTA(
+        geom_obj->triangulatedSolidAngle(V3D(2.0, 0, 0), scaleFactor), expected,
+        satol);
   }
 
   void testExactVolumeCuboid() {
@@ -1029,6 +1071,28 @@ public:
     auto cuboid = shapeFactory.createShape(typeElement);
     const double cylinderVolume = height * M_PI * radius * radius;
     TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
+  }
+
+  void testExactVolumeHollowCylinder() {
+    using namespace Poco::XML;
+    constexpr double innerRadius = 0.98;
+    constexpr double radius = 0.99;
+    constexpr double height = 88;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testHollowCylinder");
+    AutoPtr<Element> shapeElement = createHollowCylinderTypeElement(
+        "hollow-cylinder-shape", height, innerRadius, radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "hollow-cylinder-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double hollowCylinderVolume =
+        M_PI * height * (radius * radius - innerRadius * innerRadius);
+    TS_ASSERT_DELTA(cuboid->volume(), hollowCylinderVolume, 1e-6)
   }
 
   void testMonteCarloVolume() {
@@ -1176,51 +1240,29 @@ public:
 
     double satol = 1e-3; // typical result tolerance
 
-    //    if(timeTest)
-    //    {
-    //      // block to test time of solid angle methods
-    //      // change false to true to include
-    //      int iter=4000;
-    //      int starttime=clock();
-    //      for (int i=0;i<iter;i++)
-    //        saTri=geom_obj->triangleSolidAngle(observer);
-    //      int endtime=clock();
-    //      std::cout << std::endl << "Cyl tri time=" <<
-    //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      '\n';
-    //      iter=50;
-    //      starttime=clock();
-    //      for (int i=0;i<iter;i++)
-    //        saRay=geom_obj->rayTraceSolidAngle(observer);
-    //      endtime=clock();
-    //      std::cout << "Cyl ray time=" <<
-    //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      '\n';
-    //    }
-
-    saTri = geom_obj->triangleSolidAngle(observer);
+    saTri = geom_obj->triangulatedSolidAngle(observer);
     saRay = geom_obj->rayTraceSolidAngle(observer);
     TS_ASSERT_DELTA(saTri, 1.840302, 0.001);
     TS_ASSERT_DELTA(saRay, 1.840302, 0.01);
 
     observer = V3D(-7.2, 0, 0);
-    saTri = geom_obj->triangleSolidAngle(observer);
+    saTri = geom_obj->triangulatedSolidAngle(observer);
     saRay = geom_obj->rayTraceSolidAngle(observer);
 
     TS_ASSERT_DELTA(saTri, 1.25663708, 0.001);
     TS_ASSERT_DELTA(saRay, 1.25663708, 0.001);
 
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 7)), 0.7531,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 7)), 0.7531,
                     0.753 * satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 7, 0)), 0.7531,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 7, 0)), 0.7531,
                     0.753 * satol);
 
-    saTri = geom_obj->triangleSolidAngle(V3D(20, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(20, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.07850147, satol * 0.0785);
-    saTri = geom_obj->triangleSolidAngle(V3D(200, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(200, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.000715295, satol * 0.000715);
-    saTri = geom_obj->triangleSolidAngle(V3D(2000, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(2000, 0, 0));
     TS_ASSERT_DELTA(saTri, 7.08131e-6, satol * 7.08e-6);
   }
   void testSolidAngleSphereTri()
@@ -1236,13 +1278,13 @@ public:
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(8.1, 0, 0)), 0.864364,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(8.1, 0, 0)), 0.864364,
                     satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
                     satol);
     // surface point
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
                     satol);
   }
 
@@ -1621,6 +1663,34 @@ private:
     shapeElement->appendChild(element);
     element = document->createElement("radius");
     element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("height");
+    element->setAttribute("val", std::to_string(height));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element> createHollowCylinderTypeElement(
+      const std::string &id, const double height, const double innerRadius,
+      const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("hollow-cylinder");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre-of-bottom-base");
+    element->setAttribute("x", std::to_string(-height / 2));
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("axis");
+    element->setAttribute("x", "1.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("outer-radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("inner-radius");
+    element->setAttribute("val", std::to_string(innerRadius));
     shapeElement->appendChild(element);
     element = document->createElement("height");
     element->setAttribute("val", std::to_string(height));

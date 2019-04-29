@@ -15,7 +15,6 @@
 #include <boost/shared_ptr.hpp>
 #endif
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 namespace Mantid {

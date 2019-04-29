@@ -57,5 +57,10 @@ void AlgorithmProgressWidget::showDetailsDialog() {
 QProgressBar *AlgorithmProgressWidget::progressBar() const {
   return m_progressBar;
 }
+
+void AlgorithmProgressWidget::blockUpdates(bool block) {
+  m_presenter->blockSignals(block);
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -237,8 +237,9 @@ class TransformToIqt(PythonAlgorithm):
         from IndirectCommon import CheckHistZero, CheckHistSame
 
         # Process resolution data
-        num_res_hist = CheckHistZero(self._resolution)[0]
-        if num_res_hist > 1:
+        res_number_of_histograms = CheckHistZero(self._resolution)[0]
+        sample_number_of_histograms = CheckHistZero(self._sample)[0]
+        if res_number_of_histograms > 1 and sample_number_of_histograms is not res_number_of_histograms:
             CheckHistSame(
                 self._sample,
                 'Sample',

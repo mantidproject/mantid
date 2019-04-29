@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=@DESKTOP_NAME@
+Comment=Neutron Data Reduction Framework
+GenericName=@DESKTOP_NAME@
+Exec=@DESKTOP_EXEC_CMD@
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Categories=Education;Science;Qt;Analysis
+Icon=@DESKTOP_ICON@
+StartupNotify=false
+Name[en]=@DESKTOP_NAME@

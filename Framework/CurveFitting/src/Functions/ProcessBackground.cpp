@@ -323,7 +323,7 @@ void ProcessBackground::deleteRegion() {
     }
   }
   size_t sizex = incIndexes.size();
-  size_t sizey = incIndexes.size();
+  size_t sizey = sizex;
   if (dataX.size() > dataY.size()) {
     sizex++;
   }
@@ -1033,17 +1033,11 @@ size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
     }
 
     // Flag the excluded region
-    for (int i = i_min; i <= i_max; ++i)
-      v_useX[i] = false;
+    for (int excluded = i_min; excluded <= i_max; ++excluded)
+      v_useX[excluded] = false;
   }
 
-  // Count non-excluded region
-  size_t count = 0;
-  for (auto &&useX : v_useX)
-    if (useX)
-      ++count;
-
-  return count;
+  return std::count(v_useX.cbegin(), v_useX.cend(), true);
 }
 
 } // namespace Functions

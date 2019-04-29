@@ -22,7 +22,7 @@ class StateMachine(object):
         """
         Respond to mouse press event.
         """
-        if self.tool.toolbar_state_checker.is_tool_active():
+        if self.tool.toolbar_manager.is_tool_active():
             return
         self.state.button_press_callback(event)
 
@@ -30,7 +30,7 @@ class StateMachine(object):
         """
         Respond to mouse move event.
         """
-        if self.tool.toolbar_state_checker.is_tool_active():
+        if self.tool.toolbar_manager.is_tool_active():
             return
         self.state.motion_notify_callback(event)
 
@@ -38,7 +38,7 @@ class StateMachine(object):
         """
         Respond to mouse release event.
         """
-        if self.tool.toolbar_state_checker.is_tool_active():
+        if self.tool.toolbar_manager.is_tool_active():
             return
         self.state.button_release_callback(event)
         self.state = self.state.transition()

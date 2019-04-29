@@ -1,6 +1,4 @@
-#
-## Tests for Muon GUIs
-##
+# Tests for Muon GUIs
 
 set ( TEST_PY_FILES
    FFTModel_test.py
@@ -33,7 +31,10 @@ set ( TEST_PY_FILES
    LoadWidgetView_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
+   muon_context_test.py
    muon_data_context_test.py
+   muon_gui_context_test.py
+   muon_group_pair_context_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    transformWidget_test.py
@@ -50,9 +51,9 @@ set ( TEST_PY_FILES
    help_widget_presenter_test.py
 )
 
-check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
+check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
-set ( PYUNITTEST_QT_API pyqt ) # force to use qt4
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt4 ${TEST_PY_FILES} )
-unset ( PYUNITTEST_QT_API )
+set(PYUNITTEST_QT_API pyqt) # force to use qt4
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.MuonQt4 ${TEST_PY_FILES})
+unset(PYUNITTEST_QT_API)

@@ -8,7 +8,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <list>
 #include <map>
 #include <sstream>
@@ -22,15 +21,19 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/make_unique.h"
-//#include "MantidGeometry/Surfaces/Torus.h"
-#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 
 namespace Mantid {
+
+namespace {
+Kernel::Logger logger("surfaceFactory");
+}
 
 namespace Geometry {
 
@@ -164,7 +167,7 @@ SurfaceFactory::processLine(const std::string &Line) const
 
   std::unique_ptr<Surface> X = createSurfaceID(key);
   if (X->setSurface(Line)) {
-    std::cerr << "X:: " << X->setSurface(Line) << '\n';
+    logger.error() << "X:: " << X->setSurface(Line) << '\n';
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
   }
 

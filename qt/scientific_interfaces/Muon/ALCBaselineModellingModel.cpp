@@ -90,8 +90,8 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   // Find points which are in at least one section, and exclude them from
   // disable list
   for (size_t i = 0; i < numBins; ++i) {
-    for (auto it = sections.begin(); it != sections.end(); ++it) {
-      if (ws->x(0)[i] >= it->first && ws->x(0)[i] <= it->second) {
+    for (const auto &section : sections) {
+      if (ws->x(0)[i] >= section.first && ws->x(0)[i] <= section.second) {
         toDisable[i] = false;
         break; // No need to check other sections
       }
@@ -156,9 +156,9 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() {
     table->addColumn("double", "Start X");
     table->addColumn("double", "End X");
 
-    for (auto it = m_sections.begin(); it != m_sections.end(); ++it) {
+    for (auto &section : m_sections) {
       TableRow newRow = table->appendRow();
-      newRow << it->first << it->second;
+      newRow << section.first << section.second;
     }
 
     return table;

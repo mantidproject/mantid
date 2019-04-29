@@ -369,14 +369,10 @@ void MaxEnt::exec() {
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
   for (size_t s = 0; s < nHist; s++) {
-    auto errors = inWS->e(s).rawData();
-
-    size_t npoints = errors.size();
-    for (size_t i = 0; i < npoints; i++) {
-      if (errors[i] <= 0.0) {
-        throw std::invalid_argument(
-            "Input data must have all errors non-zero.");
-      }
+    const auto &errors = inWS->e(s);
+    if (std::any_of(errors.cbegin(), errors.cend(),
+                    [](const auto error) { return error <= 0.; })) {
+      throw std::invalid_argument("Input data must have all errors non-zero.");
     }
   }
 
@@ -794,11 +790,11 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
     const std::vector<double> &image, double background, double distEps) {
 
-  double sum = 0.;
-  for (double point : image)
-    sum += fabs(point);
+  const double pointSum = std::accumulate(
+      image.cbegin(), image.cend(), 0.,
+      [](const auto sum, const auto point) { return sum + std::abs(point); });
 
-  size_t dim = coeffs.s2.size().first;
+  const size_t dim = coeffs.s2.size().first;
 
   double dist = 0.;
 
@@ -809,10 +805,10 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     dist += delta[k] * sum;
   }
 
-  if (dist > distEps * sum / background) {
+  if (dist > distEps * pointSum / background) {
     auto newDelta = delta;
     for (size_t k = 0; k < delta.size(); k++) {
-      newDelta[k] *= sqrt(distEps * sum / dist / background);
+      newDelta[k] *= sqrt(distEps * pointSum / dist / background);
     }
     return newDelta;
   }

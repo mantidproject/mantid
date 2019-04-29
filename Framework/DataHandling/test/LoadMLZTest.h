@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadMLZ.h"
+#include "MantidGeometry/Instrument.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -41,9 +42,9 @@ public:
   }
 
   /*
-   * This test only loads the Sample Data
+   * This test loading of the Sample Data
    */
-  void testExecJustSample() {
+  void testLoad() {
     LoadMLZ loader;
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
@@ -55,10 +56,14 @@ public:
     MatrixWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace);
-    MatrixWorkspace_sptr output2D =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1006); // to check
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1006);
+
+    // test whether instrument parameter Efixed has been set
+    auto instrument = output->getInstrument();
+    TS_ASSERT(instrument->hasParameter("Efixed"));
+    auto efixed = instrument->getNumberParameter("Efixed")[0];
+    TS_ASSERT_DELTA(efixed, 2.272, 0.001);
 
     AnalysisDataService::Instance().clear();
   }

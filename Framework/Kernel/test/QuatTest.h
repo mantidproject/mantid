@@ -248,8 +248,7 @@ public:
     // V3D some(1,0,0);
     // V3D target(0,1,0);
 
-    V3D rotAxis = some.cross_prod(target);
-    rotAxis.normalize();
+    const V3D rotAxis = normalize(some.cross_prod(target));
 
     double targ_norm = target.norm();
     double some_norm = some.norm();

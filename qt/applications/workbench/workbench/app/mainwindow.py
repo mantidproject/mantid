@@ -21,10 +21,11 @@ from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
+from mantid.py3compat import setswitchinterval
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
-# -----------------------------------------------------------------------------exception_handler.py
+# -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
 
@@ -169,6 +170,9 @@ class MainWindow(QMainWindow):
         self.project = None
         self.project_recovery = None
 
+        # Interface Runner
+        self.executioner = None
+
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -309,9 +313,11 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launch_custom_gui(self, filename):
-        executioner = PythonCodeExecution()
-        executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
-        executioner.execute(open(filename).read(), filename)
+        if self.executioner is None:
+            self.executioner = PythonCodeExecution()
+            self.executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
+
+        self.executioner.execute(open(filename).read(), filename)
 
     def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
@@ -601,21 +607,28 @@ def start_workbench(app, command_line_options):
     main_window.set_splash('Initializing mantid framework')
     FrameworkManagerImpl.Instance()
     main_window.post_mantid_init()
-    main_window.show()
-    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
     if main_window.splash:
         main_window.splash.hide()
 
     if command_line_options.script is not None:
         main_window.editor.open_file_in_new_tab(command_line_options.script)
+        editor_task = None
         if command_line_options.execute:
-            main_window.editor.execute_current_async()  # TODO use the result as an exit code
+            # if the quit flag is not specified, this task reference will be
+            # GC'ed, and the task will be finished alongside the GUI startup
+            editor_task = main_window.editor.execute_current_async()
 
         if command_line_options.quit:
+            # wait for the code interpreter thread to finish executing the script
+            editor_task.join()
             main_window.close()
-            return 0
 
+            # for task exit code descriptions see the classes AsyncTask and TaskExitCode
+            return int(editor_task.exit_code) if editor_task else 0
+
+    main_window.show()
+    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
     # Project Recovey on startup
     main_window.project_recovery.repair_checkpoints()
     if main_window.project_recovery.check_for_recover_checkpoint():
@@ -670,7 +683,7 @@ def main():
     app = initialize()
     # the default sys check interval leads to long lags
     # when request scripts to be aborted
-    sys.setcheckinterval(SYSCHECK_INTERVAL)
+    setswitchinterval(SYSCHECK_INTERVAL)
     exit_value = 0
     try:
         exit_value = start_workbench(app, options)

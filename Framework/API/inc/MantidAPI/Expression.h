@@ -216,7 +216,6 @@ private:
    * @return True if it is true
    */
   bool is_op_symbol(const char c) const;
-
   boost::shared_ptr<Operators> m_operators; ///< pointer ot the operators
 };
 

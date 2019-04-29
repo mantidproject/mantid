@@ -67,7 +67,7 @@ if ( CPPCHECK_EXECUTABLE )
   # Header files to be ignored require different handling
   set ( CPPCHECK_HEADER_EXCLUDES
         MantidPlot/src/origin/OPJFile.h
-		MantidPlot/src/origin/tree.hh
+        MantidPlot/src/origin/tree.hh
       )
 
   # setup the standard arguments

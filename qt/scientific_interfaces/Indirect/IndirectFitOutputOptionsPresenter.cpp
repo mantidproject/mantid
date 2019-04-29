@@ -51,8 +51,7 @@ void IndirectFitOutputOptionsPresenter::setAvailablePlotOptions(
   auto const resultSelected = m_model->isResultGroupSelected(selectedGroup);
   setPlotTypes(selectedGroup);
   m_view->setWorkspaceComboBoxVisible(!resultSelected);
-  m_view->setPlotEnabled(resultSelected ? isResultGroupPlottable()
-                                        : isPDFGroupPlottable());
+  m_view->setPlotEnabled(isSelectedGroupPlottable());
 }
 
 void IndirectFitOutputOptionsPresenter::setResultWorkspace(
@@ -116,12 +115,8 @@ void IndirectFitOutputOptionsPresenter::saveResult() {
   setSaving(false);
 }
 
-bool IndirectFitOutputOptionsPresenter::isResultGroupPlottable() {
-  return m_model->isResultGroupPlottable();
-}
-
-bool IndirectFitOutputOptionsPresenter::isPDFGroupPlottable() {
-  return m_model->isPDFGroupPlottable();
+bool IndirectFitOutputOptionsPresenter::isSelectedGroupPlottable() const {
+  return m_model->isSelectedGroupPlottable(m_view->getSelectedGroupWorkspace());
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotting(bool plotting) {
@@ -140,7 +135,7 @@ void IndirectFitOutputOptionsPresenter::setSaving(bool saving) {
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
-  m_view->setPlotEnabled(enable);
+  m_view->setPlotEnabled(enable && isSelectedGroupPlottable());
 }
 
 void IndirectFitOutputOptionsPresenter::setEditResultEnabled(bool enable) {

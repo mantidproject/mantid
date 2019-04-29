@@ -9,13 +9,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property, RebinParamsValidator,
-                           StringListValidator)
-from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
-                              DetectorEfficiencyCorUser, Divide, GenerateGroupingPowder, GroupDetectors, MaskDetectors, Rebin, Scale,
-                              SofQWNormalisedPolygon, Transpose)
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property,
+                           RebinParamsValidator, StringListValidator)
+from mantid.simpleapi import (BinWidthAtX, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
+                              DetectorEfficiencyCorUser, Divide, GenerateGroupingPowder, GroupDetectors, MaskDetectors,
+                              Rebin, Scale, SofQWNormalisedPolygon, Transpose)
 import math
 import numpy
 import os
@@ -41,48 +42,6 @@ def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
                      EnableLogging=algorithmLogging)
     wsCleanup.cleanup(ws)
     return scaledWS
-
-
-def _createDetectorGroups(ws):
-    """Find workspace indices with (almost) same theta and group them. Masked
-    detectors are ignored.
-    """
-    numHistograms = ws.getNumberHistograms()
-    groups = list()
-    detectorGrouped = numHistograms * [False]
-    spectrumInfo = ws.spectrumInfo()
-    twoThetas = numpy.empty(numHistograms)
-    for i in range(numHistograms):
-        det = ws.getDetector(i)
-        twoThetas[i] = ws.detectorTwoTheta(det)
-    for i in range(numHistograms):
-        if spectrumInfo.isMasked(i) or detectorGrouped[i]:
-            continue
-        twoTheta1 = twoThetas[i]
-        currentGroup = [ws.getDetector(i).getID()]
-        twoThetaDiff = numpy.abs(twoThetas[i + 1:] - twoTheta1)
-        equalTwoThetas = numpy.flatnonzero(twoThetaDiff < 0.01 / 180.0 * constants.pi)
-        for j in (i + 1) + equalTwoThetas:
-            if spectrumInfo.isMasked(int(j)):
-                continue
-            currentGroup.append(ws.getDetector(int(j)).getID())
-            detectorGrouped[j] = True
-        groups.append(currentGroup)
-    return groups
-
-
-def _detectorGroupsToXml(groups, instrument):
-    """Create grouping pattern XML tree from detector groups."""
-    from xml.etree import ElementTree
-    rootElement = ElementTree.Element('detector-grouping', {'instrument': 'IN5'})
-    for group in groups:
-        name = str(group.pop())
-        groupElement = ElementTree.SubElement(rootElement, 'group', {'name': name})
-        detIds = name
-        for detId in group:
-            detIds += ',' + str(detId)
-        ElementTree.SubElement(groupElement, 'detids', {'val': detIds})
-    return rootElement
 
 
 def _defaultEnergyBinning(ws, algorithmLogging):
@@ -265,13 +224,6 @@ def _rebin(ws, params, wsNames, algorithmLogging):
     return rebinnedWS
 
 
-def _writeXml(element, filename):
-    """Write XML element to a file."""
-    from xml.etree import ElementTree
-    with open(filename, mode='wb') as outFile:
-        ElementTree.ElementTree(element).write(outFile)
-
-
 class DirectILLReduction(DataProcessorAlgorithm):
     """A data reduction workflow algorithm for the direct geometry TOF spectrometers at ILL."""
 
@@ -302,56 +254,54 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def PyExec(self):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 9)
-        report = common.Report()
-        subalgLogging = False
-        if self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON:
-            subalgLogging = True
+        self._report = utils.Report()
+        self._subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsNames = common.NameSource(wsNamePrefix, cleanupMode)
-        wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
+        self._names = utils.NameSource(wsNamePrefix, cleanupMode)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
 
         # The variables 'mainWS' and 'monWS shall hold the current main
         # data throughout the algorithm.
 
         # Get input workspace.
         progress.report('Loading inputs')
-        mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
+        mainWS = self._inputWS()
 
         progress.report('Applying diagnostics')
-        mainWS = self._applyDiagnostics(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._applyDiagnostics(mainWS)
 
         # Vanadium normalization.
         progress.report('Normalising to vanadium')
-        mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        mainWS = self._normalizeToVana(mainWS)
 
         # Convert units from TOF to energy.
         progress.report('Converting to energy')
-        mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._convertTOFToDeltaE(mainWS)
 
         # KiKf conversion.
-        mainWS = self._correctByKiKf(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._correctByKiKf(mainWS)
 
         # Rebinning.
         progress.report('Rebinning in energy')
-        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._rebinInW(mainWS)
 
         # Divide the energy transfer workspace by bin widths.
-        mainWS = self._convertToDistribution(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._convertToDistribution(mainWS)
 
         # Detector efficiency correction.
         progress.report('Correcting detector efficiency')
-        mainWS = self._correctByDetectorEfficiency(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._correctByDetectorEfficiency(mainWS)
 
         progress.report('Grouping detectors')
-        mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        mainWS = self._groupDetectors(mainWS)
 
-        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup, subalgLogging)
+        self._outputWSConvertedToTheta(mainWS)
 
         progress.report('Converting to q')
-        mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        mainWS = self._transpose(mainWS, wsNames, wsCleanup, subalgLogging)
-        self._finalize(mainWS, wsCleanup, report)
+        mainWS = self._sOfQW(mainWS)
+        mainWS = self._transpose(mainWS)
+        self._finalize(mainWS)
         progress.report('Done')
 
     def PyInit(self):
@@ -375,10 +325,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                                direction=Direction.Output),
                              doc='The reduced S(Q, DeltaE) workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
-                             defaultValue=common.CLEANUP_ON,
+                             defaultValue=utils.Cleanup.ON,
                              validator=StringListValidator([
-                                 common.CLEANUP_ON,
-                                 common.CLEANUP_OFF]),
+                                 utils.Cleanup.ON,
+                                 utils.Cleanup.OFF]),
                              direction=Direction.Input,
                              doc='What to do with intermediate workspaces.')
         self.declareProperty(name=common.PROP_SUBALG_LOGGING,
@@ -447,73 +397,60 @@ class DirectILLReduction(DataProcessorAlgorithm):
             issues[common.PROP_REBINNING_W] = 'Cannot be specified at the same time with ' + common.PROP_REBINNING_PARAMS_W + '.'
         return issues
 
-    def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _applyDiagnostics(self, mainWS):
         """Mask workspace according to diagnostics."""
         if self.getProperty(common.PROP_DIAGNOSTICS_WS).isDefault:
             return mainWS
         diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
-        maskedWSName = wsNames.withSuffix('diagnostics_applied')
-        maskedWS = CloneWorkspace(InputWorkspace=mainWS,
-                                  OutputWorkspace=maskedWSName,
-                                  EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
-        MaskDetectors(Workspace=maskedWS,
+        MaskDetectors(Workspace=mainWS,
                       MaskedWorkspace=diagnosticsWS,
-                      EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        return maskedWS
+                      EnableLogging=self._subalgLogging)
+        return mainWS
 
-    def _convertToDistribution(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _convertToDistribution(self, mainWS):
         """Convert the workspace into a distribution."""
-        distributionWSName = wsNames.withSuffix('as_distribution')
-        distributionWS = CloneWorkspace(InputWorkspace=mainWS,
-                                        OutputWorkspace=distributionWSName,
-                                        EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        ConvertToDistribution(Workspace=distributionWS,
-                              EnableLogging=subalgLogging)
-        return distributionWS
+        ConvertToDistribution(Workspace=mainWS,
+                              EnableLogging=self._subalgLogging)
+        return mainWS
 
-    def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _convertTOFToDeltaE(self, mainWS):
         """Convert the X axis units from time-of-flight to energy transfer."""
-        energyConvertedWSName = wsNames.withSuffix('energy_converted')
+        energyConvertedWSName = self._names.withSuffix('energy_converted')
         energyConvertedWS = ConvertUnits(InputWorkspace=mainWS,
                                          OutputWorkspace=energyConvertedWSName,
                                          Target='DeltaE',
                                          EMode='Direct',
-                                         EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                         EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return energyConvertedWS
 
-    def _correctByDetectorEfficiency(self, mainWS, wsNames, wsCleanup,
-                                     subalgLogging):
+    def _correctByDetectorEfficiency(self, mainWS):
         """Apply detector efficiency corrections."""
-        correctedWSName = wsNames.withSuffix('detector_efficiency_corrected')
+        correctedWSName = self._names.withSuffix('detector_efficiency_corrected')
         correctedWS = \
             DetectorEfficiencyCorUser(InputWorkspace=mainWS,
                                       OutputWorkspace=correctedWSName,
-                                      EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                      EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return correctedWS
 
-    def _correctByKiKf(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _correctByKiKf(self, mainWS):
         """Apply the k_i / k_f correction."""
-        correctedWSName = wsNames.withSuffix('kikf')
+        correctedWSName = self._names.withSuffix('kikf')
         correctedWS = CorrectKiKf(InputWorkspace=mainWS,
                                   OutputWorkspace=correctedWSName,
-                                  EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                  EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return correctedWS
 
-    def _finalize(self, outWS, wsCleanup, report):
+    def _finalize(self, outWS):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
-        wsCleanup.cleanup(outWS)
-        wsCleanup.finalCleanup()
-        report.toLog(self.log())
+        self._cleanup.cleanup(outWS)
+        self._cleanup.finalCleanup()
+        self._report.toLog(self.log())
 
-    def _groupDetectors(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _groupDetectors(self, mainWS):
         """Group detectors with similar thetas."""
         instrument = mainWS.getInstrument()
         fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrument.getName()))
@@ -523,76 +460,75 @@ class DirectILLReduction(DataProcessorAlgorithm):
         if angleStepProperty.isDefault:
             if instrument.hasParameter('natural-angle-step'):
                 angleStep = instrument.getNumberParameter('natural-angle-step', recursive=False)[0]
-                report.notice('Using grouping angle step of {} degrees from the IPF.'.format(angleStep))
+                self._report.notice('Using grouping angle step of {} degrees from the IPF.'.format(angleStep))
             else:
                 angleStep = 0.01
-                report.notice('Using the default grouping angle step of {} degrees.'.format(angleStep))
+                self._report.notice('Using the default grouping angle step of {} degrees.'.format(angleStep))
         else:
             angleStep = angleStepProperty.value
         GenerateGroupingPowder(InputWorkspace=mainWS,
                                AngleStep=angleStep,
                                GroupingFilename=path,
                                GenerateParFile=False,
-                               EnableLogging=subalgLogging)
+                               EnableLogging=self._subalgLogging)
         try:
-            groupedWSName = wsNames.withSuffix('grouped_detectors')
+            groupedWSName = self._names.withSuffix('grouped_detectors')
             groupedWS = GroupDetectors(InputWorkspace=mainWS,
                                        OutputWorkspace=groupedWSName,
                                        MapFile=path,
                                        KeepUngroupedSpectra=False,
                                        Behaviour='Average',
-                                       EnableLogging=subalgLogging)
-            wsCleanup.cleanup(mainWS)
+                                       EnableLogging=self._subalgLogging)
+            self._cleanup.cleanup(mainWS)
             return groupedWS
         finally:
             os.remove(path)
 
-    def _inputWS(self, wsNames, wsCleanup, subalgLogging):
+    def _inputWS(self):
         """Return the raw input workspace."""
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
-        wsCleanup.protect(mainWS)
+        self._cleanup.protect(mainWS)
         return mainWS
 
-    def _normalizeToVana(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _normalizeToVana(self, mainWS):
         """Normalize to vanadium workspace."""
         if self.getProperty(common.PROP_VANA_WS).isDefault:
             return mainWS
         vanaWS = self.getProperty(common.PROP_VANA_WS).value
-        vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
+        vanaNormalizedWSName = self._names.withSuffix('vanadium_normalized')
         vanaNormalizedWS = Divide(LHSWorkspace=mainWS,
                                   RHSWorkspace=vanaWS,
                                   OutputWorkspace=vanaNormalizedWSName,
-                                  EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                  EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         if self.getProperty(common.PROP_ABSOLUTE_UNITS).value == common.ABSOLUTE_UNITS_ON:
-            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS, wsNames, wsCleanup, report,
-                                              subalgLogging)
+            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS)
         return vanaNormalizedWS
 
-    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _outputWSConvertedToTheta(self, mainWS):
         """
         If requested, convert the spectrum axis to theta and save the result
         into the proper output property.
         """
         if not self.getProperty(common.PROP_OUTPUT_THETA_W_WS).isDefault:
-            thetaWSName = wsNames.withSuffix('in_theta_energy_for_output')
+            thetaWSName = self._names.withSuffix('in_theta_energy_for_output')
             thetaWS = ConvertSpectrumAxis(InputWorkspace=mainWS,
                                           OutputWorkspace=thetaWSName,
                                           Target='Theta',
                                           EMode='Direct',
-                                          EnableLogging=subalgLogging)
+                                          EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
-            wsCleanup.cleanup(thetaWS)
+            self._cleanup.cleanup(thetaWS)
 
-    def _rebinInW(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _rebinInW(self, mainWS):
         """Rebin the horizontal axis of a workspace."""
         eRebinParams = self.getProperty(common.PROP_REBINNING_PARAMS_W)
         eRebin = self.getProperty(common.PROP_REBINNING_W)
         if eRebinParams.isDefault:
             if eRebin.isDefault:
-                binBorders = _defaultEnergyBinning(mainWS, subalgLogging)
+                binBorders = _defaultEnergyBinning(mainWS, self._subalgLogging)
             else:
-                binBorders = _hybridEnergyBinning(mainWS, eRebin.value, subalgLogging)
+                binBorders = _hybridEnergyBinning(mainWS, eRebin.value, self._subalgLogging)
             params = list()
             binWidths = numpy.diff(binBorders)
             for start, width in zip(binBorders[:-1], binWidths):
@@ -601,20 +537,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
             params.append(binBorders[-1])
         else:
             params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
-        rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
-        wsCleanup.cleanup(mainWS)
+        rebinnedWS = _rebin(mainWS, params, self._names, self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return rebinnedWS
 
-    def _sOfQW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _sOfQW(self, mainWS):
         """Run the SofQWNormalisedPolygon algorithm."""
-        sOfQWWSName = wsNames.withSuffix('sofqw')
+        sOfQWWSName = self._names.withSuffix('sofqw')
         if self.getProperty(common.PROP_BINNING_PARAMS_Q).isDefault:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
             e = numpy.ceil(-numpy.log10(dq)) + 1
             dq = (5. * ((dq*10**e) // 5 + 1.))*10**-e
             params = [qMin, dq, qMax]
-            report.notice('Binned momentum transfer axis to bin width {0} A-1.'.format(dq))
+            self._report.notice('Binned momentum transfer axis to bin width {0} A-1.'.format(dq))
         else:
             params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
             if len(params) == 1:
@@ -627,20 +563,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                          EMode='Direct',
                                          EFixed=Ei,
                                          ReplaceNaNs=False,
-                                         EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                         EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return sOfQWWS
 
-    def _transpose(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _transpose(self, mainWS):
         """Transpose the final output workspace."""
         transposing = self.getProperty(common.PROP_TRANSPOSE_SAMPLE_OUTPUT).value
         if transposing == common.TRANSPOSING_OFF:
             return mainWS
-        transposedWSName = wsNames.withSuffix('transposed')
+        transposedWSName = self._names.withSuffix('transposed')
         transposedWS = Transpose(InputWorkspace=mainWS,
                                  OutputWorkspace=transposedWSName,
-                                 EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
+                                 EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(mainWS)
         return transposedWS
 
 

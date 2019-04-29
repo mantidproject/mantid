@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StartsWithValidator.h"
 #ifndef Q_MOC_RUN
-#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #endif
 

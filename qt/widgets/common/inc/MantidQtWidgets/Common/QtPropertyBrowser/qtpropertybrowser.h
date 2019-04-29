@@ -332,10 +332,10 @@ public:
   void unsetFactoryForManager(QtAbstractPropertyManager *manager);
 
   QtBrowserItem *currentItem() const;
-  void setCurrentItem(QtBrowserItem *);
+  void setCurrentItem(QtBrowserItem * /*item*/);
 
 Q_SIGNALS:
-  void currentItemChanged(QtBrowserItem *);
+  void currentItemChanged(QtBrowserItem * /*_t1*/);
 
 public Q_SLOTS:
 

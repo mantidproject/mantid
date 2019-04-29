@@ -5,15 +5,19 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
 namespace Strings {
+
+namespace {
+Logger logger("Regex");
+}
 
 /**
   Find the match in regular expression and places number in Aout
@@ -131,7 +135,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
   if (m1 == empty)
     return 0;
 
-  std::cerr << "SFC :: \n";
+  logger.information() << "SFC :: \n";
   Aout.clear();
   unsigned int zero = 0; // Needed for boost 1.40
   const size_t M0 = m1->position(zero);
@@ -145,7 +149,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
     }
     ML = m1->position(zero) + (*m1)[0].str().length();
   }
-  std::cerr << "SFC :: " << M0 << " " << ML << '\n';
+  logger.information() << "SFC :: " << M0 << " " << ML << '\n';
   // Found object
   Text.erase(M0, ML);
   return 1;
@@ -180,7 +184,7 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
     for (unsigned int index = 1; index < m1->size(); index++)
       Aout.push_back((*m1)[index].str());
   }
-  std::cerr << "SFC :: " << M0 << " " << ML << '\n';
+  logger.information() << "SFC :: " << M0 << " " << ML << '\n';
   // Found object
   Text.erase(M0, ML);
   return 1;

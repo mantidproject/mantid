@@ -53,9 +53,9 @@ New Additions in Workbench:
         :width: 500
 
     * **Much better searching in the** :ref:`WorkbenchAlgorithmToolbox` - Previously in
-      MantidPlot you could only search if you knew the full algorithm name.
+      MantidPlot you could only search if you knew the beginning of the algorithm name.
       This has now changed to make it easier to search for algorithms, by
-      allowing users to put in part of the algorithm name.
+      allowing users to put in any part of the algorithm name.
     * **Ability to restore default layout on workbench** - Customising your
       workspace is common among users and developers alike so with that in mind
       it is now easier to undo any changes and reset it to the default using

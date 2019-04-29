@@ -10,6 +10,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+import sys
 import traceback
 import unittest
 
@@ -89,6 +90,20 @@ class PythonCodeExecutionTest(GuiTest):
         executor, recv = self._run_async_code(code)
         self.assertTrue(recv.success_cb_called)
         self.assertFalse(recv.error_cb_called)
+
+    def test_script_dir_added_to_path_on_execution(self):
+        code = "import sys; syspath = sys.path"
+        test_filename = '/path/to/script/called/script.py'
+        executor = PythonCodeExecution()
+        executor.execute(code, filename=test_filename)
+        self.assertIn('/path/to/script/called', executor.globals_ns['syspath'])
+
+    def test_script_dir_removed_from_path_after_execution(self):
+        code = "import sys; syspath = sys.path"
+        test_filename = '/path/to/script/called/script.py'
+        executor = PythonCodeExecution()
+        executor.execute(code, filename=test_filename)
+        self.assertNotIn('/path/to/script/called', sys.path)
 
     # ---------------------------------------------------------------------------
     # Error execution tests
