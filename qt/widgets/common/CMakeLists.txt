@@ -762,6 +762,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsCommon
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${TARGET_LIBRARIES}
+                     ${PYTHON_LIBRARIES}
                    QT4_LINK_LIBS
                      Qt4::QtHelp
                      Qt4::QtNetwork
@@ -792,6 +793,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsCommon
                      ${PYTHON_INCLUDE_PATH}
                    LINK_LIBS
                      ${TARGET_LIBRARIES}
+                     ${PYTHON_LIBRARIES}
                      PythonInterfaceCore
                    QT5_LINK_LIBS
                      Qt5::Concurrent
