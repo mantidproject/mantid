@@ -54,7 +54,8 @@ public:
     Track::LType::const_iterator iterEnd = A.cend();
     iterBegin++;
     TS_ASSERT_EQUALS(iterBegin, iterEnd);
-    TS_ASSERT_DELTA(A.distInsideObject(), 1.73205081, 0.000001); // TODO check the math on the side
+    TS_ASSERT_DELTA(A.distInsideObject(), 1.73205081,
+                    0.000001); // TODO check the math on the side
   }
 
   void testreset() {
