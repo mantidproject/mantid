@@ -25,21 +25,18 @@ namespace RandomPoint {
 Kernel::V3D localPointInCylinder(const Kernel::V3D &basis,
                                  const Kernel::V3D &alongAxis,
                                  double polarAngle, double radialLength) {
-  using boost::math::pow;
   // Use basis to get a second perpendicular vector to define basis2
-  Mantid::Kernel::V3D basis2;
+  Kernel::V3D basis2;
   if (basis.X() == 0) {
-    Mantid::Kernel::V3D x{1., 0., 0.};
-    basis2 = x;
+    basis2.setX(1.);
   } else if (basis.Y() == 0) {
-    Mantid::Kernel::V3D y{0., 1., 0.};
-    basis2 = y;
+    basis2.setY(1.);
   } else if (basis.Z() == 0) {
-    Mantid::Kernel::V3D z{0., 0., 1.};
-    basis2 = z;
+    basis2.setZ(1.);
   } else {
-    Mantid::Kernel::V3D v{-basis.Y(), basis.X(), 0.};
-    basis2 = Mantid::Kernel::normalize(v);
+    basis2.setX(-basis.Y());
+    basis2.setY(basis.X());
+    basis2.normalize();
   }
   const Kernel::V3D basis3{basis.cross_prod(basis2)};
   const Kernel::V3D localPoint{
@@ -85,8 +82,7 @@ Kernel::V3D inCylinder(const detail::ShapeInfo &shapeInfo,
   const double r{geometry.radius * std::sqrt(r2)};
   const double z{geometry.height * r3};
   const Kernel::V3D alongAxis{geometry.axis * z};
-  const Kernel::V3D &basis1{geometry.axis};
-  auto localPoint = localPointInCylinder(basis1, alongAxis, polar, r);
+  auto localPoint = localPointInCylinder(geometry.axis, alongAxis, polar, r);
   return localPoint + geometry.centreOfBottomBase;
 }
 

@@ -287,17 +287,15 @@ public:
 
     Mantid::Kernel::V3D basis2;
     if (basis.X() == 0) {
-      Mantid::Kernel::V3D x{1., 0., 0.};
-      basis2 = x;
+      basis2.setX(1.);
     } else if (basis.Y() == 0) {
-      Mantid::Kernel::V3D y{0., 1., 0.};
-      basis2 = y;
+      basis2.setY(1.);
     } else if (basis.Z() == 0) {
-      Mantid::Kernel::V3D z{0., 0., 1.};
-      basis2 = z;
+      basis2.setZ(1.);
     } else {
-      Mantid::Kernel::V3D v{-basis.Y(), basis.X(), 0.};
-      basis2 = Mantid::Kernel::normalize(v);
+      basis2.setX(-basis.Y());
+      basis2.setY(basis.X());
+      basis2.normalize();
     }
     const Mantid::Kernel::V3D basis3{basis.cross_prod(basis2)};
 
