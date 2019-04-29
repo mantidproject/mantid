@@ -57,6 +57,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   auto detIDs = m_instrumentWorkspace->getInstrument()->getDetectorIDs(true);
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   std::vector<SpectrumDefinition> specDefs;
+  specDefs.reserve(detIDs.size());
   for (const auto detID : detIDs)
     specDefs.emplace_back(detectorInfo.indexOf(detID));
   // We need to filter based on detector IDs, but use IndexInfo for filtering
@@ -147,9 +148,9 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
     SpectrumDetectorMapping mapping(spec, udet, monitors);
     auto uniqueSpectra = mapping.getSpectrumNumbers();
     std::vector<SpectrumDefinition> spectrumDefinitions;
-    for (const auto spec : uniqueSpectra) {
+    for (const auto specNo : uniqueSpectra) {
       spectrumDefinitions.emplace_back();
-      for (const auto detID : mapping.getDetectorIDsForSpectrumNo(spec)) {
+      for (const auto detID : mapping.getDetectorIDsForSpectrumNo(specNo)) {
         try {
           spectrumDefinitions.back().add(detectorInfo.indexOf(detID));
         } catch (std::out_of_range &) {
@@ -184,7 +185,7 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
     // its detector IDs). IndexInfo does the filtering for use.
     const auto indices = indexInfo.makeIndexSet(
         static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
-    for (const auto &index : indices)
+    for (const auto index : indices)
       m_range.push_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   // Check if SpectrumList was supplied (or filled via min/max above)

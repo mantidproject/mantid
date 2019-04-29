@@ -243,8 +243,8 @@ void PanelsSurface::init() {
   spreadBanks();
 
   RectF surfaceRect;
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    RectF rect(m_flatBanks[i]->polygon.boundingRect());
+  for (auto &flatBank : m_flatBanks) {
+    RectF rect(flatBank->polygon.boundingRect());
     surfaceRect.unite(rect);
   }
 
@@ -317,7 +317,7 @@ void PanelsSurface::addFlatBankOfDetectors(
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
 #pragma omp parallel for ordered
-  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
+  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
@@ -354,10 +354,10 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   }
 
   info->polygon = QPolygonF(verts);
-  for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
-    const auto &row = componentInfo.children(columns[i]);
-    for (int j = 0; j < static_cast<int>(row.size()); ++j) {
-      addDetector(row[j], ref, index, info->rotation);
+  for (auto column : columns) {
+    const auto &row = componentInfo.children(column);
+    for (auto j : row) {
+      addDetector(j, ref, index, info->rotation);
     }
   }
 }
@@ -456,10 +456,10 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
-  for (int i = 0; i < static_cast<int>(tubes.size()); ++i) {
-    const auto &children = componentInfo.children(tubes[i]);
+  for (auto tube : tubes) {
+    const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
-    for (int j = 0; j < static_cast<int>(children.size()); ++j) {
+    for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
       addDetector(children[j], pos0, index, info->rotation);
     }
 
@@ -712,9 +712,9 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
  * Remove all found flat banks
  */
 void PanelsSurface::clearBanks() {
-  for (int i = 0; i < m_flatBanks.size(); ++i) {
-    if (m_flatBanks[i])
-      delete m_flatBanks[i];
+  for (auto &flatBank : m_flatBanks) {
+    if (flatBank)
+      delete flatBank;
   }
   m_flatBanks.clear();
 }

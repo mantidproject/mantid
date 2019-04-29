@@ -12,7 +12,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include "ui_LineViewer.h"
 #include <QWidget>

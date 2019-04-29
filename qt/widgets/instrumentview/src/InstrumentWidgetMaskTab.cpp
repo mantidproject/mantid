@@ -1012,9 +1012,9 @@ InstrumentWidgetMaskTab::generateMaskWorkspaceName(bool temp) const {
   auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   int maxIndex = 0;
   const std::string baseName = "MaskWorkspace";
-  for (auto name = wsNames.begin(); name != wsNames.end(); ++name) {
-    if (name->find(baseName) == 0) {
-      int index = Mantid::Kernel::Strings::endsWithInt(*name);
+  for (auto &wsName : wsNames) {
+    if (wsName.find(baseName) == 0) {
+      int index = Mantid::Kernel::Strings::endsWithInt(wsName);
       if (index > 0 && index > maxIndex)
         maxIndex = index;
       else

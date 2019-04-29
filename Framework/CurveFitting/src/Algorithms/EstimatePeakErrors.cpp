@@ -15,8 +15,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
@@ -156,7 +154,7 @@ void EstimatePeakErrors::exec() {
       for (size_t i = 0; i < cf->nFunctions(); ++i) {
         IFunction *fun = cf->getFunction(i).get();
         size_t np = fun->nParams();
-        IPeakFunction *peak = dynamic_cast<IPeakFunction *>(fun);
+        peak = dynamic_cast<IPeakFunction *>(fun);
         if (peak) {
           std::string prefix = "f" + std::to_string(i) + ".";
           GSLMatrix covariance(*matrix, ip, ip, np, np);

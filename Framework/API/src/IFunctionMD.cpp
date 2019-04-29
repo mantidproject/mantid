@@ -18,7 +18,6 @@
 
 #include "MantidGeometry/muParser_Silent.h"
 #include <boost/lambda/lambda.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <cfloat>

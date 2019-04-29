@@ -1298,6 +1298,30 @@ public:
     TS_ASSERT_EQUALS(values->getFitWeight(9), 1);
     TS_ASSERT_EQUALS(values->getFitWeight(10), 1);
   }
+
+  void test_normalised_composite_member_output() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 0.1 + exp(-0.5 * pow(x / 0.5, 2)); }, 1,
+        -2.0, 2.0, 0.2, true);
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",
+                    "name=FlatBackground;name=Gaussian,Height=1,Sigma=0.5");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "out");
+    fit.setProperty("OutputCompositeMembers", true);
+    fit.setProperty("Normalise", true);
+    fit.execute();
+    auto out_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "out_Workspace");
+    auto const &y1 = out_ws->readY(1);
+    auto const &y3 = out_ws->readY(3);
+    auto const &y4 = out_ws->readY(4);
+    for (size_t i = 0; i < y1.size(); ++i) {
+      TS_ASSERT_DELTA(y1[i], y3[i] + y4[i], 1e-10);
+    }
+    AnalysisDataService::Instance().clear();
+  }
 };
 
 class FitMWTestPerformance : public CxxTest::TestSuite {

@@ -114,20 +114,17 @@ void ExtractQENSMembers::exec() {
 
 std::vector<MatrixWorkspace_sptr>
 ExtractQENSMembers::getInputWorkspaces() const {
+  const std::vector<std::string> workspaceNames =
+      getProperty("InputWorkspaces");
   std::vector<MatrixWorkspace_sptr> workspaces;
-  std::vector<std::string> workspaceNames = getProperty("InputWorkspaces");
 
-  for (const auto &name : workspaceNames)
-    workspaces.emplace_back(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
-
-  if (!workspaces.empty()) {
+  if (!workspaceNames.empty()) {
     workspaces.reserve(workspaceNames.size());
+    auto &ADS = AnalysisDataService::Instance();
     for (const auto &name : workspaceNames)
-      workspaces.emplace_back(
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name));
+      workspaces.emplace_back(ADS.retrieveWS<MatrixWorkspace>(name));
   } else
-    workspaces.push_back(getProperty("InputWorkspace"));
+    workspaces.emplace_back(getProperty("InputWorkspace"));
   return workspaces;
 }
 

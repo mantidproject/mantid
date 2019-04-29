@@ -172,8 +172,8 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
 
   const auto &instruments = m_currentFacility->instruments();
   std::set<std::string> alphabetizedNames;
-  for (auto itr = instruments.cbegin(); itr != instruments.cend(); ++itr) {
-    alphabetizedNames.insert(itr->name());
+  for (const auto &instrument : instruments) {
+    alphabetizedNames.insert(instrument.name());
   }
   for (const auto &name_std_str : alphabetizedNames) {
     QString name = QString::fromStdString(name_std_str);

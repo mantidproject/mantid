@@ -139,7 +139,7 @@ public:
     std::vector<GSLVector> res;
     res.reserve(m_params.size());
     for (auto &it : m_params) {
-      res.push_back(it.second);
+      res.emplace_back(it.second);
     }
     return res;
   }

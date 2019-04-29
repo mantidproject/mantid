@@ -45,8 +45,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(ITableWorkspaceProperty('InputWorkspace', '', Direction.Input),
                              doc='Input table workspace.')
-        validator = IntArrayBoundedValidator()
-        validator.setLower(0)
+        validator = IntArrayBoundedValidator(lower=0)
         self.declareProperty(
             IntArrayProperty('ColumnIndices', values=[], direction=Direction.Input, validator=validator),
             'Comma separated list of column indices for which statistics will be separated')

@@ -405,8 +405,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
         positiveFloat = FloatBoundedValidator(lower=0)
-        positiveIntArray = IntArrayBoundedValidator()
-        positiveIntArray.setLower(0)
+        positiveIntArray = IntArrayBoundedValidator(lower=0)
         scalingFactor = FloatBoundedValidator(lower=0, upper=1)
 
         # Properties.

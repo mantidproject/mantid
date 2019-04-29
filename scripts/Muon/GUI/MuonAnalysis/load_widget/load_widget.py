@@ -34,4 +34,4 @@ class LoadWidget(object):
         self.load_widget.set_load_file_widget(self.file_widget)
         self.load_widget.set_load_run_widget(self.run_widget)
 
-        self.load_widget.set_current_instrument(context.instrument)
+        self.load_widget.set_current_instrument(context.data_context.instrument)

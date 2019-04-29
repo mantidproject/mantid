@@ -80,7 +80,7 @@ boost::shared_ptr<CSGObject> ShapeFactory::createShape(std::string shapeXML,
   }
   // Get pointer to root element
   Element *pRootElem = pDoc->documentElement();
-  auto thing = createShape(pRootElem);
+
   // convert into a Geometry object
   return createShape(pRootElem);
 }

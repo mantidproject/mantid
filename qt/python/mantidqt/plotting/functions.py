@@ -21,13 +21,15 @@ try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
-from mantid.py3compat import is_text_string
 from matplotlib.gridspec import GridSpec
+from matplotlib.legend import Legend
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
+from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
+from mantid.py3compat import is_text_string
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 
 # -----------------------------------------------------------------------------
@@ -130,6 +132,10 @@ def plot_from_names(names, errors, overplot, fig=None):
     :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
+    if fig and len(fig.axes) > 1:
+        LOGGER.warning("Cannot plot workspace on top of Matplotlib subplots.")
+        return None
+
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
         selection = get_spectra_selection(workspaces)
@@ -201,6 +207,11 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         fig, ax = get_plot_fig(overplot, ax_properties, window_title)
     else:
         ax = fig.gca()
+
+    if not isinstance(ax, MantidAxes):
+        # Convert to a MantidAxes if it isn't already. Ignore legend since
+        # a new one will be drawn later
+        ax = MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
 
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot

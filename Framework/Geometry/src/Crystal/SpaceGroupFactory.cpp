@@ -255,11 +255,9 @@ std::vector<std::string>
 SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_generatorMap.size());
-
   for (const auto &generator : m_generatorMap) {
-    symbols.push_back(generator.first);
+    symbols.emplace_back(generator.first);
   }
-
   return symbols;
 }
 

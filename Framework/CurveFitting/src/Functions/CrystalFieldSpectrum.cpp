@@ -133,9 +133,9 @@ std::string CrystalFieldSpectrum::writeToString(
   for (size_t ip = 0; ip < m_nPeaks; ++ip) {
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
     // Print peak's atributes
-    auto attr = peak.getAttributeNames();
-    for (const auto &attName : attr) {
-      std::string attValue = peak.getAttribute(attName).value();
+    const auto attrNames = peak.getAttributeNames();
+    for (const auto &attName : attrNames) {
+      const std::string attValue = peak.getAttribute(attName).value();
       if (!attValue.empty() && attValue != "\"\"") {
         ostr << ",f" << ip << "." << attName << '=' << attValue;
       }

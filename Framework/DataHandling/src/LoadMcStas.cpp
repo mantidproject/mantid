@@ -410,7 +410,7 @@ std::vector<std::string> LoadMcStas::readEventData(
             detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
-        auto weightedEvent = WeightedEvent();
+        WeightedEvent weightedEvent;
         if (errorBarsSetTo1) {
           weightedEvent = WeightedEvent(detector_time, pulse_time,
                                         data[numberOfDataColumn * in], 1.0);
@@ -442,11 +442,11 @@ std::vector<std::string> LoadMcStas::readEventData(
 
   // ensure that specified name is given to workspace (eventWS) when added to
   // outputGroup
-  for (auto eventWS : allEventWS) {
-    const auto ws = eventWS.first;
+  for (const auto &wsAndName : allEventWS) {
+    const auto ws = wsAndName.first;
     ws->setAllX(axis);
-    AnalysisDataService::Instance().addOrReplace(eventWS.second, ws);
-    scatteringWSNames.emplace_back(eventWS.second);
+    AnalysisDataService::Instance().addOrReplace(wsAndName.second, ws);
+    scatteringWSNames.emplace_back(wsAndName.second);
   }
   return scatteringWSNames;
 }

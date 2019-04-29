@@ -10,9 +10,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <qwt_plot.h>
 
@@ -213,6 +213,8 @@ void Iqt::setup() {
     m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item),
                                   QColor(246, 246, 246));
 
+  setPreviewSpectrumMaximum(0);
+
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
@@ -240,6 +242,13 @@ void Iqt::setup() {
           SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
           SLOT(setTiledPlotLastPlot(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
+          SLOT(plotInput()));
+
+  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this,
+          SLOT(updateEnergyRange(int)));
 }
 
 void Iqt::run() {
@@ -447,7 +456,7 @@ bool Iqt::validate() {
 }
 
 /**
- * Ensures that absolute min and max energy are equal.
+ * Ensures that the min energy is below zero and the max energy is above zero
  *
  * @param prop Qt property that was changed
  * @param val New value of that property
@@ -457,22 +466,21 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
              SLOT(updatePropertyValues(QtProperty *, double)));
 
   if (prop == m_properties["EHigh"]) {
-    // If the user enters a negative value for EHigh assume they did not mean to
-    // add a -
     if (val < 0) {
       val = -val;
       m_dblManager->setValue(m_properties["EHigh"], val);
     }
 
-    m_dblManager->setValue(m_properties["ELow"], -val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked())
+      m_dblManager->setValue(m_properties["ELow"], -val);
   } else if (prop == m_properties["ELow"]) {
-    // If the user enters a positive value for ELow, assume they meant to add a
     if (val > 0) {
       val = -val;
       m_dblManager->setValue(m_properties["ELow"], val);
     }
 
-    m_dblManager->setValue(m_properties["EHigh"], -val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked())
+      m_dblManager->setValue(m_properties["EHigh"], -val);
   }
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
@@ -534,19 +542,25 @@ void Iqt::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
+void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+
 void Iqt::plotInput(const QString &wsname) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updatePropertyValues(QtProperty *, double)));
 
   MatrixWorkspace_sptr workspace;
   try {
-    workspace = Mantid::API::AnalysisDataService::Instance()
-                    .retrieveWS<MatrixWorkspace>(wsname.toStdString());
+    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        wsname.toStdString());
     setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
+    setPreviewSpectrumMaximum(0);
     return;
   }
+
+  setPreviewSpectrumMaximum(
+      static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1);
 
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
@@ -598,11 +612,15 @@ void Iqt::plotInput(const QString &wsname) {
   updateDisplayedBinParameters();
 }
 
+void Iqt::setPreviewSpectrumMaximum(int value) {
+  m_uiForm.spPreviewSpec->setMaximum(value);
+}
+
 /**
  * Updates the range selectors and properties when range selector is moved.
  *
  * @param min Range selector min value
- * @param max Range selector amx value
+ * @param max Range selector max value
  */
 void Iqt::rsRangeChangedLazy(double min, double max) {
   double oldMin = m_dblManager->value(m_properties["ELow"]);
@@ -622,6 +640,13 @@ void Iqt::updateRS(QtProperty *prop, double val) {
     xRangeSelector->setMinimum(val);
   else if (prop == m_properties["EHigh"])
     xRangeSelector->setMaximum(val);
+}
+
+void Iqt::updateEnergyRange(int state) {
+  if (state != 0) {
+    auto const value = m_dblManager->value(m_properties["ELow"]);
+    m_dblManager->setValue(m_properties["EHigh"], -value);
+  }
 }
 
 void Iqt::setTiledPlotFirstPlot(int value) {

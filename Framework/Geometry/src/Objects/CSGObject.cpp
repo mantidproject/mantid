@@ -139,9 +139,6 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   double r0(radius), r1(r0 - r_step);
 
   for (int st = 1; st < Cone::g_nstacks; ++st) {
-    if (st == Cone::g_nstacks)
-      z1 = height;
-
     for (int sl = 0; sl < Cone::g_nslices; ++sl) {
       int vertex = sl;
       V3D pt1 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);

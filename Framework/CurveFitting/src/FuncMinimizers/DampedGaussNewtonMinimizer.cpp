@@ -16,7 +16,6 @@
 
 #include "MantidKernel/Logger.h"
 
-#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <gsl/gsl_blas.h>
 
