@@ -72,7 +72,7 @@ if ( CPPCHECK_EXECUTABLE )
 
   # setup the standard arguments
   set (_cppcheck_args "${CPPCHECK_ARGS}")
-    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} "--inline-suppr")
+    list ( APPEND _cppcheck_args ${CPPCHECK_TEMPLATE_ARG} )
     if ( CPPCHECK_NUM_THREADS GREATER 0)
         list ( APPEND _cppcheck_args -j ${CPPCHECK_NUM_THREADS} )
   endif ( CPPCHECK_NUM_THREADS GREATER 0)
