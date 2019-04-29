@@ -119,7 +119,7 @@ QIcon IconicFont::getIcon(const QStringList &iconNames,
   }
   actualOptions = options;
   for (auto i = 0; i < iconNames.size(); ++i) {
-    addValuesToOptions(actualOptions, iconNames);
+    addValuesToOptions(actualOptions, iconNames, i);
   }
 
   return this->iconByPainter(&m_painter, actualOptions);

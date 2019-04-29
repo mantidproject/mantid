@@ -38,7 +38,7 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   const auto charecterOption = options[QString("charecter")].toString();
   const auto prefix = options[QString("prefix")].toString();
   const auto charecter =
-      iconic->findCharecterFromCharMap(prefix, charecterOption);
+      iconic->findCharacterFromCharMap(prefix, charecterOption);
 
   // Set some defaults so it doesn't fail later if nothing was set
   QString color("black");

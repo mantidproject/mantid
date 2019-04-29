@@ -24,7 +24,7 @@ if(ENABLE_MANTIDPLOT)
                    Qt4::QtCore
                    Qt4::QtGui
                    Qt4::QtScript
-		   ${PYTHON_LIBRARIES}
+		               ${PYTHON_LIBRARIES}
                  INSTALL_DIR
                    ${WORKBENCH_LIB_DIR}/mantidqt
                  LINUX_INSTALL_RPATH

@@ -38,7 +38,7 @@ public:
   IconicFont();
   QIcon getIcon(const QStringList &iconNames,
                 const QList<QHash<QString, QVariant>> &options);
-  QString findCharecterFromCharMap(const QString &, const QString &) const;
+  QString findCharacterFromCharMap(const QString &, const QString &) const;
   QFont getFont(const QString &prefix, const int drawSize);
 
 private:
@@ -46,8 +46,9 @@ private:
                 const QString &charmapFilename);
   QIcon iconByPainter(CharIconPainter *painter,
                       QList<QHash<QString, QVariant>> &options);
-  void addValuesToOptions(const QString &iconName,
-                          const QStringList &iconNames);
+  void addValuesToOptions(QList<QHash<QString, QVariant>> &options,
+                          const QStringList &iconNames,
+                          unsigned int vectorIndex);
 
   QHash<QString, QString> m_fontnames;
 
