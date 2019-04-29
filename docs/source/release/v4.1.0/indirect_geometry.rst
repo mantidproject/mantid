@@ -20,6 +20,14 @@ Particularly, this will allow to calculate correct absorption corrections before
 With the new IDF the flight-paths inside the sample will properly take into account the off-plane angle, which was not the case with the previous IDF.
 This change has a retroactive effect, but for reductions where the detectors were grouped, it should not produce different results.
 
+.. figure:: ../../images/IN16B-R.png
+   :align: left
+   :scale: 49%
+
+.. figure:: ../../images/IN16B-N.png
+   :align: right
+   :scale: 50%
+
 Algorithms
 ----------
 
