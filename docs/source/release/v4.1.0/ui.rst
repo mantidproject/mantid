@@ -24,6 +24,9 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
+- The plot windows now have a Mouse right-click context menu that allow showing/hiding error bars for each plotted line.
+
+
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
