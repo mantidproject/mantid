@@ -94,3 +94,7 @@ def get_pair_data_directory(context, run):
             run) + "; Pairs/"
     else:
         return context.data_context._base_run_name(run) + " Pairs/"
+
+
+def get_phase_quad_workspace_name(context, run, period):
+    return get_raw_data_workspace_name(context, run, period=str(period)) + " (PhaseQuad)"
