@@ -827,6 +827,75 @@ public:
     TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
   }
 
+  void testTracksForSolidCylinder() {
+    // hollow cylinder at the origin with the symmetry axis along y
+    constexpr double RADIUS{0.03};
+    constexpr double HEIGHT{0.05};
+    const V3D BOTTOM_CENTRE{0., -.5*HEIGHT, 0.};
+    const V3D AXIS_SYMM{0., 1., 0.};
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(RADIUS, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "cyl");
+
+    const V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    // centre of sample
+    Track in_centre(V3D{0., 0. , 0.}, BEAM_DIRECTION);
+    cylinder->interceptSurface(in_centre);
+    TS_ASSERT_EQUALS(in_centre.distInsideObject(), RADIUS);
+
+    constexpr double HALF_RADIUS{0.5 * RADIUS};
+
+    Track in_right(V3D{0., 0. , HALF_RADIUS}, BEAM_DIRECTION);
+    cylinder->interceptSurface(in_right);
+    TS_ASSERT_EQUALS(in_right.distInsideObject(), 0.5 * RADIUS);
+
+    Track in_left(V3D{0., 0. , -HALF_RADIUS}, BEAM_DIRECTION);
+    cylinder->interceptSurface(in_left);
+    TS_ASSERT_EQUALS(in_left.distInsideObject(), 1.5 * RADIUS);
+  }
+
+  void testTracksForHollowCylinder() {
+    // hollow cylinder at the origin with the symmetry axis along y
+    constexpr double RADIUS_INNER{0.29};
+    constexpr double RADIUS_OUTER{0.3};
+    constexpr double HEIGHT{0.5};
+    const V3D BOTTOM_CENTRE{0., -.5*HEIGHT, 0.};
+    const V3D AXIS_SYMM{0., 1., 0.};
+    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
+        RADIUS_INNER, RADIUS_OUTER, HEIGHT, BOTTOM_CENTRE, AXIS_SYMM, "hol-cyl");
+
+    constexpr double WALL_THICKNESS{RADIUS_OUTER - RADIUS_INNER};
+    const V3D BEAM_DIRECTION{0., 0., 1.}; // along z-axis
+
+    // point in void - should this work?
+    Track in_void(V3D{0., 0. ,0.}, BEAM_DIRECTION);
+    hollowCylinder->interceptSurface(in_void);
+    TS_ASSERT_EQUALS(in_void.distInsideObject(), WALL_THICKNESS);
+
+    // ----- center of wall
+    constexpr double RADIUS_IN_WALL_CENTRE{.5 * (RADIUS_INNER + RADIUS_OUTER)};
+    // point in first wall
+    Track in_first_wall(V3D{0., 0. ,RADIUS_IN_WALL_CENTRE}, BEAM_DIRECTION);
+    hollowCylinder->interceptSurface(in_first_wall);
+    TS_ASSERT_EQUALS(in_first_wall.distInsideObject(), .5 * WALL_THICKNESS);
+
+    // point in second wall
+    Track in_second_wall(V3D{0., 0. , -RADIUS_IN_WALL_CENTRE}, BEAM_DIRECTION);
+    hollowCylinder->interceptSurface(in_second_wall);
+    TS_ASSERT_EQUALS(in_second_wall.distInsideObject(), 1.5 * WALL_THICKNESS);
+
+    // ----- offset in wall - 3/4 of the way through the wall
+    constexpr double RADIUS_IN_WALL_OFFSET{(.25 * RADIUS_INNER) + (.75 * RADIUS_OUTER)};
+    // point in first wall
+    Track in_first_wall_offset(V3D{0., 0. ,RADIUS_IN_WALL_OFFSET}, BEAM_DIRECTION);
+    hollowCylinder->interceptSurface(in_first_wall_offset);
+    TS_ASSERT_EQUALS(in_first_wall_offset.distInsideObject(), .25 * WALL_THICKNESS);  // DOESN'T WORK
+
+    // point in second wall
+    Track in_second_wall_offset(V3D{0., 0. , -RADIUS_IN_WALL_OFFSET}, BEAM_DIRECTION);
+    hollowCylinder->interceptSurface(in_second_wall_offset);
+    TS_ASSERT_EQUALS(in_second_wall_offset.distInsideObject(), 1.75 * WALL_THICKNESS);  // DOESN'T WORK
+  }
+
   void testGeneratePointInsideSphere() {
     using namespace ::testing;
 
