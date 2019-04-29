@@ -68,8 +68,8 @@ UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
  *been registered,
  *          else an empty set.
  */
-QSet<QString> UserSubWindowFactoryImpl::categories(
-    const QString &interfaceName) const {
+QSet<QString>
+UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
   if (!m_categoryLookup.contains(interfaceName))
     return QSet<QString>();
 
