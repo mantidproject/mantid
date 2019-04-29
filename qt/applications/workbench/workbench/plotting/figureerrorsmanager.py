@@ -47,12 +47,15 @@ class FigureErrorsManager(object):
 
             for index, line in enumerate(lines):
                 if line.get_label() == MantidAxes.MPL_NOLEGEND:
-                    self._add_with_existing_errors(ax, error_bars_menu, index, line)
+                    # self._add_with_existing_errors(ax, error_bars_menu, index, line)
+                    error_line = ax.find_errorbar_container(line)
+                    label = error_line.get_label()
                 else:
                     # this line has no errorbar, so the label is contained here
                     label = line.get_label()
-                    error_bars_menu.addAction(label, partial(self._update_plot_after,
-                                                             self.add_errorbar_for, index))
+
+                error_bars_menu.addAction(label, partial(self._update_plot_after,
+                                                         self._toggle_error_bar_for, index))
 
         # always add the toggle all error bars option
         menu.addAction(self.TOGGLE_ERROR_BARS_BUTTON_TEXT, partial(self._update_plot_after,
@@ -168,32 +171,6 @@ class FigureErrorsManager(object):
                 # the line has errors, move forwards in the iteration
                 index += 1
 
-    def _add_with_existing_errors(self, ax, error_bars_menu, index, line):
-        """
-        Add an action to toggle the errors for a line with existing errors.
-        This does not require any interaction with the workspace
-        as the error data is already present and just needs to be shown/hidden.
-
-        :param ax: Axis on which the menu action will be executed.
-        :type ax: MantidAxes
-        :param error_bars_menu: The menu to which the action will be added
-        :type error_bars_menu: QMenu
-        :param index: The index of the line in the axes' `lines` container.
-        :type index: int
-        :param line: The line for which the error line will be retrieved.
-        :type line: matplotlib.lines.Line2D
-        :return:
-        """
-        # this line has an existing errorbar,
-        # which contains the label that should be displayed in the legend
-        error_line = ax.find_errorbar_container(line)
-
-        label = error_line.get_label()
-
-        error_bars_menu.addAction(label,
-                                  partial(self._update_plot_after,
-                                          self._toggle_error_bar_for, index))
-
     def _toggle_error_bar_for(self, index, make_visible=None):
         """
         :param make_visible: Forces this visibility state on all lines.
@@ -205,6 +182,10 @@ class FigureErrorsManager(object):
         """
         ax = self.canvas.figure.axes[0]  # type: MantidAxes
         errorbar_container = ax.find_errorbar_container(ax.lines[index])
+        if errorbar_container is None:
+            # make the error line invisible, because the `not` below will flip it and make it visible
+            self.add_errorbar_for(index, make_visible=False)
+            errorbar_container = ax.find_errorbar_container(ax.lines[index])
 
         # the container has the errors there
         error_line = errorbar_container.lines[2][0]
