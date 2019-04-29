@@ -184,6 +184,7 @@ class FigureErrorsManager(object):
         errorbar_container = ax.find_errorbar_container(ax.lines[index])
         if errorbar_container is None:
             # make the error line invisible, because the `not` below will flip it and make it visible
+            # and if a forced state is provided that will overwrite it anyway
             self.add_errorbar_for(index, make_visible=False)
             errorbar_container = ax.find_errorbar_container(ax.lines[index])
 

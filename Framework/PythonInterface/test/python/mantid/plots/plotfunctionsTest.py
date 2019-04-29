@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import numpy as np
 import matplotlib
+import numpy as np
+
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import unittest
@@ -99,6 +100,13 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.errorbar(ax, self.ws2d_histo, specNum=2, linewidth=6)
         funcs.errorbar(ax, self.ws_MD_1d, 'bo')
 
+    def test_1d_errorbars_specifying_error_visibility(self):
+        fig, ax = plt.subplots()
+        errorbar_container = funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1, errors_visible=True)
+        self.assertTrue(errorbar_container[2][0].get_visible())
+        errorbar_container = funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1, errors_visible=False)
+        self.assertFalse(errorbar_container[2][0].get_visible())
+
     def test_1d_scatter(self):
         fig, ax = plt.subplots()
         funcs.scatter(ax, self.ws2d_histo, specNum=1)
@@ -129,8 +137,8 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.update_colorplot_datalimits(ax, mesh)
         self.assertAlmostEqual(10.0, ax.get_xlim()[0])
         self.assertAlmostEqual(30.0, ax.get_xlim()[1])
-        #self.assertAlmostEqual(4.0, ax.get_ylim()[0])
-        #self.assertAlmostEqual(8.0, ax.get_ylim()[1])
+        # self.assertAlmostEqual(4.0, ax.get_ylim()[0])
+        # self.assertAlmostEqual(8.0, ax.get_ylim()[1])
 
     def test_update_colorplot_datalimits_for_pcolormesh(self):
         self._do_update_colorplot_datalimits(funcs.pcolormesh)

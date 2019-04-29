@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import matplotlib
+
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 from matplotlib.container import ErrorbarContainer
@@ -14,8 +15,7 @@ import numpy as np
 import unittest
 
 from mantid.plots.plotfunctions import get_colorplot_extents
-from mantid.api import WorkspaceFactory
-from mantid.simpleapi import (AnalysisDataService, CreateWorkspace,
+from mantid.simpleapi import (CreateWorkspace,
                               CreateSampleWorkspace, DeleteWorkspace)
 
 
@@ -23,6 +23,7 @@ class Plots__init__Test(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
+
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -53,7 +54,7 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_errorbar_plots(self):
         self.ax.errorbar(self.ws2d_histo, specNum=2, linewidth=6)
-        self.ax.errorbar(np.arange(10), np.arange(10), 0.1*np.ones((10,)), fmt='bo-')
+        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10,)), fmt='bo-')
 
     def test_imshow(self):
         self.ax.imshow(self.ws2d_histo)
@@ -115,9 +116,9 @@ class Plots__init__Test(unittest.TestCase):
                                   NSpec=3)
         self.ax.errorbar(eb_data, specNum=2, color='r')
         eb_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40, 20, 30, 40],
-                                     DataY=[3, 4, 5, 3, 4, 5],
-                                     DataE=[.1, .2, .3, .4, .1, .1],
-                                     NSpec=3)
+                                  DataY=[3, 4, 5, 3, 4, 5],
+                                  DataE=[.1, .2, .3, .4, .1, .1],
+                                  NSpec=3)
         self.ax.replace_workspace_artists(eb_data)
         self.assertEqual(1, len(self.ax.containers))
         eb_container = self.ax.containers[0]
@@ -178,6 +179,20 @@ class Plots__init__Test(unittest.TestCase):
         ax = fig.add_subplot(111, projection='3d')
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
+
+    def test_legend_executes(self):
+        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=1, errors_visible=True)
+        self.ax.plot(self.ws2d_histo, specNum=2)
+        self.ax.errorbar(self.ws2d_histo, 'rs', specNum=3, errors_visible=True)
+        legend = self.ax.legend()
+        # assert that the order is as plotted -> line with error is first,
+        # then the line without errors is shown
+        # this tests our custom behaviour, as MPL's default is to append errors at the bottom
+
+        self.assertTrue("spec 1" in legend.texts[0].get_text())
+        self.assertTrue("spec 2" in legend.texts[1].get_text())
+        self.assertTrue("spec 3" in legend.texts[2].get_text())
+
 
 
 if __name__ == '__main__':

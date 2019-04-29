@@ -1,0 +1,175 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+#
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+import matplotlib.figure
+import matplotlib.pyplot as plt
+from qtpy.QtWidgets import QMenu
+
+from mantid.plots import MantidAxes
+from mantid.simpleapi import CreateWorkspace
+from mantidqt.utils.qt.testing import GuiTest
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager
+
+
+class FigureErrorsManagerTest(GuiTest):
+    @classmethod
+    def setUpClass(cls):
+        cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+                                         DataY=[2, 3, 4, 5, 3, 5],
+                                         DataE=[1, 2, 3, 4, 1, 1],
+                                         NSpec=3,
+                                         Distribution=True,
+                                         UnitX='Wavelength',
+                                         VerticalAxisUnit='DeltaE',
+                                         VerticalAxisValues=[4, 6, 8],
+                                         OutputWorkspace='ws2d_histo')
+
+    def setUp(self):
+        self.fig, self.ax = plt.subplots(
+            subplot_kw={'projection': 'mantid'})  # type: matplotlib.figure.Figure, MantidAxes
+
+        self.errors_manager = FigureErrorsManager(self.fig.canvas)  # type: FigureErrorsManager
+
+    def tearDown(self):
+        plt.close('all')
+        # makes it easier to annotate types, otherwise
+        # there is confusion between concrete type and None
+        del self.fig
+        del self.ax
+        del self.errors_manager
+
+    def test_add_error_bars_menu(self):
+        main_menu = QMenu()
+        self.errors_manager.add_error_bars_menu(main_menu)
+        # Check all the expected buttons are added
+        self.assertTrue(
+            any(FigureErrorsManager.TOGGLE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children()))
+        self.assertTrue(
+            any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children()))
+        self.assertTrue(
+            any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children()))
+        self.assertEqual(4, len(main_menu.children()))
+
+    def test_add_errorbar_for(self):
+        self.ax.plot(self.ws2d_histo, specNum=1)
+        self.ax.plot(self.ws2d_histo, specNum=2)
+        self.errors_manager.add_errorbar_for(0)
+        legend = self.ax.legend()
+
+        # the first spectrum should be in the first place,
+        # as it uses our override of the legend, which doesn't always
+        # append errors at the bottom of the legend
+        self.assertTrue("spec 1" in legend.texts[0].get_text())
+        # axes should be NOLEGEND as they have errors
+        self.assertEqual(MantidAxes.MPL_NOLEGEND, self.ax.lines[0].get_label())
+        # a single error container should be present
+        self.assertEqual(1, len(self.ax.containers))
+        # check that the first error container references the first line on the plot
+        self.assertEqual(self.ax.lines[0], self.ax.containers[0][0])
+        # check that the error line is visible
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        self.assertTrue("spec 2" in legend.texts[1].get_text())
+
+        # --------------------------------------------
+        # Add a second error bar
+        # --------------------------------------------
+        self.errors_manager.add_errorbar_for(1)
+        self.assertTrue("spec 2" in legend.texts[1].get_text())
+
+        self.assertEqual(MantidAxes.MPL_NOLEGEND, self.ax.lines[1].get_label())
+        # a single error container should be present
+        self.assertEqual(2, len(self.ax.containers))
+        # check that the first error container references the first line on the plot
+        self.assertEqual(self.ax.lines[1], self.ax.containers[1][0])
+        # check that the error line is visible
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+
+    def test_show_error_bar_for(self):
+        self.ax.plot(self.ws2d_histo, specNum=1)
+        # assert plot does not have errors
+        self.assertEqual(0, len(self.ax.containers))
+
+        self.errors_manager.show_error_bar_for(0)
+
+        # check that the errors have been added
+        self.assertEqual(1, len(self.ax.containers))
+        # check the errors have the correct line
+        self.assertEqual(self.ax.lines[0], self.ax.containers[0][0])
+        # check that the errors are visible
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        # Add an actual line with errors
+        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
+        # should be hidden because of errors_visible=False
+        self.assertFalse(self.ax.containers[1][2][0].get_visible())
+        # so show it
+        self.errors_manager.show_error_bar_for(1)
+        # now it should be visible
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+
+    def test_hide_error_bar_for(self):
+        # default error plot shows the errors
+        self.ax.errorbar(self.ws2d_histo, specNum=1)
+        self.assertEqual(1, len(self.ax.containers))
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.hide_error_bar_for(0)
+        # assert that the errors have been hidden
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+        self.assertEqual(self.ax.lines[0], self.ax.containers[0][0])
+
+        # Add an actual line with errors
+        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=True)
+        # should be visible because of errors_visible=True
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+        # so hide it
+        self.errors_manager.hide_error_bar_for(1)
+        # now it should be hidden
+        self.assertFalse(self.ax.containers[1][2][0].get_visible())
+
+    def test_toggle_all_error_bars(self):
+        # add one errorbar with visible and one with hidden errors
+        self.ax.errorbar(self.ws2d_histo, specNum=1)
+        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
+        # first is visible
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        # second is hidden
+        self.assertFalse(self.ax.containers[1][2][0].get_visible())
+
+        # toggle will flip the states
+        self.errors_manager.toggle_all_error_bars()
+
+        # first is now HIDDEN
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+        # second is now VISIBLE
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+
+    def test_toggle_all_error_bars_force_state(self):
+        # add one errorbar with visible and one with hidden errors
+        self.ax.errorbar(self.ws2d_histo, specNum=1)
+        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
+        # first is visible
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        # second is hidden
+        self.assertFalse(self.ax.containers[1][2][0].get_visible())
+
+        # toggle will now force all the states to visible
+        self.errors_manager.toggle_all_error_bars(make_visible=True)
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+
+        # toggle will now force all the states to hidden
+        self.errors_manager.toggle_all_error_bars(make_visible=False)
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+        self.assertFalse(self.ax.containers[1][2][0].get_visible())

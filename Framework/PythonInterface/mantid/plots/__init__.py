@@ -25,12 +25,12 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
+from matplotlib.table import Table
 
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
 from mantid.plots.utility import MantidAxKwargs
-from matplotlib.table import Table
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -784,6 +784,7 @@ class MantidAxes(Axes):
           -> any errors are plotted
 
         If there are no args or no errors, we back out to use the original MPL implementation
+        :rtype: matplotlib.legend.Legend
         """
         if len(args) == 0 or len(self.containers) == 0:
             handles = []
