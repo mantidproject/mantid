@@ -35,7 +35,7 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   painter->save();
   const auto colorVariant = options[QString("color")];
   const auto scaleVariant = options[QString("scaleFactor")];
-  const auto charecterOption = options[QString("charecter")].toString();
+  const auto charecterOption = options[QString("character")].toString();
   const auto prefix = options[QString("prefix")].toString();
   const auto charecter =
       iconic->findCharacterFromCharMap(prefix, charecterOption);
