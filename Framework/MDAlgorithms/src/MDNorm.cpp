@@ -365,6 +365,28 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       }
     }
   }
+  // validate accumulation workspaces, if provided
+  // this only checks that, if given, the two workspaces
+  // have the same dimensions.  We verify that binning parameters
+  // are the same when we execute the algorithm.
+  boost::shared_ptr<IMDHistoWorkspace> tempNormWS =
+      this->getProperty("TemporaryNormalizationWorkspace");
+  Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
+      this->getProperty("TemporaryDataWorkspace");
+  if (tempNormWS || tempDataWS){
+    if((!tempNormWS) || (!tempDataWS)){
+      errorMessage.emplace("AccumulationWorkspaces",
+                           "Must provide either no accumulation workspaces or,"
+                           "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
+      for(size_t i = 0; i < 3; i++){
+        auto ax1 = tempNormWS->getDimension(i);
+        auto ax2 = tempDataWS->getDimension(i);
+        if(!(ax1->getMinimum() == ax2->getMinimum()) && (ax1->getMaximum() == ax2->getMaximum()) && (ax1->getNBins() == ax2->getNBins()))
+      errorMessage.emplace("AccumulationWorkspaces",
+                           "Binning for TemporaryNormalizationWorkspaces and TemporaryDataWorkspace must be the same.");
+      }
+    }
+  }
   return errorMessage;
 }
 
@@ -676,6 +698,65 @@ void MDNorm::createNormalizationWS(
 }
 
 /**
+ * Validates the TemporaryDataWorkspace has the same binning
+ * as the input binning parameters
+ * @param parameters :: map of binning parameters
+ * @param tempDataWS :: the workspace weare using to aggregate from
+ * @return :: bool - true means the binning is correct to aggreagete using tempDataWS
+ */
+bool MDNorm::isValidBinningForTemporaryDataWorkspace(
+     const std::map<std::string, std::string> &parameters,
+     const Mantid::API::IMDHistoWorkspace_sptr tempDataWS){
+
+  std::string numBinsStr = parameters.at("OutputBins");
+  std::string extentsStr = parameters.at("OutputExtents");
+  std::string tmp;
+  std::vector<size_t> numBins;
+  std::vector<double> extents;
+  std::vector<size_t> numBinsTempData;
+  std::vector<float> extentsTempData;
+  size_t pos = 0; //parse numbins
+
+  while ((pos = numBinsStr.find(",")) != std::string::npos){
+    tmp = numBinsStr.substr(0,pos);
+    numBins.push_back(std::stoi(tmp));
+    numBinsStr.erase(0, pos + 1);
+  }
+
+  pos = 0; //parse extents
+  while ((pos = extentsStr.find(",")) != std::string::npos){
+    tmp = extentsStr.substr(0,pos);
+    extents.push_back(std::stof(tmp));
+    extentsStr.erase(0, pos + 1);
+  }
+
+  //parse the input data workspace
+    for (int i = 0; i < 3; i++){
+      auto ax = tempDataWS->getDimension(i);
+      numBinsTempData.push_back(ax->getNBins());
+      extentsTempData.push_back(ax->getMinimum());
+      extentsTempData.push_back(ax->getMaximum());
+    }
+  if((numBins.size() != 3) || (numBinsTempData.size() != 3) || extents.size() != 6 || extentsTempData.size() != 6){
+    g_log.error("Cannot parse binning dimensions for MDNorm.");
+    return false;
+  }
+  //compare the arrays
+  for(size_t i=0; i<3; i++){
+    if(numBins[i] != numBinsTempData[i]){
+      g_log.error("Number of bins for TemporaryDataWorkspace is not the same for binning parameters.");
+      return false;
+    }
+    if(std::abs(extents[2*i] - extentsTempData[2*i])>1.e-5 || std::abs(extents[2*i+1] - extentsTempData[2*i+1])>1.e-5){
+      g_log.error("Binning extents are not the same for TemporaryDataWorkspace and the accumulating workspace.");
+      return false;
+    }
+  }
+  return true;
+}
+
+
+/**
  * Runs the BinMD algorithm on the input to provide the output workspace
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
@@ -686,6 +767,15 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
       this->getProperty("TemporaryDataWorkspace");
   Mantid::API::Workspace_sptr outputWS;
   std::map<std::string, std::string> parameters = getBinParameters();
+
+  //check that our input matches the temporary workspaces
+  if (tempDataWS){
+      bool isValidBinning = isValidBinningForTemporaryDataWorkspace(parameters, tempDataWS);
+      if(!isValidBinning){
+        throw(std::invalid_argument("Provided binning parameters do not agree with accumulation workspaces"));
+      }
+   }
+
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
   for (auto so : symmetryOps) {
@@ -720,7 +810,6 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
     for (auto const &p : parameters) {
       auto key = p.first;
       auto value = p.second;
-
       std::stringstream basisVector;
       std::vector<double> projection(m_inputWS->getNumDims(), 0.);
       if (value.find("QDimension0") != std::string::npos) {
