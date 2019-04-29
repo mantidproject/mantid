@@ -4,9 +4,6 @@
 # dlls
 ###########################################################################
 set (SYSTEM_PACKAGE_TARGET RUNTIME)
-# Also include MSVC runtime libraries when running install commands
-set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
-include (InstallRequiredSystemLibraries)
 
 ###########################################################################
 # Compiler options.

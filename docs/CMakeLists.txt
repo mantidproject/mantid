@@ -157,21 +157,23 @@ set(
 
 if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
-  if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-    # must "make docs-qthelp" before "make package" otherwise there will be a
-    # build failure
-    install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
-                  ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
-            DESTINATION ${INBUNDLE}${HTML_DOCS_DEST})
-    install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/
-            DESTINATION ${INBUNDLE}${HTML_DOCS_DEST}
-            FILES_MATCHING
-            PATTERN "*.html")
-    install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/
-                      ${SPHINX_BUILD_DIR}/qthelp/_static/
-            DESTINATION ${INBUNDLE}${HTML_DOCS_DEST})
-  else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-    install(DIRECTORY ${SPHINX_BUILD_DIR}/html/
-            DESTINATION ${INBUNDLE}${HTML_DOCS_DEST})
-  endif(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+  foreach(_bundle ${BUNDLES})
+    if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+      # must "make docs-qthelp" before "make package" otherwise there will be a
+      # build failure
+      install(FILES ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qhc
+                    ${SPHINX_BUILD_DIR}/qthelp/MantidProject.qch
+              DESTINATION ${_bundle}${HTML_DOCS_DEST})
+      install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/
+              DESTINATION ${_bundle}${HTML_DOCS_DEST}
+              FILES_MATCHING
+              PATTERN "*.html")
+      install(DIRECTORY ${SPHINX_BUILD_DIR}/qthelp/_images/
+                        ${SPHINX_BUILD_DIR}/qthelp/_static/
+              DESTINATION ${_bundle}${HTML_DOCS_DEST})
+    else(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+      install(DIRECTORY ${SPHINX_BUILD_DIR}/html/
+              DESTINATION ${_bundle}${HTML_DOCS_DEST})
+    endif(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+  endforeach()
 endif(PACKAGE_DOCS)

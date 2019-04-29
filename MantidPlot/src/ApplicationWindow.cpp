@@ -13837,7 +13837,7 @@ void ApplicationWindow::disregardCol() {
 }
 
 void ApplicationWindow::showHomePage() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
+  MantidDesktopServices::openUrl(QUrl("https://www.mantidproject.org"));
 }
 void ApplicationWindow::showMantidConcepts() { HelpWindow::showConcept(this); }
 void ApplicationWindow::showalgorithmDescriptions() {
@@ -13857,7 +13857,7 @@ void ApplicationWindow::showFirstTimeSetup() {
 void ApplicationWindow::showmantidplotHelp() { HelpWindow::showPage(this); }
 
 void ApplicationWindow::showBugTracker() {
-  MantidDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
+  MantidDesktopServices::openUrl(QUrl("https://forum.mantidproject.org/"));
 }
 
 /*

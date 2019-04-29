@@ -21,6 +21,7 @@ namespace API {
 class EXPORT_OPT_MANTIDQT_COMMON MantidDesktopServices {
 public:
   static bool openUrl(const QUrl &url);
+  static bool openUrl(const QString &url);
   static void setUrlHandler(const QString &scheme, QObject *receiver,
                             const char *method);
   static void unsetUrlHandler(const QString &scheme);

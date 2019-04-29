@@ -14,6 +14,7 @@ Improvements
 - You can now double-click the numbers on a figure axis to adjust the axis' scale.
 - You can now plot workspaces on top of figures you've created using scripts. Simply create a matplotlib figure in the
   script window, then drag and drop a workspace on top of it.
+- Mantid's offline help is now available in Workbench.
 
 Bugfixes
 ########
