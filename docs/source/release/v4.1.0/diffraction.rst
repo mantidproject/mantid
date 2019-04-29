@@ -52,6 +52,7 @@ Improvements
 
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
 
+- :ref:`MDNorm <algm-MDNorm>` now checks for consistent binning between the given parameters and the input accumulation workspaces if the latter are given.
 
 Imaging
 -------
