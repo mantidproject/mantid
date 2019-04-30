@@ -16,7 +16,7 @@ from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRu
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from test.Muon.context_setup import setup_context_for_tests
 
 
 class HomeTabRunInfoPresenterTest(unittest.TestCase):

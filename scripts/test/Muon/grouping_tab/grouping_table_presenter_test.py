@@ -9,7 +9,7 @@ from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter impor
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from test.Muon.context_setup import setup_context_for_tests
 
 maximum_number_of_groups = 20
 

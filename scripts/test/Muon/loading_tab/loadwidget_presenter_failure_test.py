@@ -20,7 +20,7 @@ from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from test.Muon.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):

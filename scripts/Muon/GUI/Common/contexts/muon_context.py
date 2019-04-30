@@ -25,7 +25,7 @@ class MuonContext(object):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
-        self.phase_context = muon_phase_context
+        self._phase_context = muon_phase_context
         self.base_directory = base_directory
 
     @property
@@ -39,6 +39,10 @@ class MuonContext(object):
     @property
     def group_pair_context(self):
         return self._group_pair_context
+
+    @property
+    def phase_context(self):
+        return self._phase_context
 
     def calculate_group(self, group_name, run, rebin=False):
         group_workspace = calculate_group_data(self, group_name, run, rebin)

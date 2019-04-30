@@ -18,7 +18,7 @@ from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import 
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from test.Muon.context_setup import setup_context_for_tests
 
 
 class HomeTabGroupingPresenterTest(unittest.TestCase):

@@ -15,7 +15,7 @@ from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import 
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from test.Muon.context_setup import setup_context_for_tests
 
 
 class HomeTabInstrumentPresenterTest(unittest.TestCase):
