@@ -900,9 +900,16 @@ bool MatrixWorkspace::isCommonLogBins() const {
   }
 
   double diff = x0[1] / x0[0];
+  if (!std::isfinite(diff)) {
+    return false;
+  }
   // ignore final bin, since it may be a different size
   for (size_t i = 1; i < x0.size() - 2; ++i) {
-    if (std::abs(x0[i + 1] / x0[i] - diff) > EPSILON) {
+    if (std::isfinite(x0[i + 1]) && std::isfinite(x0[i])) {
+      if (std::abs(x0[i + 1] / x0[i] - diff) > EPSILON) {
+        return false;
+      }
+    } else {
       return false;
     }
   }
