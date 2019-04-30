@@ -9,7 +9,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <string>
 namespace Mantid {

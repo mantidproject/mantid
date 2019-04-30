@@ -13,7 +13,6 @@
 
 #include "MantidKernel/ConfigService.h"
 
-#include <boost/lexical_cast.hpp>
 #include <gsl/gsl_sf_erf.h>
 
 const double PEAKRANGE = 5.0;

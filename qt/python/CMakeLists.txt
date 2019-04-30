@@ -90,6 +90,8 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/test/test_fitpropertybrowser.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
     mantidqt/widgets/observers/test/test_ads_observer.py
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
@@ -122,6 +124,7 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_view.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py

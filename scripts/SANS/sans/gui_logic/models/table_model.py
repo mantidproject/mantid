@@ -321,7 +321,7 @@ class TableIndexModel(object):
 
     def to_list(self):
         return [self.sample_scatter, self._string_period(self.sample_scatter_period), self.sample_transmission,
-                self._string_period(self.sample_transmission_period),self.sample_direct,
+                self._string_period(self.sample_transmission_period), self.sample_direct,
                 self._string_period(self.sample_direct_period), self.can_scatter,
                 self._string_period(self.can_scatter_period), self.can_transmission,
                 self._string_period(self.can_transmission_period), self.can_direct,
@@ -335,12 +335,10 @@ class TableIndexModel(object):
         :return: a list of data in the order as would typically appear
         in a batch file
         """
-        return_list = [self.sample_scatter, self.output_name, self.sample_transmission,
+        return_list = [self.sample_scatter, self.sample_transmission,
                        self.sample_direct, self.can_scatter, self.can_transmission,
-                       self.can_direct, self.user_file]
-        return_list = list(map(str, return_list))
-        return_list = list(map(str.strip, return_list))
-        return return_list
+                       self.can_direct, self.output_name, self.user_file]
+        return list(map(lambda item: str(item).strip(), return_list))
 
     def isMultiPeriod(self):
         return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,

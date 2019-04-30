@@ -135,6 +135,14 @@ both containing the dynamic susceptibility as a function of frequency, in units 
 The extension denoting this quantity in the workspace and file names is "Xqw"
 (the extension for the structure factor is "sqw").
 
+Powder Diffraction
+==================
+If <i>OutputPowderSpectrum</i> is checked,
+two additional workspaces are created
+after a call to algorithm :ref:`algm-BASISPowderDiffraction`
+- `BSS_XXXX_sq_angle`: Intensity versus scattering angle :math:`\vec{2\theta}`
+- `BSS_XXXX_sq`: Intensity versus momentum transfer
+
 Usage
 -----
 
