@@ -18,11 +18,11 @@ set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
 # Choose the proper suffix for the build.
 # if the string is not empty, capitalise the first letter
 if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
-  # change the icon if this is not a release build - the icons have _<suffix> appended, e.g. _nightly and _unstable
+  # change the icon if this is not a release build - the icons have <suffix> appended, e.g. nightly and unstable
   # this is done before the capitalisation of the first letter
-  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
-  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}")
-  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
+  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
+  set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}${CPACK_PACKAGE_SUFFIX}")
+  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}${CPACK_PACKAGE_SUFFIX}" )
 
   string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
   # get only first letter
