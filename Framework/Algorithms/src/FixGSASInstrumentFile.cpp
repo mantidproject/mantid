@@ -71,14 +71,16 @@ void FixGSASInstrumentFile::exec() {
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
-  string line;
-  while (getline(infile, line)) {
-    // Split "\n"
-    vector<string> fields;
-    boost::algorithm::split(fields, line, boost::algorithm::is_any_of("\n"));
-    if (fields.empty())
-      throw runtime_error("Impossible to have an empty line. ");
-    vec_line.push_back(fields[0]);
+  {
+    string line;
+    while (getline(infile, line)) {
+      // Split "\n"
+      vector<string> fields;
+      boost::algorithm::split(fields, line, boost::algorithm::is_any_of("\n"));
+      if (fields.empty())
+        throw runtime_error("Impossible to have an empty line. ");
+      vec_line.push_back(fields[0]);
+    }
   }
   infile.close();
 
@@ -94,7 +96,7 @@ void FixGSASInstrumentFile::exec() {
     throw runtime_error(errss.str());
   }
 
-  for (auto &line : vec_line) {
+  for (const auto &line : vec_line) {
     ofile << line;
     for (size_t j = line.size(); j < LINESIZE; ++j)
       ofile << " ";

@@ -145,6 +145,7 @@ class MuonContext(object):
 
         for run in run_numbers:
             workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
+
             for name in pair_names:
                 workspace_options.append(
                     wsName.get_pair_data_workspace_name(self,

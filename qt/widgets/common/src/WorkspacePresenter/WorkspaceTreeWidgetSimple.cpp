@@ -35,6 +35,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
           new QAction("Overplot spectrum with errors...", this)),
       m_plotColorfill(new QAction("Colorfill", this)),
       m_sampleLogs(new QAction("Show Sample Logs", this)),
+      m_sliceViewer(new QAction("Show Slice Viewer", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)),
       m_showAlgorithmHistory(new QAction("Show History", this)) {
@@ -55,6 +56,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
   connect(m_plotColorfill, SIGNAL(triggered()), this,
           SLOT(onPlotColorfillClicked()));
   connect(m_sampleLogs, SIGNAL(triggered()), this, SLOT(onSampleLogsClicked()));
+  connect(m_sliceViewer, SIGNAL(triggered()), this,
+          SLOT(onSliceViewerClicked()));
   connect(m_showInstrument, SIGNAL(triggered()), this,
           SLOT(onShowInstrumentClicked()));
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
@@ -116,6 +119,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     } else if (boost::dynamic_pointer_cast<IMDWorkspace>(workspace)) {
       menu->addAction(m_showAlgorithmHistory);
       menu->addAction(m_sampleLogs);
+      menu->addAction(m_sliceViewer);
     }
 
     menu->addSeparator();
@@ -152,6 +156,10 @@ void WorkspaceTreeWidgetSimple::onPlotColorfillClicked() {
 
 void WorkspaceTreeWidgetSimple::onSampleLogsClicked() {
   emit sampleLogsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onSliceViewerClicked() {
+  emit sliceViewerClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 void WorkspaceTreeWidgetSimple::onShowInstrumentClicked() {

@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/Chebyshev.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <stdexcept>

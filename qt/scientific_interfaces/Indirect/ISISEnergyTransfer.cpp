@@ -398,8 +398,12 @@ void ISISEnergyTransfer::run() {
     reductionAlg->setProperty("GroupingString", grouping.second);
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
-  reductionAlg->setProperty("OutputWorkspace",
-                            "IndirectEnergyTransfer_Workspaces");
+
+  m_outputGroupName = instName.toLower().toStdString() +
+                      m_uiForm.dsRunFiles->getText().toStdString() + "_" +
+                      getAnalyserName().toStdString() +
+                      getReflectionName().toStdString() + "_Reduced";
+  reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
 
@@ -421,14 +425,13 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  auto const outputName("IndirectEnergyTransfer_Workspaces");
-
-  if (!error && doesExistInADS(outputName)) {
-    if (auto const outputGroup = getADSWorkspaceGroup(outputName)) {
+  if (!error && doesExistInADS(m_outputGroupName)) {
+    if (auto const outputGroup = getADSWorkspaceGroup(m_outputGroupName)) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
-      ungroupWorkspace(outputGroup->getName());
+      if (!m_uiForm.ckGroupOutput->isChecked())
+        ungroupWorkspace(outputGroup->getName());
 
       // Enable plotting and saving
       m_uiForm.pbPlot->setEnabled(true);
@@ -445,17 +448,13 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 }
 
 int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
-  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return i;
-  return 0;
+  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+  return index >= 0 ? index : 0;
 }
 
 bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
-  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return false;
-  return true;
+  auto const index = m_uiForm.cbGroupingOptions->findText(option);
+  return index == -1;
 }
 
 void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {

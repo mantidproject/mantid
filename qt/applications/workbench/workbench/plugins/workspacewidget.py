@@ -22,6 +22,7 @@ from mantid.kernel import logger
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
@@ -54,6 +55,7 @@ class WorkspaceWidget(PluginWidget):
                                                                                errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
         self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
+        self.workspacewidget.sliceViewerClicked.connect(self._do_slice_viewer)
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
         self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
@@ -116,6 +118,21 @@ class WorkspaceWidget(PluginWidget):
                 SampleLogs(ws=ws, parent=self)
             except Exception as exception:
                 logger.warning("Could not open sample logs for workspace '{}'."
+                               "".format(ws.name()))
+                logger.debug("{}: {}".format(type(exception).__name__,
+                                             exception))
+
+    def _do_slice_viewer(self, names):
+        """
+        Show the sliceviewer window for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            try:
+                SliceViewer(ws=ws, parent=self)
+            except Exception as exception:
+                logger.warning("Could not open slice viewer for workspace '{}'."
                                "".format(ws.name()))
                 logger.debug("{}: {}".format(type(exception).__name__,
                                              exception))

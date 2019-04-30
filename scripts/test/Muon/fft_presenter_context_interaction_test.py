@@ -19,6 +19,14 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from mantid.api import FileFinder
 
 
+def retrieve_combobox_info(combo_box):
+    output_list = []
+    for i in range(combo_box.count()):
+        output_list.append(str(combo_box.itemText(i)))
+
+    return output_list
+
+
 class FFTPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
@@ -53,50 +61,48 @@ class FFTPresenterTest(unittest.TestCase):
     def test_getWorkspaceNames_sets_workspace_and_imaginary_workspace_list_correctly(self):
         self.presenter.getWorkspaceNames()
 
-        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
-        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; #1')
+        self.assertEqual(retrieve_combobox_info(self.view.ws),
+                         ['MUSR22725; Pair Asym; test_pair; #1',
+                          'MUSR22725; Group; top; Asymmetry; #1', 'MUSR22725; Group; bkwd; Asymmetry; #1',
+                          'MUSR22725; Group; bottom; Asymmetry; #1', 'MUSR22725; Group; fwd; Asymmetry; #1'])
 
-        self.assertEquals(self.view.Im_ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
-        self.assertEquals(self.view.Im_ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
-        self.assertEquals(self.view.Im_ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; #1')
-        self.assertEquals(self.view.Im_ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; #1')
-        self.assertEquals(self.view.Im_ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; #1')
+        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; #1',
+                                                                   'MUSR22725; Group; top; Asymmetry; #1',
+                                                                   'MUSR22725; Group; bkwd; Asymmetry; #1',
+                                                                   'MUSR22725; Group; bottom; Asymmetry; #1',
+                                                                   'MUSR22725; Group; fwd; Asymmetry; #1'])
 
     def test_handle_use_raw_data_changed_when_no_rebin_set(self):
         self.view.set_raw_checkbox_state(False)
 
-        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
-        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; #1')
-        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; #1')
 
-        self.assertEquals(self.view.Im_ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; #1')
-        self.assertEquals(self.view.Im_ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; #1')
-        self.assertEquals(self.view.Im_ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; #1')
-        self.assertEquals(self.view.Im_ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; #1')
-        self.assertEquals(self.view.Im_ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; #1')
+        self.assertEqual(retrieve_combobox_info(self.view.ws),
+                         ['MUSR22725; Pair Asym; test_pair; #1',
+                          'MUSR22725; Group; top; Asymmetry; #1', 'MUSR22725; Group; bkwd; Asymmetry; #1',
+                          'MUSR22725; Group; bottom; Asymmetry; #1', 'MUSR22725; Group; fwd; Asymmetry; #1'])
+
+        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; #1',
+                                                                   'MUSR22725; Group; top; Asymmetry; #1',
+                                                                   'MUSR22725; Group; bkwd; Asymmetry; #1',
+                                                                   'MUSR22725; Group; bottom; Asymmetry; #1',
+                                                                   'MUSR22725; Group; fwd; Asymmetry; #1'])
 
         self.view.warning_popup.assert_called_once_with('No rebin options specified')
 
     def test_handle_use_raw_data_changed_when_rebin_set(self):
-        self.gui_context.update({'RebinType': 'Fixed', 'RebinFixed' : 2})
+        self.gui_context.update({'RebinType': 'Fixed', 'RebinFixed': 2})
         self.view.set_raw_checkbox_state(False)
 
-        self.assertEquals(self.view.ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1')
+        self.assertEqual(retrieve_combobox_info(self.view.ws),
+                         ['MUSR22725; Pair Asym; test_pair; Rebin; #1',
+                          'MUSR22725; Group; top; Asymmetry; Rebin; #1', 'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1',
+                          'MUSR22725; Group; bottom; Asymmetry; Rebin; #1', 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1'])
 
-        self.assertEquals(self.view.Im_ws.itemText(0), 'MUSR22725; Pair Asym; test_pair; Rebin; #1')
-        self.assertEquals(self.view.Im_ws.itemText(1), 'MUSR22725; Group; top; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.Im_ws.itemText(2), 'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.Im_ws.itemText(3), 'MUSR22725; Group; bottom; Asymmetry; Rebin; #1')
-        self.assertEquals(self.view.Im_ws.itemText(4), 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1')
+        self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; Rebin; #1',
+                                                                   'MUSR22725; Group; top; Asymmetry; Rebin; #1',
+                                                                   'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1',
+                                                                   'MUSR22725; Group; bottom; Asymmetry; Rebin; #1',
+                                                                   'MUSR22725; Group; fwd; Asymmetry; Rebin; #1'])
 
     def test_get_pre_inputs_with_phase_quad(self):
         self.context.phase_context.add_phase_quad('MUSR22725_PhaseQuad_MUSR22725_phase_table')
@@ -134,7 +140,6 @@ class FFTPresenterTest(unittest.TestCase):
         phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
         self.context.phase_context.add_phase_quad(phase_name)
         self.presenter.getWorkspaceNames()
-
         self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name, 1), {'AcceptXRoundingErrors': True, 'AutoShift': True,
                                                             'InputWorkspace': phase_name, 'InputImagWorkspace': phase_name,
                                                             'Real': 0, 'Imaginary': 1, 'Transform': 'Forward'})
@@ -182,6 +187,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with('MUSR22725_PhaseQuad_MUSR22725_phase_table',
                                                                         'MUSR22725 PhaseTable',
                                                                         fft_mock_return)
+
 
 
 if __name__ == '__main__':

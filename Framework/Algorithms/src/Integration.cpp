@@ -428,12 +428,10 @@ std::map<std::string, std::string> Integration::validateInputs() {
     }
   }
   if (!isEmpty(minRange)) {
-    for (const auto x : maxRanges) {
-      if (x < minRange) {
-        issues["RangeUpperList"] =
-            "RangeUpperList has a value lower than RangeLower.";
-        break;
-      }
+    if (std::any_of(maxRanges.cbegin(), maxRanges.cend(),
+                    [minRange](const auto x) { return x < minRange; })) {
+      issues["RangeUpperList"] =
+          "RangeUpperList has a value lower than RangeLower.";
     }
   }
   return issues;

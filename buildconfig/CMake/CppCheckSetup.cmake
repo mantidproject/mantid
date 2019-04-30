@@ -42,8 +42,7 @@ if ( CPPCHECK_EXECUTABLE )
 
   set ( CPPCHECK_EXCLUDES
         Framework/LiveData/src/ISIS/DAE/
-        Framework/LiveData/src/ISIS/private/flatbuffers/
-        Framework/LiveData/src/ISIS/private/schema/
+        Framework/LiveData/src/Kafka/private/Schema/
         Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/
         Framework/ICat/src/ICat3/GSoapGenerated/
@@ -66,8 +65,17 @@ if ( CPPCHECK_EXECUTABLE )
 
   # Header files to be ignored require different handling
   set ( CPPCHECK_HEADER_EXCLUDES
+        Framework/LiveData/src/Kafka/private/Schema/ba57_run_info_generated.h
+        Framework/LiveData/src/Kafka/private/Schema/df12_det_spec_map_generated.h
+        Framework/LiveData/src/Kafka/private/Schema/ev42_events_generated.h
+        Framework/LiveData/src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
+        Framework/LiveData/src/Kafka/private/Schema/f142_logdata_generated.h
+        Framework/LiveData/src/Kafka/private/Schema/is84_isis_events_generated.h
+        Framework/LiveData/src/Kafka/private/Schema/flatbuffers/base.h
+        Framework/LiveData/src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+        Framework/LiveData/src/Kafka/private/Schema/flatbuffers/stl_emulation.h
         MantidPlot/src/origin/OPJFile.h
-		MantidPlot/src/origin/tree.hh
+        MantidPlot/src/origin/tree.hh
       )
 
   # setup the standard arguments

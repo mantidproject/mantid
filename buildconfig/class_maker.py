@@ -21,7 +21,7 @@ VERSION = "1.0"
 #======================================================================
 def get_year():
     """returns the current year"""
-    return datetime.datetime.now().date().year
+    return datetime.datetime.now().year
 
 #======================================================================
 def write_header(subproject, classname, filename, args):

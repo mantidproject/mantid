@@ -189,8 +189,7 @@ void ConvertToMDMinMaxGlobal::exec() {
                                PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
       if (GeometryMode == "Direct") {
-        double Ei = boost::lexical_cast<double, std::string>(
-            ws->run().getProperty("Ei")->value());
+        const double Ei = ws->run().getPropertyValueAsType<double>("Ei");
         qmax =
             std::sqrt(energyToK * Ei) + std::sqrt(energyToK * (Ei - deltaEmin));
       } else // indirect
