@@ -106,7 +106,7 @@ bool SampleEnvironment::isValid(const V3D &point) const {
  * @return The total number of segments added to the track
  */
 size_t SampleEnvironment::interceptSurfaces(Track &track) const {
-  return std::accumulate(m_components.cbegin(), m_components.cend(), 0,
+  return std::accumulate(m_components.cbegin(), m_components.cend(), size_t(0),
                          [&track](size_t sum, const auto &component) {
                            return sum + component->interceptSurface(track);
                          });
