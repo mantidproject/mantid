@@ -8,7 +8,8 @@ class PhaseTableContext(object):
         self.phase_tables = []
 
     def add_phase_table(self, name):
-        self.phase_tables.append(name)
+        if name not in self.phase_tables:
+            self.phase_tables.append(name)
 
     def get_phase_table_list(self, instrument):
         return [phase_table for phase_table in self.phase_tables if instrument in phase_table]
