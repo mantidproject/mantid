@@ -37,7 +37,7 @@ Usage
    import directtools as dt
    ws = CreateSampleWorkspace(Function='Quasielastic Tunnelling', NumBanks=1, BankPixelWidth=20)
    AddSampleLog(ws, LogName='wavelength', LogValue='6.26', LogType='Number', LogUnit='Angstrom')
-   SetInstrumentParameter(ws, ParameterName='l2', ParameterType='String', Value='5')
+   SetInstrumentParameter(ws, ParameterName='l2', ParameterType='Number', Value='5')
    SofTT = SofTwoThetaTOF(ws, AngleStep=1)
    fig, axes = dt.subplots()
    axes.pcolor(SofTT)
