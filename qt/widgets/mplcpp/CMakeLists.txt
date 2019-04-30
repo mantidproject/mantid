@@ -63,6 +63,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
+    PythonInterfaceCore
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   INSTALL_DIR
