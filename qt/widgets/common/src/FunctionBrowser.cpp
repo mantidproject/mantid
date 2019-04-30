@@ -183,9 +183,7 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
 /// Get error of a local parameter
 double FunctionBrowser::getLocalParameterError(const QString &parName,
                                                int i) const {
-  //checkLocalParameter(parName);
-  //return m_localParameterValues[parName][i].error;
-  return 0.0;
+  return m_presenter->getLocalParameterValue(parName, i);
 }
 
 void FunctionBrowser::resetLocalParameters() {}
@@ -212,11 +210,7 @@ IFunction_sptr FunctionBrowser::getGlobalFunction() {
 /// @param fixed :: Make it fixed (true) or free (false)
 void FunctionBrowser::setLocalParameterFixed(const QString &parName, int i,
                                              bool fixed) {
-  //checkLocalParameter(parName);
-  //m_localParameterValues[parName][i].fixed = fixed;
-  //if (i == m_currentDataset) {
-  //  updateLocalTie(parName);
-  //}
+  m_presenter->setLocalParameterFixed(parName, i, fixed);
 }
 
 /// Check if a local parameter is fixed
@@ -224,9 +218,7 @@ void FunctionBrowser::setLocalParameterFixed(const QString &parName, int i,
 /// @param i :: Index of a dataset.
 bool FunctionBrowser::isLocalParameterFixed(const QString &parName,
                                             int i) const {
-  //checkLocalParameter(parName);
-  //return m_localParameterValues[parName][i].fixed;
-  return false;
+  return m_presenter->isLocalParameterFixed(parName, i);
 }
 
 /// Get the tie for a local parameter.
@@ -234,9 +226,7 @@ bool FunctionBrowser::isLocalParameterFixed(const QString &parName,
 /// @param i :: Index of a dataset.
 QString FunctionBrowser::getLocalParameterTie(const QString &parName,
                                               int i) const {
-  //checkLocalParameter(parName);
-  //return m_localParameterValues[parName][i].tie;
-  return "";
+  return m_presenter->getLocalParameterTie(parName, i);
 }
 
 /// Set a tie for a local parameter.
@@ -245,11 +235,7 @@ QString FunctionBrowser::getLocalParameterTie(const QString &parName,
 /// @param tie :: A tie string.
 void FunctionBrowser::setLocalParameterTie(const QString &parName, int i,
                                            QString tie) {
-  //checkLocalParameter(parName);
-  //m_localParameterValues[parName][i].tie = tie;
-  //if (i == m_currentDataset) {
-  //  updateLocalTie(parName);
-  //}
+  m_presenter->setLocalParameterTie(parName, i, tie);
 }
 
 /// Update the interface to have the same parameter values as in a function.

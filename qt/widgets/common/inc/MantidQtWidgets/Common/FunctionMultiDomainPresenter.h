@@ -67,10 +67,13 @@ signals:
   void functionStructureChanged();
   void parameterChanged(const QString &funcIndex, const QString &paramName);
 private slots:
-  void viewChangedParameter(const QString &paramName);
+  void viewChangedParameter(const QString &parName);
   void viewPastedFunction(const QString &funStr);
   void viewAddedFunction(const QString &funStr);
-  void viewChangedTie(const QString &paramName, const QString &tie);
+  void viewChangedTie(const QString &parName, const QString &tie);
+  void viewAddedConstraint(const QString &functionIndex, const QString &constraint);
+  void viewRemovedConstraint(const QString &parName);
+  void viewRequestedCopyToClipboard();
   void editLocalParameter(const QString &parName);
   void editLocalParameterFinish(int result);
 private:

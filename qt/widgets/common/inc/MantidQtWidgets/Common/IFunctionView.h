@@ -52,8 +52,13 @@ signals:
   void localParameterButtonClicked(const QString &parName);
   /// User sets a tie
   void parameterTieChanged(const QString &parName, const QString &tie);
+  /// User sets a constraint
+  void parameterConstraintAdded(const QString &functionIndex, const QString &constraint);
+  /// User removes a constraint
+  void parameterConstraintRemoved(const QString &paramName);
+  /// User requested copy function to clipboard
+  void copyToClipboardRequest();
   void globalsChanged();
-  void constraintsChanged();
 };
 
 } // namespace MantidWidgets

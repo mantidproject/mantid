@@ -44,6 +44,8 @@ namespace MantidWidgets {
     virtual int currentDomainIndex() const = 0;
     virtual void setCurrentDomainIndex(int) = 0;
     virtual void changeTie(const QString & paramName, const QString & tie) = 0;
+    virtual void addConstraint(const QString &functionIndex, const QString &constraint) = 0;
+    virtual void removeConstraint(const QString &paramName) = 0;
   };
 
   class EXPORT_OPT_MANTIDQT_COMMON MultiDomainFunctionModel : public IFunctionModel {
@@ -77,6 +79,8 @@ namespace MantidWidgets {
     void setLocalParameterFixed(const QString &parName, int i, bool fixed);
     void setLocalParameterTie(const QString &parName, int i, QString tie);
     void changeTie(const QString & parName, const QString & tie);
+    void addConstraint(const QString &functionIndex, const QString &constraint) override;
+    void removeConstraint(const QString &paramName) override;
   private:
     void checkIndex(int) const;
     MultiDomainFunction_sptr m_function;

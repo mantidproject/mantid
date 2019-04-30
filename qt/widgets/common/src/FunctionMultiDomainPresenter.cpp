@@ -30,7 +30,10 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
   connect(m_view, SIGNAL(functionReplaced(const QString &)), this, SLOT(viewPastedFunction(const QString &)));
   connect(m_view, SIGNAL(functionAdded(const QString &)), this, SLOT(viewAddedFunction(const QString &)));
   connect(m_view, SIGNAL(parameterTieChanged(const QString &, const QString &)), this, SLOT(viewChangedTie(const QString &, const QString &)));
+  connect(m_view, SIGNAL(parameterConstraintAdded(const QString &, const QString &)), this, SLOT(viewAddedConstraint(const QString &, const QString &)));
+  connect(m_view, SIGNAL(parameterConstraintRemoved(const QString &)), this, SLOT(viewRemovedConstraint(const QString &)));
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this, SLOT(editLocalParameter(const QString &)));
+  connect(m_view, SIGNAL(copyToClipboardRequest()), this, SLOT(viewRequestedCopyToClipboard()));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun)
@@ -220,6 +223,24 @@ void FunctionMultiDomainPresenter::viewAddedFunction(const QString & funStr)
 void FunctionMultiDomainPresenter::viewChangedTie(const QString & paramName, const QString & tie)
 {
   m_model->changeTie(paramName, tie);
+}
+
+void FunctionMultiDomainPresenter::viewAddedConstraint(const QString &functionIndex, const QString & constraint)
+{
+  m_model->addConstraint(functionIndex, constraint);
+}
+
+void FunctionMultiDomainPresenter::viewRemovedConstraint(const QString & parName)
+{
+  m_model->removeConstraint(parName);
+}
+
+void FunctionMultiDomainPresenter::viewRequestedCopyToClipboard()
+{
+  auto fun = getFunction();
+  if (fun) {
+    QApplication::clipboard()->setText(QString::fromStdString(fun->asString()));
+  }
 }
 
 QString FunctionMultiDomainPresenter::getFunctionString() const

@@ -295,6 +295,17 @@ void MultiDomainFunctionModel::changeTie(const QString & parName, const QString 
   }
 }
 
+void MultiDomainFunctionModel::addConstraint(const QString &functionIndex, const QString & constraint)
+{
+  auto fun = getFunctionWithPrefix(functionIndex, getCurrentFunction());
+  fun->addConstraints(constraint.toStdString());
+}
+
+void MultiDomainFunctionModel::removeConstraint(const QString & paramName)
+{
+  getCurrentFunction()->removeConstraint(paramName.toStdString());
+}
+
 /// Check a domain/function index to be in range.
 void MultiDomainFunctionModel::checkIndex(int index) const {
   if (index < 0 || index >= getNumberDomains()) {

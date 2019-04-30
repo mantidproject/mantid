@@ -108,8 +108,7 @@ public:
   void setParameterTie(const QString &paramName, const QString &tie) override;
 
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
-    bool attributesOnly = false);
+  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr, bool attributesOnly = false);
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
@@ -166,7 +165,7 @@ protected:
   /// Get the function index for a property
   QString getIndex(QtProperty *prop) const;
   /// Get name of the parameter for a property
-  QString getParameterName(QtProperty *prop);
+  QString getParameterName(QtProperty *prop) const;
   /// Get function property for the index
   QtProperty *getFunctionProperty(const QString &index) const;
   ///// Get a property for a parameter
@@ -202,6 +201,8 @@ protected:
   /// Get a constraint string
   QString getConstraint(const QString &paramName, const QString &lowerBound,
                         const QString &upperBound) const;
+  /// Get a pair of function index (eg f0.f2.) and constraint expression given a parameter property
+  std::pair<QString, QString> getFunctionAndConstraint(QtProperty *prop) const;
 
 protected slots:
   /// Show the context menu

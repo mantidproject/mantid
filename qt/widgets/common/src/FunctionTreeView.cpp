@@ -844,7 +844,7 @@ QString FunctionTreeView::getIndex(QtProperty *prop) const {
  * Get name of the parameter for a property
  * @param prop :: A property
  */
-QString FunctionTreeView::getParameterName(QtProperty *prop) {
+QString FunctionTreeView::getParameterName(QtProperty *prop) const {
   if (isParameter(prop)) {
     return getIndex(prop) + prop->propertyName();
   } else {
@@ -1575,10 +1575,7 @@ void FunctionTreeView::pasteFromClipboard() {
  * Copy function to the clipboard
  */
 void FunctionTreeView::copyToClipboard() {
-  auto fun = getFunction();
-  if (fun) {
-    QApplication::clipboard()->setText(QString::fromStdString(fun->asString()));
-  }
+  emit copyToClipboardRequest();
 }
 
 /**
@@ -1591,8 +1588,11 @@ void FunctionTreeView::addConstraints() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  addConstraintProperties(prop, "0<" + prop->propertyName() + "<0");
-  emit constraintsChanged();
+  QString functionIndex, name;
+  std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
+  auto const constraint = "0<" + name + "<0";
+  addConstraintProperties(prop, constraint);
+  emit parameterConstraintAdded(functionIndex, constraint);
 }
 
 /**
@@ -1606,10 +1606,12 @@ void FunctionTreeView::addConstraints10() {
   if (!isParameter(prop))
     return;
   double val = getParameter(prop);
-  addConstraintProperties(prop, QString::number(val * 0.9) + "<" +
-                                    prop->propertyName() + "<" +
-                                    QString::number(val * 1.1));
-  emit constraintsChanged();
+  QString functionIndex, name;
+  std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
+  auto const constraint = QString::number(val * 0.9) + "<" + name + "<" +
+    QString::number(val * 1.1);
+  addConstraintProperties(prop, constraint);
+  emit parameterConstraintAdded(functionIndex, constraint);
 }
 
 /**
@@ -1623,10 +1625,12 @@ void FunctionTreeView::addConstraints50() {
   if (!isParameter(prop))
     return;
   double val = getParameter(prop);
-  addConstraintProperties(prop, QString::number(val * 0.5) + "<" +
-                                    prop->propertyName() + "<" +
-                                    QString::number(val * 1.5));
-  emit constraintsChanged();
+  QString functionIndex, name;
+  std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
+  auto const constraint = QString::number(val * 0.5) + "<" + name + "<" +
+    QString::number(val * 1.5);
+  addConstraintProperties(prop, constraint);
+  emit parameterConstraintAdded(functionIndex, constraint);
 }
 
 /**
@@ -1646,7 +1650,7 @@ void FunctionTreeView::removeConstraints() {
       removeProperty(p);
     }
   }
-  emit constraintsChanged();
+  emit parameterConstraintRemoved(getParameterName(prop));
 }
 
 /**
@@ -1661,7 +1665,30 @@ void FunctionTreeView::removeConstraint() {
     return;
   auto paramProp = getParentParameterProperty(prop);
   removeProperty(prop);
-  emit constraintsChanged();
+  auto const parName = getParameterName(paramProp);
+  emit parameterConstraintRemoved(parName);
+  QString functionIndex, constraint;
+  std::tie(functionIndex, constraint) = getFunctionAndConstraint(paramProp);
+  if (!constraint.isEmpty()) {
+    emit parameterConstraintAdded(functionIndex, constraint);
+  }
+}
+
+std::pair<QString, QString> FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
+  auto const parName = getParameterName(prop);
+  QString lower, upper;
+  for (auto p : prop->subProperties()) {
+    if (p->propertyName() == "LowerBound")
+      lower = m_constraintManager->value(p);
+    if (p->propertyName() == "UpperBound")
+      upper = m_constraintManager->value(p);
+  }
+  if (!lower.isEmpty() || !upper.isEmpty()) {
+    QString functionIndex, name;
+    std::tie(functionIndex, name) = splitParameterName(parName);
+    return std::make_pair(functionIndex, getConstraint(name, lower, upper));
+  }
+  return std::make_pair("", "");
 }
 
 /**
@@ -1761,7 +1788,12 @@ void FunctionTreeView::constraintChanged(QtProperty *prop) {
     const bool isLower = constraint.lower == prop;
     const bool isUpper = constraint.upper == prop;
     if (isLower || isUpper) {
-      emit constraintsChanged();
+      auto paramProp = getParentParameterProperty(prop);
+      QString functionIndex, constraint;
+      std::tie(functionIndex, constraint) = getFunctionAndConstraint(paramProp);
+      if (!constraint.isEmpty()) {
+        emit parameterConstraintAdded(functionIndex, constraint);
+      }
     }
   }
 }
