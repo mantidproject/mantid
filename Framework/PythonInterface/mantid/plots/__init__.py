@@ -790,10 +790,14 @@ class MantidAxes(Axes):
             handles = []
             labels = []
             for line in self.lines:
-                # the line is an error line, and the label must be extracted from the ErrorContainer
                 if line.get_label() == self.MPL_NOLEGEND:
                     errorbar = self.find_errorbar_container(line)
-
+                    if not errorbar:
+                        # the line does not have an errorbar container that would have the label
+                        # nor does it have a label, as it has been marked with NOLEGEND
+                        # simply continue to the next line
+                        continue
+                        
                     handle = errorbar
                     label = errorbar.get_label()
                 else:
