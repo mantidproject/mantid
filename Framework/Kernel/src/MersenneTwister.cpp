@@ -49,7 +49,8 @@ MersenneTwister::MersenneTwister(const double start, const double end)
  */
 MersenneTwister::MersenneTwister(const size_t seedValue, const double start,
                                  const double end)
-    : m_engine(), uniformRealDistribution(start, end), m_start(start), m_end(end), m_seed(), m_savedEngine() {
+    : m_engine(), uniformRealDistribution(start, end), m_start(start),
+      m_end(end), m_seed(), m_savedEngine() {
   setSeed(seedValue);
 }
 

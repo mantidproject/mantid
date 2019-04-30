@@ -153,7 +153,8 @@ cases exist.
   return 0; // both points imaginary
 }
 
-int Line::intersect(std::vector<Kernel::V3D> &VecOut, const Quadratic &Sur) const
+int Line::intersect(std::vector<Kernel::V3D> &VecOut,
+                    const Quadratic &Sur) const
 /**
 For the line that intersects the surfaces
 add the point(s) to the VecOut, return number of points

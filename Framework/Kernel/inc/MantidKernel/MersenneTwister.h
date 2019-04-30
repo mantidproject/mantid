@@ -45,9 +45,11 @@ public:
   void setRange(const double start, const double end) override;
   /// Generate the next random number in the sequence within the given range
   /// default range
-  inline double nextValue() override { return uniformRealDistribution(m_engine); }
+  inline double nextValue() override {
+    return uniformRealDistribution(m_engine);
+  }
   /// Generate the next random number in the sequence within the given range.
-  inline double nextValue(double start, double end) override{
+  inline double nextValue(double start, double end) override {
     return std::uniform_real_distribution<double>(start, end)(m_engine);
   }
   /// Return the next integer in the sequence within the given range
