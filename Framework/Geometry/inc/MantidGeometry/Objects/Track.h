@@ -69,6 +69,9 @@ struct MANTID_GEOMETRY_DLL Link {
                            //@}
 };
 
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
+                                             const Link &link);
+
 // calculations should prefer throwing a std::domain_error rather than using
 // INVALID
 enum class TrackDirection { LEAVING = -1, INVALID = 0, ENTERING = 1 };
@@ -78,7 +81,7 @@ inline bool operator<(const TrackDirection left, const TrackDirection right) {
 }
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
-                                             TrackDirection direction);
+                                             const TrackDirection &direction);
 
 /**
  * Stores a point of intersection along a track. The component intersected

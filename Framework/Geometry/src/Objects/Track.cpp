@@ -240,7 +240,12 @@ double Track::distInsideObject() const {
                          });
 }
 
-std::ostream &operator<<(std::ostream &os, TrackDirection direction) {
+std::ostream &operator<<(std::ostream &os, const Link &link) {
+  os << link.entryPoint << "->" << link.exitPoint;
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const TrackDirection &direction) {
   switch (direction) {
   case TrackDirection::ENTERING:
     os << "ENTERING";
