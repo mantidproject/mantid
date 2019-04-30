@@ -151,8 +151,11 @@ class PhaseTablePresenterTest(unittest.TestCase):
         mock_data_service.addToGroup.assert_called_once_with('MUSR22222', 'MUSR22222_PhaseQuad_phase_table_MUSR22222')
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
-    def test_handle_calcuate_phase_quad_behaves_correctly_for_succesful_calculation(self, run_algorithm_mock):
+    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.mantid')
+    def test_handle_calcuate_phase_quad_behaves_correctly_for_succesful_calculation(self, mantid_mock, run_algorithm_mock):
         phase_quad_mock = mock.MagicMock()
+        alg_mock = mock.MagicMock()
+        mantid_mock.AlgorithmManager.create.return_value = alg_mock
         run_algorithm_mock.return_value = phase_quad_mock
         self.presenter.add_phase_quad_to_ADS = mock.MagicMock()
         self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
@@ -164,7 +167,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.assertTrue(self.view.isEnabled())
         run_algorithm_mock.assert_called_once_with({'PhaseTable': 'MUSR22222_period_1_phase_table',
-                                                    'InputWorkspace': 'MUSR22222_raw_data_period_1'})
+                                                    'InputWorkspace': 'MUSR22222_raw_data_period_1'}, alg_mock)
         self.presenter.add_phase_quad_to_ADS.assert_called_once_with({'PhaseTable': 'MUSR22222_period_1_phase_table',
                                                                       'InputWorkspace': 'MUSR22222_raw_data_period_1'},
                                                                       phase_quad_mock)
@@ -189,7 +192,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.set_phase_table_combo_box.assert_called_once_with(['MUSR22222_phase_table', 'Construct'])
 
     def test_handle_calculation_started_and_handle_calculation_ended_called_correctly(self):
-        self.presenter.handle_calculation_started = mock.MagicMock()
+        self.presenter.handle_phase_table_calculation_started = mock.MagicMock()
         self.presenter.handle_calculation_success = mock.MagicMock()
         self.presenter.handle_calculation_error = mock.MagicMock()
         self.presenter.calculate_phase_table = mock.MagicMock()
@@ -197,7 +200,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
-        self.presenter.handle_calculation_started.assert_called_once_with()
+        self.presenter.handle_phase_table_calculation_started.assert_called_once_with()
         self.presenter.handle_calculation_success.assert_called_once_with()
         self.presenter.handle_calculation_error.assert_not_called()
         self.presenter.calculate_phase_table.assert_called_once_with()
