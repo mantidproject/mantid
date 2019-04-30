@@ -9,8 +9,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import matplotlib.axes
-import matplotlib.figure
 import matplotlib.pyplot as plt
 from qtpy.QtWidgets import QMenu
 
