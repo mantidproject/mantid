@@ -32,28 +32,6 @@ public:
 
   PseudoVoigtTest()
       : m_xValues(), m_yValues(), m_dfdh(), m_dfda(), m_dfdx0(), m_dfdf() {
-    //    m_xValues.push_back(0.991491491491491);
-    //    m_xValues.push_back(0.992492492492492);
-    //    m_xValues.push_back(0.993493493493493);
-    //    m_xValues.push_back(0.994494494494494);
-    //    m_xValues.push_back(0.995495495495496);
-    //    m_xValues.push_back(0.996496496496497);
-    //    m_xValues.push_back(0.997497497497497);
-    //    m_xValues.push_back(0.998498498498498);
-    //    m_xValues.push_back(0.999499499499499);
-    //    m_xValues.push_back(1.000500500500501);
-    //    m_xValues.push_back(1.001501501501501);
-    //    m_xValues.push_back(1.002502502502503);
-    //    m_xValues.push_back(1.003503503503504);
-    //    m_xValues.push_back(1.004504504504504);
-    //    m_xValues.push_back(1.005505505505506);
-    //    m_xValues.push_back(1.006506506506506);
-    //    m_xValues.push_back(1.007507507507508);
-    //    m_xValues.push_back(1.008508508508509);
-    //    m_xValues.push_back(1.009509509509509);
-    //    m_xValues.push_back(1.010510510510511);
-    //    m_xValues.push_back(1.011511511511511);
-
     for (size_t i = 0; i < 200; ++i) {
       double x_i = -10 + 0.1 * static_cast<double>(i);
       m_xValues.push_back(x_i);
@@ -305,7 +283,7 @@ public:
   /** Regular pseudo voigt
    * @brief testPseudoVoigtValues
    */
-  void Failed_Still_testPseudoVoigtValues() {
+  void testPseudoVoigtValues() {
     const double center{-1.0};
     const double intensity{2.0};
     const double fwhm{2.0};
@@ -329,12 +307,11 @@ public:
 
     // check height
     double height = pv->height();
-    // FIXME - THIS IS WRONG!
     TS_ASSERT_DELTA(height, values[100], 1.E-10);
 
-    //    for (size_t i = 0; i < values.size(); ++i) {
-    //      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
-    //    }
+    for (size_t i = 0; i < values.size(); ++i) {
+      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
+    }
   }
 
   /** Test derivative with eta = 0.5
@@ -392,12 +369,9 @@ public:
       // calculate numerically
       std::vector<double> vec_eta;
       std::vector<double> vec_numeric_deriv;
-      numerical_paaram_partial_derivative(pv, 0, min_eta, max_eta,
-                                          eta_resolution, x, vec_eta,
-                                          vec_numeric_deriv);
-
-      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
-                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+      numerical_param_partial_derivative(pv, 0, min_eta, max_eta,
+                                         eta_resolution, x, vec_eta,
+                                         vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_eta.size(); ++i) {
@@ -418,7 +392,6 @@ public:
 
     // create function
     IPeakFunction_sptr pv = getInitializedPV(x0, min_intensity, fwhm, eta);
-    // Mantid::CurveFitting::Jacobian jacobian(1, 4);
 
     // evalulate at N points
     std::vector<double> xvalues{-1}; // consider to expand to [-2, -1, 0]
@@ -443,25 +416,19 @@ public:
       // calculate numerically
       std::vector<double> vec_intensity;
       std::vector<double> vec_numeric_deriv;
-      numerical_paaram_partial_derivative(pv, 1, min_intensity, max_intensity,
-                                          intensity_resolution, x,
-                                          vec_intensity, vec_numeric_deriv);
-
-      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
-                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+      numerical_param_partial_derivative(pv, 1, min_intensity, max_intensity,
+                                         intensity_resolution, x, vec_intensity,
+                                         vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_intensity.size(); ++i) {
         TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-3);
-        // std::cout << vec_intensity[i] << "    " << vec_numeric_deriv[i] << "
-        // "
-        //          << vec_jocob_deriv[i] << "\n";
       }
     }
     return;
   }
 
-  void Passed_testPseudoVoigtDerivativesVaringCentre() {
+  void testPseudoVoigtDerivativesVaringCentre() {
     double min_x0 = -1.2;
     double max_x0 = -0.8;
     double intensity = 2.;
@@ -495,20 +462,12 @@ public:
       // calculate numerically
       std::vector<double> vec_x0;
       std::vector<double> vec_numeric_deriv;
-      numerical_paaram_partial_derivative(pv, 2, min_x0, max_x0, x0_resolution,
-                                          x, vec_x0, vec_numeric_deriv);
-
-      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
-                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+      numerical_param_partial_derivative(pv, 2, min_x0, max_x0, x0_resolution,
+                                         x, vec_x0, vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_x0.size(); ++i) {
         TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 1.E-1);
-        //        std::cout << vec_x0[i] << "    " << vec_numeric_deriv[i] << "
-        //        "
-        //                  << vec_jocob_deriv[i] << "    "
-        //                  << vec_jocob_deriv[i] - vec_numeric_deriv[i] <<
-        //                  "\n";
       }
     }
     return;
@@ -548,18 +507,13 @@ public:
       // calculate numerically
       std::vector<double> vec_fwhm;
       std::vector<double> vec_numeric_deriv;
-      numerical_paaram_partial_derivative(pv, 3, min_fwhm, max_fwhm,
-                                          fwhm_resolution, x, vec_fwhm,
-                                          vec_numeric_deriv);
-
-      std::cout << "Jocobian size = " << vec_jocob_deriv.size() << ", "
-                << "Numerical size = " << vec_numeric_deriv.size() << "\n";
+      numerical_param_partial_derivative(pv, 3, min_fwhm, max_fwhm,
+                                         fwhm_resolution, x, vec_fwhm,
+                                         vec_numeric_deriv);
 
       // compare
       for (size_t i = 0; i < vec_fwhm.size(); ++i) {
         TS_ASSERT_DELTA(vec_jocob_deriv[i], vec_numeric_deriv[i], 0.005);
-        // std::cout << vec_fwhm[i] << "    " << vec_numeric_deriv[i] << "    "
-        //          << vec_jocob_deriv[i] << "\n";
       }
     }
     return;
@@ -568,8 +522,9 @@ public:
   /** Test the intensity ratio between a Gaussian and Lorentzian
    * @brief testIntensityRatio
    */
-  void Redo_testIntensityRatio() {
+  void testIntensityRatio() {
     // TODO - Implement!
+    TS_ASSERT(false);
   }
 
 private:
@@ -622,12 +577,12 @@ private:
    * @param param_vec: (output) parameter value vector
    * @param deriv_vec: (output) derivative vector
    */
-  void numerical_paaram_partial_derivative(IPeakFunction_sptr &pv,
-                                           size_t param_index, double min_value,
-                                           double max_value, double resolution,
-                                           double x,
-                                           std::vector<double> &param_vec,
-                                           std::vector<double> &deriv_vec) {
+  void numerical_param_partial_derivative(IPeakFunction_sptr &pv,
+                                          size_t param_index, double min_value,
+                                          double max_value, double resolution,
+                                          double x,
+                                          std::vector<double> &param_vec,
+                                          std::vector<double> &deriv_vec) {
     // create a single value vector for domain
     std::vector<double> vec_x{x};
     FunctionDomain1DVector domain(vec_x);
@@ -652,7 +607,6 @@ private:
     deriv_vec.resize(param_vec.size() - 1);
     for (size_t i = 0; i < param_vec.size() - 1; ++i) {
       deriv_vec[i] = (pv_vec[i + 1] - pv_vec[i]) / resolution;
-      // std::cout << i << ": d(pV)/da = " << deriv_vec[i] << "\n";
     }
     // pop out the last element of parameter vector
     param_vec.pop_back();

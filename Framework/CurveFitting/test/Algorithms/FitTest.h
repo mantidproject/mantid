@@ -1749,7 +1749,6 @@ public:
     TS_ASSERT_DELTA(out->getParameter("Scale"), 0.25, 0.01);
   }
 
-  // FIXME - This Failed!
   // Get data out for the singled out test!
   void test_function_PseudoVoigt() {
 
@@ -1785,7 +1784,6 @@ public:
 
     Fit fit;
     fit.initialize();
-    // FIXME - 20181213 - Remove all the debugging output later
     fit.setProperty("Function", "name=PseudoVoigt, PeakCentre=0.0, FWHM=0.15, "
                                 "Intensity=112.78, Mixing=0.7");
     fit.setProperty("InputWorkspace", ws);

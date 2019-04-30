@@ -19,8 +19,12 @@ namespace Functions {
 using namespace CurveFitting;
 using namespace Constraints;
 using namespace std;
-
 using namespace API;
+
+namespace {
+/// static logger
+Kernel::Logger g_log("PseudoVoigt");
+} // namespace
 
 DECLARE_FUNCTION(PseudoVoigt)
 
@@ -145,7 +149,7 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
 /// override because setParameter(size_t i ...) is overriden
 void PseudoVoigt::setParameter(const std::string &name, const double &value,
                                bool explicitlySet) {
-  std::cout << "[PV] Set " << name << " as " << value << "\n";
+  g_log.debug() << "[PV] Set " << name << " as " << value << "\n";
   API::IPeakFunction::setParameter(name, value, explicitlySet);
 }
 
@@ -170,15 +174,16 @@ void PseudoVoigt::setParameter(size_t i, const double &value,
                                bool explicitlySet) {
   API::IPeakFunction::setParameter(i, value, explicitlySet);
 
-  std::cout << "[PV] Set " << i << "-th parameter with value " << value << "\n";
+  g_log.debug() << "[PV] Set " << i << "-th parameter with value " << value
+                << "\n";
 
   // explicitly set means that there is a chance that some parameter shall be
   // re-calculated
   // peak center shall be excluded as it does nothing to do with height, H,
   // intensity and mixing
   if (explicitlySet && i != 2) {
-    std::cout << "Update set history for " << i << "-th parameter"
-              << "\n";
+    g_log.debug() << "Update set history for " << i << "-th parameter"
+                  << "\n";
     update_set_history(i);
     estimate_parameter_value();
   }
@@ -189,8 +194,8 @@ void PseudoVoigt::setParameter(size_t i, const double &value,
 void PseudoVoigt::estimate_parameter_value() {
   // peak center
   size_t to_calculate_index = get_parameter_to_calculate_from_set();
-  std::cout << "Time to calculate " << to_calculate_index << "-th parameter"
-            << "\n";
+  g_log.debug() << "Time to calculate " << to_calculate_index << "-th parameter"
+                << "\n";
 
   if (to_calculate_index == 0) {
     // calculate mixings
@@ -199,14 +204,14 @@ void PseudoVoigt::estimate_parameter_value() {
     double mixing = (m_height * 0.5 * M_PI * gamma / peak_intensity - 1) /
                     (sqrt(M_PI * M_LN2) - 1);
     if (mixing < 0) {
-      std::cout << "Calculated mixing (eta) = " << mixing
-                << " < 0.  Set to 0 instead"
-                << "\n";
+      g_log.debug() << "Calculated mixing (eta) = " << mixing
+                    << " < 0.  Set to 0 instead"
+                    << "\n";
       mixing = 0;
     } else if (mixing > 1) {
-      std::cout << "Calculated mixing (eta) = " << mixing
-                << " > 1. Set to 1 instead"
-                << "\n";
+      g_log.debug() << "Calculated mixing (eta) = " << mixing
+                    << " > 1. Set to 1 instead"
+                    << "\n";
       mixing = 1;
     }
 
@@ -220,20 +225,20 @@ void PseudoVoigt::estimate_parameter_value() {
     double intensity =
         m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
     setParameter(1, intensity, false);
-    std::cout << "Estimate peak intensity = " << intensity << "\n";
+    g_log.debug() << "Estimate peak intensity = " << intensity << "\n";
   } else if (to_calculate_index == 3) {
     // calculate peak width
     double eta = getParameter(0);
     double intensity = getParameter(1);
 
-    std::cout << "Intensity = " << intensity << ", height = " << m_height
-              << ", mixing = " << eta << "\n";
+    g_log.debug() << "Intensity = " << intensity << ", height = " << m_height
+                  << ", mixing = " << eta << "\n";
     double gamma = intensity * 2 * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) /
                    (M_PI * m_height);
     if (gamma < 1.E-10) {
-      std::cout << "Peak width (H or Gamma) = " << gamma
-                << ". Set 1.E-2 instead"
-                << "\n";
+      g_log.debug() << "Peak width (H or Gamma) = " << gamma
+                    << ". Set 1.E-2 instead"
+                    << "\n";
     }
     setParameter(3, gamma, false);
   }
@@ -281,10 +286,9 @@ size_t PseudoVoigt::get_parameter_to_calculate_from_set() {
   size_t largest_distance{0};
   size_t num_been_set{0};
 
-  // std::cout << "distances size = " << m_set_history_distances.size() << "\n";
   for (size_t i = 0; i < m_set_history_distances.size(); ++i) {
-    std::cout << "distance[" << i << "] = " << m_set_history_distances[i]
-              << "\n";
+    g_log.debug() << "distance[" << i << "] = " << m_set_history_distances[i]
+                  << "\n";
     if (m_set_history_distances[i] >= largest_distance) {
       // for those to set for: any number counts
       index_largest_distance = i;
@@ -324,7 +328,7 @@ void PseudoVoigt::setHeight(const double h) {
   // set height
   m_height = h;
   update_set_history(2);
-  std::cout << "PV: set height = " << m_height << "\n";
+  g_log.debug() << "PV: set height = " << m_height << "\n";
   estimate_parameter_value();
 }
 
