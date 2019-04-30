@@ -16,7 +16,7 @@ from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import AnalysisDataService
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 import functools
-from mantid.api import WorkspaceGroup
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
 raw_data = "_raw_data"
 
 
@@ -112,7 +112,8 @@ class MaxEntPresenter(object):
 
         maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
 
-        base_name, group = self.calculate_base_name_and_group(maxent_parameters['InputWorkspace'])
+        base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'])
+        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument)
 
         self.add_maxent_workspace_to_ADS(base_name, group, maxent_workspace)
 
@@ -179,15 +180,3 @@ class MaxEntPresenter(object):
                 output = alg.getProperty(key).value
                 AnalysisDataService.addOrReplace(base_name + optional_output_suffixes[key], output)
                 AnalysisDataService.addToGroup(group, base_name + optional_output_suffixes[key])
-
-    def calculate_base_name_and_group(self, input_workspace):
-        run = re.search('[0-9]+', input_workspace).group()
-        base_name = self.load.data_context._base_run_name(run) + '_MaxEnt'
-        group = self.load.data_context._base_run_name(run) + ' MaxEnt Outputs'
-
-        if not AnalysisDataService.doesExist(group):
-            new_group = WorkspaceGroup()
-            AnalysisDataService.addOrReplace(group, new_group)
-            AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), group)
-
-        return base_name, group

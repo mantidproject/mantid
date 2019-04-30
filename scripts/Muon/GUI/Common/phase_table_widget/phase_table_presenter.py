@@ -4,6 +4,8 @@ from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases,
 from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid.api import AnalysisDataService, WorkspaceGroup
 import re
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, get_phase_table_workspace_group_name, \
+    get_phase_quad_workspace_name, get_fitting_workspace_name
 
 
 class GenericObserver(Observer):
@@ -56,7 +58,8 @@ class PhaseTablePresenter(object):
 
         self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
 
-        self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started, self.handle_calculation_success,
+        self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
+                                                             self.handle_calculation_success,
                                                              self.handle_calculation_error)
 
         self.phasequad_calculation_thread.start()
@@ -70,10 +73,11 @@ class PhaseTablePresenter(object):
 
         phase_quad = run_PhaseQuad(parameters)
 
-        base_name = parameters['InputWorkspace'].split('_')[0] + '_PhaseQuad_phase_table_'\
-            + parameters['PhaseTable'].split('_')[0]
-        base_name, group = self.calculate_base_name_and_group(base_name)
-        self.add_phase_quad_to_ADS(base_name, group, phase_quad)
+        phasequad_workspace_name = get_phase_quad_workspace_name(parameters['InputWorkspace'], parameters['PhaseTable'])
+        workspace_group_name = get_phase_table_workspace_group_name(phasequad_workspace_name,
+                                                                    self.context.data_context.instrument)
+
+        self.add_phase_quad_to_ADS(phasequad_workspace_name, workspace_group_name, phase_quad)
 
     def get_parameters_for_phase_quad(self):
         parameters = {}
@@ -110,9 +114,12 @@ class PhaseTablePresenter(object):
 
         detector_table, fitting_information = run_CalMuonDetectorPhases(parameters)
 
-        base_name, group = self.calculate_base_name_and_group(parameters['DetectorTable'])
-        self.add_phase_table_to_ADS(base_name, group, detector_table)
-        self.add_fitting_info_to_ADS_if_required(base_name, group, fitting_information)
+        workspace_group_name = get_phase_table_workspace_group_name(parameters['DetectorTable'],
+                                                                    self.context.data_context.instrument)
+        fitting_workspace_name = get_fitting_workspace_name(parameters['DetectorTable'])
+
+        self.add_phase_table_to_ADS(parameters['DetectorTable'], workspace_group_name, detector_table)
+        self.add_fitting_info_to_ADS_if_required(fitting_workspace_name, workspace_group_name, fitting_information)
 
         return parameters['DetectorTable']
 
@@ -125,8 +132,8 @@ class PhaseTablePresenter(object):
         if not self.view.output_fit_information:
             return
 
-        AnalysisDataService.addOrReplace(base_name + '_fit_information', fitting_information)
-        AnalysisDataService.addToGroup(group, base_name + '_fit_information')
+        AnalysisDataService.addOrReplace(base_name, fitting_information)
+        AnalysisDataService.addToGroup(group, base_name)
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
         parameters = {}
@@ -142,7 +149,10 @@ class PhaseTablePresenter(object):
         backward_group = self.context.phase_context.options_dict['backward_group']
         parameters['BackwardSpectra'] = self.context.group_pair_context[backward_group].detectors
 
-        parameters['DetectorTable'] = parameters['InputWorkspace'].replace('_raw_data', '') + "_phase_table"
+        parameters['DetectorTable'] = parameters['InputWorkspace'].replace('_raw_data', '') + "; PhaseTable"
+
+        parameters['DetectorTable'] = get_phase_table_workspace_name(parameters['InputWorkspace'], forward_group,
+                                                                     backward_group)
 
         return parameters
 
@@ -160,15 +170,3 @@ class PhaseTablePresenter(object):
         phase_table_list.append('Construct')
 
         self.view.set_phase_table_combo_box(phase_table_list)
-
-    def calculate_base_name_and_group(self, table_name):
-        run = re.search('[0-9]+', table_name).group()
-        base_name = table_name
-        group = self.context.data_context._base_run_name(run) + ' PhaseTables'
-
-        if not AnalysisDataService.doesExist(group):
-            new_group = WorkspaceGroup()
-            AnalysisDataService.addOrReplace(group, new_group)
-            AnalysisDataService.addToGroup(self.context.data_context._base_run_name(run), group)
-
-        return base_name, group
