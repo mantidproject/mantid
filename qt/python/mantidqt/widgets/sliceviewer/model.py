@@ -9,17 +9,30 @@
 #
 from __future__ import (absolute_import, division, print_function)
 from mantid.plots.helperfunctions import get_indices
+from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 import numpy as np
+from mantid.py3compat.enum import Enum
+
+
+class WS_TYPE(Enum):
+        MDE = 0
+        MDH = 1
+        MATRIX = 2
 
 
 class SliceViewerModel(object):
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
     def __init__(self, ws):
-        if len(ws.getNonIntegratedDimensions()) < 2:
-            raise ValueError("workspace must have at least 2 non-integrated dimensions")
-
-        if not ws.isMDHistoWorkspace():
-            raise ValueError("currenly only works for MDHistoWorkspace")
+        if isinstance(ws, MatrixWorkspace):
+                if ws.getNumberHistograms() < 2:
+                        raise ValueError("workspace must contain at least 2 spectrum")
+                if ws.blocksize() < 2:
+                        raise ValueError("workspace must contain at least 2 bin")
+        elif ws.isMDHistoWorkspace():
+                if len(ws.getNonIntegratedDimensions()) < 2:
+                        raise ValueError("workspace must have at least 2 non-integrated dimensions")
+        else:
+                raise ValueError("currenly only works for MatrixWorkspace and MDHistoWorkspace")
 
         self._ws = ws
 
@@ -50,3 +63,14 @@ class SliceViewerModel(object):
         returns a list of dict for each dimension conainting dim_info
         """
         return [self.get_dim_info(n) for n in range(self.get_ws().getNumDims())]
+
+    def get_ws_type(self):
+        if isinstance(self.get_ws(), MatrixWorkspace):
+            return WS_TYPE.MATRIX
+        elif isinstance(self.get_ws(), MultipleExperimentInfos):
+            if self.get_ws().isMDHistoWorkspace():
+                return WS_TYPE.MDH
+            else:
+                return WS_TYPE.MDE
+        else:
+            raise ValueError("Unsupported workspace type")
