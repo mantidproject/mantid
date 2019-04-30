@@ -128,7 +128,6 @@ if(ENABLE_WORKBENCH)
     mantidqt/icons/test/test_icons.py)
 
   # Tests
-  set(PYUNITTEST_RUN_SERIAL ON)
   set(PYUNITTEST_QT_API pyqt5)
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR}
                       mantidqt_qt5

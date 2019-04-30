@@ -16,8 +16,6 @@
 #include <QIconEngine>
 #include <QString>
 #include <QVariant>
-#include <boost/optional.hpp>
-#include <vector>
 
 namespace MantidQt {
 namespace Icons {

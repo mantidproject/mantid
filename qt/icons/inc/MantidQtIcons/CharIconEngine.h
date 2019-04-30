@@ -17,7 +17,6 @@
 #include <QRect>
 #include <QString>
 #include <QVariant>
-#include <vector>
 
 namespace MantidQt {
 namespace Icons {

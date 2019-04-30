@@ -8,7 +8,6 @@
 
 #include <QFile>
 #include <QFontDatabase>
-#include <boost/algorithm/string.hpp>
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #include <QtScript/QScriptEngine>

@@ -8,4 +8,5 @@ If the file names differ from the source then the script may need to be re-evalu
 - Delete the files from the folder containing this folder named `materialdesignicons.css`, `materialdesignicons-webfont-charmap.json`, and `materialdesignicons-webfont.ttf`
 - Move the new .ttf file and .css files into the containing folder these can be gained from either the material design github or https://cdnjs.com/libraries/MaterialDesign-Webfont/
 - Run the python script `updatematerialdesignjson.py` which will generate a new .json file
+- Re-build the library targets MantidQtIconsQt5 and MantidQtIconsQt4
 - In theory now it should be updated, any icons that were removed or renamed will need to be replaced with new files.
