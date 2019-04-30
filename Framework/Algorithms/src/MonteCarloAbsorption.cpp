@@ -30,7 +30,6 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
-#include <valgrind/callgrind.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -164,13 +163,9 @@ void MonteCarloAbsorption::exec() {
   interpolateOpt.set(getPropertyValue("Interpolation"));
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
-  CALLGRIND_START_INSTRUMENTATION;
-  CALLGRIND_TOGGLE_COLLECT;
   auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
                                seed, interpolateOpt, useSparseInstrument,
                                static_cast<size_t>(maxScatterPtAttempts));
-  CALLGRIND_TOGGLE_COLLECT;
-  CALLGRIND_STOP_INSTRUMENTATION;
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
