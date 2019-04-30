@@ -886,7 +886,10 @@ bool SANSRunWindow::loadUserFile() {
     return false;
   }
 
-  const double unit_conv(1000.);
+  // Make sure the reduction settings property object exists in the
+  // PropertyManagerDataService.
+  getReductionSettings();
+  constexpr double unit_conv(1000.);
   // Radius
   double dbl_param =
       runReduceScriptFunction("print(i.ReductionSingleton().mask.min_radius)")
