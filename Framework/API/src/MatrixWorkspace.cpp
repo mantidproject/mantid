@@ -900,7 +900,8 @@ bool MatrixWorkspace::isCommonLogBins() const {
   }
 
   double diff = x0[1] / x0[0];
-  for (size_t i = 1; i < x0.size() - 1; ++i) {
+  // ignore final bin, since it may be a different size
+  for (size_t i = 1; i < x0.size() - 2; ++i) {
     if (x0[i + 1] / x0[i] != diff) {
       return false;
     }
