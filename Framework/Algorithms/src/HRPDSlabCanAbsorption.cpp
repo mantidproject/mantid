@@ -137,7 +137,7 @@ void HRPDSlabCanAbsorption::exec() {
     }
     // For 90 degree bank need it wrt X axis
     else {
-      double theta = detectorPos.angle(V3D(1.0, 0.0, 0.0));
+      double theta = detectorPos.angle(X_AXIS);
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
