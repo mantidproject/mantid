@@ -11,9 +11,9 @@ from mantid.api import AnalysisDataService
 from mantid.api import FileFinder
 
 from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
-from test.Muon.context_setup import setup_context_for_tests
 
 if sys.version_info.major < 2:
     from unittest import mock

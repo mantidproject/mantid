@@ -4,7 +4,6 @@ from PyQt4 import QtGui
 import six
 from mantid.py3compat import mock
 
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
@@ -17,6 +16,7 @@ from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import Gro
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter, MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class GroupingTabPresenterTest(unittest.TestCase):

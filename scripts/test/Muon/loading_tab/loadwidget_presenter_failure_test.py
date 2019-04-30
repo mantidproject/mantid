@@ -10,17 +10,17 @@ from PyQt4 import QtGui
 from mantid.py3compat import mock
 
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from test.Muon.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):

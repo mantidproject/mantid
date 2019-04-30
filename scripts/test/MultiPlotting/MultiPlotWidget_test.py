@@ -7,11 +7,10 @@
 import unittest
 
 from mantid.py3compat import mock
-from MultiPlotting.multi_plotting_widget import MultiPlotWidget
-from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from MultiPlotting.subplot.subplot import subplot
+
 from MultiPlotting.multi_plotting_context import PlottingContext
-from Muon.GUI.Common import mock_widget
+from MultiPlotting.multi_plotting_widget import MultiPlotWidget
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class bounds(object):

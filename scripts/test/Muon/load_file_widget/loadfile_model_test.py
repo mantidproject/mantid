@@ -4,7 +4,7 @@ import unittest
 import six
 
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from test.Muon.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class LoadFileWidgetModelTest(unittest.TestCase):

@@ -9,8 +9,8 @@ import unittest
 from mantid.py3compat import mock
 
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities.muon_test_helpers import IteratorWithException
-from test.Muon.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetModelTest(unittest.TestCase):

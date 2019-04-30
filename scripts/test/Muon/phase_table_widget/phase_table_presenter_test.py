@@ -8,11 +8,11 @@ import unittest
 
 from mantid.py3compat import mock
 
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
-from test.Muon.context_setup import setup_context
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 class PhaseTablePresenterTest(unittest.TestCase):

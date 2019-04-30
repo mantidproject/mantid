@@ -11,12 +11,12 @@ from mantid.api import FileFinder
 from mantid.py3compat import mock
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
 from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
-from test.Muon.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class HomeTabRunInfoPresenterTest(unittest.TestCase):

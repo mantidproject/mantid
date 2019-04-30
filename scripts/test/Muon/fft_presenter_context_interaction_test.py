@@ -10,14 +10,14 @@ from qtpy import QtWidgets
 from mantid.api import FileFinder
 from mantid.py3compat import mock
 
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
-from test.Muon.context_setup import setup_context_for_tests
 
 
 def retrieve_combobox_info(combo_box):
