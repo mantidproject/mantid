@@ -60,7 +60,7 @@ public:
                             const BoundingBox &activeRegion,
                             const size_t maxAttempts) const;
   bool isValid(const Kernel::V3D &point) const;
-  int interceptSurfaces(Track &track) const;
+  size_t interceptSurfaces(Track &track) const;
 
   void add(const IObject_const_sptr &component);
 

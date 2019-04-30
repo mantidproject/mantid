@@ -72,7 +72,7 @@ public:
 
     auto kit = createTestKit();
     Track ray(V3D(-0.5, 0, 0), V3D(1.0, 0.0, 0.0));
-    int nsegments(0);
+    size_t nsegments(0);
     TS_ASSERT_THROWS_NOTHING(nsegments = kit->interceptSurfaces(ray));
     TS_ASSERT_EQUALS(3, nsegments);
     TS_ASSERT_EQUALS(3, ray.size());
