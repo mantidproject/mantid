@@ -46,6 +46,7 @@ static QApplicationHolder MAIN_QAPPLICATION;
 
 class MockFunctionView : public IFunctionView {
 public:
+  // Mock implementation of the interface
   void clear() override {
     m_function = IFunction_sptr();
   }
@@ -73,6 +74,16 @@ public:
     return m_currentFunctionIndex;
   }
 
+  void setParameterTie(const QString &paramName, const QString &tie) override {
+    if (!tie.isEmpty()) {
+      m_function->tie(paramName.toStdString(), tie.toStdString());
+    }
+    else {
+      m_function->removeTie(paramName.toStdString());
+    }
+  }
+
+  // Mock user action
   void addFunction(const QString &prefix, const QString& funStr) {
     m_currentFunctionIndex = prefix;
     if (prefix.isEmpty()) {
@@ -86,9 +97,12 @@ public:
     emit functionAdded(funStr);
   }
 
-  void setParameterTie(const QString &paramName, const QString &tie) {
-    m_function->tie(paramName.toStdString(), tie.toStdString());
+  void userSetsParameterTie(const QString &paramName, const QString &tie) {
+    setParameterTie(paramName, tie);
+    emit parameterTieChanged(paramName, tie);
   }
+
+  IFunction_sptr getFunction() const { return m_function; }
 private:
   IFunction_sptr m_function;
   boost::optional<QString> m_currentFunctionIndex;
@@ -249,6 +263,82 @@ public:
     TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 2.0);
     presenter.setCurrentDataset(2);
     TS_ASSERT_EQUALS(view->getParameter("f1.A0"), 3.0);
+  }
+
+  void test_view_set_tie() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
+    view->userSetsParameterTie("f1.A0", "1.0");
+    TS_ASSERT(presenter.isParameterFixed("f1.A0"));
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "");
+    view->userSetsParameterTie("f1.A0", "");
+    TS_ASSERT(!presenter.isParameterFixed("f1.A0"));
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "");
+    view->userSetsParameterTie("f1.A0", "f0.A0");
+    TS_ASSERT(!presenter.isParameterFixed("f1.A0"));
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
+    auto fun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(fun->getParameterStatus(1), IFunction::Tied);
+    view->userSetsParameterTie("f1.A0", "f1.A0=f1.A0");
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f1.A0");
+  }
+
+  void test_view_set_tie_multi() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
+    view->userSetsParameterTie("f1.A0", "1.0");
+    TS_ASSERT(presenter.isParameterFixed("f1.A0"));
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "");
+    view->userSetsParameterTie("f1.A0", "");
+    TS_ASSERT(!presenter.isParameterFixed("f1.A0"));
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "");
+    view->userSetsParameterTie("f1.A0", "f0.A0");
+    TS_ASSERT(!presenter.isParameterFixed("f1.A0"));
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
+    auto fun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(fun->getParameterStatus(1), IFunction::Tied);
+    TS_ASSERT_EQUALS(presenter.getLocalParameterTie("f1.A0", 0), "f0.A0");
+    TS_ASSERT_EQUALS(presenter.getLocalParameterTie("f1.A0", 1), "");
+    presenter.setCurrentDataset(2);
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "");
+    presenter.setCurrentDataset(0);
+    TS_ASSERT_EQUALS(presenter.getParameterTie("f1.A0"), "f0.A0");
+  }
+
+  void test_presenter_set_tie() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
+    auto viewFun = view->getFunction();
+    presenter.setLocalParameterTie("f1.A0", 0, "1.0");
+    TS_ASSERT(viewFun->isFixed(1));
+    presenter.setLocalParameterTie("f1.A0", 0, "f0.A0");
+    TS_ASSERT(!viewFun->isFixed(1));
+    TS_ASSERT(viewFun->getTie(1));
+    TS_ASSERT_EQUALS(viewFun->getTie(1)->asString(), "f1.A0=f0.A0");
+  }
+
+  void test_presenter_set_tie_multi() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(3);
+    presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
+    auto viewFun = view->getFunction();
+    presenter.setLocalParameterTie("f1.A0", 0, "1.0");
+    TS_ASSERT(viewFun->isFixed(1));
+    presenter.setLocalParameterTie("f1.A0", 0, "f0.A0");
+    TS_ASSERT(!viewFun->isFixed(1));
+    TS_ASSERT(viewFun->getTie(1));
+    TS_ASSERT_EQUALS(viewFun->getTie(1)->asString(), "f1.A0=f0.A0");
+    presenter.setCurrentDataset(2);
+    TS_ASSERT(!viewFun->getTie(1));
+    presenter.setLocalParameterTie("f0.A0", 2, "1.0");
+    presenter.setCurrentDataset(0);
+    TS_ASSERT(!viewFun->isFixed(0));
+    TS_ASSERT_EQUALS(viewFun->getTie(1)->asString(), "f1.A0=f0.A0");
   }
 };
 

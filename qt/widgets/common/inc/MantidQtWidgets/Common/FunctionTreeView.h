@@ -186,7 +186,7 @@ protected:
   /// Check if a property is a tie
   bool isTie(QtProperty *prop) const;
   /// Get a tie for a paramater
-  std::string getTie(QtProperty *prop) const;
+  QString getTie(QtProperty *prop) const;
 
   /// Add a constraint property
   QList<AProperty> addConstraintProperties(QtProperty *prop,

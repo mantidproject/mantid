@@ -845,7 +845,12 @@ QString FunctionTreeView::getIndex(QtProperty *prop) const {
  * @param prop :: A property
  */
 QString FunctionTreeView::getParameterName(QtProperty *prop) {
-  return getIndex(prop) + prop->propertyName();
+  if (isParameter(prop)) {
+    return getIndex(prop) + prop->propertyName();
+  } else {
+    auto parent = getParentParameterProperty(prop);
+    return getIndex(prop) + parent->propertyName();
+  }
 }
 
 /**
@@ -932,13 +937,16 @@ bool FunctionTreeView::isTie(QtProperty *prop) const {
  * Get a tie for a parameter
  * @param prop :: A parameter property
  */
-std::string FunctionTreeView::getTie(QtProperty *prop) const {
+QString FunctionTreeView::getTie(QtProperty *prop) const {
   if (!prop)
     return "";
+  if (prop->propertyName() == "Tie") {
+    return m_tieManager->value(prop);
+  }
   auto children = prop->subProperties();
   foreach (QtProperty *child, children) {
     if (child->propertyName() == "Tie") {
-      return m_tieManager->value(child).toStdString();
+      return m_tieManager->value(child);
     }
   }
   return "";
@@ -1482,7 +1490,7 @@ void FunctionTreeView::fixParameter() {
     return;
   QString tie = QString::number(getParameter(prop));
   addTieProperty(prop, tie);
-  emit tiesChanged();
+  emit parameterTieChanged(getParameterName(prop), tie);
 }
 
 /// Get a tie property attached to a parameter property
@@ -1510,7 +1518,7 @@ void FunctionTreeView::removeTie() {
   if (tieProp) {
     removeProperty(tieProp);
   }
-  emit tiesChanged();
+  emit parameterTieChanged(getParameterName(prop), "");
 }
 
 /**
@@ -1530,12 +1538,15 @@ void FunctionTreeView::addTie() {
   if (ok && !tie.isEmpty()) {
     try {
       addTieProperty(prop, tie);
+      emit parameterTieChanged(getParameterName(prop), tie);
     } catch (Mantid::API::Expression::ParsingError &) {
       QMessageBox::critical(this, "MantidPlot - Error",
                             "Syntax errors found in tie: " + tie);
+    } catch (std::exception &e) {
+      QMessageBox::critical(this, "MantidPlot - Error",
+                            QString::fromLatin1("Errors found in tie: ") + e.what());
     }
   }
-  emit tiesChanged();
 }
 
 /**
@@ -1739,7 +1750,7 @@ void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
 void FunctionTreeView::tieChanged(QtProperty *prop) {
   for (const auto &atie : m_ties) {
     if (atie.tieProp == prop) {
-      emit tiesChanged();
+      emit parameterTieChanged(getParameterName(prop), getTie(prop));
     }
   }
 }
@@ -1811,7 +1822,16 @@ void FunctionTreeView::updateCurrentFunctionIndex() {
 
 void FunctionTreeView::setParameterTie(const QString &paramName, const QString &tie) {
   auto paramProp = getParameterProperty(paramName);
-  addTieProperty(paramProp, tie);
+  auto tieProp = getTieProperty(paramProp);
+  if (!tie.isEmpty()) {
+    if (tieProp) {
+      m_tieManager->setValue(tieProp, tie);
+    } else {
+      addTieProperty(paramProp, tie);
+    }
+  } else if (tieProp) {
+    removeProperty(tieProp);
+  }
 }
 
 QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const

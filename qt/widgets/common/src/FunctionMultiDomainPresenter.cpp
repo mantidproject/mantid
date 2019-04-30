@@ -29,6 +29,7 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
   connect(m_view, SIGNAL(parameterChanged(const QString &)), this, SLOT(viewChangedParameter(const QString &)));
   connect(m_view, SIGNAL(functionReplaced(const QString &)), this, SLOT(viewPastedFunction(const QString &)));
   connect(m_view, SIGNAL(functionAdded(const QString &)), this, SLOT(viewAddedFunction(const QString &)));
+  connect(m_view, SIGNAL(parameterTieChanged(const QString &, const QString &)), this, SLOT(viewChangedTie(const QString &, const QString &)));
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this, SLOT(editLocalParameter(const QString &)));
 }
 
@@ -81,6 +82,16 @@ double FunctionMultiDomainPresenter::getParameter(const QString & paramName)
   return m_model->getParameter(paramName);
 }
 
+bool FunctionMultiDomainPresenter::isParameterFixed(const QString & parName) const
+{
+  return m_model->isParameterFixed(parName);
+}
+
+QString FunctionMultiDomainPresenter::getParameterTie(const QString & parName) const
+{
+  return m_model->getParameterTie(parName);
+}
+
 void FunctionMultiDomainPresenter::updateParameters(const IFunction & fun)
 {
   const auto paramNames = fun.getParameterNames();
@@ -126,8 +137,14 @@ void FunctionMultiDomainPresenter::setCurrentDataset(int index)
 {
   m_model->setCurrentDomainIndex(index);
   for (auto const name : m_model->getParameterNames()) {
-    m_view->setParameter(name, m_model->getParameter(name));
+    auto const value = m_model->getParameter(name);
+    m_view->setParameter(name, value);
     m_view->setParamError(name, m_model->getParamError(name));
+    if (m_model->isLocalParameterFixed(name, index)) {
+      m_view->setParameterTie(name, QString::number(value));
+    } else {
+      m_view->setParameterTie(name, m_model->getLocalParameterTie(name, index));
+    }
   }
 }
 
@@ -170,11 +187,21 @@ void FunctionMultiDomainPresenter::setLocalParameterValue(const QString & parNam
 void FunctionMultiDomainPresenter::setLocalParameterFixed(const QString & parName, int i, bool fixed)
 {
   m_model->setLocalParameterFixed(parName, i, fixed);
+  if (m_model->currentDomainIndex() == i) {
+    if (fixed) {
+      m_view->setParameterTie(parName, QString::number(m_model->getParameter(parName)));
+    } else {
+      m_view->setParameterTie(parName, "");
+    }
+  }
 }
 
 void FunctionMultiDomainPresenter::setLocalParameterTie(const QString & parName, int i, QString tie)
 {
   m_model->setLocalParameterTie(parName, i, tie);
+  if (m_model->currentDomainIndex() == i) {
+    m_view->setParameterTie(parName, tie);
+  }
 }
 
 void FunctionMultiDomainPresenter::viewPastedFunction(const QString & funStr)
@@ -188,6 +215,11 @@ void FunctionMultiDomainPresenter::viewAddedFunction(const QString & funStr)
   auto prefix = m_view->currentFunctionIndex();
   m_model->addFunction(prefix.value_or(""), funStr);
   emit functionStructureChanged();
+}
+
+void FunctionMultiDomainPresenter::viewChangedTie(const QString & paramName, const QString & tie)
+{
+  m_model->changeTie(paramName, tie);
 }
 
 QString FunctionMultiDomainPresenter::getFunctionString() const
@@ -246,8 +278,13 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
     assert(values.size() == getNumberOfDatasets());
     for (int i = 0; i < values.size(); ++i) {
       setLocalParameterValue(parName, i, values[i]);
-      setLocalParameterFixed(parName, i, fixes[i]);
-      setLocalParameterTie(parName, i, ties[i]);
+      if (!ties[i].isEmpty()) {
+        setLocalParameterTie(parName, i, ties[i]);
+      } else if (fixes[i]) {
+        setLocalParameterFixed(parName, i, fixes[i]);
+      } else {
+        setLocalParameterTie(parName, i, "");
+      }
     }
   }
   m_editLocalParameterDialog = nullptr;

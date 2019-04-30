@@ -123,6 +123,26 @@ double MultiDomainFunctionModel::getParamError(const QString & paramName) const
   return fun->getError(index);
 }
 
+bool MultiDomainFunctionModel::isParameterFixed(const QString & parName) const
+{
+  return isLocalParameterFixed(parName, static_cast<int>(m_currentDomainIndex));
+}
+
+QString MultiDomainFunctionModel::getParameterTie(const QString & parName) const
+{
+  return getLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex));
+}
+
+void MultiDomainFunctionModel::setParameterFixed(const QString & parName, bool fixed)
+{
+  setLocalParameterFixed(parName, static_cast<int>(m_currentDomainIndex), fixed);
+}
+
+void MultiDomainFunctionModel::setParameterTie(const QString & parName, QString tie)
+{
+  setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
+}
+
 QStringList MultiDomainFunctionModel::getParameterNames() const
 {
   QStringList names;
@@ -225,7 +245,9 @@ QString MultiDomainFunctionModel::getLocalParameterTie(const QString & parName, 
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   auto const tie = fun->getTie(parIndex);
   if (!tie) return "";
-  return QString::fromStdString(tie->asString());
+  auto const tieStr = QString::fromStdString(tie->asString());
+  auto const j = tieStr.indexOf('=');
+  return tieStr.mid(j + 1);
 }
 
 void MultiDomainFunctionModel::setLocalParameterValue(const QString & parName, int i, double value)
@@ -246,16 +268,31 @@ void MultiDomainFunctionModel::setLocalParameterFixed(const QString & parName, i
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   if (fixed) {
-    getSingleFunction(i)->fix(parIndex);
-  } else {
-    getSingleFunction(i)->unfix(parIndex);
+    fun->fix(parIndex);
+  } else if (fun->isFixed(parIndex)) {
+    fun->unfix(parIndex);
   }
 }
 
 void MultiDomainFunctionModel::setLocalParameterTie(const QString & parName, int i, QString tie)
 {
-  if (tie.isEmpty()) return;
-  getSingleFunction(i)->tie(parName.toStdString(), tie.toStdString());
+  auto fun = getSingleFunction(i);
+  auto const name = parName.toStdString();
+  if (tie.isEmpty()) {
+    fun->removeTie(fun->parameterIndex(name));
+  } else {
+    auto const j = tie.indexOf('=');
+    fun->tie(name, tie.mid(j + 1).toStdString());
+  }
+}
+
+void MultiDomainFunctionModel::changeTie(const QString & parName, const QString & tie)
+{
+  try {
+    setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
+  } catch (std::exception &) {
+    // the tie is probably being edited
+  }
 }
 
 /// Check a domain/function index to be in range.

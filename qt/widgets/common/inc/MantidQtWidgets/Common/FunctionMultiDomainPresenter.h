@@ -42,6 +42,8 @@ public:
   void setParameter(const QString &paramName, double value);
   void setParamError(const QString &paramName, double value);
   double getParameter(const QString &paramName);
+  bool isParameterFixed(const QString &parName) const;
+  QString getParameterTie(const QString &parName) const;
   void updateParameters(const IFunction &fun);
   void clearErrors();
   boost::optional<QString> currentFunctionIndex() const;
@@ -68,6 +70,7 @@ private slots:
   void viewChangedParameter(const QString &paramName);
   void viewPastedFunction(const QString &funStr);
   void viewAddedFunction(const QString &funStr);
+  void viewChangedTie(const QString &paramName, const QString &tie);
   void editLocalParameter(const QString &parName);
   void editLocalParameterFinish(int result);
 private:

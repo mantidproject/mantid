@@ -50,9 +50,10 @@ signals:
   void parameterChanged(const QString &paramName);
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
+  /// User sets a tie
+  void parameterTieChanged(const QString &parName, const QString &tie);
   void globalsChanged();
   void constraintsChanged();
-  void tiesChanged();
 };
 
 } // namespace MantidWidgets
