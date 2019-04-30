@@ -56,10 +56,13 @@ void ProgressTracker::complete() {
 }
 
 // EventProcessor
-EventProcessor::EventProcessor(const std::vector<bool> &roi, size_t stride,
-                               double period, double phase, int64_t startTime,
-                               double tofMinBoundary, double tofMaxBoundary,
-                               double timeMinBoundary, double timeMaxBoundary)
+EventProcessor::EventProcessor(const std::vector<bool> &roi,
+                               const size_t stride, const double period,
+                               const double phase, const int64_t startTime,
+                               const double tofMinBoundary,
+                               const double tofMaxBoundary,
+                               const double timeMinBoundary,
+                               const double timeMaxBoundary)
     : m_roi(roi), m_stride(stride), m_frames(0), m_framesValid(0),
       m_startTime(startTime), m_period(period), m_phase(phase),
       m_tofMinBoundary(tofMinBoundary), m_tofMaxBoundary(tofMaxBoundary),
@@ -113,10 +116,12 @@ void EventProcessor::addEvent(size_t x, size_t y, double tof) {
 }
 
 // EventCounter
-EventCounter::EventCounter(const std::vector<bool> &roi, size_t stride,
-                           double period, double phase, int64_t startTime,
-                           double tofMinBoundary, double tofMaxBoundary,
-                           double timeMinBoundary, double timeMaxBoundary,
+EventCounter::EventCounter(const std::vector<bool> &roi, const size_t stride,
+                           const double period, const double phase,
+                           const int64_t startTime, const double tofMinBoundary,
+                           const double tofMaxBoundary,
+                           const double timeMinBoundary,
+                           const double timeMaxBoundary,
                            std::vector<size_t> &eventCounts)
     : EventProcessor(roi, stride, period, phase, startTime, tofMinBoundary,
                      tofMaxBoundary, timeMinBoundary, timeMaxBoundary),
@@ -140,11 +145,11 @@ void EventCounter::addEventImpl(size_t id, int64_t pulse, double tof) {
 }
 
 // EventAssigner
-EventAssigner::EventAssigner(const std::vector<bool> &roi, size_t stride,
-                             double period, double phase, int64_t startTime,
-                             double tofMinBoundary, double tofMaxBoundary,
-                             double timeMinBoundary, double timeMaxBoundary,
-                             std::vector<EventVector_pt> &eventVectors)
+EventAssigner::EventAssigner(
+    const std::vector<bool> &roi, const size_t stride, const double period,
+    const double phase, const int64_t startTime, const double tofMinBoundary,
+    const double tofMaxBoundary, const double timeMinBoundary,
+    const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors)
     : EventProcessor(roi, stride, period, phase, startTime, tofMinBoundary,
                      tofMaxBoundary, timeMinBoundary, timeMaxBoundary),
       m_eventVectors(eventVectors) {}
@@ -154,9 +159,10 @@ void EventAssigner::addEventImpl(size_t id, int64_t pulse, double tof) {
 
 // EventAssignerFixedWavelength
 EventAssignerFixedWavelength::EventAssignerFixedWavelength(
-    const std::vector<bool> &roi, size_t stride, double wavelength,
-    double period, double phase, int64_t startTime, double tofMinBoundary,
-    double tofMaxBoundary, double timeMinBoundary, double timeMaxBoundary,
+    const std::vector<bool> &roi, const size_t stride, const double wavelength,
+    const double period, const double phase, const int64_t startTime,
+    const double tofMinBoundary, const double tofMaxBoundary,
+    const double timeMinBoundary, const double timeMaxBoundary,
     std::vector<EventVector_pt> &eventVectors)
     : EventAssigner(roi, stride, period, phase, startTime, tofMinBoundary,
                     tofMaxBoundary, timeMinBoundary, timeMaxBoundary,

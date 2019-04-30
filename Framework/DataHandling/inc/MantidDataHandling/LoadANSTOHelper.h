@@ -78,10 +78,11 @@ protected:
 
 public:
   // construction
-  EventProcessor(const std::vector<bool> &roi, size_t stride, double period,
-                 double phase, int64_t startTime, double tofMinBoundary,
-                 double tofMaxBoundary, double timeMinBoundary,
-                 double timeMaxBoundary);
+  EventProcessor(const std::vector<bool> &roi, size_t stride,
+                 const double period, const double phase,
+                 const int64_t startTime, const double tofMinBoundary,
+                 const double tofMaxBoundary, const double timeMinBoundary,
+                 const double timeMaxBoundary);
 
   // methods
   void newFrame();
@@ -101,10 +102,11 @@ protected:
 
 public:
   // construction
-  EventCounter(const std::vector<bool> &roi, size_t stride, double period,
-               double phase, int64_t startTime, double tofMinBoundary,
-               double tofMaxBoundary, double timeMinBoundary,
-               double timeMaxBoundary, std::vector<size_t> &eventCounts);
+  EventCounter(const std::vector<bool> &roi, const size_t stride,
+               const double period, const double phase, const int64_t startTime,
+               const double tofMinBoundary, const double tofMaxBoundary,
+               const double timeMinBoundary, const double timeMaxBoundary,
+               std::vector<size_t> &eventCounts);
 
   // properties
   size_t numFrames() const;
@@ -122,10 +124,10 @@ protected:
 
 public:
   // construction
-  EventAssigner(const std::vector<bool> &roi, size_t stride, double period,
-                double phase, int64_t startTime, double tofMinBoundary,
-                double tofMaxBoundary, double timeMinBoundary,
-                double timeMaxBoundary,
+  EventAssigner(const std::vector<bool> &roi, const size_t stride,
+                const double period, const double phase, int64_t startTime,
+                const double tofMinBoundary, const double tofMaxBoundary,
+                const double timeMinBoundary, const double timeMaxBoundary,
                 std::vector<EventVector_pt> &eventVectors);
 };
 
@@ -139,12 +141,12 @@ protected:
 
 public:
   // construction
-  EventAssignerFixedWavelength(const std::vector<bool> &roi, size_t stride,
-                               double wavelength, double period, double phase,
-                               int64_t startTime, double tofMinBoundary,
-                               double tofMaxBoundary, double timeMinBoundary,
-                               double timeMaxBoundary,
-                               std::vector<EventVector_pt> &eventVectors);
+  EventAssignerFixedWavelength(
+      const std::vector<bool> &roi, const size_t stride,
+      const double wavelength, const double period, const double phase,
+      const int64_t startTime, const double tofMinBoundary,
+      const double tofMaxBoundary, const double timeMinBoundary,
+      const double timeMaxBoundary, std::vector<EventVector_pt> &eventVectors);
 };
 
 class FastReadOnlyFile {
