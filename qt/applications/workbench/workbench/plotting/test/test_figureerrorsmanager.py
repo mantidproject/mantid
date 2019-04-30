@@ -9,6 +9,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import matplotlib.axes
+import matplotlib.figure
 import matplotlib.pyplot as plt
 from qtpy.QtWidgets import QMenu
 
@@ -19,6 +21,11 @@ from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
 class FigureErrorsManagerTest(GuiTest):
+    """
+    Test class that covers the interaction of the FigureErrorsManager with plots
+    that use the mantid projection and have MantidAxes
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -30,6 +37,7 @@ class FigureErrorsManagerTest(GuiTest):
                                          VerticalAxisUnit='DeltaE',
                                          VerticalAxisValues=[4, 6, 8],
                                          OutputWorkspace='ws2d_histo')
+        super(cls, FigureErrorsManagerTest).setUpClass()
 
     def setUp(self):
         self.fig, self.ax = plt.subplots(
@@ -172,3 +180,114 @@ class FigureErrorsManagerTest(GuiTest):
         self.errors_manager.toggle_all_error_bars(make_visible=False)
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
         self.assertFalse(self.ax.containers[1][2][0].get_visible())
+
+
+class ScriptedPlotFigureErrorsManagerTest(GuiTest):
+    """
+    Test class that covers the interaction of the FigureErrorsManager with plots that
+    do not use the MantidAxes, which happens if they are scripted.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+                                         DataY=[2, 3, 4, 5, 3, 5],
+                                         DataE=[1, 2, 3, 4, 1, 1],
+                                         NSpec=3,
+                                         Distribution=True,
+                                         UnitX='Wavelength',
+                                         VerticalAxisUnit='DeltaE',
+                                         VerticalAxisValues=[4, 6, 8],
+                                         OutputWorkspace='ws2d_histo')
+        super(cls, ScriptedPlotFigureErrorsManagerTest).setUpClass()
+
+    def setUp(self):
+        # scripted plot does NOT use the mantid projection
+        # and does not have the MantidAxes
+        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, matplotlib.axes.Axes
+
+        self.errors_manager = FigureErrorsManager(self.fig.canvas)  # type: FigureErrorsManager
+
+    def test_context_menu_not_added_for_scripted_plot_without_errors(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.plot([0, 15000], [0, 14000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.errors_manager.add_error_bars_menu(main_menu)
+
+        # number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_context_menu_added_for_scripted_plot_with_errors(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.errors_manager.add_error_bars_menu(main_menu)
+
+        # actions should have been added now
+        self.assertTrue(
+            any(FigureErrorsManager.TOGGLE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children() if
+                hasattr(child, 'text')))
+        self.assertTrue(
+            any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children() if
+                hasattr(child, 'text')))
+        self.assertTrue(
+            any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children() if
+                hasattr(child, 'text')))
+        self.assertEqual(5, len(main_menu.children()))
+
+    def test_scripted_plot_hide_error_for(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.hide_error_bar_for(1)
+
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+
+    def test_scripted_plot_show_error_for(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.hide_error_bar_for(1)
+
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.show_error_bar_for(1)
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+    def test_scripted_plot_toggle_all(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.toggle_all_error_bars()
+
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.toggle_all_error_bars()
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+    def test_scripted_plot_show_unsupported_axis_raises_not_implemented(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+
+        self.assertRaises(NotImplementedError, self.errors_manager.show_error_bar_for, 0)

@@ -30,7 +30,7 @@ from matplotlib.table import Table
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
-from mantid.plots.utility import MantidAxKwargs
+from mantid.plots.utility import MantidAxKwargs, find_errorbar_container
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -791,13 +791,13 @@ class MantidAxes(Axes):
             labels = []
             for line in self.lines:
                 if line.get_label() == self.MPL_NOLEGEND:
-                    errorbar = self.find_errorbar_container(line)
+                    errorbar = find_errorbar_container(line, self.containers)
                     if not errorbar:
                         # the line does not have an errorbar container that would have the label
                         # nor does it have a label, as it has been marked with NOLEGEND
                         # simply continue to the next line
                         continue
-                        
+
                     handle = errorbar
                     label = errorbar.get_label()
                 else:
@@ -814,11 +814,6 @@ class MantidAxes(Axes):
             return Axes.legend(self, handles, labels)
         else:
             return Axes.legend(self, *args, **kwargs)
-
-    def find_errorbar_container(self, line):
-        for container in self.containers:
-            if line == container[0]:
-                return container
 
     # ------------------ Private api --------------------------------------------------------
 
