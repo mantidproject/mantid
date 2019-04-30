@@ -10,7 +10,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/NullValidator.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -27,7 +26,6 @@ void AbortRemoteJob2::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
-  auto nullValidator = boost::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()

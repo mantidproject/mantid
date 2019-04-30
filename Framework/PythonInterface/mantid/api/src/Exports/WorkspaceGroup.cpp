@@ -57,6 +57,15 @@ void addWorkspace(WorkspaceGroup &self, const boost::python::object &pyobj) {
                           Workspace_sptr>::extractCppValue(pyobj));
 }
 
+Workspace_sptr getItem(WorkspaceGroup &self, const int &index) {
+  if (index < 0) {
+    if (static_cast<size_t>(-index) > self.size())
+      self.throwIndexOutOfRangeError(index);
+    return self.getItem(self.size() + index);
+  }
+  return self.getItem(index);
+}
+
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
                                                                no_init)
@@ -80,10 +89,7 @@ void export_WorkspaceGroup() {
            "Returns the number of workspaces contained in the group")
       .def("remove", &WorkspaceGroup::remove,
            (arg("self"), arg("workspace_name")), "Remove a name from the group")
-      .def("getItem",
-           (Workspace_sptr(WorkspaceGroup::*)(const size_t) const) &
-               WorkspaceGroup::getItem,
-           (arg("self"), arg("workspace_name")),
+      .def("getItem", getItem, (arg("self"), arg("index")),
            return_value_policy<Policies::ToWeakPtr>(),
            "Returns the item at the given index")
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
@@ -96,10 +102,7 @@ void export_WorkspaceGroup() {
                WorkspaceGroup::contains,
            (arg("self"), arg("workspace name")),
            "Does this group contain the named workspace?")
-      .def("__getitem__",
-           (Workspace_sptr(WorkspaceGroup::*)(const size_t) const) &
-               WorkspaceGroup::getItem,
-           (arg("self"), arg("index")),
+      .def("__getitem__", getItem, (arg("self"), arg("index")),
            return_value_policy<Policies::ToWeakPtr>())
       .def("__iter__", range<return_value_policy<copy_non_const_reference>>(
                            &group_begin, &group_end));

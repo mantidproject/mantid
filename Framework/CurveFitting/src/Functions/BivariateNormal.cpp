@@ -619,10 +619,10 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
              (getParameter("Mcol") - (mx)) * TotN) /
         (TotI - getParameter("Background") * TotN);
 
-    if (Varx0 > 0)
+    if (Varx0 > 0) {
       Varxx = std::min<double>(Varxx, 1.21 * Varx0);
-    if (Varx0 > 0)
       Varxx = std::max<double>(Varxx, .79 * Varx0);
+    }
 
   } else {
     Varxx = getParameter(IVXX);
@@ -636,11 +636,10 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
              getParameter("Background") * (Syy)-Background * (Mrow - (my)) *
                  (Mrow - (my)) * TotN) /
             (TotI - Background * TotN);
-    if (Vary0 > 0)
+    if (Vary0 > 0) {
       Varyy = std::min<double>(Varyy, 1.21 * Vary0);
-    if (Vary0 > 0)
       Varyy = std::max<double>(Varyy, .79 * Vary0);
-
+    }
   } else {
     Varyy = getParameter(IVYY);
   }

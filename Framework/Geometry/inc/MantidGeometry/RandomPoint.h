@@ -34,12 +34,20 @@ inCylinder(const detail::ShapeInfo &shapeInfo,
            Kernel::PseudoRandomNumberGenerator &rng);
 
 MANTID_GEOMETRY_DLL Kernel::V3D
+inHollowCylinder(const detail::ShapeInfo &shapeInfo,
+                 Kernel::PseudoRandomNumberGenerator &rng);
+
+MANTID_GEOMETRY_DLL Kernel::V3D
 inSphere(const detail::ShapeInfo &shapeInfo,
          Kernel::PseudoRandomNumberGenerator &rng);
 
 MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
 inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
                size_t maxAttempts);
+
+MANTID_GEOMETRY_DLL Kernel::V3D
+localPointInCylinder(const Kernel::V3D &basis, const Kernel::V3D &alongAxis,
+                     double polarAngle, double radialLength);
 
 template <Kernel::V3D (*T)(const detail::ShapeInfo &,
                            Kernel::PseudoRandomNumberGenerator &)>

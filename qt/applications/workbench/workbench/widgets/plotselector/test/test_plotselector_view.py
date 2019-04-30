@@ -9,19 +9,15 @@
 #
 from __future__ import absolute_import, division, print_function
 
-from mantidqt.utils.qt.testing import GuiTest
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtTest import QTest
+import unittest
 
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, Column
-
-import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 
 class PlotSelectorWidgetTest(GuiTest):

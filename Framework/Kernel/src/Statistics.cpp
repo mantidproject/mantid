@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/max.hpp>
@@ -16,11 +17,13 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {
 namespace Kernel {
+namespace {
+Logger logger("Statistics");
+}
 
 using std::string;
 using std::vector;
@@ -96,14 +99,14 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
  */
 template <typename TYPE>
 std::vector<double> getZscore(const vector<TYPE> &data) {
+  std::vector<double> Zscore;
   if (data.size() < 3) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  std::vector<double> Zscore;
   Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
@@ -119,14 +122,14 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
 template <typename TYPE>
 std::vector<double> getWeightedZscore(const vector<TYPE> &data,
                                       const vector<TYPE> &weights) {
+  std::vector<double> Zscore;
   if (data.size() < 3) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  std::vector<double> Zscore;
   Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
   double sumWeights = 0.0;
@@ -299,9 +302,11 @@ Rfactor getRFactor(const std::vector<double> &obsI,
       sumdenom += tempden;
 
       if (tempnom != tempnom || tempden != tempden) {
-        std::cout << "***** Error! ****** Data indexed " << i << " is NaN. "
-                  << "i = " << i << ": cal = " << calI[i] << ", obs = " << obs_i
-                  << ", weight = " << weight << ". \n";
+        logger.error() << "***** Error! ****** Data indexed " << i
+                       << " is NaN. "
+                       << "i = " << i << ": cal = " << calI[i]
+                       << ", obs = " << obs_i << ", weight = " << weight
+                       << ". \n";
       }
     }
   }
@@ -311,8 +316,8 @@ Rfactor getRFactor(const std::vector<double> &obsI,
   rfactor.Rwp = std::sqrt(sumnom / sumdenom);
 
   if (rfactor.Rwp != rfactor.Rwp)
-    std::cout << "Rwp is NaN.  Denominator = " << sumnom
-              << "; Nominator = " << sumdenom << ". \n";
+    logger.debug() << "Rwp is NaN.  Denominator = " << sumnom
+                   << "; Nominator = " << sumdenom << ". \n";
 
   return rfactor;
 }

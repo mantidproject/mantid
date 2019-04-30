@@ -8,14 +8,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
+from mantid.py3compat import mock
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel, options_column_bool)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from qtpy.QtCore import QCoreApplication
 from sans.common.enums import (RowState, SampleShape)
-try:
-    from unittest import mock
-except:
-    import mock
 
 
 class TableModelTest(unittest.TestCase):
@@ -326,8 +323,8 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel(*test_row)
 
         actual_list = table_index_model.to_batch_list()
-        expected_list = ["SANS2D00022024", "out_file", "SANS2D00022025", "SANS2D00022026",
-                         "", "", "", "a_user_file"]
+        expected_list = ["SANS2D00022024", "SANS2D00022025", "SANS2D00022026",
+                         "", "", "",  "out_file", "a_user_file"]
 
         self.assertEqual(actual_list, expected_list)
 

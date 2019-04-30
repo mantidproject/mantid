@@ -7,12 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
+
 
 class MuonLoadDataTest(unittest.TestCase):
 

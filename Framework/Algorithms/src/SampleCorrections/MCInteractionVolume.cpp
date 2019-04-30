@@ -101,8 +101,7 @@ double MCInteractionVolume::calculateAbsorption(
     scatterPos = m_sample->generatePointInObject(rng, m_activeRegion,
                                                  m_maxScatterAttempts);
   }
-  auto toStart = startPos - scatterPos;
-  toStart.normalize();
+  const auto toStart = normalize(startPos - scatterPos);
   Track beforeScatter(scatterPos, toStart);
   int nlinks = m_sample->interceptSurface(beforeScatter);
   if (m_env) {
@@ -130,8 +129,7 @@ double MCInteractionVolume::calculateAbsorption(
   };
 
   // Now track to final destination
-  V3D scatteredDirec = endPos - scatterPos;
-  scatteredDirec.normalize();
+  const V3D scatteredDirec = normalize(endPos - scatterPos);
   Track afterScatter(scatterPos, scatteredDirec);
   m_sample->interceptSurface(afterScatter);
   if (m_env) {

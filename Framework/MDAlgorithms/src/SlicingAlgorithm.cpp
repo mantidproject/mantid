@@ -157,7 +157,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   // The current dimension index.
   size_t dim = m_binDimensions.size();
 
-  size_t n_first_comma = std::string::npos;
+  size_t n_first_comma;
 
   // Special case: accept dimension names [x,y,z]
   if (input[0] == '[') {

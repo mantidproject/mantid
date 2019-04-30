@@ -31,7 +31,7 @@ template <typename HeldType> struct StdVectorExtractor {
   }
 };
 template <> struct StdVectorExtractor<bool> {
-  static std::vector<bool> extract(const boost::python::object &) {
+  static std::vector<bool> extract(const boost::python::object & /*unused*/) {
     throw std::runtime_error(
         "Unable to supported extracting std::vector<bool> from python object");
   }

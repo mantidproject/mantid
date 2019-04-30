@@ -303,7 +303,7 @@ size_t MatrixWorkspaceMDIterator::getLinearIndex() const {
       "MatrixWorkspaceMDIterator does not implement getLinearIndex");
 }
 
-bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t) const {
+bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t /*index*/) const {
   throw std::runtime_error(
       "MatrixWorkspaceMDIterator does not implement isWithinBounds");
 }

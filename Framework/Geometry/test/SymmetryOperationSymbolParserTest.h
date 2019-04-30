@@ -8,7 +8,6 @@
 #define MANTID_GEOMETRY_SYMMETRYOPERATIONSYMBOLPARSERTEST_H_
 
 #include "MantidKernel/Timer.h"
-#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"

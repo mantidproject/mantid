@@ -15,6 +15,18 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+Improvements
+############
+
+- Changed focus to save out .his files in the format <run-number><instrument> as opposed to <run-number>_<instrument> to allow for better compatibility with opengenie.
+
+Bug Fixes
+#########
+
+- Prevented crash caused by canceling algorithms called by GUI.
+
+- Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
+
 Single Crystal Diffraction
 --------------------------
 
@@ -37,6 +49,8 @@ Improvements
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
 
 - :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` will integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
+
+- :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
 
 
 Imaging

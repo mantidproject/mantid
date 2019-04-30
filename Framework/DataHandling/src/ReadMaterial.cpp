@@ -8,8 +8,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Material.h"
 
-#include <iostream>
-
 namespace Mantid {
 namespace DataHandling {
 

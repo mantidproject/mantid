@@ -10,7 +10,7 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include <iostream>
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

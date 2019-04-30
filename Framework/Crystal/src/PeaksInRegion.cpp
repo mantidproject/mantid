@@ -85,8 +85,8 @@ bool PeaksInRegion::pointOutsideAnyExtents(const V3D &testPoint) const {
          testPoint[2] < m_extents[4] || testPoint[2] > m_extents[5];
 }
 
-bool PeaksInRegion::pointInsideAllExtents(const V3D &testPoint,
-                                          const Mantid::Kernel::V3D &) const {
+bool PeaksInRegion::pointInsideAllExtents(
+    const V3D &testPoint, const Mantid::Kernel::V3D & /*peakCenter*/) const {
   return testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1] &&
          testPoint[1] >= m_extents[2] && testPoint[1] <= m_extents[3] &&
          testPoint[2] >= m_extents[4] && testPoint[2] <= m_extents[5];

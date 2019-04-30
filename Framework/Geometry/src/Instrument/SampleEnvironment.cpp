@@ -32,6 +32,16 @@ SampleEnvironment::SampleEnvironment(std::string name,
                                      Container_const_sptr container)
     : m_name(std::move(name)), m_components(1, container) {}
 
+const IObject &SampleEnvironment::getComponent(const size_t index) const {
+  if (index > this->nelements()) {
+    std::stringstream msg;
+    msg << "Requested SampleEnvironment element that is out of range: " << index
+        << " < " << this->nelements();
+    throw std::out_of_range(msg.str());
+  }
+  return *(m_components[index]);
+}
+
 /**
  * @return An axis-aligned BoundingBox object that encompasses the whole kit.
  */
@@ -84,11 +94,9 @@ SampleEnvironment::generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
  * @returns True if the point is within the environment
  */
 bool SampleEnvironment::isValid(const V3D &point) const {
-  for (const auto &component : m_components) {
-    if (component->isValid(point))
-      return true;
-  }
-  return false;
+  return std::any_of(
+      m_components.cbegin(), m_components.cend(),
+      [&point](const auto &component) { return component->isValid(point); });
 }
 
 /**
@@ -98,11 +106,10 @@ bool SampleEnvironment::isValid(const V3D &point) const {
  * @return The total number of segments added to the track
  */
 int SampleEnvironment::interceptSurfaces(Track &track) const {
-  int nsegments(0);
-  for (const auto &component : m_components) {
-    nsegments += component->interceptSurface(track);
-  }
-  return nsegments;
+  return std::accumulate(m_components.cbegin(), m_components.cend(), 0,
+                         [&track](int sum, const auto &component) {
+                           return sum + component->interceptSurface(track);
+                         });
 }
 
 /**

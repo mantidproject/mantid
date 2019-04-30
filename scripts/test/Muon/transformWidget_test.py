@@ -4,23 +4,18 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
-
-from  Muon.GUI.Common import mock_widget
-from  Muon.GUI.Common.utilities import load_utils
-from  Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
-from  Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
-from  Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
-from  Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
-from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
-
-
-# need to update this
 import unittest
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+
+from mantid.py3compat import mock
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
+from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 
 class TransformTest(unittest.TestCase):
     def setUp(self):
@@ -30,7 +25,7 @@ class TransformTest(unittest.TestCase):
         self.maxent=mock.create_autospec( maxent_presenter.MaxEntPresenter,spec_set=True)
 
         # create widget
-        self.widget=transform_widget.TransformWidget(self.load)
+        self.widget=transform_widget.TransformWidget(self.load, FFTWidget, MaxEntWidget)
         # create the view
         self.view=mock.create_autospec(transform_view.TransformView,spec_set=False)
         self.view.getView=mock.Mock()

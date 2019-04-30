@@ -131,6 +131,9 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text(description)
+        self.groupingNotifier.notify_subscribers()
+
+        self.handle_update_all_clicked()
 
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
@@ -151,8 +154,12 @@ class GroupingTabPresenter(object):
         self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
                                               self.handle_update_finished,
-                                              self._view.display_warning_box)
+                                              self.error_callback)
         self.update_thread.start()
+
+    def error_callback(self, error_message):
+        self.enable_editing_notifier.notify_subscribers()
+        self._view.display_warning_box(error_message)
 
     def handle_update_finished(self):
         self.enable_editing()

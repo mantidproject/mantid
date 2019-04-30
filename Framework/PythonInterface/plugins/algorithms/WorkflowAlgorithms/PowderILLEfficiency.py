@@ -128,8 +128,7 @@ class PowderILLEfficiency(PythonAlgorithm):
                                  'relative calibration constants; for example, the beam stop [degrees]. ')
 
         pixelRangeValidator = CompositeValidator()
-        greaterThanOne = IntArrayBoundedValidator()
-        greaterThanOne.setLower(1)
+        greaterThanOne = IntArrayBoundedValidator(lower=1)
         lengthTwo = IntArrayLengthValidator()
         lengthTwo.setLength(2)
         orderedPairsValidator = IntArrayOrderedPairsValidator()

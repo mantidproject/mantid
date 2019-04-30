@@ -64,8 +64,8 @@ units of :math:`\Delta E`. See the algorithm :ref:`ISISIndirectEnergyTransfer <a
 .. interface:: Data Reduction
   :widget: tabISISEnergyTransfer
 
-Options
-#######
+ISIS Energy Transfer Options
+############################
 
 Run Files
   Allows you to select the raw data files for an experiment. You can enter these
@@ -129,6 +129,9 @@ Run
 Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
 
+Group Output
+  This will place the output reduced files from a reduction into a group workspace.
+
 Fold Multiple Frames
   This option is only relevant for TOSCA. If checked, then multiple-framed data
   will be folded back into a single spectra, if unchecked the frames will be
@@ -141,6 +144,35 @@ Output in :math:`cm^{-1}`
 Select Save Formats
   Allows you to select multiple output save formats to save the reduced data as,
   in all cases the file will be saved in the default save directory.
+
+.. _isis-energy-transfer-example-workflow:
+
+ISIS Energy Transfer Example Workflow
+#####################################
+The ISIS Energy Transfer tab operates on raw TOF data files. Before starting this workflow, go to
+**Manage Directories** and make sure that **Search Data Archive** is set to **all**.
+
+1. Set the **Instrument** to be OSIRIS, the **Analyser** to be graphite and the **Reflection** to
+   be 002.
+
+2. In **Run Files**, enter the run numbers 104371-104375 and press enter.
+
+3. Change the **Spectra Min** and **Spectra Max** if you want to avoid some of the detectors. For
+   the purposes of this demonstration, keep them at their default values.
+
+4. The **Detector Grouping** option allows you to specify how you want to group your detectors. The 
+   different option available are explained in the :ref:`detector-grouping` section. For this
+   demonstration, choose **Individual**.
+
+5. Click **Run** and wait for the interface to finish processing. This should generate a
+   workspace ending in _red.
+
+6. Choose a default save directory and then tick the **Nexus** checkbox. Click **Save** to save the
+   output workspace. The workspace ending in _red will be used in the :ref:`elwin-example-workflow`.
+
+Go to the :ref:`isis-calibration-example-workflow`.
+
+.. _detector-grouping:
 
 Grouping
 ########
@@ -189,6 +221,38 @@ Multiple
 
 .. interface:: Data Reduction
   :widget: pgMultipleRebin
+
+A note on Masked Detectors
+##########################
+
+When a reduction of a single run number takes place, the masked detectors used for the
+reduction are found using the :ref:`IdentifyNoisyDetectors <algm-IdentifyNoisyDetectors>`
+algorithm.
+
+When using the **Sum Files** option the noisy detectors for each of the run numbers could
+be different. In this case, the masked detectors for the summed run is found by first finding
+the noisy detectors for each of the individual runs within the summed run using
+:ref:`IdentifyNoisyDetectors <algm-IdentifyNoisyDetectors>`. For instance, let us say that we
+find that the following run numbers have these noisy detectors:
+
+.. code-block:: sh
+
+  Run number 22841 has noisy detectors 53, 54, 55
+  Run number 22842 has noisy detectors 53, 54, 56
+  Run number 22843 has noisy detectors 53, 55, 56
+
+To find the detectors which should be masked for a summed run of 22841-22843 we first combine
+these noisy detectors so that we have 53, 54, 55 and 56. A summed file is then calculated from
+these run numbers and the :ref:`IdentifyNoisyDetectors <algm-IdentifyNoisyDetectors>` algorithm
+finds the noisy detectors for this summed file.
+
+.. code-block:: sh
+
+  Summed file 22841-22843 has noisy detectors 13, 53, 54, 55
+
+The masked detectors used for the summed run would also include any additional detectors found
+to be noisy for the summed run. The masked detectors used for the summed reduction of 22841-22843
+would therefore be 13, 53, 54, 55 and 56.
 
 ILL Energy Transfer
 ~~~~~~~~~~~~~~~~~~~
@@ -288,8 +352,8 @@ The calibration file is normalised to an average of 1.
 .. interface:: Data Reduction
   :widget: tabISISCalibration
 
-Options
-~~~~~~~
+ISIS Calibration Options
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Run No
   This allows you to select a run for the function to use, either by selecting the
@@ -363,6 +427,31 @@ Peak Range
 Scale Factor
   Factor to scale the intensities with
 
+.. _isis-calibration-example-workflow:
+
+ISIS Calibration Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ISIS Calibration tab operates on raw TOF data files. Before starting this workflow, go to
+**Manage Directories** and make sure that **Search Data Archive** is set to **all**.
+
+1. Set the **Instrument** to be IRIS, the **Analyser** to be graphite and the **Reflection** to
+   be 002.
+
+2. In **Run Files**, enter the run number 26176 and press enter.
+
+3. Tick **Create RES File**. This will create a workspace ending in _res.
+
+4. Click **Run** and wait for the interface to finish processing. This should generate
+   workspaces ending in _red, _res and _calib. The calibration workspace can be used in the ISIS
+   Energy Transfer tab by ticking **Use Calib File**.
+
+5. Click **Plot Result**. This should produce plots of your workspaces ending in _calib and _res.
+
+6. Choose a default save directory and then click **Save Result** to save the workspaces ending
+   in _res and _calib. The _res file is used in the :ref:`iqt-example-workflow` and 
+   :ref:`convfit-example-workflow`. The _calib file is used in the
+   :ref:`isis-diagnostics-example-workflow`.
+
 ISIS Diagnostics
 ----------------
 
@@ -373,8 +462,8 @@ MODES. It is only available when the default facility is set to ISIS.
 .. interface:: Data Reduction
   :widget: tabISISDiagnostics
 
-Options
-~~~~~~~
+ISIS Diagnostics Options
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Input Files
   This allows you to select a run for the function to use, either by selecting the
@@ -418,6 +507,34 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
+.. _isis-diagnostics-example-workflow:
+
+ISIS Diagnostics Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ISIS Diagnostics tab operates on raw TOF data files. Before starting this workflow, go to
+**Manage Directories** and make sure that **Search Data Archive** is set to **all**.
+
+1. Set the **Instrument** to be IRIS, the **Analyser** to be graphite and the **Reflection** to
+   be 002.
+
+2. In **Run Files**, enter the run number 26176 and press enter.
+
+3. Tick **Use Calibration** and load the file named ``irs26173_graphite002_calib``.
+
+4. Change the **Preview Spectrum** variable to view a different spectrum in the mini-plot.
+
+5. Change the **Start** and **End** variables to specify a PeakRange for the
+   :ref:`TimeSlice <algm-TimeSlice>` algorithm. Alternatively, you can move the blue sliders on the
+   mini-plot.
+
+6. Click **Run** and wait for the interface to finish processing. This should generate a
+   workspace ending in _slice. The **Preview** mini-plot will be updated.
+
+7. Click **Plot Result** to produce a larger plot of the **Preview** mini-plot.
+
+Go to the :ref:`transmission-example-workflow`.
+
+
 Transmission
 ------------
 
@@ -431,8 +548,8 @@ wavelength.
 .. interface:: Data Reduction
   :widget: tabTransmission
 
-Options
-~~~~~~~
+Transmission Options
+~~~~~~~~~~~~~~~~~~~~
 
 Sample
   Allows the selection of a raw file or workspace to be used as the sample.
@@ -450,6 +567,27 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
+.. _transmission-example-workflow:
+
+Transmission Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Transmission tab operates on raw TOF data files. Before starting this workflow, go to
+**Manage Directories** and make sure that **Search Data Archive** is set to **all**.
+
+1. Set the **Instrument** to be IRIS, the **Analyser** to be graphite and the **Reflection** to
+   be 002.
+
+2. In the **Sample** box, enter the run number 26176 and press enter. In the **Background** box,
+   enter the run number 26174 and press enter.
+
+3. Click **Run** and wait for the interface to finish processing. This will run the algorithm
+   :ref:`IndirectTransmissionMonitor <algm-IndirectTransmissionMonitor>` and plots the output
+   workspaces in the **Preview** mini-plot.
+
+4. Click **Plot Result** to produce a larger plot of the **Preview** mini-plot.
+
+Go to the :ref:`symmetrise-example-workflow`.
+
 Symmetrise
 ----------
 
@@ -464,8 +602,8 @@ in the range :math:`-EMax` to :math:`-EMin`, the curve between :math:`-EMin` and
 .. interface:: Data Reduction
   :widget: tabSymmetrise
 
-Options
-~~~~~~~
+Symmetrise Options
+~~~~~~~~~~~~~~~~~~
 
 Input
   Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
@@ -495,6 +633,8 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
+.. _preview-properties:
+
 Preview
 ~~~~~~~
 
@@ -512,6 +652,31 @@ Delta Y
   The difference between Negative and Positive Y. Typically this should be as
   close to zero as possible.
 
+.. _symmetrise-example-workflow:
+
+Symmetrise Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Symmetrise tab operates on ``_red`` files. The file used in this workflow can
+be produced using the 26176 run number on the ISIS Energy Transfer tab. The instrument used to
+produce this file is IRIS, the analyser is graphite and the reflection is 002. See the
+:ref:`isis-energy-transfer-example-workflow`.
+
+1. In the **Input** box, load the file named ``iris26176_graphite002_red``. This will
+   automatically plot the data on the first mini-plot.
+
+2. Move the green slider located at x = -0.5 to be at x = -0.4.
+
+3. Click **Preview**. This will update the :ref:`Preview properties <preview-properties>` and
+   the neighbouring mini-plot.
+
+4. Click **Run** and wait for the interface to finish processing. This will run the
+   :ref:`Symmetrise <algm-Symmetrise>` algorithm. The output workspace is called
+   ``iris26176_graphite002_sym_red``.
+
+5. Click **Plot Result** to produce a plot of the output workspace and the input workspace.
+
+Go to the :ref:`sqw-example-workflow`.
+
 S(Q, w)
 -------
 
@@ -520,8 +685,8 @@ Provides an interface for running the :ref:`SofQW <algm-SofQW>` algorithm.
 .. interface:: Data Reduction
   :widget: tabSQw
 
-Options
-~~~~~~~
+S(Q, w) Options
+~~~~~~~~~~~~~~~
 
 Input
   Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
@@ -551,6 +716,36 @@ Plot Contour
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
 
+.. _sqw-example-workflow:
+
+S(Q, w) Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The S(Q, w) tab operates on ``_red`` files. The file used in this workflow can be produced
+using the 26176 run number on the ISIS Energy Transfer tab. The instrument used to
+produce this file is IRIS, the analyser is graphite and the reflection is 002. See the
+:ref:`isis-energy-transfer-example-workflow`.
+
+1. In the **Input** box, load the file named ``iris26176_graphite002_red``. This will
+   automatically plot the data as a contour plot within the interface.
+
+2. Set the **Q Low**, **Q Width** and **Q High** to be 0.5, 0.05 and 1.8. These values are
+   read from the contour plot.
+
+3. Tick **Rebin in Energy**.
+
+4. Set the **E Low**, **E Width** and **E High** to be -0.5, 0.005 and 0.5. Again, these values
+   should be read from the contour plot.
+
+5. Click **Run** and wait for the interface to finish processing. This will perform an energy
+   rebin before performing the :ref:`SofQW <algm-SofQW>` algorithm. The output workspace ends
+   with suffix _sqw and is called ``iris26176_graphite002_sqw``.
+
+6. Choose a workspace index and then click **Plot Spectrum** to plot a spectrum from the
+   output workspace.
+
+7. Choose a default save directory and then click **Save Result** to save the output workspace.
+   The _sqw file is used in the :ref:`moments-example-workflow`.
+
 Moments
 -------
 
@@ -561,8 +756,8 @@ by the SofQW tab.
 .. interface:: Data Reduction
   :widget: tabMoments
 
-Options
-~~~~~~~
+Moments Options
+~~~~~~~~~~~~~~~
 
 Input
   Allows you to select an :math:`S(Q, \omega)` file (*_sqw.nxs*) or workspace
@@ -584,5 +779,21 @@ Plot Result
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
+
+.. _moments-example-workflow:
+
+Moments Example Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~
+The Moments tab operates on ``_sqw`` files. The file used in this workflow is produced during
+the :ref:`sqw-example-workflow`.
+
+1. In the **Input** box, load the file named ``irs26176_graphite002_sqw``. This will
+   automatically plot the data in the first mini-plot.
+
+2. Drag the blue sliders on the mini-plot so they are x=-0.4 and x=0.4.
+
+3. Click **Run** and wait for the interface to finish processing. This will run the
+   :ref:`SofQWMoments <algm-SofQWMoments>` algorithm. The output workspace ends
+   with suffix _moments and is called ``iris26176_graphite002_moments``.
 
 .. categories:: Interfaces Indirect

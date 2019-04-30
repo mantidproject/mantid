@@ -10,11 +10,10 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from mock import patch
 import unittest
-
 from qtpy.QtWidgets import QInputDialog
 
+from mantid.py3compat.mock import patch
 from mantidqt.utils.qt.testing import GuiTest, ModalTester
 
 

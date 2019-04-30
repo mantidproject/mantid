@@ -53,8 +53,7 @@ void RotationSurface::findAxes() {
         m_xaxis = Mantid::Kernel::V3D(1, 0, 0);
       }
     } else {
-      m_xaxis = pos - m_zaxis * z;
-      m_xaxis.normalize();
+      m_xaxis = normalize(pos - m_zaxis * z);
     }
     m_yaxis = m_zaxis.cross_prod(m_xaxis);
   }
@@ -236,8 +235,7 @@ void RotationSurface::findUVBounds() {
   m_u_max = -DBL_MAX;
   m_v_min = DBL_MAX;
   m_v_max = -DBL_MAX;
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    const UnwrappedDetector &udet = m_unwrappedDetectors[i];
+  for (const auto &udet : m_unwrappedDetectors) {
     if (udet.empty() ||
         !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;

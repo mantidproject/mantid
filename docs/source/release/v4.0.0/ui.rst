@@ -38,4 +38,9 @@ Instrument View
 
 - The miniplot on the pick tab of the instrument view now shows the HKL values for peaks when viewing a summed collection of detectors.
 
+Error Reporter Changes
+----------------------
+
+- The error reporter now accepts free text of up to 3200 characters in a free text box.
+
 :ref:`Release 4.0.0 <v4.0.0>`

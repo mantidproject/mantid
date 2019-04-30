@@ -122,7 +122,6 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference() {
   MatrixWorkspace_sptr fluxRefWS;
   if (m_reductionManager->existsProperty(entryName)) {
     fluxRefWS = m_reductionManager->getProperty(entryName);
-    fluxRefWSName = m_reductionManager->getPropertyValue(entryName);
     m_output_message += "   | Using flux reference " + referenceFluxFile + "\n";
   } else {
     IAlgorithm_sptr loadAlg = createChildAlgorithm("Load");

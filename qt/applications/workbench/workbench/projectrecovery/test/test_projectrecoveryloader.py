@@ -16,14 +16,20 @@ import tempfile
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
+from mantid.py3compat import mock
 from mantid.simpleapi import CreateSampleWorkspace
+
+from mantidqt.utils.testing.strict_mock import StrictContextManagerMock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery
 
 if sys.version_info.major >= 3:
-    from unittest import mock
     unicode = str
-else:
-    import mock
+
+
+def add_main_window_mock(loader):
+    loader.main_window = mock.Mock()
+    loader.main_window.algorithm_selector = mock.Mock()
+    loader.main_window.algorithm_selector.block_progress_widget_updates = StrictContextManagerMock()
 
 
 class ProjectRecoveryLoaderTest(unittest.TestCase):
@@ -45,6 +51,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
     def test_attempt_recovery_and_recovery_passes(self, presenter):
         presenter.return_value.start_recovery_view.return_value = True
         presenter.return_value.start_recovery_failure.return_value = True
+        add_main_window_mock(self.pr.loader)
         self.pr.clear_all_unused_checkpoints = mock.MagicMock()
         self.pr.start_recovery_thread = mock.MagicMock()
 
@@ -54,11 +61,13 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         self.assertEqual(presenter.return_value.start_recovery_failure.call_count, 0)
         self.assertEqual(self.pr.clear_all_unused_checkpoints.call_count, 1)
         self.assertEqual(self.pr.start_recovery_thread.call_count, 1)
+        self.pr.loader.main_window.algorithm_selector.block_progress_widget_updates.assert_context_triggered()
 
     @mock.patch('workbench.projectrecovery.projectrecoveryloader.ProjectRecoveryPresenter')
     def test_attempt_recovery_and_recovery_fails_first_time_but_is_successful_on_failure_view(self, presenter):
         presenter.return_value.start_recovery_view.return_value = False
         presenter.return_value.start_recovery_failure.return_value = True
+        add_main_window_mock(self.pr.loader)
         self.pr.clear_all_unused_checkpoints = mock.MagicMock()
         self.pr.start_recovery_thread = mock.MagicMock()
 
@@ -68,6 +77,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         self.assertEqual(presenter.return_value.start_recovery_failure.call_count, 1)
         self.assertEqual(self.pr.clear_all_unused_checkpoints.call_count, 1)
         self.assertEqual(self.pr.start_recovery_thread.call_count, 1)
+        self.pr.loader.main_window.algorithm_selector.block_progress_widget_updates.assert_context_triggered()
 
     @mock.patch('workbench.projectrecovery.projectrecoveryloader.ProjectLoader')
     def test_load_project_interfaces_call(self, loader):

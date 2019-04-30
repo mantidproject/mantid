@@ -909,7 +909,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::ColorBarWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/ColorBarWidget.h</header>
+   <header>MantidQtWidgets/Plotting/Qwt/ColorBarWidget.h</header>
   </customwidget>
   <customwidget>
    <class>QwtPlot</class>
@@ -920,7 +920,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::SafeQwtPlot</class>
    <extends>QwtPlot</extends>
-   <header>MantidQtWidgets/LegacyQwt/SafeQwtPlot.h</header>
+   <header>MantidQtWidgets/Plotting/Qwt/SafeQwtPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

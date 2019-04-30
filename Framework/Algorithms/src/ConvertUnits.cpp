@@ -488,8 +488,11 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       // try and get the value from the run parameters
       const API::Run &run = inputWS->run();
       if (run.hasProperty("Ei")) {
-        Kernel::Property *prop = run.getProperty("Ei");
-        efixedProp = boost::lexical_cast<double, std::string>(prop->value());
+        try {
+          efixedProp = run.getPropertyValueAsType<double>("Ei");
+        } catch (Kernel::Exception::NotFoundError &) {
+          throw std::runtime_error("Cannot retrieve Ei value from the logs");
+        }
       } else {
         if (needEfixed) {
           throw std::invalid_argument(
@@ -728,13 +731,13 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 
     result = create<MatrixWorkspace>(*workspace, BinEdges(bins));
 
-    for (size_t i = 0; i < numSpec; ++i) {
-      auto &X = workspace->x(i);
-      auto &Y = workspace->y(i);
-      auto &E = workspace->e(i);
-      result->mutableX(i).assign(X.begin() + first, X.end());
-      result->mutableY(i).assign(Y.begin() + first, Y.end());
-      result->mutableE(i).assign(E.begin() + first, E.end());
+    for (size_t wsIndex = 0; wsIndex < numSpec; ++wsIndex) {
+      auto &X = workspace->x(wsIndex);
+      auto &Y = workspace->y(wsIndex);
+      auto &E = workspace->e(wsIndex);
+      result->mutableX(wsIndex).assign(X.begin() + first, X.end());
+      result->mutableY(wsIndex).assign(Y.begin() + first, Y.end());
+      result->mutableE(wsIndex).assign(E.begin() + first, E.end());
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a

@@ -32,7 +32,7 @@ template <typename T> using ValueAsTypeMemFn = T (Json::Value::*)() const;
 // createProperty is called.
 struct FromJson {
   template <typename T>
-  explicit FromJson(ValueAsTypeMemFn<T>)
+  explicit FromJson(ValueAsTypeMemFn<T> /*unused*/)
       : m_self{std::make_unique<ModelT<T>>()} {}
 
   std::unique_ptr<Property> createProperty(const std::string &name,

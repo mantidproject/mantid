@@ -59,7 +59,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         nbins = matrixWS.blocksize()
         nhists = matrixWS.getNumberHistograms()
         self.assertEquals(nbins, 17)
-        self.assertEquals(nhists, 3)
+        self.assertEquals(nhists, 4)
 
         # Check histogram names
         text_axis = matrixWS.getAxis(1)
@@ -67,6 +67,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEquals('f0.A0',text_axis.label(0))
         self.assertEquals('f1.Height',text_axis.label(1))
         self.assertEquals('f1.Lifetime',text_axis.label(2))
+        self.assertEquals('Chi_squared',text_axis.label(3))
 
         # Check bin units
         self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())

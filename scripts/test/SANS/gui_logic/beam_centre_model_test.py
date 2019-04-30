@@ -7,18 +7,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import sys
+
+from mantid.py3compat import mock
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType, SANSFacility
 from sans.test_helper.test_director import TestDirector
 from sans.state.data import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
-
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class BeamCentreModelTest(unittest.TestCase):

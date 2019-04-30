@@ -206,14 +206,12 @@ void MDNormDirectSC::cacheInputs() {
         "sample");
   }
   m_samplePos = sample->getPos();
-  m_beamDir = m_samplePos - source->getPos();
-  m_beamDir.normalize();
+  m_beamDir = normalize(m_samplePos - source->getPos());
 
   double originaldEmin = exptInfoZero.run().getBinBoundaries().front();
   double originaldEmax = exptInfoZero.run().getBinBoundaries().back();
   if (exptInfoZero.run().hasProperty("Ei")) {
-    Kernel::Property *eiprop = exptInfoZero.run().getProperty("Ei");
-    m_Ei = boost::lexical_cast<double>(eiprop->value());
+    m_Ei = exptInfoZero.run().getPropertyValueAsType<double>("Ei");
     if (m_Ei <= 0) {
       throw std::invalid_argument("Ei stored in the workspace is not positive");
     }

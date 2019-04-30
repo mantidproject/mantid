@@ -1,18 +1,18 @@
-import six
-import unittest
 import os
+import unittest
+
+import six
+
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadFileWidgetModelTest(unittest.TestCase):
 
     def setUp(self):
-        self.data = MuonLoadData()
-        self.context = MuonDataContext()
-        self.context.instrument = 'EMU'
-        self.model = BrowseFileWidgetModel(self.data, self.context)
+        setup_context_for_tests(self)
+        self.data_context.instrument = 'EMU'
+        self.model = BrowseFileWidgetModel(self.loaded_data, self.context)
 
     def assert_model_empty(self):
         self.assertEqual(self.model.loaded_workspaces, [])

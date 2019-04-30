@@ -195,8 +195,8 @@ void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
     const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
   std::size_t counter = 0;
-  for (auto i = 0u; i < fittingData.size(); ++i)
-    addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], counter);
+  for (const auto &data : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, data, counter);
 }
 
 void addInputDataToSimultaneousFit(
@@ -205,9 +205,8 @@ void addInputDataToSimultaneousFit(
     const std::pair<double, double> &range,
     const std::vector<double> &exclude) {
   std::size_t counter = 0;
-  for (auto i = 0u; i < fittingData.size(); ++i)
-    addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], range, exclude,
-                                  counter);
+  for (const auto &data : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, data, range, exclude, counter);
 }
 
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
@@ -250,7 +249,7 @@ void cleanTemporaries(const std::string &base,
                       const std::unique_ptr<IndirectFitData> &fitData) {
   removeFromADSIfExists(base);
 
-  const auto clean = [&](std::size_t index, std::size_t) {
+  const auto clean = [&](std::size_t index, std::size_t /*unused*/) {
     cleanTemporaries(base + "_" + std::to_string(index));
   };
   fitData->applyEnumeratedSpectra(clean);
@@ -717,7 +716,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t /*unused*/) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 

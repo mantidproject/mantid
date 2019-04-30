@@ -293,13 +293,11 @@ GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
 template <class Base>
 void GenericDataProcessorAlgorithm<Base>::saveNexus(
     const std::string &outputWSName, const std::string &outputFile) {
-  bool saveOutput = true;
 #ifdef MPI_BUILD
-  if (boost::mpi::communicator().rank() > 0)
-    saveOutput = false;
+  if (boost::mpi::communicator().rank() <= 0 && !outputFile.empty()) {
+#else
+  if (!outputFile.empty()) {
 #endif
-
-  if (saveOutput && !outputFile.empty()) {
     IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);

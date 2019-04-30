@@ -219,11 +219,9 @@ std::string shortParameterName(const std::string &longName) {
 
 bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   const auto &first = workspaces.front();
-  for (const auto &workspace : workspaces) {
-    if (workspace != first)
-      return true;
-  }
-  return false;
+  return std::any_of(
+      workspaces.cbegin(), workspaces.cend(),
+      [&first](const auto &workspace) { return workspace != first; });
 }
 
 template <typename F, typename Renamer>
@@ -546,7 +544,12 @@ void QENSFitSequential::exec() {
 
   setProperty("OutputWorkspace", resultWs);
   setProperty("OutputParameterWorkspace", parameterWs);
-  setProperty("OutputWorkspaceGroup", groupWs);
+  // Copy the group to prevent the ADS having two entries for one workspace
+  auto outGroupWs = WorkspaceGroup_sptr(new WorkspaceGroup);
+  for (auto item : groupWs->getAllItems()) {
+    outGroupWs->addWorkspace(item);
+  }
+  setProperty("OutputWorkspaceGroup", outGroupWs);
 }
 
 std::map<std::string, std::string>
@@ -608,7 +611,7 @@ std::string QENSFitSequential::getOutputBaseName() const {
 
 bool QENSFitSequential::throwIfElasticQConversionFails() const { return false; }
 
-bool QENSFitSequential::isFitParameter(const std::string &) const {
+bool QENSFitSequential::isFitParameter(const std::string & /*unused*/) const {
   return true;
 }
 
@@ -665,6 +668,7 @@ WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
+  pifp->setProperty("IncludeChiSquared", true);
   return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 

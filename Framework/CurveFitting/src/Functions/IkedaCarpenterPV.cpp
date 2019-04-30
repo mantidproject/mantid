@@ -160,12 +160,10 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double *xValues,
     }
 
     // note if a version of convertValue was added which allows a double* as
-    // first argument
-    // then could avoid copying above plus only have to resize m_wavelength when
-    // its size smaller than nData
+    // first argument then could avoid copying above plus only have to resize
+    // m_wavelength when its size smaller than nData
     API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
     if (mws) {
-      API::MatrixWorkspace_const_sptr mws = getMatrixWorkspace();
       Instrument_const_sptr instrument = mws->getInstrument();
       Geometry::IComponent_const_sptr sample = instrument->getSample();
       if (sample != nullptr) {
@@ -389,8 +387,9 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
   }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian *, const double *,
-                                          const size_t) {
+void IkedaCarpenterPV::functionDerivLocal(API::Jacobian * /*jacobian*/,
+                                          const double * /*xValues*/,
+                                          const size_t /*nData*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "functionDerivLocal is not implemented for IkedaCarpenterPV.");
 }

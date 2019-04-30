@@ -537,7 +537,6 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
       this->calcDerivativeAndCountZeros(binsAvrg, SAvrg, der1Avrg, peaks);
   size_t nHills =
       this->calcDerivativeAndCountZeros(binsAvrg, der1Avrg, der2Avrg, hillsPos);
-  size_t nPrevHills = 2 * nHills;
   if (nPeaks == 1) {
     foundRealPeakPos = true;
     realPeakPos = peaks[0];
@@ -548,7 +547,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   while ((nPeaks > 1 || nHills > 2) && (!iterations_fail)) {
     Kernel::VectorHelper::smoothInRange(SAvrg, SAvrg1, SmoothRange, &binsAvrg,
                                         0, ind_max - ind_min, &binsAvrg1);
-    nPrevHills = nHills;
+    const auto nPrevHills = nHills;
 
     nPeaks =
         this->calcDerivativeAndCountZeros(binsAvrg1, SAvrg1, der1Avrg, peaks);

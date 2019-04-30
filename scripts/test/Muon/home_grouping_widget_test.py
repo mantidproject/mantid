@@ -4,27 +4,21 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
+import unittest
+from PyQt4 import QtGui
 
+from mantid import ConfigService
+from mantid.api import FileFinder
+from mantid.py3compat import mock
+
+import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common import mock_widget
-import unittest
-from PyQt4 import QtGui
-from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import FileFinder
-from mantid import ConfigService
-import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.muon_pair import MuonPair
-
-
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
+from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class HomeTabGroupingPresenterTest(unittest.TestCase):
@@ -32,9 +26,8 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self._qapp = mock_widget.mockQapp()
         self.obj = QtGui.QWidget()
         ConfigService['default.instrument'] = 'MUSR'
-        self.loaded_data = MuonLoadData()
-        self.context = MuonDataContext(self.loaded_data)
-        self.context.gui_variables['RebinType'] = 'None'
+        setup_context_for_tests(self)
+        self.gui_context['RebinType'] = 'None'
         self.view = HomeGroupingWidgetView(self.obj)
         self.model = HomeGroupingWidgetModel(self.context)
         self.presenter = HomeGroupingWidgetPresenter(self.view, self.model)
@@ -44,13 +37,13 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
 
         file_path = FileFinder.findRuns('MUSR00022725.nxs')[0]
         ws, run, filename = load_utils.load_workspace_from_filename(file_path)
-        self.context._loaded_data.remove_data(run=run)
-        self.context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
-        self.context.current_runs = [[22725]]
+        self.data_context._loaded_data.remove_data(run=run)
+        self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
+        self.data_context.current_runs = [[22725]]
 
         self.context.update_current_data()
         test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
-        self.context.add_pair(pair=test_pair)
+        self.group_context.add_pair(pair=test_pair)
         self.presenter.update_group_pair_list()
 
     def tearDown(self):

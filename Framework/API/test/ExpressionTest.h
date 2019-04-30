@@ -10,7 +10,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Expression.h"
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -134,6 +134,7 @@ class ProjectRecoverySaver(object):
 
             alg.initialize()
             alg.setProperty("AppendTimestamp", True)
+            alg.setProperty("AppendExecCount", True)
             alg.setProperty("InputWorkspace", ws)
             alg.setPropertyValue("Filename", filename)
             alg.setPropertyValue("StartTimestamp", start_time)

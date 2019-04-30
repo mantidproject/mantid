@@ -216,7 +216,7 @@ QString ISISCalibration::backgroundRangeString() const {
          m_properties["CalBackMax"]->valueText();
 }
 
-QString ISISCalibration::instrumentDetectorRangeString() const {
+QString ISISCalibration::instrumentDetectorRangeString() {
   return getInstrumentDetail("spectra-min") + "," +
          getInstrumentDetail("spectra-max");
 }
@@ -298,7 +298,13 @@ void ISISCalibration::run() {
   const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
   m_outputCalibrationName = outputWorkspaceNameStem + "_calib";
-  m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
+
+  try {
+    m_batchAlgoRunner->addAlgorithm(calibrationAlgorithm(filenames));
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    return;
+  }
 
   // Initially take the calibration workspace as the result
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
@@ -366,19 +372,23 @@ void ISISCalibration::setDefaultInstDetails() {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
+    showMessageBox(ex.what());
   }
 }
 
 void ISISCalibration::setDefaultInstDetails(
     QMap<QString, QString> const &instrumentDetails) {
+  auto const instrument = getInstrumentDetail(instrumentDetails, "instrument");
+  auto const spectraMin =
+      getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
+  auto const spectraMax =
+      getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
+
   // Set the search instrument for runs
-  m_uiForm.leRunNo->setInstrumentOverride(
-      getInstrumentDetail(instrumentDetails, "instrument"));
+  m_uiForm.leRunNo->setInstrumentOverride(instrument);
 
   // Set spectra range
-  setResolutionSpectraRange(
-      getInstrumentDetail(instrumentDetails, "spectra-min").toDouble(),
-      getInstrumentDetail(instrumentDetails, "spectra-max").toDouble());
+  setResolutionSpectraRange(spectraMin, spectraMax);
 
   // Set peak and background ranges
   const auto ranges = getRangesFromInstrument();
@@ -387,13 +397,11 @@ void ISISCalibration::setDefaultInstDetails(
   setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0),
                      getValueOr(ranges, "back-end-tof", 0.0));
 
-  if (instrumentDetails.contains("resolution") &&
-      !instrumentDetails["resolution"].isEmpty()) {
-    m_uiForm.ckCreateResolution->setEnabled(true);
-  } else {
+  auto const hasResolution =
+      hasInstrumentDetail(instrumentDetails, "resolution");
+  m_uiForm.ckCreateResolution->setEnabled(hasResolution);
+  if (!hasResolution)
     m_uiForm.ckCreateResolution->setChecked(false);
-    m_uiForm.ckCreateResolution->setEnabled(false);
-  }
 }
 
 /**
@@ -412,8 +420,12 @@ void ISISCalibration::calPlotRaw() {
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
 
-  int const specMin = getInstrumentDetail("spectra-min").toInt();
-  int const specMax = getInstrumentDetail("spectra-max").toInt();
+  int const specMin = hasInstrumentDetail("spectra-min")
+                          ? getInstrumentDetail("spectra-min").toInt()
+                          : -1;
+  int const specMax = hasInstrumentDetail("spectra-max")
+                          ? getInstrumentDetail("spectra-max").toInt()
+                          : -1;
 
   if (!loadFile(filename, wsname, specMin, specMax)) {
     emit showMessageBox("Unable to load file.\nCheck whether your file exists "
@@ -708,7 +720,7 @@ void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
 }
 
 IAlgorithm_sptr
-ISISCalibration::calibrationAlgorithm(const QString &inputFiles) const {
+ISISCalibration::calibrationAlgorithm(const QString &inputFiles) {
   auto calibrationAlg =
       AlgorithmManager::Instance().create("IndirectCalibration");
   calibrationAlg->initialize();

@@ -597,8 +597,8 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
 
 void EnggDiffractionPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
-  for (size_t i = 0; i < msgs.size(); i++) {
-    g_log.information() << msgs[i] << '\n';
+  for (const auto &msg : msgs) {
+    g_log.information() << msg << '\n';
   }
 }
 
@@ -682,10 +682,9 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (size_t i = 0; i < filename.size(); i++) {
-          char *str = &filename[i];
-          if (std::isdigit(*str)) {
-            run_number += filename[i];
+        for (const char &ch : filename) {
+          if (std::isdigit(ch)) {
+            run_number += ch;
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
@@ -736,10 +735,9 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
         std::string filename = inputDir.getFileName();
 
         // convert to int or assign it to size_t
-        for (size_t i = 0; i < filename.size(); i++) {
-          char *str = &filename[i];
-          if (std::isdigit(*str)) {
-            run_number += filename[i];
+        for (const char &ch : filename) {
+          if (std::isdigit(ch)) {
+            run_number += ch;
           }
         }
         run_number.erase(0, run_number.find_first_not_of('0'));
@@ -980,9 +978,13 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                std::string(rexc.what())
         << '\n';
   } catch (std::invalid_argument &) {
+    m_calibFinishedOK = false;
     g_log.error()
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. \n";
+  } catch (Mantid::API::Algorithm::CancelException &) {
+    m_calibFinishedOK = false;
+    g_log.error() << "Execution terminated by user. \n";
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -1462,8 +1464,8 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
   std::vector<std::string> res;
   res.reserve(bankIDs.size());
   std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
-  for (size_t b = 0; b < bankIDs.size(); b++) {
-    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankIDs[b]) +
+  for (auto bankID : bankIDs) {
+    res.emplace_back(prefix + boost::lexical_cast<std::string>(bankID) +
                      ".nxs");
   }
 
@@ -1588,21 +1590,26 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                           ") for run " + runNo + " into: "
                    << effectiveFilenames[idx] << '\n';
     try {
-      m_focusFinishedOK = false;
+
       doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
                  dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
+      m_focusFinishedOK = false;
       g_log.error() << "The focusing calculations failed. One of the algorithms"
                        "did not execute correctly. See log messages for "
                        "further details. Error: " +
                            std::string(rexc.what())
                     << '\n';
     } catch (std::invalid_argument &ia) {
+      m_focusFinishedOK = false;
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
                        "See log messages for details. Error: "
                     << ia.what() << '\n';
+    } catch (Mantid::API::Algorithm::CancelException) {
+      m_focusFinishedOK = false;
+      g_log.error() << "Focus terminated by user.\n";
     }
   }
 

@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
 import unittest
-import sys
 
 from mantid.kernel import ConfigService
-from sans.common.enums import SANSInstrument
+from mantid.py3compat import mock
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_selection import RunSelection
@@ -20,11 +20,6 @@ from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from fake_signal import FakeSignal
 from assert_called import assert_called
-
-if sys.version_info.major == 2:
-    import mock
-else:
-    from unittest import mock
 
 
 class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
@@ -437,4 +432,36 @@ class AddRunsFilenameManagerTest(unittest.TestCase):
         self.assertEqual(actual_name, expected_name)
 
 
-if __name__ == '__main__': unittest.main()
+class AddRunsDefaultSettingsTest(unittest.TestCase):
+    def setUp(self):
+        self.presenter = AddRunsPagePresenter(mock.Mock(),
+                                              mock.Mock(),
+                                              mock.Mock(),
+                                              mock.Mock(),
+                                              mock.Mock())
+
+    def test_that_presenter_calls_properties_handler_to_update_directory_on_directory_changed(self):
+        new_dir_name = os.path.join("some", "dir", "path")
+        self.presenter._view.display_save_directory_box = mock.Mock(return_value=new_dir_name)
+        self.presenter.gui_properties_handler.update_default = mock.Mock()
+        self.presenter.set_output_directory = mock.Mock()
+
+        self.presenter._handle_output_directory_changed()
+        self.presenter.gui_properties_handler.update_default.assert_called_once_with("add_runs_output_directory",
+                                                                                     new_dir_name + os.sep)
+
+    def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
+        default_dir = os.path.join("default", "save", "directory")
+        ConfigService["defaultsave.directory"] = default_dir
+
+        output_dir = self.presenter.set_output_directory("")
+        ConfigService["defaultsave.directory"] = ""
+
+        self.assertEqual(output_dir, default_dir,
+                         "Because directory input was an empty string, we expected the output directory "
+                         "to use the default save directory {} instead. "
+                         "Directory actually used was {}".format(default_dir, output_dir))
+
+
+if __name__ == '__main__':
+    unittest.main()

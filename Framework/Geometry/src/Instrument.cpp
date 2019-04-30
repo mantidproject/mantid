@@ -427,9 +427,7 @@ IComponent_const_sptr Instrument::getSample() const {
  *  @returns A unit vector denoting the direction of the beam
  */
 Kernel::V3D Instrument::getBeamDirection() const {
-  V3D retval = getSample()->getPos() - getSource()->getPos();
-  retval.normalize();
-  return retval;
+  return normalize(getSample()->getPos() - getSource()->getPos());
 }
 
 //------------------------------------------------------------------------------------------
@@ -1040,7 +1038,6 @@ void Instrument::saveNexus(::NeXus::File *file,
     file->closeGroup(); // detectors
 
     // Create Monitor IDs vector
-    auto detmons = getDetectors(detmonIDs);
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (isMonitorViaIndex(i))
