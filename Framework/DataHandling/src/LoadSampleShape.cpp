@@ -8,12 +8,15 @@
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadOff.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+
 #include "MantidKernel/ArrayProperty.h"
 
 #include "MantidGeometry/Instrument.h"
@@ -48,11 +51,6 @@ void LoadSampleShape::init() {
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
-
-  // Rotation angles
-  declareProperty("XDegrees",0.0,"The degrees to rotate on the x axis by");
-  declareProperty("YDegrees",0.0,"The degrees to rotate on the y axis by");
-  declareProperty("ZDegrees",0.0,"The degrees to rotate on the z axis by");
 
   // Output workspace
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -95,7 +93,7 @@ void LoadSampleShape::exec() {
     }
   }
   // rotate shape
-  shape = rotate(shape);
+  shape = rotate(shape, inputWS);
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();
@@ -111,49 +109,14 @@ void LoadSampleShape::exec() {
  * @returns a shared pointer to the newly rotated Shape
  */
 boost::shared_ptr<MeshObject>
-LoadSampleShape::rotate(boost::shared_ptr<MeshObject> sampleMesh) {
-  const std::vector<double> rotationMatrix = generateMatrix();
+LoadSampleShape::rotate(boost::shared_ptr<MeshObject> sampleMesh,
+                        MatrixWorkspace_const_sptr inputWS) {
+  const std::vector<double> rotationMatrix =
+      inputWS->run().getGoniometer().getR();
   sampleMesh->rotate(rotationMatrix);
-  
+
   return sampleMesh;
 }
 
-Matrix<double> LoadSampleShape::generateMatrix() {
-  Kernel::Matrix<double> xMatrix = generateXRotation();
-  Kernel::Matrix<double> yMatrix = generateYRotation();
-  Kernel::Matrix<double> zMatrix = generateZRotation();
-  xMatrix.print();
-  g_log.notice("x");
-  yMatrix.print();
-  g_log.notice("y");
-  zMatrix.print();
-  g_log.notice("z");
-  (xMatrix * yMatrix * zMatrix).print();
-  return xMatrix * yMatrix * zMatrix;
-}
-
-Matrix<double> LoadSampleShape::generateXRotation() {
-  const double xRotation = getProperty("xDegrees");
-  const double sinX = sin(xRotation);
-  const double cosX = cos(xRotation);
-  std::vector<double> matrixList = {1, 0, 0, 0, cosX, sinX, 0, -sinX, cosX};
-  return Kernel::Matrix<double>(matrixList);
-}
-
-Matrix<double> LoadSampleShape::generateYRotation() {
-  const double yRotation = getProperty("yDegrees");
-  const double sinY = sin(yRotation);
-  const double cosY = cos(yRotation);
-  std::vector<double> matrixList = {cosY, 0, sinY, 0, 1, 0, -sinY, 0, cosY};
-  return Kernel::Matrix<double>(matrixList);
-}
-
-Matrix<double> LoadSampleShape::generateZRotation() {
-  const double zRotation = getProperty("zDegrees");
-  const double sinZ = sin(zRotation);
-  const double cosZ = cos(zRotation);
-  std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
-  return Kernel::Matrix<double>(matrixList);
-}
 } // namespace DataHandling
 } // namespace Mantid
