@@ -36,6 +36,8 @@ const V3D Z_AXIS{0.0, 0.0, 1.0};
    bank.
  */
 
+constexpr double HRPD_CAN_HEIGHT{ 2.3 };
+constexpr double HRPD_CAN_WIDTH{ 1.8 };
 constexpr double VAN_WINDOW_THICKNESS{0.000125}; // in m
 constexpr double VAN_RHO{0.07192 * 100};         // in Angstroms-3 * 100
 constexpr double VAN_REF_ATTEN{-5.08 * VAN_RHO / NeutronAtom::ReferenceLambda};
@@ -204,11 +206,8 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
                                  getProperty(PropertyNames::NUM_WL_POINTS));
   childAlg->setProperty<std::string>("ExpMethod",
                                      getProperty(PropertyNames::EXP_METHOD));
-  // The height and width of the sample holder are standard for HRPD
-  const double HRPDCanHeight = 2.3;
-  const double HRPDCanWidth = 1.8;
-  childAlg->setProperty("SampleHeight", HRPDCanHeight);
-  childAlg->setProperty("SampleWidth", HRPDCanWidth);
+  childAlg->setProperty("SampleHeight", HRPD_CAN_HEIGHT);
+  childAlg->setProperty("SampleWidth", HRPD_CAN_WIDTH);
   // Valid values are 0.2,0.5,1.0 & 1.5 - would be nice to have a numeric list
   // validator
   childAlg->setPropertyValue("SampleThickness",
