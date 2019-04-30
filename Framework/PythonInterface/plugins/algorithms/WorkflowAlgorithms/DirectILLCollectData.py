@@ -15,7 +15,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
+from mantid.simpleapi import (CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
                               FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
 import numpy
@@ -23,26 +23,15 @@ import numpy
 _MONSUM_LIMIT = 100
 
 
-def _applyIncidentEnergyCalibration(ws, eiWS, wsNames, report, algorithmLogging):
+def _applyIncidentEnergyCalibration(ws, eiWS, report):
     """Update incident energy and wavelength in the sample logs."""
     originalEnergy = ws.getRun().getLogData('Ei').value
     originalWavelength = ws.getRun().getLogData('wavelength').value
     energy = eiWS.readY(0)[0]
     wavelength = UnitConversion.run('Energy', 'Wavelength', energy, 0, 0, 0, Direct, 5)
-    AddSampleLog(Workspace=ws,
-                 LogName='Ei',
-                 LogText=str(energy),
-                 LogType='Number',
-                 NumberType='Double',
-                 LogUnit='meV',
-                 EnableLogging=algorithmLogging)
-    AddSampleLog(Workspace=ws,
-                 Logname='wavelength',
-                 LogText=str(wavelength),
-                 LogType='Number',
-                 NumberType='Double',
-                 LogUnit='Angstrom',
-                 EnableLogging=algorithmLogging)
+    run = ws.run()
+    run.addProperty('Ei', float(energy), 'meV', True)
+    run.addProperty('wavelength', float(wavelength), 'Angstrom', True)
     report.notice("Applied Ei calibration to '" + str(ws) + "'.")
     report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
     report.notice('Original wavelength: {} new wavelength {}.'.format(originalWavelength, wavelength))
@@ -541,10 +530,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
                 self._cleanup.protect(eiCalibrationWS)
             if eiCalibrationWS:
-                mainWS = _applyIncidentEnergyCalibration(mainWS, eiCalibrationWS, self._names,
-                                                         self._report, self._subalgLogging)
-                monWS = _applyIncidentEnergyCalibration(monWS, eiCalibrationWS, self._names, self._report,
-                                                        self._subalgLogging)
+                mainWS = _applyIncidentEnergyCalibration(mainWS, eiCalibrationWS, self._report)
+                monWS = _applyIncidentEnergyCalibration(monWS, eiCalibrationWS, self._report)
         if not self.getProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
             if eiCalibrationWS is None:
                 eiCalibrationWSName = self._names.withSuffix('incident_energy_from_logs')
