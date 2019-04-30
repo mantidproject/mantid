@@ -14,7 +14,7 @@ Mantid::Kernel::Logger g_log("LoadShape");
 }
 namespace Mantid {
 namespace DataHandling {
-enum ScaleUnits { metres, centimetres, milimetres };
+enum ScaleUnits { metres, centimetres, millimetres };
 
 class DLLExport LoadShape {
 
@@ -27,7 +27,7 @@ protected:
       yVal = yVal / 100;
       zVal = zVal / 100;
       break;
-    case milimetres:
+    case millimetres:
       xVal = xVal / 1000;
       yVal = yVal / 1000;
       zVal = zVal / 1000;

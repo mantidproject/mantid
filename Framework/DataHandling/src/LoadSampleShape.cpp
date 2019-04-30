@@ -76,7 +76,7 @@ void LoadSampleShape::exec() {
   } else if (scaleProperty == "cm") {
     scaleType = centimetres;
   } else if (scaleProperty == "mm") {
-    scaleType = milimetres;
+    scaleType = millimetres;
   } else {
     throw std::invalid_argument(scaleProperty +
                                 " is not an accepted scale of stl file.");
