@@ -179,8 +179,6 @@ void IFittingAlgorithm::setFunction() {
  */
 void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
                                      bool addProperties) {
-  // get the workspace
-  API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
   // m_function->setWorkspace(ws);
   const size_t n = std::string("InputWorkspace").size();
   const std::string suffix =

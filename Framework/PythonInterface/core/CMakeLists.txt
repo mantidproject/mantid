@@ -30,6 +30,7 @@ set(INC_FILES
 set(_target_name PythonInterfaceCore)
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
 target_include_directories(${_target_name} PUBLIC inc)
+target_include_directories(${_target_name} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 # Set the name of the generated library
 set_target_properties(${_target_name}
                       PROPERTIES OUTPUT_NAME

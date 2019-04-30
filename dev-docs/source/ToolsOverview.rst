@@ -285,3 +285,33 @@ For example, to convert all loops classified as *risky* or above, we would appen
 
     ;-config={CheckOptions: [ {key: modernize-loop-convert.MinConfidence, value: risky} ]}
 
+CMake-format
+---------------------
+
+`CMake-format <https://github.com/cheshirekow/cmake_format/>`__ is a tool which is used to format individual ``CMakeLists.txt`` to make them easier to read. 
+The package can be installed using ``pip install cmake_format`` or ``sudo pip install cmake_format``.
+
+To use cmake-format on a specific ``CMakeLists.txt`` file in the command line run 
+
+.. code::
+
+	python -m cmake_format -c /path/to/mantid/.cmake-format.json -i /path/to/CMakeLists.txt
+	
+This will format the file using the config file ``.cmake-format.json`` which can be found in the root of the mantid directory.
+
+There is an official Visual Studio extension, details of which can be found `here <https://marketplace.visualstudio.com/items?itemName=cheshirekow.cmake-format>`__.
+
+To format on all the CMakeLists run the following from within the mantid source folder:
+
+.. code::
+
+	import os
+
+	dir = os.getcwd()
+	for path, subdirs, files in os.walk(dir):
+		for file in files:
+			if file.endswith("CMakeLists.txt"):
+				cmakefile = os.path.join(path, file)
+				print("Formatting " + cmakefile)
+				os.system('python -m cmake_format -c ' + os.path.join(dir, '.cmake-format.json') +' -i ' + cmakefile)
+

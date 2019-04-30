@@ -10,7 +10,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/exec.hpp>

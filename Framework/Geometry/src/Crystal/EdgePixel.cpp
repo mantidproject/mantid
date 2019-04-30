@@ -43,8 +43,7 @@ bool edgePixel(Mantid::Geometry::Instrument_const_sptr inst,
       startI = 0;
       parent = children[0];
       children.clear();
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
     }
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =

@@ -9,7 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DataComparison");
@@ -580,10 +580,10 @@ void DataComparison::diffSelected() {
   QList<int> selectedRows;
 
   // Generate a list of selected row numbers
-  for (auto it = selectedItems.begin(); it != selectedItems.end(); ++it) {
-    int row = (*it)->row();
+  for (auto &selectedItem : selectedItems) {
+    int row = selectedItem->row();
     if (!selectedRows.contains(row))
-      selectedRows << (*it)->row();
+      selectedRows << selectedItem->row();
   }
 
   // Check there is the correct number of selected items

@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Elwin.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>
 
@@ -268,11 +268,11 @@ void Elwin::run() {
   // Load input files
   std::string inputWorkspacesString;
 
-  for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
-    QFileInfo inputFileInfo(*it);
+  for (auto &inputFilename : inputFilenames) {
+    QFileInfo inputFileInfo(inputFilename);
     auto const workspaceName = inputFileInfo.baseName().toStdString();
     m_batchAlgoRunner->addAlgorithm(
-        loadAlgorithm((*it).toStdString(), workspaceName));
+        loadAlgorithm(inputFilename.toStdString(), workspaceName));
     inputWorkspacesString += workspaceName + ",";
   }
 
@@ -506,8 +506,7 @@ void Elwin::newInputFiles() {
 
   // Populate the combo box with the filenames
   QStringList filenames = m_uiForm.dsInputFiles->getFilenames();
-  for (auto it = filenames.begin(); it != filenames.end(); ++it) {
-    QString rawFilename = *it;
+  for (auto rawFilename : filenames) {
     QFileInfo inputFileInfo(rawFilename);
     QString sampleName = inputFileInfo.baseName();
 

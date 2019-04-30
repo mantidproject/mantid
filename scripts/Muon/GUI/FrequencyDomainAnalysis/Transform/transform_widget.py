@@ -8,8 +8,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformView
 
-from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
 from Muon.GUI.Common.observer_pattern import Observer
 
@@ -18,10 +16,10 @@ from qtpy import QtWidgets
 
 class TransformWidget(QtWidgets.QWidget):
 
-    def __init__(self, load, parent=None):
+    def __init__(self, load, fft_widget, maxent_widget, parent=None):
         super(TransformWidget, self).__init__(parent)
-        self._fft = FFTWidget(load=load, parent=self)
-        self._maxent = MaxEntWidget(load=load, parent=self)
+        self._fft = fft_widget(load=load, parent=self)
+        self._maxent = maxent_widget(load=load, parent=self)
         self._selector = TransformSelectionWidget(parent=self)
         self.LoadObserver = LoadObserver(self)
         self.instrumentObserver = instrumentObserver(self)

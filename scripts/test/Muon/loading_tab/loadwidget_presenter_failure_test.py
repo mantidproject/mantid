@@ -4,26 +4,23 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from PyQt4 import QtGui
 import unittest
+from PyQt4 import QtGui
 
 from mantid.py3compat import mock
-from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
-from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common import mock_widget
-
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_data_context import MuonDataContext
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-
+from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
@@ -59,15 +56,14 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.addCleanup(self.load_run_patcher.stop)
         self.load_run_mock = self.load_run_patcher.start()
 
-        self.data = MuonLoadData()
-        self.context = MuonDataContext(self.data)
-        self.context.instrument = 'EMU'
+        setup_context_for_tests(self)
+        self.data_context.instrument = 'EMU'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
-        self.load_file_model = BrowseFileWidgetModel(self.data, self.context)
-        self.load_run_model = LoadRunWidgetModel(self.data, self.context)
+        self.load_file_model = BrowseFileWidgetModel(self.loaded_data, self.context)
+        self.load_run_model = LoadRunWidgetModel(self.loaded_data, self.context)
 
-        self.model = LoadWidgetModel(self.data, self.context)
+        self.model = LoadWidgetModel(self.loaded_data, self.context)
         self.view = LoadWidgetView(parent=self.obj, load_run_view=self.load_run_view,
                                    load_file_view=self.load_file_view)
 

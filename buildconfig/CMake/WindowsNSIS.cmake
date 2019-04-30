@@ -11,7 +11,7 @@ set( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
 
-set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "MantidPlot_Icon_32offset" )
+set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "mantidplot" )
 set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "mantid_workbench" )
 set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
 
@@ -57,6 +57,22 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
+# MSVC runtime & openmp libs for Visual Studio
+# They are in the locations defined by the VS***COMNTOOLS environment variable
+set ( _RT 140 )
+file ( TO_CMAKE_PATH $ENV{VS${_RT}COMNTOOLS}../../VC/redist/x64 X64_REDIST_DIR )
+# CRT libraries
+set ( CRT_DLLS concrt${_RT}.dll msvcp${_RT}.dll vccorlib${_RT}.dll vcruntime${_RT}.dll )
+foreach( DLL ${CRT_DLLS} )
+  install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.CRT/${DLL} DESTINATION bin )
+endforeach()
+# OpenMP
+set ( OMP_DLLS vcomp${_RT}.dll )
+foreach( DLL ${OMP_DLLS} )
+    install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.OpenMP/${DLL} DESTINATION bin )
+endforeach()
+
+# Other third party dependencies
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_filesystem-mt.dll

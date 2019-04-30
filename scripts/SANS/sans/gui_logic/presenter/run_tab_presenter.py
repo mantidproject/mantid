@@ -15,25 +15,24 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 import csv
 import os
-import sys
 import time
 import traceback
 
 from mantid.api import (FileFinder)
-from mantid.kernel import Logger, ConfigService
+from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
+from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       add_dir_to_datasearch, remove_dir_from_datasearch)
+                                       add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
@@ -77,6 +76,15 @@ def log_times(func):
         return result
 
     return run
+
+
+class SaveDirectoryObserver(ConfigPropertyObserver):
+    def __init__(self, callback):
+        super(SaveDirectoryObserver, self).__init__("defaultsave.directory")
+        self.callback = callback
+
+    def onPropertyValueChanged(self, new_value, old_value):
+        self.callback(new_value)
 
 
 class RunTabPresenter(object):
@@ -290,7 +298,6 @@ class RunTabPresenter(object):
 
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
-            self._view.set_out_default_user_file()
             self._view.set_out_default_output_mode()
             self._view.set_out_default_save_can()
 
@@ -301,6 +308,12 @@ class RunTabPresenter(object):
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
+
+            self._view.gui_properties_handler = SANSGuiPropertiesHandler(
+                                                    {"user_file": (self._view.set_out_default_user_file,
+                                                                   str)},
+                                                    line_edits={"user_file":
+                                                                self._view.user_file_line_edit})
 
     def on_user_file_load(self):
         """
@@ -650,12 +663,6 @@ class RunTabPresenter(object):
             self.sans_logger.notice("Cannot export table as it is empty.")
             return
 
-        # Python 2 and 3 take input in different modes for writing lists to csv files
-        if sys.version_info[0] == 2:
-            open_type = 'wb'
-        else:
-            open_type = 'w'
-
         try:
             self._view.disable_buttons()
 
@@ -664,7 +671,7 @@ class RunTabPresenter(object):
             filename = self._get_filename_to_save(filename)
             if filename is not None:
                 self.sans_logger.information("Starting export of table. Filename: {}".format(filename))
-                with open(filename, open_type) as outfile:
+                with open(filename, csv_open_type) as outfile:
                     # Pass filewriting object rather than filename to make testing easier
                     writer = csv.writer(outfile)
                     self._export_table(writer, non_empty_rows)
@@ -1299,22 +1306,17 @@ class RunTabPresenter(object):
     @staticmethod
     def _create_batch_entry_from_row(row):
         batch_file_keywords = ["sample_sans",
-                               "output_as",
                                "sample_trans",
                                "sample_direct_beam",
                                "can_sans",
                                "can_trans",
                                "can_direct_beam",
+                               "output_as",
                                "user_file"]
-
-        loop_range = min(len(row), len(batch_file_keywords))
-        new_row = [''] * (2 * loop_range)
-
-        for i in range(loop_range):
-            key = batch_file_keywords[i]
-            value = row[i]
-            new_row[2*i] = key
-            new_row[2*i + 1] = value
+        new_row = []
+        for key, value in zip(batch_file_keywords, row):
+            new_row.append(key)
+            new_row.append(value)
 
         return new_row
 

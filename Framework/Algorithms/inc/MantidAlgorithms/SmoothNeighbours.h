@@ -91,19 +91,18 @@ private:
   void exec() override;
 
   void execWorkspace2D();
-  void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);
+  void execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws);
   void findNeighboursRectangular();
   void findNeighboursUbiqutious();
-  Mantid::Geometry::Instrument_const_sptr fetchInstrument() const;
 
   /// Sets the weighting stragegy.
-  void setWeightingStrategy(const std::string strategyName, double &cutOff);
+  void setWeightingStrategy(const std::string &strategyName, double &cutOff);
   /// Translate the entered radius into meters.
-  double translateToMeters(const std::string radiusUnits,
-                           const double &enteredRadius);
+  double translateToMeters(const std::string &radiusUnits,
+                           const double &enteredRadius) const;
 
   /// Build the instrument/detector setup in workspace
-  void setupNewInstrument(API::MatrixWorkspace_sptr outws);
+  void setupNewInstrument(API::MatrixWorkspace &outws) const;
 
   /// Build the instrument/detector setup in workspace
   void spreadPixels(API::MatrixWorkspace_sptr outws);

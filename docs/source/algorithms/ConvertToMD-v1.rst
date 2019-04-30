@@ -68,16 +68,21 @@ Notes
    mode.
 #. A good guess on the limits can be obtained from the
    :ref:`algm-ConvertToMDMinMaxLocal` algorithm.
-#. Switching the attribute `ConverterType = {Default, Indexed}` from `Default`
-   to `Indexed` increases performance especially for bigger files, but has some
-   restrictions:
 
- a. `SplitInto` should be the power of two,e.g. 2, 4, 8, 16 etc.,
+Indexed mode
+------------
 
- b. `FileBackEnd` and `TopLevelSplitting` are not applicable and
-    should be disabled.
- c. Indexing adds the minor error to the events coordinate, to check it see log
-    at `Error with using Morton indexes is`.
+Setting the `ConverterType` parameter to `Indexed` uses an alternative intermediate data format within `ConvertToMD` which may give significant performance boosts in certain cases.
+
+The performance benefit of this method is dependant on the number of events in the input dataset.
+Once you have data files containing more than 100 million events and have at least 8 cores this method becomes worth enabling.
+For large files (>500 million events) performance scales well with the number of available CPU cores (i.e. using 32 cores will be notably faster than 8 cores).
+
+Use of this method comes with the following restrictions:
+
+#. `SplitInto` should be the power of two (i.e. 2, 4, 8, 16, etc.)
+#. `FileBackEnd` and `TopLevelSplitting` are not applicable and should be disabled
+#. Indexing adds a small numerical error to the event coordinates, the magnitude of this error is listed in the log (`Error with using Morton indexes is`)
 
 How to write custom ConvertToMD plugin
 --------------------------------------

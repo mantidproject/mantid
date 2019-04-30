@@ -67,61 +67,6 @@ V3D createPerpendicular(const V3D &symmetryAxis) {
     return symmetryAxis.cross_prod(Z_AXIS);
 }
 
-} // namespace
-
-namespace Rasterize {
-
-// -------------------
-// collection of calculations that convert to CSGObjects and pass the work on
-
-Raster calculate(const V3D &beamDirection,
-                 const boost::shared_ptr<const IObject> shape,
-                 const double cubeSizeInMetre) {
-  // convert to the underlying CSGObject
-  const auto csgshape =
-      boost::dynamic_pointer_cast<const Geometry::CSGObject>(shape);
-  if (!csgshape)
-    throw std::logic_error("Failed to convert IObject to CSGObject");
-  if (!(csgshape->hasValidShape()))
-    throw std::logic_error("Shape[IObject] does not have a valid shape");
-
-  return calculate(beamDirection, *csgshape, cubeSizeInMetre);
-}
-
-Raster calculateCylinder(const V3D &beamDirection,
-                         const boost::shared_ptr<const Geometry::IObject> shape,
-                         const size_t numSlices, const size_t numAnnuli) {
-  // convert to the underlying CSGObject
-  const auto csgshape =
-      boost::dynamic_pointer_cast<const Geometry::CSGObject>(shape);
-  if (!csgshape)
-    throw std::logic_error("Failed to convert IObject to CSGObject");
-  if (!(csgshape->hasValidShape()))
-    throw std::logic_error("Shape[IObject] does not have a valid shape");
-  if (csgshape->shape() != detail::ShapeInfo::GeometryShape::CYLINDER) {
-    throw std::invalid_argument("Given shape is not a cylinder.");
-  }
-  return calculateCylinder(beamDirection, *csgshape, numSlices, numAnnuli);
-}
-
-Raster
-calculateHollowCylinder(const V3D &beamDirection,
-                        const boost::shared_ptr<const Geometry::IObject> shape,
-                        const size_t numSlices, const size_t numAnnuli) {
-  // convert to the underlying CSGObject
-  const auto csgshape =
-      boost::dynamic_pointer_cast<const Geometry::CSGObject>(shape);
-  if (!csgshape)
-    throw std::logic_error("Failed to convert IObject to CSGObject");
-  if (!(csgshape->hasValidShape()))
-    throw std::logic_error("Shape[IObject] does not have a valid shape");
-  if (csgshape->shape() != detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
-    throw std::invalid_argument("Given shape is not a hollow cylinder.");
-  }
-  return calculateHollowCylinder(beamDirection, *csgshape, numSlices,
-                                 numAnnuli);
-}
-
 const V3D CalculatePosInCylinder(const double phi, const double R,
                                  const double z,
                                  const std::array<V3D, 3> coords) {
@@ -142,116 +87,155 @@ const V3D CalculatePosInCylinder(const double phi, const double R,
   return V3D(xcomp, ycomp, zcomp);
 }
 
-// -------------------
-// actual calculations
+// This must be updated when new primitives become available
+bool hasCustomizedRaster(detail::ShapeInfo::GeometryShape shape) {
+  if (shape == detail::ShapeInfo::GeometryShape::CYLINDER)
+    return true;
+  if (shape == detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER)
+    return true;
+  // nothing else has been customized
+  return false;
+}
 
-/*
- * This method attempts to convert the object to one of the primitive types. If
- * that is not found it uses the arbitrary shape code.
- */
-Raster calculate(const V3D &beamDirection, const CSGObject &shape,
-                 const double cubeSizeInMetre) {
+double calcDistanceInShapeNoCheck(const V3D &beamDirection,
+                                  const IObject &shape, const V3D &position) {
+  // Create track for distance in cylinder before scattering point
+  Track incoming(position, -beamDirection);
+
+  shape.interceptSurface(incoming);
+  return incoming.front().distFromStart;
+}
+
+Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
+                        const double cubeSizeInMetre) {
   if (cubeSizeInMetre <= 0.)
     throw std::runtime_error("Tried to section shape into zero size elements");
 
-  if (shape.shape() == Geometry::detail::ShapeInfo::GeometryShape::CYLINDER) {
-    const auto params = shape.shapeInfo().cylinderGeometry();
-    const size_t numSlice = std::max<size_t>(
-        1, static_cast<size_t>(params.height / cubeSizeInMetre));
-    const size_t numAnnuli = std::max<size_t>(
-        1, static_cast<size_t>(params.radius / cubeSizeInMetre));
-    return calculateCylinder(beamDirection, shape, numSlice, numAnnuli);
-  } else if (shape.shape() ==
-             Geometry::detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
-    const auto params = shape.shapeInfo().hollowCylinderGeometry();
-    const size_t numSlice = std::max<size_t>(
-        1, static_cast<size_t>(params.height / cubeSizeInMetre));
-    const size_t numAnnuli = std::max<size_t>(
-        1, static_cast<size_t>((params.radius - params.innerRadius) /
-                               cubeSizeInMetre));
-    return calculateHollowCylinder(beamDirection, shape, numSlice, numAnnuli);
-  } else { // arbitrary shape code
-    const auto bbox = shape.getBoundingBox();
-    assert(bbox.xMax() > bbox.xMin());
-    assert(bbox.yMax() > bbox.yMin());
-    assert(bbox.zMax() > bbox.zMin());
+  const auto bbox = shape.getBoundingBox();
+  assert(bbox.xMax() > bbox.xMin());
+  assert(bbox.yMax() > bbox.yMin());
+  assert(bbox.zMax() > bbox.zMin());
 
-    const double xLength = bbox.xMax() - bbox.xMin();
-    const double yLength = bbox.yMax() - bbox.yMin();
-    const double zLength = bbox.zMax() - bbox.zMin();
+  const double xLength = bbox.xMax() - bbox.xMin();
+  const double yLength = bbox.yMax() - bbox.yMin();
+  const double zLength = bbox.zMax() - bbox.zMin();
 
-    const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
-    const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
-    const size_t numZSlices = static_cast<size_t>(zLength / cubeSizeInMetre);
-    const double XSliceThickness = xLength / static_cast<double>(numXSlices);
-    const double YSliceThickness = yLength / static_cast<double>(numYSlices);
-    const double ZSliceThickness = zLength / static_cast<double>(numZSlices);
-    const double elementVolume =
-        XSliceThickness * YSliceThickness * ZSliceThickness;
+  const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
+  const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
+  const size_t numZSlices = static_cast<size_t>(zLength / cubeSizeInMetre);
+  const double XSliceThickness = xLength / static_cast<double>(numXSlices);
+  const double YSliceThickness = yLength / static_cast<double>(numYSlices);
+  const double ZSliceThickness = zLength / static_cast<double>(numZSlices);
+  const double elementVolume =
+      XSliceThickness * YSliceThickness * ZSliceThickness;
 
-    const size_t numVolumeElements = numXSlices * numYSlices * numZSlices;
+  const size_t numVolumeElements = numXSlices * numYSlices * numZSlices;
 
-    Raster result;
-    try {
-      result.reserve(numVolumeElements);
-    } catch (...) {
-      // Typically get here if the number of volume elements is too large
-      // Provide a bit more information
-      throw std::logic_error(
-          "Too many volume elements requested - try increasing the value "
-          "of the ElementSize property.");
-    }
+  Raster result;
+  try {
+    result.reserve(numVolumeElements);
+  } catch (...) {
+    // Typically get here if the number of volume elements is too large
+    // Provide a bit more information
+    throw std::logic_error(
+        "Too many volume elements requested - try increasing the value "
+        "of the ElementSize property.");
+  }
 
-    // go through the bounding box generating cubes and seeing if they are
-    // inside the shape
-    for (size_t i = 0; i < numZSlices; ++i) {
-      const double z =
-          (static_cast<double>(i) + 0.5) * ZSliceThickness + bbox.xMin();
+  // go through the bounding box generating cubes and seeing if they are
+  // inside the shape
+  for (size_t i = 0; i < numZSlices; ++i) {
+    const double z =
+        (static_cast<double>(i) + 0.5) * ZSliceThickness + bbox.xMin();
 
-      for (size_t j = 0; j < numYSlices; ++j) {
-        const double y =
-            (static_cast<double>(j) + 0.5) * YSliceThickness + bbox.yMin();
+    for (size_t j = 0; j < numYSlices; ++j) {
+      const double y =
+          (static_cast<double>(j) + 0.5) * YSliceThickness + bbox.yMin();
 
-        for (size_t k = 0; k < numXSlices; ++k) {
-          const double x =
-              (static_cast<double>(k) + 0.5) * XSliceThickness + bbox.zMin();
-          // Set the current position in the sample in Cartesian coordinates.
-          const Kernel::V3D currentPosition = V3D(x, y, z);
-          // Check if the current point is within the object. If not, skip.
-          if (shape.isValid(currentPosition)) {
-            // Create track for distance in sample before scattering point
-            Track incoming(currentPosition, -beamDirection);
-            // We have an issue where occasionally, even though a point is
-            // within the object a track segment to the surface isn't correctly
-            // created. In the context of this algorithm I think it's safe to
-            // just chuck away the element in this case. This will also throw
-            // away points that are inside a gauge volume but outside the sample
-            if (shape.interceptSurface(incoming) > 0) {
-              result.l1.emplace_back(incoming.cbegin()->distFromStart);
-              result.position.emplace_back(currentPosition);
-              result.volume.emplace_back(elementVolume);
-            }
+      for (size_t k = 0; k < numXSlices; ++k) {
+        const double x =
+            (static_cast<double>(k) + 0.5) * XSliceThickness + bbox.zMin();
+        // Set the current position in the sample in Cartesian coordinates.
+        const Kernel::V3D currentPosition = V3D(x, y, z);
+        // Check if the current point is within the object. If not, skip.
+        if (shape.isValid(currentPosition)) {
+          // Create track for distance in sample before scattering point
+          Track incoming(currentPosition, -beamDirection);
+          // We have an issue where occasionally, even though a point is
+          // within the object a track segment to the surface isn't correctly
+          // created. In the context of this algorithm I think it's safe to
+          // just chuck away the element in this case. This will also throw
+          // away points that are inside a gauge volume but outside the sample
+          if (shape.interceptSurface(incoming) > 0) {
+            result.l1.emplace_back(incoming.cbegin()->distFromStart);
+            result.position.emplace_back(currentPosition);
+            result.volume.emplace_back(elementVolume);
           }
         }
       }
     }
+  }
 
-    // Record the number of elements we ended up with
-    result.totalvolume = static_cast<double>(result.l1.size()) * elementVolume;
+  // Record the number of elements we ended up with
+  result.totalvolume = static_cast<double>(result.l1.size()) * elementVolume;
 
-    return result;
+  return result;
+}
+
+} // namespace
+
+namespace Rasterize {
+
+// -------------------
+// collection of calculations that convert to CSGObjects and pass the work on
+
+Raster calculate(const V3D &beamDirection, const IObject &shape,
+                 const double cubeSizeInMetre) {
+  const auto primitive = shape.shape();
+  if (hasCustomizedRaster(primitive)) {
+    // convert to the underlying primitive type - this assumes that there are
+    // only customizations for CSGObjects
+    const auto &shapeInfo = shape.shapeInfo();
+    if (primitive == Geometry::detail::ShapeInfo::GeometryShape::CYLINDER) {
+      const auto params = shapeInfo.cylinderGeometry();
+      const size_t numSlice = std::max<size_t>(
+          1, static_cast<size_t>(params.height / cubeSizeInMetre));
+      const size_t numAnnuli = std::max<size_t>(
+          1, static_cast<size_t>(params.radius / cubeSizeInMetre));
+      return calculateCylinder(beamDirection, shape, numSlice, numAnnuli);
+    } else if (primitive ==
+               Geometry::detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER) {
+      const auto params = shapeInfo.hollowCylinderGeometry();
+      const size_t numSlice = std::max<size_t>(
+          1, static_cast<size_t>(params.height / cubeSizeInMetre));
+      const size_t numAnnuli = std::max<size_t>(
+          1, static_cast<size_t>((params.radius - params.innerRadius) /
+                                 cubeSizeInMetre));
+      return calculateHollowCylinder(beamDirection, shape, numSlice, numAnnuli);
+    } else {
+      throw std::runtime_error(
+          "Rasterize::calculate should never get to this point");
+    }
+  } else {
+    return calculateGeneric(beamDirection, shape, cubeSizeInMetre);
   }
 }
 
-Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
+Raster calculateCylinder(const V3D &beamDirection, const IObject &shape,
                          const size_t numSlices, const size_t numAnnuli) {
+  if (shape.shape() != detail::ShapeInfo::GeometryShape::CYLINDER)
+    throw std::invalid_argument("Given shape is not a cylinder.");
+
   if (numSlices == 0)
     throw std::runtime_error("Tried to section cylinder into zero slices");
   if (numAnnuli == 0)
     throw std::runtime_error("Tried to section cylinder into zero annuli");
 
+  // convert to the underlying primitive type
+  const auto &shapeInfo = shape.shapeInfo();
+
   // get the geometry for the volume elements
-  const auto params = shape.shapeInfo().cylinderGeometry();
+  const auto params = shapeInfo.cylinderGeometry();
   const V3D center =
       (params.axis * .5 * params.height) + params.centreOfBottomBase;
 
@@ -307,14 +291,10 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
         assert(shape.isValid(position));
 
         result.position.emplace_back(position);
-
-        // Create track for distance in cylinder before scattering point
-        Track incoming(position, -beamDirection);
-
-        shape.interceptSurface(incoming);
-        result.l1.emplace_back(incoming.front().distFromStart);
-
         result.volume.emplace_back(elementVolume);
+        // TODO should be customized for cylinder
+        result.l1.emplace_back(
+            calcDistanceInShapeNoCheck(beamDirection, shape, position));
       } // loop over k
     }   // loop over j
   }     // loop over i
@@ -322,17 +302,21 @@ Raster calculateCylinder(const V3D &beamDirection, const CSGObject &shape,
   return result;
 }
 
-Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
+Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape,
                                const size_t numSlices, const size_t numAnnuli) {
+  if (shape.shape() != detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER)
+    throw std::invalid_argument("Given shape is not a hollow cylinder.");
+
   if (numSlices == 0)
-    throw std::runtime_error(
-        "Tried to section hollow cylinder into zero slices");
+    throw std::runtime_error("Tried to section cylinder into zero slices");
   if (numAnnuli == 0)
-    throw std::runtime_error(
-        "Tried to section hollow cylinder into zero annuli");
+    throw std::runtime_error("Tried to section cylinder into zero annuli");
+
+  // convert to the underlying primitive type
+  const auto &shapeInfo = shape.shapeInfo();
 
   // get the geometry for the volume elements
-  const auto params = shape.shapeInfo().hollowCylinderGeometry();
+  const auto params = shapeInfo.hollowCylinderGeometry();
   const V3D center =
       (params.axis * .5 * params.height) + params.centreOfBottomBase;
 
@@ -395,20 +379,17 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const CSGObject &shape,
         assert(shape.isValid(position));
 
         result.position.emplace_back(position);
-
-        // Create track for distance in cylinder before scattering point
-        Track incoming(position, -beamDirection);
-
-        shape.interceptSurface(incoming);
-        result.l1.emplace_back(incoming.front().distFromStart);
-
         result.volume.emplace_back(elementVolume);
+        // TODO should be customized for hollow cylinder
+        result.l1.emplace_back(
+            calcDistanceInShapeNoCheck(beamDirection, shape, position));
       } // loop over k
     }   // loop over j
   }     // loop over i
 
   return result;
 }
+
 } // namespace Rasterize
 } // namespace Geometry
 } // namespace Mantid

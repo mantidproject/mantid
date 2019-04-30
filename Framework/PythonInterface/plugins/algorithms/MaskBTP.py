@@ -69,7 +69,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.instname = self.instrument.getName()
 
         # special cases are defined, default value is in front
-        self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":38,"TOPAZ":10})
+        self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":23,"TOPAZ":10})
         self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
                       "SEQUOIA":150,"SNAP":64,"SXD":11,"TOPAZ":59,"WAND":8,"WISH":10}
         tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WAND":1,"WISH":1})
@@ -172,14 +172,20 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             else:
                 raise ValueError("Out of range index for ARCS instrument bank numbers")
         elif self.instname=="SEQUOIA":
-            if self.bankmin[self.instname]<=banknum<= 74:
+            # there are only banks 23-26 in A row
+            if self.bankmin[self.instname]<=banknum<= 37:
+                A_row = self.instrument.getComponentByName("A row")
+                if A_row is None or banknum>26:
+                    return None
+                return A_row[banknum-23][0]
+            if 38<=banknum<= 74:
                 return self.instrument.getComponentByName("B row")[banknum-38][0]
             elif 75<=banknum<= 113:
                 return self.instrument.getComponentByName("C row")[banknum-75][0]
             elif 114<=banknum<=self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
-                raise ValueError("Out of range index for SEQUOIA instrument bank numbers")
+                raise ValueError("Out of range index for SEQUOIA instrument bank numbers: %s" % (banknum,))
         elif self.instname in ["CNCS", "CORELLI","HYSPEC", "WAND"]:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]

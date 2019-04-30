@@ -13,21 +13,24 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
-from ..kernel.funcinspect import lhs_info, customise_func
-from . import _api
-
 import inspect as _inspect
-from six import get_function_code, Iterator, iteritems
 import sys
 
-#------------------------------------------------------------------------------
+from six import Iterator, get_function_code, iteritems
+
+from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
+from mantid.kernel.funcinspect import customise_func, lhs_info
+
+
+# ------------------------------------------------------------------------------
 # Binary Ops
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def attach_binary_operators_to_workspace():
     """
         Attaches the common binary operators
         to the Workspace class
     """
+
     def add_operator_func(attr, algorithm, inplace, reverse):
         # Wrapper for the function call
         def op_wrapper(self, other):
@@ -35,38 +38,42 @@ def attach_binary_operators_to_workspace():
             result_info = lhs_info()
             # Pass off to helper
             return _do_binary_operation(algorithm, self, other, result_info,
-                                 inplace, reverse)
+                                        inplace, reverse)
+
         op_wrapper.__name__ = attr
-        setattr(_api.Workspace, attr, op_wrapper)
+        setattr(Workspace, attr, op_wrapper)
+
     # Binary operations that workspaces are aware of
     operations = {
-        "Plus":("__add__", "__radd__","__iadd__"),
-        "Minus":("__sub__", "__rsub__","__isub__"),
-        "Multiply":("__mul__", "__rmul__","__imul__"),
-        "LessThan":"__lt__",
-        "GreaterThan":"__gt__",
-        "Or":"__or__",
-        "And":"__and__",
-        "Xor":"__xor__"
+        "Plus": ("__add__", "__radd__", "__iadd__"),
+        "Minus": ("__sub__", "__rsub__", "__isub__"),
+        "Multiply": ("__mul__", "__rmul__", "__imul__"),
+        "LessThan": "__lt__",
+        "GreaterThan": "__gt__",
+        "Or": "__or__",
+        "And": "__and__",
+        "Xor": "__xor__"
     }
     # The division operator changed in Python 3
-    divops = ["__truediv__", "__rtruediv__","__itruediv__"]
+    divops = ["__truediv__", "__rtruediv__", "__itruediv__"]
     if sys.version_info[0] < 3:
         # For Python 2 add the older methods so that modules without __future__
         # still work
-        divops.extend(["__div__", "__rdiv__","__idiv__"])
+        divops.extend(["__div__", "__rdiv__", "__idiv__"])
     operations["Divide"] = divops
-    
+
     # Loop through and add each one in turn
     for alg, attributes in iteritems(operations):
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
 
+
 # Prefix for temporary objects within workspace operations
 _workspace_op_prefix = '__python_op_tmp'
 # A list of temporary workspaces created by algebraic operations
 _workspace_op_tmps = []
+
 
 def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
     """
@@ -96,17 +103,17 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         output_name = _workspace_op_prefix + str(len(_workspace_op_tmps))
 
     # Do the operation
-    resultws = _api.performBinaryOp(self,rhs, op, output_name, inplace, reverse)
+    resultws = performBinaryOp(self, rhs, op, output_name, inplace, reverse)
 
     # Do we need to clean up
     if clear_tmps:
-        ads = _api.AnalysisDataServiceImpl.Instance()
+        ads = AnalysisDataServiceImpl.Instance()
         for name in _workspace_op_tmps:
             if name in ads and output_name != name:
                 del ads[name]
         _workspace_op_tmps = []
     else:
-        if type(resultws) == _api.WorkspaceGroup:
+        if type(resultws) == WorkspaceGroup:
             # Ensure the members are removed aswell
             members = resultws.getNames()
             for member in members:
@@ -114,16 +121,18 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         else:
             _workspace_op_tmps.append(output_name)
 
-    return resultws # For self-assignment this will be set to the same workspace
+    return resultws  # For self-assignment this will be set to the same workspace
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Unary Ops
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def attach_unary_operators_to_workspace():
     """
         Attaches the common unary operators
         to the Workspace class
     """
+
     def add_operator_func(attr, algorithm):
         # Wrapper for the function call
         def op_wrapper(self):
@@ -131,11 +140,13 @@ def attach_unary_operators_to_workspace():
             result_info = lhs_info()
             # Pass off to helper
             return _do_unary_operation(algorithm, self, result_info)
+
         op_wrapper.__name__ = attr
-        setattr(_api.Workspace, attr, op_wrapper)
+        setattr(Workspace, attr, op_wrapper)
+
     # Binary operations that workspaces are aware of
     operations = {
-        'NotMD':'__invert__'
+        'NotMD': '__invert__'
     }
     # Loop through and add each one in turn
     for alg, attributes in iteritems(operations):
@@ -168,9 +179,10 @@ def _do_unary_operation(op, self, lhs_vars):
         _workspace_op_tmps.append(output_name)
 
     # Do the operation
-    ads = _api.AnalysisDataServiceImpl.Instance()
+    ads = AnalysisDataServiceImpl.Instance()
 
-    alg = simpleapi._create_algorithm_object(op) # gets the child status correct for PythonAlgorithms
+    # gets the child status correct for PythonAlgorithms
+    alg = simpleapi._create_algorithm_object(op)
     alg.setProperty("InputWorkspace", self)
     alg.setPropertyValue("OutputWorkspace", output_name)
     alg.execute()
@@ -184,11 +196,13 @@ def _do_unary_operation(op, self, lhs_vars):
 
     return resultws
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # TableWorkspace Operations
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def attach_tableworkspaceiterator():
     """Attaches the iterator code to a table workspace."""
+
     def __iter_method(self):
         class ITableWorkspaceIter(Iterator):
             def __init__(self, wksp):
@@ -200,14 +214,16 @@ def attach_tableworkspaceiterator():
                 if self.__pos + 1 > self.__max:
                     raise StopIteration
                 self.__pos += 1
-                return self.__wksp.row(self.__pos-1)
+                return self.__wksp.row(self.__pos - 1)
+
         return ITableWorkspaceIter(self)
 
-    setattr(_api.ITableWorkspace, "__iter__", __iter_method)
+    setattr(ITableWorkspace, "__iter__", __iter_method)
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Algorithms as workspace methods
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None):
     """
         Adds a method to the given type that calls an algorithm
@@ -219,6 +235,7 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         :param workspace_types: A list of string names of a workspace types. If None, then it is attached
                               to the general Workspace type. Default=None
     """
+
     def _method_impl(self, *args, **kwargs):
         # Map the calling object to the requested parameter
         kwargs[self_param_name] = self
@@ -227,7 +244,8 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
         kwargs["__LHS_FRAME_OBJECT__"] = _inspect.currentframe().f_back
         # Call main function
         return func_obj(*args, **kwargs)
-    #------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
     # Add correct meta-properties for the method
     signature = ['self']
     signature.extend(get_function_code(func_obj).co_varnames)
@@ -235,8 +253,9 @@ def attach_func_as_method(name, func_obj, self_param_name, workspace_types=None)
                    tuple(signature), func_obj.__doc__)
 
     if workspace_types or len(workspace_types) > 0:
+        from mantid import api
         for typename in workspace_types:
-            cls = getattr(_api, typename)
+            cls = getattr(api, typename)
             setattr(cls, name, _method_impl)
     else:
-        setattr(_api.Workspace, name, _method_impl)
+        setattr(Workspace, name, _method_impl)

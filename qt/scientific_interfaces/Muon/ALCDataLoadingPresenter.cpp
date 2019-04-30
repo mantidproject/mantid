@@ -14,7 +14,7 @@
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 #include "MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>
@@ -266,8 +266,8 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
-  for (auto it = properties.begin(); it != properties.end(); ++it) {
-    logs.push_back((*it)->name());
+  for (auto property : properties) {
+    logs.push_back(property->name());
   }
   m_view->setAvailableLogs(logs);
 

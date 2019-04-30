@@ -40,7 +40,7 @@ std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(
   std::vector<SymmetryOperation> symOps;
   symOps.reserve(identifiers.size());
   for (const auto &identifier : identifiers) {
-    symOps.push_back(createSymOp(boost::trim_copy(identifier)));
+    symOps.emplace_back(createSymOp(boost::trim_copy(identifier)));
   }
 
   return symOps;
@@ -73,11 +73,9 @@ std::vector<std::string>
 SymmetryOperationFactoryImpl::subscribedSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_prototypes.size());
-
   for (const auto &prototype : m_prototypes) {
-    symbols.push_back(prototype.first);
+    symbols.emplace_back(prototype.first);
   }
-
   return symbols;
 }
 

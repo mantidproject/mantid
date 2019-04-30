@@ -7,9 +7,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 
-#include "../General/UserInputValidator.h"
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ISISCalibration.h"
 
 namespace MantidQt {

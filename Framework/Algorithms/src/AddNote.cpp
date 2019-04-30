@@ -112,7 +112,6 @@ void AddNote::exec() {
     removeExisting(logWS, name);
   }
   createOrUpdate(run, name);
-  auto dtv = boost::make_shared<DateTimeValidator>();
 }
 
 /**

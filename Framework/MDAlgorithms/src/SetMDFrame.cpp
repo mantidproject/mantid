@@ -85,7 +85,6 @@ void SetMDFrame::init() {
 
   auto axisValidator =
       boost::make_shared<Mantid::Kernel::ArrayBoundedValidator<int>>();
-  axisValidator->clearUpper();
   axisValidator->setLower(0);
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>(

@@ -225,7 +225,6 @@ public:
   GenericDialog(QWidget *parent = nullptr);
 };
 
-
 class InterfaceManager {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -240,6 +239,15 @@ public:
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
       const QStringList &disabled = QStringList());
+
+  void showHelpPage(const QString &url=QString());
+  void showWikiPage(const QString &page=QString());
+  void showAlgorithmHelp(const QString &name, const int version=-1);
+  void showConceptHelp(const QString &name);
+  void showFitFunctionHelp(const QString &name=QString());
+  void showCustomInterfaceHelp(const QString &name);
+  void showWebPage(const QString &url);
+  void closeHelpWindow();
 };
 
 // ---------------------------------
@@ -290,6 +298,7 @@ signals:
   void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceNames);
+  void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
 };

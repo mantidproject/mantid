@@ -10,8 +10,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-#include <boost/lexical_cast.hpp>
-
 namespace Mantid {
 namespace CurveFitting {
 
