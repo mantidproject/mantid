@@ -876,7 +876,6 @@ void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
   m_axes[axisIndex] = newAxis;
 }
 
-
 /**
  *  Whether the workspace contains common X bins with logarithmic spacing
  *  @return whether the workspace contains common X bins with log spacing
