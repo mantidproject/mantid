@@ -800,8 +800,12 @@ class MantidAxes(Axes):
                     handle = line
                     label = line.get_label()
 
-                handles.append(handle)
-                labels.append(label)
+                # if the label starts with an underscore then
+                # it should not be part of the legend as it is hidden
+                # this can't be checked before the error line check above
+                if not label.startswith("_"):
+                    handles.append(handle)
+                    labels.append(label)
 
             return Axes.legend(self, handles, labels)
         else:
