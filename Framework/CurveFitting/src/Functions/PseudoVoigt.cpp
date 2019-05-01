@@ -12,6 +12,53 @@
 
 #include <cmath>
 
+namespace {
+
+/** a_G = 2/gamma * sqrt(ln2/pi)
+ * @param gamma :: FWHM
+ * @return
+ */
+inline constexpr double cal_ag(const double gamma) {
+  const double ag = 2. / gamma * sqrt(M_LN2 / M_PI);
+  return ag;
+}
+
+/** b_G = 4 ln2 / gamma^2
+ * @param gamma :: FWHM
+ * @return
+ */
+inline constexpr double cal_bg(const double gamma) {
+  const double bg = 4 * M_LN2 / (gamma * gamma);
+  return bg;
+}
+
+/** calculate normalized Gaussian
+ * @param ag : a_G
+ * @param bg : b_G
+ * @param xdiffsq : (x - x0)**2
+ * @return
+ */
+inline constexpr double cal_gaussian(const double ag, const double bg,
+                                     const double xdiffsq) {
+  const double gaussian = ag * exp(-bg * xdiffsq);
+  return gaussian;
+}
+
+/** calculate lorentzian
+ * @param gamma_div_2: H
+ * @param gammasq_div_4: H^2
+ * @param xdiffsq
+ * @return
+ */
+inline constexpr double cal_lorentzian(const double gamma_div_2,
+                                       const double gammasq_div_4,
+                                       const double xdiffsq) {
+  double lorentz = gamma_div_2 / (xdiffsq + gammasq_div_4) / M_PI;
+  return lorentz;
+}
+
+} // namespace
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -358,48 +405,6 @@ void PseudoVoigt::setHeight(const double h) {
  */
 void PseudoVoigt::setFwhm(const double w) { setParameter("FWHM", w, true); }
 
-/** a_G = 2/gamma * sqrt(ln2/pi)
- * @param gamma :: FWHM
- * @return
- */
-double PseudoVoigt::cal_ag(const double gamma) const {
-  const double ag = 2. / gamma * sqrt(M_LN2 / M_PI);
-  return ag;
-}
-
-/** b_G = 4 ln2 / gamma^2
- * @param gamma :: FWHM
- * @return
- */
-double PseudoVoigt::cal_bg(const double gamma) const {
-  const double bg = 4 * M_LN2 / (gamma * gamma);
-  return bg;
-}
-
-/** calculate normalized Gaussian
- * @param ag : a_G
- * @param bg : b_G
- * @param xdiffsq : (x - x0)**2
- * @return
- */
-double PseudoVoigt::cal_gaussian(const double ag, const double bg,
-                                 const double xdiffsq) const {
-  const double gaussian = ag * exp(-bg * xdiffsq);
-  return gaussian;
-}
-
-/** calculate lorentzian
- * @param gamma_div_2: H
- * @param gammasq_div_4: H^2
- * @param xdiffsq
- * @return
- */
-double PseudoVoigt::cal_lorentzian(const double gamma_div_2,
-                                   const double gammasq_div_4,
-                                   const double xdiffsq) const {
-  double lorentz = gamma_div_2 / (xdiffsq + gammasq_div_4) / M_PI;
-  return lorentz;
-}
 
 } // namespace Functions
 } // namespace CurveFitting
