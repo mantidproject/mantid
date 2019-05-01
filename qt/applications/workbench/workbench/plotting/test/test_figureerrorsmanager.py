@@ -11,15 +11,14 @@ from __future__ import (absolute_import, division, print_function,
 
 import matplotlib
 
-matplotlib.use('AGG')
+matplotlib.use("AGG")
 
-import matplotlib.pyplot as plt
-from qtpy.QtWidgets import QMenu
-
-from mantid.plots import MantidAxes
-from mantid.simpleapi import CreateWorkspace
-from mantidqt.utils.qt.testing import GuiTest
-from workbench.plotting.figureerrorsmanager import FigureErrorsManager
+import matplotlib.pyplot as plt  # noqa: E402
+from qtpy.QtWidgets import QMenu  # noqa: E402
+from mantid.plots import MantidAxes  # noqa: E402
+from mantid.simpleapi import CreateWorkspace  # noqa: E402
+from mantidqt.utils.qt.testing import GuiTest  # noqa: E402
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager  # noqa: E402
 
 
 class FigureErrorsManagerTest(GuiTest):
@@ -39,18 +38,16 @@ class FigureErrorsManagerTest(GuiTest):
                                          VerticalAxisUnit='DeltaE',
                                          VerticalAxisValues=[4, 6, 8],
                                          OutputWorkspace='ws2d_histo')
+        # initialises the QApplication
         super(cls, FigureErrorsManagerTest).setUpClass()
 
     def setUp(self):
-        self.fig, self.ax = plt.subplots(
-            subplot_kw={'projection': 'mantid'})  # type: matplotlib.figure.Figure, MantidAxes
+        self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
-        self.errors_manager = FigureErrorsManager(self.fig.canvas)  # type: FigureErrorsManager
+        self.errors_manager = FigureErrorsManager(self.fig.canvas)
 
     def tearDown(self):
         plt.close('all')
-        # makes it easier to annotate types, otherwise
-        # there is confusion between concrete type and None
         del self.fig
         del self.ax
         del self.errors_manager
@@ -58,14 +55,14 @@ class FigureErrorsManagerTest(GuiTest):
     def test_add_error_bars_menu(self):
         main_menu = QMenu()
         self.errors_manager.add_error_bars_menu(main_menu)
-        # Check all the expected buttons are added
+
+        # Check the expected sub-menu with buttons is added
+        added_menu = main_menu.children()[1]
         self.assertTrue(
-            any(FigureErrorsManager.TOGGLE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children()))
+            any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertTrue(
-            any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children()))
-        self.assertTrue(
-            any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children()))
-        self.assertEqual(4, len(main_menu.children()))
+            any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+        self.assertEqual(3, len(added_menu.children()))
 
     def test_add_errorbar_for(self):
         self.ax.plot(self.ws2d_histo, specNum=1)
@@ -201,18 +198,41 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
                                          VerticalAxisUnit='DeltaE',
                                          VerticalAxisValues=[4, 6, 8],
                                          OutputWorkspace='ws2d_histo')
+        # initialises the QApplication
         super(cls, ScriptedPlotFigureErrorsManagerTest).setUpClass()
 
     def setUp(self):
-        # scripted plot does NOT use the mantid projection
-        # and does not have the MantidAxes
-        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, matplotlib.axes.Axes
+        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, MantidAxes
 
         self.errors_manager = FigureErrorsManager(self.fig.canvas)  # type: FigureErrorsManager
+
+    def tearDown(self):
+        plt.close('all')
+        self.fig = None
+        self.ax = None
+        self.errors_manager = None
 
     def test_context_menu_not_added_for_scripted_plot_without_errors(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
         self.ax.plot([0, 15000], [0, 14000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.errors_manager.add_error_bars_menu(main_menu)
+
+        # number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_scripted_plot_line_without_label_handled_properly(self):
+        # having the special nolabel is usually present on lines with errors,
+        # but sometimes can be present on lines without errors, this test covers that case
+        self.ax.plot([0, 15000], [0, 15000], label=MantidAxes.MPL_NOLEGEND)
+        self.ax.plot([0, 15000], [0, 15000], label=MantidAxes.MPL_NOLEGEND)
 
         main_menu = QMenu()
         # QMenu always seems to have 1 child when empty,
@@ -239,17 +259,14 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
         # so no context menu will be added
         self.errors_manager.add_error_bars_menu(main_menu)
 
-        # actions should have been added now
+        added_menu = main_menu.children()[1]
+
+        # actions should have been added now, which for this case are only `Show all` and `Hide all`
         self.assertTrue(
-            any(FigureErrorsManager.TOGGLE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children() if
-                hasattr(child, 'text')))
+            any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertTrue(
-            any(FigureErrorsManager.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children() if
-                hasattr(child, 'text')))
-        self.assertTrue(
-            any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in main_menu.children() if
-                hasattr(child, 'text')))
-        self.assertEqual(5, len(main_menu.children()))
+            any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+        self.assertEqual(2, len(main_menu.children()))
 
     def test_scripted_plot_hide_error_for(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
@@ -289,7 +306,32 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
 
+    def test_scripted_plot_with_y_x_errors(self):
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], xerr=[10, 10000], label='MyLabel 2')
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        # line with X Errors
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+
+        self.errors_manager.toggle_all_error_bars()
+
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+        # line with X Errors is not affected by the toggle
+        self.assertTrue(self.ax.containers[1][2][0].get_visible())
+        self.tearDown()
+
+    def test_scripted_plot_with_only_x_errors(self):
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], xerr=[10, 10000], label='MyLabel 2')
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+        self.errors_manager.toggle_all_error_bars()
+        # state does not change, because the toggle does not affect X errors
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        self.tearDown()
+
     def test_scripted_plot_show_unsupported_axis_raises_not_implemented(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
 
         self.assertRaises(NotImplementedError, self.errors_manager.show_error_bar_for, 0)
+        self.tearDown()
