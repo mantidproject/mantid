@@ -14,6 +14,8 @@ from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
+from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
 
 
 class MuonContext(object):
@@ -131,9 +133,49 @@ class MuonContext(object):
                (self.gui_context['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
+    def get_workspace_names_for_FFT_analysis(self, use_raw=True):
+        pair_names = list(self.group_pair_context.pair_names)
+        group_names = list(self.group_pair_context.group_names)
+        run_numbers = self.data_context.current_runs
+        workspace_options = []
+
+        for run in run_numbers:
+            workspace_options += [
+                wsName.get_phase_quad_workspace_name(self, run_list_to_string(run), period=str(period + 1))
+                for period in range(self.data_context.num_periods(run))]
+            for name in pair_names:
+                workspace_options.append(
+                    wsName.get_pair_data_workspace_name(self,
+                                                        str(name),
+                                                        run_list_to_string(run), not use_raw))
+            for group_name in group_names:
+                workspace_options.append(
+                    wsName.get_group_asymmetry_name(self, str(group_name), run_list_to_string(run),
+                                                    not use_raw))
+        return workspace_options
+
+    def get_detectors_excluded_from_default_grouping_tables(self):
+        groups, _ = get_default_grouping(
+            self.data_context.current_workspace, self.data_context.instrument,
+            self.data_context.main_field_direction)
+        detectors_in_group = []
+        for group in groups:
+            detectors_in_group += group.detectors
+        detectors_in_group = set(detectors_in_group)
+
+        return [det for det in range(1, self.data_context.num_detectors) if det not in detectors_in_group]
+
+    # Get the groups/pairs for active WS
+    def getGroupedWorkspaceNames(self):
+        run_numbers = self.data_context.current_runs
+        runs = [
+            wsName.get_raw_data_workspace_name(self, run_list_to_string(run_number), period=str(period + 1))
+            for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
+        return runs
+
     @property
     def first_good_data(self):
         if self.gui_context['FirstGoodDataFromFile']:
-            return self.data_context.get_loaded_data_for_run(self.current_runs[-1])["FirstGoodData"]
+            return self.data_context.get_loaded_data_for_run(self.data_context.current_runs[-1])["FirstGoodData"]
         else:
             return self.gui_context['FirstGoodData']

@@ -119,7 +119,7 @@ file:
 
 .. code-block:: sh
 
-   test-pr=!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f
+   test-pr="!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f"
 
 where again ``<main-remote-name>`` has the same meaning as above. A given pull request can now be checkout with
 
@@ -179,7 +179,7 @@ changes:
 Pull Requests
 ^^^^^^^^^^^^^
 
-To merge code with the release branch open a pull request as usual but instead of using the
+To merge code with the release branch, open a pull request as usual but instead of using the
 default merge target select ``release-next``:
 
 .. image:: images/release-branch-new-pr.png

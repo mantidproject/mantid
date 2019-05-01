@@ -103,13 +103,13 @@ void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
 }
 
 void ALCPeakFittingPresenter::onFittedPeaksChanged() {
-  IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
+  IFunction_const_sptr fitted = m_model->fittedPeaks();
   auto dataWS = m_model->data();
-  if (fittedPeaks && dataWS) {
+  if (fitted && dataWS) {
     const auto &x = dataWS->x(0);
     m_view->setFittedCurve(
-        *(QwtHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
-    m_view->setFunction(fittedPeaks);
+        *(QwtHelper::curveDataFromFunction(fitted, x.rawData())));
+    m_view->setFunction(fitted);
   } else {
     m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
     m_view->setFunction(IFunction_const_sptr());

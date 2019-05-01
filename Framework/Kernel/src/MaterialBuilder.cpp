@@ -277,10 +277,11 @@ double MaterialBuilder::getOrCalculateRho(
       density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
     } else if (m_massDensity) {
       // g / cc -> atoms / Angstrom^3
-      double rmm = 0.;
-      for (const auto &formulaUnit : formula) {
-        rmm += formulaUnit.atom->mass * formulaUnit.multiplicity;
-      }
+      const double rmm =
+          std::accumulate(formula.cbegin(), formula.cend(), 0.,
+                          [](double sum, const Material::FormulaUnit &f) {
+                            return sum + f.atom->mass * f.multiplicity;
+                          });
       density = (m_massDensity.get() * totalNumAtoms / rmm) *
                 PhysicalConstants::N_A * 1e-24;
     } else if (!m_formula.empty() && m_formula.size() == 1) {

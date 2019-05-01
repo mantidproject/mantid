@@ -116,7 +116,8 @@ The returned object can then be used to call other methods that belong to ``Spec
 
 	# Get a SpectrumDefinition object
 	spectrumDefinition = info.getSpectrumDefinition(0)
-	print(type(spectrumDefinition))
+	from mantid.api import SpectrumDefinition
+	print("The type is SpectrumDefinition: {}".format(isinstance(spectrumDefinition, SpectrumDefinition)))
 
 Output:
 
@@ -124,7 +125,7 @@ Output:
 
 	10.0
 	[0,0,-10]
-	<class '_api.SpectrumDefinition'>
+	The type is SpectrumDefinition: True
 
 
 *bases:* :py:obj:`mantid.api.SpectrumInfo`
@@ -135,4 +136,3 @@ Output:
     :members:
     :undoc-members:
     :inherited-members:
-

@@ -41,11 +41,10 @@ namespace { // anonymous namespace
 
 class ConversionFactors {
 public:
-  explicit ConversionFactors(ITableWorkspace_const_sptr table) {
-    m_difcCol = table->getColumn("difc");
-    m_difaCol = table->getColumn("difa");
-    m_tzeroCol = table->getColumn("tzero");
-
+  explicit ConversionFactors(ITableWorkspace_const_sptr table)
+      : m_difcCol(table->getColumn("difc")),
+        m_difaCol(table->getColumn("difa")),
+        m_tzeroCol(table->getColumn("tzero")) {
     this->generateDetidToRow(table);
   }
 
