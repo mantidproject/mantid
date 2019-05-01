@@ -51,7 +51,10 @@ public:
     m_function = IFunction_sptr();
   }
   void setFunction(IFunction_sptr fun) override {
-    m_function = fun->clone();
+    if (fun)
+      m_function = fun->clone();
+    else
+      m_function = fun;
   }
   bool hasFunction() const override { return bool(m_function); }
   void setParameter(const QString &paramName, double value) override {
@@ -102,6 +105,18 @@ public:
     emit parameterTieChanged(paramName, tie);
   }
 
+  void removeFunction(const QString &prefix) {
+    QString parentPrefix;
+    int i;
+    std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
+    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(getFunctionWithPrefix(parentPrefix, m_function));
+    if (i >= 0)
+      fun->removeFunction(i);
+    else
+      clear();
+    emit functionRemoved(prefix);
+  }
+
   IFunction_sptr getFunction() const { return m_function; }
 private:
   IFunction_sptr m_function;
@@ -122,6 +137,23 @@ public:
     FrameworkManager::Instance();
   }
 
+  void test_utils_splitFunctionPrefix() {
+    QString prefix;
+    int i;
+    std::tie(prefix, i) = splitFunctionPrefix("");
+    TS_ASSERT_EQUALS(prefix, "");
+    TS_ASSERT_EQUALS(i, -1);
+    std::tie(prefix, i) = splitFunctionPrefix("f0.");
+    TS_ASSERT_EQUALS(prefix, "");
+    TS_ASSERT_EQUALS(i, 0);
+    std::tie(prefix, i) = splitFunctionPrefix("f0.f1.");
+    TS_ASSERT_EQUALS(prefix, "f0.");
+    TS_ASSERT_EQUALS(i, 1);
+    std::tie(prefix, i) = splitFunctionPrefix("f0.f3.f24.");
+    TS_ASSERT_EQUALS(prefix, "f0.f3.");
+    TS_ASSERT_EQUALS(i, 24);
+  }
+
   void test_empty() {
     auto view = make_unique<MockFunctionView>();
     FunctionMultiDomainPresenter presenter(view.get());
@@ -132,6 +164,7 @@ public:
     auto view = make_unique<MockFunctionView>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=LinearBackground,A0=1,A1=2");
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 0);
     TS_ASSERT_DELTA(view->getParameter("A0"), 1.0, 1e-15);
     TS_ASSERT_DELTA(view->getParameter("A1"), 2.0, 1e-15);
     auto fun = presenter.getFitFunction();
@@ -176,6 +209,7 @@ public:
     auto view = make_unique<MockFunctionView>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 3);
     presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;name=FlatBackground,A0=2)");
     view->addFunction("f1.", "name=LinearBackground");
     auto newFun = presenter.getFunction()->getFunction(1)->getFunction(2);
@@ -340,6 +374,88 @@ public:
     TS_ASSERT(!viewFun->isFixed(0));
     TS_ASSERT_EQUALS(viewFun->getTie(1)->asString(), "f1.A0=f0.A0");
   }
+
+  void test_set_datasets() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    presenter.setNumberOfDatasets(0);
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 0);
+    auto fun = presenter.getFunction();
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->name(), "FlatBackground");
+    auto ffun = presenter.getFitFunction();
+    TS_ASSERT(ffun);
+    TS_ASSERT_EQUALS(ffun->name(), "FlatBackground");
+    presenter.setNumberOfDatasets(2);
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 2);
+    ffun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(ffun->nFunctions(), 2);
+    presenter.setNumberOfDatasets(0);
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 0);
+    fun = presenter.getFunction();
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->name(), "FlatBackground");
+    ffun = presenter.getFitFunction();
+    TS_ASSERT(ffun);
+    TS_ASSERT_EQUALS(ffun->name(), "FlatBackground");
+  }
+
+  void test_set_datasets_zero() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(0);
+    presenter.setFunctionString("name=FlatBackground");
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 0);
+    auto fun = presenter.getFunction();
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->name(), "FlatBackground");
+    auto ffun = presenter.getFitFunction();
+    TS_ASSERT(ffun);
+    TS_ASSERT_EQUALS(ffun->name(), "FlatBackground");
+    TS_ASSERT_THROWS_NOTHING(presenter.setCurrentDataset(0));
+  }
+
+  void test_remove_datasets() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    presenter.setNumberOfDatasets(5);
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 5);
+    auto ffun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(ffun->getNumberDomains(), 5);
+    QList<int> indices; indices << 2 << 4 << 1;
+    presenter.removeDatasets(indices);
+    TS_ASSERT_EQUALS(ffun->getNumberDomains(), 2);
+    TS_ASSERT_EQUALS(ffun->nFunctions(), 2);
+  }
+
+  void test_replace_function() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    presenter.setNumberOfDatasets(2);
+    presenter.setFunctionString("name=LinearBackground");
+    auto fun = presenter.getFunction();
+    TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+  }
+
+  void test_remove_function_single() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    auto fun = presenter.getFunction();
+    TS_ASSERT_EQUALS(fun->name(), "FlatBackground");
+    view->removeFunction("");
+    fun = presenter.getFunction();
+    TS_ASSERT(!fun);
+    presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
+    view->removeFunction("f0.");
+    fun = presenter.getFunction();
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+  }
+
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRENTERTEST_H_

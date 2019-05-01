@@ -48,7 +48,8 @@ void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
   }
   m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
   if (fun) {
-    for (int i = 0; i < m_numberDomains; ++i) {
+    auto const nf = m_numberDomains > 0 ? m_numberDomains : 1;
+    for (int i = 0; i < nf; ++i) {
       m_function->addFunction(fun->clone());
       m_function->setDomainIndex(i, i);
     }
@@ -84,7 +85,8 @@ void MultiDomainFunctionModel::addFunction(const QString & prefix, const QString
     return;
   }
   auto newFun = FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  for (int i = 0; i < getNumberDomains(); ++i) {
+  auto const nf = m_numberDomains > 0 ? m_numberDomains : 1;
+  for (int i = 0; i < nf; ++i) {
     auto fun = getSingleFunction(i);
     auto parentFun = getFunctionWithPrefix(prefix, fun);
     auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
@@ -95,6 +97,30 @@ void MultiDomainFunctionModel::addFunction(const QString & prefix, const QString
       break;
     } else {
       throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+    }
+  }
+}
+
+void MultiDomainFunctionModel::removeFunction(const QString & functionIndex)
+{
+  QString prefix;
+  int index;
+  std::tie(prefix, index) = splitFunctionPrefix(functionIndex);
+  if (prefix.isEmpty() && index == -1) {
+    clear();
+    return;
+  }
+  auto const nf = m_numberDomains > 0 ? m_numberDomains : 1;
+  for (int i = 0; i < nf; ++i) {
+    auto fun = getSingleFunction(i);
+    auto parentFun = getFunctionWithPrefix(prefix, fun);
+    auto cf = boost::dynamic_pointer_cast<CompositeFunction>(parentFun);
+    if (!cf) {
+      throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+    }
+    cf->removeFunction(index);
+    if (cf->nFunctions() == 1 && prefix.isEmpty()) {
+      m_function->replaceFunction(i, cf->getFunction(0));
     }
   }
 }
@@ -156,6 +182,9 @@ QStringList MultiDomainFunctionModel::getParameterNames() const
 IFunction_sptr MultiDomainFunctionModel::getSingleFunction(int index) const
 {
   checkIndex(index);
+  if (!m_function || m_function->nFunctions() == 0) {
+    return IFunction_sptr();
+  }
   return m_function->getFunction(index);
 }
 
@@ -167,8 +196,8 @@ IFunction_sptr MultiDomainFunctionModel::getCurrentFunction() const
 void MultiDomainFunctionModel::setNumberDomains(int nDomains)
 {
   auto const nd = static_cast<size_t>(nDomains);
-  if (nd < 1) {
-    throw std::runtime_error("Number of domains shouldn't be less than 1.");
+  if (nd < 0) {
+    throw std::runtime_error("Number of domains shouldn't be less than 0.");
   }
   if (nd == m_numberDomains) {
     return;
@@ -177,16 +206,22 @@ void MultiDomainFunctionModel::setNumberDomains(int nDomains)
     m_numberDomains = nd;
     return;
   }
-  auto const lastIndex = m_numberDomains - 1;
+  auto const nfOld = m_numberDomains > 0 ? m_numberDomains : 1;
+  auto const lastIndex = nfOld - 1;
+  auto const nf = nd > 0 ? nd : 1;
   if (nd > m_numberDomains) {
     auto fun = m_function->getFunction(lastIndex);
-    for (size_t i = m_numberDomains; i < nd; ++i) {
+    for (size_t i = nfOld; i < nf; ++i) {
       m_function->addFunction(fun->clone());
       m_function->setDomainIndex(i, i);
     }
   } else {
-    for (size_t i = lastIndex; i >= nd; --i) {
+    for (size_t i = lastIndex; i >= nf; --i) {
       m_function->removeFunction(i);
+    }
+    m_function->clearDomainIndices();
+    for (size_t i = 0; i < m_function->nFunctions(); ++i) {
+      m_function->setDomainIndex(i, i);
     }
   }
   m_numberDomains = nDomains;
@@ -308,6 +343,7 @@ void MultiDomainFunctionModel::removeConstraint(const QString & paramName)
 
 /// Check a domain/function index to be in range.
 void MultiDomainFunctionModel::checkIndex(int index) const {
+  if (index == 0) return;
   if (index < 0 || index >= getNumberDomains()) {
     throw std::runtime_error("Domain index is out of range: " + std::to_string(index) + " out of " + std::to_string(getNumberDomains()));
   }

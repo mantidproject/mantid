@@ -131,6 +131,7 @@ public slots:
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
   void removeDatasets(QList<int> indices);
+  void addDatasets(const QStringList &names);
 
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;

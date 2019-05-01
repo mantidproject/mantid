@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QMessageBox>
+#include <QStringList>
 #include <QTableWidget>
 
 namespace {
@@ -72,15 +73,16 @@ void DataController::addWorkspace() {
       }
 
       if (!matrixWorkspaces.empty()) {
+        QStringList datasetNames;
         for (auto iws = matrixWorkspaces.begin(); iws != matrixWorkspaces.end();
              ++iws) {
           auto name = QString::fromStdString((**iws).getName());
           for (auto i = indices.begin(); i != indices.end(); ++i) {
             addWorkspaceSpectrum(name, *i, **iws);
+            datasetNames << name + " (" + QString::number(*i) + ")";
           }
         }
-        emit spectraAdded(
-            static_cast<int>(indices.size() * matrixWorkspaces.size()));
+        emit spectraAdded(datasetNames);
         emit dataTableUpdated();
       }
     } else {

@@ -44,6 +44,8 @@ signals:
   void functionReplaced(const QString &funStr);
   /// User adds a function
   void functionAdded(const QString &funStr);
+  /// User removes a function
+  void functionRemoved(const QString &functionIndex);
   /// User selects a different (sub)function (or one of it's sub-properties)
   void currentFunctionChanged();
   /// Function parameter gets changed

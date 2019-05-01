@@ -42,6 +42,16 @@ IFunction_sptr getFunctionWithPrefix(const QString & prefix, const IFunction_spt
   return getFunctionWithPrefix(prefix.mid(j + 1), compFun->getFunction(funIndex));
 }
 
+std::pair<QString, int> splitFunctionPrefix(const QString & prefix)
+{
+  if (prefix.isEmpty())
+    return std::make_pair("", -1);
+  auto j = prefix.lastIndexOf('.', -2);
+  auto parentPrefix = prefix.left(j > 0 ? j + 1 : 0);
+  auto funIndex = prefix.mid(j + 2, prefix.size() - j - 3).toInt();
+  return std::make_pair(parentPrefix, funIndex);
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt
 

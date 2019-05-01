@@ -199,6 +199,16 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
   m_presenter->removeDatasets(indices);
 }
 
+/// Add some datasets to those already set.
+/// @param names :: A list of names fr the new datasets.
+void FunctionBrowser::addDatasets(const QStringList & names)
+{
+  auto allNames = m_presenter->getDatasetNames();
+  allNames.append(names);
+  m_presenter->setNumberOfDatasets(allNames.size());
+  m_presenter->setDatasetNames(allNames);
+}
+
 /// Return the multidomain function for multi-dataset fitting
 IFunction_sptr FunctionBrowser::getGlobalFunction() {
   return m_presenter->getFitFunction();

@@ -161,9 +161,6 @@ void MultiDatasetFit::initLayout() {
       new MantidQt::MantidWidgets::FunctionBrowser(nullptr, true);
   m_functionBrowser->setColumnSizes(100, 100, 45);
   splitter->addWidget(m_functionBrowser);
-  connect(m_functionBrowser,
-          SIGNAL(localParameterButtonClicked(const QString &)), this,
-          SLOT(editLocalParameterValues(const QString &)));
   connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this,
           SLOT(reset()));
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this,
@@ -177,8 +174,8 @@ void MultiDatasetFit::initLayout() {
           SLOT(setCurrentDataset(int)));
   connect(m_dataController, SIGNAL(spectraRemoved(QList<int>)),
           m_functionBrowser, SLOT(removeDatasets(QList<int>)));
-  connect(m_dataController, SIGNAL(spectraAdded(int)), m_functionBrowser,
-          SLOT(addDatasets(int)));
+  connect(m_dataController, SIGNAL(spectraAdded(const QStringList&)), m_functionBrowser,
+          SLOT(addDatasets(const QStringList&)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
       nullptr,
@@ -311,7 +308,6 @@ void MultiDatasetFit::fitSequential() {
 /// Fit the data simultaneously.
 void MultiDatasetFit::fitSimultaneous() {
   try {
-
     m_uiForm.btnFit->setEnabled(false);
     auto fun = createFunction();
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -378,6 +374,10 @@ void MultiDatasetFit::fit() {
 
   auto fittingType = m_fitOptionsBrowser->getCurrentFittingType();
   auto n = getNumberOfSpectra();
+  if (n == 0) {
+    QMessageBox::warning(this, "MantidPlot - Warning", "Data wasn't set.");
+    return;
+  }
   int fitAll = QMessageBox::Yes;
 
   if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous) {

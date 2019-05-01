@@ -11,6 +11,7 @@
 #include <QObject>
 
 // Forward declaration
+class QStringList;
 class QTableWidget;
 
 // Forward declaration
@@ -57,7 +58,7 @@ signals:
   void dataSetUpdated(int i);
   void hasSelection(bool);
   void spectraRemoved(QList<int>);
-  void spectraAdded(int n);
+  void spectraAdded(const QStringList&);
 
 public slots:
   void setFittingRangeGlobal(bool);

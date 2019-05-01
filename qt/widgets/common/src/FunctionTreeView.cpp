@@ -1441,7 +1441,7 @@ void FunctionTreeView::removeFunction() {
   QtProperty *prop = item->property();
   if (!isFunction(prop))
     return;
-
+  auto const functionIndex = getIndex(prop);
   removeProperty(prop);
   updateFunctionIndices();
 
@@ -1476,6 +1476,7 @@ void FunctionTreeView::removeFunction() {
       }
     }
   }
+  emit functionRemoved(functionIndex);
 }
 
 /**

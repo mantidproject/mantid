@@ -49,6 +49,7 @@ public:
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
   void setDatasetNames(const QStringList &names);
+  QStringList getDatasetNames() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);
@@ -70,6 +71,7 @@ private slots:
   void viewChangedParameter(const QString &parName);
   void viewPastedFunction(const QString &funStr);
   void viewAddedFunction(const QString &funStr);
+  void viewRemovedFunction(const QString &functionIndex);
   void viewChangedTie(const QString &parName, const QString &tie);
   void viewAddedConstraint(const QString &functionIndex, const QString &constraint);
   void viewRemovedConstraint(const QString &parName);

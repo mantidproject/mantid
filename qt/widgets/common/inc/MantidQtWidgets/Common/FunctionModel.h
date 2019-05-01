@@ -30,6 +30,7 @@ namespace MantidWidgets {
     virtual IFunction_sptr getFitFunction() const = 0;
     virtual bool hasFunction() const = 0;
     virtual void addFunction(const QString &prefix, const QString &funStr) = 0;
+    virtual void removeFunction(const QString &functionIndex) = 0;
     virtual void setParameter(const QString &paramName, double value) = 0;
     virtual void setParamError(const QString &paramName, double value) = 0;
     virtual double getParameter(const QString &paramName) const = 0;
@@ -54,6 +55,7 @@ namespace MantidWidgets {
     IFunction_sptr getFitFunction() const override;
     bool hasFunction() const override;
     void addFunction(const QString &prefix, const QString &funStr) override;
+    void removeFunction(const QString &functionIndex) override;
     void setParameter(const QString &paramName, double value) override;
     void setParamError(const QString &paramName, double value) override;
     double getParameter(const QString &paramName) const override;
@@ -85,7 +87,7 @@ namespace MantidWidgets {
     void checkIndex(int) const;
     MultiDomainFunction_sptr m_function;
     size_t m_currentDomainIndex = 0;
-    size_t m_numberDomains = 1;
+    size_t m_numberDomains = 0;
     mutable QStringList m_datasetNames;
   };
 

@@ -16,6 +16,7 @@
 #include <QClipboard>
 #include <QMessageBox>
 #include <QWidget>
+#include <iostream>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -29,6 +30,7 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
   connect(m_view, SIGNAL(parameterChanged(const QString &)), this, SLOT(viewChangedParameter(const QString &)));
   connect(m_view, SIGNAL(functionReplaced(const QString &)), this, SLOT(viewPastedFunction(const QString &)));
   connect(m_view, SIGNAL(functionAdded(const QString &)), this, SLOT(viewAddedFunction(const QString &)));
+  connect(m_view, SIGNAL(functionRemoved(const QString &)), this, SLOT(viewRemovedFunction(const QString &)));
   connect(m_view, SIGNAL(parameterTieChanged(const QString &, const QString &)), this, SLOT(viewChangedTie(const QString &, const QString &)));
   connect(m_view, SIGNAL(parameterConstraintAdded(const QString &, const QString &)), this, SLOT(viewAddedConstraint(const QString &, const QString &)));
   connect(m_view, SIGNAL(parameterConstraintRemoved(const QString &)), this, SLOT(viewRemovedConstraint(const QString &)));
@@ -126,6 +128,11 @@ void FunctionMultiDomainPresenter::setDatasetNames(const QStringList & names)
   m_model->setDatasetNames(names);
 }
 
+QStringList FunctionMultiDomainPresenter::getDatasetNames() const
+{
+  return m_model->getDatasetNames();
+}
+
 int FunctionMultiDomainPresenter::getNumberOfDatasets() const
 {
   return m_model->getNumberDomains();
@@ -138,6 +145,7 @@ int FunctionMultiDomainPresenter::getCurrentDataset() const
 
 void FunctionMultiDomainPresenter::setCurrentDataset(int index)
 {
+  if (!m_model->hasFunction()) return;
   m_model->setCurrentDomainIndex(index);
   for (auto const name : m_model->getParameterNames()) {
     auto const value = m_model->getParameter(name);
@@ -153,6 +161,19 @@ void FunctionMultiDomainPresenter::setCurrentDataset(int index)
 
 void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices)
 {
+  auto datasetNames = getDatasetNames();
+  // Sort in reverse order
+  qSort(indices.begin(), indices.end(), [](int a, int b) {return a > b; });
+  for (auto i = indices.constBegin(); i != indices.constEnd(); ++i) {
+    datasetNames.removeAt(*i);
+  }
+  m_model->setNumberDomains(datasetNames.size());
+  m_model->setDatasetNames(datasetNames);
+  auto currentIndex = m_model->currentDomainIndex();
+  if (currentIndex >= datasetNames.size()) {
+    currentIndex = datasetNames.isEmpty() ? 0 : datasetNames.size() - 1;
+  }
+  setCurrentDataset(currentIndex);
 }
 
 double FunctionMultiDomainPresenter::getLocalParameterValue(const QString & parName, int i) const
@@ -218,6 +239,11 @@ void FunctionMultiDomainPresenter::viewAddedFunction(const QString & funStr)
   auto prefix = m_view->currentFunctionIndex();
   m_model->addFunction(prefix.value_or(""), funStr);
   emit functionStructureChanged();
+}
+
+void FunctionMultiDomainPresenter::viewRemovedFunction(const QString & functionIndex)
+{
+  m_model->removeFunction(functionIndex);
 }
 
 void FunctionMultiDomainPresenter::viewChangedTie(const QString & paramName, const QString & tie)
