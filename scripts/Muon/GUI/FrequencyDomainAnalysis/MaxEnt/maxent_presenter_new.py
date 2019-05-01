@@ -16,7 +16,10 @@ from Muon.GUI.Common.observer_pattern import Observer
 from mantid.api import AnalysisDataService
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 import functools
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, get_base_data_directory
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+
+
 raw_data = "_raw_data"
 
 
@@ -112,14 +115,7 @@ class MaxEntPresenter(object):
 
         maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
 
-        base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'])
-        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument)
-
-        self.add_maxent_workspace_to_ADS(base_name, group, maxent_workspace)
-
-        maxent_output_options = self.get_maxent_output_options()
-
-        self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, group)
+        self.add_maxent_workspace_to_ADS(maxent_parameters['InputWorkspace'], maxent_workspace, alg)
 
     def get_parameters_for_maxent_calculation(self):
         inputs = {}
@@ -160,9 +156,18 @@ class MaxEntPresenter(object):
 
         self.view.update_phase_table_combo(phase_table_list)
 
-    def add_maxent_workspace_to_ADS(self, base_name, group, maxent_workspace):
-        AnalysisDataService.addOrReplace(base_name, maxent_workspace)
-        AnalysisDataService.addToGroup(group, base_name)
+    def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
+        run = re.search('[0-9]+', input_workspace).group()
+        base_name = get_maxent_workspace_name(input_workspace)
+        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument)
+        directory = get_base_data_directory(self.load, run) + group
+
+        muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
+        muon_workspace_wrapper.show()
+
+        maxent_output_options = self.get_maxent_output_options()
+
+        self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, directory)
 
     def get_maxent_output_options(self):
         output_options = {}
@@ -174,9 +179,8 @@ class MaxEntPresenter(object):
 
         return output_options
 
-    def add_optional_outputs_to_ADS(self, alg, output_options, base_name, group):
+    def add_optional_outputs_to_ADS(self, alg, output_options, base_name, directory):
         for key in output_options:
             if output_options[key]:
                 output = alg.getProperty(key).value
-                AnalysisDataService.addOrReplace(base_name + optional_output_suffixes[key], output)
-                AnalysisDataService.addToGroup(group, base_name + optional_output_suffixes[key])
+                MuonWorkspaceWrapper(output, directory + base_name + optional_output_suffixes[key]).show()

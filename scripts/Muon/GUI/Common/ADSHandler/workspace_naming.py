@@ -147,24 +147,14 @@ def get_base_run_name(run, instrument):
 
 def get_phase_table_workspace_group_name(insertion_workspace_name, instrument):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group =  get_base_run_name(run, instrument) + ' PhaseTables'
-
-    if not AnalysisDataService.doesExist(group) or type(AnalysisDataService.retrieve(group)) is not WorkspaceGroup:
-        new_group = WorkspaceGroup()
-        AnalysisDataService.addOrReplace(group, new_group)
-        AnalysisDataService.addToGroup(get_base_run_name(run, instrument), group)
+    group =  get_base_run_name(run, instrument) + ' PhaseTables/'
 
     return group
 
 
 def get_fft_workspace_group_name(insertion_workspace_name, instrument):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group =  get_base_run_name(run, instrument) + ' FFT'
-
-    if not AnalysisDataService.doesExist(group) or type(AnalysisDataService.retrieve(group)) is not WorkspaceGroup:
-        new_group = WorkspaceGroup()
-        AnalysisDataService.addOrReplace(group, new_group)
-        AnalysisDataService.addToGroup(get_base_run_name(run, instrument), group)
+    group = get_base_run_name(run, instrument) + ' FFT/'
 
     return group
 
@@ -184,13 +174,9 @@ def get_fft_workspace_name(input_workspace):
 def get_maxent_workspace_name(input_workspace):
     return input_workspace + '; MaxEnt'
 
+
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group =  get_base_run_name(run, instrument) + ' Maxent'
-
-    if not AnalysisDataService.doesExist(group) or type(AnalysisDataService.retrieve(group)) is not WorkspaceGroup:
-        new_group = WorkspaceGroup()
-        AnalysisDataService.addOrReplace(group, new_group)
-        AnalysisDataService.addToGroup(get_base_run_name(run, instrument), group)
+    group =  get_base_run_name(run, instrument) + ' Maxent/'
 
     return group

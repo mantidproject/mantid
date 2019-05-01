@@ -5,8 +5,8 @@ from Muon.GUI.Common.observer_pattern import Observer, Observable
 from mantid.api import AnalysisDataService, WorkspaceGroup
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, get_phase_table_workspace_group_name, \
-    get_phase_quad_workspace_name, get_fitting_workspace_name
-
+    get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 class GenericObserver(Observer):
     def __init__(self, callback):
@@ -73,11 +73,7 @@ class PhaseTablePresenter(object):
 
         phase_quad = run_PhaseQuad(parameters)
 
-        phasequad_workspace_name = get_phase_quad_workspace_name(parameters['InputWorkspace'], parameters['PhaseTable'])
-        workspace_group_name = get_phase_table_workspace_group_name(phasequad_workspace_name,
-                                                                    self.context.data_context.instrument)
-
-        self.add_phase_quad_to_ADS(phasequad_workspace_name, workspace_group_name, phase_quad)
+        self.add_phase_quad_to_ADS(parameters['InputWorkspace'], parameters['PhaseTable'], phase_quad)
 
     def get_parameters_for_phase_quad(self):
         parameters = {}
@@ -90,11 +86,17 @@ class PhaseTablePresenter(object):
 
         return parameters
 
-    def add_phase_quad_to_ADS(self, base_name, group, phase_quad):
-        AnalysisDataService.addOrReplace(base_name, phase_quad)
-        AnalysisDataService.addToGroup(group, base_name)
+    def add_phase_quad_to_ADS(self, input_workspace, input_phase_table, phase_quad):
+        run = re.search('[0-9]+', input_workspace).group()
+        phasequad_workspace_name = get_phase_quad_workspace_name(input_workspace, input_phase_table)
+        phase_table_group = get_phase_table_workspace_group_name(phasequad_workspace_name,
+                                                                    self.context.data_context.instrument)
+        directory = get_base_data_directory(self.context, run) + phase_table_group
 
-        self.context.phase_context.add_phase_quad(base_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(phase_quad, directory + phasequad_workspace_name)
+        muon_workspace_wrapper.show()
+
+        self.context.phase_context.add_phase_quad(muon_workspace_wrapper)
         self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):
@@ -114,26 +116,34 @@ class PhaseTablePresenter(object):
 
         detector_table, fitting_information = run_CalMuonDetectorPhases(parameters)
 
-        workspace_group_name = get_phase_table_workspace_group_name(parameters['DetectorTable'],
-                                                                    self.context.data_context.instrument)
-        fitting_workspace_name = get_fitting_workspace_name(parameters['DetectorTable'])
-
-        self.add_phase_table_to_ADS(parameters['DetectorTable'], workspace_group_name, detector_table)
-        self.add_fitting_info_to_ADS_if_required(fitting_workspace_name, workspace_group_name, fitting_information)
+        self.add_phase_table_to_ADS(parameters['DetectorTable'], detector_table)
+        self.add_fitting_info_to_ADS_if_required(parameters['DetectorTable'], fitting_information)
 
         return parameters['DetectorTable']
 
-    def add_phase_table_to_ADS(self, base_name, group, detector_table):
-        AnalysisDataService.addOrReplace(base_name, detector_table)
-        AnalysisDataService.addToGroup(group, base_name)
-        self.context.phase_context.add_phase_table(base_name)
+    def add_phase_table_to_ADS(self, base_name, detector_table):
+        run = re.search('[0-9]+', base_name).group()
 
-    def add_fitting_info_to_ADS_if_required(self, base_name, group, fitting_information):
+        phase_table_group = get_phase_table_workspace_group_name(base_name,
+                                                                    self.context.data_context.instrument)
+        directory = get_base_data_directory(self.context, run) + phase_table_group
+        muon_workspace_wrapper = MuonWorkspaceWrapper(detector_table, directory + base_name)
+        muon_workspace_wrapper.show()
+
+        self.context.phase_context.add_phase_table(muon_workspace_wrapper)
+
+    def add_fitting_info_to_ADS_if_required(self, base_name, fitting_information):
         if not self.view.output_fit_information:
             return
 
-        AnalysisDataService.addOrReplace(base_name, fitting_information)
-        AnalysisDataService.addToGroup(group, base_name)
+        run = re.search('[0-9]+', base_name).group()
+        phase_table_group = get_phase_table_workspace_group_name(base_name,
+                                                                 self.context.data_context.instrument)
+        fitting_workspace_name = get_fitting_workspace_name(base_name)
+        directory = get_base_data_directory(self.context, run) + phase_table_group
+
+        muon_workspace_wrapper = MuonWorkspaceWrapper(fitting_information, directory + fitting_workspace_name)
+        muon_workspace_wrapper.show()
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
         parameters = {}
