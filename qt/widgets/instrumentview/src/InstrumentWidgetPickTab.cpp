@@ -1503,8 +1503,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         continue;
       // get the y-value for detector idet
       const auto &Y = ws->y(index);
-      double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
-      xymap[xvalue] = sum;
+      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
       if (err) {
         const auto &E = ws->e(index);
         std::vector<double> tmp(imax - imin);
@@ -1512,7 +1511,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
                        tmp.begin(), std::multiplies<double>());
         // sum them
-        double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
         // take sqrt
         errmap[xvalue] = sqrt(sum);
       }
@@ -1797,7 +1796,7 @@ void DetectorPlotController::addPeak(double x, double y) {
 
     // if there is a UB available calculate HKL for the new peak
     if (tw->sample().hasOrientedLattice()) {
-      auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
+      alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
           "CalculatePeaksHKL");
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();

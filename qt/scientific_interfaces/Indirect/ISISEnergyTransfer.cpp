@@ -234,23 +234,19 @@ bool ISISEnergyTransfer::validate() {
     int detectorMin = m_uiForm.spPlotTimeSpecMin->value();
     int detectorMax = m_uiForm.spPlotTimeSpecMax->value();
 
-    QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-    auto pos = rawFile.lastIndexOf(".");
-    auto extension = rawFile.right(rawFile.length() - pos);
-    QFileInfo rawFileInfo(rawFile);
-    std::string name = rawFileInfo.baseName().toStdString();
+    const QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
+    const auto pos = rawFile.lastIndexOf(".");
+    const auto extension = rawFile.right(rawFile.length() - pos);
+    const QFileInfo rawFileInfo(rawFile);
+    const std::string name = rawFileInfo.baseName().toStdString();
 
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
     loadAlg->initialize();
     loadAlg->setProperty("Filename", rawFile.toStdString());
     loadAlg->setProperty("OutputWorkspace", name);
     if (extension.compare(".nxs") == 0) {
-      int64_t detectorMin =
-          static_cast<int64_t>(m_uiForm.spPlotTimeSpecMin->value());
-      int64_t detectorMax =
-          static_cast<int64_t>(m_uiForm.spPlotTimeSpecMax->value());
-      loadAlg->setProperty("SpectrumMin", detectorMin);
-      loadAlg->setProperty("SpectrumMax", detectorMax);
+      loadAlg->setProperty("SpectrumMin", static_cast<int64_t>(detectorMin));
+      loadAlg->setProperty("SpectrumMax", static_cast<int64_t>(detectorMax));
     } else {
       loadAlg->setProperty("SpectrumMin", detectorMin);
       loadAlg->setProperty("SpectrumMax", detectorMax);
@@ -297,10 +293,14 @@ bool ISISEnergyTransfer::numberInCorrectRange(
 
 QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
     std::vector<std::size_t> const &customGroupingNumbers) const {
-  for (const auto &number : customGroupingNumbers)
-    if (!numberInCorrectRange(number))
-      return "Please supply a custom grouping within the correct range";
-  return "";
+  if (std::any_of(customGroupingNumbers.cbegin(), customGroupingNumbers.cend(),
+                  [this](auto number) {
+                    return !this->numberInCorrectRange(number);
+                  })) {
+    return "Please supply a custom grouping within the correct range";
+  } else {
+    return "";
+  }
 }
 
 QString ISISEnergyTransfer::validateDetectorGrouping() const {
@@ -593,9 +593,6 @@ void ISISEnergyTransfer::mappingOptionSelected(const QString &groupType) {
  */
 std::pair<std::string, std::string>
 ISISEnergyTransfer::createMapFile(const std::string &groupType) {
-  QString specRange =
-      m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
-
   if (groupType == "File") {
     QString groupFile = m_uiForm.dsMapFile->getFirstFilename();
     if (groupFile == "")
@@ -683,8 +680,6 @@ void ISISEnergyTransfer::plotRaw() {
   setPlotTimeIsPlotting(true);
 
   QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-  auto pos = rawFile.lastIndexOf(".");
-  auto extension = rawFile.right(rawFile.length() - pos);
   QFileInfo rawFileInfo(rawFile);
   std::string name = rawFileInfo.baseName().toStdString();
   auto const instName =
