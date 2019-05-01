@@ -4,7 +4,11 @@ if ( CPPCHECK_EXECUTABLE )
   set ( CPPCHECK_SOURCE_DIRS
         Framework
         MantidPlot
-        qt
+        qt/paraview_ext
+        qt/scientific_interfaces
+        qt/widgets/common
+        qt/widgets/instrumentView
+        qt/widgets/mplcpp
       )
 
   set ( CPPCHECK_USE_INCLUDE_DIRS OFF CACHE BOOL "Use specified include directories. WARNING: cppcheck will run significantly slower." )

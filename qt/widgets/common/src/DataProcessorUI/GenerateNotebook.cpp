@@ -401,7 +401,7 @@ reduceRowString(const RowData_sptr data, const QString &instrument,
     throw std::invalid_argument("Can't generate notebook");
   }
 
-  QString preprocessString;
+  QString preprocessingString;
 
   // Create a copy of the processing options, which we'll update with
   // the results of preprocessing where applicable
@@ -443,7 +443,7 @@ reduceRowString(const RowData_sptr data, const QString &instrument,
     // Python code ran to load and pre-process runs
     const boost::tuple<QString, QString> load_ws_string =
         loadWorkspaceString(colValue, instrument, preprocessor, options);
-    preprocessString += boost::get<0>(load_ws_string);
+    preprocessingString += boost::get<0>(load_ws_string);
 
     // Update the options map with the result of preprocessing
     processingOptions[algProp] = boost::get<1>(load_ws_string);
@@ -458,17 +458,17 @@ reduceRowString(const RowData_sptr data, const QString &instrument,
   addProperties(algProperties, processingOptions);
 
   // Populate processString
-  QString processString;
-  processString += processor.name();
-  processString += "(";
-  processString += algProperties.join(", ");
-  processString += ")";
+  QString processingString;
+  processingString += processor.name();
+  processingString += "(";
+  processingString += algProperties.join(", ");
+  processingString += ")";
 
   // Populate codeString, which contains both pre-processing and processing
   // python code
   QString codeString;
-  codeString += preprocessString;
-  codeString += processString;
+  codeString += preprocessingString;
+  codeString += processingString;
   codeString += "\n";
 
   // Return the python code + the output properties

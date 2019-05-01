@@ -33,9 +33,7 @@ std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
 EnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
     const std::string &vanadiumRunNumber) const {
   const auto vanadiumRunName = generateVanadiumRunName(vanadiumRunNumber);
-  const auto vanadiumWS =
-      loadMatrixWorkspace(vanadiumRunName, VANADIUM_INPUT_WORKSPACE_NAME);
-
+  loadMatrixWorkspace(vanadiumRunName, VANADIUM_INPUT_WORKSPACE_NAME);
   auto enggVanadiumCorrections =
       Mantid::API::AlgorithmManager::Instance().create(
           "EnggVanadiumCorrections");

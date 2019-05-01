@@ -298,6 +298,7 @@ signals:
   void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceNames);
+  void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
 };

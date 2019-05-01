@@ -75,6 +75,17 @@ trap onexit INT TERM EXIT
 export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
+# Some preprocessing steps on the workspace
+###############################################################################
+BUILD_DIR_REL=build
+BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
+
+# Clean the source tree to remove stale configured files but make sure to
+# leave external/ and the BUILD_DIR directory intact.
+# There is a later check to see if this is a clean build and remove BUILD_DIR.
+git clean -d -x --force --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
+
+###############################################################################
 # Print out the versions of things we are using
 ###############################################################################
 # we use cmake3 on rhel because cmake is too old
@@ -159,14 +170,11 @@ fi
 # For a clean build the entire thing is removed to guarantee it is clean. All
 # other build types are assumed to be incremental and the following items
 # are removed to ensure stale build objects don't interfere with each other:
-#   - those removed by git clean -fdx --exclude=`basename $BUILD_DIR`
 #   - build/bin/**: if libraries are removed from cmake they are not deleted
 #                   from bin and can cause random failures
 #   - build/ExternalData/**: data files will change over time and removing
 #                            the links helps keep it fresh
 ###############################################################################
-BUILD_DIR_REL=build
-BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
 if [ -z "$BUILD_DIR" ]; then
   echo "Build directory not set. Cannot continue"
   exit 1
@@ -176,7 +184,6 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
-  git clean -fdx --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
   rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
   find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then

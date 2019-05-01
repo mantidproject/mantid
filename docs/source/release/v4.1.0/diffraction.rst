@@ -12,6 +12,11 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+Improvements
+############
+
+- The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
+
 Engineering Diffraction
 -----------------------
 
