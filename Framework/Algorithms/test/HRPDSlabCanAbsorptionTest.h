@@ -109,9 +109,9 @@ public:
     TS_ASSERT_DELTA(result->y(1).front(), 0.7033, 0.0001);
     TS_ASSERT_DELTA(result->y(1)[5], 0.5939, 0.0001);
     TS_ASSERT_DELTA(result->y(1).back(), 0.5192, 0.0001);
-    TS_ASSERT_DELTA(result->y(2).front(), 0.7332, 0.0001);
-    TS_ASSERT_DELTA(result->y(2)[5], 0.6398, 0.0001);
-    TS_ASSERT_DELTA(result->y(2).back(), 0.5734, 0.0001);
+    TS_ASSERT_DELTA(result->y(2).front(), 0.7337, 0.0001);
+    TS_ASSERT_DELTA(result->y(2)[5], 0.6404, 0.0001);
+    TS_ASSERT_DELTA(result->y(2).back(), 0.5741, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
