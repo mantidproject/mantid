@@ -505,7 +505,23 @@ void MDNorm::exec() {
 }
 
 /**
- *
+ * Get the dimension name when not using reciprocal lattice units.
+ * @param i - axis number to return axis name for.  Can be 0, 1, or 2.
+ * @return string containing the name
+ */
+std::string MDNorm::QDimensionName(int i) {
+  if(i == 0)
+    return std::string("Q_sample_x");
+  else if(i == 1)
+    return std::string("Q_sample_y");
+  else if(i == 2)
+    return std::string("Q_sample_z");
+  else
+    throw std::invalid_argument(
+      "Index must be 0, 1, or 2 for QDimensionName");
+}
+/**
+ * Get the dimension name when using reciprocal lattice units.
  * @param projection - a vector with 3 elements, containing a
  *   description of the projection ("1,-1,0" for "[H,-H,0]")
  * @return string containing the name
@@ -727,19 +743,25 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
   // make sure the number of dimensions is the same for both workspaces
   size_t numDimsInput = m_inputWS->getNumDims();
   size_t numDimsTemp = tempDataWS->getNumDims();
-  if(numDimsInput == numDimsTemp){
-      for(size_t i = 0; i < numDimsTemp; i++){
-      auto dim1 = m_inputWS->getDimension(i);
-      auto dim2 = tempDataWS->getDimension(i);
-      if (dim1->getName() != dim2->getName()){
-          throw(std::invalid_argument("InputWorkspace and TemporaryDataWorkspace "
-                                      "do not have the same dimensions."));
-          break;
-      }
-      }
-  } else {
-      throw(std::invalid_argument("InputWorkspace and TempDataWorkspace "
+  
+  if(numDimsInput != numDimsTemp){
+    throw(std::invalid_argument("InputWorkspace and TempDataWorkspace "
                                   "must have the same number of dimensions."));
+  } else {
+    std::string dim0Name = tempDataWS->getDimension(0)->getName();
+    std::string dim1Name = tempDataWS->getDimension(1)->getName();
+    std::string dim2Name = tempDataWS->getDimension(2)->getName();
+    if(!m_isRLU){ //Q_sample
+        if(dim0Name.compare(QDimensionName(0)) + dim1Name.compare(QDimensionName(1)) + 
+           dim2Name.compare(QDimensionName(2)) != 0){
+            throw(std::invalid_argument("TemporaryDataWorkspace must be in  Q_sample if not using RLU."));
+        }
+     } else { //HKL
+        if(dim0Name.compare(QDimensionName(m_Q0Basis))+ dim1Name.compare(QDimensionName(m_Q1Basis))+
+          dim2Name.compare(QDimensionName(m_Q2Basis)) !=0 ){
+            throw(std::invalid_argument("TemporaryDataWorkspace does not have appropriate RLU units."));
+        }
+    }
   }
 
   // make sure the binning parameters are also valid
@@ -856,7 +878,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_hIdx = qindex;
         if (!m_isRLU) {
           projection[0] = 1.;
-          basisVector << "Q_sample_x,A^{-1}";
+          basisVector << QDimensionName(0)<<",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][0];
@@ -868,7 +890,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_kIdx = qindex;
         if (!m_isRLU) {
           projection[1] = 1.;
-          basisVector << "Q_sample_y,A^{-1}";
+          basisVector << QDimensionName(1)<<",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][1];
@@ -880,7 +902,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_lIdx = qindex;
         if (!m_isRLU) {
           projection[2] = 1.;
-          basisVector << "Q_sample_z,A^{-1}";
+          basisVector << QDimensionName(2)<<",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][2];
@@ -910,11 +932,14 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
     binMD->executeAsChildAlg();
     outputWS = binMD->getProperty("OutputWorkspace");
 
+
     // set the temporary workspace to be the output workspace, so it keeps
     // adding different symmetries
     tempDataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
     soIndex += 1;
   }
+
+  if()
 
   auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
