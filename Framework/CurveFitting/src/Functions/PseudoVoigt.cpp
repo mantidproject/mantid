@@ -10,7 +10,7 @@
 #include "MantidKernel/make_unique.h"
 #include <iostream>
 
-#include <cmath>
+// #include <math>
 
 namespace {
 
@@ -19,7 +19,7 @@ namespace {
  * @return
  */
 inline constexpr double cal_ag(const double gamma) {
-  const double ag = 2. / gamma * sqrt(M_LN2 / M_PI);
+  const double ag = 2. / gamma * std::sqrt(M_LN2 / M_PI);
   return ag;
 }
 
@@ -40,7 +40,7 @@ inline constexpr double cal_bg(const double gamma) {
  */
 inline constexpr double cal_gaussian(const double ag, const double bg,
                                      const double xdiffsq) {
-  const double gaussian = ag * exp(-bg * xdiffsq);
+  const double gaussian = ag * std::exp(-bg * xdiffsq);
   return gaussian;
 }
 
