@@ -186,7 +186,6 @@ set(SRC_FILES
     src/MaskInstrument.cpp
     src/MaskNonOverlappingBins.cpp
     src/MatrixWorkspaceAccess.cpp
-    src/ManualProgressReporter.cpp
     src/Max.cpp
     src/MaxEnt.cpp
     src/MaxEnt/MaxentCalculator.cpp
@@ -527,7 +526,6 @@ set(INC_FILES
     inc/MantidAlgorithms/MaskInstrument.h
     inc/MantidAlgorithms/MaskNonOverlappingBins.h
     inc/MantidAlgorithms/MatrixWorkspaceAccess.h
-    inc/MantidAlgorithms/ManualProgressReporter.h
     inc/MantidAlgorithms/Max.h
     inc/MantidAlgorithms/MaxEnt.h
     inc/MantidAlgorithms/MaxEnt/MaxentCalculator.h

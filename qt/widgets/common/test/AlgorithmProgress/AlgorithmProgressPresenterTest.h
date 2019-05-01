@@ -1,10 +1,11 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSTEST_H_
 #define MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSTEST_H_
 
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
+#include "ManualProgressReporter.h"
 #include "MockAlgorithmProgressWidget.h"
 
 #include <QCoreApplication>
@@ -23,14 +24,13 @@ using namespace MantidQt::MantidWidgets;
 class AlgorithmProgressPresenterTest : public CxxTest::TestSuite {
 public:
   static AlgorithmProgressPresenterTest *createSuite() {
+    AlgorithmFactory::Instance()
+        .subscribe<Mantid::Algorithms::ManualProgressReporter>();
     return new AlgorithmProgressPresenterTest();
   }
   static void destroySuite(AlgorithmProgressPresenterTest *suite) {
+    AlgorithmFactory::Instance().unsubscribe(NAME_MANUALRPOGRESSREPORTER, 1);
     delete suite;
-  }
-  AlgorithmProgressPresenterTest() {
-    // initialises the Framework so that all Algorithms are loaded
-    FrameworkManager::Instance();
   }
 
   void setUp() override {

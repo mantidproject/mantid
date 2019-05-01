@@ -1,10 +1,11 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSPRESENTERTEST_H_
 #define MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSPRESENTERTEST_H_
 
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
+#include "ManualProgressReporter.h"
 #include "MockAlgorithmProgressDialogWidget.h"
 
 #include <QApplication>
@@ -24,15 +25,15 @@ using namespace MantidQt::MantidWidgets;
 class AlgorithmProgressDialogPresenterTest : public CxxTest::TestSuite {
 public:
   static AlgorithmProgressDialogPresenterTest *createSuite() {
+    AlgorithmFactory::Instance()
+        .subscribe<Mantid::Algorithms::ManualProgressReporter>();
     return new AlgorithmProgressDialogPresenterTest();
   }
   static void destroySuite(AlgorithmProgressDialogPresenterTest *suite) {
+    AlgorithmFactory::Instance().unsubscribe(NAME_MANUALRPOGRESSREPORTER, 1);
     delete suite;
   }
-  AlgorithmProgressDialogPresenterTest() {
-    // initialises the Framework so that all Algorithms are loaded
-    FrameworkManager::Instance();
-  }
+
   void setUp() override {
     mockDialogView.reset();
     // The mock view also creates the presenter, because
