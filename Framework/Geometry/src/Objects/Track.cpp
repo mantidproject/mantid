@@ -127,9 +127,16 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
                      const IObject &obj, const ComponentID compID) {
   IntersectionPoint newPoint(direction, endPoint,
                              endPoint.distance(m_startPoint), obj, compID);
-  auto lowestPtr =
-      std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
-  m_surfPoints.insert(lowestPtr, newPoint);
+  if (m_surfPoints.empty()) {
+     m_surfPoints.insert(m_surfPoints.begin(), newPoint);
+  } else {
+    const auto lastPoint = m_surfPoints.back();
+    if (direction != lastPoint.direction) {
+      auto lowestPtr =
+          std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
+      m_surfPoints.insert(lowestPtr, newPoint);
+    }
+  }
 }
 
 /**
