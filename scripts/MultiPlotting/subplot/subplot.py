@@ -25,6 +25,7 @@ class subplot(QtWidgets.QWidget):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
+        self._context.add_canvas(self.canvas)
         self._rm_window = None
         self._selector_window = None
         # update quick edit from tool bar

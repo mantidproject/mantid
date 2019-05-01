@@ -7,14 +7,75 @@
 from __future__ import absolute_import, print_function
 
 from MultiPlotting.gridspec_engine import gridspecEngine
-
+from copy import deepcopy
 from MultiPlotting.subplot.subplot_context import subplotContext
+
+from mantid.api import AnalysisDataServiceObserver
+from functools import wraps
+
 import mantid.simpleapi as mantid
 
 
 xBounds = "xBounds"
 yBounds = "yBounds"
 
+def _catch_exceptions(func):
+    """
+    Catch all exceptions in method and print a traceback to stderr
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            sys.stderr.write("Error occurred in handler:\n")
+            import traceback
+            traceback.print_exc()
+
+    return wrapper
+
+class ManagerADSObserver(AnalysisDataServiceObserver):
+
+    def __init__(self, context):
+        super(ManagerADSObserver, self).__init__()
+        self._subplots= context
+        self._canvas = None
+        print("set ADS")
+        #self.observeClear(True)
+        self.observeDelete(True)
+        #self.observeReplace(True)
+
+    def add_canvas(self,canvas):
+        self._canvas = canvas
+
+    @_catch_exceptions
+    def deleteHandle(self, _, workspace):
+        """
+        Called when the ADS has deleted a workspace. Checks the
+        attached axes for any hold a plot from this workspace. If removing
+        this leaves empty axes then the parent window is triggered for
+        closer
+        :param _: The name of the workspace. Unused
+        :param workspace: A pointer to the workspace
+        """
+        print("mooooo!!!! "+workspace.name(),self._subplots.keys() )
+
+        for subplot in self._subplots.keys():
+             #print(subplot)
+             try:
+                  print("fdsafd",workspace)
+                  mm = self._subplots[subplot].get_ws_by_name(workspace.name())
+                  print(mm)
+                  labels = self._subplots[subplot].ws[mm]
+                  #print(labels,mm)
+                  for label in labels:
+                      print("hi")
+                      # is it even going in the function? Might be better to just throw a signal up ... 
+                      tmp = deepcopy(label)
+                      self._subplots[subplot].removePlotLine(tmp)
+                      self._canvas.draw()
+             except:
+                  continue
 
 class PlottingContext(object):
 
@@ -25,6 +86,12 @@ class PlottingContext(object):
         self.context[yBounds] = [0., 0.]
         self._gridspec_engine = gridspec_engine
         self._gridspec = None
+        self._ADSObserver = ManagerADSObserver(self.subplots)
+        self._canvas = None
+
+    def add_canvas(self,canvas):
+        self._canvas = canvas
+        self._ADSObserver.add_canvas(self._canvas)
 
     def addSubplot(self, name, subplot):
         self.subplots[name] = subplotContext(name, subplot)

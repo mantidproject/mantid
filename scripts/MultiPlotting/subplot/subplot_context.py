@@ -154,6 +154,7 @@ class subplotContext(object):
             return
         lines = self._lines[name]
         for line in lines:
+            print(name)
             line.remove()
             del line
         del self._lines[name]
@@ -167,6 +168,7 @@ class subplotContext(object):
                     to_delete.append(key)
         for key in to_delete:
             del self._ws[key]
+
 
     def removeVLine(self, name):
         if name not in self._vLines:
@@ -198,3 +200,8 @@ class subplotContext(object):
         keys = list(self._labelObjects.keys())
         for label in keys:
             self.removeLabel(label)
+
+    def get_ws_by_name(self,name):
+        for ws in self._ws:
+            if name == ws.name():
+               return ws
