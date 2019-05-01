@@ -278,10 +278,10 @@ void ExtractSpectra::checkProperties() {
     }
     m_croppingInX = true;
   }
-  if (!m_commonBoundaries)
+  if (!m_commonBoundaries) {
     m_minX = 0;
-  if (!m_commonBoundaries)
     m_maxX = static_cast<int>(m_inputWorkspace->x(0).size());
+  }
 
   // The hierarchy of inputs is (one is being selected):
   // 1. DetectorList

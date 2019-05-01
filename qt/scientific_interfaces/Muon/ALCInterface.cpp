@@ -27,8 +27,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(ALCInterface)
 
-const QStringList ALCInterface::STEP_NAMES{"Data loading", "Baseline modelling",
-                                           "Peak fitting"};
+const QStringList ALCInterface::STEP_NAMES = {
+    "Data loading", "Baseline modelling", "Peak fitting"};
 
 // %1 - current step no., %2 - total no. of steps, %3 - current step label
 const QString ALCInterface::LABEL_FORMAT = "Step %1/%2 - %3";
@@ -181,9 +181,9 @@ void ALCInterface::exportResults() {
 
   // Check if any of the above is not empty
   bool nothingToExport = true;
-  for (auto it = results.begin(); it != results.end(); ++it) {
+  for (auto &result : results) {
 
-    if (it->second) {
+    if (result.second) {
       nothingToExport = false;
       break;
     }
@@ -196,10 +196,10 @@ void ALCInterface::exportResults() {
     AnalysisDataService::Instance().addOrReplace(
         groupName, boost::make_shared<WorkspaceGroup>());
 
-    for (auto it = results.begin(); it != results.end(); ++it) {
-      if (it->second) {
-        std::string wsName = groupName + "_" + it->first;
-        AnalysisDataService::Instance().addOrReplace(wsName, it->second);
+    for (auto &result : results) {
+      if (result.second) {
+        std::string wsName = groupName + "_" + result.first;
+        AnalysisDataService::Instance().addOrReplace(wsName, result.second);
         AnalysisDataService::Instance().addToGroup(groupName, wsName);
       }
     }
@@ -291,11 +291,11 @@ void ALCInterface::importResults() {
 
     if (AnalysisDataService::Instance().doesExist(wsData)) {
 
-      MatrixWorkspace_sptr data =
+      MatrixWorkspace_sptr dataWs =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
 
       // Check that ws contains one spectrum only
-      if (data->getNumberHistograms() < 3) {
+      if (dataWs->getNumberHistograms() < 3) {
         QMessageBox::critical(this, "Error",
                               "Workspace " + QString::fromStdString(wsData) +
                                   " must contain at least three spectra");
@@ -303,7 +303,7 @@ void ALCInterface::importResults() {
       }
 
       // Set the retrieved data
-      m_peakFittingModel->setData(data);
+      m_peakFittingModel->setData(dataWs);
 
     } else {
       // Error message

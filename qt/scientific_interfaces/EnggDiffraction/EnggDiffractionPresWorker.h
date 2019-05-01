@@ -70,9 +70,8 @@ private slots:
    */
   void focus() {
 
-    for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
+    for (auto runNo : m_multiRunNo) {
 
-      auto runNo = m_multiRunNo[i];
       m_pres->doFocusRun(runNo, m_banks, m_SpectrumNos, m_dgFile);
     }
     emit finished();

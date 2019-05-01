@@ -170,6 +170,43 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         self._verify_workspaces_for_can()
 
+    def test_that_the_output_workspace_is_valid_when_using_cross_sections_for_sample(self):
+        """
+        Test simple run with sample workspace using cross sections.
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleDensityType='Number Density',
+                                       SampleDensity=0.1,
+                                       SampleCoherentXSection=0.039,
+                                       SampleIncoherentXSection=56.052,
+                                       SampleAttenuationXSection=0.222)
+
+        ass_ws_name = self._corrections_ws_name + '_ass'
+        self._verify_workspace(ass_ws_name)
+
+    def test_that_the_output_workspace_is_valid_when_using_cross_sections_for_sample_and_can(self):
+        """
+        Test simple run with sample and can workspace using cross sections.
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleDensityType='Number Density',
+                                       SampleDensity=0.1,
+                                       SampleCoherentXSection=0.039,
+                                       SampleIncoherentXSection=56.052,
+                                       SampleAttenuationXSection=0.222,
+                                       CanWorkspace=self._can_ws,
+                                       CanDensityType='Number Density',
+                                       CanDensity=0.1,
+                                       CanCoherentXSection=0.018,
+                                       CanIncoherentXSection=5.08,
+                                       CanAttenuationXSection=5.08)
+
+        self._verify_workspaces_for_can()
+
     def test_number_density_for_sample_can(self):
         """
         Test simple run with sample and can workspace and number density for both

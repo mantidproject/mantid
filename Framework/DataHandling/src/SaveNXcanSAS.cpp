@@ -494,13 +494,13 @@ bool areAxesNumeric(Mantid::API::MatrixWorkspace_sptr workspace) {
 class SpectrumAxisValueProvider {
 public:
   explicit SpectrumAxisValueProvider(
-      Mantid::API::MatrixWorkspace_sptr workspace) {
-    m_workspace = workspace;
+      Mantid::API::MatrixWorkspace_sptr workspace)
+      : m_workspace(workspace) {
     setSpectrumAxisValues();
   }
 
-  Mantid::MantidVec::value_type *operator()(Mantid::API::MatrixWorkspace_sptr,
-                                            int index) {
+  Mantid::MantidVec::value_type *
+  operator()(Mantid::API::MatrixWorkspace_sptr /*unused*/, int index) {
     auto isPointData =
         m_workspace->getNumberHistograms() == m_spectrumAxisValues.size();
     double value = 0;

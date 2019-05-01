@@ -19,8 +19,6 @@ from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, Delete
                               CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
 
 
-
-
 class PlotFunctionsTest(unittest.TestCase):
 
     @classmethod
@@ -155,6 +153,22 @@ class PlotFunctionsTest(unittest.TestCase):
         self.assertRaises(AttributeError, funcs.pcolor, ax, table)
         self.assertRaises(AttributeError, funcs.pcolormesh, ax, table)
         self.assertRaises(AttributeError, funcs.pcolorfast, ax, table)
+
+    def test_1d_indices(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws_MD_2d, indices=(slice(None), 0, 0))
+        funcs.plot(ax, self.ws_MD_2d, indices=(0, slice(None), 0))
+        funcs.plot(ax, self.ws_MD_2d, indices=(0, 0, slice(None)))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, indices=(0, slice(None), slice(None)))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
+
+    def test_1d_slicepoint(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(None, 0, 0))
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, None, 0))
+        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, 0, None))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, slicepoint=(0, None, None))
+        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
 
 
 if __name__ == '__main__':

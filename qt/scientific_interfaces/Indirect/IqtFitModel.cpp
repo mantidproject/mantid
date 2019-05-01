@@ -84,10 +84,11 @@ bool constrainIntensities(IFunction_sptr function) {
       intensityParameters.empty())
     return false;
 
-  std::string tieString("1");
-
-  for (const auto &parameter : backgroundParameters)
-    tieString += "-" + parameter;
+  std::string tieString = std::accumulate(
+      backgroundParameters.cbegin(), backgroundParameters.cend(),
+      std::string("1"), [](const auto &head, const auto &parameter) {
+        return head + "-" + parameter;
+      });
 
   for (auto i = 1u; i < intensityParameters.size(); ++i)
     tieString += "-" + intensityParameters[i];
@@ -285,7 +286,7 @@ IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
       new MultiDomainFunction);
   const auto functionString = function->asString();
   for (auto i = 0u; i < numberOfWorkspaces(); ++i) {
-    auto addDomains = [&](std::size_t) {
+    auto addDomains = [&](std::size_t /*unused*/) {
       const auto index = multiDomainFunction->nFunctions();
       multiDomainFunction->addFunction(createFunction(functionString));
       multiDomainFunction->setDomainIndex(index, index);

@@ -5,12 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 
@@ -325,10 +325,10 @@ void ApplyAbsorptionCorrections::run() {
         m_uiForm.dsContainer->getCurrentDataName().toStdString();
     MatrixWorkspace_sptr containerWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canName);
-    auto run = containerWs->run();
-    if (run.hasProperty("run_number")) {
+    auto logs = containerWs->run();
+    if (logs.hasProperty("run_number")) {
       outputWsName +=
-          "_" + QString::fromStdString(run.getProperty("run_number")->value());
+          "_" + QString::fromStdString(logs.getProperty("run_number")->value());
     } else {
       auto canCutIndex = QString::fromStdString(canName).indexOf("_");
       outputWsName += "_" + QString::fromStdString(canName).left(canCutIndex);

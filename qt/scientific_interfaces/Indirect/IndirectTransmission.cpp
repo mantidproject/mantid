@@ -23,7 +23,7 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
   m_uiForm.setupUi(parent);
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this,
-          SLOT(instrumentSet()));
+          SLOT(setInstrument()));
 
   // Update the preview plot when the algorithm is complete
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -87,11 +87,6 @@ void IndirectTransmission::transAlgDone(bool error) {
     return;
 
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_transmission";
-
-  WorkspaceGroup_sptr resultWsGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outWsName.toStdString());
 
   // Do plotting
   m_uiForm.ppPlot->clear();
@@ -106,12 +101,17 @@ void IndirectTransmission::transAlgDone(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void IndirectTransmission::instrumentSet() {
-  auto const instrument = getInstrumentDetail("instrument");
+void IndirectTransmission::setInstrument() {
+  try {
+    setInstrument(getInstrumentDetail("instrument"));
+  } catch (std::exception const &ex) {
+    showMessageBox(ex.what());
+  }
+}
 
-  // Set the search instrument for runs
-  m_uiForm.dsSampleInput->setInstrumentOverride(instrument);
-  m_uiForm.dsCanInput->setInstrumentOverride(instrument);
+void IndirectTransmission::setInstrument(QString const &instrumentName) {
+  m_uiForm.dsSampleInput->setInstrumentOverride(instrumentName);
+  m_uiForm.dsCanInput->setInstrumentOverride(instrumentName);
 }
 
 /**

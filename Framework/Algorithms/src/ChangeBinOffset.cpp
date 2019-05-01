@@ -36,24 +36,24 @@ void ChangeBinOffset::init() {
 }
 
 void ChangeBinOffset::exec() {
-  const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
   if (outputW != inputW) {
     outputW = inputW->clone();
     setProperty("OutputWorkspace", outputW);
   }
 
-  double offset = getProperty("Offset");
+  const double offset = getProperty("Offset");
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(outputW);
   if (eventWS) {
     this->for_each<Indices::FromProperty>(
         *eventWS, std::make_tuple(EventWorkspaceAccess::eventList),
-        [=](EventList &eventList) { eventList.addTof(offset); });
+        [offset](EventList &eventList) { eventList.addTof(offset); });
   } else {
     this->for_each<Indices::FromProperty>(
         *outputW, std::make_tuple(MatrixWorkspaceAccess::x),
-        [=](std::vector<double> &dataX) {
+        [offset](std::vector<double> &dataX) {
           for (auto &x : dataX)
             x += offset;
         });

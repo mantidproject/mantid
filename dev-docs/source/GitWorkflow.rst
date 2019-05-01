@@ -8,7 +8,7 @@ Mantid Git Workflow
    :local:
 
 Summary
-^^^^^^^
+-------
 
 This page describes the workflow used in conjunction with `Git
 <http://git-scm.com>`_ and `GitHub <https://www.github.com/>`_ for
@@ -22,7 +22,7 @@ Go `here <https://github.com/k88hudson/git-flight-rules>`__ for a
 (fairly) comprehensive guide to solving your various Git problems.
 
 Description
-^^^^^^^^^^^
+-----------
 
 We follow the `GitHub flow
 <https://guides.github.com/introduction/flow/index.html>`_, using
@@ -51,7 +51,7 @@ The steps for a new piece of work can be summarised as follows:
 .. _GitWorkflowPublicPrivateBranches:
 
 Public and Private Branches
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
 
 When naming `public branches
 <http://github.com/mantidproject/mantid/branches>`_ that will be
@@ -73,7 +73,7 @@ to drop the prefix.
 .. _GitWorkflowPullRequests:
 
 Pull Requests
-^^^^^^^^^^^^^
+-------------
 
 For an general overview of using pull requests on GitHub look `here
 <https://help.github.com/articles/using-pull-requests/>`__.
@@ -98,6 +98,9 @@ Recommended reading: `How to Write the Perfect Pull Request <https://github.com/
 
 For further information about the review process see :ref:`reviewing a pull request <ReviewingAPullRequest>`.
 
+Checkout a Pull Request
+^^^^^^^^^^^^^^^^^^^^^^^
+
 To check out a particular pull request for functional testing use the following commmands:
 
 .. code-block:: sh
@@ -111,17 +114,23 @@ then ``main-remote-name=origin`` else if you cloned from a fork then it is the n
 back to the original repository.
 
 Note that these commands will checkout a temporary branch that has the development branch merged with master and not just
-the development branch on its own. This command can be aliased by adding the following to the ``[alias]]`` section of your ``~/.gitconfig``
+the development branch on its own. This command can be aliased by adding the following to the ``[alias]`` section of your ``~/.gitconfig``
 file:
 
 .. code-block:: sh
 
-   test-pr=!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f
+   test-pr="!f() { git fetch <main-remote-name> +pull/$1/merge:pr/$1-merged && git checkout pr/$1-merged; }; f"
 
-where again ``<main-remote-name>`` has the same meaning as above
+where again ``<main-remote-name>`` has the same meaning as above. A given pull request can now be checkout with
+
+.. code-block:: sh
+
+   git test-pr <ID>
+
+where ``<ID>`` is the pull request number given on GitHub.
 
 Stale Pull Requests
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Pull requests that go an extended period of time without any activity
 are considered stale and will be picked up by a (partially) automated
@@ -148,7 +157,7 @@ The reasons a pull request may be flagged up currently are:
 <https://github.com/DanNixon/mantid_pr_bot>`__)
 
 Code Freeze
-^^^^^^^^^^^
+-----------
 
 At the start of a *code freeze* before a major release there will be a
 release branch created named ``release-next``. At this point
@@ -158,7 +167,7 @@ be stabilized for the release. The release branch will be merged to
 merged to ``master``.
 
 New Branches
-------------
+^^^^^^^^^^^^
 
 During the code freeze it is important to ensure that a new branch is
 created from the correct base branch depending on the scope of the
@@ -168,15 +177,15 @@ changes:
 - ``release-next``: bugfixes. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/release-next``
 
 Pull Requests
--------------
+^^^^^^^^^^^^^
 
-To merge code with the release branch open a pull request as usual but instead of using the
+To merge code with the release branch, open a pull request as usual but instead of using the
 default merge target select ``release-next``:
 
 .. image:: images/release-branch-new-pr.png
 
 Fixing a PR with an Incorrect Base Branch
------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The target branch on GitHub needs to match the base branch used in the
 commands above when the branch was initially created. If the compare

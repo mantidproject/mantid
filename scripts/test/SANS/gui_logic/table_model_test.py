@@ -323,8 +323,8 @@ class TableModelTest(unittest.TestCase):
         table_index_model = TableIndexModel(*test_row)
 
         actual_list = table_index_model.to_batch_list()
-        expected_list = ["SANS2D00022024", "out_file", "SANS2D00022025", "SANS2D00022026",
-                         "", "", "", "a_user_file"]
+        expected_list = ["SANS2D00022024", "SANS2D00022025", "SANS2D00022026",
+                         "", "", "",  "out_file", "a_user_file"]
 
         self.assertEqual(actual_list, expected_list)
 

@@ -99,6 +99,14 @@ public:
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
         TS_ASSERT(outputWS);
         TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+        auto &inXs = inputWS->x(i);
+        const auto binWidth =
+            (inXs.back() - inXs.front()) / static_cast<double>(inXs.size() - 1);
+        auto &outXs = outputWS->x(0);
+        for (size_t binIndex = 0; binIndex < outXs.size() - 1; ++binIndex) {
+          TS_ASSERT_DELTA(outXs[binIndex + 1] - outXs[binIndex], binWidth,
+                          1e-12)
+        }
         auto &Ys = outputWS->y(0);
         const auto totalYSummedInQ =
             std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
@@ -139,6 +147,14 @@ public:
         API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
         TS_ASSERT(outputWS);
         TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+        auto &inXs = inputWS->x(beamCentre);
+        const auto binWidth =
+            (inXs.back() - inXs.front()) / static_cast<double>(inXs.size() - 1);
+        auto &outXs = outputWS->x(0);
+        for (size_t binIndex = 0; binIndex < outXs.size() - 1; ++binIndex) {
+          TS_ASSERT_DELTA(outXs[binIndex + 1] - outXs[binIndex], binWidth,
+                          1e-12)
+        }
         auto &Ys = outputWS->y(0);
         const auto totalYSummedInQ =
             std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);

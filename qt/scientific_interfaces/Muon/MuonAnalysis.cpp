@@ -1094,8 +1094,7 @@ void MuonAnalysis::updatePairTable() {
 
   // reset context of combo boxes
   for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
-    QComboBox *qwF =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
+    qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
     QComboBox *qwB =
         static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
 
@@ -2478,7 +2477,6 @@ void MuonAnalysis::setAppendingRun(int inc) {
 
   int fileExtensionSize(currentFiles[fileNumber].size() -
                         currentFiles[fileNumber].indexOf('.'));
-  QString fileExtension = currentFiles[fileNumber].right(fileExtensionSize);
   currentFiles[fileNumber].chop(fileExtensionSize);
 
   int firstRunNumber = currentFiles[fileNumber].right(runSize).toInt();
@@ -2983,7 +2981,7 @@ bool MuonAnalysis::isOverwriteEnabled() {
 /**
  * Executed when interface gets hidden or closed
  */
-void MuonAnalysis::hideEvent(QHideEvent *) {
+void MuonAnalysis::hideEvent(QHideEvent * /*unused*/) {
   // Show toolbars if were chosen to be hidden by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(false);
@@ -2996,7 +2994,7 @@ void MuonAnalysis::hideEvent(QHideEvent *) {
 /**
  * Executed when interface gets shown
  */
-void MuonAnalysis::showEvent(QShowEvent *) {
+void MuonAnalysis::showEvent(QShowEvent * /*unused*/) {
   // Hide toolbars if requested by user
   if (m_uiForm.hideToolbars->isChecked())
     emit setToolbarsHidden(true);

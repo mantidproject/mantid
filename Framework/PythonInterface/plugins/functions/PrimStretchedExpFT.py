@@ -38,7 +38,7 @@ class PrimStretchedExpFT(IFunction1D):
         pass
 
     def function1D(self, xvals, **optparms):
-        """ Fourier transform of the symmetrized stretched exponential integrated
+        r""" Fourier transform of the symmetrized stretched exponential integrated
         within each energy bin.
 
         The Symmetrized Stretched Exponential:

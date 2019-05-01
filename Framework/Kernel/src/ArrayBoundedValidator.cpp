@@ -13,24 +13,14 @@ namespace Mantid {
 namespace Kernel {
 
 /**
- * Default constructor
- */
-template <typename TYPE>
-ArrayBoundedValidator<TYPE>::ArrayBoundedValidator()
-    : TypedValidator<std::vector<TYPE>>(),
-      boundVal(boost::make_shared<BoundedValidator<TYPE>>()) {}
-
-/**
  * Copy constructor
  * @param abv :: the ArrayBoundedValidator to copy
  */
 template <typename TYPE>
 ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(
-    const ArrayBoundedValidator<TYPE> &abv)
-    : TypedValidator<std::vector<TYPE>>() {
-  this->boundVal = boost::dynamic_pointer_cast<BoundedValidator<TYPE>>(
-      abv.boundVal->clone());
-}
+    const ArrayBoundedValidator<TYPE> &abv) noexcept
+    : TypedValidator<std::vector<TYPE>>(),
+      m_actualValidator(abv.m_actualValidator) {}
 
 /**
  * Constructor via bounds parameters
@@ -38,27 +28,26 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(
  * @param upperBound :: the upper bound value to validate
  */
 template <typename TYPE>
-ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(const TYPE lowerBound,
-                                                   const TYPE upperBound)
+ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(
+    const TYPE lowerBound, const TYPE upperBound) noexcept
     : TypedValidator<std::vector<TYPE>>(),
-      boundVal(
-          boost::make_shared<BoundedValidator<TYPE>>(lowerBound, upperBound)) {}
+      m_actualValidator(lowerBound, upperBound) {}
+
+template <typename TYPE>
+ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(TYPE lowerBound,
+                                                   TYPE upperBound,
+                                                   bool exclusive) noexcept
+    : TypedValidator<std::vector<TYPE>>(),
+      m_actualValidator(lowerBound, upperBound, exclusive) {}
 
 /**
  * Constructor via a BoundedValidator
  * @param bv :: the BoundedValidator object to use
  */
 template <typename TYPE>
-ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(BoundedValidator<TYPE> &bv) {
-  this->boundVal =
-      boost::dynamic_pointer_cast<BoundedValidator<TYPE>>(bv.clone());
-}
-
-/**
- * Object destructor
- */
-template <typename TYPE>
-ArrayBoundedValidator<TYPE>::~ArrayBoundedValidator() {}
+ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(
+    BoundedValidator<TYPE> &bv) noexcept
+    : TypedValidator<std::vector<TYPE>>(), m_actualValidator(bv) {}
 
 /**
  * Create a clone of the current ArrayBoundedValidator
@@ -67,16 +56,6 @@ ArrayBoundedValidator<TYPE>::~ArrayBoundedValidator() {}
 template <typename TYPE>
 IValidator_sptr ArrayBoundedValidator<TYPE>::clone() const {
   return boost::make_shared<ArrayBoundedValidator<TYPE>>(*this);
-}
-
-/**
- * Accessor for the stored BoundedValidator
- * @return a pointer to the stored BoundedValidator
- */
-template <typename TYPE>
-boost::shared_ptr<BoundedValidator<TYPE>>
-ArrayBoundedValidator<TYPE>::getValidator() const {
-  return this->boundVal;
 }
 
 /**
@@ -95,7 +74,7 @@ std::string ArrayBoundedValidator<TYPE>::checkValidity(
   typename std::vector<TYPE>::const_iterator it;
   std::size_t index = 0;
   for (it = value.begin(); it != value.end(); ++it) {
-    std::string retval = this->boundVal->isValid(*it);
+    std::string retval = m_actualValidator.isValid(*it);
     if (!retval.empty()) {
       error << "At index " << index << ": " << retval;
     }
@@ -105,40 +84,73 @@ std::string ArrayBoundedValidator<TYPE>::checkValidity(
   return error.str();
 }
 
-template <typename TYPE> bool ArrayBoundedValidator<TYPE>::hasLower() const {
-  return this->boundVal->hasLower();
-}
-
-template <typename TYPE> bool ArrayBoundedValidator<TYPE>::hasUpper() const {
-  return this->boundVal->hasUpper();
+template <typename TYPE>
+bool ArrayBoundedValidator<TYPE>::hasLower() const noexcept {
+  return m_actualValidator.hasLower();
 }
 
 template <typename TYPE>
-const TYPE &ArrayBoundedValidator<TYPE>::lower() const {
-  return this->boundVal->lower();
+bool ArrayBoundedValidator<TYPE>::hasUpper() const noexcept {
+  return m_actualValidator.hasUpper();
 }
 
 template <typename TYPE>
-const TYPE &ArrayBoundedValidator<TYPE>::upper() const {
-  return this->boundVal->upper();
+TYPE ArrayBoundedValidator<TYPE>::lower() const noexcept {
+  return m_actualValidator.lower();
 }
 
 template <typename TYPE>
-void ArrayBoundedValidator<TYPE>::setLower(const TYPE &value) {
-  this->boundVal->setLower(value);
+TYPE ArrayBoundedValidator<TYPE>::upper() const noexcept {
+  return m_actualValidator.upper();
 }
 
 template <typename TYPE>
-void ArrayBoundedValidator<TYPE>::setUpper(const TYPE &value) {
-  this->boundVal->setUpper(value);
+bool ArrayBoundedValidator<TYPE>::isLowerExclusive() const noexcept {
+  return m_actualValidator.isLowerExclusive();
+}
+/// Check if upper bound is exclusive
+template <typename TYPE>
+bool ArrayBoundedValidator<TYPE>::isUpperExclusive() const noexcept {
+  return m_actualValidator.isUpperExclusive();
+}
+/// Set the lower bound to be exclusive
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setLowerExclusive(
+    const bool exclusive) noexcept {
+  m_actualValidator.setLowerExclusive(exclusive);
+}
+/// Set the upper bound to be exclusive
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setUpperExclusive(
+    const bool exclusive) noexcept {
+  m_actualValidator.setUpperExclusive(exclusive);
 }
 
-template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearLower() {
-  this->boundVal->clearLower();
+/// Set both the upper and lower bounds to be exclusive
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setExclusive(const bool exclusive) noexcept {
+  m_actualValidator.setLowerExclusive(exclusive);
+  m_actualValidator.setUpperExclusive(exclusive);
 }
 
-template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearUpper() {
-  this->boundVal->clearUpper();
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setLower(const TYPE &value) noexcept {
+  m_actualValidator.setLower(value);
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::setUpper(const TYPE &value) noexcept {
+  m_actualValidator.setUpper(value);
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::clearLower() noexcept {
+  m_actualValidator.clearLower();
+}
+
+template <typename TYPE>
+void ArrayBoundedValidator<TYPE>::clearUpper() noexcept {
+  m_actualValidator.clearUpper();
 }
 
 // Required explicit instantiations

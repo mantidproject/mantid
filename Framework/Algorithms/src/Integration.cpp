@@ -268,7 +268,8 @@ void Integration::exec() {
         sumF = std::accumulate(F.begin() + distmin, F.begin() + distmax, 0.0);
         if (distmin > 0)
           Fmin = F[distmin - 1];
-        Fmax = F[distmax];
+        Fmax = F[static_cast<std::size_t>(distmax) < F.size() ? distmax
+                                                              : F.size() - 1];
       }
       if (!is_distrib) {
         // Sum the Y, and sum the E in quadrature
@@ -427,12 +428,10 @@ std::map<std::string, std::string> Integration::validateInputs() {
     }
   }
   if (!isEmpty(minRange)) {
-    for (const auto x : maxRanges) {
-      if (x < minRange) {
-        issues["RangeUpperList"] =
-            "RangeUpperList has a value lower than RangeLower.";
-        break;
-      }
+    if (std::any_of(maxRanges.cbegin(), maxRanges.cend(),
+                    [minRange](const auto x) { return x < minRange; })) {
+      issues["RangeUpperList"] =
+          "RangeUpperList has a value lower than RangeLower.";
     }
   }
   return issues;

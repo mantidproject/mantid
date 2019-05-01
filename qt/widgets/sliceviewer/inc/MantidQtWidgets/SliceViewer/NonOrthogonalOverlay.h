@@ -13,8 +13,8 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMDNonOrthogonal.h"
 #include <QPainter>
 #include <QWidget>
 #include <qwt_plot.h>

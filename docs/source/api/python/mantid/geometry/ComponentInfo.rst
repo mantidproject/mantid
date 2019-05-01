@@ -4,7 +4,7 @@
 
 This is a python binding to the C++ class Mantid::Geometry::ComponentInfo.
 
-Most of the information concerning ``ComponentInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document. 
+Most of the information concerning ``ComponentInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document.
 
 --------
 Purpose
@@ -13,17 +13,17 @@ The purpose of the ``ComponentInfo`` object is to allow the user to access geome
 
 Many users may need this extra information so that they can have a better understanding of the beamline they are using and the components that make up the beamline - e.g. detectors, banks, choppers. This extra information is easy and fast to access.
 
-ComponentInfo is one of three objects that the user can gain access to from a workspace. 
+ComponentInfo is one of three objects that the user can gain access to from a workspace.
 The other two are:
 
  * ``SpectrumInfo``
  * ``DetectorInfo``
 
 ---------
-Indexing 
+Indexing
 ---------
-The ``ComponentInfo`` object is accessed by an index going from 0 to N-1 where N is the number of components. 
-The component index for a detector is EQUAL to the detector index. In other words, a detector with a detector index of 5 when working with a ``DetectorInfo`` object and will have a component index of 5 when working with a ``ComponentInfo`` object. 
+The ``ComponentInfo`` object is accessed by an index going from 0 to N-1 where N is the number of components.
+The component index for a detector is EQUAL to the detector index. In other words, a detector with a detector index of 5 when working with a ``DetectorInfo`` object and will have a component index of 5 when working with a ``ComponentInfo`` object.
 
 Another way to think about this is that the first 0 to n-1 components referenced in ``ComponentInfo`` are detectors, where n is the total number of detectors.
 
@@ -33,22 +33,23 @@ Usage
 
 **Example 1 - Creating a ComponentInfo Object:**
 This example shows how to obtain a ``ComponentInfo`` object from a workspace object.
-The return value is a ``ComponentInfo`` object. 
+The return value is a ``ComponentInfo`` object.
 
 .. testcode:: CreateComponentInfoObject
-	
+
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
 
 	# Get the ComponentInfo object
 	info = ws.componentInfo()
-	print(type(info))
+	from mantid.geometry import ComponentInfo
+	print("The type is ComponentInfo: {}".format(isinstance(info, ComponentInfo)))
 
 Output:
 
 .. testoutput:: CreateComponentInfoObject
 
-	<class 'mantid.geometry._geometry.ComponentInfo'>
+	The type is ComponentInfo: True
 
 
 **Example 2 - Calling Some Methods on the ComponentInfo Object:**
@@ -57,14 +58,14 @@ This example shows how to call a few different methods on the ComponentInfo obje
 The ``relativePosition`` method takes in an integer ``index`` parameter which corresponds to a component.
 The return value is a ``V3D`` object which denotes a point in 3D space.
 
-The ``setRotation()`` method takes in a ``Quat`` object which defines a rotation. The rotation is applied to the component. 
+The ``setRotation()`` method takes in a ``Quat`` object which defines a rotation. The rotation is applied to the component.
 Retrieving the rotation after setting it may not always give the same ``Quat`` object back - i.e. the values could be changed.
 
 The ``hasParent()`` method takes an integer ``index`` parameter which corresponds to a component.
 The return value is ``True`` if the component has a parent component or ``False`` otherwise.
 
 .. testcode:: CallMethods
-	
+
 	# Import Quat
 	from mantid.kernel import Quat
 
@@ -100,7 +101,7 @@ The method returns a list of integers representing the child components.
 The returned list can then be indexed into to obtain a specific component.
 
 .. testcode:: CallChildrenMethod
-	
+
 	# Create a workspace to use
 	ws = CreateSampleWorkspace()
 
@@ -119,12 +120,12 @@ Output:
 	0
 	[]
 
-	
+
 *bases:* :py:obj:`mantid.geometry.ComponentInfo`
 
 .. module:`mantid.geometry`
 
-.. autoclass:: mantid.geometry.ComponentInfo 
+.. autoclass:: mantid.geometry.ComponentInfo
     :members:
     :undoc-members:
     :inherited-members:

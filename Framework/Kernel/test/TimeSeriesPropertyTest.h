@@ -1346,6 +1346,40 @@ public:
   }
 
   /*
+   * Test cloneWithTimeShift
+   */
+  void test_cloneWithTimeShift() {
+    auto time_series = std::make_unique<TimeSeriesProperty<int>>("IntUnixTest");
+    time_series->addValue("2019-02-10T16:17:00", 1);
+
+    auto time_series_small_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(100.));
+    const auto &small_shift_times = time_series_small_shift->timesAsVector();
+    TS_ASSERT_EQUALS(small_shift_times[0], DateAndTime("2019-02-10T16:18:40"));
+
+    auto time_series_large_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(1234.));
+    const auto &large_shift_times = time_series_large_shift->timesAsVector();
+    TS_ASSERT_EQUALS(large_shift_times[0], DateAndTime("2019-02-10T16:37:34"));
+
+    auto time_series_negative_shift = dynamic_cast<TimeSeriesProperty<int> *>(
+        time_series->cloneWithTimeShift(-1234.));
+    const auto &negative_shift_times =
+        time_series_negative_shift->timesAsVector();
+    TS_ASSERT_EQUALS(negative_shift_times[0],
+                     DateAndTime("2019-02-10T15:56:26"));
+
+    // There is a known issue which can cause cloneWithTimeShift to be called
+    // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
+    // seconds in DateAndTime::operator+= Typical usage of this method is with
+    // shifts in the range tested here.
+
+    delete time_series_small_shift;
+    delete time_series_large_shift;
+    delete time_series_negative_shift;
+  }
+
+  /*
    * Test countSize()
    */
   void test_CountSize() {

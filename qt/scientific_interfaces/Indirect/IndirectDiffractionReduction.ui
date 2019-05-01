@@ -906,7 +906,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
    <extends>QComboBox</extends>
-   <header>MantidQtWidgets/Common/IndirectInstrumentConfig.h</header>
+   <header>IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

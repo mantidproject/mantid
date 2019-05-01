@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidHistogramData/Interpolate.h"
@@ -42,6 +43,10 @@ using PhysicalConstants::E_mev_toNeutronWavenumberSq;
 namespace {
 // the maximum number of elements to combine at once in the pairwise summation
 constexpr size_t MAX_INTEGRATION_LENGTH{1000};
+
+const std::string CALC_SAMPLE = "Sample";
+const std::string CALC_CONTAINER = "Container";
+const std::string CALC_ENVIRONMENT = "Environment";
 
 inline size_t findMiddle(const size_t start, const size_t stop) {
   size_t half =
@@ -77,6 +82,14 @@ void AbsorptionCorrection::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Output workspace name");
+
+  // AbsorbedBy
+  std::vector<std::string> scatter_options{CALC_SAMPLE, CALC_CONTAINER,
+                                           CALC_ENVIRONMENT};
+  declareProperty(
+      "ScatterFrom", CALC_SAMPLE,
+      boost::make_shared<StringListValidator>(std::move(scatter_options)),
+      "The component to calculate the absorption for (default: Sample)");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -121,6 +134,41 @@ void AbsorptionCorrection::init() {
   defineProperties();
 }
 
+std::map<std::string, std::string> AbsorptionCorrection::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // verify that the container/environment information is there if requested
+  const std::string scatterFrom = getProperty("ScatterFrom");
+  if (scatterFrom != CALC_SAMPLE) {
+    API::MatrixWorkspace_const_sptr wksp = getProperty("InputWorkspace");
+    const auto &sample = wksp->sample();
+    if (sample.hasEnvironment()) {
+      const auto numComponents = sample.getEnvironment().nelements();
+      // first element is assumed to be the container
+      if (scatterFrom == CALC_CONTAINER && numComponents == 0) {
+        result["ScatterFrom"] = "Sample does not have a container defined";
+      } else if (scatterFrom == CALC_ENVIRONMENT) {
+        if (numComponents < 2) {
+          result["ScatterFrom"] = "Sample does not have an environment defined";
+        } else if (numComponents > 2) {
+          std::stringstream msg;
+          msg << "Do not know how to calculate absorption from multiple "
+                 "component sample environment. Encountered "
+              << numComponents << " components";
+          result["ScatterFrom"] = msg.str();
+        }
+      }
+    } else { // customize error message based on selection
+      if (scatterFrom == CALC_CONTAINER)
+        result["ScatterFrom"] = "Sample does not have a container defined";
+      else if (scatterFrom == CALC_ENVIRONMENT)
+        result["ScatterFrom"] = "Sample does not have an environment defined";
+    }
+  }
+
+  return result;
+}
+
 void AbsorptionCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -159,7 +207,7 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
-  // Calculate the cached values of L1 and element volumes.
+  // Calculate the cached values of L1, element volumes, and geometry size
   initialiseCachedDistances();
   if (m_L1s.empty()) {
     throw std::runtime_error(
@@ -172,13 +220,14 @@ void AbsorptionCorrection::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-
     // Copy over bins
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
-    if (!spectrumInfo.hasDetectors(i))
+    if (!spectrumInfo.hasDetectors(i)) {
+      g_log.information() << "Spectrum " << i
+                          << " does not have a detector defined for it\n";
       continue;
-
+    }
     const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
@@ -217,8 +266,11 @@ void AbsorptionCorrection::exec() {
       } else if (m_emode == DeltaEMode::Indirect) {
         Y[j] = this->doIntegration(-linearCoefAbs[j], linearCoefAbsFixed, L2s,
                                    0, L2s.size());
+      } else { // should never happen
+        throw std::runtime_error(
+            "AbsorptionCorrection doesn't have a known DeltaEMode defined");
       }
-      Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
+      Y[j] /= m_sampleVolume; // Divide by total volume of the shape
 
       // Make certain that last point is calculated
       if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
@@ -255,10 +307,19 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection");      // in barns
   double rho = getProperty("SampleNumberDensity");         // in Angstroms-3
+  const std::string scatterFrom = getProperty("ScatterFrom");
 
   bool createMaterial =
       !(isEmpty(rho) && isEmpty(sigma_s) && isEmpty(sigma_atten));
-  m_material = m_inputWS->sample().getShape().material();
+  // get the material from the correct component
+  const auto &sampleObj = m_inputWS->sample();
+  if (scatterFrom == CALC_SAMPLE) {
+    m_material = sampleObj.getShape().material();
+  } else if (scatterFrom == CALC_CONTAINER) {
+    m_material = sampleObj.getEnvironment().getContainer().material();
+  } else if (scatterFrom == CALC_ENVIRONMENT) {
+    m_material = sampleObj.getEnvironment().getComponent(1).material();
+  }
 
   if (createMaterial) {
     // get values from the existing material
@@ -323,9 +384,18 @@ void AbsorptionCorrection::retrieveBaseProperties() {
 /// Create the sample object using the Geometry classes, or use the existing one
 void AbsorptionCorrection::constructSample(API::Sample &sample) {
   const std::string xmlstring = sampleXML();
+  const std::string scatterFrom = getProperty("ScatterFrom");
   if (xmlstring.empty()) {
-    // This means that we should use the shape already defined on the sample.
-    m_sampleObject = &sample.getShape();
+    // Get the shape from the proper object
+    if (scatterFrom == CALC_SAMPLE)
+      m_sampleObject = &sample.getShape();
+    else if (scatterFrom == CALC_CONTAINER)
+      m_sampleObject = &(sample.getEnvironment().getContainer());
+    else if (scatterFrom == CALC_ENVIRONMENT)
+      m_sampleObject = &(sample.getEnvironment().getComponent(1));
+    else
+      throw std::runtime_error("Somebody forgot to fill in an if/else tree");
+
     // Check there is one, and fail if not
     if (!m_sampleObject->hasValidShape()) {
       const std::string mess(
@@ -333,7 +403,11 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
       g_log.error(mess);
       throw std::invalid_argument(mess);
     }
-  } else {
+  } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
+    std::stringstream msg;
+    msg << "Cannot use geometry xml for ScatterFrom=" << scatterFrom;
+    throw std::runtime_error(msg.str());
+  } else { // create a geometry from the sample object
     boost::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
     sample.setShape(shape);
     m_sampleObject = &sample.getShape();
@@ -361,8 +435,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
   for (size_t i = 0; i < m_numVolumeElements; ++i) {
     // Create track for distance in cylinder between scattering point and
     // detector
-    V3D direction = detectorPos - m_elementPositions[i];
-    direction.normalize();
+    const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
     int temp = m_sampleObject->interceptSurface(outgoing);
 

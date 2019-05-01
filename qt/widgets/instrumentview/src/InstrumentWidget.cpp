@@ -537,7 +537,7 @@ void InstrumentWidget::setupColorMap() { emit colorMapChanged(); }
 /**
  * Connected to QTabWidget::currentChanged signal
  */
-void InstrumentWidget::tabChanged(int) { updateInfoText(); }
+void InstrumentWidget::tabChanged(int /*unused*/) { updateInfoText(); }
 
 /**
  * Change color map button slot. This provides the file dialog box to select
@@ -702,7 +702,6 @@ void InstrumentWidget::saveImage(QString filename) {
 
   if (ext.isEmpty()) {
     filename += defaultExt;
-    ext = QFileInfo(filename).completeSuffix();
   } else {
     if (!formats.contains(ext.toLatin1())) {
       QString msg("Unsupported file extension. Choose one of the following: ");
@@ -865,7 +864,8 @@ void InstrumentWidget::componentSelected(size_t componentIndex) {
   }
 }
 
-void InstrumentWidget::executeAlgorithm(const QString &, const QString &) {
+void InstrumentWidget::executeAlgorithm(const QString & /*unused*/,
+                                        const QString & /*unused*/) {
   // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 

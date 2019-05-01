@@ -54,7 +54,6 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <iostream>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -117,9 +116,8 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
   // loaded
-  boost::shared_ptr<Mantid::API::IFunction> f =
-      boost::shared_ptr<Mantid::API::IFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
+  boost::shared_ptr<Mantid::API::IFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
   if (m_autoBgName.toLower() == "none") {
     m_autoBgName = "";
   } else {
@@ -608,7 +606,6 @@ void FitPropertyBrowser::updateSetupMenus() {
 void FitPropertyBrowser::executeCustomSetupLoad(const QString &name) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
-  QStringList names = settings.childKeys();
 
   QString str = settings.value(name).toString();
   loadFunction(str);
@@ -617,7 +614,6 @@ void FitPropertyBrowser::executeCustomSetupLoad(const QString &name) {
 void FitPropertyBrowser::executeCustomSetupRemove(const QString &name) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
-  QStringList names = settings.childKeys();
 
   settings.remove(name);
   updateSetupMenus();
@@ -849,7 +845,7 @@ FitPropertyBrowser::tryCreateFitFunction(const QString &str) {
   }
 }
 
-void FitPropertyBrowser::popupMenu(const QPoint &) {
+void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
   QtBrowserItem *ci = m_browser->currentItem();
   if (!ci)
     return;
@@ -1751,8 +1747,8 @@ void FitPropertyBrowser::populateWorkspaceNames() {
 
   QStringList tmp;
   auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  for (auto it = sv.begin(); it != sv.end(); ++it) {
-    auto const &name = QString::fromStdString(*it);
+  for (auto &it : sv) {
+    auto const &name = QString::fromStdString(it);
     if (allAreAllowed || m_allowedSpectra.contains(name)) {
       tmp << name;
     }
@@ -1803,7 +1799,6 @@ void FitPropertyBrowser::addHandle(
   if (!isWorkspaceValid(ws) ||
       (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName)))
     return;
-  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(qName);
 
@@ -1830,7 +1825,6 @@ void FitPropertyBrowser::addHandle(
 
 /// workspace was removed
 void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
-  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0) {
@@ -1907,13 +1901,13 @@ QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
                                             QtProperty *prop) const {
   QList<QtBrowserItem *> children = parent->children();
   QtBrowserItem *res = nullptr;
-  for (int i = 0; i < children.size(); i++) {
-    if (children[i]->property() == prop) {
-      return children[i];
+  for (auto &child : children) {
+    if (child->property() == prop) {
+      return child;
     }
-    QList<QtBrowserItem *> grand_children = children[i]->children();
+    QList<QtBrowserItem *> grand_children = child->children();
     if (grand_children.size() > 0)
-      res = findItem(children[i], prop);
+      res = findItem(child, prop);
     if (res)
       return res;
   }
@@ -2222,14 +2216,14 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie,
   hasTie = false;
   hasBounds = false;
   QList<QtProperty *> subs = parProp->subProperties();
-  for (int i = 0; i < subs.size(); i++) {
-    if (subs[i]->propertyName() == "Tie") {
+  for (auto &sub : subs) {
+    if (sub->propertyName() == "Tie") {
       hasTie = true;
     }
-    if (subs[i]->propertyName() == "LowerBound") {
+    if (sub->propertyName() == "LowerBound") {
       hasBounds = true;
     }
-    if (subs[i]->propertyName() == "UpperBound") {
+    if (sub->propertyName() == "UpperBound") {
       hasBounds = true;
     }
   }
@@ -2240,9 +2234,9 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie,
  */
 QtProperty *FitPropertyBrowser::getTieProperty(QtProperty *parProp) const {
   QList<QtProperty *> subs = parProp->subProperties();
-  for (int i = 0; i < subs.size(); i++) {
-    if (subs[i]->propertyName() == "Tie") {
-      return subs[i];
+  for (auto &sub : subs) {
+    if (sub->propertyName() == "Tie") {
+      return sub;
     }
   }
   return nullptr;
@@ -3050,17 +3044,17 @@ void FitPropertyBrowser::setWorkspaceProperties() {
     QString errName;
     auto names = tws->getColumnNames();
     QStringList columns;
-    for (size_t i = 0; i < names.size(); ++i) {
-      columns << QString::fromStdString(names[i]);
-      auto col = tws->getColumn(names[i]);
+    for (const auto &name : names) {
+      columns << QString::fromStdString(name);
+      auto col = tws->getColumn(name);
       if (xName.isEmpty() && col->getPlotType() == 1 /*X*/) {
-        xName = QString::fromStdString(names[i]);
+        xName = QString::fromStdString(name);
       }
       if (yName.isEmpty() && col->getPlotType() == 2 /*Y*/) {
-        yName = QString::fromStdString(names[i]);
+        yName = QString::fromStdString(name);
       }
       if (errName.isEmpty() && col->getPlotType() == 5 /*yErr*/) {
-        errName = QString::fromStdString(names[i]);
+        errName = QString::fromStdString(name);
       }
     }
     m_columnManager->setEnumNames(m_xColumn, columns);
@@ -3226,40 +3220,42 @@ void FitPropertyBrowser::minimizerChanged() {
   auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(
       this->minimizer());
   auto &properties = minzer->getProperties();
-  for (auto it = properties.begin(); it != properties.end(); ++it) {
-    QString propName = QString::fromStdString((**it).name());
+  for (auto property : properties) {
+    QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;
     if (auto prp =
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(*it)) {
+            dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
       prop = m_boolManager->addProperty(propName);
       bool val = *prp;
       m_boolManager->setValue(prop, val);
     } else if (auto prp =
                    dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(
-                       *it)) {
+                       property)) {
       prop = this->addDoubleProperty(propName);
       double val = *prp;
       m_doubleManager->setValue(prop, val);
     } else if (auto prp =
                    dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(
-                       *it)) {
+                       property)) {
       prop = m_intManager->addProperty(propName);
       int val = *prp;
       m_intManager->setValue(prop, val);
     } else if (auto prp =
                    dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(
-                       *it)) {
+                       property)) {
       prop = m_intManager->addProperty(propName);
       size_t val = *prp;
       m_intManager->setValue(prop, static_cast<int>(val));
     } else if (auto prp = dynamic_cast<
-                   Mantid::Kernel::PropertyWithValue<std::string> *>(*it)) {
+                   Mantid::Kernel::PropertyWithValue<std::string> *>(
+                   property)) {
       prop = m_stringManager->addProperty(propName);
       QString val = QString::fromStdString(prp->value());
       m_stringManager->setValue(prop, val);
-    } else if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(*it)) {
+    } else if (dynamic_cast<Mantid::API::IWorkspaceProperty *>(property)) {
       prop = m_stringManager->addProperty(propName);
-      m_stringManager->setValue(prop, QString::fromStdString((**it).value()));
+      m_stringManager->setValue(prop,
+                                QString::fromStdString((*property).value()));
     } else {
       QMessageBox::warning(this, "MantidPlot - Error",
                            "Type of minimizer's property " + propName +
@@ -3270,7 +3266,7 @@ void FitPropertyBrowser::minimizerChanged() {
     if (!prop)
       continue;
     // set the tooltip from property doc string
-    QString toolTip = QString::fromStdString((**it).documentation());
+    QString toolTip = QString::fromStdString((*property).documentation());
     if (!toolTip.isEmpty()) {
       prop->setToolTip(toolTip);
     }

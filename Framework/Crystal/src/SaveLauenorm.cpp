@@ -23,7 +23,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;

@@ -71,9 +71,9 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
 }
 
 InstrumentRenderer::~InstrumentRenderer() {
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
+  for (unsigned int i : m_displayListId) {
+    if (i != 0) {
+      glDeleteLists(i, 1);
     }
   }
 }
@@ -330,7 +330,6 @@ void InstrumentRenderer::reset() {
 }
 
 void InstrumentRenderer::resetColors() {
-  auto sharedWorkspace = m_actor.getWorkspace();
   const double vmin(m_actor.minValue()), vmax(m_actor.maxValue());
   // Reset all colors to 0 and resize m_colors to the appropriate size
   const auto zero = m_colorMap.rgb(vmin, vmax, 0);

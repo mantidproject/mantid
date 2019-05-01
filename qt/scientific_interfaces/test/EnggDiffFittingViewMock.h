@@ -14,7 +14,6 @@
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-// This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffFittingView
     : public MantidQt::CustomInterfaces::IEnggDiffFittingView {
 

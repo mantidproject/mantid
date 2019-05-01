@@ -14,7 +14,7 @@
 #include "IEnggDiffractionView.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
@@ -223,7 +223,7 @@ private:
   void saveSettings() const override;
 
   // when the interface is shown
-  void showEvent(QShowEvent *) override;
+  void showEvent(QShowEvent * /*unused*/) override;
 
   // window (custom interface) close
   void closeEvent(QCloseEvent *ev) override;

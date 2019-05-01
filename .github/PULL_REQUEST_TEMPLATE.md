@@ -1,6 +1,8 @@
 **Description of work.**
 
-**Report to:** [user name]/[nobody]. <!--If the original issue was raised by a user they should be named here. Do not leak email addresses-->
+<!-- If the original issue was raised by a user they should be named here. Do not leak email addresses
+**Report to:** [user name]
+-->
 
 **To test:**
 

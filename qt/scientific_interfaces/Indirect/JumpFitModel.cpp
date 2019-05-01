@@ -156,8 +156,8 @@ subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
   subworkspaces.reserve(1 + 2 * widthSpectra.size());
 
   int start = 0;
-  for (auto i = 0u; i < widthSpectra.size(); ++i) {
-    const auto spectrum = static_cast<int>(widthSpectra[i]);
+  for (auto spectrum_number : widthSpectra) {
+    const auto spectrum = static_cast<int>(spectrum_number);
     if (spectrum > start) {
       auto const outputName = "__extracted_" + std::to_string(start) + "_to_" +
                               std::to_string(spectrum);
@@ -212,7 +212,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                const Spectra &) {
+                                const Spectra & /*spectra*/) {
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addJumpFitParameters(workspace.get(), name);
 
@@ -249,16 +249,16 @@ JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace,
 
 std::unordered_map<std::string, JumpFitParameters>::const_iterator
 JumpFitModel::findJumpFitParameters(std::size_t dataIndex) const {
-  const auto workspace = getWorkspace(dataIndex);
-  if (!workspace)
+  const auto ws = getWorkspace(dataIndex);
+  if (!ws)
     return m_jumpParameters.end();
-  return m_jumpParameters.find(workspace->getName());
+  return m_jumpParameters.find(ws->getName());
 }
 
 std::string JumpFitModel::getFitParameterName(std::size_t dataIndex,
                                               std::size_t spectrum) const {
-  const auto workspace = getWorkspace(dataIndex);
-  const auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
+  const auto ws = getWorkspace(dataIndex);
+  const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
   return axis->label(spectrum);
 }
 

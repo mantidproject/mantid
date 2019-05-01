@@ -195,8 +195,8 @@ void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
     const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
   std::size_t counter = 0;
-  for (auto i = 0u; i < fittingData.size(); ++i)
-    addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], counter);
+  for (const auto &data : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, data, counter);
 }
 
 void addInputDataToSimultaneousFit(
@@ -205,9 +205,8 @@ void addInputDataToSimultaneousFit(
     const std::pair<double, double> &range,
     const std::vector<double> &exclude) {
   std::size_t counter = 0;
-  for (auto i = 0u; i < fittingData.size(); ++i)
-    addInputDataToSimultaneousFit(fitAlgorithm, fittingData[i], range, exclude,
-                                  counter);
+  for (const auto &data : fittingData)
+    addInputDataToSimultaneousFit(fitAlgorithm, data, range, exclude, counter);
 }
 
 template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
@@ -250,7 +249,7 @@ void cleanTemporaries(const std::string &base,
                       const std::unique_ptr<IndirectFitData> &fitData) {
   removeFromADSIfExists(base);
 
-  const auto clean = [&](std::size_t index, std::size_t) {
+  const auto clean = [&](std::size_t index, std::size_t /*unused*/) {
     cleanTemporaries(base + "_" + std::to_string(index));
   };
   fitData->applyEnumeratedSpectra(clean);
@@ -492,10 +491,9 @@ void IndirectFittingModel::setExcludeRegion(const std::string &exclude,
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
-  auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
-  addWorkspace(workspace,
-               std::make_pair(0u, workspace->getNumberHistograms() - 1));
+  addWorkspace(ws, std::make_pair(0u, ws->getNumberHistograms() - 1));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
@@ -511,9 +509,9 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
                                         const Spectra &spectra) {
-  auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
-  addWorkspace(workspace, spectra);
+  addWorkspace(ws, spectra);
 }
 
 void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
@@ -717,7 +715,7 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModel::createDefaultParameters(std::size_t) const {
+IndirectFittingModel::createDefaultParameters(std::size_t /*unused*/) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -765,14 +763,13 @@ IndirectFittingModel::getFittingAlgorithm(FittingMode mode) const {
 IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
                                                    std::size_t spectrum) const {
   const auto &fitData = m_fittingData[dataIndex];
-  const auto workspace = fitData->workspace();
+  const auto ws = fitData->workspace();
   const auto range = fitData->getRange(spectrum);
   const auto exclude = fitData->excludeRegionsVector(spectrum);
 
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, getFittingFunction(), getResultXAxisUnit());
-  addInputDataToSimultaneousFit(fitAlgorithm, workspace, spectrum, range,
-                                exclude, "");
+  addInputDataToSimultaneousFit(fitAlgorithm, ws, spectrum, range, exclude, "");
   fitAlgorithm->setProperty("OutputWorkspace",
                             singleFitOutputName(dataIndex, spectrum));
   return fitAlgorithm;

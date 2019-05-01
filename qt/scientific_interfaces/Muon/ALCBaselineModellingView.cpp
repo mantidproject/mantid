@@ -10,7 +10,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
+#include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 
 #include <boost/scoped_array.hpp>
 

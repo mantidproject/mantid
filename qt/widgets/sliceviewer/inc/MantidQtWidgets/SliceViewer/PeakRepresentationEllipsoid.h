@@ -27,7 +27,7 @@ public:
           calculator);
 
   /// Setter for the slice point
-  void setSlicePoint(const double &) override;
+  void setSlicePoint(const double & /*z*/) override;
   /// Transform the coordinates.
   void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;

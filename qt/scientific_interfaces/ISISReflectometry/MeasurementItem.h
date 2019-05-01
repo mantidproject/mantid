@@ -45,7 +45,7 @@ public:
   std::string label() const;
   double angle() const;
   std::string angleStr() const;
-  MeasurementItem &operator=(const MeasurementItem &);
+  MeasurementItem &operator=(const MeasurementItem & /*other*/);
 
 private:
   /// Constructor

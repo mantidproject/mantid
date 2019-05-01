@@ -93,11 +93,12 @@ void EnggDiffFittingModel::setDifcTzero(
     run.addProperty<double>("tzero", DEFAULT_TZERO, units, true);
   } else {
     GSASCalibrationParms params(0, 0.0, 0.0, 0.0);
-    for (const auto &paramSet : calibParams) {
-      if (paramSet.bankid == runLabel.bank) {
-        params = paramSet;
-        break;
-      }
+    const auto found = std::find_if(calibParams.cbegin(), calibParams.cend(),
+                                    [&runLabel](const auto &paramSet) {
+                                      return paramSet.bankid == runLabel.bank;
+                                    });
+    if (found != calibParams.cend()) {
+      params = *found;
     }
     if (params.difc == 0) {
       params = calibParams.front();
@@ -358,7 +359,6 @@ EnggDiffFittingModel::createCalibrationParamsTable(
 
 void EnggDiffFittingModel::convertFromDistribution(
     Mantid::API::MatrixWorkspace_sptr inputWS) {
-  const auto name = inputWS->getName();
   auto convertFromDistAlg = Mantid::API::AlgorithmManager::Instance().create(
       "ConvertFromDistribution");
   convertFromDistAlg->initialize();
@@ -537,17 +537,19 @@ EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
   const std::string name = ws->getName();
   std::vector<std::string> chunks;
   boost::split(chunks, name, boost::is_any_of("_"));
-  bool isNum = isDigit(chunks.back());
-  if (!chunks.empty() && isNum) {
-    try {
-      return boost::lexical_cast<size_t>(chunks.back());
-    } catch (boost::exception &) {
-      // If we get a bad cast or something goes wrong then
-      // the file is probably not what we were expecting
-      // so throw a runtime error
-      throw std::runtime_error(
-          "Failed to fit file: The data was not what is expected. "
-          "Does the file contain a focused workspace?");
+  if (!chunks.empty()) {
+    const bool isNum = isDigit(chunks.back());
+    if (isNum) {
+      try {
+        return boost::lexical_cast<size_t>(chunks.back());
+      } catch (boost::exception &) {
+        // If we get a bad cast or something goes wrong then
+        // the file is probably not what we were expecting
+        // so throw a runtime error
+        throw std::runtime_error(
+            "Failed to fit file: The data was not what is expected. "
+            "Does the file contain a focused workspace?");
+      }
     }
   }
 

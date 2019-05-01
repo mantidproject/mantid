@@ -9,7 +9,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
 #include "ui_LinePlotOptions.h"
 #include <QWidget>
 

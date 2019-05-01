@@ -231,13 +231,17 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     if (m_divergenceWS) {
       deltatheta = m_divergenceWS->y(i)[0];
     } else {
-      double solidangle = 0.0;
-      for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
-        // No scanning support for solidAngle currently, use only first
-        // component of index, ignore time index
-        if (!detectorInfo.isMasked(index.first))
-          solidangle += componentInfo.solidAngle(index.first, samplepos);
-      }
+      auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+      const double solidangle = std::accumulate(
+          spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+          [&componentInfo, &detectorInfo, &samplepos](const auto sum,
+                                                      const auto &index) {
+            if (!detectorInfo.isMasked(index.first)) {
+              return sum + componentInfo.solidAngle(index.first, samplepos);
+            } else {
+              return sum;
+            }
+          });
       deltatheta = sqrt(solidangle);
     }
 

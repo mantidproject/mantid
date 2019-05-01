@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-import PyQt4.QtCore as QtCore
+from qtpy import QtCore
 from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
 
 

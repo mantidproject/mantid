@@ -981,7 +981,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
       if (!m_calibrationWS) {
         if (AnalysisDataService::Instance().doesExist(m_instName +
                                                       "_offsets")) {
-          OffsetsWorkspace_sptr offsetsWS =
+          offsetsWS =
               AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
                   m_instName + "_offsets");
           convertOffsetsToCal(offsetsWS);

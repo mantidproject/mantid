@@ -523,8 +523,8 @@ void LoadGroupXMLFile::parseXML() {
     } // "group"
     else if (pNode->nodeName() == "component") {
       // Node "component" = value
-      auto it = m_groupComponentsMap.find(curgroupid);
-      if (it == m_groupComponentsMap.end()) {
+      auto groupIt = m_groupComponentsMap.find(curgroupid);
+      if (groupIt == m_groupComponentsMap.end()) {
         std::stringstream ss;
         ss << "XML File (component) heirachial error!"
            << "  Inner Text = " << pNode->innerText() << '\n';
@@ -540,14 +540,14 @@ void LoadGroupXMLFile::parseXML() {
           finalvalue = val_value;
         else
           finalvalue = value;
-        it->second.push_back(finalvalue);
+        groupIt->second.emplace_back(finalvalue);
       }
 
     } // Component
     else if (pNode->nodeName() == "detids") {
       // Node "detids"
-      auto it = m_groupDetectorsMap.find(curgroupid);
-      if (it == m_groupDetectorsMap.end()) {
+      auto groupIt = m_groupDetectorsMap.find(curgroupid);
+      if (groupIt == m_groupDetectorsMap.end()) {
         std::stringstream ss;
         ss << "XML File (detids) hierarchal error!"
            << "  Inner Text = " << pNode->innerText() << '\n';
@@ -565,14 +565,14 @@ void LoadGroupXMLFile::parseXML() {
           finalvalue = value;
 
         std::vector<int> parsedRange = Strings::parseRange(finalvalue);
-        it->second.insert(it->second.end(), parsedRange.begin(),
-                          parsedRange.end());
+        groupIt->second.insert(groupIt->second.end(), parsedRange.begin(),
+                               parsedRange.end());
       }
     } // "detids"
     else if (pNode->nodeName() == "ids") {
       // Node ids: for spectrum number
-      auto it = m_groupSpectraMap.find(curgroupid);
-      if (it == m_groupSpectraMap.end()) {
+      auto groupIt = m_groupSpectraMap.find(curgroupid);
+      if (groupIt == m_groupSpectraMap.end()) {
         std::stringstream ss;
         ss << "XML File (ids) hierarchal error! "
            << "  Inner Text = " << pNode->innerText() << '\n';
@@ -590,8 +590,8 @@ void LoadGroupXMLFile::parseXML() {
           finalvalue = value;
 
         std::vector<int> parsedRange = Strings::parseRange(finalvalue);
-        it->second.insert(it->second.end(), parsedRange.begin(),
-                          parsedRange.end());
+        groupIt->second.insert(groupIt->second.end(), parsedRange.begin(),
+                               parsedRange.end());
       }
     }
 

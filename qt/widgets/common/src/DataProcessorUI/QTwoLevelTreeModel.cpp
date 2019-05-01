@@ -64,11 +64,8 @@ public:
   bool isProcessed() const { return m_isProcessed; }
   void setProcessed(const bool isProcessed) { m_isProcessed = isProcessed; }
   bool allRowsProcessed() const {
-    for (const auto &row : m_rows) {
-      if (!row.isProcessed())
-        return false;
-    }
-    return true;
+    return std::all_of(m_rows.cbegin(), m_rows.cend(),
+                       [](const auto &row) { return row.isProcessed(); });
   }
   // Get/set error
   std::string error() const {
@@ -77,9 +74,9 @@ public:
       return m_error;
     // If the group's error is not set but some row errors are, then
     // report that some rows failed
-    for (auto const &row : m_rows) {
-      if (!row.error().empty())
-        return "Some rows in the group have errors";
+    if (std::any_of(m_rows.cbegin(), m_rows.cend(),
+                    [](const auto &row) { return !row.error().empty(); })) {
+      return "Some rows in the group have errors";
     }
     // Return an empty string if there is no error
     return std::string();
@@ -89,11 +86,8 @@ public:
   bool reductionFailed() const {
     if (!m_error.empty())
       return true;
-    for (auto const &row : m_rows) {
-      if (row.reductionFailed())
-        return true;
-    }
-    return false;
+    return std::any_of(m_rows.cbegin(), m_rows.cend(),
+                       [](auto const &row) { return row.reductionFailed(); });
   }
   // Get the row data for the given row index
   RowData_sptr rowData(const size_t rowIndex) const {

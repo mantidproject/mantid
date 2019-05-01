@@ -715,8 +715,7 @@ void Shape2DFree::resetBoundingRect() {
   int j1 = 0;
   // Add contiguous portions of the polygon to the outline
   // and break at points from breaks list.
-  for (int i = 0; i < breaks.size(); ++i) {
-    auto j = breaks[i];
+  for (int j : breaks) {
     if (j == j1 + 1) {
       m_outline.moveTo(m_polygon[j]);
     } else {

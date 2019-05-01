@@ -665,9 +665,9 @@ void groupWorkspaces(const std::string &groupName,
 
   if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
-      if (!group->contains(*it)) {
-        group->add(*it);
+    for (const auto &inputWorkspace : inputWorkspaces) {
+      if (!group->contains(inputWorkspace)) {
+        group->add(inputWorkspace);
       }
     }
   } else {
@@ -1136,11 +1136,12 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
     std::vector<std::string> params;
     if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
-        const auto &ws = group->getItem(i);
-        if (ws->getName().find("_Parameters") != std::string::npos) {
+        const auto &wsInGroup = group->getItem(i);
+        if (wsInGroup->getName().find("_Parameters") != std::string::npos) {
           params = getKeysFromTable(
-              boost::dynamic_pointer_cast<ITableWorkspace>(ws));
-        } else if (ws->getName().find("_Workspace") != std::string::npos) {
+              boost::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
+        } else if (wsInGroup->getName().find("_Workspace") !=
+                   std::string::npos) {
           ++nRuns;
         }
       }

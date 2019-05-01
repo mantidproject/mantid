@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -165,10 +164,10 @@ double jm6(double nj, double j) {
 double f20(double nj, double j) { return 3 * pow(nj, 2) - j * (j + 1); }
 
 //------------------------------
-double f21(double nj, double) { return nj; }
+double f21(double nj, double /*unused*/) { return nj; }
 
 //------------------------------
-double f22(double, double) { return 1.0; }
+double f22(double /*unused*/, double /*unused*/) { return 1.0; }
 
 //------------------------------
 double f40(double nj, double j) {
@@ -185,10 +184,10 @@ double f41(double nj, double j) {
 double f42(double nj, double j) { return 7 * pow(nj, 2) - j * (j + 1) - 5; }
 
 //------------------------------
-double f43(double nj, double) { return nj; }
+double f43(double nj, double /*unused*/) { return nj; }
 
 //------------------------------
-double f44(double, double) { return 1.0; }
+double f44(double /*unused*/, double /*unused*/) { return 1.0; }
 
 //------------------------------
 double f60(double nj, double j) {
@@ -220,10 +219,10 @@ double f63(double nj, double j) {
 double f64(double nj, double j) { return 11 * pow(nj, 2) - j * (j + 1) - 38; }
 
 //------------------------------
-double f65(double nj, double) { return nj; }
+double f65(double nj, double /*unused*/) { return nj; }
 
 //------------------------------
-double f66(double, double) { return 1.0; }
+double f66(double /*unused*/, double /*unused*/) { return 1.0; }
 
 //-------------------------------
 // ff(k,q,nj,j) := fkq(nj,j)
@@ -876,24 +875,23 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
   //	only those excitations are taken into account whose intensities are
   //	greater equal than di
 
-  int dim = static_cast<int>(energy.size());
+  const int dim = static_cast<int>(energy.size());
   IntFortranVector tempDegeneration(dim);
   DoubleFortranVector tempEnergies(dim);
 
   // find out how many degenerated energy levels exists
   tempEnergies(1) = 0.0;
   tempDegeneration(1) = 1;
-  int k = 1;
-  for (int i = 2; i <= dim; ++i) { // do i=2,dim
-    if (std::fabs(tempEnergies(k) - energy(i)) >= de) {
-      k = k + 1;
-      tempEnergies(k) = energy(i);
-      tempDegeneration(k) = 1;
+  int n_energies = 1;
+  for (int i = 2; i <= dim; ++i) {
+    if (std::fabs(tempEnergies(n_energies) - energy(i)) >= de) {
+      n_energies += 1;
+      tempEnergies(n_energies) = energy(i);
+      tempDegeneration(n_energies) = 1;
     } else {
-      tempDegeneration(k) = tempDegeneration(k) + 1;
+      tempDegeneration(n_energies) = tempDegeneration(n_energies) + 1;
     }
   }
-  int n_energies = k;
 
   // Resize the output arrays
   degeneration.allocate(n_energies);
@@ -902,11 +900,11 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
 
   // store the intensities of the degenarated levels
   i_energies.zero();
-  for (int i = 1; i <= dim; ++i) { // do i=1,dim
+  for (int i = 1; i <= dim; ++i) {
     int ii = no(i, tempDegeneration, n_energies);
     degeneration(ii) = tempDegeneration(ii);
     e_energies(ii) = tempEnergies(ii);
-    for (int k = 1; k <= dim; ++k) { // do k=1,dim
+    for (int k = 1; k <= dim; ++k) {
       int kk = no(k, tempDegeneration, n_energies);
       i_energies(ii, kk) = i_energies(ii, kk) + mat(i, k);
     }

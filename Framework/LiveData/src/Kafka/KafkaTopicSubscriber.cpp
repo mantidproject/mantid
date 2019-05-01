@@ -43,20 +43,6 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("api.version.request", "true", errorMsg);
   return conf;
 }
-
-/// Create and return a topic configuration object for a given global
-/// configuration
-std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
-  auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
-  std::string errorMsg;
-  // default to start consumption from the end of the topic
-  // NB, can be circumvented by calling assign rather than subscribe
-  conf->set("auto.offset.reset", "largest", errorMsg);
-
-  // tie the global config to this topic configuration
-  globalConf->set("default_topic_conf", conf.get(), errorMsg);
-  return conf;
-}
 } // namespace
 
 namespace Mantid {
@@ -292,7 +278,6 @@ void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
 void KafkaTopicSubscriber::createConsumer() {
   // Create configurations
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
-  auto topicConf = createTopicConfiguration(globalConf.get());
 
   std::string errorMsg;
   m_consumer = std::unique_ptr<KafkaConsumer>(

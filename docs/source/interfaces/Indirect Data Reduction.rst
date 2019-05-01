@@ -129,6 +129,9 @@ Run
 Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
 
+Group Output
+  This will place the output reduced files from a reduction into a group workspace.
+
 Fold Multiple Frames
   This option is only relevant for TOSCA. If checked, then multiple-framed data
   will be folded back into a single spectra, if unchecked the frames will be
@@ -218,6 +221,38 @@ Multiple
 
 .. interface:: Data Reduction
   :widget: pgMultipleRebin
+
+A note on Masked Detectors
+##########################
+
+When a reduction of a single run number takes place, the masked detectors used for the
+reduction are found using the :ref:`IdentifyNoisyDetectors <algm-IdentifyNoisyDetectors>`
+algorithm.
+
+When using the **Sum Files** option the noisy detectors for each of the run numbers could
+be different. In this case, the masked detectors for the summed run is found by first finding
+the noisy detectors for each of the individual runs within the summed run using
+:ref:`IdentifyNoisyDetectors <algm-IdentifyNoisyDetectors>`. For instance, let us say that we
+find that the following run numbers have these noisy detectors:
+
+.. code-block:: sh
+
+  Run number 22841 has noisy detectors 53, 54, 55
+  Run number 22842 has noisy detectors 53, 54, 56
+  Run number 22843 has noisy detectors 53, 55, 56
+
+To find the detectors which should be masked for a summed run of 22841-22843 we first combine
+these noisy detectors so that we have 53, 54, 55 and 56. A summed file is then calculated from
+these run numbers and the :ref:`IdentifyNoisyDetectors <algm-IdentifyNoisyDetectors>` algorithm
+finds the noisy detectors for this summed file.
+
+.. code-block:: sh
+
+  Summed file 22841-22843 has noisy detectors 13, 53, 54, 55
+
+The masked detectors used for the summed run would also include any additional detectors found
+to be noisy for the summed run. The masked detectors used for the summed reduction of 22841-22843
+would therefore be 13, 53, 54, 55 and 56.
 
 ILL Energy Transfer
 ~~~~~~~~~~~~~~~~~~~

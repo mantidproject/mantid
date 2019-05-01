@@ -103,10 +103,11 @@ bool workspaceIsPlottable(MatrixWorkspace_const_sptr workspace) {
 }
 
 bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
-  for (auto const &workspace : *groupWorkspace)
-    if (workspaceIsPlottable(convertToMatrixWorkspace(workspace)))
-      return true;
-  return false;
+  return std::any_of(groupWorkspace->begin(), groupWorkspace->end(),
+                     [](auto const &workspace) {
+                       return workspaceIsPlottable(
+                           convertToMatrixWorkspace(workspace));
+                     });
 }
 
 std::vector<std::string>
@@ -210,6 +211,12 @@ WorkspaceGroup_sptr IndirectFitOutputOptionsModel::getPDFWorkspace() const {
 }
 
 void IndirectFitOutputOptionsModel::removePDFWorkspace() { m_pdfGroup.reset(); }
+
+bool IndirectFitOutputOptionsModel::isSelectedGroupPlottable(
+    std::string const &selectedGroup) const {
+  return isResultGroupSelected(selectedGroup) ? isResultGroupPlottable()
+                                              : isPDFGroupPlottable();
+}
 
 bool IndirectFitOutputOptionsModel::isResultGroupPlottable() const {
   if (m_resultGroup)

@@ -48,9 +48,6 @@ class HomeTabPresenter(object):
         if self._model.is_data_loaded():
             self._model.show_all_data()
 
-    def update_current_data(self):
-        self._model.update_current_data()
-
     def update_all_widgets(self):
         """
         Update all widgets from the context.

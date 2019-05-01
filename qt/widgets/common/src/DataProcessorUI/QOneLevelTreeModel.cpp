@@ -363,8 +363,8 @@ void QOneLevelTreeModel::updateAllRowData() {
 /** Called when the data in the table has changed. Updates the
  * table values in the cached RowData
  */
-void QOneLevelTreeModel::tableDataUpdated(const QModelIndex &,
-                                          const QModelIndex &) {
+void QOneLevelTreeModel::tableDataUpdated(const QModelIndex & /*unused*/,
+                                          const QModelIndex & /*unused*/) {
   updateAllRowData();
 }
 
