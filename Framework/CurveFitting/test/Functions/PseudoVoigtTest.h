@@ -30,122 +30,11 @@ public:
   static PseudoVoigtTest *createSuite() { return new PseudoVoigtTest(); }
   static void destroySuite(PseudoVoigtTest *suite) { delete suite; }
 
-  PseudoVoigtTest()
-      : m_xValues(), m_yValues(), m_dfdh(), m_dfda(), m_dfdx0(), m_dfdf() {
+  PseudoVoigtTest() : m_xValues() {
     for (size_t i = 0; i < 200; ++i) {
       double x_i = -10 + 0.1 * static_cast<double>(i);
       m_xValues.push_back(x_i);
     }
-
-    m_yValues.push_back(4.372997125267132);
-    m_yValues.push_back(4.458629118465070);
-    m_yValues.push_back(4.535563492585204);
-    m_yValues.push_back(4.603064037523992);
-    m_yValues.push_back(4.660455187114265);
-    m_yValues.push_back(4.707139614264023);
-    m_yValues.push_back(4.742615179498014);
-    m_yValues.push_back(4.766490204566635);
-    m_yValues.push_back(4.778496044066421);
-    m_yValues.push_back(4.778496044066421);
-    m_yValues.push_back(4.766490204566637);
-    m_yValues.push_back(4.742615179498014);
-    m_yValues.push_back(4.707139614264019);
-    m_yValues.push_back(4.660455187114265);
-    m_yValues.push_back(4.603064037523992);
-    m_yValues.push_back(4.535563492585212);
-    m_yValues.push_back(4.458629118465070);
-    m_yValues.push_back(4.372997125267132);
-    m_yValues.push_back(4.279447055100300);
-    m_yValues.push_back(4.178785512380577);
-    m_yValues.push_back(4.071831485496261);
-
-    m_dfdh.push_back(0.914852955076807);
-    m_dfdh.push_back(0.932767598005245);
-    m_dfdh.push_back(0.948862655352554);
-    m_dfdh.push_back(0.962984108268618);
-    m_dfdh.push_back(0.974990624919302);
-    m_dfdh.push_back(0.984757241477829);
-    m_dfdh.push_back(0.992178907844773);
-    m_dfdh.push_back(0.997173682963731);
-    m_dfdh.push_back(0.999685364867452);
-    m_dfdh.push_back(0.999685364867452);
-    m_dfdh.push_back(0.997173682963731);
-    m_dfdh.push_back(0.992178907844773);
-    m_dfdh.push_back(0.984757241477829);
-    m_dfdh.push_back(0.974990624919302);
-    m_dfdh.push_back(0.962984108268618);
-    m_dfdh.push_back(0.948862655352554);
-    m_dfdh.push_back(0.932767598005245);
-    m_dfdh.push_back(0.914852955076807);
-    m_dfdh.push_back(0.895281810690438);
-    m_dfdh.push_back(0.874222910539870);
-    m_dfdh.push_back(0.851847591108002);
-
-    m_dfda.push_back(0.127423417613684);
-    m_dfda.push_back(0.105761666867053);
-    m_dfda.push_back(0.083998491075912);
-    m_dfda.push_back(0.063081569151440);
-    m_dfda.push_back(0.043939766110092);
-    m_dfda.push_back(0.027438762645369);
-    m_dfda.push_back(0.014336810534878);
-    m_dfda.push_back(0.005243855136706);
-    m_dfda.push_back(0.000587294644077);
-    m_dfda.push_back(0.000587294644077);
-    m_dfda.push_back(0.005243855136706);
-    m_dfda.push_back(0.014336810534878);
-    m_dfda.push_back(0.027438762645369);
-    m_dfda.push_back(0.043939766110092);
-    m_dfda.push_back(0.063081569151440);
-    m_dfda.push_back(0.083998491075912);
-    m_dfda.push_back(0.105761666867053);
-    m_dfda.push_back(0.127423417613684);
-    m_dfda.push_back(0.148058862985728);
-    m_dfda.push_back(0.166802486088368);
-    m_dfda.push_back(0.182878080915878);
-
-    m_dfdx0.push_back(-8.963400576569903e+01);
-    m_dfdx0.push_back(-8.132865068366561e+01);
-    m_dfdx0.push_back(-7.226335976168113e+01);
-    m_dfdx0.push_back(-6.248995205947752e+01);
-    m_dfdx0.push_back(-5.207782518137794e+01);
-    m_dfdx0.push_back(-4.111379724585275e+01);
-    m_dfdx0.push_back(-2.970095613292614e+01);
-    m_dfdx0.push_back(-1.795646367180882e+01);
-    m_dfdx0.push_back(-6.008372247750958e+00);
-    m_dfdx0.push_back(6.008372247750958e+00);
-    m_dfdx0.push_back(1.795646367180882e+01);
-    m_dfdx0.push_back(2.970095613292614e+01);
-    m_dfdx0.push_back(4.111379724585275e+01);
-    m_dfdx0.push_back(5.207782518137794e+01);
-    m_dfdx0.push_back(6.248995205947752e+01);
-    m_dfdx0.push_back(7.226335976168113e+01);
-    m_dfdx0.push_back(8.132865068366561e+01);
-    m_dfdx0.push_back(8.963400576569903e+01);
-    m_dfdx0.push_back(9.714448961626630e+01);
-    m_dfdx0.push_back(1.038406984991238e+02);
-    m_dfdx0.push_back(1.097169693748341e+02);
-
-    m_dfdf.push_back(1.525303401418302e+01);
-    m_dfdf.push_back(1.221150911166150e+01);
-    m_dfdf.push_back(9.403640409427975e+00);
-    m_dfdf.push_back(6.880775502044572e+00);
-    m_dfdf.push_back(4.691695962286301e+00);
-    m_dfdf.push_back(2.880846653863556e+00);
-    m_dfdf.push_back(1.486534340987295e+00);
-    m_dfdf.push_back(5.392331432975621e-01);
-    m_dfdf.push_back(6.014386634385344e-02);
-    m_dfdf.push_back(6.014386634385344e-02);
-    m_dfdf.push_back(5.392331432975621e-01);
-    m_dfdf.push_back(1.486534340987295e+00);
-    m_dfdf.push_back(2.880846653863556e+00);
-    m_dfdf.push_back(4.691695962286301e+00);
-    m_dfdf.push_back(6.880775502044572e+00);
-    m_dfdf.push_back(9.403640409427975e+00);
-    m_dfdf.push_back(1.221150911166150e+01);
-    m_dfdf.push_back(1.525303401418302e+01);
-    m_dfdf.push_back(1.847592895604664e+01);
-    m_dfdf.push_back(2.182837505987588e+01);
-    m_dfdf.push_back(2.526016311933117e+01);
   }
 
   void testCategory() {
@@ -204,7 +93,7 @@ public:
   }
 
   /** Test against with pure Gaussian
-   * @brief testGaussianEdge
+   * @brief testGaussianEdge : test PseudoVoigt behaves as a Gaussian
    */
   void testGaussianEdge() {
     FunctionDomain1DVector domain(m_xValues);
@@ -225,7 +114,8 @@ public:
     TS_ASSERT_DELTA(num_intensity, 2.0, 1.E-5);
 
     // check with Gaussian at same center value, same intensity and peak width
-    // This is a non-normalized Gaussian
+    // This is a non-normalized Gaussian: need to be converted to normalized
+    // Gaussian
     Gaussian gaussian;
     gaussian.initialize();
     gaussian.setCentre(-1.);
@@ -235,11 +125,16 @@ public:
     FunctionValues valuesGaussian(domain);
     gaussian.function(domain, valuesGaussian);
 
+    double ag = 2. / fwhm * sqrt(M_LN2 / M_PI);
+
     for (size_t i = 0; i < valuesPV.size(); ++i) {
-      TS_ASSERT_DELTA(valuesPV[i], valuesGaussian[i], 1e-15);
+      TS_ASSERT_DELTA(valuesPV[i], ag * valuesGaussian[i], 1e-15);
     }
   }
 
+  /** Test against with pure Lorentzian
+   * @brief testLorentzianEdge : test PseudoVoigt behaves as a Lorentzian
+   */
   void testLorentzianEdge() {
     FunctionDomain1DVector domain(m_xValues);
 
@@ -270,23 +165,24 @@ public:
     TS_ASSERT_DELTA(pv->intensity(), intensity, 1.E-10);
     TS_ASSERT_DELTA(pv->getParameter("Mixing"), mixing, 1.E-10);
 
+    // check each data point
     for (size_t i = 0; i < valuesPV.size(); ++i) {
-      continue;
-      // TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
+      TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
     }
 
     // check height
     TS_ASSERT_DELTA(pv->height(), lorentzian.height(), 1e-16);
   }
 
-  /** Regular pseudo voigt
-   * @brief testPseudoVoigtValues
+  /** Test as a regular pseudo voigt function
+   * @brief testPseudoVoigtValues : test a regular pseudo voigt function with
+   * both Gaussian and Lorentzian part
    */
-  void TONIGHT_testPseudoVoigtValues() {
-    const double center{4.43};
-    const double intensity{2301.0};
-    const double fwhm{0.8321};
-    const double mixing{0.81};
+  void testPseudoVoigtValues() {
+    const double center{4.};
+    const double intensity{2000.};
+    const double fwhm{0.7};
+    const double mixing{0.8};
     IPeakFunction_sptr pv = getInitializedPV(center, intensity, fwhm, mixing);
 
     FunctionDomain1DVector domain(m_xValues);
@@ -294,45 +190,44 @@ public:
 
     pv->function(domain, values);
 
-    for (size_t i = 0; i < values.size(); ++i) {
-      std::cout << m_xValues[i] << "    " << values[i] << "\n";
-    }
-
-    // check intensity
-    double numeric_intensity =
+    // check integration
+    double num_intensity =
         numerical_integrate_pv(center, intensity, fwhm, mixing);
-    TS_ASSERT_DELTA(numeric_intensity, intensity, 1.0E-2);
-    TS_ASSERT(numeric_intensity < intensity);
+    TS_ASSERT_DELTA(num_intensity, intensity, 1.);
 
-    // check height
-    double height = pv->height();
-    TS_ASSERT_DELTA(height, values[100], 1.E-10);
+    // calculate Gaussian and Lorentzian
+    // check with Gaussian and Lorentzian with same center, FWHM and intensities
+    // considering mixing
+    // This is a non-normalized Gaussian
+    Gaussian gaussian;
+    gaussian.initialize();
+    gaussian.setCentre(center);
+    gaussian.setIntensity(intensity * mixing);
+    gaussian.setFwhm(fwhm);
+    FunctionValues valuesGaussian(domain);
+    gaussian.function(domain, valuesGaussian);
 
+    // This is a non-normalized Lorentzian
+    Lorentzian lorentzian;
+    lorentzian.initialize();
+    lorentzian.setCentre(center);
+    lorentzian.setIntensity(intensity * (1. - mixing));
+    lorentzian.setFwhm(fwhm);
+    FunctionValues valuesLorentzian(domain);
+    lorentzian.function(domain, valuesLorentzian);
+
+    // Compare each data point
+    double ag = 2. / fwhm * sqrt(M_LN2 / M_PI);
     for (size_t i = 0; i < values.size(); ++i) {
-      TS_ASSERT_DELTA(values[i], m_yValues[i], 1e-13);
+      TS_ASSERT_DELTA(values[i], ag * valuesGaussian[i] + valuesLorentzian[i],
+                      1e-8);
     }
   }
 
-  /** Test derivative with eta = 0.5
+  /** Compare numerical derivative and analytical derivatives for eta
+   * @brief testPseudoVoigtDerivativesVaringMixing: test derivative on eta
+   * (mixing)
    */
-  void testPseudoVoigtDerivativesXAxis() {
-
-    IPeakFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
-
-    FunctionDomain1DVector domain(m_xValues);
-    Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
-
-    pv->functionDeriv(domain, jacobian);
-
-    for (size_t i = 0; i < domain.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 0), m_dfda[i], 1e-13);
-      TS_ASSERT_DELTA(jacobian.get(i, 1), m_dfdh[i], 1e-13);
-      TS_ASSERT_DELTA(jacobian.get(i, 2), m_dfdx0[i], 1e-11);
-      TS_ASSERT_DELTA(jacobian.get(i, 3), m_dfdf[i], 1e-11);
-    }
-  }
-
-  /// compare numerical derivative and analytical derivatives for eta
   void testPseudoVoigtDerivativesVaringMixing() {
     double x0 = -1.;
     double intensity = 2;
@@ -381,6 +276,10 @@ public:
     return;
   }
 
+  /** test derivative on intensity
+   * @brief testPseudoVoigtDerivativesVaringIntensity: test derivative on
+   * intensity
+   */
   void testPseudoVoigtDerivativesVaringIntensity() {
     double x0 = -1.;
     double min_intensity = 0.9;
@@ -427,6 +326,9 @@ public:
     return;
   }
 
+  /** test derivative on peak center
+   * @brief testPseudoVoigtDerivativesVaringCentre: test derivative to center
+   */
   void testPseudoVoigtDerivativesVaringCentre() {
     double min_x0 = -1.2;
     double max_x0 = -0.8;
@@ -472,6 +374,9 @@ public:
     return;
   }
 
+  /** test derivative on peak width (FWHM)
+   * @brief testPseudoVoigtDerivativesVaringFWHM: test derivative to peak width
+   */
   void testPseudoVoigtDerivativesVaringFWHM() {
     double x0 = -1.;
     double intensity = 2;
@@ -606,11 +511,6 @@ private:
   }
 
   std::vector<double> m_xValues;
-  std::vector<double> m_yValues;
-  std::vector<double> m_dfdh;
-  std::vector<double> m_dfda;
-  std::vector<double> m_dfdx0;
-  std::vector<double> m_dfdf;
 };
 
 #endif /* MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_ */
