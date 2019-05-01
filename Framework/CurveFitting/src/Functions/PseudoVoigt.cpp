@@ -405,7 +405,6 @@ void PseudoVoigt::setHeight(const double h) {
  */
 void PseudoVoigt::setFwhm(const double w) { setParameter("FWHM", w, true); }
 
-
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
