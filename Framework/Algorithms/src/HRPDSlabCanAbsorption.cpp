@@ -36,8 +36,8 @@ const V3D Z_AXIS{0.0, 0.0, 1.0};
    bank.
  */
 
-constexpr double HRPD_CAN_HEIGHT{ 2.3 };
-constexpr double HRPD_CAN_WIDTH{ 1.8 };
+constexpr double HRPD_CAN_HEIGHT{2.3};
+constexpr double HRPD_CAN_WIDTH{1.8};
 constexpr double VAN_WINDOW_THICKNESS{0.000125}; // in m
 constexpr double VAN_RHO{0.07192 * 100};         // in Angstroms-3 * 100
 constexpr double VAN_REF_ATTEN{-5.08 * VAN_RHO / NeutronAtom::ReferenceLambda};

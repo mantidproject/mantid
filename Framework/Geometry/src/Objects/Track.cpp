@@ -128,7 +128,7 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
   IntersectionPoint newPoint(direction, endPoint,
                              endPoint.distance(m_startPoint), obj, compID);
   if (m_surfPoints.empty()) {
-     m_surfPoints.insert(m_surfPoints.begin(), newPoint);
+    m_surfPoints.insert(m_surfPoints.begin(), newPoint);
   } else {
     const auto lastPoint = m_surfPoints.back();
     if (direction != lastPoint.direction) {
