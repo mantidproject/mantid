@@ -30,7 +30,7 @@ from mantid.kernel import Logger
 from mantid.plots import MantidAxes
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantid.py3compat import is_text_string, string_types
-from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
+from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -54,9 +54,11 @@ def manage_workspace_names(func):
     :param func: A plotting function
     :return:
     """
+
     def inner_func(workspaces, *args, **kwargs):
         workspaces = _validate_workspace_names(workspaces)
         return func(workspaces, *args, **kwargs)
+
     return inner_func
 
 

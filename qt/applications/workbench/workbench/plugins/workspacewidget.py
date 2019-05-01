@@ -9,17 +9,14 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# system imports
-from functools import partial
-
-# third-party library imports
 import matplotlib.pyplot
+from functools import partial
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
-# local package imports
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
-from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.dialogs.plottypedialog import PlotTypeDialog
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, LOGGER, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
@@ -186,7 +183,17 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _action_double_click_workspace(self, name):
-        self._do_show_data([name])
+        dlg = PlotTypeDialog(parent=None)
+        dlg.exec_()
+        dialog_decision = dlg.decision
+
+        if dialog_decision is None:
+            # cancelled
+            return None
+        elif dialog_decision == PlotTypeDialog.Colorfill:
+            return self._do_plot_colorfill([name])
+        else:
+            return self._do_plot_spectrum([name], errors=False, overplot=False)
 
     def refresh_workspaces(self):
         self.workspacewidget.refreshWorkspaces()
