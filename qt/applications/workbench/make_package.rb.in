@@ -182,6 +182,7 @@ end
 Qt_Executables = "-executable=Contents/MacOS/#{File.basename(qscintilla2_lib)} "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt5.so "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/widgets/instrumentview/_instrumentviewqt5.so "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/icons/_iconsqt5.so "
 Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtCore.so "
 Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtGui.so "
 Qt_Executables << "-executable=Contents/MacOS/PyQt5/QtOpenGl.so "

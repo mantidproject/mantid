@@ -17,6 +17,15 @@ namespace Icons {
 
 class IconicFont;
 
+/**
+ * CharIconPainter is intended to be owned by an IconicFont object, this object
+ * will pass it as a pointer to each of it's created CharIconEngines. The
+ * functions inside of this object will perform the painting of the icon to the
+ * pixmap inside of the QIcon object, when called by the CharIconEngine.
+ *
+ * QIcon calls pixmap/paint on CharIconEngine. CharIconEngine calls paint on
+ * CharIconPainter.
+ */
 class EXPORT_OPT_MANTIDQT_ICONS CharIconPainter : public QPainter {
 public:
   void paint(IconicFont *iconic, QPainter *painter, QRect rect,
