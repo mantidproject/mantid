@@ -23,8 +23,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include "boost/algorithm/string/trim.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 #include <Poco/AutoPtr.h>
