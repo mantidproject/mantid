@@ -388,7 +388,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
             if (!((dim1->getMinimum() == dim2->getMinimum()) &&
                 (dim1->getMaximum() == dim2->getMaximum()) &&
                 (dim1->getNBins() == dim2->getNBins()) &&
-                (dim1->getName() != dim2->getName()))){
+                (dim1->getName() == dim2->getName()))){
               errorMessage.emplace("AccumulationWorkspaces",
                                    "Binning for TemporaryNormalizationWorkspaces "
                                    "and TemporaryDataWorkspace must be the same.");
@@ -731,7 +731,7 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
       for(size_t i = 0; i < numDimsTemp; i++){
       auto dim1 = m_inputWS->getDimension(i);
       auto dim2 = tempDataWS->getDimension(i);
-      if (!(dim1->getName() != dim2->getName())){
+      if (dim1->getName() != dim2->getName()){
           throw(std::invalid_argument("InputWorkspace and TemporaryDataWorkspace "
                                       "do not have the same dimensions."));
           break;
