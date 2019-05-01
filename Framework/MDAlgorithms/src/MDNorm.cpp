@@ -366,31 +366,42 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     }
   }
   // validate accumulation workspaces, if provided
-  // this only checks that, if given, the two workspaces
-  // have the same dimensions.  We verify that binning parameters
-  // are the same when we execute the algorithm.
   boost::shared_ptr<IMDHistoWorkspace> tempNormWS =
       this->getProperty("TemporaryNormalizationWorkspace");
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
       this->getProperty("TemporaryDataWorkspace");
-  if (tempNormWS || tempDataWS) {
-    if ((!tempNormWS) || (!tempDataWS)) {
-      errorMessage.emplace(
-          "AccumulationWorkspaces",
+
+  // check that either both or neuther accumulation workspaces are provied
+  if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
+       errorMessage.emplace("AccumulationWorkspaces",
           "Must provide either no accumulation workspaces or,"
           "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
-      for (size_t i = 0; i < 3; i++) {
-        auto ax1 = tempNormWS->getDimension(i);
-        auto ax2 = tempDataWS->getDimension(i);
-        if (!(ax1->getMinimum() == ax2->getMinimum()) &&
-            (ax1->getMaximum() == ax2->getMaximum()) &&
-            (ax1->getNBins() == ax2->getNBins()))
-          errorMessage.emplace("AccumulationWorkspaces",
-                               "Binning for TemporaryNormalizationWorkspaces "
-                               "and TemporaryDataWorkspace must be the same.");
-      }
     }
+  // check that both accumulation workspaces are on the same grid
+  if (tempNormWS && tempDataWS){
+      size_t numNormDims = tempNormWS->getNumDims();
+      size_t numDataDims = tempDataWS->getNumDims();
+      if (numNormDims == numDataDims){
+          for (size_t i = 0; i < numNormDims; i++) {
+            auto dim1 = tempNormWS->getDimension(i);
+            auto dim2 = tempDataWS->getDimension(i);
+            if (!((dim1->getMinimum() == dim2->getMinimum()) &&
+                (dim1->getMaximum() == dim2->getMaximum()) &&
+                (dim1->getNBins() == dim2->getNBins()) &&
+                (dim1->getName() != dim2->getName()))){
+              errorMessage.emplace("AccumulationWorkspaces",
+                                   "Binning for TemporaryNormalizationWorkspaces "
+                                   "and TemporaryDataWorkspace must be the same.");
+            break;
+            }
+        }
+      } else { // accumulation workspaces have different number of dimensions
+              errorMessage.emplace("AccumulationWorkspaces",
+                                   "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
+                                   "do not have the same number of dimensions");
+      }
   }
+
   return errorMessage;
 }
 
@@ -713,6 +724,25 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
     const std::map<std::string, std::string> &parameters,
     const Mantid::API::IMDHistoWorkspace_sptr tempDataWS) {
 
+  // make sure the number of dimensions is the same for both workspaces
+  size_t numDimsInput = m_inputWS->getNumDims();
+  size_t numDimsTemp = tempDataWS->getNumDims();
+  if(numDimsInput == numDimsTemp){
+      for(size_t i = 0; i < numDimsTemp; i++){
+      auto dim1 = m_inputWS->getDimension(i);
+      auto dim2 = tempDataWS->getDimension(i);
+      if (!(dim1->getName() != dim2->getName())){
+          throw(std::invalid_argument("InputWorkspace and TemporaryDataWorkspace "
+                                      "do not have the same dimensions."));
+          break;
+      }
+      }
+  } else {
+      throw(std::invalid_argument("InputWorkspace and TempDataWorkspace "
+                                  "must have the same number of dimensions."));
+  }
+
+  // make sure the binning parameters are also valid
   std::string numBinsStr = parameters.at("OutputBins");
   std::string extentsStr = parameters.at("OutputExtents");
   std::string tmp;
@@ -736,19 +766,19 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
   }
 
   // parse the input data workspace
-  for (int i = 0; i < 3; i++) {
+  for (size_t i = 0; i < numDimsInput; i++) {
     auto ax = tempDataWS->getDimension(i);
     numBinsTempData.push_back(ax->getNBins());
     extentsTempData.push_back(ax->getMinimum());
     extentsTempData.push_back(ax->getMaximum());
   }
-  if ((numBins.size() != 3) || (numBinsTempData.size() != 3) ||
-      extents.size() != 6 || extentsTempData.size() != 6) {
+  if ((numBins.size() != numDimsInput) || (numBinsTempData.size() != numDimsInput) ||
+      extents.size() != 2*numDimsInput || extentsTempData.size() != 2*numDimsInput) {
     g_log.error("Cannot parse binning dimensions for MDNorm.");
     return false;
   }
   // compare the arrays
-  for (size_t i = 0; i < 3; i++) {
+  for (size_t i = 0; i < numDimsInput; i++) {
     if (numBins[i] != numBinsTempData[i]) {
       g_log.error("Number of bins for TemporaryDataWorkspace is not the same "
                   "for binning parameters.");
