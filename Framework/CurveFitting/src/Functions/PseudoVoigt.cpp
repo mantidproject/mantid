@@ -10,7 +10,7 @@
 #include "MantidKernel/make_unique.h"
 #include <iostream>
 
-// #include <math>
+#include <cmath>
 
 namespace {
 
