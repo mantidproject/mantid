@@ -81,7 +81,7 @@ private:
     TS_ASSERT_EQUALS(shape->numberOfTriangles(), triangles);
     TS_ASSERT_DELTA(shape->volume(), volume, delta);
   }
-  const ScaleUnits units = metres;
+  const ScaleUnits units = ScaleUnits::metres;
 };
 
 #endif /* LOAD_ASCIISTL_TEST_H_ */

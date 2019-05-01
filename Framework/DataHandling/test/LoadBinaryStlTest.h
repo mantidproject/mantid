@@ -29,7 +29,7 @@ public:
 
   void test_loading_cube_stl_cm() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    const ScaleUnits cm = centimetres;
+    const ScaleUnits cm = ScaleUnits::centimetres;
     auto loader = LoadBinaryStl(path, cm);
     auto cube = loader.readStl();
     assert_shape_matches(cube, 8, 12, 0.003, 0.00001);
@@ -88,6 +88,6 @@ private:
     TS_ASSERT_DELTA(shape->volume(), volume, delta);
   }
 
-  const ScaleUnits units = metres;
+  const ScaleUnits units = ScaleUnits::metres;
 };
 #endif /* LOAD_BINARYSTL_TEST_H_ */

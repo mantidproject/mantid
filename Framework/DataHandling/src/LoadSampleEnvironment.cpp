@@ -203,19 +203,8 @@ void LoadSampleEnvironment::exec() {
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
-  ScaleUnits scaleType;
-  std::string scaleProperty = getPropertyValue("Scale");
-
-  if (scaleProperty == "m") {
-    scaleType = metres;
-  } else if (scaleProperty == "cm") {
-    scaleType = centimetres;
-  } else if (scaleProperty == "mm") {
-    scaleType = millimetres;
-  } else {
-    throw std::invalid_argument(scaleProperty +
-                                " is not an accepted scale of stl file.");
-  }
+  const std::string scaleProperty = getPropertyValue("Scale");
+  const ScaleUnits scaleType = getScaleType(scaleProperty);
 
   if (getProperty("SetMaterial")) {
     ReadMaterial::MaterialParameters params;

@@ -162,7 +162,7 @@ private:
   // load a cube into a meshobject
   std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    ScaleUnits unit = metres;
+    constexpr ScaleUnits unit = ScaleUnits::metres;
     auto loader = LoadBinaryStl(path, unit);
     auto cube = loader.readStl();
     return cube;
