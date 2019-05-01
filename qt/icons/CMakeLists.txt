@@ -28,7 +28,7 @@ if(ENABLE_MANTIDPLOT)
                         @loader_path/../MacOS
                         @loader_path/../Libraries
                       LINUX_INSTALL_RPATH
-                        "\$ORIGIN/../${LIB_DIR}"
+                        "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 if(ENABLE_WORKBENCH)
@@ -53,7 +53,7 @@ if(ENABLE_WORKBENCH)
                         @loader_path/../MacOS
                         @loader_path/../Libraries
                       LINUX_INSTALL_RPATH
-                        "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
+                        "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 endif()
 
 set(QT5_TEST_FILES test/IconTest.h)
