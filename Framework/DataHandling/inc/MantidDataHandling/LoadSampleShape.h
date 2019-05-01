@@ -8,6 +8,7 @@
 #define DATAHANDLING_LOAD_SHAPE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -46,13 +47,18 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
-
+  boost::shared_ptr<Geometry::MeshObject>
+  rotate(boost::shared_ptr<Geometry::MeshObject> sampleMesh);
+  Kernel::Matrix<double> generateMatrix();
+  Kernel::Matrix<double> generateXRotation();
+  Kernel::Matrix<double> generateYRotation();
+  Kernel::Matrix<double> generateZRotation();
 private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
 
-  boost::shared_ptr<Geometry::MeshObject> rotate(boost::shared_ptr<Geometry::MeshObject> sampleMesh);
+
 };
 
 } // end namespace DataHandling
