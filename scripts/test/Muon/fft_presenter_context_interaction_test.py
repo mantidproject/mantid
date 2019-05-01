@@ -76,7 +76,6 @@ class FFTPresenterTest(unittest.TestCase):
     def test_handle_use_raw_data_changed_when_no_rebin_set(self):
         self.view.set_raw_checkbox_state(False)
 
-
         self.assertEqual(retrieve_combobox_info(self.view.ws),
                          ['MUSR22725; Pair Asym; test_pair; #1',
                           'MUSR22725; Group; top; Asymmetry; #1', 'MUSR22725; Group; bkwd; Asymmetry; #1',
@@ -97,7 +96,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.assertEqual(retrieve_combobox_info(self.view.ws),
                          ['MUSR22725; Pair Asym; test_pair; Rebin; #1',
                           'MUSR22725; Group; top; Asymmetry; Rebin; #1', 'MUSR22725; Group; bkwd; Asymmetry; Rebin; #1',
-                          'MUSR22725; Group; bottom; Asymmetry; Rebin; #1', 'MUSR22725; Group; fwd; Asymmetry; Rebin; #1'])
+                          'MUSR22725; Group; bottom; Asymmetry; Rebin; #1',
+                          'MUSR22725; Group; fwd; Asymmetry; Rebin; #1'])
 
         self.assertEqual(retrieve_combobox_info(self.view.Im_ws), ['MUSR22725; Pair Asym; test_pair; Rebin; #1',
                                                                    'MUSR22725; Group; top; Asymmetry; Rebin; #1',
@@ -106,7 +106,9 @@ class FFTPresenterTest(unittest.TestCase):
                                                                    'MUSR22725; Group; fwd; Asymmetry; Rebin; #1'])
 
     def test_get_pre_inputs_with_phase_quad(self):
-        self.context.phase_context.add_phase_quad('MUSR22725_PhaseQuad_MUSR22725_phase_table')
+        workspace_wrapper = mock.MagicMock()
+        workspace_wrapper.workspace_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
+        self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
 
         self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
@@ -123,27 +125,34 @@ class FFTPresenterTest(unittest.TestCase):
 
     def test_get_imaginary_pre_inputs(self):
         self.presenter.getWorkspaceNames()
-        self.assertEquals(self.presenter.get_imaginary_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
-                                                                  'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; #1',
-                                                                  'NegativePadding': True, 'Padding': 1})
+        self.assertEquals(self.presenter.get_imaginary_inputs(),
+                          {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
+                           'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; #1',
+                           'NegativePadding': True, 'Padding': 1})
 
     def test_get_fft_inputs_with_phase_quad_no_imag(self):
-        phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
-        self.context.phase_context.add_phase_quad(phase_name)
+        workspace_wrapper = mock.MagicMock()
+        workspace_wrapper.workspace_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
+        self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
         self.view.imaginary_data = False
 
-        self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name), {'AcceptXRoundingErrors': True, 'AutoShift': True,
-                                                            'InputWorkspace': phase_name,
-                                                            'Real': 0, 'Transform': 'Forward'})
+        self.assertEquals(
+            self.presenter.get_fft_inputs(workspace_wrapper.workspace_name, workspace_wrapper.workspace_name),
+            {'AcceptXRoundingErrors': True, 'AutoShift': True,
+             'InputWorkspace': workspace_wrapper.workspace_name,
+             'Real': 0, 'Transform': 'Forward'})
 
     def test_get_fft_inputs_with_phase_quad(self):
+        workspace_wrapper = mock.MagicMock()
         phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
-        self.context.phase_context.add_phase_quad(phase_name)
+        workspace_wrapper.workspace_name = phase_name
+        self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
-        self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name, 1), {'AcceptXRoundingErrors': True, 'AutoShift': True,
-                                                            'InputWorkspace': phase_name, 'InputImagWorkspace': phase_name,
-                                                            'Real': 0, 'Imaginary': 1, 'Transform': 'Forward'})
+        self.assertEquals(self.presenter.get_fft_inputs(phase_name, phase_name, 1),
+                          {'AcceptXRoundingErrors': True, 'AutoShift': True,
+                           'InputWorkspace': phase_name, 'InputImagWorkspace': phase_name,
+                           'Real': 0, 'Imaginary': 1, 'Transform': 'Forward'})
 
     def test_get_fft_inputs_without_phase_quad(self):
         self.presenter.getWorkspaceNames()
@@ -170,25 +179,27 @@ class FFTPresenterTest(unittest.TestCase):
         fft_mock.return_value = fft_mock_return
         apodization_mock.return_value = apodization_mock_return
         self.presenter.add_fft_workspace_to_ADS = mock.MagicMock()
-        self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=('MUSR22725_PhaseQuad_MUSR22725_phase_table',
-                                                                                    'MUSR22725 PhaseTable'))
-        phase_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
-        self.context.phase_context.add_phase_quad(phase_name)
+        self.presenter.calculate_base_name_and_group = mock.MagicMock(
+            return_value=('MUSR22725_PhaseQuad_MUSR22725_phase_table',
+                          'MUSR22725 PhaseTable'))
+        workspace_wrapper = mock.MagicMock()
+        workspace_wrapper.workspace_name = 'MUSR22725_PhaseQuad_MUSR22725_phase_table'
+        self.context.phase_context.add_phase_quad(workspace_wrapper)
         self.presenter.getWorkspaceNames()
 
         self.presenter.calculate_FFT()
 
-        apodization_mock.assert_called_once_with({'Padding': 1, 'ApodizationFunction': 'Lorentz', 'NegativePadding': True,
-                                                  'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table', 'DecayConstant': 4.4})
+        apodization_mock.assert_called_once_with(
+            {'Padding': 1, 'ApodizationFunction': 'Lorentz', 'NegativePadding': True,
+             'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table', 'DecayConstant': 4.4})
 
         fft_mock.assert_called_once_with({'Real': 0, 'InputWorkspace': apodization_mock_return, 'Transform': 'Forward',
-                                          'AcceptXRoundingErrors': True, 'AutoShift': True, 'InputImagWorkspace': apodization_mock_return,
+                                          'AcceptXRoundingErrors': True, 'AutoShift': True,
+                                          'InputImagWorkspace': apodization_mock_return,
                                           'Imaginary': 1})
 
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with('MUSR22725_PhaseQuad_MUSR22725_phase_table',
-                                                                        'MUSR22725 PhaseTable',
                                                                         fft_mock_return)
-
 
 
 if __name__ == '__main__':
