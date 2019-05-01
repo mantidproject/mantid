@@ -17,8 +17,7 @@ from mantid.simpleapi import mtd
 
 
 class FigureErrorsManager(object):
-    ERROR_BARS_MENU_TEXT = "Error Bars"
-    TOGGLE_ERROR_BARS_BUTTON_TEXT = "Toggle errors"
+    ERROR_BARS_MENU_TEXT = "Y Error Bars"
     SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
     HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
 
@@ -45,17 +44,26 @@ class FigureErrorsManager(object):
         ax_is_supported = self._supported_ax(ax)
 
         lines = ax.lines
+
+        error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
         # if there's more than one line plotted, then
         # add a sub menu, containing an action to hide the
         # error bar for each line
+        error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
+                                  partial(self._update_plot_after,
+                                          self.toggle_all_error_bars, make_visible=True))
+        error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
+                                  partial(self._update_plot_after,
+                                          self.toggle_all_error_bars, make_visible=False))
+        menu.addMenu(error_bars_menu)
         if len(lines) > 1:
             # add into the correct menu,
             # if there is a single line, then
             # add the action to the main menu
-            error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
-            menu.addMenu(error_bars_menu)
 
             for index, line in enumerate(lines):
+                # todo show state in action menu, use qt checkbox stuff
+
                 if line.get_label() == MantidAxes.MPL_NOLEGEND:
                     error_line = find_errorbar_container(line, containers)
                     label = error_line.get_label()
@@ -69,14 +77,6 @@ class FigureErrorsManager(object):
                     if ax_is_supported:
                         error_bars_menu.addAction(label, partial(self._update_plot_after,
                                                                  self._toggle_error_bar_for, index))
-
-        # always add the toggle all error bars option
-        menu.addAction(self.TOGGLE_ERROR_BARS_BUTTON_TEXT, partial(self._update_plot_after,
-                                                                   self.toggle_all_error_bars))
-        menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT, partial(self._update_plot_after,
-                                                                 self.toggle_all_error_bars, make_visible=True))
-        menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT, partial(self._update_plot_after,
-                                                                 self.toggle_all_error_bars, make_visible=False))
 
     def add_errorbar_for(self, index, make_visible=None):
         """
@@ -212,17 +212,28 @@ class FigureErrorsManager(object):
             self.add_errorbar_for(index, make_visible=False)
             errorbar_container = find_errorbar_container(ax.lines[index], ax.containers)
 
-        # the container has the errors there
-        error_line = errorbar_container.lines[2][0]
-        # if a force_state is passed, use that, otherwise invert the current state
-        new_state = not error_line.get_visible() if make_visible is None else make_visible
+        # Finds the correct index for Y errors,
+        # depending on whether X errors are present.
+        # Currently the X errors are not touched at all.
+        if errorbar_container.has_yerr and errorbar_container.has_xerr:
+            y_err_index = 1
+        elif errorbar_container.has_yerr and not errorbar_container.has_xerr:
+            y_err_index = 0
+        else:
+            y_err_index = None
 
-        # updates the creation args state if the plot would be saved out
-        if self._supported_ax(ax):
-            creation_args = ax.creation_args
-            creation_args[index][MantidAxKwargs.ERRORS_VISIBLE] = new_state
+        if y_err_index is not None:
+            error_line = errorbar_container.lines[2][y_err_index]
+            # the container has the errors there
+            # if a force_state is passed, use that, otherwise invert the current state
+            new_state = not error_line.get_visible() if make_visible is None else make_visible
 
-        error_line.set_visible(new_state)
+            # updates the creation args state if the plot would be saved out
+            if self._supported_ax(ax):
+                creation_args = ax.creation_args
+                creation_args[index][MantidAxKwargs.ERRORS_VISIBLE] = new_state
+
+            error_line.set_visible(new_state)
 
     def _update_plot_after(self, func, *args, **kwargs):
         """
