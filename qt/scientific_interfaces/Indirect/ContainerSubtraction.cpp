@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"

@@ -667,7 +667,7 @@ void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
  * @param preview The plot preview whose range to resize.
  * @param range   The range to resize to, as a pair of minimum and maximum value
  */
-void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
+void IndirectTab::resizePlotRange(MantidWidgets::PreviewPlot *preview,
                                   QPair<double, double> range) {
   preview->resizeX();
   preview->setAxisRange(range, QwtPlot::yLeft);

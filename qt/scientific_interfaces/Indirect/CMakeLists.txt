@@ -1,4 +1,5 @@
-set (SRC_FILES
+# Qt 4 implementation
+set(QT4_SRC_FILES
     AbsorptionCorrections.cpp
     ApplyAbsorptionCorrections.cpp
     CalculatePaalmanPings.cpp
@@ -74,98 +75,31 @@ set (SRC_FILES
     Stretch.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
-set (INC_FILES
-    DllConfig.h
-    AbsorptionCorrections.h
-    ApplyAbsorptionCorrections.h
-    CalculatePaalmanPings.h
-    ContainerSubtraction.h
-    ConvFit.h
-    ConvFitAddWorkspaceDialog.h
-    ConvFitDataPresenter.h
-    ConvFitDataTablePresenter.h
+# IMPORTANT: Include files are required in the QT4_MOC_FILES set. Scroll down to
+# find it.
+set(QT4_INC_FILES
     ConvFitModel.h
-    CorrectionsTab.h
-    DensityOfStates.h
-    Elwin.h
-    IAddWorkspaceDialog.h
-    IIndirectFitDataView.h
-    IIndirectFitOutputOptionsModel.h
-    IIndirectFitOutputOptionsView.h
-    IIndirectFitPlotView.h
-    IIndirectSettingsView.h
-    ILLEnergyTransfer.h
-    ISISCalibration.h
-    ISISDiagnostics.h
-    ISISEnergyTransfer.h
-    IndirectAddWorkspaceDialog.h
-    IndirectBayes.h
-    IndirectBayesTab.h
-    IndirectCorrections.h
-    IndirectDataAnalysis.h
-    IndirectDataAnalysisTab.h
-    IndirectDataReduction.h
-    IndirectDataReductionTab.h
-    IndirectDataTablePresenter.h
-    IndirectDiffractionReduction.h
-    IndirectEditResultsDialog.h
-    IndirectFitAnalysisTab.h
+    DllConfig.h
     IndirectFitData.h
-    IndirectFitDataPresenter.h
-    IndirectFitDataView.h
     IndirectFitOutput.h
     IndirectFitOutputOptionsModel.h
-    IndirectFitOutputOptionsPresenter.h
-    IndirectFitOutputOptionsView.h
     IndirectFitPlotModel.h
     IndirectFitPlotPresenter.h
-    IndirectFitPlotView.h
     IndirectFittingModel.h
-    IndirectInterface.h
-    IndirectLoadILL.h
-    IndirectMolDyn.h
-    IndirectMoments.h
-    IndirectSassena.h
-    IndirectSettings.h
-    IndirectSettingsModel.h
-    IndirectSettingsPresenter.h
-    IndirectSettingsView.h
-    IndirectSimulation.h
-    IndirectSimulationTab.h
-    IndirectSpectrumSelectionPresenter.h
-    IndirectSpectrumSelectionView.h
-    IndirectSqw.h
-    IndirectSymmetrise.h
-    IndirectTab.h
-    IndirectTools.h
     IndirectToolsTab.h
-    IndirectTransmission.h
-    IndirectTransmissionCalc.h
-    Iqt.h
-    IqtFit.h
     IqtFitModel.h
-    JumpFit.h
-    JumpFitAddWorkspaceDialog.h
-    JumpFitDataPresenter.h
-    JumpFitDataTablePresenter.h
-    LazyAsyncRunner.h
     JumpFitModel.h
-    MSDFit.h
-    MSDFitModel.h
-    Quasi.h
-    ResNorm.h
-    Stretch.h)
+    MSDFitModel.h)
 
-set(MOC_FILES
+set(QT4_MOC_FILES
     AbsorptionCorrections.h
     ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
     ContainerSubtraction.h
-    ConvFit.h
     ConvFitAddWorkspaceDialog.h
     ConvFitDataPresenter.h
     ConvFitDataTablePresenter.h
+    ConvFit.h
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
@@ -208,27 +142,27 @@ set(MOC_FILES
     IndirectSpectrumSelectionView.h
     IndirectSqw.h
     IndirectSymmetrise.h
-    IndirectTransmission.h
-    IndirectTransmissionCalc.h
+    IndirectTab.h
     IndirectTools.h
     IndirectToolsTab.h
-    IndirectTab.h
-    Iqt.h
+    IndirectTransmissionCalc.h
+    IndirectTransmission.h
     IqtFit.h
-    JumpFit.h
+    Iqt.h
+    ISISCalibration.h
+    ISISDiagnostics.h
+    ISISEnergyTransfer.h
     JumpFitAddWorkspaceDialog.h
     JumpFitDataPresenter.h
     JumpFitDataTablePresenter.h
+    JumpFit.h
     LazyAsyncRunner.h
     MSDFit.h
     Quasi.h
     ResNorm.h
-    Stretch.h
-    ISISCalibration.h
-    ISISDiagnostics.h
-    ISISEnergyTransfer.h)
+    Stretch.h)
 
-set (UI_FILES
+set(QT4_UI_FILES
     AbsorptionCorrections.ui
     ApplyAbsorptionCorrections.ui
     CalculatePaalmanPings.ui
@@ -279,11 +213,10 @@ set (RES_FILES
 
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                    QT_VERSION 4
-                   SRC ${SRC_FILES}
-                   MOC ${MOC_FILES}
-                   NOMOC ${INC_FILES}
-                   UI ${UI_FILES}
-                   RES ${RES_FILES}
+                   SRC ${QT4_SRC_FILES}
+                   MOC ${QT4_MOC_FILES}
+                   NOMOC ${QT4_INC_FILES}
+                   UI ${QT4_UI_FILES}
                    DEFS IN_MANTIDQT_INDIRECT
                    PRECOMPILED PrecompiledHeader.h
                    INCLUDE_DIRS
@@ -310,6 +243,56 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                      @loader_path/../../plugins/qt4
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
-    
+
+# Qt 5 implementation
+set(SRC_FILES
+    AbsorptionCorrections.cpp
+    ApplyAbsorptionCorrections.cpp
+    CalculatePaalmanPings.cpp
+    ContainerSubtraction.cpp
+    IndirectCorrections.cpp
+    IndirectTab.cpp)
+
+set(MOC_FILES
+  AbsorptionCorrections.h
+  ApplyAbsorptionCorrections.h
+  CalculatePaalmanPings.h
+  ContainerSubtraction.h
+  IndirectCorrections.h
+  IndirectTab.h)
+
+set(INC_FILES)
+
+set(UI_FILES
+    AbsorptionCorrections.ui
+    ApplyAbsorptionCorrections.ui
+    CalculatePaalmanPings.ui
+    ContainerSubtraction.ui
+    IndirectCorrections.ui)
+
+mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
+                  QT_VERSION 5
+                  SRC ${SRC_FILES}
+                  MOC ${MOC_FILES}
+                  NOMOC ${INC_FILES}
+                  UI ${UI_FILES}
+                  DEFS IN_MANTIDQT_INDIRECT
+                  INCLUDE_DIRS
+                  ${CMAKE_CURRENT_SOURCE_DIR}
+                  LINK_LIBS
+                  ${TCMALLOC_LIBRARIES_LINKTIME}
+                  ${CORE_MANTIDLIBS}
+                  MTD_QT_LINK_LIBS
+                  MantidQtWidgetsCommon
+                  MantidQtWidgetsPlotting
+                  INSTALL_DIR_BASE
+                  ${PLUGINS_DIR}
+                  OSX_INSTALL_RPATH
+                  @loader_path/../../Contents/MacOS
+                  @loader_path/../../plugins/qt5
+                  LINUX_INSTALL_RPATH
+                  "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/")
+
+
 # Testing target
 add_subdirectory(test)
