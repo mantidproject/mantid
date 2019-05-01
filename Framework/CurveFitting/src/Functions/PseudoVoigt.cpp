@@ -191,12 +191,13 @@ void PseudoVoigt::setParameter(size_t i, const double &value,
   return;
 }
 
-void PseudoVoigt::estimate_parameter_value() {
+bool PseudoVoigt::estimate_parameter_value() {
   // peak center
   size_t to_calculate_index = get_parameter_to_calculate_from_set();
   g_log.debug() << "Time to calculate " << to_calculate_index << "-th parameter"
                 << "\n";
 
+  bool some_value_updated{true};
   if (to_calculate_index == 0) {
     // calculate mixings
     double peak_intensity = getParameter(1);
@@ -241,9 +242,12 @@ void PseudoVoigt::estimate_parameter_value() {
                     << "\n";
     }
     setParameter(3, gamma, false);
+  } else {
+    // no value updated
+    some_value_updated = false;
   }
 
-  return;
+  return some_value_updated;
 }
 
 /** The purpose of this is to track which user-specified parameter is outdated
@@ -326,10 +330,27 @@ double PseudoVoigt::height() const {
  */
 void PseudoVoigt::setHeight(const double h) {
   // set height
+  double prev_height = m_height;
   m_height = h;
+
+  // update set history
   update_set_history(2);
   g_log.debug() << "PV: set height = " << m_height << "\n";
-  estimate_parameter_value();
+
+  // update other parameters' value
+  bool updated_any_value = estimate_parameter_value();
+  if (!updated_any_value) {
+    // force to update peak intensity
+    double old_intensity = getParameter("Intensity");
+    // This is what Roman suggests!
+    double new_intensity{1.};
+    if (prev_height > 0)
+      new_intensity = old_intensity * m_height / prev_height;
+    else
+      new_intensity = m_height; // this is a better than nothing estimation
+    setParameter("Intensity", new_intensity,
+                 false); // no need to update other parameters
+  }
 }
 
 /** set FWHM

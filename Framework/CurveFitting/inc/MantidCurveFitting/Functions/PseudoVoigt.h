@@ -83,7 +83,7 @@ private:
   /// get the parameter (by index) to calculate according to parameter set
   /// history
   size_t get_parameter_to_calculate_from_set();
-  void estimate_parameter_value();
+  bool estimate_parameter_value();
 
   double m_height;
 };
