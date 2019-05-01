@@ -13,8 +13,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Surfaces/Line.h"
+#include "MantidKernel/Tolerance.h"
 #include <iosfwd>
 #include <list>
 
@@ -198,9 +198,9 @@ public:
   int nonComplete() const;
 
 private:
-  Line m_line;              ///< Line object containing origin and direction
-  LType m_links;            ///< Track units
-  PType m_surfPoints;       ///< Intersection points
+  Line m_line;        ///< Line object containing origin and direction
+  LType m_links;      ///< Track units
+  PType m_surfPoints; ///< Intersection points
 };
 
 } // NAMESPACE Geometry

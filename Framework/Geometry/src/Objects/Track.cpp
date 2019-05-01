@@ -124,8 +124,8 @@ void Track::removeCojoins() {
  */
 void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
                      const IObject &obj, const ComponentID compID) {
-  IntersectionPoint newPoint(direction, endPoint,
-                             endPoint.distance(m_line.getOrigin()), obj, compID);
+  IntersectionPoint newPoint(
+      direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
   auto lowestPtr =
       std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
   m_surfPoints.insert(lowestPtr, newPoint);
