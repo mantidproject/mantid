@@ -130,6 +130,10 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
     def set_calculate_phase_quad_action(self, action):
         self.calculate_phase_quad_button.clicked.connect(action)
 
+    def set_cancel_action(self, action):
+        self.cancel_button.clicked.connect(action)
+        self.phasequad_cancel_button.clicked.connect(action)
+
     def ensure_groups_different(self):
         if self.backward_group_combo.currentText() == self.forward_group_combo.currentText():
             self.backward_group_combo.blockSignals(True)
@@ -142,8 +146,31 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
         self._old_backward_index = self.backward_group_combo.currentIndex()
         self._old_forward_index = self.forward_group_combo.currentIndex()
 
-    def warning_popup(self, message):
+    @staticmethod
+    def warning_popup(message):
         warning(message)
+
+    def enable_widget(self):
+        for widget in self.children():
+            if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
+                continue
+            widget.setEnabled(True)
+
+    def disable_widget(self):
+        for widget in self.children():
+            if str(widget.objectName()) == ['cancel_button', 'phasequad_cancel_button']:
+                continue
+            widget.setEnabled(False)
+
+    def enable_cancel(self):
+        self.cancel_button.setEnabled(True)
+
+    def enable_phasequad_cancel(self):
+        self.phasequad_cancel_button.setEnabled(True)
+
+    def disable_cancel(self):
+        self.cancel_button.setEnabled(False)
+        self.phasequad_cancel_button.setEnabled(False)
 
     def setup_phase_table_options_table(self):
         self.phase_table_options_table.setColumnWidth(0, 300)

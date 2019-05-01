@@ -74,8 +74,7 @@ def run_MuonGroupingAsymmetry(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
-def run_CalMuonDetectorPhases(parameter_dict):
-    alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+def run_CalMuonDetectorPhases(parameter_dict, alg):
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setRethrows(True)
@@ -85,8 +84,7 @@ def run_CalMuonDetectorPhases(parameter_dict):
     return alg.getProperty("DetectorTable").value, alg.getProperty('DataFitted').value
 
 
-def run_PhaseQuad(parameters_dict):
-    alg = mantid.AlgorithmManager.create('PhaseQuad')
+def run_PhaseQuad(parameters_dict, alg):
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setRethrows(True)

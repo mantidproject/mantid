@@ -5,13 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantid.py3compat import mock
-from Muon.GUI.Common.contexts.context_setup import setup_context
-from Muon.GUI.Common import mock_widget
 from qtpy import QtCore
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 class PhaseTablePresenterTest(unittest.TestCase):
@@ -44,20 +45,22 @@ class PhaseTablePresenterTest(unittest.TestCase):
             self.assertEquals(getattr(self.view, key), item)
 
     def test_update_model_from_view_updates_model_to_have_correct_values_if_view_changed(self):
-        self.view.set_input_combo_box(['new_workspace_name'])
-        self.view.input_workspace = 'new_workspace_name'
+        workspace_name = 'new_workspace_name'
+        self.view.set_input_combo_box([workspace_name])
+        self.view.input_workspace = workspace_name
 
         self.presenter.update_model_from_view()
 
-        self.assertEquals(self.context.phase_context.options_dict['input_workspace'], 'new_workspace_name')
+        self.assertEquals(self.context.phase_context.options_dict['input_workspace'], workspace_name)
 
     def test_create_parameters_for_cal_muon_phase_returns_correct_parameter_dict(self):
-        self.context.phase_context.options_dict['input_workspace'] = 'input_workspace_name'
+        workspace_name = 'input_workspace_name'
+        self.context.phase_context.options_dict['input_workspace'] = workspace_name
 
         result = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
 
         self.assertEquals(result, {'BackwardSpectra': [2, 4, 6, 8, 10], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 5, 7, 9],
-                                   'InputWorkspace': 'input_workspace_name', 'LastGoodData': 15,
+                                   'InputWorkspace': workspace_name, 'LastGoodData': 15,
                                    'DetectorTable': 'input_workspace_name_phase_table'})
 
     def test_correctly_retrieves_workspace_names_associsated_to_current_runs(self):
@@ -104,7 +107,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertTrue(self.view.isEnabled())
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
-    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_calculation(self, run_algorith_mock):
+    def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_in_calculation(self, run_algorith_mock):
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
         run_algorith_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
@@ -150,8 +153,11 @@ class PhaseTablePresenterTest(unittest.TestCase):
         mock_data_service.addToGroup.assert_called_once_with('MUSR22222 PhaseTable', 'MUSR22222_PhaseQuad_phase_table_MUSR22222')
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
-    def test_handle_calcuate_phase_quad_behaves_correctly_for_succesful_calculation(self, run_algorithm_mock):
+    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.mantid')
+    def test_handle_calcuate_phase_quad_behaves_correctly_for_succesful_calculation(self, mantid_mock, run_algorithm_mock):
         phase_quad_mock = mock.MagicMock()
+        alg_mock = mock.MagicMock()
+        mantid_mock.AlgorithmManager.create.return_value = alg_mock
         run_algorithm_mock.return_value = phase_quad_mock
         self.presenter.add_phase_quad_to_ADS = mock.MagicMock()
         self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=('MUSR22222_period_1_phase_table',
@@ -165,9 +171,15 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.assertTrue(self.view.isEnabled())
         run_algorithm_mock.assert_called_once_with({'PhaseTable': 'MUSR22222_period_1_phase_table',
+<<<<<<< HEAD
                                                     'InputWorkspace': 'MUSR22222_raw_data_period_1'})
         self.presenter.add_phase_quad_to_ADS.assert_called_once_with('MUSR22222_period_1_phase_table',
                                                                      'MUSR22222 PhaseTable',
+=======
+                                                    'InputWorkspace': 'MUSR22222_raw_data_period_1'}, alg_mock)
+        self.presenter.add_phase_quad_to_ADS.assert_called_once_with({'PhaseTable': 'MUSR22222_period_1_phase_table',
+                                                                      'InputWorkspace': 'MUSR22222_raw_data_period_1'},
+>>>>>>> origin/25511_create_phase_table_tab
                                                                       phase_quad_mock)
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
@@ -190,7 +202,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.set_phase_table_combo_box.assert_called_once_with(['MUSR22222_phase_table', 'Construct'])
 
     def test_handle_calculation_started_and_handle_calculation_ended_called_correctly(self):
-        self.presenter.handle_calculation_started = mock.MagicMock()
+        self.presenter.handle_phase_table_calculation_started = mock.MagicMock()
         self.presenter.handle_calculation_success = mock.MagicMock()
         self.presenter.handle_calculation_error = mock.MagicMock()
         self.presenter.calculate_phase_table = mock.MagicMock()
@@ -198,7 +210,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
-        self.presenter.handle_calculation_started.assert_called_once_with()
+        self.presenter.handle_phase_table_calculation_started.assert_called_once_with()
         self.presenter.handle_calculation_success.assert_called_once_with()
         self.presenter.handle_calculation_error.assert_not_called()
         self.presenter.calculate_phase_table.assert_called_once_with()

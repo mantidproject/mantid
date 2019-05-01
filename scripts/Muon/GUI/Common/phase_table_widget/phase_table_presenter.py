@@ -2,11 +2,12 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
 from Muon.GUI.Common.observer_pattern import Observer, Observable
-from mantid.api import AnalysisDataService, WorkspaceGroup
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, get_phase_table_workspace_group_name, \
     get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+import mantid
+
 
 class GenericObserver(Observer):
     def __init__(self, callback):
@@ -21,6 +22,7 @@ class PhaseTablePresenter(object):
     def __init__(self, view, context):
         self.view = view
         self.context = context
+        self.current_alg = None
 
         self.group_change_observer = GenericObserver(self.update_current_groups_list)
         self.run_change_observer = GenericObserver(self.update_current_run_list)
@@ -39,12 +41,16 @@ class PhaseTablePresenter(object):
         for key in self.context.phase_context.options_dict:
             self.context.phase_context.options_dict[key] = getattr(self.view, key, None)
 
+    def cancel(self):
+        if self.current_alg is not None:
+            self.current_alg.cancel()
+
     def handle_calulate_phase_table_clicked(self):
         self.update_model_from_view()
 
         self.calculation_thread = self.create_calculation_thread()
 
-        self.calculation_thread.threadWrapperSetUp(self.handle_calculation_started, self.handle_calculation_success,
+        self.calculation_thread.threadWrapperSetUp(self.handle_phase_table_calculation_started, self.handle_calculation_success,
                                                    self.handle_calculation_error)
 
         self.calculation_thread.start()
@@ -71,7 +77,9 @@ class PhaseTablePresenter(object):
     def calculate_phase_quad(self):
         parameters = self.get_parameters_for_phase_quad()
 
-        phase_quad = run_PhaseQuad(parameters)
+        self.current_alg = mantid.AlgorithmManager.create("PhaseQuad")
+        phase_quad = run_PhaseQuad(parameters, self.current_alg)
+        self.current_alg = None
 
         self.add_phase_quad_to_ADS(parameters['InputWorkspace'], parameters['PhaseTable'], phase_quad)
 
@@ -100,21 +108,32 @@ class PhaseTablePresenter(object):
         self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):
-        self.view.setEnabled(False)
+        self.view.disable_widget()
+        self.view.enable_phasequad_cancel()
+
+    def handle_phase_table_calculation_started(self):
+        self.view.disable_widget()
+        self.view.enable_cancel()
 
     def handle_calculation_error(self, error):
-        self.view.setEnabled(True)
+        self.view.enable_widget()
         self.view.warning_popup(error)
+        self.view.disable_cancel()
+        self.current_alg = None
 
     def handle_calculation_success(self):
         self.phase_table_calculation_complete_notifier.notify_subscribers()
         self.update_current_phase_tables()
-        self.view.setEnabled(True)
+        self.view.enable_widget()
+        self.view.disable_cancel()
+        self.current_alg = None
 
     def calculate_phase_table(self):
         parameters = self.create_parameters_for_cal_muon_phase_algorithm()
 
-        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters)
+        self.current_alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
+        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg)
+        self.current_alg = None
 
         self.add_phase_table_to_ADS(parameters['DetectorTable'], detector_table)
         self.add_fitting_info_to_ADS_if_required(parameters['DetectorTable'], fitting_information)

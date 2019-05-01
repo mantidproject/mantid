@@ -7,18 +7,19 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
-from mantid.py3compat import mock
 from qtpy import QtWidgets
-from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.utilities import load_utils
+
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
+from mantid.py3compat import mock
+
 from Muon.GUI.Common.muon_pair import MuonPair
 from mantid.api import FileFinder
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
 from qtpy import QtCore
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.Common.utilities import load_utils
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
 
 
 def retrieve_combobox_info(combo_box):

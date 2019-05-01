@@ -7,8 +7,9 @@
 import unittest
 
 from mantid.py3compat import mock
+
+from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.thread_model import ThreadModel
-from Muon.GUI.Common import mock_widget
 
 
 class testModelWithoutExecute:

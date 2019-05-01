@@ -1,8 +1,7 @@
 import unittest
 
-from Muon.GUI.Common import mock_widget
-
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class LoadFileWidgetViewTest(unittest.TestCase):
