@@ -166,7 +166,7 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
 
   MatrixWorkspace_sptr workspace = inputWS->clone();
   AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
-  
+
   IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
   LRBgd->setProperty("InputWorkspace", workspace);
