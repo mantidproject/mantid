@@ -9,16 +9,16 @@
 Description
 -----------
 
-This algorithm calculates the background in a workspace using the spectrum ranges in :literal:`InputWorkspaceIndexSet`. If no spectrum ranges are given the whole input workspace is used.
+This algorithm calculates and subtracts the background from a given workspace using the spectrum ranges in :literal:`InputWorkspaceIndexSet`. If no spectrum ranges are given the whole input workspace is used.
 
 The background can be calculated using three methods. **PerDetectorAverage** which groups the background spectrum together and divides it by the total number of spectra. 
 This is done using :ref:`algm-GroupDetectors`. **Polynomial** uses :ref:`algm-Transpose` so the spectrum numbers 
 are in the X (horizontal) axis and TOF channels are the vertical axis. Then the background is calculated by fitting a polynomial of the given degree to each TOF using the background spectra given 
 in :literal:`InputWorkspaceIndexSet`. This is done using :ref:`algm-CalculatePolynomialBackground`. The value of CostFunction is passed to :ref:`algm-CalculatePolynomialBackground` as-is. 
 The default option is ‘Least squares’ which uses the histogram errors as weights. This might not be desirable, e.g. when there are bins with zero counts and zero errors. 
-An ‘Unweighted least squares’ option is available to deal with such cases. Once this has been done the workspace is then transposed again so it is in the same form as the input workspace. 
-**AveragePixelFit** calculates the background by summing the region of interest of the background region either side of the peak, then finds an average of these regions and subtracts the average from 
-the region of interest of the whole :literal:`InputWorkspace`. It takes the :literal:`PeakRange` which is the range of pixels containing the peak, the :literal:`IntegrationRange` which is the pixel range defining
+An ‘Unweighted least squares’ option is available to deal with such cases. Once this has been done the workspace is then transposed again and subtracted from the input workspace. 
+**AveragePixelFit** uses :ref:`algm-RefRoi` to sum the background region on either side of the peak and finding average of these regions. Then the average is subtracted from 
+the sum of the whole region of interest of the detector. It takes the :literal:`PeakRange` which is the range of pixels containing the peak, the :literal:`IntegrationRange` which is the pixel range defining
 the axis which is integrated over when finding the region of interest and the background range is taken from the :literal:`InputWorkspaceIndexSet`. Note when using the average pixel fit method the background must only be
 one region either side of the peak. If any more regions are given the background will be taken as all the spectra between the highest and lowest spectra entered excluding the peak. 
 This is done using :ref:`algm-LRSubtractAverageBackground`.
