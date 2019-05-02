@@ -13,7 +13,6 @@ import mantid.simpleapi as mantid
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 import re
 from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import AnalysisDataService
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 import functools
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, get_base_data_directory
@@ -30,6 +29,7 @@ class GenericObserver(Observer):
 
     def update(self, observable, arg):
         self.callback()
+
 
 optional_output_suffixes = {'OutputPhaseTable': '_phase_table', 'OutputDeadTimeTable': '_dead_times',
                             'ReconstructedSpectra': '_reconstructed_spectra', 'PhaseConvergenceTable': '_phase_convergence'}

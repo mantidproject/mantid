@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
 from mantid import api
-from mantid.api import Workspace, WorkspaceGroup
+from mantid.api import Workspace
 
 
 def add_directory_structure(dirs):
@@ -63,7 +63,7 @@ class MuonWorkspaceWrapper(object):
     A basic muon workspace which is either the workspace or the name of the workspace in the ADS
     """
 
-    def __init__(self, workspace, name =''):
+    def __init__(self, workspace, name=''):
         self._is_in_ads = False
         self._workspace = None
         self._directory_structure = ""
@@ -117,8 +117,6 @@ class MuonWorkspaceWrapper(object):
             if mtd.doesExist(self._workspace_name):
                 mtd.remove(self._workspace_name)
             self._is_in_ads = False
-            self.name = ""
-            self._directory_structure = ""
         if isinstance(value, Workspace):
             self._workspace = value
         else:

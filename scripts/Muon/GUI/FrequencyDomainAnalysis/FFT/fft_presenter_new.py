@@ -10,7 +10,6 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
-from mantid.api import AnalysisDataService, WorkspaceGroup
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, get_base_data_directory
 import re
