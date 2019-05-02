@@ -67,9 +67,6 @@ void IndirectSassena::run() {
 
   m_batchAlgoRunner->addAlgorithm(sassenaAlg);
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSassenaAlg;
-  inputFromSassenaAlg["InputWorkspace"] = m_outWsName.toStdString();
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 

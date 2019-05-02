@@ -932,10 +932,6 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (!prop) {
     throw std::runtime_error("FunctionBrowser: null property pointer");
   }
-  AProperty ap;
-  ap.item = nullptr;
-  ap.prop = nullptr;
-  ap.parent = nullptr;
 
   if (!isParameter(prop))
     return;
@@ -946,7 +942,7 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
-  ap = addProperty(prop, tieProp);
+  addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
   const auto parName = getParameterName(prop);
@@ -1559,21 +1555,25 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
 /// property (tie or constraint).
 QtProperty *
 FunctionBrowser::getParentParameterProperty(QtProperty *prop) const {
-  for (auto &tie : m_ties) {
-    if (tie.tieProp == prop) {
-      return tie.paramProp;
+  const auto foundTie =
+      std::find_if(m_ties.begin(), m_ties.end(),
+                   [prop](const auto &tie) { return tie.tieProp == prop; });
+  if (foundTie != m_ties.end()) {
+    return foundTie->paramProp;
+  } else {
+    const auto foundConstraint = std::find_if(
+        m_constraints.begin(), m_constraints.end(),
+        [prop](const auto &constraint) {
+          return constraint.lower == prop || constraint.upper == prop;
+        });
+    if (foundConstraint != m_constraints.end()) {
+      return foundConstraint->paramProp;
+    } else {
+      throw std::logic_error(
+          "QtProperty " + prop->propertyName().toStdString() +
+          " is not a child of a property for any function parameter.");
     }
   }
-
-  for (auto &constraint : m_constraints) {
-    if (constraint.lower == prop || constraint.upper == prop) {
-      return constraint.paramProp;
-    }
-  }
-
-  throw std::logic_error(
-      "QtProperty " + prop->propertyName().toStdString() +
-      " is not a child of a property for any function parameter.");
 }
 
 /**
@@ -2245,8 +2245,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
       const auto parName = QString::fromStdString(parameterName);
       if (globalParams.contains(parName))
         continue;
-      auto tie = fun1->getTie(j);
-      if (tie) {
+      if (fun1->getTie(j)) {
         // If parameter has a tie at this stage then it gets it from the
         // currently displayed function. But the i-th local parameters may not
         // have this tie, so remove it

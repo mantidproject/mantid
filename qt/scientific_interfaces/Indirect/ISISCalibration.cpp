@@ -522,19 +522,19 @@ void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
 
       const auto energyRange = m_uiForm.ppResolution->getCurveRange("Energy");
       // Set default rebinning bounds
-      QPair<double, double> peakRange(-res * 10, res * 10);
+      QPair<double, double> peakERange(-res * 10, res * 10);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
       setPlotPropertyRange(resPeak, m_properties["ResELow"],
                            m_properties["ResEHigh"], energyRange);
       setRangeSelector(resPeak, m_properties["ResELow"],
-                       m_properties["ResEHigh"], peakRange);
+                       m_properties["ResEHigh"], peakERange);
 
       // Set default background bounds
-      QPair<double, double> backgroundRange(-res * 9, -res * 8);
+      QPair<double, double> backgroundERange(-res * 9, -res * 8);
       auto resBackground =
           m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"],
-                       m_properties["ResEnd"], backgroundRange);
+                       m_properties["ResEnd"], backgroundERange);
     }
   }
 }

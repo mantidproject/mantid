@@ -238,9 +238,11 @@ void TwoLevelTreeManager::groupRows() {
   int groupId = m_model->rowCount();
   appendGroup();
   // Append as many rows as the number of selected rows minus one
-  int rowsToAppend = -1;
-  for (const auto &row : selectedRows)
-    rowsToAppend += static_cast<int>(row.second.size());
+  const int rowsToAppend =
+      std::accumulate(selectedRows.cbegin(), selectedRows.cend(), -1,
+                      [](auto sum, const auto &row) {
+                        return sum + static_cast<int>(row.second.size());
+                      });
   for (int i = 0; i < rowsToAppend; i++)
     insertRow(groupId, i);
 
@@ -552,8 +554,6 @@ TreeData TwoLevelTreeManager::allData(bool prompt) {
 
   TreeData allData;
 
-  auto options = m_presenter->options();
-
   if (m_model->rowCount() == 0 && prompt) {
     m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
     return allData;
@@ -711,7 +711,7 @@ TwoLevelTreeManager::createDefaultWorkspace(const WhiteList &whitelist) {
   column->setPlotType(0);
 
   for (const auto &columnName : whitelist.names()) {
-    auto column = ws->addColumn("str", columnName.toStdString());
+    column = ws->addColumn("str", columnName.toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();

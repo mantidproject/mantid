@@ -36,8 +36,7 @@ public:
   int version() const override { return 1; }
   /// Related algorithms
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleEnvironment", "CopySample", "SetSampleMaterial",
-            "LoadSampleShape"};
+    return {"CopySample", "SetSampleMaterial", "LoadSampleShape"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {

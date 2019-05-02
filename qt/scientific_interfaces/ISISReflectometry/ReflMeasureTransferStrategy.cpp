@@ -110,9 +110,9 @@ MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
       const MeasurementItem &measurementItem = mapOfMeasurement.second[i];
 
       if (i == 0) {
-        std::string title = measurementItem.title();
+        const std::string itemTitle = measurementItem.title();
         groupName = std::to_string(nextGroupId) + " - " +
-                    title.substr(0, title.find(":th"));
+                    itemTitle.substr(0, itemTitle.find(":th"));
       }
 
       if (subIdMap.find(measurementItem.subId()) != subIdMap.end()) {

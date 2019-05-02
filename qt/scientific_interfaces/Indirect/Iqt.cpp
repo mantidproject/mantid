@@ -131,8 +131,8 @@ calculateBinParameters(std::string const &wsName, std::string const &resName,
                        double energyMin, double energyMax,
                        double binReductionFactor) {
   ITableWorkspace_sptr propsTable;
-  const auto paramTableName = "__IqtProperties_temp";
   try {
+    const auto paramTableName = "__IqtProperties_temp";
     auto toIqt = AlgorithmManager::Instance().createUnmanaged("TransformToIqt");
     toIqt->initialize();
     toIqt->setChild(true); // record this as internal
@@ -391,8 +391,6 @@ void Iqt::plotTiled() {
   auto const cropValue =
       getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
   cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
-
-  auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
 
   // Plot tiledwindow
   std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;

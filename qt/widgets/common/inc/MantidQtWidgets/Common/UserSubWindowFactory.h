@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_INTERFACEFACTORY_H_
-#define MANTIDQT_API_INTERFACEFACTORY_H_
+
+#ifndef MANTIDQT_API_USERSUBWINDOWFACTORYIMPL_H_
+#define MANTIDQT_API_USERSUBWINDOWFACTORYIMPL_H_
 
 //------------------------
 // Includes
@@ -29,37 +30,6 @@ class AlgorithmDialog;
 class UserSubWindow;
 
 /**
-    The AlgorithmDialogFactory is responsible for creating concrete instances of
-    AlgorithmDialog classes. It is implemented as a singleton class.
-
-    @author Martyn Gigg, Tessella plc
-    @date 24/02/2009
-*/
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialogFactoryImpl
-    : public Mantid::Kernel::DynamicFactory<AlgorithmDialog> {
-
-public:
-  // Unhide the inherited create method
-  using Mantid::Kernel::DynamicFactory<AlgorithmDialog>::createUnwrapped;
-  AlgorithmDialogFactoryImpl(const AlgorithmDialogFactoryImpl &) = delete;
-  AlgorithmDialogFactoryImpl &
-  operator=(const AlgorithmDialogFactoryImpl &) = delete;
-
-private:
-  friend struct Mantid::Kernel::CreateUsingNew<AlgorithmDialogFactoryImpl>;
-
-  /// Private Constructor for singleton class
-  AlgorithmDialogFactoryImpl() = default;
-
-  /// Private Destructor
-  ~AlgorithmDialogFactoryImpl() override = default;
-};
-
-/// The specific instantiation of the templated type
-using AlgorithmDialogFactory =
-    Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
-
-/**
     The UserSubWindowFactory is responsible for creating concrete instances of
     user interface classes. It is implemented as a singleton class.
 
@@ -69,29 +39,16 @@ using AlgorithmDialogFactory =
 class EXPORT_OPT_MANTIDQT_COMMON UserSubWindowFactoryImpl
     : public Mantid::Kernel::DynamicFactory<UserSubWindow> {
 public:
-  template <typename TYPE> void subscribe() {
-    std::string realName = TYPE::name();
-    Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
-    saveAliasNames<TYPE>(realName);
-
-    // Make a record of each interface's categories.
-    const QStringList categories =
-        TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
-    QSet<QString> result;
-    foreach (const QString category, categories) {
-      result.insert(category.trimmed());
-    }
-    m_categoryLookup[QString::fromStdString(realName)] = result;
-  }
-
-public:
   UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &) = delete;
   UserSubWindowFactoryImpl &
   operator=(const UserSubWindowFactoryImpl &) = delete;
   // Override createUnwrapped to search through the alias list
   UserSubWindow *createUnwrapped(const std::string &name) const override;
 
-  QSet<QString> getInterfaceCategories(const QString &interfaceName) const;
+  QSet<QString> categories(const QString &interfaceName) const;
+  QStringList keys() const;
+
+  template <typename TYPE> void subscribe();
 
 protected:
   // Unhide the inherited create method
@@ -118,6 +75,21 @@ private:
   /// A map of interfaces to their categories.
   QHash<QString, QSet<QString>> m_categoryLookup;
 };
+
+template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
+  std::string realName = TYPE::name();
+  Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
+  saveAliasNames<TYPE>(realName);
+
+  // Make a record of each interface's categories.
+  const QStringList categories =
+      TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
+  QSet<QString> result;
+  foreach (const QString category, categories) {
+    result.insert(category.trimmed());
+  }
+  m_categoryLookup[QString::fromStdString(realName)] = result;
+}
 
 /**
  * Save the alias names of an interface
@@ -148,16 +120,15 @@ void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
 /// The specific instantiation of the templated type
 using UserSubWindowFactory =
     Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
+
 } // namespace API
 } // namespace MantidQt
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
-    Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmDialogFactoryImpl>;
-EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::UserSubWindowFactoryImpl>;
 } // namespace Kernel
 } // namespace Mantid
 
-#endif // MANTIDQT_API_INTERFACEFACTORY_H_
+#endif

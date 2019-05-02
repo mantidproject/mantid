@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 import sys
 from DGSPlanner import DGSPlannerGUI
-from gui_helper import get_qapplication
+from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
 planner = DGSPlannerGUI.DGSPlannerGUI()

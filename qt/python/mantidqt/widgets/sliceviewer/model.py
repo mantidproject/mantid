@@ -15,8 +15,8 @@ import numpy as np
 class SliceViewerModel(object):
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
     def __init__(self, ws):
-        if ws.getNumDims() < 2:
-            raise ValueError("workspace must have at least 2 dimensions")
+        if len(ws.getNonIntegratedDimensions()) < 2:
+            raise ValueError("workspace must have at least 2 non-integrated dimensions")
 
         if not ws.isMDHistoWorkspace():
             raise ValueError("currenly only works for MDHistoWorkspace")

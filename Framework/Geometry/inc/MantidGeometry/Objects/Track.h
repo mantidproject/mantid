@@ -13,6 +13,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Tolerance.h"
 #include <iosfwd>
 #include <list>
@@ -169,9 +170,9 @@ public:
   /// Clear the current set of intersection results
   void clearIntersectionResults();
   /// Returns the starting point
-  const Kernel::V3D &startPoint() const { return m_startPoint; }
+  const Kernel::V3D &startPoint() const { return m_line.getOrigin(); }
   /// Returns the direction as a unit vector
-  const Kernel::V3D &direction() const { return m_unitVector; }
+  const Kernel::V3D &direction() const { return m_line.getDirect(); }
   /// Total distance covered inside object
   double distInsideObject() const;
   /// Returns an interator to the start of the set of links
@@ -202,10 +203,9 @@ public:
   int nonComplete() const;
 
 private:
-  Kernel::V3D m_startPoint; ///< Start Point
-  Kernel::V3D m_unitVector; ///< unit vector to direction
-  LType m_links;            ///< Track units
-  PType m_surfPoints;       ///< Intersection points
+  Line m_line;        ///< Line object containing origin and direction
+  LType m_links;      ///< Track units
+  PType m_surfPoints; ///< Intersection points
 };
 
 } // NAMESPACE Geometry

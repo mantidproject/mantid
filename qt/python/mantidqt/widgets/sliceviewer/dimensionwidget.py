@@ -17,6 +17,7 @@ class State(Enum):
     X = 0
     Y = 1
     NONE = 2
+    DISABLE = 3
 
 
 class DimensionWidget(QWidget):
@@ -43,18 +44,14 @@ class DimensionWidget(QWidget):
 
         self.dims = []
         for n, dim in enumerate(dims_info):
-            if n == 0:
-                state = State.X
-            elif n == 1:
-                state = State.Y
-            else:
-                state = State.NONE
-            self.dims.append(Dimension(dim, number=n, state=state, parent=self))
+            self.dims.append(Dimension(dim, number=n, parent=self))
 
         for widget in self.dims:
             widget.stateChanged.connect(self.change_dims)
             widget.valueChanged.connect(self.valueChanged)
             self.layout.addWidget(widget)
+
+        self.set_initial_states()
 
     def change_dims(self, number):
         states = [d.get_state() for n, d in enumerate(self.dims)]
@@ -78,6 +75,12 @@ class DimensionWidget(QWidget):
 
         self.dimensionsChanged.emit()
 
+    def set_initial_states(self):
+        # set first 2 State.NONE dimensions as x and y
+        none_state_dims = [d for d in self.dims if d.state==State.NONE]
+        none_state_dims[0].set_state(State.X)
+        none_state_dims[1].set_state(State.Y)
+
     def get_slicepoint(self):
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
 
@@ -88,7 +91,7 @@ class Dimension(QWidget):
     """
     pass in dimension
 
-    state: one of (State.X, State.Y, State.NONE)
+    state: one of (State.X, State.Y, State.NONE, State.DISBALE)
 
     Can be run independently by:
 
@@ -141,6 +144,10 @@ class Dimension(QWidget):
         self.layout.addWidget(self.units)
 
         self.set_value(0)
+
+        if self.nbins < 2:
+            state = State.DISABLE
+
         self.set_state(state)
 
     def set_state(self, state):
@@ -157,11 +164,20 @@ class Dimension(QWidget):
             self.slider.hide()
             self.spinbox.hide()
             self.units.hide()
-        else:
+        elif self.state == State.NONE:
             self.x.setChecked(False)
             self.y.setChecked(False)
             self.slider.show()
             self.spinbox.show()
+            self.units.show()
+        else:
+            self.x.setChecked(False)
+            self.x.setDisabled(True)
+            self.y.setChecked(False)
+            self.y.setDisabled(True)
+            self.slider.hide()
+            self.spinbox.show()
+            self.spinbox.setDisabled(True)
             self.units.show()
 
     def get_state(self):
