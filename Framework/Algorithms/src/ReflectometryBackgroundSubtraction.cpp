@@ -316,7 +316,7 @@ ReflectometryBackgroundSubtraction::validateInputs() {
           "AveragePixelFit background subtraction";
     }
 
-		const std::vector<int> peakRange = getProperty("PeakRange");
+    const std::vector<int> peakRange = getProperty("PeakRange");
     auto numberOfypixels = static_cast<int>(inputWS->getNumberHistograms());
     if (backgroundType == "AveragePixelFit" &&
         (peakRange.front() < 0 || peakRange.back() > numberOfypixels - 1)) {
