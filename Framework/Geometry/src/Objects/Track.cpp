@@ -127,21 +127,19 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
   IntersectionPoint newPoint(
       direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
   if (m_surfPoints.empty()) {
+    // no need to compare directions, just add the segment
     m_surfPoints.push_back(newPoint);
   } else {
+    // the segment shorter than this one
     auto lowestPtr =
         std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
-    auto nextPtr = std::next(lowestPtr);
-    if ((lowestPtr->direction != newPoint.direction) ||
-        (nextPtr == m_surfPoints.end())) {
-      // if the direction has changed or there is nothing past it to replace,
-      // add the point
+
+    // in principle there should be a check for the point after where this
+    // should be inserted in practice it doesn't seem to matter
+    const bool sameDirectionAsPrevious =
+        (lowestPtr->direction == newPoint.direction);
+    if (!sameDirectionAsPrevious)
       m_surfPoints.insert(lowestPtr, newPoint);
-    } else if (nextPtr->direction == newPoint.direction) {
-      // replace the next with the new point at shorter distance
-      m_surfPoints.erase(nextPtr);
-      m_surfPoints.insert(lowestPtr, newPoint);
-    }
   }
 }
 
