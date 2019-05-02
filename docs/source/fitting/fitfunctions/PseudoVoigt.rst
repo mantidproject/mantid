@@ -77,16 +77,16 @@ Effective peak parameters
 Derivative
 ++++++++++
 
-- To mixing paramter :math:`\eta`
+- With respect to mixing parameter :math:`\eta`
 
 .. math:: \frac{\partial pV(x)}{\partial \eta} = I \cdot [G'(x, \Gamma) - L'(x, \Gamma)]
 
 
-- To intensity :math:`I`
+- With respect to intensity :math:`I`
 
 .. math:: \frac{\partial pV(x)}{\partial I} = \eta G'(x, \Gamma) + (1-\eta) L'(x, \Gamma)
 
-- To peak centre :math:`x_0`
+- With respect to peak centre :math:`x_0`
 
 .. math:: \frac{\partial pV(x)}{\partial x_0} = I \cdot [\eta \frac{\partial G'(x, \Gamma)}{\partial x_0} + (1 - \eta) \frac{\partial L'(x, \Gamma)}{\partial x_0}]
 
@@ -94,7 +94,7 @@ Derivative
 
 .. math:: \frac{\partial L'(x, \Gamma)}{\partial x_0} = \frac{\Gamma}{2\pi} (-1) (-2) (x - x_0) \frac{1}{[(x - x_0)^2 + \frac{\Gamma^2}{4}]^2} = \frac{(x-x_0)\Gamma}{\pi[(x - x_0)^2 + \frac{\Gamma^2}{4}]^2} = \frac{4\pi(x-x_0)}{\Gamma}[L'(x, \Gamma)]^2
 
-- To peak width :math:`\Gamma`
+- With respect to peak width :math:`\Gamma`
 
 .. math:: \frac{\partial pV(x)}{\partial \Gamma} = I \cdot [\eta \frac{\partial G'(x, \Gamma)}{\partial \Gamma} + (1 - \eta) \frac{\partial L'(x, \Gamma)}{\partial \Gamma}]
 
