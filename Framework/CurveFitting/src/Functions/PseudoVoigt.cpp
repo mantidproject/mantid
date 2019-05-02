@@ -14,22 +14,21 @@
 
 namespace {
 
+const double LN2_DIV_PI = 2. * std::sqrt(M_LN2 / M_PI);
+constexpr double LN2_M4 = 4 * M_LN2;
+
 /** a_G = 2/gamma * sqrt(ln2/pi)
  * @param gamma :: FWHM
  * @return
  */
-inline double cal_ag(const double gamma) {
-  const double ag = 2. / gamma * std::sqrt(M_LN2 / M_PI);
-  return ag;
-}
+inline double cal_ag(const double gamma) { return LN2_DIV_PI / gamma; }
 
 /** b_G = 4 ln2 / gamma^2
  * @param gamma :: FWHM
  * @return
  */
 inline constexpr double cal_bg(const double gamma) {
-  const double bg = 4 * M_LN2 / (gamma * gamma);
-  return bg;
+  return LN2_M4 / (gamma * gamma);
 }
 
 /** calculate normalized Gaussian
@@ -40,8 +39,7 @@ inline constexpr double cal_bg(const double gamma) {
  */
 inline double cal_gaussian(const double ag, const double bg,
                            const double xdiffsq) {
-  const double gaussian = ag * std::exp(-bg * xdiffsq);
-  return gaussian;
+  return ag * std::exp(-bg * xdiffsq);
 }
 
 /** calculate lorentzian
@@ -53,8 +51,7 @@ inline double cal_gaussian(const double ag, const double bg,
 inline constexpr double cal_lorentzian(const double gamma_div_2,
                                        const double gammasq_div_4,
                                        const double xdiffsq) {
-  double lorentz = gamma_div_2 / (xdiffsq + gammasq_div_4) / M_PI;
-  return lorentz;
+  return gamma_div_2 / (xdiffsq + gammasq_div_4) / M_PI;
 }
 
 } // namespace
