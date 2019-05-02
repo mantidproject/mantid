@@ -10,11 +10,11 @@ from PyQt4 import QtGui
 
 from mantid.py3compat import mock
 
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
