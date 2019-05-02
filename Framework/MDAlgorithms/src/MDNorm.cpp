@@ -311,10 +311,11 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       auto it = std::find(originalDimensionNames.begin(),
                           originalDimensionNames.end(), dimName);
       if (it == originalDimensionNames.end()) {
-        errorMessage.emplace(propName,
-                             "Name '" + dimName +
-                                 "' is not one of the "
-                                 "original workspace names or a directional dimension");
+        errorMessage.emplace(
+            propName,
+            "Name '" + dimName +
+                "' is not one of the "
+                "original workspace names or a directional dimension");
       } else {
         // make sure dimension is unique
         auto itSel = std::find(selectedDimensions.begin(),
@@ -373,33 +374,35 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
 
   // check that either both or neuther accumulation workspaces are provied
   if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
-       errorMessage.emplace("AccumulationWorkspaces",
-          "Must provide either no accumulation workspaces or,"
-          "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
-    }
+    errorMessage.emplace(
+        "AccumulationWorkspaces",
+        "Must provide either no accumulation workspaces or,"
+        "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
+  }
   // check that both accumulation workspaces are on the same grid
-  if (tempNormWS && tempDataWS){
-      size_t numNormDims = tempNormWS->getNumDims();
-      size_t numDataDims = tempDataWS->getNumDims();
-      if (numNormDims == numDataDims){
-          for (size_t i = 0; i < numNormDims; i++) {
-            const auto dim1 = tempNormWS->getDimension(i);
-            const auto dim2 = tempDataWS->getDimension(i);
-            if (!((dim1->getMinimum() == dim2->getMinimum()) &&
-                (dim1->getMaximum() == dim2->getMaximum()) &&
-                (dim1->getNBins() == dim2->getNBins()) &&
-                (dim1->getName() == dim2->getName()))){
-              errorMessage.emplace("AccumulationWorkspaces",
-                                   "Binning for TemporaryNormalizationWorkspaces "
-                                   "and TemporaryDataWorkspace must be the same.");
-            break;
-            }
+  if (tempNormWS && tempDataWS) {
+    size_t numNormDims = tempNormWS->getNumDims();
+    size_t numDataDims = tempDataWS->getNumDims();
+    if (numNormDims == numDataDims) {
+      for (size_t i = 0; i < numNormDims; i++) {
+        const auto dim1 = tempNormWS->getDimension(i);
+        const auto dim2 = tempDataWS->getDimension(i);
+        if (!((dim1->getMinimum() == dim2->getMinimum()) &&
+              (dim1->getMaximum() == dim2->getMaximum()) &&
+              (dim1->getNBins() == dim2->getNBins()) &&
+              (dim1->getName() == dim2->getName()))) {
+          errorMessage.emplace("AccumulationWorkspaces",
+                               "Binning for TemporaryNormalizationWorkspaces "
+                               "and TemporaryDataWorkspace must be the same.");
+          break;
         }
-      } else { // accumulation workspaces have different number of dimensions
-              errorMessage.emplace("AccumulationWorkspaces",
-                                   "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
-                                   "do not have the same number of dimensions");
       }
+    } else { // accumulation workspaces have different number of dimensions
+      errorMessage.emplace(
+          "AccumulationWorkspaces",
+          "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
+          "do not have the same number of dimensions");
+    }
   }
 
   return errorMessage;
@@ -510,15 +513,14 @@ void MDNorm::exec() {
  * @return string containing the name
  */
 std::string MDNorm::QDimensionName(int i) {
-  if(i == 0)
+  if (i == 0)
     return std::string("Q_sample_x");
-  else if(i == 1)
+  else if (i == 1)
     return std::string("Q_sample_y");
-  else if(i == 2)
+  else if (i == 2)
     return std::string("Q_sample_z");
   else
-    throw std::invalid_argument(
-      "Index must be 0, 1, or 2 for QDimensionName");
+    throw std::invalid_argument("Index must be 0, 1, or 2 for QDimensionName");
 }
 /**
  * Get the dimension name when using reciprocal lattice units.
@@ -743,59 +745,76 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
   // make sure the number of dimensions is the same for both workspaces
   size_t numDimsInput = m_inputWS->getNumDims();
   size_t numDimsTemp = tempDataWS->getNumDims();
-  
-  if(numDimsInput != numDimsTemp){
+
+  if (numDimsInput != numDimsTemp) {
     throw(std::invalid_argument("InputWorkspace and TempDataWorkspace "
-                                  "must have the same number of dimensions."));
+                                "must have the same number of dimensions."));
   } else {
 
     // sort out which axes are dimensional
     size_t parametersIndex = 0;
-    std::vector<size_t> dimensionIndex(numDimsInput+1,3); // stores h, k, l or Qx, Qy, Qz dimensions
-    std::vector<size_t> nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
+    std::vector<size_t> dimensionIndex(
+        numDimsInput + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
+    std::vector<size_t>
+        nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
     for (auto const &p : parameters) {
       auto key = p.first;
       auto value = p.second;
-      if(value.find("QDimension0") != std::string::npos)
+      if (value.find("QDimension0") != std::string::npos)
         dimensionIndex[0] = parametersIndex;
-      else if(value.find("QDimension1") != std::string::npos)
+      else if (value.find("QDimension1") != std::string::npos)
         dimensionIndex[1] = parametersIndex;
-      else if(value.find("QDimension2") != std::string::npos)
+      else if (value.find("QDimension2") != std::string::npos)
         dimensionIndex[2] = parametersIndex;
-      else if((key.find("OutputBins") == std::string::npos) && 
-              (key.find("OutputExtents") == std::string::npos)){
+      else if ((key.find("OutputBins") == std::string::npos) &&
+               (key.find("OutputExtents") == std::string::npos)) {
         nonDimensionIndex.push_back(parametersIndex);
       }
       parametersIndex++;
     }
-    for(auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it){
-      if(!(*it < numDimsInput+1))
-        throw(std::invalid_argument("Cannot find QDimension0, QDimension1, or QDimension2"));
+    for (auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it) {
+      if (!(*it < numDimsInput + 1))
+        throw(std::invalid_argument(
+            "Cannot find QDimension0, QDimension1, or QDimension2"));
     }
 
     // make sure the names of dimensional axes are the same
-    const std::string dimXName = tempDataWS->getDimension(dimensionIndex[0])->getName();
-    const std::string dimYName = tempDataWS->getDimension(dimensionIndex[1])->getName();
-    const std::string dimZName = tempDataWS->getDimension(dimensionIndex[2])->getName();
-    if(!m_isRLU){ //Q_sample
-        if(dimXName.compare(QDimensionName(0)) + dimYName.compare(QDimensionName(1)) + 
-           dimZName.compare(QDimensionName(2)) != 0){
-            throw(std::invalid_argument("TemporaryDataWorkspace must be in  Q_sample if not using RLU."));
-        }
-     } else { //HKL
-        if(dimXName.compare(QDimensionName(m_Q0Basis))+ dimYName.compare(QDimensionName(m_Q1Basis))+
-          dimZName.compare(QDimensionName(m_Q2Basis)) !=0 ){
-            throw(std::invalid_argument("TemporaryDataWorkspace does not have appropriate RLU units."));
-        }
+    const std::string dimXName =
+        tempDataWS->getDimension(dimensionIndex[0])->getName();
+    const std::string dimYName =
+        tempDataWS->getDimension(dimensionIndex[1])->getName();
+    const std::string dimZName =
+        tempDataWS->getDimension(dimensionIndex[2])->getName();
+    if (!m_isRLU) { // Q_sample
+      if (dimXName.compare(QDimensionName(0)) +
+              dimYName.compare(QDimensionName(1)) +
+              dimZName.compare(QDimensionName(2)) !=
+          0) {
+        throw(std::invalid_argument(
+            "TemporaryDataWorkspace must be in  Q_sample if not using RLU."));
+      }
+    } else { // HKL
+      if (dimXName.compare(QDimensionName(m_Q0Basis)) +
+              dimYName.compare(QDimensionName(m_Q1Basis)) +
+              dimZName.compare(QDimensionName(m_Q2Basis)) !=
+          0) {
+        throw(std::invalid_argument(
+            "TemporaryDataWorkspace does not have appropriate RLU units."));
+      }
     }
     // make sure the names of non-dimensional axes are the same
-    if(!(nonDimensionIndex.empty())){
-      for(auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end(); ++it){
+    if (!(nonDimensionIndex.empty())) {
+      for (auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end();
+           ++it) {
         const size_t indexID = *it;
-        const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
-        const std::string nameData = tempDataWS->getDimension(indexID)->getName();
-        if(nameInput.compare(nameData) != 0){
-            throw(std::invalid_argument("TemporaryDataWorkspace does not have the same dimension names as InputWorkspace."));
+        const std::string nameInput =
+            m_inputWS->getDimension(indexID)->getName();
+        const std::string nameData =
+            tempDataWS->getDimension(indexID)->getName();
+        if (nameInput.compare(nameData) != 0) {
+          throw(
+              std::invalid_argument("TemporaryDataWorkspace does not have the "
+                                    "same dimension names as InputWorkspace."));
         }
       }
     }
@@ -831,8 +850,10 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
     extentsTempData.push_back(ax->getMinimum());
     extentsTempData.push_back(ax->getMaximum());
   }
-  if ((numBins.size() != numDimsInput) || (numBinsTempData.size() != numDimsInput) ||
-      extents.size() != 2*numDimsInput || extentsTempData.size() != 2*numDimsInput) {
+  if ((numBins.size() != numDimsInput) ||
+      (numBinsTempData.size() != numDimsInput) ||
+      extents.size() != 2 * numDimsInput ||
+      extentsTempData.size() != 2 * numDimsInput) {
     g_log.error("Cannot parse binning dimensions for MDNorm.");
     return false;
   }
@@ -915,7 +936,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_hIdx = qindex;
         if (!m_isRLU) {
           projection[0] = 1.;
-          basisVector << QDimensionName(0)<<",A^{-1}";
+          basisVector << QDimensionName(0) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][0];
@@ -927,7 +948,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_kIdx = qindex;
         if (!m_isRLU) {
           projection[1] = 1.;
-          basisVector << QDimensionName(1)<<",A^{-1}";
+          basisVector << QDimensionName(1) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][1];
@@ -939,7 +960,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_lIdx = qindex;
         if (!m_isRLU) {
           projection[2] = 1.;
-          basisVector << QDimensionName(2)<<",A^{-1}";
+          basisVector << QDimensionName(2) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][2];
@@ -968,7 +989,6 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
     // execute algorithm
     binMD->executeAsChildAlg();
     outputWS = binMD->getProperty("OutputWorkspace");
-
 
     // set the temporary workspace to be the output workspace, so it keeps
     // adding different symmetries
