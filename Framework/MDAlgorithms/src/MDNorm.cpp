@@ -375,7 +375,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
   // check that either both or neuther accumulation workspaces are provied
   if ((tempNormWS && !tempDataWS) || (!tempNormWS && tempDataWS)) {
     errorMessage.emplace(
-        "AccumulationWorkspaces",
+        "TemporaryDataWorkspace",
         "Must provide either no accumulation workspaces or,"
         "both TemporaryNormalizationWorkspaces and TemporaryDataWorkspace");
   }
@@ -391,7 +391,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
               (dim1->getMaximum() == dim2->getMaximum()) &&
               (dim1->getNBins() == dim2->getNBins()) &&
               (dim1->getName() == dim2->getName()))) {
-          errorMessage.emplace("AccumulationWorkspaces",
+          errorMessage.emplace("TemporaryDataWorkspace",
                                "Binning for TemporaryNormalizationWorkspaces "
                                "and TemporaryDataWorkspace must be the same.");
           break;
@@ -399,7 +399,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       }
     } else { // accumulation workspaces have different number of dimensions
       errorMessage.emplace(
-          "AccumulationWorkspaces",
+          "TemporaryDataWorkspace",
           "TemporaryNormalizationWorkspace and TemporaryDataWorkspace "
           "do not have the same number of dimensions");
     }
