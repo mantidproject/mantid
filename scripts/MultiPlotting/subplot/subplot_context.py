@@ -101,6 +101,10 @@ class subplotContext(object):
             self.redraw_annotations()
 
     @property
+    def size(self):
+        return len(self._lines)
+
+    @property
     def lines(self):
         return self._lines
 
@@ -201,7 +205,8 @@ class subplotContext(object):
         for label in keys:
             self.removeLabel(label)
 
-    def get_ws_by_name(self,name):
+    def get_lines_from_WS_name(self, name):
         for ws in self._ws:
             if name == ws.name():
-               return ws
+               return self._ws[ws]
+        return []
