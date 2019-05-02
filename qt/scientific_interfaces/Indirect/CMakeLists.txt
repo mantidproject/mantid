@@ -287,6 +287,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                   MTD_QT_LINK_LIBS
                   MantidQtWidgetsCommon
                   MantidQtWidgetsPlotting
+                  MantidQtWidgetsMplCpp
                   INSTALL_DIR_BASE
                   ${PLUGINS_DIR}
                   OSX_INSTALL_RPATH

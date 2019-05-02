@@ -7,14 +7,23 @@
 #ifndef MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_
 #define MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/MplCpp/Line2D.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <Poco/NObserver.h>
 
 #include <QWidget>
+#include <list>
 
 namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
+class FigureCanvasQt;
+}
+} // namespace Widgets
 namespace MantidWidgets {
 
 /**
@@ -24,7 +33,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
   Q_OBJECT
 
 public:
-  PreviewPlot(QWidget *parent = nullptr, bool init = true);
+  PreviewPlot(QWidget *parent = nullptr, bool watchADS = true);
 
   void addSpectrum(const QString &curveName,
                    const Mantid::API::MatrixWorkspace_sptr &ws,
@@ -34,12 +43,35 @@ public:
                    const size_t wsIndex = 0,
                    const QColor &curveColour = QColor());
   void removeSpectrum(const QString &curveName);
-  void setAxisRange(QPair<double, double> range,
+  void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
 
 public slots:
   void clear();
   void resizeX();
+
+private:
+  void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
+  void
+  onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void removeLines(const Mantid::API::MatrixWorkspace &ws);
+
+  struct Line2DInfo {
+    Widgets::MplCpp::Line2D line;
+    QString name;
+    // Non-owning pointer to the source workspace
+    // It is only safe to compare this with another workspace pointer
+    const Mantid::API::MatrixWorkspace *const workspace;
+    const size_t wsIndex;
+  };
+
+  Widgets::MplCpp::FigureCanvasQt *m_canvas;
+  std::list<Line2DInfo> m_lines;
+  // Poco Observers for ADS Notifications
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
+      m_wsRemovedObserver;
+  Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification>
+      m_wsReplacedObserver;
 };
 
 } // namespace MantidWidgets

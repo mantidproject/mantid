@@ -170,6 +170,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
+    ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp
