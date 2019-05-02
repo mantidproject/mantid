@@ -9,7 +9,6 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadOff.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -79,18 +78,8 @@ void LoadSampleShape::exec() {
   if (filetype == "off") {
     auto offReader = LoadOff(filename, scaleType);
     shape = offReader.readOFFshape();
-  } else /* stl */ {
-
-    auto asciiStlReader = LoadAsciiStl(filename, scaleType);
-    auto binaryStlReader = LoadBinaryStl(filename, scaleType);
-    if (binaryStlReader.isBinarySTL(filename)) {
-      shape = binaryStlReader.readStl();
-    } else if (asciiStlReader.isAsciiSTL(filename)) {
-      shape = asciiStlReader.readStl();
-    } else {
-      throw Kernel::Exception::ParseError(
-          "Could not read file, did not match either STL Format", filename, 0);
-    }
+  } else {
+    shape = loadStl(filename, scaleType);
   }
   // rotate shape
   shape = rotate(shape, inputWS);
@@ -118,5 +107,20 @@ LoadSampleShape::rotate(boost::shared_ptr<MeshObject> sampleMesh,
   return sampleMesh;
 }
 
+boost::shared_ptr<MeshObject> LoadSampleShape::loadStl(std::string filename,
+                                                       ScaleUnits scaleType) {
+  boost::shared_ptr<MeshObject> shape = nullptr;
+  auto asciiStlReader = LoadAsciiStl(filename, scaleType);
+  auto binaryStlReader = LoadBinaryStl(filename, scaleType);
+  if (binaryStlReader.isBinarySTL(filename)) {
+    shape = binaryStlReader.readStl();
+  } else if (asciiStlReader.isAsciiSTL(filename)) {
+    shape = asciiStlReader.readStl();
+  } else {
+    throw Kernel::Exception::ParseError(
+        "Could not read file, did not match either STL Format", filename, 0);
+  }
+  return shape;
+}
 } // namespace DataHandling
 } // namespace Mantid

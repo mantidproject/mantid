@@ -9,11 +9,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/LoadShape.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 
 namespace Mantid {
-namespace Geometry {
-class MeshObject;
-}
 namespace DataHandling {
 /**  Load Shape into an instrument of a workspace
 
@@ -55,9 +54,10 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
+  boost::shared_ptr<Geometry::MeshObject> loadStl(std::string filename,
+                                        ScaleUnits scaleType);
 };
 
-} // end namespace DataHandling
+} // namespace DataHandling
 } // namespace Mantid
-
 #endif /* DATAHANDLING_LOAD_SHAPE_H_ */
