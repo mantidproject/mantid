@@ -38,7 +38,7 @@ private:
       const Mantid::API::IMDHistoWorkspace_sptr);
   std::map<std::string, std::string> validateInputs() override final;
   std::string QDimensionName(std::vector<double> projection);
-  std::string QDimensionName(int i);
+  std::string QDimensionNameQSample(int i);
   std::map<std::string, std::string> getBinParameters();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   DataObjects::MDHistoWorkspace_sptr

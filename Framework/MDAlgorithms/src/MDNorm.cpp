@@ -512,7 +512,7 @@ void MDNorm::exec() {
  * @param i - axis number to return axis name for.  Can be 0, 1, or 2.
  * @return string containing the name
  */
-std::string MDNorm::QDimensionName(int i) {
+std::string MDNorm::QDimensionNameQSample(int i) {
   if (i == 0)
     return std::string("Q_sample_x");
   else if (i == 1)
@@ -520,7 +520,7 @@ std::string MDNorm::QDimensionName(int i) {
   else if (i == 2)
     return std::string("Q_sample_z");
   else
-    throw std::invalid_argument("Index must be 0, 1, or 2 for QDimensionName");
+    throw std::invalid_argument("Index must be 0, 1, or 2 for QDimensionNameQSample");
 }
 /**
  * Get the dimension name when using reciprocal lattice units.
@@ -751,7 +751,7 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
                                 "must have the same number of dimensions."));
   } else {
 
-    // sort out which axes are dimensional
+    // sort out which axes are dimensional and check names
     size_t parametersIndex = 0;
     std::vector<size_t> dimensionIndex(
         numDimsInput + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
@@ -760,13 +760,41 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
     for (auto const &p : parameters) {
       auto key = p.first;
       auto value = p.second;
-      if (value.find("QDimension0") != std::string::npos)
+      if (value.find("QDimension0") != std::string::npos){
         dimensionIndex[0] = parametersIndex;
-      else if (value.find("QDimension1") != std::string::npos)
+        const std::string dimXName = tempDataWS->getDimension(parametersIndex)->getName();
+        if(m_isRLU){ //hkl
+          if(dimXName.compare(QDimensionName(m_Q0Basis)) != 0){
+            return false;
+          }
+        } else {
+          if(dimXName.compare(QDimensionNameQSample(0)) != 0)
+            return false;
+        }
+      } else if (value.find("QDimension1") != std::string::npos) {
         dimensionIndex[1] = parametersIndex;
-      else if (value.find("QDimension2") != std::string::npos)
+        const std::string dimYName = tempDataWS->getDimension(parametersIndex)->getName();
+        if(m_isRLU){ //hkl
+          if(dimYName.compare(QDimensionName(m_Q1Basis)) != 0){
+            return false;
+          }
+        } else {
+          if(dimYName.compare(QDimensionNameQSample(1)) != 0)
+            return false;
+        }
+      } else if (value.find("QDimension2") != std::string::npos) {
         dimensionIndex[2] = parametersIndex;
-      else if ((key.find("OutputBins") == std::string::npos) &&
+        const std::string dimZName = tempDataWS->getDimension(parametersIndex)->getName();
+        if(m_isRLU){ //hkl
+          if(dimZName.compare(QDimensionName(m_Q2Basis)) != 0){
+            return false;
+          }
+        } else {
+          if(dimZName.compare(QDimensionNameQSample(2)) != 0)
+            return false;
+        }
+
+      } else if ((key.find("OutputBins") == std::string::npos) &&
                (key.find("OutputExtents") == std::string::npos)) {
         nonDimensionIndex.push_back(parametersIndex);
       }
@@ -775,33 +803,9 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
     for (auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it) {
       if (!(*it < numDimsInput + 1))
         throw(std::invalid_argument(
-            "Cannot find QDimension0, QDimension1, or QDimension2"));
+            "Cannot find at least one of QDimension0, QDimension1, or QDimension2"));
     }
 
-    // make sure the names of dimensional axes are the same
-    const std::string dimXName =
-        tempDataWS->getDimension(dimensionIndex[0])->getName();
-    const std::string dimYName =
-        tempDataWS->getDimension(dimensionIndex[1])->getName();
-    const std::string dimZName =
-        tempDataWS->getDimension(dimensionIndex[2])->getName();
-    if (!m_isRLU) { // Q_sample
-      if (dimXName.compare(QDimensionName(0)) +
-              dimYName.compare(QDimensionName(1)) +
-              dimZName.compare(QDimensionName(2)) !=
-          0) {
-        throw(std::invalid_argument(
-            "TemporaryDataWorkspace must be in  Q_sample if not using RLU."));
-      }
-    } else { // HKL
-      if (dimXName.compare(QDimensionName(m_Q0Basis)) +
-              dimYName.compare(QDimensionName(m_Q1Basis)) +
-              dimZName.compare(QDimensionName(m_Q2Basis)) !=
-          0) {
-        throw(std::invalid_argument(
-            "TemporaryDataWorkspace does not have appropriate RLU units."));
-      }
-    }
     // make sure the names of non-dimensional axes are the same
     if (!(nonDimensionIndex.empty())) {
       for (auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end();
@@ -892,7 +896,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         isValidBinningForTemporaryDataWorkspace(parameters, tempDataWS);
     if (!isValidBinning) {
       throw(std::invalid_argument("Provided binning parameters do not agree "
-                                  "with accumulation workspaces"));
+                                  "with temporary workspace bins."));
     }
   }
 
@@ -936,7 +940,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_hIdx = qindex;
         if (!m_isRLU) {
           projection[0] = 1.;
-          basisVector << QDimensionName(0) << ",A^{-1}";
+          basisVector << QDimensionNameQSample(0) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][0];
@@ -948,7 +952,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_kIdx = qindex;
         if (!m_isRLU) {
           projection[1] = 1.;
-          basisVector << QDimensionName(1) << ",A^{-1}";
+          basisVector << QDimensionNameQSample(1) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][1];
@@ -960,7 +964,7 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
         m_lIdx = qindex;
         if (!m_isRLU) {
           projection[2] = 1.;
-          basisVector << QDimensionName(2) << ",A^{-1}";
+          basisVector << QDimensionNameQSample(2) << ",A^{-1}";
         } else {
           qDimensionIndices.push_back(qindex);
           projection[0] = Qtransform[0][2];
