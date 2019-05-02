@@ -252,6 +252,7 @@ void FunctionBrowser::setLocalParameterTie(const QString &parName, int i,
 /// @param fun :: A function to get parameter values from.
 void FunctionBrowser::updateMultiDatasetParameters(
     const Mantid::API::IFunction &fun) {
+  m_presenter->updateMultiDatasetParameters(fun);
 }
 
 /// Get the index of the current dataset.

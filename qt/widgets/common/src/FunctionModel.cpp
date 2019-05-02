@@ -42,6 +42,7 @@ void IFunctionModel::clear()
 }
 
 void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
+  m_globalParameterNames.clear();
   m_function = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
   if (m_function) {
     return;
@@ -112,6 +113,7 @@ void MultiDomainFunctionModel::addFunction(const QString & prefix, const QString
       throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
     }
   }
+  updateGlobals();
 }
 
 void MultiDomainFunctionModel::removeFunction(const QString & functionIndex)
@@ -134,8 +136,12 @@ void MultiDomainFunctionModel::removeFunction(const QString & functionIndex)
     cf->removeFunction(index);
     if (cf->nFunctions() == 1 && prefix.isEmpty()) {
       m_function->replaceFunction(i, cf->getFunction(0));
+      m_function->checkFunction();
+    } else {
+      cf->checkFunction();
     }
   }
+  updateGlobals();
 }
 
 void MultiDomainFunctionModel::setParameter(const QString & paramName, double value)
@@ -232,6 +238,7 @@ void MultiDomainFunctionModel::setNumberDomains(int nDomains)
     for (size_t i = lastIndex; i >= nf; --i) {
       m_function->removeFunction(i);
     }
+    m_function->checkFunction();
     m_function->clearDomainIndices();
     for (size_t i = 0; i < m_function->nFunctions(); ++i) {
       m_function->setDomainIndex(i, i);
@@ -379,6 +386,28 @@ void MultiDomainFunctionModel::checkIndex(int index) const {
   if (index == 0) return;
   if (index < 0 || index >= getNumberDomains()) {
     throw std::runtime_error("Domain index is out of range: " + std::to_string(index) + " out of " + std::to_string(getNumberDomains()));
+  }
+}
+
+void MultiDomainFunctionModel::updateMultiDatasetParameters(const IFunction & fun)
+{
+  if (!hasFunction()) return;
+  assert(m_function->nParams() == fun.nParams());
+  for (size_t i = 0; i < fun.nParams(); ++i) {
+    m_function->setParameter(i, fun.getParameter(i));
+    m_function->setError(i, fun.getError(i));
+  }
+}
+
+void MultiDomainFunctionModel::updateGlobals()
+{
+  auto const fun = getCurrentFunction();
+  for (auto it = m_globalParameterNames.begin(); it != m_globalParameterNames.end();) {
+    if (!fun->hasParameter(it->toStdString())) {
+      it = m_globalParameterNames.erase(it);
+    } else {
+      ++it;
+    }
   }
 }
 

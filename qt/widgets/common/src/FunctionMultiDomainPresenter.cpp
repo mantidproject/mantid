@@ -43,6 +43,7 @@ void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun)
 {
   m_model->setFunction(fun);
   m_view->setFunction(m_model->getCurrentFunction());
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::setFunctionString(const QString & funStr)
@@ -106,6 +107,19 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction & fun)
     setParameter(qName, fun.getParameter(parameter));
     const size_t index = fun.parameterIndex(parameter);
     setParamError(qName, fun.getError(index));
+  }
+}
+
+void FunctionMultiDomainPresenter::updateMultiDatasetParameters(const IFunction & fun)
+{
+  m_model->updateMultiDatasetParameters(fun);
+  auto currentFun = m_model->getCurrentFunction();
+  const auto paramNames = currentFun->getParameterNames();
+  for (const auto &parameter : paramNames) {
+    const QString qName = QString::fromStdString(parameter);
+    m_view->setParameter(qName, currentFun->getParameter(parameter));
+    const size_t index = currentFun->parameterIndex(parameter);
+    m_view->setParamError(qName, currentFun->getError(index));
   }
 }
 
@@ -254,12 +268,15 @@ void FunctionMultiDomainPresenter::viewAddedFunction(const QString & funStr)
 {
   auto prefix = m_view->currentFunctionIndex();
   m_model->addFunction(prefix.value_or(""), funStr);
+  m_view->setGlobalParameters(m_model->getGlobalParameters());
   emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::viewRemovedFunction(const QString & functionIndex)
 {
   m_model->removeFunction(functionIndex);
+  m_view->setGlobalParameters(m_model->getGlobalParameters());
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::viewChangedTie(const QString & paramName, const QString & tie)

@@ -86,6 +86,10 @@ public:
     }
   }
 
+  void setGlobalParameters(const QStringList& globals) {
+    m_globals = globals;
+  }
+
   // Mock user action
   void addFunction(const QString &prefix, const QString& funStr) {
     m_currentFunctionIndex = prefix;
@@ -122,6 +126,7 @@ private:
   IFunction_sptr m_function;
   boost::optional<QString> m_currentFunctionIndex;
   bool m_areErrorsEnabled{ true };
+  QStringList m_globals;
 };
 
 class FunctionMultiDomainPresenterTest : public CxxTest::TestSuite {
@@ -473,6 +478,8 @@ public:
     fun = presenter.getFunction();
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+    auto ffun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(ffun->nParams(), 4);
   }
 
   void test_view_addFunction_after_remove() {

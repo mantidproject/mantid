@@ -106,6 +106,8 @@ public:
   boost::optional<QString> currentFunctionIndex() const override;
   /// Set a tie
   void setParameterTie(const QString &paramName, const QString &tie) override;
+  /// Set new global parameters.
+  void setGlobalParameters(const QStringList&) override;
   /// Get a list of global parameters
   QStringList getGlobalParameters() const;
 

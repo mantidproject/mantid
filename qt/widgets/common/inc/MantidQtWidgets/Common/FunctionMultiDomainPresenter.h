@@ -45,6 +45,7 @@ public:
   bool isParameterFixed(const QString &parName) const;
   QString getParameterTie(const QString &parName) const;
   void updateParameters(const IFunction &fun);
+  void updateMultiDatasetParameters(const IFunction &fun);
   void clearErrors();
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);

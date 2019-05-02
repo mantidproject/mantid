@@ -1878,6 +1878,15 @@ QStringList FunctionTreeView::getGlobalParameters() const {
   return globals;
 }
 
+void FunctionTreeView::setGlobalParameters(const QStringList&globals) {
+  for (auto ap : m_properties) {
+    auto prop = ap.prop;
+    if (!prop->hasOption(globalOptionName)) continue;
+    auto isGlobal = globals.contains(getParameterName(prop));
+    prop->setOption(globalOptionName, isGlobal);
+  }
+}
+
 QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const
 {
   return m_browser->getItemWidget(m_properties.find(prop)->item);

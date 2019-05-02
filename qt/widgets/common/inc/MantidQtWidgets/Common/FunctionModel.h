@@ -50,6 +50,7 @@ namespace MantidWidgets {
     virtual QStringList getGlobalParameters() const = 0;
     virtual void setGlobalParameters(const QStringList &globals) = 0;
     virtual QStringList getLocalParameters() const = 0;
+    virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
   };
 
   class EXPORT_OPT_MANTIDQT_COMMON MultiDomainFunctionModel : public IFunctionModel {
@@ -89,8 +90,10 @@ namespace MantidWidgets {
     QStringList getGlobalParameters() const override;
     void setGlobalParameters(const QStringList &globals) override;
     QStringList getLocalParameters() const override;
+    void updateMultiDatasetParameters(const IFunction &fun) override;
   private:
     void checkIndex(int) const;
+    void updateGlobals();
     MultiDomainFunction_sptr m_function;
     size_t m_currentDomainIndex = 0;
     size_t m_numberDomains = 0;
