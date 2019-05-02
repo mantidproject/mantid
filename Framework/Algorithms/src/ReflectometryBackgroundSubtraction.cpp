@@ -163,7 +163,7 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
                                          static_cast<int>(indexRanges.back())};
 
   auto outputWSName = getPropertyValue("OutputWorkspace");
-  
+
   MatrixWorkspace_sptr workspace = inputWS->clone();
   AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
 
