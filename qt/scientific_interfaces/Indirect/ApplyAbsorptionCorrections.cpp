@@ -656,7 +656,7 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
 }
 
 void ApplyAbsorptionCorrections::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 

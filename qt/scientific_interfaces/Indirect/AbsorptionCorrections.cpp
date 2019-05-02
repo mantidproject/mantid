@@ -643,12 +643,12 @@ void AbsorptionCorrections::setCanDensityUnit(QString const &text) {
 }
 
 void AbsorptionCorrections::setSampleDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSampleDensity);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSampleDensity);
   m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
 }
 
 void AbsorptionCorrections::setCanDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spCanDensity);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spCanDensity);
   m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
 }
 
