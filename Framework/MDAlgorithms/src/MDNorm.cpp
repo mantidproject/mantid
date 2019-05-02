@@ -383,8 +383,8 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       size_t numDataDims = tempDataWS->getNumDims();
       if (numNormDims == numDataDims){
           for (size_t i = 0; i < numNormDims; i++) {
-            auto dim1 = tempNormWS->getDimension(i);
-            auto dim2 = tempDataWS->getDimension(i);
+            const auto dim1 = tempNormWS->getDimension(i);
+            const auto dim2 = tempDataWS->getDimension(i);
             if (!((dim1->getMinimum() == dim2->getMinimum()) &&
                 (dim1->getMaximum() == dim2->getMaximum()) &&
                 (dim1->getNBins() == dim2->getNBins()) &&
@@ -748,19 +748,56 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
     throw(std::invalid_argument("InputWorkspace and TempDataWorkspace "
                                   "must have the same number of dimensions."));
   } else {
-    std::string dim0Name = tempDataWS->getDimension(0)->getName();
-    std::string dim1Name = tempDataWS->getDimension(1)->getName();
-    std::string dim2Name = tempDataWS->getDimension(2)->getName();
+
+    // sort out which axes are dimensional
+    size_t parametersIndex = 0;
+    std::vector<size_t> dimensionIndex(numDimsInput+1,3); // stores h, k, l or Qx, Qy, Qz dimensions
+    std::vector<size_t> nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
+    for (auto const &p : parameters) {
+      auto key = p.first;
+      auto value = p.second;
+      if(value.find("QDimension0") != std::string::npos)
+        dimensionIndex[0] = parametersIndex;
+      else if(value.find("QDimension1") != std::string::npos)
+        dimensionIndex[1] = parametersIndex;
+      else if(value.find("QDimension2") != std::string::npos)
+        dimensionIndex[2] = parametersIndex;
+      else if((key.find("OutputBins") == std::string::npos) && 
+              (key.find("OutputExtents") == std::string::npos)){
+        nonDimensionIndex.push_back(parametersIndex);
+      }
+      parametersIndex++;
+    }
+    for(auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it){
+      if(!(*it < numDimsInput+1))
+        throw(std::invalid_argument("Cannot find QDimension0, QDimension1, or QDimension2"));
+    }
+
+    // make sure the names of dimensional axes are the same
+    const std::string dimXName = tempDataWS->getDimension(dimensionIndex[0])->getName();
+    const std::string dimYName = tempDataWS->getDimension(dimensionIndex[1])->getName();
+    const std::string dimZName = tempDataWS->getDimension(dimensionIndex[2])->getName();
     if(!m_isRLU){ //Q_sample
-        if(dim0Name.compare(QDimensionName(0)) + dim1Name.compare(QDimensionName(1)) + 
-           dim2Name.compare(QDimensionName(2)) != 0){
+        if(dimXName.compare(QDimensionName(0)) + dimYName.compare(QDimensionName(1)) + 
+           dimZName.compare(QDimensionName(2)) != 0){
             throw(std::invalid_argument("TemporaryDataWorkspace must be in  Q_sample if not using RLU."));
         }
      } else { //HKL
-        if(dim0Name.compare(QDimensionName(m_Q0Basis))+ dim1Name.compare(QDimensionName(m_Q1Basis))+
-          dim2Name.compare(QDimensionName(m_Q2Basis)) !=0 ){
+        if(dimXName.compare(QDimensionName(m_Q0Basis))+ dimYName.compare(QDimensionName(m_Q1Basis))+
+          dimZName.compare(QDimensionName(m_Q2Basis)) !=0 ){
             throw(std::invalid_argument("TemporaryDataWorkspace does not have appropriate RLU units."));
         }
+    }
+    // make sure the names of non-dimensional axes are the same
+    if(!(nonDimensionIndex.empty())){
+      for(auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end(); ++it){
+        const size_t indexID = *it;
+        const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
+        const std::string nameData = tempDataWS->getDimension(indexID)->getName();
+        if(nameInput.compare(nameData) != 0){
+            throw(std::invalid_argument("TemporaryDataWorkspace does not have the same dimension names as InputWorkspace."));
+        }
+      }
     }
   }
 
@@ -938,8 +975,6 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
     tempDataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
     soIndex += 1;
   }
-
-  if()
 
   auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
