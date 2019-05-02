@@ -163,18 +163,19 @@ void ReflectometryBackgroundSubtraction::subtractPixelBackground(
                                          static_cast<int>(indexRanges.back())};
 
   auto outputWSName = getPropertyValue("OutputWorkspace");
-
+  
   MatrixWorkspace_sptr workspace = inputWS->clone();
   AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
 
   IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
   LRBgd->setProperty("InputWorkspace", workspace);
-  LRBgd->setProperty("LowResolutionRange",
-                     getPropertyValue("IntegrationRange"));
   LRBgd->setProperty("PeakRange", getPropertyValue("PeakRange"));
   LRBgd->setProperty("BackgroundRange", Strings::toString(backgroundRange));
   LRBgd->setProperty("SumPeak", getPropertyValue("SumPeak"));
+  // the low resolution range is 0 as it is assumed to be linear detector, this
+  // will need to change if ISIS reflectometry get a 2D detector
+  LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
   LRBgd->setProperty("OutputWorkspace", outputWSName);
   LRBgd->executeAsChildAlg();
@@ -226,19 +227,12 @@ void ReflectometryBackgroundSubtraction::init() {
   declareProperty(
       make_unique<ArrayProperty<int>>("PeakRange", "147, 163", lengthArray),
       "Pixel range defining the reflectivity peak");
-  declareProperty(make_unique<ArrayProperty<int>>("IntegrationRange", "94, 160",
-                                                  lengthArray),
-                  "Pixel range defining the axis to integrate over");
   declareProperty("SumPeak", false,
                   "If True, the resulting peak will be summed");
 
   setPropertySettings("PeakRange", make_unique<EnabledWhenProperty>(
                                        "BackgroundCalculationMethod",
                                        IS_EQUAL_TO, "AveragePixelFit"));
-
-  setPropertySettings("IntegrationRange", make_unique<EnabledWhenProperty>(
-                                              "BackgroundCalculationMethod",
-                                              IS_EQUAL_TO, "AveragePixelFit"));
 
   setPropertySettings("SumPeak", make_unique<EnabledWhenProperty>(
                                      "BackgroundCalculationMethod", IS_EQUAL_TO,

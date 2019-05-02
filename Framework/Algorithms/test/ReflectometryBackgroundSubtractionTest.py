@@ -89,7 +89,6 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
                 'InputWorkspaceIndexSet' : '0-7',
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
                 'PeakRange' : '3,4',
-                'IntegrationRange': '0,0',
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
         for i in range(0, output.getNumberHistograms()):
