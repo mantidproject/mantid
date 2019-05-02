@@ -1022,11 +1022,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         presenter._handle_output_directory_changed("a_new_directory")
-        calls = presenter._view.add_runs_presenter.handle_new_save_directory.call_args_list
-        self.assertEqual(len(calls), 1)
-
-        args = calls[0][0]
-        self.assertEqual(args, ("a_new_directory",))
+        presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
 
     @staticmethod
     def _clear_property_manager_data_service():
