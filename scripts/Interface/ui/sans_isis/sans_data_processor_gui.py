@@ -571,13 +571,13 @@ class SANSDataProcessorGui(QMainWindow,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
-        self.gui_properties_handler.update_default("user_file", self.get_user_file_path())
+        self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
 
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        self.gui_properties_handler.update_default("user_file", "")
+        self.gui_properties_handler.set_setting("user_file", "")
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):
