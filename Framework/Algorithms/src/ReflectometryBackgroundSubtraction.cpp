@@ -82,7 +82,7 @@ std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
   std::vector<double> indexRanges;
   indexRanges.push_back(indexList[0]);
   auto prevSpec = indexRanges[0];
-  for (auto index = 0; index < indexList.size() - 1; ++index) {
+  for (size_t index = 0; index < indexList.size() - 1; ++index) {
     auto spec = indexList[index + 1];
     auto range = spec - prevSpec;
     // check if start of new range
@@ -301,7 +301,6 @@ ReflectometryBackgroundSubtraction::validateInputs() {
   std::tie(inputWS, indexSet) =
       getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
   const std::string backgroundType = getProperty("BackgroundCalculationMethod");
-  const std::vector<int> peakRange = getProperty("PeakRange");
 
   if (inputWS) {
     if (backgroundType == "Polynomial" && indexSet.size() == 1) {
@@ -317,7 +316,8 @@ ReflectometryBackgroundSubtraction::validateInputs() {
           "AveragePixelFit background subtraction";
     }
 
-    auto numberOfypixels = inputWS->getNumberHistograms();
+		const std::vector<int> peakRange = getProperty("PeakRange");
+    auto numberOfypixels = static_cast<int>(inputWS->getNumberHistograms());
     if (backgroundType == "AveragePixelFit" &&
         (peakRange.front() < 0 || peakRange.back() > numberOfypixels - 1)) {
       errors["PeakRange"] =
