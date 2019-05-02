@@ -55,7 +55,7 @@ private:
   void init() override;
   void exec() override;
   boost::shared_ptr<Geometry::MeshObject> loadStl(std::string filename,
-                                        ScaleUnits scaleType);
+                                                  ScaleUnits scaleType);
 };
 
 } // namespace DataHandling
