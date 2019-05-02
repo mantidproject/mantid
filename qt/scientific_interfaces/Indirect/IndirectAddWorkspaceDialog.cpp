@@ -109,6 +109,12 @@ void AddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
 }
 
+void AddWorkspaceDialog::updateSelectedSpectra() {
+  auto const state =
+      m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
+  selectAllSpectra(state);
+}
+
 void AddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
   if (validWorkspace(name) && state == Qt::Checked) {

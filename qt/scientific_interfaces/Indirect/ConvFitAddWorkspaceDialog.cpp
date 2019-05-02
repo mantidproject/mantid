@@ -123,6 +123,12 @@ void ConvFitAddWorkspaceDialog::setResolutionFBSuffices(
   m_uiForm.dsResolution->setFBSuffixes(suffices);
 }
 
+void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
+  auto const state =
+      m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
+  selectAllSpectra(state);
+}
+
 void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
   if (validWorkspace(name) && state == Qt::Checked) {
