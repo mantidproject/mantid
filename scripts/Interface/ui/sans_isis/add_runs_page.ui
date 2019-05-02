@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>973</width>
+    <width>1017</width>
     <height>667</height>
    </rect>
   </property>
@@ -14,27 +14,24 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item alignment="Qt::AlignTop">
-    <widget class="QGroupBox" name="saveDirectoryGroup">
+   <item>
+    <widget class="QWidget" name="saveDirectoryWidget" native="true">
      <property name="minimumSize">
       <size>
-       <width>50</width>
-       <height>0</height>
+       <width>0</width>
+       <height>30</height>
       </size>
      </property>
      <property name="toolTip">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change the save directory for added runs. This can be separate from Mantid's default save directory, however this will be updated to the defaultsave whenever defaultsave is changed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <property name="title">
-      <string>Save Directory</string>
-     </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="horizontalLayoutWidget">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>20</y>
-        <width>955</width>
-        <height>27</height>
+        <y>0</y>
+        <width>991</width>
+        <height>31</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -47,7 +44,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Save Directory:</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save Directory:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
