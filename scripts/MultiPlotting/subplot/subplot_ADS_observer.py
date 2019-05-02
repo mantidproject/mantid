@@ -13,22 +13,22 @@ import mantid.simpleapi as mantid
 
 class SubplotADSObserver(AnalysisDataServiceObserver):
 
-    def __init__(self, context):
+    def __init__(self, subplot):
         super(SubplotADSObserver, self).__init__()
-        self._context= context
+        self._subplot= subplot
 
         #self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
 
-    def deleteHandle(self, workspace_name, _):
+    def deleteHandle(self, workspace_name, workspace):
         """
         Called when the ADS has deleted a workspace. Checks
         subplots for anly lines for that workspace and removes them.
         :param workspace_name: The name of the workspace
-        :param _: not used
+        :param workspace: not used
         """
-        self._context._rm_ws_from_plots(workspace_name)
+        self._subplot._rm_ws_from_plots(workspace_name)
 
     def replaceHandle(self, workspace_name, workspace):
         """
@@ -37,4 +37,4 @@ class SubplotADSObserver(AnalysisDataServiceObserver):
         :param workspace_name: The name of the workspace. Unused
         :param workspace: A reference to the new workspace
         """
-        self._context._replaced_ws( workspace)
+        self._subplot._replaced_ws( workspace)
