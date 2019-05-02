@@ -520,7 +520,8 @@ std::string MDNorm::QDimensionNameQSample(int i) {
   else if (i == 2)
     return std::string("Q_sample_z");
   else
-    throw std::invalid_argument("Index must be 0, 1, or 2 for QDimensionNameQSample");
+    throw std::invalid_argument(
+        "Index must be 0, 1, or 2 for QDimensionNameQSample");
 }
 /**
  * Get the dimension name when using reciprocal lattice units.
@@ -760,50 +761,53 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
     for (auto const &p : parameters) {
       auto key = p.first;
       auto value = p.second;
-      if (value.find("QDimension0") != std::string::npos){
+      if (value.find("QDimension0") != std::string::npos) {
         dimensionIndex[0] = parametersIndex;
-        const std::string dimXName = tempDataWS->getDimension(parametersIndex)->getName();
-        if(m_isRLU){ //hkl
-          if(dimXName.compare(QDimensionName(m_Q0Basis)) != 0){
+        const std::string dimXName =
+            tempDataWS->getDimension(parametersIndex)->getName();
+        if (m_isRLU) { // hkl
+          if (dimXName.compare(QDimensionName(m_Q0Basis)) != 0) {
             return false;
           }
         } else {
-          if(dimXName.compare(QDimensionNameQSample(0)) != 0)
+          if (dimXName.compare(QDimensionNameQSample(0)) != 0)
             return false;
         }
       } else if (value.find("QDimension1") != std::string::npos) {
         dimensionIndex[1] = parametersIndex;
-        const std::string dimYName = tempDataWS->getDimension(parametersIndex)->getName();
-        if(m_isRLU){ //hkl
-          if(dimYName.compare(QDimensionName(m_Q1Basis)) != 0){
+        const std::string dimYName =
+            tempDataWS->getDimension(parametersIndex)->getName();
+        if (m_isRLU) { // hkl
+          if (dimYName.compare(QDimensionName(m_Q1Basis)) != 0) {
             return false;
           }
         } else {
-          if(dimYName.compare(QDimensionNameQSample(1)) != 0)
+          if (dimYName.compare(QDimensionNameQSample(1)) != 0)
             return false;
         }
       } else if (value.find("QDimension2") != std::string::npos) {
         dimensionIndex[2] = parametersIndex;
-        const std::string dimZName = tempDataWS->getDimension(parametersIndex)->getName();
-        if(m_isRLU){ //hkl
-          if(dimZName.compare(QDimensionName(m_Q2Basis)) != 0){
+        const std::string dimZName =
+            tempDataWS->getDimension(parametersIndex)->getName();
+        if (m_isRLU) { // hkl
+          if (dimZName.compare(QDimensionName(m_Q2Basis)) != 0) {
             return false;
           }
         } else {
-          if(dimZName.compare(QDimensionNameQSample(2)) != 0)
+          if (dimZName.compare(QDimensionNameQSample(2)) != 0)
             return false;
         }
 
       } else if ((key.find("OutputBins") == std::string::npos) &&
-               (key.find("OutputExtents") == std::string::npos)) {
+                 (key.find("OutputExtents") == std::string::npos)) {
         nonDimensionIndex.push_back(parametersIndex);
       }
       parametersIndex++;
     }
     for (auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it) {
       if (!(*it < numDimsInput + 1))
-        throw(std::invalid_argument(
-            "Cannot find at least one of QDimension0, QDimension1, or QDimension2"));
+        throw(std::invalid_argument("Cannot find at least one of QDimension0, "
+                                    "QDimension1, or QDimension2"));
     }
 
     // make sure the names of non-dimensional axes are the same
