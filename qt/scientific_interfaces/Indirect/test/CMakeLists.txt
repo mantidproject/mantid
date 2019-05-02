@@ -1,5 +1,4 @@
 # Testing
-###########################################################################
 set(TEST_FILES
     ConvFitDataPresenterTest.h
     ConvFitModelTest.h

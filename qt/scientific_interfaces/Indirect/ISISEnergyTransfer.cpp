@@ -30,7 +30,7 @@ WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
       workspaceName);
 }
 
-std::string createRangeString(std::size_t from, std::size_t to) {
+std::string createRangeString(std::size_t const &from, std::size_t const &to) {
   return std::to_string(from) + "-" + std::to_string(to);
 }
 
@@ -313,7 +313,6 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
         m_uiForm.leCustomGroups->text().toStdString();
     if (customString.empty())
       return "Please supply a custom grouping for detectors.";
-
     else
       return checkCustomGroupingNumbersInRange(
           getCustomGroupingNumbers(customString));

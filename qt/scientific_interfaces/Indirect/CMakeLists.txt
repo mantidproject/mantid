@@ -38,6 +38,7 @@ set ( SRC_FILES
 	IndirectFitPlotPresenter.cpp
 	IndirectFitPlotView.cpp
 	IndirectFittingModel.cpp
+	IndirectInstrumentConfig.cpp
 	IndirectInterface.cpp
 	IndirectLoadILL.cpp
 	IndirectMolDyn.cpp
@@ -249,6 +250,7 @@ set ( UI_FILES
    IndirectFitOutputOptions.ui
    IndirectFitPreviewPlot.ui
    IndirectInterfaceSettings.ui
+   IndirectInstrumentConfig.ui
    IndirectLoadILL.ui
    IndirectMolDyn.ui
    IndirectMoments.ui
@@ -297,6 +299,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                      ${JSONCPP_LIBRARIES}
                    QT4_LINK_LIBS
                      Qwt5
+                     Qt4::QtXml
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
                      MantidQtWidgetsPlotting
