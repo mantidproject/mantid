@@ -80,7 +80,7 @@ bool MultiDomainFunctionModel::hasFunction() const
 
 void MultiDomainFunctionModel::addFunction(const QString & prefix, const QString & funStr)
 {
-  if (!m_function) {
+  if (!hasFunction()) {
     setFunctionString(funStr);
     return;
   }
@@ -182,7 +182,7 @@ QStringList MultiDomainFunctionModel::getParameterNames() const
 IFunction_sptr MultiDomainFunctionModel::getSingleFunction(int index) const
 {
   checkIndex(index);
-  if (!m_function || m_function->nFunctions() == 0) {
+  if (!hasFunction()) {
     return IFunction_sptr();
   }
   return m_function->getFunction(index);

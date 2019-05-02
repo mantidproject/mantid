@@ -456,6 +456,35 @@ public:
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
   }
 
+  void test_remove_function_multi() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    presenter.setNumberOfDatasets(2);
+    auto fun = presenter.getFunction();
+    TS_ASSERT_EQUALS(fun->name(), "FlatBackground");
+    view->removeFunction("");
+    fun = presenter.getFunction();
+    TS_ASSERT(!fun);
+    presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
+    view->removeFunction("f0.");
+    fun = presenter.getFunction();
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
+  }
+
+  void test_view_addFunction_after_remove() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=FlatBackground");
+    view->removeFunction("");
+    view->addFunction("", "name=LinearBackground");
+    auto newFun = presenter.getFunction();
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+    newFun = presenter.getFitFunction();
+    TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
+  }
+
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRENTERTEST_H_
