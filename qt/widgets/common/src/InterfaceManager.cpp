@@ -180,6 +180,14 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
   return user_win;
 }
 
+/**
+ * Notifies the existing interfaces that a new interface has been created, and
+ * then notifies the new interface about the other interfaces which already
+ * exist. This can be used to connect signals between interfaces (override
+ * otherUserSubWindowCreated in the interface class).
+ *
+ * @param newWindow :: The interface just created
+ */
 void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
   auto &existingWindows = existingInterfaces();
   existingWindows.erase(std::remove_if(existingWindows.begin(),
