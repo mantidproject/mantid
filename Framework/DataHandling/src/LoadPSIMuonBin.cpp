@@ -518,7 +518,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
 
   boost::trim_right(m_header.field);
   auto fieldUnit = std::string(1, m_header.field.at(m_header.field.size() - 1));
-  addToSampleLog("Field Unit", fieldUnit, outputWorkspace);
+  addToSampleLog("sample_magn_field_unit", fieldUnit, outputWorkspace);
   m_header.field.pop_back();
   try {
     auto field = std::stod(m_header.field);

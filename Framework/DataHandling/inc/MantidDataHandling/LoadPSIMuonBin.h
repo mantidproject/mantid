@@ -50,7 +50,11 @@ struct headerData {
   int32_t labelsOfHistograms[16];
   int16_t integerT0[16];
   int16_t firstGood[16];
-  int16_t lastGood[16];
+  int16_t
+      lastGood[16] = {32767, 32767, 32767, 32767, 32767, 32767,
+                      32767, 32767, 32767, 32767, 32767, 32767,
+                      32767, 32767, 32767, 32767}; // All 16 elements are the
+                                                   // max value they can be
   float realT0[16];
   float temperatures[4];
   float temperatureDeviation[4];
@@ -86,6 +90,32 @@ private:
   void readInHeader(Mantid::Kernel::BinaryStreamReader &streamReader);
   void readInHistograms(Mantid::Kernel::BinaryStreamReader &streamReader);
   void generateUnknownAxis();
+
+  // Temperature file processing
+  void readInTemperatureFile(DataObjects::Workspace2D_sptr &ws);
+  std::string detectTempFile();
+  void processLine(const std::string &line, DataObjects::Workspace2D_sptr &ws);
+  void readInTemperatureFileHeader(const std::string &contents);
+  void processHeaderLine(const std::string &line);
+  void processDateHeaderLine(const std::string &line);
+  void processTitleHeaderLine(const std::string &line);
+
+  // Sample log helper functions
+  Mantid::API::Algorithm_sptr
+  createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
+  template <class T> std::string vectorToString(const std::vector<T> &vector);
+  void addToSampleLog(const std::string &logName, const std::string &logText,
+                      DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const double &logNumber,
+                      DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const int &logNumber,
+                      DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName,
+                      const std::vector<double> &logSeries,
+                      DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName,
+                      const std::vector<int> &logSeries,
+                      DataObjects::Workspace2D_sptr &ws);
 
   // Temperature file processing
   void readInTemperatureFile(DataObjects::Workspace2D_sptr &ws);
