@@ -933,6 +933,42 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) {
   m_YUnit = newUnit;
 }
 
+/** Splits a string on the word "per" and replaces it with a Latex equivalent.
+ * E.g. "Counts per meV per hour" becomes "Counts (meV hour)$^{-1}$"
+ * If no "per"s are present leave the string as it is.
+ * @param yLabel :: The y-axis label
+ * @return std::string
+ */
+std::string replacePerWithLatex(std::string yLabel) {
+  std::vector<std::string> splitVec;
+  boost::split_regex(splitVec, yLabel, boost::regex(" per "));
+  if (splitVec.size() > 1) {
+    yLabel = splitVec[0];
+    splitVec.erase(splitVec.begin());
+    std::string unitString = boost::algorithm::join(splitVec, " ");
+    yLabel += " (" + unitString + ")$^{-1}$";
+  }
+  return yLabel;
+}
+
+/** Append the x-unit of the workspace to the y-unit label as a denominator
+* E.g. if a workspace has y-unit label "Counts" and x-unit meV, the y-unit label
+* becomes "Counts per angstrom". Or if useLatex is true "Counts per $\AA$"
+* @param yLabel :: The y-axis label
+* @param workspace :: Pointer to workspace
+* @param useLatex :: Boolean, if true use latex else use ascii
+*/
+std::string appendUnitDenominatorUsingPer(std::string yLabel,
+                                  const MatrixWorkspace *workspace,
+                                  bool useLatex) {
+  if (useLatex) {
+    yLabel += " per $" + workspace->getAxis(0)->unit()->label().latex() + "$";
+  } else {
+    yLabel += " per " + workspace->getAxis(0)->unit()->label().ascii();
+  }
+  return yLabel;
+}
+
 /// Returns a caption for the units of the data in the workspace
 std::string
 MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
@@ -943,36 +979,24 @@ MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
     // If the workspace is marked as a distribution its units are already
     // correct, if the workspace is not a distribution but is being plotted as
     // one we must adjust the unit
-    if (plotAsDistribution && !this->isDistribution()) {
-      if (useLatex) {
-        retVal += " per $" + this->getAxis(0)->unit()->label().latex() + "$";
-      } else {
-        retVal += " per " + this->getAxis(0)->unit()->label().ascii();
-      }
-    }
-    if (useLatex) {
-      std::vector<std::string> splitVec;
-      boost::split_regex(splitVec, retVal, boost::regex(" per "));
-      if (splitVec.size() > 1) {
-        retVal = splitVec[0];
-        splitVec.erase(splitVec.begin());
-        std::string unitString = boost::algorithm::join(splitVec, " ");
-        retVal += " (" + unitString + ")$^{-1}$";
-      }
-    }
+    if (plotAsDistribution && !this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
+
   } else {
     retVal = m_YUnit;
     // If this workspace is a distribution & has at least one axis & this axis
     // has its unit set then append that unit to the string to be returned
     if (!retVal.empty() && this->isDistribution() && this->axes() &&
         this->getAxis(0)->unit()) {
-      if (useLatex) {
-        retVal = retVal + " (" + this->getAxis(0)->unit()->label().latex() +
-                 ")$^{-1}$";
-      } else {
-        retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
+      retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
+    } else {
+      if (plotAsDistribution && !this->isDistribution()) {
+        retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
       }
     }
+  }
+  if (useLatex) {
+    retVal = replacePerWithLatex(retVal);
   }
   return retVal;
 }

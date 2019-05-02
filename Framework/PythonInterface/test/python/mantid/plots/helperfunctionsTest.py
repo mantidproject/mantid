@@ -193,9 +193,9 @@ class HelperFunctionsTest(unittest.TestCase):
         labels = funcs.get_axes_labels(ws)
         self.assertEqual(labels[0], 'Counts (microAmp.hour)$^{-1}$')
 
-    def test_y_units_for_distribution_and_autodist_off(self):
+    def test_y_units_for_distribution_and_autodist_off_with_latex(self):
         ws = self.ws2d_distribution
-        labels = funcs.get_axes_labels(ws, plot_as_dist=False)
+        labels = funcs.get_axes_labels(ws, plot_as_dist=False, use_latex=True)
         self.assertEqual(labels[0], 'Counts (microAmp.hour)$^{-1}$')
 
     def test_y_units_for_non_distribution_and_autodist_on_with_ascii(self):
