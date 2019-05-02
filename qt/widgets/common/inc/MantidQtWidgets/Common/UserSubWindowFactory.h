@@ -45,9 +45,8 @@ public:
   // Override createUnwrapped to search through the alias list
   UserSubWindow *createUnwrapped(const std::string &name) const override;
 
-  QSet<QString> getInterfaceCategories(const QString &interfaceName) const;
-
-  QStringList getUserSubWindowKeys() const;
+  QSet<QString> categories(const QString &interfaceName) const;
+  QStringList keys() const;
 
   template <typename TYPE> void subscribe();
 
@@ -77,9 +76,51 @@ private:
   QHash<QString, QSet<QString>> m_categoryLookup;
 };
 
+template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
+  std::string realName = TYPE::name();
+  Mantid::Kernel::DynamicFactory<UserSubWindow>::subscribe<TYPE>(realName);
+  saveAliasNames<TYPE>(realName);
+
+  // Make a record of each interface's categories.
+  const QStringList categories =
+      TYPE::categoryInfo().split(";", QString::SkipEmptyParts);
+  QSet<QString> result;
+  foreach (const QString category, categories) {
+    result.insert(category.trimmed());
+  }
+  m_categoryLookup[QString::fromStdString(realName)] = result;
+}
+
+/**
+ * Save the alias names of an interface
+ * @param realName :: The real name of the interface
+ */
+template <typename TYPE>
+void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
+  std::set<std::string> aliases = TYPE::aliases();
+  for (const auto &alias_std_str : aliases) {
+    QString alias = QString::fromStdString(alias_std_str);
+    if (m_aliasLookup.contains(alias)) {
+      if (m_badAliases.contains(alias)) {
+        QList<std::string> names = m_badAliases.value(alias);
+        names.append(realName);
+        m_badAliases[alias] = names;
+      } else {
+        QList<std::string> names;
+        names.append(m_aliasLookup.value(alias));
+        names.append(realName);
+        m_badAliases.insert(alias, names);
+      }
+      continue;
+    }
+    m_aliasLookup.insert(alias, realName);
+  }
+}
+
 /// The specific instantiation of the templated type
 using UserSubWindowFactory =
     Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
+
 } // namespace API
 } // namespace MantidQt
 
