@@ -13,6 +13,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -149,9 +150,8 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
 }
 
 /** Calculates the background by finding an average of the number of pixels each
- * side of the peak. This is done using the child algorithm
- * LRSubtractAverageBackground. The background is then subtracted from the input
- * workspace.
+ * side of the peak. This is done using the python LRSubtractAverageBackground.
+ * The background is then subtracted from the input workspace.
  *
  * @param inputWS :: the input workspace
  * @param indexRanges :: the ranges of the background region
@@ -159,28 +159,28 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
 void ReflectometryBackgroundSubtraction::subtractPixelBackground(
     MatrixWorkspace_sptr inputWS, std::vector<double> indexRanges) {
 
-  // this is needed becuase the algorithm LRSubtractAverageBackground replaces
-  // the InputWorkspace with the OutputWorkspace
-  MatrixWorkspace_sptr outputWS = inputWS->clone();
-  AnalysisDataService::Instance().addOrReplace(
-      getPropertyValue("OutputWorkspace"), outputWS);
+  const std::vector<int> backgroundRange{static_cast<int>(indexRanges.front()),
+                                         static_cast<int>(indexRanges.back())};
 
-  const std::string backgroundRange =
-      std::to_string(static_cast<int>(indexRanges.front())) + "," +
-      std::to_string(static_cast<int>(indexRanges.back()));
+  auto outputWSName = getPropertyValue("OutputWorkspace");
 
-  auto LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
+  MatrixWorkspace_sptr workspace = inputWS->clone();
+  AnalysisDataService::Instance().addOrReplace(outputWSName, workspace);
+  
+  IAlgorithm_sptr LRBgd = createChildAlgorithm("LRSubtractAverageBackground");
   LRBgd->initialize();
-  LRBgd->setProperty("InputWorkspace", outputWS);
+  LRBgd->setProperty("InputWorkspace", workspace);
   LRBgd->setProperty("LowResolutionRange",
                      getPropertyValue("IntegrationRange"));
   LRBgd->setProperty("PeakRange", getPropertyValue("PeakRange"));
-  LRBgd->setProperty("BackgroundRange", backgroundRange);
+  LRBgd->setProperty("BackgroundRange", Strings::toString(backgroundRange));
   LRBgd->setProperty("SumPeak", getPropertyValue("SumPeak"));
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
-  LRBgd->execute();
+  LRBgd->setProperty("OutputWorkspace", outputWSName);
+  LRBgd->executeAsChildAlg();
 
-  // Can only run once as doesn't override output!!!!! TODO::fix this
+  auto outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+  setProperty("OutputWorkspace", outputWS);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -316,6 +316,7 @@ ReflectometryBackgroundSubtraction::validateInputs() {
           "contain a more than one spectra for "
           "AveragePixelFit background subtraction";
     }
+
     auto numberOfypixels = inputWS->getNumberHistograms();
     if (backgroundType == "AveragePixelFit" &&
         (peakRange.front() < 0 || peakRange.back() > numberOfypixels - 1)) {
