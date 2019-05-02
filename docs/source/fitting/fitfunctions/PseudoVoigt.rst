@@ -17,16 +17,16 @@ Instead of convoluting those two functions, the Pseudo-Voigt function is defined
 
 Both functions share three parameters: Height (height of the peak at the maximum), PeakCentre (position of the maximum) and FWHM (full width at half maximum of the peak).
 
-Thus pseudo-voigt can be expressed in such way
+Thus the Pseudo-voigt function can be expressed as
 
 .. math:: pV(x) = I \cdot (\eta \cdot G'(x, \Gamma) + (1 - \eta) \cdot L'(x, \Gamma))
 
 where :math:`G'(x, \Gamma)` and `L'(x, \Gamma)` are normalized Gaussian and Lorentzian.
+And :math:`\Gamma` is FWHM.
 
-To be noticed that the Fullprof manual's way to define parameter names is following.
-:math:`\Gamma` is FWHM.  In some paper, :math:`H` is used for FWHM too.
-In the code, *gamma* will be used for FWHM.
-
+In Fullprof notation, :math:`H` is used for FHWM instead of :math:`\Gamma`.
+In the code, *gamma* is used for FWHM in order to avoid confusion with peak height :math:`h`.
+To be in line with it, we prefer to use :math:`\Gamma` for FWHM here.
 
 
 Native peak parameters
@@ -115,19 +115,29 @@ For Lorentzian part:
 .. math:: t_4 = \frac{\Gamma}{2\pi}\frac{-1}{[(x-x_0)^2 + (\Gamma/2)^2]^2} \frac{\Gamma}{2} = -\pi[L'(x, \Gamma)]^2
 
 
-Estimation of peak parameters
-+++++++++++++++++++++++++++++
+Set peak parameters
++++++++++++++++++++
 
-- Peak width (FWHM :math:`\Gamma`)
+Peak parameters can be estimated from observation.
+But some peak parameters are correlated, because peak height is not a basic parameter of Pseudo-voigt.
 
-- Peak intensity
+Here is the summary:
 
-- Peak height
+- Peak width (FWHM :math:`\Gamma`): Peak height will be re-calculated.
 
-- Peak centre
+- Peak intensity: Peak height will be re-calculated.
 
-- Mixing parameter :math:`\eta` then can be estimated by peak width, intensity and height at estimated peak centre. 
+- Peak height: Peak intensity,  mixing pamameter or FWHM can be re-calculated depending on user's choice.
 
+- Peak centre: No other parameter will be affected.
+
+- Mixing parameter :math:`\eta`: Peak height will be re-calculated. 
+
+
+Estimating mixing parameter
++++++++++++++++++++++++++++
+
+Mixing parameter :math:`eta` can be estimated from the observed value of peak's height, FWHM and intensity.
 
 
 About previous implementation
