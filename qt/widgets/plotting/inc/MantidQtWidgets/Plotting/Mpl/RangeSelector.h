@@ -23,8 +23,16 @@ class EXPORT_OPT_MANTIDQT_PLOTTING RangeSelector : public QObject {
 public:
   enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
-    RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
-                  bool visible = true, bool infoOnly = false);
+  RangeSelector(PreviewPlot *plot, SelectType type = XMINMAX,
+                bool visible = true, bool infoOnly = false);
+
+  /// convenience overload
+  void setRange(const std::pair<double, double> &range);
+
+public slots:
+  void setRange(const double min, const double max);
+  void setMinimum(double value);
+  void setMaximum(double value);
 };
 
 } // namespace MantidWidgets

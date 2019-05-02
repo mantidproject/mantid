@@ -250,6 +250,7 @@ set(SRC_FILES
     ApplyAbsorptionCorrections.cpp
     CalculatePaalmanPings.cpp
     ContainerSubtraction.cpp
+    CorrectionsTab.cpp
     IndirectCorrections.cpp
     IndirectTab.cpp)
 
@@ -258,6 +259,7 @@ set(MOC_FILES
   ApplyAbsorptionCorrections.h
   CalculatePaalmanPings.h
   ContainerSubtraction.h
+  CorrectionsTab.h
   IndirectCorrections.h
   IndirectTab.h)
 

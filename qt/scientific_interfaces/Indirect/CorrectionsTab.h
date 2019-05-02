@@ -11,8 +11,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-class QwtPlotCurve;
-class QwtPlot;
 class QSettings;
 class QString;
 
@@ -88,8 +86,7 @@ protected:
   std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws,
                                   const std::string &unitID,
                                   const std::string &suffix = "UNIT",
-                                  std::string eMode = "");
-  /// Displays and logs the error for a workspace with an invalid type
+                                  std::string eMode = ""); /// Displays and logs the error for a workspace with an invalid type
   void displayInvalidWorkspaceTypeError(const std::string &workspaceName,
                                         Mantid::Kernel::Logger &log);
 

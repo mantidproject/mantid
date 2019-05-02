@@ -43,6 +43,7 @@ set ( QWT_MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( QWT_INC_FILES
+  inc/MantidQtWidgets/Plotting/AxisID.h
   inc/MantidQtWidgets/Plotting/DllOption.h
   inc/MantidQtWidgets/Plotting/Qwt/PreviewPlot.h
   inc/MantidQtWidgets/Plotting/Qwt/MantidQwtWorkspaceData.h
@@ -149,6 +150,7 @@ set(MPL_MOC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set(MPL_INC_FILES
     ${MPL_MOC_FILES}
+    inc/MantidQtWidgets/Plotting/AxisID.h
     inc/MantidQtWidgets/Plotting/PreviewPlot.h
 )
 

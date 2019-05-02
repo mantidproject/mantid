@@ -195,11 +195,11 @@ QStringList PreviewPlot::getShownErrorBars() {
  * @param range Pair of values for range
  * @param axisID ID of axis
  */
-void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID) {
+void PreviewPlot::setAxisRange(QPair<double, double> range, AxisID axisID) {
   if (range.first > range.second)
     throw std::runtime_error("Supplied range is invalid.");
 
-  m_uiForm.plot->setAxisScale(axisID, range.first, range.second);
+  m_uiForm.plot->setAxisScale(toQwtAxis(axisID), range.first, range.second);
   emit needToReplot();
 }
 
@@ -530,7 +530,7 @@ void PreviewPlot::resizeX() {
       high = range.second;
   }
 
-  setAxisRange(qMakePair(low, high), QwtPlot::xBottom);
+  setAxisRange(qMakePair(low, high), AxisID::XBottom);
 }
 
 /**

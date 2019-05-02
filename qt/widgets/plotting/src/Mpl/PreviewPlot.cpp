@@ -13,14 +13,14 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : QWidget(parent) {}
 
 void PreviewPlot::addSpectrum(const QString &curveName,
                               const Mantid::API::MatrixWorkspace_sptr &ws,
-                              const size_t wsIndex = 0,
-                              const QColor &curveColour = QColor()) {
+                              const size_t wsIndex,
+                              const QColor &curveColour) {
   throw std::runtime_error("addSpectrum1 unimplemented");
 }
 
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
-                              const size_t wsIndex = 0,
-                              const QColor &curveColour = QColor()) {
+                              const size_t wsIndex,
+                              const QColor &curveColour) {
   throw std::runtime_error("addSpectrum2 unimplemented");
 }
 
@@ -28,7 +28,7 @@ void PreviewPlot::removeSpectrum(const QString &curveName) {
   throw std::runtime_error("removeSpectrum unimplemented");
 }
 
-void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID) {
+void PreviewPlot::setAxisRange(QPair<double, double> range, AxisID axisID) {
   throw std::runtime_error("setAxisRange unimplemented");
 }
 

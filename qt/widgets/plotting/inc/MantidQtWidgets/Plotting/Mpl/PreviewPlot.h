@@ -7,7 +7,7 @@
 #ifndef MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_
 #define MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_
 
-#include "MantidQtWidgets/Plotting/Axis.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -35,7 +35,7 @@ public:
                    const QColor &curveColour = QColor());
   void removeSpectrum(const QString &curveName);
   void setAxisRange(QPair<double, double> range,
-                    int axisID = static_cast<int>(Axis::XBottom));
+                    AxisID axisID = AxisID::XBottom);
 
 public slots:
   void clear();

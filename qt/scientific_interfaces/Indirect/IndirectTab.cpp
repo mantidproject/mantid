@@ -670,7 +670,7 @@ void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
 void IndirectTab::resizePlotRange(MantidWidgets::PreviewPlot *preview,
                                   QPair<double, double> range) {
   preview->resizeX();
-  preview->setAxisRange(range, QwtPlot::yLeft);
+  preview->setAxisRange(range, AxisID::YLeft);
 }
 
 /**
