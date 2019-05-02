@@ -90,6 +90,16 @@ class subplotContext(object):
                 label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
             self._lines[label] = [line]
 
+    def replace_ws(self,ws):
+        redraw_canvas = False
+        for key in self._ws.keys():
+            if key.name() == ws.name():
+               redraw_canvas = True
+               self._ws[ws] = self._ws.pop(key)
+               for label in self._ws[ws]:
+                   self.redraw(label)
+        return redraw_canvas
+
     def change_errors(self, state):
         self._errors = state
         for label in list(self._lines.keys()):

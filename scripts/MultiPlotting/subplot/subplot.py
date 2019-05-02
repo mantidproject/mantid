@@ -266,3 +266,10 @@ class subplot(QtWidgets.QWidget):
                   self.canvas.draw()
              if self._context.is_subplot_empty(subplot):
                 self._remove_subplot(subplot)
+
+    def _replaced_ws(self,workspace):
+        keys = deepcopy(self._context.subplots.keys())
+        for subplot in keys:
+              redraw = self._context.subplots[subplot].replace_ws(workspace)
+              if redraw:
+                  self.canvas.draw()
