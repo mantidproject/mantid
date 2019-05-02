@@ -12,20 +12,10 @@ Reflectometry Changes
 Algorithms
 ----------
 
-New
-###
-
 Improvements
 ############
 
 - An additional method to calculate background has been added to :ref:`algm-ReflectometryBackgroundSubtraction`.
-
-Bug fixes
-#########
-
-
-Algorithms
-----------
 
 Bug fixes
 #########
