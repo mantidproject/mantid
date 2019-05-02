@@ -20,7 +20,7 @@ public:
   IndirectSettingsModel();
   virtual ~IndirectSettingsModel() = default;
 
-  std::string const &getSettingsGroup() const;
+  virtual std::string getSettingsGroup() const;
 
   virtual void setFacility(std::string const &facility);
   virtual std::string getFacility() const;

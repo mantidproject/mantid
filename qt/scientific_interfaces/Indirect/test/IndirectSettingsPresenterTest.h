@@ -14,7 +14,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
-using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -23,10 +23,6 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockIIndirectSettingsView : public IIndirectSettingsView {
 public:
   /// Signals
-  void emitUpdateRestrictInputByName(std::string const &text) {
-    emit updateRestrictInputByName(text);
-  }
-
   void emitOkClicked() { emit okClicked(); }
 
   void emitApplyClicked() { emit applyClicked(); }
@@ -66,9 +62,6 @@ public:
   /// Public methods
   MOCK_CONST_METHOD0(getSettingsGroup, std::string());
 
-  MOCK_CONST_METHOD0(hasInterfaceSettings, bool());
-  MOCK_CONST_METHOD1(isSettingAvailable, bool(std::string const &settingName));
-
   MOCK_METHOD1(setFacility, void(std::string const &settingName));
   MOCK_CONST_METHOD0(getFacility, std::string());
 };
@@ -104,7 +97,7 @@ public:
 
   void
   test_that_calling_a_presenter_method_will_invoke_the_relevant_view_and_model_methods() {
-    QString const settingGroup("Data Analysis");
+    QString const settingGroup("Indirect Settings");
     checkForLoadingOfSettings(settingGroup);
   }
 
@@ -112,20 +105,8 @@ public:
   /// Unit Tests that test the views signals invoke the correct methods
   ///----------------------------------------------------------------------
 
-  void
-  test_that_the_updateRestrictInputByName_signal_will_set_the_input_data_to_be_restricted_when_passed_ISIS() {
-    EXPECT_CALL(*m_view, setRestrictInputByNameChecked(true)).Times(1);
-    m_view->emitUpdateRestrictInputByName("ISIS");
-  }
-
-  void
-  test_that_the_updateRestrictInputByName_signal_will_set_the_input_data_to_be_unrestricted_when_not_passed_ISIS() {
-    EXPECT_CALL(*m_view, setRestrictInputByNameChecked(false)).Times(1);
-    m_view->emitUpdateRestrictInputByName("ILL");
-  }
-
   void test_that_the_okClicked_signal_will_attempt_to_save_the_settings() {
-    QString const settingGroup("Data Analysis");
+    QString const settingGroup("Indirect Settings");
 
     checkForSavingOfSettings(settingGroup);
 
@@ -133,7 +114,7 @@ public:
   }
 
   void test_that_the_applyClicked_signal_will_attempt_to_save_the_settings() {
-    QString const settingGroup("Data Analysis");
+    QString const settingGroup("Indirect Settings");
 
     checkForSavingOfSettings(settingGroup);
 
@@ -160,12 +141,12 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_loadSettings_will_attempt_to_load_the_relevant_settings() {
-    QString const settingGroup("Data Analysis");
+    QString const settingGroup("Indirect Settings");
     checkForLoadingOfSettings(settingGroup);
   }
 
   void test_that_getSetting_will_attempt_to_get_a_setting_from_the_view() {
-    QString const settingGroup("Data Analysis");
+    QString const settingGroup("Indirect Settings");
     std::string const settingName("plot-error-bars");
 
     ON_CALL(*m_model, getSettingsGroup())
@@ -188,12 +169,11 @@ public:
 
 private:
   void checkForLoadingOfSettings(QString const &settingGroup) {
-    ON_CALL(*m_model, isSettingAvailable("restrict-input-by-name"))
-        .WillByDefault(Return(true));
-    ON_CALL(*m_model, isSettingAvailable("plot-error-bars"))
-        .WillByDefault(Return(true));
+    std::string const facility("ISIS");
+
     ON_CALL(*m_model, getSettingsGroup())
         .WillByDefault(Return(settingGroup.toStdString()));
+    ON_CALL(*m_model, getFacility()).WillByDefault(Return(facility));
     ON_CALL(*m_view,
             getSetting(settingGroup, QString("restrict-input-by-name")))
         .WillByDefault(Return(true));
@@ -201,14 +181,14 @@ private:
         .WillByDefault(Return(true));
 
     ExpectationSet expectations =
-        EXPECT_CALL(*m_model, isSettingAvailable("restrict-input-by-name"))
-            .Times(1)
-            .WillOnce(Return(true));
+        EXPECT_CALL(*m_model, getFacility()).WillOnce(Return(facility));
+    expectations +=
+        EXPECT_CALL(*m_view,
+                    setSelectedFacility(QString::fromStdString(facility)))
+            .Times(1);
     expectations +=
         EXPECT_CALL(*m_view, setRestrictInputByNameChecked(true)).Times(1);
-    expectations += EXPECT_CALL(*m_model, isSettingAvailable("plot-error-bars"))
-                        .Times(1)
-                        .WillOnce(Return(true));
+
     EXPECT_CALL(*m_view, setPlotErrorBarsChecked(true))
         .Times(1)
         .After(expectations);
@@ -217,22 +197,30 @@ private:
   }
 
   void checkForSavingOfSettings(QString const &settingGroup) {
+    std::string const facility("ISIS");
+
     ON_CALL(*m_model, getSettingsGroup())
         .WillByDefault(Return(settingGroup.toStdString()));
-    ON_CALL(*m_model, isSettingAvailable("restrict-input-by-name"))
-        .WillByDefault(Return(false));
-    ON_CALL(*m_model, isSettingAvailable("plot-error-bars"))
-        .WillByDefault(Return(false));
+    ON_CALL(*m_view, getSelectedFacility())
+        .WillByDefault(Return(QString::fromStdString(facility)));
+    ON_CALL(*m_view, isRestrictInputByNameChecked())
+        .WillByDefault(Return(true));
+    ON_CALL(*m_view, isPlotErrorBarsChecked()).WillByDefault(Return(true));
 
     EXPECT_CALL(*m_model, getSettingsGroup())
         .Times(1)
         .WillOnce(Return(settingGroup.toStdString()));
-    EXPECT_CALL(*m_model, isSettingAvailable("restrict-input-by-name"))
-        .Times(1)
-        .WillOnce(Return(false));
-    EXPECT_CALL(*m_model, isSettingAvailable("plot-error-bars"))
-        .Times(1)
-        .WillOnce(Return(false));
+
+    Expectation expectation =
+        EXPECT_CALL(*m_view, getSelectedFacility()).Times(1);
+    EXPECT_CALL(*m_model, setFacility(facility)).Times(1).After(expectation);
+
+    EXPECT_CALL(*m_view, setSetting(settingGroup,
+                                    QString("restrict-input-by-name"), true))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setSetting(settingGroup, QString("plot-error-bars"), true))
+        .Times(1);
   }
 
   MockIIndirectSettingsView *m_view;

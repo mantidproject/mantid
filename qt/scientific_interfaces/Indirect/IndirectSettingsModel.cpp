@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 IndirectSettingsModel::IndirectSettingsModel()
     : m_settingsGroup("Indirect Settings") {}
 
-std::string const &IndirectSettingsModel::getSettingsGroup() const {
+std::string IndirectSettingsModel::getSettingsGroup() const {
   return m_settingsGroup;
 }
 
