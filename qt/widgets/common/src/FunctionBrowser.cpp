@@ -284,14 +284,16 @@ void FunctionBrowser::clearErrors() {
 }
 
 QStringList FunctionBrowser::getGlobalParameters() const {
-  return QStringList();
+  return m_presenter->getGlobalParameters();
 }
 
 QStringList FunctionBrowser::getLocalParameters() const {
   return QStringList();
 }
 
-void FunctionBrowser::setGlobalParameters(QStringList &globals) {}
+void FunctionBrowser::setGlobalParameters(const QStringList &globals) {
+  m_presenter->setGlobalParameters(globals);
+}
 
 boost::optional<QString> FunctionBrowser::currentFunctionIndex() {
   return m_presenter->currentFunctionIndex();

@@ -58,8 +58,21 @@ void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
 
 IFunction_sptr MultiDomainFunctionModel::getFitFunction() const
 {
-  if (!m_function || m_function->nFunctions() > 1) {
+  if (!m_function) {
     return m_function;
+  }
+  if (m_function->nFunctions() > 1) {
+    auto fun = boost::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+    auto const n = m_function->nFunctions();
+    for (auto const par : m_globalParameterNames) {
+      QStringList ties;
+      for (size_t i = 1; i < n; ++i) {
+        ties << "f" + QString::number(i) + "." + par;
+      }
+      ties << "f0." + par;
+      fun->addTies(ties.join("=").toStdString());
+    }
+    return fun;
   }
   if (m_function->nFunctions() == 1) {
     auto fun = m_function->getFunction(0);
@@ -339,6 +352,26 @@ void MultiDomainFunctionModel::addConstraint(const QString &functionIndex, const
 void MultiDomainFunctionModel::removeConstraint(const QString & paramName)
 {
   getCurrentFunction()->removeConstraint(paramName.toStdString());
+}
+
+QStringList MultiDomainFunctionModel::getGlobalParameters() const
+{
+  return m_globalParameterNames;
+}
+
+void MultiDomainFunctionModel::setGlobalParameters(const QStringList & globals)
+{
+  m_globalParameterNames = globals;
+}
+
+QStringList MultiDomainFunctionModel::getLocalParameters() const
+{
+  QStringList locals;
+  for (auto const name : getParameterNames()) {
+    if (!m_globalParameterNames.contains(name))
+      locals << name;
+  }
+  return locals;
 }
 
 /// Check a domain/function index to be in range.

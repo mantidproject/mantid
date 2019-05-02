@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRENTERTEST_H_
-#define MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRENTERTEST_H_
+#ifndef MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
+#define MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
 
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
@@ -124,15 +124,15 @@ private:
   bool m_areErrorsEnabled{ true };
 };
 
-class FunctionMultiDomainPrenterTest : public CxxTest::TestSuite {
+class FunctionMultiDomainPresenterTest : public CxxTest::TestSuite {
 
 public:
-  static FunctionMultiDomainPrenterTest *createSuite() {
-    return new FunctionMultiDomainPrenterTest;
+  static FunctionMultiDomainPresenterTest *createSuite() {
+    return new FunctionMultiDomainPresenterTest;
   }
-  static void destroySuite(FunctionMultiDomainPrenterTest *suite) { delete suite; }
+  static void destroySuite(FunctionMultiDomainPresenterTest *suite) { delete suite; }
 
-  FunctionMultiDomainPrenterTest() {
+  FunctionMultiDomainPresenterTest() {
     // To make sure API is initialized properly
     FrameworkManager::Instance();
   }
@@ -426,8 +426,10 @@ public:
     TS_ASSERT_EQUALS(ffun->getNumberDomains(), 5);
     QList<int> indices; indices << 2 << 4 << 1;
     presenter.removeDatasets(indices);
+    ffun = presenter.getFitFunction();
     TS_ASSERT_EQUALS(ffun->getNumberDomains(), 2);
     TS_ASSERT_EQUALS(ffun->nFunctions(), 2);
+    TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 2);
   }
 
   void test_replace_function() {
@@ -485,6 +487,32 @@ public:
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
   }
 
+  void test_set_globals() {
+    auto view = make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString("name=LinearBackground");
+    presenter.setNumberOfDatasets(3);
+    QStringList globals("A1");
+    presenter.setGlobalParameters(globals);
+    auto fun = presenter.getFitFunction();
+    TS_ASSERT(!fun->getTie(1));
+    TS_ASSERT_EQUALS(fun->getTie(3)->asString(), "f1.A1=f0.A1");
+    TS_ASSERT_EQUALS(fun->getTie(5)->asString(), "f2.A1=f0.A1");
+    auto locals = presenter.getLocalParameters();
+    TS_ASSERT_EQUALS(locals[0], "A0");
+    globals.clear();
+    globals << "A0";
+    presenter.setGlobalParameters(globals);
+    fun = presenter.getFitFunction();
+    TS_ASSERT(!fun->getTie(0));
+    TS_ASSERT(!fun->getTie(1));
+    TS_ASSERT(!fun->getTie(3));
+    TS_ASSERT(!fun->getTie(5));
+    TS_ASSERT_EQUALS(fun->getTie(2)->asString(), "f1.A0=f0.A0");
+    TS_ASSERT_EQUALS(fun->getTie(4)->asString(), "f2.A0=f0.A0");
+    locals = presenter.getLocalParameters();
+    TS_ASSERT_EQUALS(locals[0], "A1");
+  }
 };
 
-#endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRENTERTEST_H_
+#endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_

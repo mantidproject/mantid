@@ -106,6 +106,8 @@ public:
   boost::optional<QString> currentFunctionIndex() const override;
   /// Set a tie
   void setParameterTie(const QString &paramName, const QString &tie) override;
+  /// Get a list of global parameters
+  QStringList getGlobalParameters() const;
 
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr, bool attributesOnly = false);

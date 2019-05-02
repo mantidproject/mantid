@@ -60,7 +60,8 @@ signals:
   void parameterConstraintRemoved(const QString &paramName);
   /// User requested copy function to clipboard
   void copyToClipboardRequest();
-  void globalsChanged();
+  /// User changed the list of global parameters.
+  void globalsChanged(const QStringList&);
 };
 
 } // namespace MantidWidgets

@@ -72,7 +72,7 @@ public:
   void updateParameters(const IFunction &fun) override;
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
-  void setGlobalParameters(QStringList &globals);
+  void setGlobalParameters(const QStringList &globals);
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets

@@ -36,6 +36,7 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
   connect(m_view, SIGNAL(parameterConstraintRemoved(const QString &)), this, SLOT(viewRemovedConstraint(const QString &)));
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this, SLOT(editLocalParameter(const QString &)));
   connect(m_view, SIGNAL(copyToClipboardRequest()), this, SLOT(viewRequestedCopyToClipboard()));
+  connect(m_view, SIGNAL(globalsChanged(const QStringList&)), this, SLOT(viewChangedGlobals(const QStringList&)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun)
@@ -228,6 +229,21 @@ void FunctionMultiDomainPresenter::setLocalParameterTie(const QString & parName,
   }
 }
 
+QStringList FunctionMultiDomainPresenter::getGlobalParameters() const
+{
+  return m_model->getGlobalParameters();
+}
+
+void FunctionMultiDomainPresenter::setGlobalParameters(const QStringList & globals)
+{
+  m_model->setGlobalParameters(globals);
+}
+
+QStringList FunctionMultiDomainPresenter::getLocalParameters() const
+{
+  return m_model->getLocalParameters();
+}
+
 void FunctionMultiDomainPresenter::viewPastedFunction(const QString & funStr)
 {
   m_model->setFunctionString(funStr);
@@ -267,6 +283,11 @@ void FunctionMultiDomainPresenter::viewRequestedCopyToClipboard()
   if (fun) {
     QApplication::clipboard()->setText(QString::fromStdString(fun->asString()));
   }
+}
+
+void FunctionMultiDomainPresenter::viewChangedGlobals(const QStringList & globalParameters)
+{
+  m_model->setGlobalParameters(globalParameters);
 }
 
 QString FunctionMultiDomainPresenter::getFunctionString() const

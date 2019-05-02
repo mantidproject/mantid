@@ -82,6 +82,33 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter("f1.A1"), 2.0);
     }
   }
+
+  void test_globals() {
+    MultiDomainFunctionModel model;
+    model.setFunctionString("name=LinearBackground,A0=1,A1=2");
+    model.setNumberDomains(3);
+    QStringList globals("A1");
+    model.setGlobalParameters(globals);
+    auto fun = model.getFitFunction();
+    TS_ASSERT(!fun->getTie(1));
+    TS_ASSERT_EQUALS(fun->getTie(3)->asString(), "f1.A1=f0.A1");
+    TS_ASSERT_EQUALS(fun->getTie(5)->asString(), "f2.A1=f0.A1");
+    auto locals = model.getLocalParameters();
+    TS_ASSERT_EQUALS(locals[0], "A0");
+    globals.clear();
+    globals << "A0";
+    model.setGlobalParameters(globals);
+    fun = model.getFitFunction();
+    TS_ASSERT(!fun->getTie(0));
+    TS_ASSERT(!fun->getTie(1));
+    TS_ASSERT(!fun->getTie(3));
+    TS_ASSERT(!fun->getTie(5));
+    TS_ASSERT_EQUALS(fun->getTie(2)->asString(), "f1.A0=f0.A0");
+    TS_ASSERT_EQUALS(fun->getTie(4)->asString(), "f2.A0=f0.A0");
+    locals = model.getLocalParameters();
+    TS_ASSERT_EQUALS(locals[0], "A1");
+  }
+
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONMODELTEST_H_

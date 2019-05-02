@@ -61,6 +61,9 @@ public:
   void setLocalParameterValue(const QString &parName, int i, double value, double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, QString tie);
+  QStringList getGlobalParameters() const;
+  void setGlobalParameters(const QStringList &globals);
+  QStringList getLocalParameters() const;
 
   void setColumnSizes(int s0, int s1, int s2);
   void setErrorsEnabled(bool enabled);
@@ -76,6 +79,7 @@ private slots:
   void viewAddedConstraint(const QString &functionIndex, const QString &constraint);
   void viewRemovedConstraint(const QString &parName);
   void viewRequestedCopyToClipboard();
+  void viewChangedGlobals(const QStringList&globalParameters);
   void editLocalParameter(const QString &parName);
   void editLocalParameterFinish(int result);
 private:

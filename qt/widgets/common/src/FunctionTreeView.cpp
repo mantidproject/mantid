@@ -1819,7 +1819,7 @@ void FunctionTreeView::setColumnSizes(int s0, int s1, int s2) {
  * Emit a signal when any of the Global options change.
  */
 void FunctionTreeView::globalChanged(QtProperty *, const QString &, bool) {
-  emit globalsChanged();
+  emit globalsChanged(getGlobalParameters());
 }
 
 /**
@@ -1865,6 +1865,17 @@ void FunctionTreeView::setParameterTie(const QString &paramName, const QString &
   } else if (tieProp) {
     removeProperty(tieProp);
   }
+}
+
+QStringList FunctionTreeView::getGlobalParameters() const {
+  QStringList globals;
+  for (auto prop : m_properties) {
+    if (prop.prop->checkOption(globalOptionName)) {
+      auto const name = getParameterName(prop.prop);
+      globals << name;
+    }
+  }
+  return globals;
 }
 
 QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const

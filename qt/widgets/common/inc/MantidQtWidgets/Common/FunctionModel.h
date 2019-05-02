@@ -47,6 +47,9 @@ namespace MantidWidgets {
     virtual void changeTie(const QString & paramName, const QString & tie) = 0;
     virtual void addConstraint(const QString &functionIndex, const QString &constraint) = 0;
     virtual void removeConstraint(const QString &paramName) = 0;
+    virtual QStringList getGlobalParameters() const = 0;
+    virtual void setGlobalParameters(const QStringList &globals) = 0;
+    virtual QStringList getLocalParameters() const = 0;
   };
 
   class EXPORT_OPT_MANTIDQT_COMMON MultiDomainFunctionModel : public IFunctionModel {
@@ -83,12 +86,16 @@ namespace MantidWidgets {
     void changeTie(const QString & parName, const QString & tie);
     void addConstraint(const QString &functionIndex, const QString &constraint) override;
     void removeConstraint(const QString &paramName) override;
+    QStringList getGlobalParameters() const override;
+    void setGlobalParameters(const QStringList &globals) override;
+    QStringList getLocalParameters() const override;
   private:
     void checkIndex(int) const;
     MultiDomainFunction_sptr m_function;
     size_t m_currentDomainIndex = 0;
     size_t m_numberDomains = 0;
     mutable QStringList m_datasetNames;
+    QStringList m_globalParameterNames;
   };
 
 } // namespace MantidWidgets
