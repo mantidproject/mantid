@@ -18,7 +18,7 @@ namespace {
  * @param gamma :: FWHM
  * @return
  */
-inline constexpr double cal_ag(const double gamma) {
+inline double cal_ag(const double gamma) {
   const double ag = 2. / gamma * std::sqrt(M_LN2 / M_PI);
   return ag;
 }
@@ -38,8 +38,8 @@ inline constexpr double cal_bg(const double gamma) {
  * @param xdiffsq : (x - x0)**2
  * @return
  */
-inline constexpr double cal_gaussian(const double ag, const double bg,
-                                     const double xdiffsq) {
+inline double cal_gaussian(const double ag, const double bg,
+                           const double xdiffsq) {
   const double gaussian = ag * std::exp(-bg * xdiffsq);
   return gaussian;
 }
