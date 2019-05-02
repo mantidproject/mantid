@@ -24,6 +24,7 @@ Improvements
 ############
 
 - Changed focus to save out .his files in the format <run-number><instrument> as opposed to <run-number>_<instrument> to allow for better compatibility with opengenie.
+- Added sample environment file for POWGEN that includes many of the standard sample containers
 
 Bug Fixes
 #########
