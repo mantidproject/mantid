@@ -8,13 +8,15 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS"]
-allowed_extensions = ["nxs"]
+allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
+allowed_extensions = ["nxs", "bin"]
 FILE_SEP = os.sep
 
 
 def filter_for_extensions(extensions):
     """Filter for file browser"""
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('localhost', port=8000, stdoutToServer=True, stderrToServer=True)
     str_list = ["*." + str(ext) for ext in extensions]
     return "Files (" + ", ".join(str_list) + ")"
 

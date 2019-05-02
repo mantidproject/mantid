@@ -218,14 +218,20 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
-        load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
+        if load_result["DeadTimeTable"] is not None:
+            load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
+        else:
+            load_result["DataDeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
-        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        if load_result["DeadTimeTable"] is not None:
+            load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        else:
+            load_result["DataDeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
 
     load_result["DeadTimeTable"] = None
@@ -240,7 +246,12 @@ def empty_loaded_data():
 
 
 def create_load_algorithm(filename, property_dictionary):
-    alg = mantid.AlgorithmManager.create("LoadMuonNexus")
+    # Assume if .bin it is a PSI file
+    if ".bin" in filename:
+        alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
+    else:
+        alg = mantid.AlgorithmManager.create("LoadMuonNexus")
+
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
