@@ -255,13 +255,13 @@ class SummationConfigurationTest(SelectionMockingTestCase):
                                          'LOQ00003-add')
 
     def test_shows_error_when_empty_default_directory(self):
-        ConfigService["defaultsave.directory"] = ""
         summation_settings_model = self._summation_settings_with_save_directory('')
         self._summation_settings_presenter.settings.return_value = summation_settings_model
         self.presenter = self._make_presenter(
             mock.Mock(),
             self._just_use_run_selector_presenter(),
             self._just_use_summation_settings_presenter())
+        self.presenter.save_directory = ""
 
         self.view.sum.emit()
         assert_called(self.view.no_save_directory)
@@ -443,12 +443,13 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
     def test_that_presenter_calls_properties_handler_to_update_directory_on_directory_changed(self):
         new_dir_name = os.path.join("some", "dir", "path")
         self.presenter._view.display_save_directory_box = mock.Mock(return_value=new_dir_name)
-        self.presenter.gui_properties_handler.update_default = mock.Mock()
+        self.presenter.gui_properties_handler.set_setting = mock.Mock()
         self.presenter.set_output_directory = mock.Mock()
 
         self.presenter._handle_output_directory_changed()
-        self.presenter.gui_properties_handler.update_default.assert_called_once_with("add_runs_output_directory",
-                                                                                     new_dir_name + os.sep)
+        self.presenter.gui_properties_handler.set_setting.assert_called_once_with("add_runs_output_directory",
+                                                                                  new_dir_name + os.sep)
+        self.presenter.set_output_directory.assert_called_once_with(new_dir_name + os.sep)
 
     def test_that_if_output_directory_is_empty_default_save_directory_is_used_instead(self):
         default_dir = os.path.join("default", "save", "directory")
@@ -461,6 +462,14 @@ class AddRunsDefaultSettingsTest(unittest.TestCase):
                          "Because directory input was an empty string, we expected the output directory "
                          "to use the default save directory {} instead. "
                          "Directory actually used was {}".format(default_dir, output_dir))
+        self.assertEqual(self.presenter.save_directory, default_dir)
+
+    def test_that_if_output_directory_is_not_empty_it_is_used(self):
+        dir = os.path.join("a", "save", "directory")
+        output_dir = self.presenter.set_output_directory(dir)
+
+        self.assertEqual(output_dir, dir)
+        self.assertEqual(self.presenter.save_directory, dir)
 
 
 if __name__ == '__main__':
