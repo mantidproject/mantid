@@ -11,13 +11,13 @@ import mantid.simpleapi as mantid
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, get_base_data_directory
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
+    get_base_data_directory
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class FFTPresenter(object):
-
     """
     This class links the FFT model to the GUI
     """
@@ -164,6 +164,7 @@ class FFTPresenter(object):
         if self.view.imaginary_data:
             if 'PhaseQuad' in self.view.workspace:
                 imaginary_workspace_input = real_workspace_input
+                imaginary_workspace_padding_parameters['InputWorkspace'] = real_workspace_padding_parameters['InputWorkspace']
                 imaginary_workspace_index = 1
             else:
                 imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
@@ -174,11 +175,13 @@ class FFTPresenter(object):
 
         frequency_domain_workspace = run_FFT(fft_parameters)
 
-        self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'], frequency_domain_workspace)
+        self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
+                                      imaginary_workspace_padding_parameters['InputWorkspace'],
+                                      frequency_domain_workspace)
 
-    def add_fft_workspace_to_ADS(self, input_workspace, fft_workspace):
+    def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
         run = re.search('[0-9]+', input_workspace).group()
-        fft_workspace_name = get_fft_workspace_name(input_workspace)
+        fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument)
         directory = get_base_data_directory(self.load, run) + group
 

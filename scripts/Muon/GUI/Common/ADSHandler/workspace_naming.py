@@ -98,10 +98,6 @@ def get_pair_data_directory(context, run):
         return context.data_context._base_run_name(run) + " Pairs/"
 
 
-# def get_phase_quad_workspace_name(context, run, period):
-#     return get_raw_data_workspace_name(context, run, period=str(period)) + " (PhaseQuad)"
-
-
 def calculate_base_name_and_group_for_phase_table(context, table_name):
     run = re.search('[0-9]+', table_name).group()
     base_name = table_name + '; ' + context.phase_context.options_dict['forward_group']
@@ -119,7 +115,7 @@ def calculate_base_name_and_group_for_phase_table(context, table_name):
 
 def calculate_base_name_and_group_for_phasequad(context, input_workspace, phase_table):
     base_name = input_workspace.split('_')[0] + '; PhaseQuad; ' \
-                + phase_table
+        + phase_table
 
     run = re.search('[0-9]+', input_workspace).group()
     group = context.data_context._base_run_name(run) + ' PhaseTables'
@@ -147,7 +143,7 @@ def get_base_run_name(run, instrument):
 
 def get_phase_table_workspace_group_name(insertion_workspace_name, instrument):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group =  get_base_run_name(run, instrument) + ' PhaseTables/'
+    group = get_base_run_name(run, instrument) + ' PhaseTables/'
 
     return group
 
@@ -167,8 +163,8 @@ def get_fitting_workspace_name(base_name):
     return base_name + '; fit_information'
 
 
-def get_fft_workspace_name(input_workspace):
-    return input_workspace + '; FFT'
+def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
+    return 'FFT; Re ' + input_workspace + '; Im ' + imaginary_input_workspace
 
 
 def get_maxent_workspace_name(input_workspace):
@@ -177,6 +173,6 @@ def get_maxent_workspace_name(input_workspace):
 
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group =  get_base_run_name(run, instrument) + ' Maxent/'
+    group = get_base_run_name(run, instrument) + ' Maxent/'
 
     return group

@@ -199,6 +199,7 @@ class FFTPresenterTest(unittest.TestCase):
                                           'Imaginary': 1})
 
         self.presenter.add_fft_workspace_to_ADS.assert_called_once_with('MUSR22725_PhaseQuad_MUSR22725_phase_table',
+                                                                        'MUSR22725_PhaseQuad_MUSR22725_phase_table',
                                                                         fft_mock_return)
 
 
