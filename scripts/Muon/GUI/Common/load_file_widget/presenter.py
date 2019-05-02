@@ -45,7 +45,7 @@ class BrowseFileWidgetPresenter(object):
         self._multiple_file_mode = text
 
     def get_filenames_from_user(self):
-        file_filter = file_utils.filter_for_extensions(["nxs"])
+        file_filter = file_utils.filter_for_extensions(["bin", "nxs"])
         directory = ""
         filenames = self._view.show_file_browser_and_return_selection(file_filter, [directory],
                                                                       multiple_files=self._multiple_files)
