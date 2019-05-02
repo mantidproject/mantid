@@ -314,7 +314,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
         errorMessage.emplace(propName,
                              "Name '" + dimName +
                                  "' is not one of the "
-                                 "original workspace names or a Q dimension");
+                                 "original workspace names or a directional dimension");
       } else {
         // make sure dimension is unique
         auto itSel = std::find(selectedDimensions.begin(),
