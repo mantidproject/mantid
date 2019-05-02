@@ -87,11 +87,6 @@ void IndirectTransmission::transAlgDone(bool error) {
     return;
 
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_transmission";
-
-  WorkspaceGroup_sptr resultWsGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outWsName.toStdString());
 
   // Do plotting
   m_uiForm.ppPlot->clear();

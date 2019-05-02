@@ -82,6 +82,7 @@ def get_indices(md_workspace, **kwargs):
                 indices.append(slice(None))
             else:
                 indices.append(pointToIndex(md_workspace.getDimension(n), p))
+        indices = tuple(indices)
     elif 'indices' in kwargs:
         indices = kwargs.pop('indices')
         assert md_workspace.getNumDims() == len(indices), "indices provided do not match the dimensions of the workspace"

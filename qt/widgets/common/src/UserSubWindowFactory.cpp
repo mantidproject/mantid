@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------
 // Includes
 //-----------------------------------------------
-#include "MantidQtWidgets/Common/InterfaceFactory.h"
+#include "MantidQtWidgets/Common/UserSubWindowFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include <sstream>
@@ -68,8 +68,8 @@ UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
  *been registered,
  *          else an empty set.
  */
-QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(
-    const QString &interfaceName) const {
+QSet<QString>
+UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
   if (!m_categoryLookup.contains(interfaceName))
     return QSet<QString>();
 
@@ -112,4 +112,18 @@ UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
   } else {
     return nullptr;
   }
+}
+
+/**
+ * The keys associated with UserSubWindow classes
+ * @returns A QStringList containing the keys from the UserSubWindowFactory that
+ * refer to UserSubWindow classes
+ */
+QStringList UserSubWindowFactoryImpl::keys() const {
+  QStringList key_list;
+  const auto keys = getKeys();
+  for (const auto &key : keys) {
+    key_list.append(QString::fromStdString(key));
+  }
+  return key_list;
 }

@@ -24,8 +24,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "AlgorithmDialogFactory.h"
 #include "DllOption.h"
-#include "InterfaceFactory.h"
 
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here

@@ -25,32 +25,23 @@ public:
 
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
-    auto Loader = LoadAsciiStl(path);
+    auto Loader = LoadAsciiStl(path, units);
     auto cube = Loader.readStl();
-    TS_ASSERT(cube->hasValidShape());
-    TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
-    TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
-    TS_ASSERT_DELTA(cube->volume(), 3000, 0.001);
+    assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
   void test_cylinder() {
     std::string path = FileFinder::Instance().getFullPath("cylinder.stl");
-    auto Loader = LoadAsciiStl(path);
+    auto Loader = LoadAsciiStl(path, units);
     auto cylinder = Loader.readStl();
-    TS_ASSERT(cylinder->hasValidShape());
-    TS_ASSERT_EQUALS(cylinder->numberOfVertices(), 722);
-    TS_ASSERT_EQUALS(cylinder->numberOfTriangles(), 1440);
-    TS_ASSERT_DELTA(cylinder->volume(), 589, 1);
+    assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_tube() {
     std::string path = FileFinder::Instance().getFullPath("tube.stl");
-    auto Loader = LoadAsciiStl(path);
+    auto Loader = LoadAsciiStl(path, units);
     auto tube = Loader.readStl();
-    TS_ASSERT(tube->hasValidShape());
-    TS_ASSERT_EQUALS(tube->numberOfVertices(), 1080);
-    TS_ASSERT_EQUALS(tube->numberOfTriangles(), 2160);
-    TS_ASSERT_DELTA(tube->volume(), 7068, 1);
+    assert_shape_matches(tube, 1080, 2160, 7068, 1);
   }
 
   void test_fail_invalid_stl_keyword() {
@@ -65,21 +56,32 @@ public:
 
   void loadFailureTest(const std::string filename) {
     std::string path = FileFinder::Instance().getFullPath(filename);
-    auto Loader = LoadAsciiStl(path);
+    auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT_THROWS_ANYTHING(Loader.readStl());
   }
 
   void test_return_false_on_binary_stl() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto Loader = LoadAsciiStl(path);
+    auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
 
   void test_return_false_on_invalid_solid() {
     std::string path = FileFinder::Instance().getFullPath("invalid_solid.stl");
-    auto Loader = LoadAsciiStl(path);
+    auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
+
+private:
+  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape,
+                            int vertices, int triangles, double volume,
+                            double delta) {
+    TS_ASSERT(shape->hasValidShape());
+    TS_ASSERT_EQUALS(shape->numberOfVertices(), vertices);
+    TS_ASSERT_EQUALS(shape->numberOfTriangles(), triangles);
+    TS_ASSERT_DELTA(shape->volume(), volume, delta);
+  }
+  const ScaleUnits units = ScaleUnits::metres;
 };
 
 #endif /* LOAD_ASCIISTL_TEST_H_ */
