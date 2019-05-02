@@ -94,7 +94,8 @@ void LoadSampleShape::exec() {
 
 /**
  * Rotates the Shape by a provided matrix
- * @param ShapeMesh The Shape to rotate
+ * @param sampleMesh The Shape to rotate
+ * @param inputWS The workspace to get the rotation from
  * @returns a shared pointer to the newly rotated Shape
  */
 boost::shared_ptr<MeshObject>
