@@ -24,6 +24,7 @@ Improvements
 - Support has been added for negative indexing of :ref:`WorkspaceGroups <WorkspaceGroup>`.
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
 - :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` and :ref:`LoadSampleShape <algm-LoadSampleShape>` now support setting the scale of the stl to millimetres, centimetres, or metres.
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now takes rotation as angles applied in order X then Y then Z, as opposed to a matrix.
 - :ref:`LoadSampleShape <algm-LoadSampleShape>` now rotates the sample based off of the setting of the goniometer.
 - :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` is able to accept any `MatrixWorkspace`, as long as it has run objects loaded from `LoadNexusLogs <algm-LoadNexusLogs>`, other than `EventWorkspace`.
 - :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` has a new property `ScatterFrom` which allows for calculating the correction for the other components (i.e. container and environment)
