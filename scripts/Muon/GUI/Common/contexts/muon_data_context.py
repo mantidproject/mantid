@@ -22,6 +22,8 @@ from Muon.GUI.Common.observer_pattern import Observable
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('localhost', port=8000, stdoutToServer=True, stderrToServer=True)
     parameter_name = "Default grouping file"
     if instrument == "MUSR" or instrument == 'CHRONUS':
         parameter_name += " - " + main_field_direction
@@ -187,7 +189,7 @@ class MuonDataContext(object):
     @property
     def num_detectors(self):
         try:
-            n_det = self.current_workspace.detectorInfo().size()
+            n_det = self.current_workspace.getNumberHistograms()
         except AttributeError:
             # default to 1
             n_det = 1

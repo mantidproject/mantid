@@ -40,7 +40,7 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
   if (wsIndices.size() != detectorIDs.size()) {
     std::string errorMsg =
         str(boost::format("The number of detectors"
-                          "requested does not equalthe number of detectors "
+                          "requested does not equal the number of detectors "
                           "provided %1% != %2% ") %
             wsIndices.size() % detectorIDs.size());
     throw std::invalid_argument(errorMsg);
