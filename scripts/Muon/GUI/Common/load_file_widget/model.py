@@ -50,12 +50,14 @@ class BrowseFileWidgetModel(object):
         failed_files = []
         for filename in self._filenames:
             try:
-                ws, run, filename = load_utils.load_workspace_from_filename(filename)
+                ws, run, filename, is_psi_data = load_utils.load_workspace_from_filename(filename)
             except Exception as error:
                 failed_files += [(filename, error)]
                 continue
-
-            instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
+            if not is_psi_data:
+                instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
+            else:
+                instrument_from_workspace = "PSI"
 
             self._loaded_data_store.remove_data(run=[run])
             self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=instrument_from_workspace)
@@ -89,7 +91,11 @@ class BrowseFileWidgetModel(object):
         return self._loaded_data_store.get_data(**kwargs)
 
     def get_instrument_from_latest_run(self):
-        return self._loaded_data_store.get_latest_data()['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
+        instrument = self._loaded_data_store.get_latest_data()['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
+        if instrument:
+            return instrument
+        else:
+            return "PSI"
 
     @property
     def instrument(self):

@@ -206,10 +206,10 @@ def load_workspace_from_filename(filename,
                                  input_properties=DEFAULT_INPUTS,
                                  output_properties=DEFAULT_OUTPUTS):
     try:
-        alg = create_load_algorithm(filename, input_properties)
+        alg, is_psi_data = create_load_algorithm(filename, input_properties)
         alg.execute()
     except:
-        alg = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
+        alg, is_psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
     workspace = alg.getProperty("OutputWorkspace").value
@@ -218,8 +218,9 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
-        if load_result["DeadTimeTable"] is not None:
+        if not is_psi_data:
             load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
+            load_result["DeadTimeTable"] = None
         else:
             load_result["DataDeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
@@ -228,17 +229,16 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
-        if load_result["DeadTimeTable"] is not None:
+        if not is_psi_data:
             load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+            load_result["DeadTimeTable"] = None
         else:
             load_result["DataDeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
 
-    load_result["DeadTimeTable"] = None
-
     filename = alg.getProperty("Filename").value
 
-    return load_result, run, filename
+    return load_result, run, filename, is_psi_data
 
 
 def empty_loaded_data():
@@ -247,17 +247,19 @@ def empty_loaded_data():
 
 def create_load_algorithm(filename, property_dictionary):
     # Assume if .bin it is a PSI file
+    is_psi_data = False
     if ".bin" in filename:
         alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
+        is_psi_data = True
     else:
         alg = mantid.AlgorithmManager.create("LoadMuonNexus")
+        alg.setProperties(property_dictionary)
 
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperty("Filename", filename)
-    alg.setProperties(property_dictionary)
-    return alg
+    return alg, is_psi_data
 
 
 def _get_algorithm_properties(alg, property_dict):

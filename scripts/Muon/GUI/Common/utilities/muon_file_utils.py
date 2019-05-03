@@ -15,10 +15,8 @@ FILE_SEP = os.sep
 
 def filter_for_extensions(extensions):
     """Filter for file browser"""
-    import pydevd_pycharm
-    pydevd_pycharm.settrace('localhost', port=8000, stdoutToServer=True, stderrToServer=True)
     str_list = ["*." + str(ext) for ext in extensions]
-    return "Files (" + ", ".join(str_list) + ")"
+    return "Files (" + " ".join(str_list) + ")"
 
 
 def get_instrument_directory(instrument):
