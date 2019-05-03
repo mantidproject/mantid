@@ -184,10 +184,6 @@ class SANSDataProcessorGui(QMainWindow,
         def on_save_other(self):
             pass
 
-        @abstractmethod
-        def on_compatibility_unchecked(self):
-            pass
-
     def __init__(self):
         """
         Initialise the interface
@@ -539,9 +535,6 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
-
-    def _on_compatibility_unchecked(self):
-        self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
         if PYQT4:
@@ -1092,7 +1085,10 @@ class SANSDataProcessorGui(QMainWindow,
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
         if not value:
-            self._on_compatibility_unchecked()
+            # If you uncheck it, post to logger, in
+            # case user didn't realise user file had
+            # turned it off
+            self.gui_logger.notice("Compatibility mode has been turned off.")
 
     @property
     def instrument(self):

@@ -350,7 +350,8 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress,
+                       include_bin_masking=False):
         _ = mask_info  # noqa
         return workspace_to_mask
 
