@@ -739,7 +739,7 @@ void MDNorm::createNormalizationWS(
  * @return :: bool - true means the binning is correct to aggreagete using
  * tempDataWS
  */
-bool MDNorm::isValidBinningForTemporaryDataWorkspace(
+void MDNorm::validateBinningForTemporaryDataWorkspace(
     const std::map<std::string, std::string> &parameters,
     const Mantid::API::IMDHistoWorkspace_sptr tempDataWS) {
 
@@ -767,11 +767,26 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
             tempDataWS->getDimension(parametersIndex)->getName();
         if (m_isRLU) { // hkl
           if (dimXName.compare(QDimensionName(m_Q0Basis)) != 0) {
-            return false;
+            std::stringstream errorMessage;
+            std::stringstream debugMessage;
+            errorMessage << "TemporaryDataWorkspace does not have the  ";
+            errorMessage << "correct name for dimension "<<parametersIndex;
+            debugMessage << "QDimension0 Names: Output will be: "<<QDimensionName(m_Q0Basis);
+            debugMessage << " TemporaryDataWorkspace: "<<dimXName;
+            g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
           }
         } else {
-          if (dimXName.compare(QDimensionNameQSample(0)) != 0)
-            return false;
+          if (dimXName.compare(QDimensionNameQSample(0)) != 0) {
+            std::stringstream errorMessage;
+            std::stringstream debugMessage;
+            errorMessage << "TemporaryDataWorkspace does not have the  ";
+            errorMessage << "correct name for dimension "<<parametersIndex;
+            debugMessage << "QDimension0 Names: Output will be: "<<QDimensionNameQSample(0);
+            debugMessage << " TemporaryDataWorkspace: "<<dimXName;
+            g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
+          }
         }
       } else if (value.find("QDimension1") != std::string::npos) {
         dimensionIndex[1] = parametersIndex;
@@ -779,11 +794,26 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
             tempDataWS->getDimension(parametersIndex)->getName();
         if (m_isRLU) { // hkl
           if (dimYName.compare(QDimensionName(m_Q1Basis)) != 0) {
-            return false;
+            std::stringstream errorMessage;
+            std::stringstream debugMessage;
+            errorMessage << "TemporaryDataWorkspace does not have the  ";
+            errorMessage << "correct name for dimension "<<parametersIndex;
+            debugMessage << "QDimension1 Names: Output will be: "<<QDimensionName(m_Q1Basis);
+            debugMessage << " TemporaryDataWorkspace: "<<dimYName;
+            g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
           }
         } else {
-          if (dimYName.compare(QDimensionNameQSample(1)) != 0)
-            return false;
+          if (dimYName.compare(QDimensionNameQSample(1)) != 0) {
+             std::stringstream errorMessage;
+            std::stringstream debugMessage;
+            errorMessage << "TemporaryDataWorkspace does not have the  ";
+            errorMessage << "correct name for dimension "<<parametersIndex;
+            debugMessage << "QDimension1 Names: Output will be: "<<QDimensionNameQSample(1);
+            debugMessage << " TemporaryDataWorkspace: "<<dimYName;
+            g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
+          }
         }
       } else if (value.find("QDimension2") != std::string::npos) {
         dimensionIndex[2] = parametersIndex;
@@ -791,11 +821,26 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
             tempDataWS->getDimension(parametersIndex)->getName();
         if (m_isRLU) { // hkl
           if (dimZName.compare(QDimensionName(m_Q2Basis)) != 0) {
-            return false;
+            std::stringstream errorMessage;
+            std::stringstream debugMessage;
+            errorMessage << "TemporaryDataWorkspace does not have the  ";
+            errorMessage << "correct name for dimension "<<parametersIndex;
+            debugMessage << "QDimension2 Names: Output will be: "<<QDimensionName(m_Q2Basis);
+            debugMessage << " TemporaryDataWorkspace: "<<dimZName;
+            g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
           }
         } else {
-          if (dimZName.compare(QDimensionNameQSample(2)) != 0)
-            return false;
+          if (dimZName.compare(QDimensionNameQSample(2)) != 0) {
+            std::stringstream errorMessage;
+            std::stringstream debugMessage;
+            errorMessage << "TemporaryDataWorkspace does not have the  ";
+            errorMessage << "correct name for dimension "<<parametersIndex;
+            debugMessage << "QDimension2 Names: Output will be: "<<QDimensionNameQSample(2);
+            debugMessage << " TemporaryDataWorkspace: "<<dimZName;
+            g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
+          }
         }
 
       } else if ((key.find("OutputBins") == std::string::npos) &&
@@ -810,7 +855,7 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
                                     "QDimension1, or QDimension2"));
     }
 
-    // make sure the names of non-dimensional axes are the same
+    // make sure the names of non-directional dimensions are the same
     if (!(nonDimensionIndex.empty())) {
       for (auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end();
            ++it) {
@@ -862,24 +907,25 @@ bool MDNorm::isValidBinningForTemporaryDataWorkspace(
       (numBinsTempData.size() != numDimsInput) ||
       extents.size() != 2 * numDimsInput ||
       extentsTempData.size() != 2 * numDimsInput) {
-    g_log.error("Cannot parse binning dimensions for MDNorm.");
-    return false;
+    throw(std::invalid_argument("Cannot parse binning dimensions for MDNorm."));
   }
   // compare the arrays
   for (size_t i = 0; i < numDimsInput; i++) {
-    if (numBins[i] != numBinsTempData[i]) {
-      g_log.error("Number of bins for TemporaryDataWorkspace is not the same "
-                  "for binning parameters.");
-      return false;
-    }
+
     if (std::abs(extents[2 * i] - extentsTempData[2 * i]) > 1.e-5 ||
         std::abs(extents[2 * i + 1] - extentsTempData[2 * i + 1]) > 1.e-5) {
-      g_log.error("Binning extents are not the same for TemporaryDataWorkspace "
-                  "and the accumulating workspace.");
-      return false;
+      std::stringstream errorMessage;
+      errorMessage << "Binning extents are not the same for TemporaryDataWorkspace ";
+      errorMessage << "and the accumulating workspace along dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
+    }
+    if (numBins[i] != numBinsTempData[i]) {
+      std::stringstream errorMessage;
+      errorMessage << "Number of bins along dimension "<<i;
+      errorMessage << " is not the same as in TemporaryDataWorkspace. Check bin size.";
+      throw(std::invalid_argument(errorMessage.str()));
     }
   }
-  return true;
 }
 
 /**
@@ -895,14 +941,8 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
   std::map<std::string, std::string> parameters = getBinParameters();
 
   // check that our input matches the temporary workspaces
-  if (tempDataWS) {
-    bool isValidBinning =
-        isValidBinningForTemporaryDataWorkspace(parameters, tempDataWS);
-    if (!isValidBinning) {
-      throw(std::invalid_argument("Provided binning parameters do not agree "
-                                  "with temporary workspace bins."));
-    }
-  }
+  if (tempDataWS) 
+        validateBinningForTemporaryDataWorkspace(parameters, tempDataWS);
 
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;

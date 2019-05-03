@@ -33,7 +33,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  bool isValidBinningForTemporaryDataWorkspace(
+  void validateBinningForTemporaryDataWorkspace(
       const std::map<std::string, std::string> &,
       const Mantid::API::IMDHistoWorkspace_sptr);
   std::map<std::string, std::string> validateInputs() override final;
