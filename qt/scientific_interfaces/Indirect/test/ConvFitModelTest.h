@@ -15,6 +15,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -34,8 +35,10 @@ std::string getFunctionString(std::string const &workspaceName) {
          "0175)))";
 }
 
-IFunction_sptr getFunction(std::string const &functionString) {
-  return FunctionFactory::Instance().createInitialized(functionString);
+MultiDomainFunction_sptr getFunction(std::string const &functionString) {
+  auto const initStr = functionString + ",$domains=i";
+  auto fun = FunctionFactory::Instance().createInitialized("composite=MultiDomainFunction;"+ initStr + ";" + initStr);
+  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
 }
 
 } // namespace
@@ -64,7 +67,7 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
 
@@ -72,7 +75,7 @@ public:
   }
 
   void test_that_addWorkspace_will_add_multiple_workspaces() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspace(3, 3);
     auto const workspace3 = createWorkspace(3, 2);
     auto const workspace4 = createWorkspace(3, 6);
@@ -86,7 +89,7 @@ public:
 
   void
   test_that_getFittingFunction_will_return_the_fitting_function_which_has_been_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->setFitFunction(getFunction(getFunctionString("Name")));
@@ -98,7 +101,7 @@ public:
 
   void
   test_that_getInstrumentResolution_will_return_none_if_the_index_provided_is_larger_than_the_number_of_workspaces() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspace(3, 3);
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -112,7 +115,7 @@ public:
     /// A unit test for a positive response from getInstrumentResolution needs
     /// to be added. The workspace used in the test will need to have an
     /// analyser attached to its instrument
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspace(3, 3);
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -123,7 +126,7 @@ public:
 
   void
   test_that_getNumberHistograms_will_get_the_number_of_spectra_for_the_workspace_specified() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const workspace2 = createWorkspace(5, 3);
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -134,7 +137,7 @@ public:
 
   void
   test_that_getResolution_will_return_the_a_nullptr_when_the_resolution_has_not_been_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const resolution = createWorkspace(5, 3);
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -143,7 +146,7 @@ public:
   }
 
   void test_that_getResolution_will_return_the_workspace_which_it_was_set_at() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const resolution = createWorkspace(6, 3);
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -154,7 +157,7 @@ public:
 
   void
   test_that_getResolution_will_return_the_a_nullptr_when_the_index_provided_is_out_of_range() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
     auto const resolution = createWorkspace(6, 3);
 
     addWorkspacesToModel(spectra, m_workspace);
@@ -174,7 +177,7 @@ public:
 
   void
   test_that_removeWorkspace_will_remove_the_workspace_specified_from_the_model() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->removeWorkspace(0);

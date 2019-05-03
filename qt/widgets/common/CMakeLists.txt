@@ -386,7 +386,6 @@ set(SRC_FILES
     src/FunctionMultiDomainPresenter.cpp
     src/FunctionTreeView.cpp
     src/HintingLineEdit.cpp
-    src/IndirectFitPropertyBrowser.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/LineEditWithClear.cpp

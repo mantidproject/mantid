@@ -44,7 +44,7 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
 
@@ -53,7 +53,7 @@ public:
 
   void
   test_that_sequentialFitOutputName_returns_the_correct_name_which_uses_the_fit_string_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
     m_model->setFitType("Gaussian");
@@ -63,7 +63,7 @@ public:
 
   void
   test_that_simultaneousFitOutputName_returns_the_correct_name_which_uses_the_fit_string_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
     m_model->setFitType("Gaussian");
@@ -73,7 +73,7 @@ public:
 
   void
   test_that_singleFitOutputName_returns_the_correct_name_which_uses_the_fit_string_set() {
-    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-1");
+    Spectra const spectra = Spectra("0-1");
 
     m_model->addWorkspace(m_workspace, spectra);
     m_model->setFitType("Gaussian");
