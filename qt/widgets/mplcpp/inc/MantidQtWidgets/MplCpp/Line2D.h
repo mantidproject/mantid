@@ -27,12 +27,10 @@ public:
   Line2D(Common::Python::Object obj, std::vector<double> xdataOwner,
          std::vector<double> ydataOwner);
   ~Line2D() noexcept;
-  // not copyable
   Line2D(const Line2D &) = delete;
   Line2D &operator=(const Line2D &) = delete;
-  // movable
   Line2D(Line2D &&) = default;
-  Line2D &operator=(Line2D &&) = default;
+  Line2D &operator=(Line2D &&);
 
   QColor getColor() const;
 

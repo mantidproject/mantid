@@ -51,6 +51,20 @@ Line2D::~Line2D() noexcept {
 }
 
 /**
+ * Move assign from another Line2D instance
+ * @param rhs The temporary object to assign from
+ * @return A reference to this object
+ */
+Line2D &Line2D::operator=(Line2D &&rhs) {
+  // This objects old data is being destroyed so the
+  // line is removed.
+  this->remove();
+  m_xOwner = std::move(rhs.m_xOwner);
+  m_yOwner = std::move(rhs.m_yOwner);
+  return *this;
+}
+
+/**
  * @return A QColor defining the color of the artist
  */
 QColor Line2D::getColor() const {
