@@ -21,8 +21,9 @@
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
+class Axes;
 class FigureCanvasQt;
-}
+} // namespace MplCpp
 } // namespace Widgets
 namespace MantidWidgets {
 
@@ -34,6 +35,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool watchADS = true);
+  ~PreviewPlot();
 
   void addSpectrum(const QString &curveName,
                    const Mantid::API::MatrixWorkspace_sptr &ws,
@@ -54,14 +56,19 @@ private:
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
   void
   onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  Widgets::MplCpp::Line2D createLine(Widgets::MplCpp::Axes &axes,
+                                     const Mantid::API::MatrixWorkspace &ws,
+                                     const size_t wsIndex);
   void removeLines(const Mantid::API::MatrixWorkspace &ws);
+  void replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
+                    const Mantid::API::MatrixWorkspace &newWS);
 
   struct Line2DInfo {
     Widgets::MplCpp::Line2D line;
     QString name;
     // Non-owning pointer to the source workspace
     // It is only safe to compare this with another workspace pointer
-    const Mantid::API::MatrixWorkspace *const workspace;
+    const Mantid::API::MatrixWorkspace * workspace;
     const size_t wsIndex;
   };
 

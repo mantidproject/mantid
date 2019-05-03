@@ -43,9 +43,19 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
 }
 
 /**
+ * Destructor.
+ * Remove ADS observers
+ */
+PreviewPlot::~PreviewPlot() {
+  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  notificationCenter.removeObserver(m_wsReplacedObserver);
+  notificationCenter.removeObserver(m_wsRemovedObserver);
+}
+
+/**
  * Add a curve for a given spectrum to the plot
  * @param curveName A string label for the curve
- * @param ws A pointer to a MatrixWorkspace that contains the data
+ * @param ws A MatrixWorkspace that contains the data
  * @param wsIndex The index of the workspace to access
  * @param curveColour Defines the color of the curve
  */
@@ -61,23 +71,25 @@ void PreviewPlot::addSpectrum(const QString &curveName,
     return;
   }
   removeSpectrum(curveName);
-
-  const auto &histogram = ws->histogram(wsIndex);
-  const auto xpts = histogram.points();
-  const auto signal = histogram.y();
   auto axes = m_canvas->gca();
   m_lines.emplace_back(
-      Line2DInfo{axes.plot(xpts.data().rawData(), signal.rawData()), curveName,
-                 ws.get(), wsIndex});
-  axes.relim();
+      Line2DInfo{createLine(axes, *ws, wsIndex), curveName, ws.get(), wsIndex});
   m_canvas->draw();
+  axes.relim();
 }
 
+/**
+ * Add a curve for a given spectrum to the plot
+ * @param curveName A string label for the curve
+ * @param wsName A name of a MatrixWorkspace that contains the data
+ * @param wsIndex The index of the workspace to access
+ * @param curveColour Defines the color of the curve
+ */
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
                               const size_t wsIndex, const QColor &curveColour) {
   addSpectrum(curveName,
               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                  curveName.toStdString()),
+                  wsName.toStdString()),
               wsIndex, curveColour);
 }
 
@@ -118,8 +130,8 @@ void PreviewPlot::onWorkspaceRemoved(
   // Ignore non matrix workspaces
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     removeLines(*ws);
+    m_canvas->draw();
   }
-  m_canvas->draw();
 }
 
 /**
@@ -129,10 +141,28 @@ void PreviewPlot::onWorkspaceRemoved(
 void PreviewPlot::onWorkspaceReplaced(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
   // Ignore non matrix workspaces
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
-    removeLines(*ws);
+  if (auto oldWS =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+    if (auto newWS =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+      replaceLines(*oldWS, *newWS);
+      m_canvas->draw();
+    }
   }
-  m_canvas->draw();
+}
+
+/**
+ * Add a line to the canvas using the data from the workspace
+ * @param ws A reference to the workspace
+ * @param wsIndex The wsIndex
+ */
+Line2D PreviewPlot::createLine(Widgets::MplCpp::Axes &axes,
+                               const Mantid::API::MatrixWorkspace &ws,
+                               const size_t wsIndex) {
+  const auto &histogram = ws.histogram(wsIndex);
+  const auto xpts = histogram.points();
+  const auto signal = histogram.y();
+  return axes.plot(xpts.data().rawData(), signal.rawData());
 }
 
 /**
@@ -149,6 +179,25 @@ void PreviewPlot::removeLines(const Mantid::API::MatrixWorkspace &ws) {
       m_lines.erase(curveIter);
     }
   };
+}
+
+/**
+ * Replace any curves based on the old workspace with data from the new
+ * workspace
+ * @param oldWS A reference to the existing workspace
+ * @param newWS A reference to the replacement workspace
+ */
+void PreviewPlot::replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
+                               const Mantid::API::MatrixWorkspace &newWS) {
+  auto axes = m_canvas->gca();
+  for (auto &info : m_lines) {
+    if (info.workspace == &oldWS) {
+      info.line = createLine(axes, newWS, info.wsIndex);
+      info.workspace = &newWS;
+    }
+  }
+  axes.relim();
+  m_canvas->draw();
 }
 
 } // namespace MantidWidgets
