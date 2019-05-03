@@ -58,6 +58,8 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False):
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
     axes.set_title(labels[-1])
+    if workspace.isCommonLogBins():
+        axes.set_xscale('log')
 
 
 def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):

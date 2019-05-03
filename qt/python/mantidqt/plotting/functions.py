@@ -250,7 +250,7 @@ def use_imshow(ws):
     y = ws.getAxis(1).extractValues()
     difference = np.diff(y)
     try:
-        return np.all(np.isclose(difference[:-1], difference[0]))
+        return np.all(np.isclose(difference[:-1], difference[0])) and not ws.isCommonLogBins()
     except IndexError:
         return False
 
