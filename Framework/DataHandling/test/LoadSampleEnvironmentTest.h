@@ -98,9 +98,9 @@ public:
     alg.setProperty("YDegrees", 60.0);
     alg.setProperty("ZDegrees", 30.0);
     auto rotationMatrix = alg.generateMatrix();
-    std::vector<double> vectorToMatch = {0.4330127, -0.2500000, 0.8660254,
-                                         0.7500000, -0.4330127, -0.5000000,
-                                         0.5000000, 0.8660254,  0.0000000};
+    std::vector<double> vectorToMatch = {0.4330127,  0.7500000, 0.5000000,
+                                         0.2500000,  0.4330127, -0.8660254,
+                                         -0.8660254, 0.5000000, 0.0000000};
     compareMatrix(vectorToMatch, rotationMatrix);
   }
 
@@ -164,10 +164,10 @@ public:
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {
-        -6.28413,  10.46899,  -11.22095, -3.97647,  16.02167,  1.57914,
-        1.41338,   15.06344,  -6.78932,  -11.67398, 11.42722,  -2.85248,
-        11.673985, -11.42722, 2.85248,   6.28413,   -10.46899, 11.22095,
-        -1.41338,  -15.06344, 6.78932,   3.97647,   -16.02167, -1.57914};
+        -13.70635, 5.52235,   -7.52591,  -5.33788,  15.55731,  -2.11589,
+        -6.00884,  10.91220,  -10.94611, -13.03539, 10.16745,  1.30430,
+        13.03539,  -10.16745, -1.30430,  13.70635,  -5.52235,  7.52591,
+        6.00884,   -10.91220, 10.94611,  5.33788,   -15.55731, 2.11589};
     for (size_t i = 0; i < 24; ++i) {
       TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
     }

@@ -328,14 +328,23 @@ LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
   return environmentMesh;
 }
 
+/**
+ * Generates a rotation Matrix applying the x rotation then y rotation, then z rotation
+ * @returns a matrix of doubles to use as the rotation matrix
+ */
 Matrix<double> LoadSampleEnvironment::generateMatrix() {
   Kernel::Matrix<double> xMatrix = generateXRotation();
   Kernel::Matrix<double> yMatrix = generateYRotation();
   Kernel::Matrix<double> zMatrix = generateZRotation();
 
-  return xMatrix * yMatrix * zMatrix;
+  return zMatrix * yMatrix * xMatrix;
 }
 
+/**
+ * Generates the x component of the rotation matrix
+ * using the xDegrees Property.
+ * @returns a matrix of doubles to use as the x axis rotation matrix
+ */
 Matrix<double> LoadSampleEnvironment::generateXRotation() {
   const double xRotation = getProperty("xDegrees");
   const double sinX = sin(DegreesToRadians(xRotation));
@@ -344,6 +353,11 @@ Matrix<double> LoadSampleEnvironment::generateXRotation() {
   return Kernel::Matrix<double>(matrixList);
 }
 
+/**
+ * Generates the y component of the rotation matrix
+ * using the yDegrees Property.
+ * @returns a matrix of doubles to use as the y axis rotation matrix
+ */
 Matrix<double> LoadSampleEnvironment::generateYRotation() {
   const double yRotation = getProperty("yDegrees");
   const double sinY = sin(DegreesToRadians(yRotation));
@@ -352,6 +366,11 @@ Matrix<double> LoadSampleEnvironment::generateYRotation() {
   return Kernel::Matrix<double>(matrixList);
 }
 
+/**
+ * Generates the z component of the rotation matrix
+ * using the zDegrees Property.
+ * @returns a matrix of doubles to use as the z axis rotation matrix
+ */
 Matrix<double> LoadSampleEnvironment::generateZRotation() {
   const double zRotation = getProperty("zDegrees");
   const double sinZ = sin(DegreesToRadians(zRotation));
