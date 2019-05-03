@@ -108,6 +108,12 @@ LoadSampleShape::rotate(boost::shared_ptr<MeshObject> sampleMesh,
   return sampleMesh;
 }
 
+/**
+ * Handles the loading of STL files
+ * @param filename The file to load
+ * @param scaleType The units of the scale to use mm, cm or m
+ * @returns a shared pointer to the loaded meshobject
+ */
 boost::shared_ptr<MeshObject> LoadSampleShape::loadStl(std::string filename,
                                                        ScaleUnits scaleType) {
   boost::shared_ptr<MeshObject> shape = nullptr;
