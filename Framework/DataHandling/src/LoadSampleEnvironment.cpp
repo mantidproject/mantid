@@ -317,7 +317,7 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
 }
 
 /**
- * Rotates the environment by a provided matrix
+ * Rotates the environment by a generated matrix
  * @param environmentMesh The environment to rotate
  * @returns a shared pointer to the newly rotated environment
  */
@@ -340,7 +340,7 @@ Matrix<double> LoadSampleEnvironment::generateXRotation() {
   const double xRotation = getProperty("xDegrees");
   const double sinX = sin(DegreesToRadians(xRotation));
   const double cosX = cos(DegreesToRadians(xRotation));
-  std::vector<double> matrixList = {1, 0, 0, 0, cosX, sinX, 0, -sinX, cosX};
+  std::vector<double> matrixList = {1, 0, 0, 0, cosX, -sinX, 0, sinX, cosX};
   return Kernel::Matrix<double>(matrixList);
 }
 
