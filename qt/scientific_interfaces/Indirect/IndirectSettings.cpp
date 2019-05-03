@@ -17,7 +17,7 @@ IndirectSettings::IndirectSettings(QWidget *parent)
 }
 
 void IndirectSettings::initLayout() {
-  m_presenter = Mantid::Kernel::make_unique<IndirectSettingsPresenter>(this);
+  m_presenter = std::make_unique<IndirectSettingsPresenter>(this);
 
   auto centralWidget = m_uiForm.centralWidget->layout();
   centralWidget->addWidget(m_presenter->getView());

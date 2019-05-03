@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include <map>
+#include <memory>
 
 #include <QVariant>
 
