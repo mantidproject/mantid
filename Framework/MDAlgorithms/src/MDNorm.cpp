@@ -770,9 +770,10 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
             std::stringstream errorMessage;
             std::stringstream debugMessage;
             errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension "<<parametersIndex;
-            debugMessage << "QDimension0 Names: Output will be: "<<QDimensionName(m_Q0Basis);
-            debugMessage << " TemporaryDataWorkspace: "<<dimXName;
+            errorMessage << "correct name for dimension " << parametersIndex;
+            debugMessage << "QDimension0 Names: Output will be: "
+                         << QDimensionName(m_Q0Basis);
+            debugMessage << " TemporaryDataWorkspace: " << dimXName;
             g_log.warning(debugMessage.str());
             throw(std::invalid_argument(errorMessage.str()));
           }
@@ -781,9 +782,10 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
             std::stringstream errorMessage;
             std::stringstream debugMessage;
             errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension "<<parametersIndex;
-            debugMessage << "QDimension0 Names: Output will be: "<<QDimensionNameQSample(0);
-            debugMessage << " TemporaryDataWorkspace: "<<dimXName;
+            errorMessage << "correct name for dimension " << parametersIndex;
+            debugMessage << "QDimension0 Names: Output will be: "
+                         << QDimensionNameQSample(0);
+            debugMessage << " TemporaryDataWorkspace: " << dimXName;
             g_log.warning(debugMessage.str());
             throw(std::invalid_argument(errorMessage.str()));
           }
@@ -797,20 +799,22 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
             std::stringstream errorMessage;
             std::stringstream debugMessage;
             errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension "<<parametersIndex;
-            debugMessage << "QDimension1 Names: Output will be: "<<QDimensionName(m_Q1Basis);
-            debugMessage << " TemporaryDataWorkspace: "<<dimYName;
+            errorMessage << "correct name for dimension " << parametersIndex;
+            debugMessage << "QDimension1 Names: Output will be: "
+                         << QDimensionName(m_Q1Basis);
+            debugMessage << " TemporaryDataWorkspace: " << dimYName;
             g_log.warning(debugMessage.str());
             throw(std::invalid_argument(errorMessage.str()));
           }
         } else {
           if (dimYName.compare(QDimensionNameQSample(1)) != 0) {
-             std::stringstream errorMessage;
+            std::stringstream errorMessage;
             std::stringstream debugMessage;
             errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension "<<parametersIndex;
-            debugMessage << "QDimension1 Names: Output will be: "<<QDimensionNameQSample(1);
-            debugMessage << " TemporaryDataWorkspace: "<<dimYName;
+            errorMessage << "correct name for dimension " << parametersIndex;
+            debugMessage << "QDimension1 Names: Output will be: "
+                         << QDimensionNameQSample(1);
+            debugMessage << " TemporaryDataWorkspace: " << dimYName;
             g_log.warning(debugMessage.str());
             throw(std::invalid_argument(errorMessage.str()));
           }
@@ -824,9 +828,10 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
             std::stringstream errorMessage;
             std::stringstream debugMessage;
             errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension "<<parametersIndex;
-            debugMessage << "QDimension2 Names: Output will be: "<<QDimensionName(m_Q2Basis);
-            debugMessage << " TemporaryDataWorkspace: "<<dimZName;
+            errorMessage << "correct name for dimension " << parametersIndex;
+            debugMessage << "QDimension2 Names: Output will be: "
+                         << QDimensionName(m_Q2Basis);
+            debugMessage << " TemporaryDataWorkspace: " << dimZName;
             g_log.warning(debugMessage.str());
             throw(std::invalid_argument(errorMessage.str()));
           }
@@ -835,9 +840,10 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
             std::stringstream errorMessage;
             std::stringstream debugMessage;
             errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension "<<parametersIndex;
-            debugMessage << "QDimension2 Names: Output will be: "<<QDimensionNameQSample(2);
-            debugMessage << " TemporaryDataWorkspace: "<<dimZName;
+            errorMessage << "correct name for dimension " << parametersIndex;
+            debugMessage << "QDimension2 Names: Output will be: "
+                         << QDimensionNameQSample(2);
+            debugMessage << " TemporaryDataWorkspace: " << dimZName;
             g_log.warning(debugMessage.str());
             throw(std::invalid_argument(errorMessage.str()));
           }
@@ -915,14 +921,16 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
     if (std::abs(extents[2 * i] - extentsTempData[2 * i]) > 1.e-5 ||
         std::abs(extents[2 * i + 1] - extentsTempData[2 * i + 1]) > 1.e-5) {
       std::stringstream errorMessage;
-      errorMessage << "Binning extents are not the same for TemporaryDataWorkspace ";
+      errorMessage
+          << "Binning extents are not the same for TemporaryDataWorkspace ";
       errorMessage << "and the accumulating workspace along dimension " << i;
       throw(std::invalid_argument(errorMessage.str()));
     }
     if (numBins[i] != numBinsTempData[i]) {
       std::stringstream errorMessage;
-      errorMessage << "Number of bins along dimension "<<i;
-      errorMessage << " is not the same as in TemporaryDataWorkspace. Check bin size.";
+      errorMessage << "Number of bins along dimension " << i;
+      errorMessage
+          << " is not the same as in TemporaryDataWorkspace. Check bin size.";
       throw(std::invalid_argument(errorMessage.str()));
     }
   }
@@ -941,8 +949,8 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
   std::map<std::string, std::string> parameters = getBinParameters();
 
   // check that our input matches the temporary workspaces
-  if (tempDataWS) 
-        validateBinningForTemporaryDataWorkspace(parameters, tempDataWS);
+  if (tempDataWS)
+    validateBinningForTemporaryDataWorkspace(parameters, tempDataWS);
 
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
