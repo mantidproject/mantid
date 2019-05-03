@@ -408,14 +408,12 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             "Select a table which is loaded into the ADS.")
 
         self.deadtime_browse_button = QtWidgets.QPushButton(self)
-        self.deadtime_browse_button.setObjectName("deadTimeBrowseButton")
         self.deadtime_browse_button.setText("Browse")
         self.deadtime_browse_button.setToolTip("Browse for a .nxs file to load dead times from. If valid, the "
                                                "dead times will be saved as a table, and automatically selected "
                                                "as the dead time for the current data.")
 
         self.horizontal_layout_5 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_5.setObjectName("horizontalLayout5")
         self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.deadtime_label_3)
 
@@ -565,7 +563,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.horizontal_layout_6 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_6.setObjectName("horizontalLayout6")
         self.horizontal_layout_6.addSpacing(10)
 
         self.horizontal_layout_6.addWidget(self.rebin_label)
