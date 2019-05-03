@@ -24,15 +24,6 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.setupUi(self)
 
         self.item_table_widget.setColumnWidth(0, 350)
-        self.item_table_widget.setDragEnabled(True)
-        self.item_table_widget.setAcceptDrops(True)
-        self.item_table_widget.viewport().setAcceptDrops(True)
-        self.item_table_widget.setDragDropOverwriteMode(False)
-        self.item_table_widget.setDropIndicatorShown(True)
-
-        self.item_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.item_table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.item_table_widget.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
 
         self._item_selection_changed_action = lambda a, b: 0
 
