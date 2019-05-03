@@ -318,6 +318,199 @@ public:
     TS_ASSERT(col->isNumber());
   }
 
+  void test_equals_pass() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto &data = column.data();
+    data[0] = 5;
+    data[1] = 7;
+    data[2] = 3;
+    data[3] = 12;
+    data[4] = 1;
+    data[5] = 6;
+    data[6] = 3;
+    data[7] = 2;
+    data[8] = 0;
+    data[9] = 12;
+
+    auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
+
+    TS_ASSERT(column.equals(*column2, 0));
+  }
+
+  void test_equals_fail() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto &data = column.data();
+    data[0] = 5;
+    data[1] = 7;
+    data[2] = 3;
+    data[3] = 12;
+    data[4] = 1;
+    data[5] = 6;
+    data[6] = 3;
+    data[7] = 2;
+    data[8] = 0;
+    data[9] = 12;
+
+    auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
+
+    data[0] = 9;
+
+    TS_ASSERT(!column.equals(*column2, 0));
+  }
+
+  void test_equals_fail_wrong_type() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+    ws.addColumn("vector_int", "col2");
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto column2 = ws.getColumn("col2");
+    TS_ASSERT(!column.equals(*column2, 0));
+  }
+
+  void test_equals_tolerance_normal_case() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+    ws.addColumn("int", "col2");
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<int> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = 5;
+    data[1] = 7;
+    data[2] = 3;
+    data[3] = 12;
+    data[4] = 1;
+    data[5] = 6;
+    data[6] = 3;
+    data[7] = 2;
+    data[8] = 0;
+    data[9] = 12;
+    auto &data2 = column2.data();
+    data2[0] = 6;
+    data2[1] = 6;
+    data2[2] = 4;
+    data2[3] = 13;
+    data2[4] = 2;
+    data2[5] = 5;
+    data2[6] = 2;
+    data2[7] = 1;
+    data2[8] = 1;
+    data2[9] = 11;
+    TS_ASSERT(column.equals(column2, 1));
+  }
+
+  void test_equalsRelErr() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+    ws.addColumn("int", "col2");
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<int> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = 100;
+    data[1] = 7;
+    data[2] = 3;
+    data[3] = 12;
+    data[4] = 1;
+    data[5] = 6;
+    data[6] = 3;
+    data[7] = 2;
+    data[8] = 0;
+    data[9] = 12;
+    auto &data2 = column2.data();
+    data2[0] = 90;
+    data2[1] = 6;
+    data2[2] = 3;
+    data2[3] = 12;
+    data2[4] = 1;
+    data2[5] = 7;
+    data2[6] = 2;
+    data2[7] = 3;
+    data2[8] = 0;
+    data2[9] = 12;
+    TS_ASSERT(column.equalsRelErr(column2, 1));
+  }
+
+  void test_equals_tolerance_int64() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("long64", "col1");
+    ws.addColumn("long64", "col2");
+    auto column = static_cast<TableColumn<int64_t> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<int64_t> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = 165538;
+    auto &data2 = column2.data();
+    data2[0] = 165539;
+    TS_ASSERT(column.equals(column2, 1));
+  }
+
+  void test_equals_string() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("str", "col1");
+    auto column =
+        static_cast<TableColumn<std::string> &>(*ws.getColumn("col1"));
+    auto &data = column.data();
+    data[0] = "hello";
+    auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
+    TS_ASSERT(column.equals(*column2, 0));
+  }
+
+  void test_equals_string_tolerance_fail() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("str", "col1");
+    auto column =
+        static_cast<TableColumn<std::string> &>(*ws.getColumn("col1"));
+    auto &data = column.data();
+    data[0] = "1";
+    auto column2 = std::unique_ptr<Mantid::API::Column>(column.clone());
+    data[0] = "2";
+    TS_ASSERT(!column.equals(*column2, 1));
+  }
+
+  void test_equals_general_tolerance_fail() {
+    const size_t n = 10;
+    TableWorkspace ws(n);
+    ws.addColumn("int", "col1");
+    ws.addColumn("int", "col2");
+    auto column = static_cast<TableColumn<int> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<int> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = 5;
+    data[1] = 7;
+    data[2] = 3;
+    data[3] = 12;
+    data[4] = 1;
+    data[5] = 6;
+    data[6] = 3;
+    data[7] = 2;
+    data[8] = 0;
+    data[9] = 12;
+    auto &data2 = column2.data();
+    data2[0] = 7;
+    data2[1] = 6;
+    data2[2] = 4;
+    data2[3] = 13;
+    data2[4] = 2;
+    data2[5] = 5;
+    data2[6] = 2;
+    data2[7] = 1;
+    data2[8] = 1;
+    data2[9] = 11;
+    TS_ASSERT(!column.equals(*ws.getColumn("col2"), 1));
+  }
+
 private:
   std::vector<size_t> makeIndexVector(size_t n) {
     std::vector<size_t> vec(n);

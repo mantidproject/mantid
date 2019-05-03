@@ -25,6 +25,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
     std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
     : m_model(model), m_view(view),
       m_tablePresenter(std::move(tablePresenter)) {
+  observeReplace(true);
+
   connect(m_view, SIGNAL(singleDataViewSelected()), this,
           SLOT(setModelFromSingleData()));
   connect(m_view, SIGNAL(multipleDataViewSelected()), this,
@@ -37,8 +39,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
 
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(setModelWorkspace(const QString &)));
-  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(singleSampleLoaded()));
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SIGNAL(dataChanged()));
 
@@ -66,6 +66,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
                                       std::size_t)));
 }
+
+IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const {
   return m_view;
@@ -145,15 +147,34 @@ void IndirectFitDataPresenter::loadSettings(const QSettings &settings) {
   m_view->readSettings(settings);
 }
 
+void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
+                                             const Workspace_sptr &workspace) {
+  UNUSED_ARG(workspace)
+  if (m_model->hasWorkspace(workspaceName) &&
+      !m_view->isMultipleDataTabSelected())
+    selectReplacedWorkspace(QString::fromStdString(workspaceName));
+}
+
+void IndirectFitDataPresenter::selectReplacedWorkspace(
+    const QString &workspaceName) {
+  if (m_view->isSampleWorkspaceSelectorVisible()) {
+    setModelWorkspace(workspaceName);
+    emit dataChanged();
+  } else
+    m_view->setSampleWorkspaceSelectorIndex(workspaceName);
+}
+
 UserInputValidator &
 IndirectFitDataPresenter::validate(UserInputValidator &validator) {
   return m_view->validate(validator);
 }
 
 void IndirectFitDataPresenter::showAddWorkspaceDialog() {
-  m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
+  if (!m_addWorkspaceDialog)
+    m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
   m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
   m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
+  m_addWorkspaceDialog->updateSelectedSpectra();
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
   connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,

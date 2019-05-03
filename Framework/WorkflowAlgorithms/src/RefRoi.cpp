@@ -80,17 +80,6 @@ void RefRoi::init() {
 
 /// Execute algorithm
 void RefRoi::exec() {
-  // Get the input workspace
-  const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  // Bin boundaries need to be the same, so do the full check on whether they
-  // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    g_log.error()
-        << "Can only group if the histograms have common bin boundaries\n";
-    throw std::invalid_argument(
-        "Can only group if the histograms have common bin boundaries");
-  }
-
   // Detector size
   m_nXPixel = getProperty("NXPixel");
   m_nYPixel = getProperty("NYPixel");

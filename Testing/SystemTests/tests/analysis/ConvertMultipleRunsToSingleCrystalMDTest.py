@@ -55,7 +55,8 @@ class ConvertMultipleRunsToSingleCrystalMDHKLTest(systemtesting.MantidSystemTest
                                              SetGoniometer=True,
                                              Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
                                              MinValues=[-4,3,-0.05],
-                                             MaxValues=[0,8,0.05])
+                                             MaxValues=[0,8,0.05],
+                                             QFrame='HKL')
 
     def validate(self):
         results = 'CMRSCMD_output_HKL'

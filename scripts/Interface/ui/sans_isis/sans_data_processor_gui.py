@@ -12,46 +12,48 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
-
-from six import with_metaclass
-from qtpy.QtWidgets import (QListWidgetItem, QMainWindow, QMessageBox, QFileDialog)  # noqa
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
+from six import with_metaclass
 
-from mantid.kernel import (Logger)
-from mantidqtpython import MantidQt
-
-try:
-    from mantidplot import *
-
-    canMantidPlot = True
-except ImportError:
-    canMantidPlot = False
 from reduction_gui.reduction.scripter import execute_script
-
-from . import ui_sans_data_processor_window as ui_sans_data_processor_window
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
+from mantid.kernel import (Logger)
+from mantidqt import icons
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import jobtreeview, manageuserdirectories
+from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_default_file, set_setting,
+                                       load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.models.binning_type import BinningType
-
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.work_handler import WorkHandler
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
+from qtpy import PYQT4
+if PYQT4:
+    IN_MANTIDPLOT = False
+    try:
+        from pymantidplot import proxies
+        IN_MANTIDPLOT = True
+    except ImportError:
+        # We are not in MantidPlot e.g. testing
+        pass
+
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
+
+Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
 
 class RunSelectorPresenterFactory(object):
@@ -70,8 +72,12 @@ class RunSelectorPresenterFactory(object):
                                     parent_view)
 
 
-def _make_run_summation_settings_presenter(summation_settings_view, parent_view):
-    summation_settings = SummationSettings(BinningType.Custom)
+def _make_run_summation_settings_presenter(summation_settings_view, parent_view, instrument):
+    if instrument != "LOQ":
+        binning_type = BinningType.SaveAsEventData
+    else:
+        binning_type = BinningType.Custom
+    summation_settings = SummationSettings(binning_type)
     summation_settings.bin_settings = DEFAULT_BIN_SETTINGS
     return SummationSettingsPresenter(summation_settings,
                                       summation_settings_view,
@@ -82,7 +88,7 @@ def _make_run_summation_settings_presenter(summation_settings_view, parent_view)
 # Gui Classes
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSDataProcessorGui(QMainWindow,
-                           ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
+                           Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
     VARIABLE = "Variable"
@@ -124,6 +130,10 @@ class SANSDataProcessorGui(QMainWindow,
 
         @abstractmethod
         def on_sample_geometry_selection(self, show_geometry):
+            pass
+
+        @abstractmethod
+        def on_reduction_dimensionality_changed(self, is_1d):
             pass
 
         @abstractmethod
@@ -188,7 +198,10 @@ class SANSDataProcessorGui(QMainWindow,
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
         self.__user_file_key = "user_file"
+        self.__batch_file_key = "batch_file"
         self.__mask_file_input_path_key = "mask_files"
+        self.__output_mode_key = "output_mode"
+        self.__save_can_key = "save_can"
 
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
@@ -202,12 +215,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.instrument = SANSInstrument.NoInstrument
 
-        self.paste_button.setIcon(QIcon(":/paste.png"))
-        self.copy_button.setIcon(QIcon(":/copy.png"))
-        self.cut_button.setIcon(QIcon(":/cut.png"))
-        self.erase_button.setIcon(QIcon(":/erase.png"))
-        self.delete_row_button.setIcon(QIcon(":/delete_row.png"))
-        self.insert_row_button.setIcon(QIcon(":/insert_row.png"))
+        self.paste_button.setIcon(icons.get_icon("fa.paste"))
+        self.copy_button.setIcon(icons.get_icon("fa.copy"))
+        self.cut_button.setIcon(icons.get_icon("fa.cut"))
+        self.erase_button.setIcon(icons.get_icon("fa.eraser"))
+        self.delete_row_button.setIcon(icons.get_icon("fa.trash"))
+        self.insert_row_button.setIcon(icons.get_icon("fa.table"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
@@ -217,6 +230,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
         self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
+
+        self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
+        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
         # Attach validators
         self._attach_validators()
@@ -265,25 +281,19 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        path = os.path.dirname(__file__)
-        runs_icon_path = os.path.join(path, "icons", "run.png")
-        runs_icon = QIcon(runs_icon_path)
+        runs_icon = icons.get_icon("fa.play-circle-o")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        settings_icon_path = os.path.join(path, "icons", "settings.png")
-        settings_icon = QIcon(settings_icon_path)
+        settings_icon = icons.get_icon("fa.cog")
         _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        centre_icon_path = os.path.join(path, "icons", "centre.png")
-        centre_icon = QIcon(centre_icon_path)
+        centre_icon = icons.get_icon("fa.dot-circle-o")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon_path = os.path.join(path, "icons", "sum.png")
-        add_runs_page_icon = QIcon(add_runs_page_icon_path)
+        add_runs_page_icon = icons.get_icon("fa.plus-circle")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon_path = os.path.join(path, "icons", "diagnostic.png")
-        diagnostic_icon = QIcon(diagnostic_icon_path)
+        diagnostic_icon = icons.get_icon("fa.question-circle")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -310,6 +320,11 @@ class SANSDataProcessorGui(QMainWindow,
         self.export_table_button.clicked.connect(self._export_table_clicked)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
+
+        # Output mode radio buttons
+        self.output_mode_memory_radio_button.clicked.connect(self._on_output_mode_clicked)
+        self.output_mode_file_radio_button.clicked.connect(self._on_output_mode_clicked)
+        self.output_mode_both_radio_button.clicked.connect(self._on_output_mode_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
         # Settings tabs
@@ -339,6 +354,10 @@ class SANSDataProcessorGui(QMainWindow,
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(
             self._on_q_1d_step_type_has_changed)
         self._on_q_1d_step_type_has_changed()
+
+        self.q_xy_step_type_combo_box.currentIndexChanged.connect(
+            self._on_q_xy_step_type_has_changed)
+        self._on_q_xy_step_type_has_changed()
 
         # Set the q resolution aperture shape settings
         self.q_resolution_shape_combo_box.currentIndexChanged.connect(
@@ -395,13 +414,18 @@ class SANSDataProcessorGui(QMainWindow,
         if self.data_processor_table:
             self.data_processor_table.setParent(None)
 
-        self.data_processor_table = MantidQt.MantidWidgets.Batch.JobTreeView(
+        self.data_processor_table = jobtreeview.JobTreeView(
             ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp",
              "Can Scatter", "csp",
              "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File",
              "Sample Thickness", "Sample Height", "Sample Width", "Sample Shape",
              "Options"]
             , self.cell(""), self)
+
+        # Default QTreeView size is too small
+        font = self.data_processor_table.font()
+        font.setPointSize(13)
+        self.data_processor_table.setFont(font)
 
         self.data_processor_table.setRootIsDecorated(False)
 
@@ -410,7 +434,7 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_row_inserted(0, row_entry))
 
         self.table_signals = \
-            MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.data_processor_table, self)
+            jobtreeview.JobTreeViewSignalAdapter(self.data_processor_table, self)
         # The signal adapter subscribes to events from the table
         # and emits signals whenever it is notified.
 
@@ -432,11 +456,11 @@ class SANSDataProcessorGui(QMainWindow,
         border_color = "black"
         border_opacity = 255
         is_editable = True
-        return MantidQt.MantidWidgets.Batch.Cell(text, background_color, border_thickness,
-                                                 border_color, border_opacity, is_editable)
+        return jobtreeview.Cell(text, background_color, border_thickness,
+                                border_color, border_opacity, is_editable)
 
     def row(self, path):
-        return MantidQt.MantidWidgets.Batch.RowLocation(path)
+        return jobtreeview.RowLocation(path)
 
     def _setup_main_tab(self):
         self.user_file_button.clicked.connect(self._on_user_file_load)
@@ -517,7 +541,26 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_compatibility_unchecked())
 
     def _on_help_button_clicked(self):
-        pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
+        if PYQT4:
+            proxies.showCustomInterfaceHelp('ISIS SANS v2')
+
+    def _on_output_mode_clicked(self):
+        if self.output_mode_memory_radio_button.isChecked():
+            output_mode = "PublishToADS"
+        elif self.output_mode_file_radio_button.isChecked():
+            output_mode = "SaveToFile"
+        elif self.output_mode_both_radio_button.isChecked():
+            output_mode = "Both"
+        else:
+            output_mode = None
+        set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
+
+    def _on_save_can_clicked(self, value):
+        self.save_can_checkBox.setChecked(value)
+        set_setting(self.__generic_settings, self.__save_can_key, value)
+
+    def _on_reduction_dimensionality_changed(self, is_1d):
+        self._call_settings_listeners(lambda listener: listener.on_reduction_dimensionality_changed(is_1d))
 
     def _on_user_file_load(self):
         """
@@ -528,25 +571,51 @@ class SANSDataProcessorGui(QMainWindow,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
-        set_setting(self.__generic_settings, self.__user_file_key, self.get_user_file_path())
+        self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
 
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
+
+    def on_user_file_load_failure(self):
+        self.gui_properties_handler.set_setting("user_file", "")
+        self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):
         """
         Load a default user file, called on view set-up
         """
-        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
-
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
+
+    def set_out_default_output_mode(self):
+        try:
+            default_output_mode = OutputMode.from_string(load_property(self.__generic_settings, self.__output_mode_key))
+        except RuntimeError:
+            pass
+        else:
+            self._check_output_mode(default_output_mode)
+
+    def _check_output_mode(self, value):
+        if value is OutputMode.PublishToADS:
+            self.output_mode_memory_radio_button.setChecked(True)
+        elif value is OutputMode.SaveToFile:
+            self.output_mode_file_radio_button.setChecked(True)
+        elif value is OutputMode.Both:
+            self.output_mode_both_radio_button.setChecked(True)
+
+    def set_out_default_save_can(self):
+        try:
+            default_save_can = load_property(self.__generic_settings, self.__save_can_key, type=bool)
+        except RuntimeError:
+            pass
+        else:
+            self._on_save_can_clicked(default_save_can)
 
     def _on_batch_file_load(self):
         """
         Load the batch file
         """
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
@@ -690,6 +759,11 @@ class SANSDataProcessorGui(QMainWindow,
             step_label = u'dQ/Q' if u'Log' in selection else u'Step [\u00c5^-1]'
             self.q_step_label.setText(step_label)
 
+    def _on_q_xy_step_type_has_changed(self):
+        selection = self.q_xy_step_type_combo_box.currentText()
+        step_label = u'dQ/Q' if u'Log' in selection else u'Step [\u00c5^-1]'
+        self.q_xy_step_label.setText(step_label)
+
     def set_q_resolution_shape_to_rectangular(self, is_rectangular):
         index = 1 if is_rectangular else 0
         self.q_resolution_shape_combo_box.setCurrentIndex(index)
@@ -774,7 +848,7 @@ class SANSDataProcessorGui(QMainWindow,
         return str(self.mask_file_input_line_edit.text())
 
     def show_directory_manager(self):
-        MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories(self).exec_()
 
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
@@ -915,7 +989,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @save_can.setter
     def save_can(self, value):
-        self.save_can_checkBox.setChecked(value)
+        self._on_save_can_clicked.setChecked(value)
 
     @property
     def progress_bar_minimum(self):
@@ -975,12 +1049,11 @@ class SANSDataProcessorGui(QMainWindow,
 
     @output_mode.setter
     def output_mode(self, value):
-        if value is OutputMode.PublishToADS:
-            self.output_mode_memory_radio_button.setChecked(True)
-        elif value is OutputMode.SaveToFile:
-            self.output_mode_file_radio_button.setChecked(True)
-        elif value is OutputMode.Both:
-            self.output_mode_both_radio_button.setCheck(True)
+        self._check_output_mode(value)
+        try:
+            set_setting(self.__generic_settings, self.__output_mode_key, OutputMode.to_string(value))
+        except RuntimeError:
+            pass
 
     @property
     def compatibility_mode(self):
@@ -991,14 +1064,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.event_binning_group_box.setChecked(value)
         if not value:
             self._on_compatibility_unchecked()
-
-    @property
-    def show_transmission(self):
-        return self.show_transmission_view.isChecked()
-
-    @show_transmission.setter
-    def show_transmission(self, value):
-        self.show_transmission_view.setChecked(value)
 
     @property
     def instrument(self):
@@ -1597,6 +1662,13 @@ class SANSDataProcessorGui(QMainWindow,
             self.update_gui_combo_box(value=value, expected_type=RangeStepType,
                                       combo_box="q_xy_step_type_combo_box")
 
+            if isinstance(value, list):
+                gui_element = self.q_xy_step_type_combo_box
+                gui_element.clear()
+                for element in value:
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
+                                                        expected_type=RangeStepType)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
     # ------------------------------------------------------------------------------------------------------------------
@@ -1921,8 +1993,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.fit_can_wavelength_min_line_edit.setText("")
         self.fit_can_wavelength_max_line_edit.setText("")
 
-        self.show_transmission_view.setChecked(True)
-
         self.pixel_adjustment_det_1_line_edit.setText("")
         self.pixel_adjustment_det_2_line_edit.setText("")
 
@@ -2067,4 +2137,4 @@ class SANSDataProcessorGui(QMainWindow,
         for child in self.children():
             if isinstance(child, SANSSaveOtherDialog):
                 child.done(0)
-        super(QtGui.QMainWindow, self).closeEvent(event)
+        super(QMainWindow, self).closeEvent(event)

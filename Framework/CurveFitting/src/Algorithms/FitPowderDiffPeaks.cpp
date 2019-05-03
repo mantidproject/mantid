@@ -34,7 +34,6 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
 #include <fstream>
-#include <iostream>
 
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
@@ -816,11 +815,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
       finalchi2 = chi2compf;
     } else {
       finalchi2 = bestchi2;
-      stringstream dbss;
-      dbss << "Fit peak-background composite function failed! "
-           << "Need to find out how this case peak value is changed from best "
-              "fit.";
-      g_log.warning(dbss.str());
+      g_log.warning("Fit peak-background composite function failed! Need to "
+                    "find out how this case peak value is changed from best "
+                    "fit.");
     }
   } else {
     // Flag is turned off
@@ -1159,34 +1156,33 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
 
     if (indexpeakgroup.size() == 1) {
       // Fit a single peak
-      size_t &ipeak = indexpeakgroup[0];
+      const size_t ifit = indexpeakgroup[0];
       double peakfitleftbound, peakfitrightbound;
-      calculatePeakFitBoundary(ipeak, ipeak, peakfitleftbound,
-                               peakfitrightbound);
+      calculatePeakFitBoundary(ifit, ifit, peakfitleftbound, peakfitrightbound);
 
-      g_log.information() << "\n[T] Fit Peak Indexed " << ipeak << " ("
-                          << m_vecPeakFunctions.size() - 1 - ipeak
+      g_log.information() << "\n[T] Fit Peak Indexed " << ifit << " ("
+                          << m_vecPeakFunctions.size() - 1 - ifit
                           << ")\t----------------------------------\n";
 
       BackToBackExponential_sptr thispeak =
-          m_vecPeakFunctions[ipeak].second.second;
+          m_vecPeakFunctions[ifit].second.second;
       bool annihilatedpeak;
-      m_goodFit[ipeak] =
+      m_goodFit[ifit] =
           fitSinglePeakConfident(thispeak, backgroundfunction, peakfitleftbound,
                                  peakfitrightbound, chi2, annihilatedpeak);
-      m_peakFitChi2[ipeak] = chi2;
+      m_peakFitChi2[ifit] = chi2;
       if (annihilatedpeak)
         thispeak->setHeight(0.0);
 
       // Debug output
-      vector<int> &hkl = m_vecPeakFunctions[ipeak].second.first;
+      vector<int> &hkl = m_vecPeakFunctions[ifit].second.first;
       stringstream dbss;
       dbss << "Peak [" << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
            << "] expected @ TOF = " << thispeak->centre() << ": \t";
       if (annihilatedpeak)
         dbss << "Annihilated!";
       else
-        dbss << "Fit Status = " << m_goodFit[ipeak] << ",   Chi2 = " << chi2;
+        dbss << "Fit Status = " << m_goodFit[ifit] << ",   Chi2 = " << chi2;
       g_log.information() << "[DB531] " << dbss.str() << '\n';
     } else {
       // Fit overlapped peaks
@@ -1991,18 +1987,15 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
                                    "Levenberg-MarquardtMD", 1000, chi2);
   bool evergood = fitgood;
 
-  // c) Process result
+  // c) Process result; possibly early return
   if (!fitgood) {
     vecfitgood.resize(numpeaks, false);
     vecchi2s.resize(numpeaks, -1.0);
+    return false;
   } else {
     vecfitgood.resize(numpeaks, true);
     vecchi2s.resize(numpeaks, chi2);
   }
-
-  // d) Possible early return
-  if (!fitgood)
-    return false;
 
   // 2. Fit A/B/S peak by peak
   for (size_t ipkfit = 0; ipkfit < numpeaks; ++ipkfit) {
@@ -2023,8 +2016,8 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
     // b) Fit
     storeFunctionParameters(peaksfunc, peaksfuncparams);
 
-    bool fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
-                                     "Levenberg-MarquardtMD", 1000, chi2);
+    fitgood = doFitNPeaksSimple(dataws, wsindex, peaksfunc, peakfuncs,
+                                "Levenberg-MarquardtMD", 1000, chi2);
 
     // not required. before loop starts, evergood=fitgood WITH fitgood==true
     // evergood = evergood || fitgood;
@@ -2819,9 +2812,6 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       double tof_h = calThermalNeutronTOF(d_h, dtt1, dtt1t, dtt2t, zero, zerot,
                                           width, tcross);
       newpeakptr->setCentre(tof_h);
-
-      peakcalmode = "Calculate TOF Only";
-
     } else {
       // d) Calculate a lot of peak parameters
       // Initialize the function
@@ -3009,8 +2999,9 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else {
-    cout << "[DBx211] Cropped Workspace Range: " << m_dataWS->x(m_wsIndex)[0]
-         << ", " << m_dataWS->x(m_wsIndex).back() << '\n';
+    g_log.information() << "[DBx211] Cropped Workspace Range: "
+                        << m_dataWS->x(m_wsIndex)[0] << ", "
+                        << m_dataWS->x(m_wsIndex).back() << '\n';
   }
 }
 

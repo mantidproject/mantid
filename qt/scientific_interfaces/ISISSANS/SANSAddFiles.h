@@ -84,7 +84,7 @@ private slots:
   /// this slot opens a browser to select a new file to add
   void new2AddBrowse();
   /// sets data associated with the cell
-  void setCellData(QListWidgetItem *);
+  void setCellData(QListWidgetItem * /*unused*/);
   /// clears the table that contains the names of the files to add
   void clearClicked();
   /// clears the contents of the selected row
@@ -95,7 +95,7 @@ private slots:
   /// for event data
   void onCurrentIndexChangedForHistogramChoice(int index);
   /// reacts to changes of the overlay check box
-  void onStateChangedForOverlayCheckBox(int);
+  void onStateChangedForOverlayCheckBox(int /*state*/);
   /// checks if a file corresponds to a histogram worksapce
   bool isEventWorkspace(QString file_name);
   /// checks if the files which are to be added are all based on event

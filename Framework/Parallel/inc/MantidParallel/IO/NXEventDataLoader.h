@@ -7,6 +7,7 @@
 #ifndef MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_
 #define MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_
 
+#include "MantidKernel/System.h"
 #include <H5Cpp.h>
 #include <vector>
 
@@ -94,13 +95,8 @@ void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
   read(buffer, dataSet, start, count);
 }
 
-std::string readAttribute(const H5::DataSet &dataSet,
-                          const std::string &attributeName) {
-  const auto &attr = dataSet.openAttribute(attributeName);
-  std::string value;
-  attr.read(attr.getDataType(), value);
-  return value;
-}
+std::string MANTID_PARALLEL_DLL readAttribute(const H5::DataSet &dataSet,
+                                              const std::string &attributeName);
 
 template <class TimeOffsetType, class IndexType, class TimeZeroType>
 std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>

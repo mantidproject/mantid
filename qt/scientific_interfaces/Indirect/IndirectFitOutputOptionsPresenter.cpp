@@ -36,6 +36,7 @@ void IndirectFitOutputOptionsPresenter::setUpPresenter() {
   connect(m_view, SIGNAL(plotClicked()), this, SLOT(plotResult()));
   connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
   connect(m_view, SIGNAL(saveClicked()), this, SLOT(saveResult()));
+  connect(m_view, SIGNAL(editResultClicked()), this, SLOT(editResult()));
 }
 
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(
@@ -50,8 +51,7 @@ void IndirectFitOutputOptionsPresenter::setAvailablePlotOptions(
   auto const resultSelected = m_model->isResultGroupSelected(selectedGroup);
   setPlotTypes(selectedGroup);
   m_view->setWorkspaceComboBoxVisible(!resultSelected);
-  m_view->setPlotEnabled(resultSelected ? isResultGroupPlottable()
-                                        : isPDFGroupPlottable());
+  m_view->setPlotEnabled(isSelectedGroupPlottable());
 }
 
 void IndirectFitOutputOptionsPresenter::setResultWorkspace(
@@ -115,29 +115,31 @@ void IndirectFitOutputOptionsPresenter::saveResult() {
   setSaving(false);
 }
 
-bool IndirectFitOutputOptionsPresenter::isResultGroupPlottable() {
-  return m_model->isResultGroupPlottable();
-}
-
-bool IndirectFitOutputOptionsPresenter::isPDFGroupPlottable() {
-  return m_model->isPDFGroupPlottable();
+bool IndirectFitOutputOptionsPresenter::isSelectedGroupPlottable() const {
+  return m_model->isSelectedGroupPlottable(m_view->getSelectedGroupWorkspace());
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotting(bool plotting) {
   m_view->setPlotText(plotting ? "Plotting..." : "Plot");
   m_view->setPlotExtraOptionsEnabled(!plotting);
   setPlotEnabled(!plotting);
+  setEditResultEnabled(!plotting);
   setSaveEnabled(!plotting);
 }
 
 void IndirectFitOutputOptionsPresenter::setSaving(bool saving) {
   m_view->setSaveText(saving ? "Saving..." : "Save Result");
   setPlotEnabled(!saving);
+  setEditResultEnabled(!saving);
   setSaveEnabled(!saving);
 }
 
 void IndirectFitOutputOptionsPresenter::setPlotEnabled(bool enable) {
-  m_view->setPlotEnabled(enable);
+  m_view->setPlotEnabled(enable && isSelectedGroupPlottable());
+}
+
+void IndirectFitOutputOptionsPresenter::setEditResultEnabled(bool enable) {
+  m_view->setEditResultEnabled(enable);
 }
 
 void IndirectFitOutputOptionsPresenter::setSaveEnabled(bool enable) {
@@ -151,6 +153,63 @@ void IndirectFitOutputOptionsPresenter::clearSpectraToPlot() {
 std::vector<SpectrumToPlot>
 IndirectFitOutputOptionsPresenter::getSpectraToPlot() const {
   return m_model->getSpectraToPlot();
+}
+
+void IndirectFitOutputOptionsPresenter::setEditResultVisible(bool visible) {
+  m_view->setEditResultVisible(visible);
+}
+
+void IndirectFitOutputOptionsPresenter::editResult() {
+  m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
+  m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
+  m_editResultsDialog->show();
+  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this,
+          SLOT(replaceSingleFitResult()));
+  connect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
+          SLOT(closeEditResultDialog()));
+}
+
+std::unique_ptr<IndirectEditResultsDialog>
+IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
+  return Mantid::Kernel::make_unique<IndirectEditResultsDialog>(parent);
+}
+
+void IndirectFitOutputOptionsPresenter::replaceSingleFitResult() {
+  auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
+  auto const singleBinName =
+      m_editResultsDialog->getSelectedSingleFitWorkspaceName();
+  auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
+
+  setEditingResult(true);
+  replaceSingleFitResult(inputName, singleBinName, outputName);
+  setEditingResult(false);
+}
+
+void IndirectFitOutputOptionsPresenter::replaceSingleFitResult(
+    std::string const &inputName, std::string const &singleBinName,
+    std::string const &outputName) {
+  try {
+    m_model->replaceFitResult(inputName, singleBinName, outputName);
+  } catch (std::exception const &ex) {
+    m_view->displayWarning(ex.what());
+  }
+}
+
+void IndirectFitOutputOptionsPresenter::setEditingResult(bool editing) {
+  m_editResultsDialog->setReplaceFitResultText(editing ? "Processing..."
+                                                       : "Replace Fit Result");
+  m_editResultsDialog->setReplaceFitResultEnabled(!editing);
+  setPlotEnabled(!editing);
+  setEditResultEnabled(!editing);
+  setSaveEnabled(!editing);
+}
+
+void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
+  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this,
+             SLOT(replaceSingleFitResult()));
+  disconnect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this,
+             SLOT(closeEditResultDialog()));
+  m_editResultsDialog->close();
 }
 
 void IndirectFitOutputOptionsPresenter::displayWarning(

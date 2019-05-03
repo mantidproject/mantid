@@ -244,8 +244,8 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         return  scale_factor_fit, shift_factor_fit
 
     def _check_bins(self, merge_min, merge_max, cF, cR):
-        if cF.binIndexOf(merge_min) == cR.binIndexOf(merge_max):
-            return cF.readX(0)[cR.binIndexOf(merge_max) + 1]
+        if cF.yIndexOfX(merge_min) == cR.yIndexOfX(merge_max):
+            return cF.readX(0)[cR.yIndexOfX(merge_max) + 1]
         else:
             return merge_max
 

@@ -64,6 +64,9 @@ class QuickEditView(QtWidgets.QWidget):
     def add_subplot(self, name):
         self.plot_selector.addItem(name)
 
+    def rm_subplot(self, index):
+        self.plot_selector.removeItem(index)
+
     def connect_plot_selection(self, slot):
         self.plot_selector.currentIndexChanged.connect(slot)
 
@@ -80,8 +83,8 @@ class QuickEditView(QtWidgets.QWidget):
     def connect_y_range_changed(self, slot):
         self.y_axis_changer.on_bound_changed(slot)
 
-    def set_plot_y_range(self, range):
-        self.y_axis_changer.set_bounds(range)
+    def set_plot_y_range(self, y_range):
+        self.y_axis_changer.set_bounds(y_range)
 
     def get_y_bounds(self):
         return self.y_axis_changer.get_bounds()

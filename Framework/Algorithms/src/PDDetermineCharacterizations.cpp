@@ -309,8 +309,15 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
       }
     }
   }
-  g_log.warning("Failed to determine " + label);
-  return 0.;
+
+  // generate an exception if it gets here because the log wasn't found
+  std::stringstream msg;
+  msg << "Failed to determine " << label << " because none of the logs ";
+  for (auto &name : names) {
+    msg << "\"" << name << "\" ";
+  }
+  msg << "exist";
+  throw std::runtime_error(msg.str());
 }
 
 /// Set the default values in the property manager

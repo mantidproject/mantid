@@ -496,7 +496,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
 /**
  * Respond to the show event.
  */
-void InstrumentWidgetPickTab::showEvent(QShowEvent *) {
+void InstrumentWidgetPickTab::showEvent(QShowEvent * /*unused*/) {
   // Make the state of the display view consistent with the current selection
   // type
   setSelectionType();
@@ -542,7 +542,8 @@ QColor InstrumentWidgetPickTab::getShapeBorderColor() const {
 /**
  * Do something when the time bin integraion range has changed.
  */
-void InstrumentWidgetPickTab::changedIntegrationRange(double, double) {
+void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/,
+                                                      double /*unused*/) {
   m_plotController->updatePlot();
   auto surface = m_instrWidget->getSurface();
   if (surface) {
@@ -706,6 +707,7 @@ void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
 void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
   m_infoController->displayInfo(pickID);
   m_plotController->setPlotData(pickID);
+  m_plotController->zoomOutOnPlot();
   m_plotController->updatePlot();
 }
 
@@ -1473,8 +1475,8 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
     PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
   }
 
-  auto normal = componentInfo.position(ass[1]) - componentInfo.position(ass[0]);
-  normal.normalize();
+  const auto normal = normalize(componentInfo.position(ass[1]) -
+                                componentInfo.position(ass[0]));
   const auto &detectorInfo = actor.detectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
@@ -1501,8 +1503,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         continue;
       // get the y-value for detector idet
       const auto &Y = ws->y(index);
-      double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
-      xymap[xvalue] = sum;
+      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
       if (err) {
         const auto &E = ws->e(index);
         std::vector<double> tmp(imax - imin);
@@ -1510,7 +1511,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
                        tmp.begin(), std::multiplies<double>());
         // sum them
-        double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
         // take sqrt
         errmap[xvalue] = sqrt(sum);
       }
@@ -1573,7 +1574,7 @@ void DetectorPlotController::savePlotToWorkspace() {
         actor.sumDetectors(dets, x, y);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
-        QMessageBox::warning(nullptr, "MantidPlot - Warning",
+        QMessageBox::warning(nullptr, "Mantid - Warning",
                              "Cannot save the stored curves.\nOnly the current "
                              "curve will be saved.");
       }
@@ -1662,8 +1663,7 @@ double
 DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                            const Mantid::Kernel::V3D &origin,
                                            const Mantid::Kernel::V3D &normal) {
-  Mantid::Kernel::V3D vec = pos - origin;
-  vec.normalize();
+  const auto vec = normalize(pos - origin);
   return asin(vec.scalar_prod(normal));
 }
 
@@ -1796,7 +1796,7 @@ void DetectorPlotController::addPeak(double x, double y) {
 
     // if there is a UB available calculate HKL for the new peak
     if (tw->sample().hasOrientedLattice()) {
-      auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
+      alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
           "CalculatePeaksHKL");
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();
@@ -1809,5 +1809,15 @@ void DetectorPlotController::addPeak(double x, double y) {
   }
 }
 
+/**
+ * Zoom out back to the natural home of the mini plot
+ */
+void DetectorPlotController::zoomOutOnPlot() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+// Do nothing if in Qt4 or below.
+#else
+  m_plot->zoomOutOnPlot();
+#endif
+}
 } // namespace MantidWidgets
 } // namespace MantidQt

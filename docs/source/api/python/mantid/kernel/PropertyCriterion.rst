@@ -10,5 +10,4 @@ This is a Python binding to the C++ class Mantid::Kernel::PropertyCriterion.
 .. autoclass:: mantid.kernel.PropertyCriterion 
     :members:
     :undoc-members:
-    :inherited-members:
 

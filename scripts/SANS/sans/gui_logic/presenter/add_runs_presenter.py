@@ -4,20 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import config
-from mantid.kernel import ConfigService, ConfigPropertyObserver
+import os
 
+from mantid.kernel import ConfigService
 from sans.common.enums import SANSInstrument
-from sans.gui_logic.models.run_selection import has_any_event_data
-
-
-class OutputDirectoryObserver(ConfigPropertyObserver):
-    def __init__(self, callback):
-        super(OutputDirectoryObserver, self).__init__("defaultsave.directory")
-        self.callback = callback
-
-    def onPropertyValueChanged(self, new_value, old_value):
-        self.callback(new_value)
+from sans.gui_logic.gui_common import SANSGuiPropertiesHandler
 
 
 class AddRunsFilenameManager(object):
@@ -55,7 +46,7 @@ class AddRunsFilenameManager(object):
 
     def _get_leading_zeroes(self, run_number):
         run_number_int = int(run_number)
-        total_digits_for_inst = config.getInstrument(self.instrument_string).zeroPadding(run_number_int)
+        total_digits_for_inst = ConfigService.getInstrument(self.instrument_string).zeroPadding(run_number_int)
         zeros_to_add = total_digits_for_inst - len(run_number)
         return zeros_to_add * "0"
 
@@ -77,11 +68,13 @@ class AddRunsPagePresenter(object):
                                         self._handle_selection_changed, view)
         self._summation_settings_presenter = \
             make_run_summation_presenter(view.summation_settings_view(),
-                                         view)
+                                         view, ConfigService.Instance().getString("default.instrument"))
 
+        self.save_directory = ""
         self._connect_to_view(view)
-        self._output_directory_observer = \
-            OutputDirectoryObserver(self._handle_output_directory_changed)
+
+        self.gui_properties_handler = SANSGuiPropertiesHandler({"add_runs_output_directory": (self.set_output_directory,
+                                                                                              str)})
 
     def _get_filename_manager(self):
         # Separate call so AddRunsFilesnameManager can be mocked out.
@@ -94,7 +87,7 @@ class AddRunsPagePresenter(object):
     def _connect_to_view(self, view):
         view.sum.connect(self._handle_sum)
         view.outFileChanged.connect(self._handle_out_file_changed)
-        self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
+        view.saveDirectoryClicked.connect(self._handle_output_directory_changed)
 
     def _make_base_file_name_from_selection(self, run_selection):
         filename_manager = self._get_filename_manager()
@@ -122,10 +115,7 @@ class AddRunsPagePresenter(object):
             self._view.set_out_file_name(self._generated_output_file_name)
 
     def _update_histogram_binning(self, run_selection):
-        if has_any_event_data(run_selection):
-            self._view.enable_summation_settings()
-        else:
-            self._view.disable_summation_settings()
+        self._view.enable_summation_settings()
 
     def _handle_selection_changed(self, run_selection):
         self._refresh_view(run_selection)
@@ -133,15 +123,29 @@ class AddRunsPagePresenter(object):
     def _handle_out_file_changed(self):
         self._use_generated_file_name = False
 
-    def _output_directory_is_not_empty(self, settings):
-        return settings.save_directory() != ''
+    @staticmethod
+    def _output_directory_is_not_empty(settings):
+        return settings.save_directory != ''
 
-    def _handle_output_directory_changed(self, new_directory):
-        self._view.set_out_file_directory(new_directory)
+    def _handle_output_directory_changed(self):
+        directory = self._view.display_save_directory_box("Save sum runs", self.save_directory)
+        directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
+        self.handle_new_save_directory(directory)
+
+    def handle_new_save_directory(self, directory):
+        """
+        This method is called when a new save directory is selected on the add runs page, but is also called
+        in the run_tab_presenter when a new default save directory is selected through Manage Directories.
+        :param directory: A string. The new path to the save directory
+        """
+        self.set_output_directory(directory)
+        self.gui_properties_handler.set_setting("add_runs_output_directory", directory)
 
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()
         settings = self._summation_settings_presenter.settings()
+        settings.save_directory = self.save_directory
+
         if self._output_directory_is_not_empty(settings):
             self._view.disable_sum()
             self._sum_runs(run_selection,
@@ -149,3 +153,10 @@ class AddRunsPagePresenter(object):
                            self._sum_base_file_name(run_selection))
         else:
             self._view.no_save_directory()
+
+    def set_output_directory(self, directory):
+        if not directory:
+            directory = ConfigService.Instance().getString("defaultsave.directory")
+        self.save_directory = directory
+        self._view.set_out_file_directory(directory)
+        return directory

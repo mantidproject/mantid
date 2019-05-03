@@ -10,6 +10,7 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/make_shared.hpp>
+#include <numeric>
 
 namespace Mantid {
 using PhysicalConstants::Atom;
@@ -29,7 +30,8 @@ inline bool isEmpty(const boost::optional<double> value) {
 MaterialBuilder::MaterialBuilder()
     : m_name(), m_formula(), m_atomicNo(), m_massNo(0), m_numberDensity(),
       m_zParam(), m_cellVol(), m_massDensity(), m_totalXSection(),
-      m_cohXSection(), m_incXSection(), m_absSection() {}
+      m_cohXSection(), m_incXSection(), m_absSection(),
+      m_numberDensityUnit(NumberDensityUnit::Atoms) {}
 
 /**
  * Set the string name given to the material
@@ -100,12 +102,22 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
 }
 
 /**
- * Set the number density of the sample in atoms / Angstrom^3
- * @param rho density of the sample in atoms / Angstrom^3
+ * Set the number density of the sample in atoms or formula units / Angstrom^3
+ * @param rho density of the sample in atoms or formula units / Angstrom^3
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
   m_numberDensity = rho;
+  return *this;
+}
+
+/**
+ * Set the unit for number density
+ * @param unit atoms or formula units / Anstrom^3
+ * @return A reference to this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setNumberDensityUnit(NumberDensityUnit unit) {
+  m_numberDensityUnit = unit;
   return *this;
 }
 
@@ -249,32 +261,39 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
  */
 double MaterialBuilder::getOrCalculateRho(
     const Material::ChemicalFormula &formula) const {
-  if (m_numberDensity) {
-    return m_numberDensity.get();
-  }
-  double totalNumAtoms = 0.;
-  for (const auto &formulaUnit : formula) {
-    totalNumAtoms += formulaUnit.multiplicity;
-  }
-
-  if (m_zParam && m_cellVol) {
-    return totalNumAtoms * m_zParam.get() / m_cellVol.get();
-  } else if (m_massDensity) {
-    // g / cc -> atoms / Angstrom^3
-    double rmm = 0.;
-    for (const auto &formulaUnit : formula) {
-      rmm += formulaUnit.atom->mass * formulaUnit.multiplicity;
-    }
-    return (m_massDensity.get() * totalNumAtoms / rmm) *
-           PhysicalConstants::N_A * 1e-24;
-  } else if (!m_formula.empty() && m_formula.size() == 1) {
-    return m_formula.front().atom->number_density;
+  double density;
+  if (m_numberDensity && m_numberDensityUnit == NumberDensityUnit::Atoms) {
+    density = m_numberDensity.get();
   } else {
-    throw std::runtime_error(
-        "The number density could not be determined. Please "
-        "provide the number density, ZParameter and unit "
-        "cell volume or mass density.");
+    const double totalNumAtoms =
+        std::accumulate(formula.cbegin(), formula.cend(), 0.,
+                        [](double n, const Material::FormulaUnit &f) {
+                          return n + f.multiplicity;
+                        });
+    if (m_numberDensity &&
+        m_numberDensityUnit == NumberDensityUnit::FormulaUnits) {
+      density = m_numberDensity.get() * totalNumAtoms;
+    } else if (m_zParam && m_cellVol) {
+      density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
+    } else if (m_massDensity) {
+      // g / cc -> atoms / Angstrom^3
+      const double rmm =
+          std::accumulate(formula.cbegin(), formula.cend(), 0.,
+                          [](double sum, const Material::FormulaUnit &f) {
+                            return sum + f.atom->mass * f.multiplicity;
+                          });
+      density = (m_massDensity.get() * totalNumAtoms / rmm) *
+                PhysicalConstants::N_A * 1e-24;
+    } else if (!m_formula.empty() && m_formula.size() == 1) {
+      density = m_formula.front().atom->number_density;
+    } else {
+      throw std::runtime_error(
+          "The number density could not be determined. Please "
+          "provide the number density, ZParameter and unit "
+          "cell volume or mass density.");
+    }
   }
+  return density;
 }
 
 bool MaterialBuilder::hasOverrideNeutronProperties() const {

@@ -48,11 +48,11 @@ public:
   void updateWithSlicePoint(const PeakBoundingBox &slicePoint) override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
-  void setForegroundColor(const PeakViewColor) override;
-  void setBackgroundColor(const PeakViewColor) override;
+  void setForegroundColor(const PeakViewColor /*color*/) override;
+  void setBackgroundColor(const PeakViewColor /*color*/) override;
   std::string getTransformName() const override;
   void setShown(const bool shown) override;
-  PeakBoundingBox getBoundingBox(const int) const override;
+  PeakBoundingBox getBoundingBox(const int /*peakIndex*/) const override;
   void setPeakSizeOnProjection(const double fraction) override;
   void setPeakSizeIntoProjection(const double fraction) override;
   double getPeakSizeOnProjection() const override;

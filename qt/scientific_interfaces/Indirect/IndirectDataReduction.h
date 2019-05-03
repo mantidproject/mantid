@@ -60,10 +60,10 @@ public:
   /// Handled configuration changes
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  Mantid::API::MatrixWorkspace_sptr
-  loadInstrumentIfNotExist(std::string instrumentName,
-                           std::string analyser = "",
-                           std::string reflection = "");
+  static Mantid::API::MatrixWorkspace_sptr
+  loadInstrumentIfNotExist(const std::string &instrumentName,
+                           const std::string &analyser = "",
+                           const std::string &reflection = "");
 
   std::vector<std::pair<std::string, std::vector<std::string>>>
   getInstrumentModes();
@@ -72,10 +72,6 @@ public:
 signals:
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
-  /// Emitted to update the state of the Run button
-  void updateRunButton(bool enabled = true,
-                       std::string const &enableOutputButtons = "unchanged",
-                       QString message = "Run", QString tooltip = "");
 
 private slots:
   /// Shows/hides tabs based on facility
@@ -89,10 +85,6 @@ private slots:
 
   /// Shows a information dialog box
   void showMessageBox(const QString &message);
-  /// Updates the state of the Run button
-  void emitUpdateRunButton(bool enabled = true,
-                           std::string const &enableOutputButtons = "unchanged",
-                           QString message = "Run", QString tooltip = "");
 
   /// Called when the load instrument algorithms complete
   void instrumentLoadingDone(bool error);
@@ -144,8 +136,6 @@ private:
             this, SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(tabIDRContent, SIGNAL(showMessageBox(const QString &)), this,
             SLOT(showMessageBox(const QString &)));
-    connect(tabIDRContent, SIGNAL(updateRunButton(bool, QString, QString)),
-            this, SLOT(updateRunButton(bool, QString, QString)));
 
     // Add to the cache
     m_tabs[name] = qMakePair(tabWidget, tabIDRContent);

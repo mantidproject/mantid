@@ -7,6 +7,7 @@
 #include "MantidKernel/MaterialBuilder.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/enum.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -19,6 +20,11 @@ using namespace boost::python;
 void export_MaterialBuilder() {
   register_ptr_to_python<MaterialBuilder *>();
   register_ptr_to_python<boost::shared_ptr<MaterialBuilder>>();
+
+  enum_<MaterialBuilder::NumberDensityUnit>("NumberDensityUnit")
+      .value("Atoms", MaterialBuilder::NumberDensityUnit::Atoms)
+      .value("FormulaUnits", MaterialBuilder::NumberDensityUnit::FormulaUnits)
+      .export_values();
 
   class_<MaterialBuilder, boost::noncopyable>("MaterialBuilder")
       .def("setName", &MaterialBuilder::setName, return_self<>(),
@@ -37,7 +43,12 @@ void export_MaterialBuilder() {
            "Set the mass number of the material")
       .def("setNumberDensity", &MaterialBuilder::setNumberDensity,
            return_self<>(), (arg("self"), arg("rho")),
-           "Set the number density of the material in atoms per Angstrom^3")
+           "Set the number density of the material in atoms (default) or "
+           "formula units per Angstrom^3")
+      .def("setNumberDensityUnit", &MaterialBuilder::setNumberDensityUnit,
+           return_self<>(), (arg("self"), arg("unit")),
+           "Change the number density units from atoms per Angstrom^3 to the "
+           "desired unit")
       .def("setZParameter", &MaterialBuilder::setZParameter, return_self<>(),
            (arg("self"), arg("zparam")),
            "Set the number of formula units in a unit cell")

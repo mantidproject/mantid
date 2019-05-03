@@ -203,6 +203,11 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
     }
   }
 
+  m_inputW = getProperty("InputWorkspace");
+  m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
+  if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
+    result["InputWorkspace"] = "Cannot process empty event workspace";
+
   return result;
 }
 
@@ -302,6 +307,8 @@ void AlignAndFocusPowder::exec() {
   tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
   m_resampleX = getProperty("ResampleX");
+  const double compressEventsTolerance = getProperty("CompressTolerance");
+  const double wallClockTolerance = getProperty("CompressWallClockTolerance");
   // determine some bits about d-space and binning
   if (m_resampleX != 0) {
     m_params.clear(); // ignore the normal rebin parameters
@@ -407,10 +414,9 @@ void AlignAndFocusPowder::exec() {
   m_progress = make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
-    double tolerance = getProperty("CompressTolerance");
-    if (tolerance > 0.) {
-      double wallClockTolerance = getProperty("CompressWallClockTolerance");
-      g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+    if (compressEventsTolerance > 0.) {
+      g_log.information() << "running CompressEvents(Tolerance="
+                          << compressEventsTolerance;
       if (!isEmpty(wallClockTolerance))
         g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
       g_log.information() << ") started at "
@@ -419,7 +425,7 @@ void AlignAndFocusPowder::exec() {
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("Tolerance", tolerance);
+      compressAlg->setProperty("Tolerance", compressEventsTolerance);
       if (!isEmpty(wallClockTolerance)) {
         compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
         compressAlg->setPropertyValue("StartTime",
@@ -712,11 +718,10 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // compress again if appropriate
-  double tolerance = getProperty("CompressTolerance");
   m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-  if ((m_outputEW) && (tolerance > 0.)) {
-    double wallClockTolerance = getProperty("CompressWallClockTolerance");
-    g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+  if ((m_outputEW) && (compressEventsTolerance > 0.)) {
+    g_log.information() << "running CompressEvents(Tolerance="
+                        << compressEventsTolerance;
     if (!isEmpty(wallClockTolerance))
       g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
     g_log.information() << ") started at "
@@ -724,7 +729,7 @@ void AlignAndFocusPowder::exec() {
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("Tolerance", tolerance);
+    compressAlg->setProperty("Tolerance", compressEventsTolerance);
     if (!isEmpty(wallClockTolerance)) {
       compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
       compressAlg->setPropertyValue("StartTime",
@@ -960,44 +965,34 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   // check if the workspaces exist with their canonical names so they are not
   // reloaded for chunks
   if ((!m_groupWS) && (!calFilename.empty()) && (!groupFilename.empty())) {
-    try {
+    if (AnalysisDataService::Instance().doesExist(m_instName + "_group"))
       m_groupWS = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(
           m_instName + "_group");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
-    }
   }
   if ((!m_calibrationWS) && (!calFilename.empty())) {
     OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
     if (offsetsWS) {
       convertOffsetsToCal(offsetsWS);
     } else {
-      try {
+      if (AnalysisDataService::Instance().doesExist(m_instName + "_cal"))
         m_calibrationWS =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 m_instName + "_cal");
-      } catch (Exception::NotFoundError &) {
-        ; // not noteworthy
-      }
       if (!m_calibrationWS) {
-        try {
-          OffsetsWorkspace_sptr offsetsWS =
+        if (AnalysisDataService::Instance().doesExist(m_instName +
+                                                      "_offsets")) {
+          offsetsWS =
               AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
                   m_instName + "_offsets");
           convertOffsetsToCal(offsetsWS);
-        } catch (Exception::NotFoundError &) {
-          ; // not noteworthy
         }
       }
     }
   }
   if ((!m_maskWS) && (!calFilename.empty())) {
-    try {
+    if (AnalysisDataService::Instance().doesExist(m_instName + "_mask"))
       m_maskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(
           m_instName + "_mask");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
-    }
   }
 
   // see if everything exists to exit early
@@ -1008,41 +1003,10 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   if (calFilename.empty() && groupFilename.empty())
     return;
 
-  // load grouping file if it was already specified
-  if (!groupFilename.empty()) {
-    g_log.information() << "Loading Grouping file \"" << groupFilename
-                        << "\"\n";
-    if (groupFilename.find(".cal") != std::string::npos) {
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
-      alg->setProperty("InputWorkspace", m_inputW);
-      alg->setPropertyValue("Filename", groupFilename);
-      alg->setProperty<bool>("MakeCalWorkspace", false);
-      alg->setProperty<bool>("MakeGroupingWorkspace", true);
-      alg->setProperty<bool>("MakeMaskWorkspace", false);
-      alg->setPropertyValue("WorkspaceName", m_instName);
-      alg->executeAsChildAlg();
-
-      // get the workspace
-      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
-    } else {
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-      alg->setProperty("InputFile", groupFilename);
-      alg->executeAsChildAlg();
-
-      // get the workspace
-      m_groupWS = alg->getProperty("OutputWorkspace");
-    }
-
-    // register the workspace with the ADS
-    const std::string name = m_instName + "_group";
-    AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-    this->setPropertyValue("GroupingWorkspace", name);
-  }
-
-  if (calFilename.empty())
-    return;
-
-  g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
+  g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
+  if (!groupFilename.empty())
+    g_log.information() << "with grouping from \"" << groupFilename << "\"";
+  g_log.information("");
 
   // bunch of booleans to keep track of things
   const bool loadMask = !m_maskWS;
@@ -1052,6 +1016,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);
   alg->setPropertyValue("Filename", calFilename);
+  alg->setPropertyValue("GroupFilename", groupFilename);
   alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);

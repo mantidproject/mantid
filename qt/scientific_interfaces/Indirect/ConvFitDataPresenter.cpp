@@ -40,10 +40,19 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
 }
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
-  auto const numberOfWorkspaces = m_convModel->numberOfWorkspaces();
-  auto const index = m_convModel->getWorkspace(0) ? numberOfWorkspaces - 1
-                                                  : numberOfWorkspaces;
-  m_convModel->setResolution(name.toStdString(), index);
+  auto const workspaceCount = m_convModel->numberOfWorkspaces();
+  auto const index =
+      m_convModel->getWorkspace(0) ? workspaceCount - 1 : workspaceCount;
+  setModelResolution(name.toStdString(), index);
+}
+
+void ConvFitDataPresenter::setModelResolution(std::string const &name,
+                                              std::size_t const &index) {
+  try {
+    m_convModel->setResolution(name, index);
+  } catch (std::exception const &ex) {
+    displayWarning(ex.what());
+  }
 }
 
 void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {

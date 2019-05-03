@@ -36,9 +36,9 @@ private:
 public:
   RotaryCounter(const int S, const int N); ///< Size,Max
 
-  int operator==(const RotaryCounter &) const;
-  int operator<(const RotaryCounter &) const;
-  int operator>(const RotaryCounter &) const;
+  bool operator==(const RotaryCounter &) const;
+  bool operator<(const RotaryCounter &) const;
+  bool operator>(const RotaryCounter &) const;
   /// Accessor operator
   int operator[](const int I) const { return RC[I]; }
   int operator++();

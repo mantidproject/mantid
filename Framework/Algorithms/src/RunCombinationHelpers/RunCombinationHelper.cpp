@@ -10,7 +10,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
@@ -143,7 +142,7 @@ RunCombinationHelper::validateInputWorkspaces(
     }
     inWS.emplace_back(ws);
     // Check that it has common binning
-    if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
+    if (!inWS.back()->isCommonBins()) {
       g_log.error("Input workspaces must have common binning for all spectra");
       throw std::invalid_argument(
           "Input workspaces must have common binning for all spectra");

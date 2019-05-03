@@ -24,12 +24,17 @@ namespace Kernel {
  *  @param type :: The type of the property
  *  @param direction :: Whether this is a Direction::Input, Direction::Output or
  * Direction::InOut (Input & Output) property
+ * @throws std::invalid_argument if the name is empty
  */
 Property::Property(std::string name, const std::type_info &type,
                    const unsigned int direction)
     : m_name(std::move(name)), m_documentation(""), m_typeinfo(&type),
       m_direction(direction), m_units(""), m_group(""), m_remember(true),
       m_autotrim(true) {
+  if (m_name.empty()) {
+    throw std::invalid_argument("An empty property name is not permitted");
+  }
+
   // Make sure a random int hasn't been passed in for the direction
   // Property & PropertyWithValue destructors will be called in this case
   if (m_direction > 2)
@@ -43,6 +48,9 @@ Property::Property(const Property &right)
       m_typeinfo(right.m_typeinfo), m_direction(right.m_direction),
       m_units(right.m_units), m_group(right.m_group),
       m_remember(right.m_remember), m_autotrim(right.m_autotrim) {
+  if (m_name.empty()) {
+    throw std::invalid_argument("An empty property name is not permitted");
+  }
   if (right.m_settings)
     m_settings.reset(right.m_settings->clone());
 }

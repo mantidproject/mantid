@@ -226,8 +226,7 @@ He3TubeEfficiency::calculateExponential(std::size_t spectraIndex,
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
   // the sample to the detector center
-  Kernel::V3D vectorFromSample = idet.getPos() - m_samplePos;
-  vectorFromSample.normalize();
+  const Kernel::V3D vectorFromSample = normalize(idet.getPos() - m_samplePos);
   Kernel::Quat rot = idet.getRotation();
   // rotate the original cylinder object axis to get the detector axis in the
   // actual instrument
@@ -324,9 +323,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det,
 double He3TubeEfficiency::distToSurface(const Kernel::V3D start,
                                         const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
-  Kernel::V3D direction = Kernel::V3D(0.0, 0.0, 0.0) - start;
-  // it needs to be a unit vector
-  direction.normalize();
+  const Kernel::V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line,
   // here called a track
   Geometry::Track track(start, direction);

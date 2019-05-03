@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ILLEnergyTransfer.h"
 
-#include "../General/Background.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QInputDialog>
@@ -28,6 +27,15 @@ ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI,
           SLOT(setInstrumentDefault()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 
   // Validate to remove invalid markers
   validateTab();
@@ -173,8 +181,6 @@ bool ILLEnergyTransfer::validate() {
 }
 
 void ILLEnergyTransfer::run() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
-
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
   QString backgroundFilename =
       m_uiForm.rfBackgroundRun->getUserInput().toString();
@@ -260,9 +266,10 @@ void ILLEnergyTransfer::run() {
                               m_backCalibScaling);
   }
 
-  reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
+  reductionAlg->setProperty("Analyser",
+                            getInstrumentDetail("analyser").toStdString());
   reductionAlg->setProperty("Reflection",
-                            instDetails["reflection"].toStdString());
+                            getInstrumentDetail("reflection").toStdString());
 
   std::string target = m_uiForm.cbSpectrumTarget->currentText().toStdString();
   reductionAlg->setProperty("SpectrumAxis", target);
@@ -321,6 +328,11 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
 }
 
 /**
+ * Handle when Run is clicked
+ */
+void ILLEnergyTransfer::runClicked() { runTab(); }
+
+/**
  * Handles plotting of the reduced ws.
  */
 void ILLEnergyTransfer::plot() {
@@ -352,11 +364,25 @@ void ILLEnergyTransfer::save() {
  * Called when the instrument has changed, used to update default values.
  */
 void ILLEnergyTransfer::setInstrumentDefault() {
-  QMap<QString, QString> instDetails = getInstrumentDetails();
+  auto const instrument = getInstrumentDetail("instrument");
 
   // Set instrument in run file widgets
-  m_uiForm.rfInput->setInstrumentOverride(instDetails["instrument"]);
-  m_uiForm.rfMapFile->setInstrumentOverride(instDetails["instrument"]);
+  m_uiForm.rfInput->setInstrumentOverride(instrument);
+  m_uiForm.rfMapFile->setInstrumentOverride(instrument);
+}
+
+void ILLEnergyTransfer::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ILLEnergyTransfer::updateRunButton(bool enabled,
+                                        std::string const &enableOutputButtons,
+                                        QString const message,
+                                        QString const tooltip) {
+  UNUSED_ARG(enableOutputButtons);
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
 }
 
 } // namespace CustomInterfaces

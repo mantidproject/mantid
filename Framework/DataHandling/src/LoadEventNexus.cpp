@@ -266,12 +266,26 @@ void LoadEventNexus::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
+  std::vector<std::string> loadType{"Default"};
+
+#ifndef _WIN32
+  loadType.push_back("Multiprocess (experimental)");
+#endif // _WIN32
 
 #ifdef MPI_EXPERIMENTAL
-  declareProperty(make_unique<PropertyWithValue<bool>>("UseParallelLoader",
+  loadType.emplace_back("MPI");
+#endif // MPI_EXPERIMENTAL
+
+  auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
+  declareProperty("LoadType", "Default", loadTypeValidator,
+                  "Set type of loader. 2 options {Default, Multiproceess},"
+                  "'Multiprocess' should work faster for big files and it is "
+                  "experimental, available only in Linux");
+
+  declareProperty(make_unique<PropertyWithValue<bool>>("LoadNexusInstrumentXML",
                                                        true, Direction::Input),
-                  "Use experimental parallel loader for loading event data.");
-#endif
+                  "Reads the embedded Instrument XML from the NeXus file "
+                  "(optional, default True). ");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -414,17 +428,17 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   std::string isooffset; // ISO8601 offset
   file.getAttr("offset", isooffset);
   DateAndTime offset(isooffset);
-  std::string unit; // time units
-  if (file.hasAttr("unit"))
-    file.getAttr("unit", unit);
+  std::string units; // time units
+  if (file.hasAttr("units"))
+    file.getAttr("units", units);
   file.closeData();
 
   // TODO. Logic here is similar to BankPulseTimes (ctor) should be consolidated
   if (heldTimeZeroType == ::NeXus::UINT64) {
-    if (unit != "ns")
+    if (units != "ns")
       logger.warning(
           "event_time_zero is uint64_t, but units not in ns. Found to be: " +
-          unit);
+          units);
     std::vector<uint64_t> nanoseconds;
     file.readData("event_time_zero", nanoseconds);
     if (nanoseconds.empty())
@@ -436,10 +450,10 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
                         offset.totalNanoseconds();
     return std::make_pair(absoluteFirst, absoluteLast);
   } else if (heldTimeZeroType == ::NeXus::FLOAT64) {
-    if (unit != "second")
+    if (units != "second")
       logger.warning("event_time_zero is double_t, but units not in seconds. "
                      "Found to be: " +
-                     unit);
+                     units);
     std::vector<double> seconds;
     file.readData("event_time_zero", seconds);
     if (seconds.empty())
@@ -479,10 +493,10 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
         auto info = file.getInfo();
         file.closeData();
         if (info.type == NeXus::UINT64) {
-          uint64_t numEvents;
-          file.readData("total_counts", numEvents);
+          uint64_t eventCount;
+          file.readData("total_counts", eventCount);
           hasTotalCounts = true;
-          return numEvents;
+          return eventCount;
         }
       } catch (::NeXus::Exception &) {
       }
@@ -631,6 +645,8 @@ LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
       nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog);
   return ret;
 }
+
+enum class LoadEventNexus::LoaderType { MPI, MULTIPROCESS, DEFAULT };
 
 //-----------------------------------------------------------------------------
 /**
@@ -839,37 +855,35 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // --------- Loading only one bank ? ----------------------------------
   std::vector<std::string> someBanks = getProperty("BankName");
-  bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
+  const bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
   if ((!someBanks.empty()) && (!monitors)) {
+    std::vector<std::string> eventedBanks;
+    eventedBanks.reserve(someBanks.size());
+    for (const auto &bank : someBanks) {
+      eventedBanks.emplace_back(bank + "_events");
+    }
     // check that all of the requested banks are in the file
-    for (auto &someBank : someBanks) {
-      bool foundIt = false;
-      for (auto &bankName : bankNames) {
-        if (bankName == someBank + "_events") {
-          foundIt = true;
-          break;
-        }
-      }
-      if (!foundIt) {
-        throw std::invalid_argument("No entry named '" + someBank +
-                                    "' was found in the .NXS file.\n");
-      }
+    const auto invalidBank =
+        std::find_if(eventedBanks.cbegin(), eventedBanks.cend(),
+                     [&bankNames](const auto &someBank) {
+                       return std::none_of(bankNames.cbegin(), bankNames.cend(),
+                                           [&someBank](const auto &name) {
+                                             return name == someBank;
+                                           });
+                     });
+    if (invalidBank != eventedBanks.cend()) {
+      throw std::invalid_argument("No entry named '" + *invalidBank +
+                                  "' was found in the .NXS file.");
     }
 
     // change the number of banks to load
-    bankNames.clear();
-    for (auto &someBank : someBanks)
-      bankNames.push_back(someBank + "_events");
+    bankNames.assign(eventedBanks.cbegin(), eventedBanks.cend());
 
-    // how many events are in a bank
-    bankNumEvents.clear();
-    bankNumEvents.assign(someBanks.size(),
-                         1); // TODO this equally weights the banks
+    // TODO this equally weights the banks
+    bankNumEvents.assign(someBanks.size(), 1);
 
     if (!SingleBankPixelsOnly)
       someBanks.clear(); // Marker to load all pixels
-  } else {
-    someBanks.clear();
   }
 
   prog->report("Initializing all pixels");
@@ -898,20 +912,53 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   longest_tof = 0.;
 
   bool loaded{false};
-  if (canUseParallelLoader(haveWeights, oldNeXusFileNames, classType)) {
+  auto loaderType = defineLoaderType(haveWeights, oldNeXusFileNames, classType);
+  if (loaderType != LoaderType::DEFAULT) {
     auto ws = m_ws->getSingleHeldWorkspace();
     m_file->close();
-    try {
-      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames,
-                                event_id_is_spec);
-      g_log.information() << "Used ParallelEventLoader.\n";
-      loaded = true;
-      shortest_tof = 0.0;
-      longest_tof = 1e10;
-    } catch (const std::runtime_error &) {
-      g_log.warning()
-          << "ParallelEventLoader failed, falling back to default loader.\n";
+    if (loaderType == LoaderType::MPI) {
+      try {
+        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name,
+                                     bankNames, event_id_is_spec);
+        g_log.information() << "Used MPI ParallelEventLoader.\n";
+        loaded = true;
+        shortest_tof = 0.0;
+        longest_tof = 1e10;
+      } catch (const std::runtime_error &) {
+        g_log.warning()
+            << "MPI event loader failed, falling back to default loader.\n";
+      }
+    } else {
+
+      struct ExceptionOutput {
+        static void out(decltype(g_log) &log, const std::exception &e,
+                        int level = 0) {
+          log.warning() << std::string(level, ' ') << "exception: " << e.what()
+                        << '\n';
+          try {
+            std::rethrow_if_nested(e);
+          } catch (const std::exception &e) {
+            ExceptionOutput::out(log, e, level + 1);
+          } catch (...) {
+          }
+        }
+      };
+
+      try {
+        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name,
+                                              bankNames, event_id_is_spec,
+                                              getProperty("Precount"));
+        g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
+        loaded = true;
+        shortest_tof = 0.0;
+        longest_tof = 1e10;
+      } catch (const std::exception &e) {
+        ExceptionOutput::out(g_log, e);
+        g_log.warning() << "\nMultiprocess event loader failed, falling back "
+                           "to default loader.\n";
+      }
     }
+
     safeOpenFile(m_filename);
   }
   if (!loaded) {
@@ -1430,37 +1477,36 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
 
 /// The parallel loader currently has no support for a series of special
 /// cases, as indicated by the return value of this method.
-bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
-                                          const bool oldNeXusFileNames,
-                                          const std::string &classType) const {
+LoadEventNexus::LoaderType
+LoadEventNexus::defineLoaderType(const bool haveWeights,
+                                 const bool oldNeXusFileNames,
+                                 const std::string &classType) const {
+  auto propVal = getPropertyValue("LoadType");
+  if (propVal == "Default")
+    return LoaderType::DEFAULT;
+
+  bool noParallelConstrictions = true;
+  noParallelConstrictions &= !(m_ws->nPeriods() != 1);
+  noParallelConstrictions &= !haveWeights;
+  noParallelConstrictions &= !oldNeXusFileNames;
+  noParallelConstrictions &=
+      !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &=
+      !((filter_time_start != Types::Core::DateAndTime::minimum() ||
+         filter_time_stop != Types::Core::DateAndTime::maximum()));
+  noParallelConstrictions &=
+      !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+         !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
+         !isDefault("ChunkNumber")));
+  noParallelConstrictions &= !(classType != "NXevent_data");
+
+  if (!noParallelConstrictions)
+    return LoaderType::DEFAULT;
 #ifndef MPI_EXPERIMENTAL
-  // Actually the parallel loader would work also in non-MPI builds but it is
-  // likely to be slower than the default loader and may also exhibit unusual
-  // behavior for non-standard Nexus files.
-  return false;
+  return LoaderType::MULTIPROCESS;
 #else
-  bool useParallelLoader = getProperty("UseParallelLoader");
-  if (!useParallelLoader)
-    return false;
+  return propVal == "MPI" ? LoaderType::MPI : LoaderType::MULTIPROCESS;
 #endif
-  if (m_ws->nPeriods() != 1)
-    return false;
-  if (haveWeights)
-    return false;
-  if (oldNeXusFileNames)
-    return false;
-  if (filter_tof_min != -1e20 || filter_tof_max != 1e20)
-    return false;
-  if (filter_time_start != Types::Core::DateAndTime::minimum() ||
-      filter_time_stop != Types::Core::DateAndTime::maximum())
-    return false;
-  if (!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
-      !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
-      !isDefault("ChunkNumber"))
-    return false;
-  if (classType != "NXevent_data")
-    return false;
-  return true;
 }
 
 Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(

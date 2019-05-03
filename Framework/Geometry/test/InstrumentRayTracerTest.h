@@ -120,6 +120,7 @@ public:
     Instrument_sptr testInst = setupInstrument();
     InstrumentRayTracer tracker(testInst);
     V3D testDir(0.010, 0.0, 15.004);
+    testDir.normalize();
     tracker.trace(testDir);
     Links results = tracker.getResults();
     TS_ASSERT_EQUALS(results.size(), 1);
@@ -147,6 +148,14 @@ public:
     TS_ASSERT_EQUALS(results.size(), 0);
   }
 
+  void test_That_traceFromSample_throws_for_zero_dir() {
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    InstrumentRayTracer tracker(inst);
+    constexpr V3D testDir(0., 0., 0.);
+    TS_ASSERT_THROWS_ANYTHING(tracker.traceFromSample(testDir));
+  }
+
   /** Test ray tracing into a rectangular detector
    *
    * @param inst :: instrument with 1 rect
@@ -156,9 +165,8 @@ public:
    */
   void doTestRectangularDetector(std::string message, Instrument_sptr inst,
                                  V3D testDir, int expectX, int expectY) {
-    //    std::cout << message << '\n';
     InstrumentRayTracer tracker(inst);
-    testDir.normalize(); // Force to be unit vector
+    testDir.normalize();
     tracker.traceFromSample(testDir);
 
     Links results = tracker.getResults();
@@ -214,7 +222,6 @@ public:
                               V3D(1.0, 0.0, 0.0), -1, -1);
     doTestRectangularDetector("Beam parallel to panel", inst,
                               V3D(0.0, 1.0, 0.0), -1, -1);
-    doTestRectangularDetector("Zero-beam", inst, V3D(0.0, 0.0, 0.0), -1, -1);
   }
 
 private:

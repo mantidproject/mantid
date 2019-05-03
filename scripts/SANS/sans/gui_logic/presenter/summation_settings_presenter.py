@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from sans.common.enums import BinningType
+
 
 class SummationSettingsPresenter(object):
     def __init__(self, summation_settings, view, parent_view):
@@ -26,9 +28,19 @@ class SummationSettingsPresenter(object):
     def _handle_bin_settings_changed(self):
         self._save_bin_settings_to_model()
 
-    def _handle_binning_type_changed(self, type_of_binning):
+    def _handle_binning_type_changed(self, index):
+        type_of_binning = self._binning_type_index_to_type(index)
         self._switch_binning_type(type_of_binning)
         self._refresh()
+
+    @staticmethod
+    def _binning_type_index_to_type(index):
+        if index == 0:
+            return BinningType.Custom
+        elif index == 1:
+            return BinningType.FromMonitors
+        elif index == 2:
+            return BinningType.SaveAsEventData
 
     def _switch_binning_type(self, type_of_binning):
         self._summation_settings.set_histogram_binning_type(type_of_binning)

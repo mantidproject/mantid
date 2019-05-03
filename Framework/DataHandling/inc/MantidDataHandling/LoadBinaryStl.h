@@ -24,9 +24,11 @@ public:
   static constexpr uint32_t TRIANGLE_DATA_SIZE = 50;
   static constexpr uint32_t TRIANGLE_COUNT_DATA_SIZE = 4;
   static constexpr uint32_t VECTOR_DATA_SIZE = 12;
-  LoadBinaryStl(std::string filename) : LoadStl(filename) {}
-  LoadBinaryStl(std::string filename, ReadMaterial::MaterialParameters params)
-      : LoadStl(filename, params) {}
+  LoadBinaryStl(std::string filename, ScaleUnits scaleType)
+      : LoadStl(filename, scaleType) {}
+  LoadBinaryStl(std::string filename, ScaleUnits scaleType,
+                ReadMaterial::MaterialParameters params)
+      : LoadStl(filename, scaleType, params) {}
   std::unique_ptr<Geometry::MeshObject> readStl() override;
   static bool isBinarySTL(std::string filename);
 

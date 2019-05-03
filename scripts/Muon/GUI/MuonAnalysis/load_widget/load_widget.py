@@ -18,7 +18,7 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPr
 
 
 class LoadWidget(object):
-    def __init__(self, loaded_data, instrument, parent):
+    def __init__(self, loaded_data, context, parent):
         # set up the views
         self.load_file_view = BrowseFileWidgetView(parent)
         self.load_run_view = LoadRunWidgetView(parent)
@@ -26,12 +26,12 @@ class LoadWidget(object):
                                                load_file_view=self.load_file_view,
                                                load_run_view=self.load_run_view)
         self.load_widget = LoadWidgetPresenter(self.load_widget_view,
-                                               LoadWidgetModel(loaded_data))
+                                               LoadWidgetModel(loaded_data, context))
 
-        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(loaded_data))
-        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(loaded_data))
+        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(loaded_data, context))
+        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(loaded_data, context))
 
         self.load_widget.set_load_file_widget(self.file_widget)
         self.load_widget.set_load_run_widget(self.run_widget)
 
-        self.load_widget.set_current_instrument(instrument)
+        self.load_widget.set_current_instrument(context.data_context.instrument)

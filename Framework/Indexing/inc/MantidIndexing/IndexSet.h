@@ -35,6 +35,14 @@ public:
   public:
     const_iterator(const IndexSet &indexSet, const size_t index)
         : m_indexSet(indexSet), m_index(index) {}
+    const_iterator &operator=(const const_iterator &other) {
+      if (&m_indexSet != &other.m_indexSet) {
+        throw std::invalid_argument(
+            "Cannot assign iterators from different IndexSet objects.");
+      }
+      m_index = other.m_index;
+      return *this;
+    }
 
   private:
     friend class boost::iterator_core_access;

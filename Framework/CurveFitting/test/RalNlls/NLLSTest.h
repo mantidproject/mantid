@@ -14,8 +14,6 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 
-#include <iostream>
-
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::API;

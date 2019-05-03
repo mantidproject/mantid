@@ -14,7 +14,7 @@
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 #include "MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>
@@ -136,8 +136,8 @@ void ALCDataLoadingPresenter::changeWatchState(int state) {
 void ALCDataLoadingPresenter::load(const std::string &lastFile) {
   m_view->disableAll();
   // Use Path.toString() to ensure both are in same (native) format
-  Poco::Path firstRun(m_view->firstRun());
-  Poco::Path lastRun(lastFile);
+  Poco::Path firstRunPath(m_view->firstRun());
+  Poco::Path lastRunPath(lastFile);
 
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
@@ -152,8 +152,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
-    alg->setProperty("FirstRun", firstRun.toString());
-    alg->setProperty("LastRun", lastRun.toString());
+    alg->setProperty("FirstRun", firstRunPath.toString());
+    alg->setProperty("LastRun", lastRunPath.toString());
     alg->setProperty("LogValue", m_view->log());
     alg->setProperty("Function", m_view->function());
     alg->setProperty("Type", m_view->calculationType());
@@ -239,20 +239,21 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   try //... to load the first run
   {
-    IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadMuonNexus");
-    load->setChild(true); // Don't want workspaces in the ADS
-    load->setProperty("Filename", m_view->firstRun());
+    IAlgorithm_sptr loadAlg =
+        AlgorithmManager::Instance().create("LoadMuonNexus");
+    loadAlg->setChild(true); // Don't want workspaces in the ADS
+    loadAlg->setProperty("Filename", m_view->firstRun());
     // We need logs only but we have to use LoadMuonNexus
     // (can't use LoadMuonLogs as not all the logs would be
     // loaded), so we load the minimum amount of data, i.e., one spectrum
-    load->setPropertyValue("SpectrumMin", "1");
-    load->setPropertyValue("SpectrumMax", "1");
-    load->setPropertyValue("OutputWorkspace", "__NotUsed");
-    load->execute();
+    loadAlg->setPropertyValue("SpectrumMin", "1");
+    loadAlg->setPropertyValue("SpectrumMax", "1");
+    loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
+    loadAlg->execute();
 
-    loadedWs = load->getProperty("OutputWorkspace");
-    firstGoodData = load->getProperty("FirstGoodData");
-    timeZero = load->getProperty("TimeZero");
+    loadedWs = loadAlg->getProperty("OutputWorkspace");
+    firstGoodData = loadAlg->getProperty("FirstGoodData");
+    timeZero = loadAlg->getProperty("TimeZero");
   } catch (...) {
     m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
     m_view->setAvailablePeriods(
@@ -266,8 +267,8 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
-  for (auto it = properties.begin(); it != properties.end(); ++it) {
-    logs.push_back((*it)->name());
+  for (auto property : properties) {
+    logs.push_back(property->name());
   }
   m_view->setAvailableLogs(logs);
 
@@ -325,19 +326,40 @@ void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
 bool ALCDataLoadingPresenter::checkCustomGrouping() {
   bool groupingOK = true;
   if (m_view->detectorGroupingType() == "Custom") {
-    auto detectors =
-        Mantid::Kernel::Strings::parseRange(m_view->getForwardGrouping());
-    const auto backward =
-        Mantid::Kernel::Strings::parseRange(m_view->getBackwardGrouping());
+    auto detectors = Mantid::Kernel::Strings::parseRange(
+        isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
+    const auto backward = Mantid::Kernel::Strings::parseRange(
+        isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
+    if (!groupingOK) {
+      return false;
+    }
     detectors.insert(detectors.end(), backward.begin(), backward.end());
-    for (const int det : detectors) {
-      if (det < 0 || det > static_cast<int>(m_numDetectors)) {
-        groupingOK = false;
-        break;
-      }
+    if (std::any_of(detectors.cbegin(), detectors.cend(),
+                    [this](const auto det) {
+                      return det < 0 || det > static_cast<int>(m_numDetectors);
+                    })) {
+      groupingOK = false;
     }
   }
   return groupingOK;
 }
+/**
+ * Check basic group string is valid
+ * i.e. does not contain letters or start with , or -
+ * @param group :: the string of the grouping
+ * @param isValid :: bool to say if the string is valid
+ * @returns :: True if grouping OK, false if bad
+ */
+std::string
+ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group,
+                                               bool &isValid) {
+  if (!std::isdigit(group[0]) ||
+      std::any_of(std::begin(group), std::end(group), ::isalpha)) {
+    isValid = false;
+    return "";
+  }
+  return group;
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

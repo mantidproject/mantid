@@ -29,6 +29,7 @@ protected:
   void addModelData(const std::string &name) override;
 
 private:
+  void setModelResolution(std::string const &name, std::size_t const &index);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;

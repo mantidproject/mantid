@@ -236,6 +236,18 @@ public:
   }
 
   void
+  test_that_hasWorkspace_returns_true_when_the_model_contains_a_workspace() {
+    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
+    TS_ASSERT(model->hasWorkspace("WorkspaceName"));
+  }
+
+  void
+  test_that_hasWorkspace_returns_false_when_the_model_does_not_contain_a_workspace() {
+    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
+    TS_ASSERT(!model->hasWorkspace("WrongName"));
+  }
+
+  void
   test_that_getWorkspace_returns_a_nullptr_when_getWorkspace_is_provided_an_out_of_range_index() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
     TS_ASSERT_EQUALS(model->getWorkspace(1), nullptr);
@@ -303,7 +315,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void
@@ -332,7 +344,7 @@ public:
 
     model->setExcludeRegion("0,1,6,4", 0, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,4.0,6.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,4.000,6.000");
   }
 
   void
@@ -594,7 +606,7 @@ public:
 
     model->setExcludeRegion("0,1,3,4", 3, 0);
 
-    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.0,1.0,3.0,4.0");
+    TS_ASSERT_EQUALS(model->getExcludeRegion(0, 0), "0.000,1.000,3.000,4.000");
   }
 
   void

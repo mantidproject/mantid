@@ -166,8 +166,8 @@ ConfigServiceImpl::ConfigServiceImpl()
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
-      m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
+      m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
+      m_isProxySet(false) {
   // getting at system details
   m_pSysConfig =
       std::make_unique<WrappedObject<Poco::Util::SystemConfiguration>>();
@@ -279,7 +279,6 @@ ConfigServiceImpl::ConfigServiceImpl()
  *  Prevents client from calling 'delete' on the pointer handed out by Instance
  */
 ConfigServiceImpl::~ConfigServiceImpl() {
-  // std::cerr << "ConfigService destroyed.\n";
   Kernel::Logger::shutdown();
   clearFacilities();
 }
@@ -357,13 +356,14 @@ std::string checkForBadConfigOptions(const std::string &filename,
     // Print warning to error channel and comment out offending line
     if (!is_ok) {
       const auto end = line.find("=");
-      std::cerr << "Encontered invalid key \"";
+      g_log.warning() << "Encontered invalid key \"";
       if (end != std::string::npos) {
-        std::cerr << Kernel::Strings::strip(line.substr(0, end));
+        g_log.warning() << Kernel::Strings::strip(line.substr(0, end));
       } else {
-        std::cerr << Kernel::Strings::strip(line);
+        g_log.warning() << Kernel::Strings::strip(line);
       }
-      std::cerr << "\" in " << filename << " on line " << line_num << std::endl;
+      g_log.warning() << "\" in " << filename << " on line " << line_num
+                      << std::endl;
 
       // comment out the property
       resultPropertiesString << '#';
@@ -419,9 +419,9 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     }
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
-    std::cerr << "Problem loading the configuration file " << filename << " "
-              << e.what() << '\n';
-    std::cerr << "Mantid is unable to start.\n" << std::endl;
+    g_log.error() << "Problem loading the configuration file " << filename
+                  << " " << e.what() << '\n';
+    g_log.error() << "Mantid is unable to start.\n" << std::endl;
     throw;
   }
 
@@ -1276,41 +1276,40 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
   args.emplace_back("/value");  // windows
 #endif
 
-  if (!cmd.empty()) {
-    try {
-      Poco::Pipe outPipe, errorPipe;
-      Poco::ProcessHandle ph =
-          Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
-      const int rc = ph.wait();
-      // Only if the command returned successfully.
-      if (rc == 0) {
-        Poco::PipeInputStream pipeStream(outPipe);
-        std::stringstream stringStream;
-        Poco::StreamCopier::copyStream(pipeStream, stringStream);
-        const std::string result = stringStream.str();
+#if defined __APPLE__ || defined _WIN32
+  try {
+    Poco::Pipe outPipe, errorPipe;
+    Poco::ProcessHandle ph =
+        Poco::Process::launch(cmd, args, nullptr, &outPipe, &errorPipe);
+    const int rc = ph.wait();
+    // Only if the command returned successfully.
+    if (rc == 0) {
+      Poco::PipeInputStream pipeStream(outPipe);
+      std::stringstream stringStream;
+      Poco::StreamCopier::copyStream(pipeStream, stringStream);
+      const std::string result = stringStream.str();
 #ifdef __APPLE__
-        const std::string product_name =
-            getValueFromStdOut(result, "ProductName:");
-        const std::string product_vers =
-            getValueFromStdOut(result, "ProductVersion:");
+      const std::string product_name =
+          getValueFromStdOut(result, "ProductName:");
+      const std::string product_vers =
+          getValueFromStdOut(result, "ProductVersion:");
 
-        description = product_name + " " + product_vers;
+      description = product_name + " " + product_vers;
 #elif _WIN32
-        description = getValueFromStdOut(result, "Caption=");
+      description = getValueFromStdOut(result, "Caption=");
 #else
-        UNUSED_ARG(result); // only used on mac and windows
+      UNUSED_ARG(result); // only used on mac and windows
 #endif
-      } else {
-        std::stringstream messageStream;
-        messageStream << "command \"" << cmd << "\" failed with code: " << rc;
-        g_log.debug(messageStream.str());
-      }
-    } catch (Poco::SystemException &e) {
-      g_log.debug("command \"" + cmd + "\" failed");
-      g_log.debug(e.what());
+    } else {
+      std::stringstream messageStream;
+      messageStream << "command \"" << cmd << "\" failed with code: " << rc;
+      g_log.debug(messageStream.str());
     }
+  } catch (Poco::SystemException &e) {
+    g_log.debug("command \"" + cmd + "\" failed");
+    g_log.debug(e.what());
   }
-
+#endif
   return description;
 }
 
@@ -1927,10 +1926,12 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
   if (facilityName.empty())
     return this->getFacility();
 
-  for (auto facility : m_facilities) {
-    if ((*facility).name() == facilityName) {
-      return *facility;
-    }
+  auto facility = std::find_if(
+      m_facilities.cbegin(), m_facilities.cend(),
+      [&facilityName](const auto f) { return f->name() == facilityName; });
+
+  if (facility != m_facilities.cend()) {
+    return **facility;
   }
 
   throw Exception::NotFoundError("Facilities", facilityName);

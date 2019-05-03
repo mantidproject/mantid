@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
-#include <iostream>
+#include <ostream>
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -4,19 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
 import unittest
 
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
 
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class IteratorWithException:
@@ -73,8 +69,10 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
-        self.data = MuonLoadData()
-        self.model = BrowseFileWidgetModel(self.data)
+        setup_context_for_tests(self)
+        
+        self.data_context.instrument = 'EMU'
+        self.model = BrowseFileWidgetModel(self.loaded_data, self.context)
         self.model.exception_message_for_failed_files = mock.Mock()
 
         self.view.disable_load_buttons = mock.Mock()
@@ -82,7 +80,6 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.warning_popup = mock.Mock()
 
         self.presenter = BrowseFileWidgetPresenter(self.view, self.model)
-        self.presenter.enable_multiple_files(False)
 
         patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils')
         self.addCleanup(patcher.stop)
@@ -106,6 +103,14 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     def load_failure(self):
         raise ValueError("Error text")
+
+    def create_fake_workspace(self, name):
+        workspace_mock = mock.MagicMock()
+        instrument_mock = mock.MagicMock()
+        instrument_mock.getName.return_value = 'EMU'
+        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+
+        return {'OutputWorkspace': [workspace_mock]}
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
@@ -154,85 +159,45 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.enable_load_buttons.call_count, 1)
 
     @run_test_with_and_without_threading
-    def test_files_not_loaded_into_model_if_multiple_files_selected_from_browse_in_single_file_mode(self):
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.model.execute = mock.Mock()
-
-        self.presenter.on_browse_button_clicked()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.model.execute.call_count, 0)
-        self.assertEqual(self.view.disable_load_buttons.call_count, 0)
-        self.assertEqual(self.view.enable_load_buttons.call_count, 0)
-
-    @run_test_with_and_without_threading
-    def test_files_not_loaded_into_model_if_multiple_files_entered_by_user_in_single_file_mode(self):
-        self.mock_user_input_text("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.model.execute = mock.Mock()
-
-        self.presenter.handle_file_changed_by_user()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.model.execute.call_count, 0)
-        self.assertEqual(self.view.disable_load_buttons.call_count, 0)
-        self.assertEqual(self.view.enable_load_buttons.call_count, 0)
-
-    @run_test_with_and_without_threading
-    def test_warning_shown_if_multiple_files_selected_from_browse_in_single_file_mode(self):
-        self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
-
-        self.presenter.on_browse_button_clicked()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.view.warning_popup.call_count, 1)
-
-    @run_test_with_and_without_threading
-    def test_warning_shown_if_multiple_files_entered_by_user_in_single_file_mode(self):
-        self.mock_user_input_text("C:/dir1/file1.nxs;C:/dir2/file2.nxs")
-        self.mock_model_to_load_workspaces([[1], [2]], [1234, 1235], ["C:/dir1/file1.nxs;C:/dir2/file2.nxs"])
-
-        self.presenter.handle_file_changed_by_user()
-        self.wait_for_thread(self.presenter._load_thread)
-
-        self.assertEqual(self.view.warning_popup.call_count, 1)
-
-    @run_test_with_and_without_threading
     def test_single_file_from_browse_loaded_into_model_and_view_in_single_file_mode(self):
+        workspace = self.create_fake_workspace(1)
+
         self.mock_browse_button_to_return_files(["C:/dir1/file1.nxs"])
-        self.mock_model_to_load_workspaces([[1]], [1234], ["C:/dir1/file1.nxs"])
+        self.mock_model_to_load_workspaces([workspace], [1234], ["C:/dir1/file1.nxs"])
         self.view.set_file_edit = mock.Mock()
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs"])
-        self.assertEqual(self.model.loaded_workspaces, [[1]])
-        self.assertEqual(self.model.loaded_runs, [1234])
+        self.assertEqual(self.model.loaded_workspaces, [workspace])
+        self.assertEqual(self.model.loaded_runs, [[1234]])
 
         self.view.set_file_edit.assert_called_once_with("C:/dir1/file1.nxs", mock.ANY)
 
     @run_test_with_and_without_threading
     def test_single_file_from_user_input_loaded_into_model_and_view_in_single_file_mode(self):
+        workspace = self.create_fake_workspace(1)
+
         self.view.set_file_edit = mock.Mock()
-        self.mock_model_to_load_workspaces([[1]], [1234], ["C:/dir1/file1.nxs"])
+        self.mock_model_to_load_workspaces([workspace], [1234], ["C:/dir1/file1.nxs"])
         self.mock_user_input_text("C:/dir1/file1.nxs")
 
         self.presenter.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/file1.nxs"])
-        self.assertEqual(self.model.loaded_workspaces, [[1]])
-        self.assertEqual(self.model.loaded_runs, [1234])
+        self.assertEqual(self.model.loaded_workspaces, [workspace])
+        self.assertEqual(self.model.loaded_runs, [[1234]])
 
         self.view.set_file_edit.assert_called_once_with("C:/dir1/file1.nxs", mock.ANY)
 
     @run_test_with_and_without_threading
     def test_that_if_invalid_file_selected_in_browser_view_does_not_change(self):
+        workspace = self.create_fake_workspace(1)
+
         self.mock_browse_button_to_return_files(["not_a_file"])
-        self.mock_model_to_load_workspaces([[1]], [1234], ["not_a_file"])
+        self.mock_model_to_load_workspaces([workspace], [1234], ["not_a_file"])
 
         self.view.set_file_edit = mock.Mock()
         self.view.reset_edit_to_cached_value = mock.Mock()
@@ -251,7 +216,9 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_view_reverts_to_previous_text_if_users_supplies_invalid_text(self):
-        self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
+        workspace = self.create_fake_workspace(1)
+
+        self.load_workspaces_into_model_and_view_from_browse([workspace], [[1234]], ["C:/dir1/EMU0001234.nxs"])
 
         invalid_user_input = ["some random text", "1+1=2", "..."]
 
@@ -267,7 +234,8 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_model_and_interface_revert_to_previous_values_if_load_fails_from_browse(self):
-        self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
+        workspace = self.create_fake_workspace(1)
+        self.load_workspaces_into_model_and_view_from_browse([workspace], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
@@ -275,15 +243,16 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/EMU0001234.nxs"])
-        self.assertEqual(self.model.loaded_workspaces, [[1]])
-        self.assertEqual(self.model.loaded_runs, [1234])
+        self.assertEqual(self.model.loaded_workspaces, [workspace])
+        self.assertEqual(self.model.loaded_runs, [[1234]])
 
         self.assertEqual(self.view.reset_edit_to_cached_value.call_count, 0)
         self.assertEqual(self.view.set_file_edit.call_args[0][0], "C:/dir1/EMU0001234.nxs")
 
     @run_test_with_and_without_threading
     def test_that_model_and_interface_revert_to_previous_values_if_load_fails_from_user_input(self):
-        self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
+        workspace = self.create_fake_workspace(1)
+        self.load_workspaces_into_model_and_view_from_browse([workspace], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
         self.view.set_file_edit("C:\dir2\EMU000123.nxs")
@@ -292,8 +261,8 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assertEqual(self.model.loaded_filenames, ["C:/dir1/EMU0001234.nxs"])
-        self.assertEqual(self.model.loaded_workspaces, [[1]])
-        self.assertEqual(self.model.loaded_runs, [1234])
+        self.assertEqual(self.model.loaded_workspaces, [workspace])
+        self.assertEqual(self.model.loaded_runs, [[1234]])
 
         self.assertEqual(self.view.reset_edit_to_cached_value.call_count, 1)
 

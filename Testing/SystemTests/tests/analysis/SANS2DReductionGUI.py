@@ -43,7 +43,7 @@ class SANS2DMinimalBatchReduction(systemtesting.MantidSystemTest):
     def __init__(self):
         super(SANS2DMinimalBatchReduction, self).__init__()
         config['default.instrument'] = 'SANS2D'
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
 
     def runTest(self):
@@ -202,7 +202,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.checkFittingSettings(fit_settings)
 
     def validate(self):
-        self.tolerance_is_reller = True
+        self.tolerance_is_rel_err = True
         self.tolerance = 1.0e-2
         self.disableChecking.append('Instrument')
         return "trans_test_rear_1D_1.5_12.5","SANSReductionGUI.nxs"

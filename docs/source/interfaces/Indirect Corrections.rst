@@ -7,14 +7,14 @@ Indirect Corrections
 Overview
 --------
 
-.. interface:: Corrections
-  :align: right
-  :width: 350
-
 Provides correction routines for quasielastic, inelastic and diffraction
 reductions.
 
-These interfaces do not support GroupWorkspace as input.
+These interfaces do not support GroupWorkspace's as input.
+
+.. interface:: Corrections
+  :align: right
+  :width: 350
 
 Action Buttons
 ~~~~~~~~~~~~~~
@@ -25,60 +25,118 @@ Action Buttons
 Py
   Exports a Python script which will replicate the processing done by the current tab.
 
-Run
-  Runs the processing configured on the current tab.
-
 Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
+Container Subtraction
+---------------------
+
+The Container Subtraction Tab is used to remove the container's contribution to a run.
+
+Once run the corrected output and container correction is shown in the preview plot. Note 
+that when this plot shows the result of a calculation the X axis is always in wavelength, 
+however when data is initially selected the X axis unit matches that of the sample workspace.
+
+The input and container workspaces will be converted to wavelength (using
+:ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
+as their X unit.
+
+.. interface:: Corrections
+  :widget: tabContainerSubtraction
+ 
+Options
+~~~~~~~
+
+Sample
+  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the sample.
+  
+Container
+  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the container.
+  
+Scale Container by Factor
+  Allows the container's intensity to be scaled by a given scale factor before being used in the corrections calculation.
+
+Shift X-values by Adding
+  Allows the X-values to be shifted by a specified amount.
+
+Spectrum
+  Changes the spectrum displayed in the preview plot.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot Spectrum
+  Gives the option to create a plot of the spectrum selected in the spin box for the corrected workspace.
+
+Plot Contour
+  Gives the option to create a contour plot of the corrected workspace.
+  
+Save Result
+  If enabled the result will be saved as a NeXus file in the default save directory.
+
 Calculate Paalman Pings
 -----------------------
+
+Calculates absorption corrections in the Paalman & Pings absorption factors that
+could be applied to the data when given information about the sample (and
+optionally the container) geometry.
 
 .. interface:: Corrections
   :widget: tabCalculatePaalmanPings
 
-Calculates absorption corrections in the Paalman & Pings absorption factors that
-could be applied to the data when given information about the sample (and
-optionally can) geometry.
-
 Options
 ~~~~~~~
 
-Input
+Sample Input
   Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
-Use Can
+Use Container
   If checked allows you to select a workspace for the container in the format of
   either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+
+Corrections Details
+  These options will be automatically preset to the default values read from the sample workspace, 
+  whenever possible. They can be overridden manually.(see below) 
 
 Sample Shape
   Sets the shape of the sample, this affects the options for the shape details
   (see below).
 
-Sample/Can Number Density
-  Density of the sample or container.
+Sample Details Method
+  Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
+  the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
 
-Sample/Can Chemical Formula
-  Chemical formula of the sample or can material. This must be provided in the
+Sample/Container Mass density, Atom Number Density or Formula Number Density
+  Density of the sample or container. This is used in the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm. If Atom Number Density is used, the NumberDensityUnit property is set to *Atoms* and if
+  Formula Number Density is used then NumberDensityUnit is set to *Formula Units*.
+
+Sample/Container Chemical Formula
+  Chemical formula of the sample or container material. This must be provided in the
   format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
   algorithm.
 
-Plot Output
-  Plots the :math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,sc}` and
-  :math:`A_{c,c}` workspaces as spectra plots.
+Cross Sections
+  Selecting the Cross Sections option in the Sample Details combobox will allow you to enter coherent,
+  incoherent and attenuation cross sections for the Sample and Container (units in barns).
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the parameter selected in the neighbouring combobox.
 
 Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
+  Saves the result in the default save directory.
 
 Correction Details
 ~~~~~~~~~~~~~~~~~~
-
-These options will be automatically preset to the default values read from the sample workspace, whenever possible.
-They can be overridden manually.
 
 Emode
   The energy transfer mode. All the options except *Efixed* require the input workspaces to be in wavelength.
@@ -92,7 +150,7 @@ Emode
 Efixed
   The value of the incident (indirect) or final (direct) energy in `mev`. Specified in the instrument parameter file.
 
-NumberWavelength
+Number Wavelengths
   Number of wavelength points to compute the corrections for. Ignored for *Efixed*.
 
 Interpolate
@@ -118,12 +176,12 @@ Sample Thickness
   Thickness of sample in :math:`cm`.
 
 Sample Angle
-  Sample angle in degrees.
+  Angle of the sample to the beam in degrees.
 
-Can Front Thickness
+Container Front Thickness
   Thickness of front container in :math:`cm`.
 
-Can Back Thickness
+Container Back Thickness
   Thickness of back container in :math:`cm`.
 
 Cylinder
@@ -134,8 +192,7 @@ Cylinder
 
 The calculation for a cylindrical geometry is performed by the
 :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
-algorithm, this algorithm is currently only available on Windows as it uses
-FORTRAN code dependent of F2Py.
+algorithm.
 
 Sample Inner Radius
   Radius of the inner wall of the sample in :math:`cm`.
@@ -153,7 +210,7 @@ Beam Width
   Width of incident beam in :math:`cm`.
 
 Step Size
-  Step size used in calculation.
+  Step size used in calculation in :math:`cm`.
 
 Annulus
 #######
@@ -163,8 +220,7 @@ Annulus
 
 The calculation for an annular geometry is performed by the
 :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
-algorithm, this algorithm is currently only available on Windows as it uses
-FORTRAN code dependent of F2Py.
+algorithm.
 
 The options here are the same as for Cylinder.
 
@@ -195,132 +251,87 @@ References:
 2. A K Soper, W S Howells & A C Hannon, `RAL Report RAL-89-046 (1989) <http://wwwisis2.isis.rl.ac.uk/Disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0%20Intro.pdf>`_
 3. H H Paalman & C J Pings, `J Appl Phys 33 2635 (1962) <http://dx.doi.org/10.1063/1.1729034>`_
 
-Apply Absorption Corrections
-----------------------------
+Calculate Monte Carlo Absorption
+--------------------------------
 
-.. interface:: Corrections
-  :widget: tabApplyAbsorptionCorrections
-
-The Apply Corrections tab applies the corrections calculated in the Calculate Paalman 
-Pings or Calculate Monte Carlo Absorption tabs of the Indirect Data Corrections interface.
-
-This uses the :ref:`ApplyPaalmanPingsCorrection
-<algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
-the form of the Paalman & Pings correction factors. When *Use Can* is disabled
-only the :math:`A_{s,s}` factor must be provided, when using a container the
-additional factors must be provided: :math:`A_{c,sc}`, :math:`A_{s,sc}` and
-:math:`A_{c,c}`.
-
-Once run the corrected output and can correction is shown in the preview plot,
-the Spectrum spin box can be used to scroll through each spectrum. Note that
-when this plot shows the result of a calculation the X axis is always in
-wavelength, however when data is initially selected the X axis unit matches that
-of the sample workspace.
-
-The input and container workspaces will be converted to wavelength (using
-:ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
-as their X unit.
-
-The binning of the sample, container and corrections factor workspace must all
-match, if the sample and container do not match you will be given the option to
-rebin (using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) the sample to
-match the container, if the correction factors do not match you will be given
-the option to interpolate (:ref:`SplineInterpolation
-<algm-SplineInterpolation>`) the correction factor to match the sample.
-
-Options
-~~~~~~~
-
-Input
-  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
-
-Geometry
-  Sets the sample geometry (this must match the sample shape used when running
-  Calculate Corrections).
-
-Use Can
-  If checked allows you to select a workspace for the container in the format of
-  either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
-
-Scale Can by factor
-  Allows the container intensity to be scaled by a given scale factor before
-  being used in the corrections calculation.
-
-Use Corrections
-  The Paalman & Pings correction factors to use in the calculation, note that
-  the file or workspace name must end in either *_flt_abs* or *_cyl_abs* for the
-  flat plate and cylinder geometries respectively.
-
-Plot Spectrum
-  Gives the option to create a plot of the spectrum selected in the spin box for
-  the corrected workspace.
-
-Plot Contour
-  Gives the option to create a contour plot of the corrected workspace.
-
-Save Result
-  If enabled the result will be saved as a NeXus file in the default save
-  directory.
-
-Absorption Corrections
-----------------------
+The Calculate Monte Carlo Absorption tab provides a cross platform alternative to the
+Calculate Paalman Pings tab. In this tab a Monte Carlo implementation is used to calculate the 
+absorption corrections.
 
 .. interface:: Corrections
   :widget: tabAbsorptionCorrections
 
-The Absorption Corrections tab provides a cross platform alternative to the
-previous Calculate and Apply Corrections tabs.
-
-Common Options
-~~~~~~~~~~~~~~
+Options
+~~~~~~~
 
 Sample Input
-  Used to select the sample from either a file or a workspace already loaded
-  into Mantid.
+  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Use Container
-  Used to enable or disable use of a container and selects one from either a
-  file or loaded workspace.
-
-Shape
-  Select the shape of the sample (see specific geometry options below).
+  If checked allows you to select a workspace for the container in the format of
+  either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Number Wavelengths
-  Number of wavelengths for calculation
+  The number of wavelength points for which a simulation is attempted.
 
 Events
-  Number of neutron events
+  The number of neutron events to generate per simulated point.
 
-Mass Density/Number Density
-  Mass density or Number Density for either the sample or container.
+Interpolation
+  Method of interpolation used to compute unsimulated values.
 
-Chemical Formula
-  Chemical formula for either the sample or container in the format expected by
-  :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
+Maximum Scatter Point Attempts
+  Maximum number of tries made to generate a scattering point within the sample (+ optional 
+  container etc). Objects with holes in them, e.g. a thin annulus can cause problems if this 
+  number is too low. If a scattering point cannot be generated by increasing this value then 
+  there is most likely a problem with the sample geometry.
 
-Use Container Corrections
-  Enables full container corrections, if disabled only a can subtraction will be
-  performed.
+Beam Height
+  The height of the beam in :math:`cm`.
 
-Scale
-  Scale factor to scale container input by.
+Beam Width
+  The width of the beam in :math:`cm`.
 
-Keep Correction Factors
-  If checked a :ref:`WorkspaceGroup` containing the correction factors will also
-  be created, this will have the suffix *_Factors*.
+Shape Details
+  Select the shape of the sample (see specific geometry options below).
 
-Plot Result
-  If clicked the corrected workspace and correction factors will be plotted.
+Sample Details Method
+  Choose to use a Chemical Formula or Cross Sections to set the neutron information in the sample using
+  the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
+
+Sample/Container Mass density, Atom Number Density or Formula Number Density
+  Density of the sample or container. This is used in the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm. If Atom Number Density is used, the NumberDensityUnit property is set to *Atoms* and if
+  Formula Number Density is used then NumberDensityUnit is set to *Formula Units*.
+
+Sample/Container Chemical Formula
+  Chemical formula of the sample or container material. This must be provided in the
+  format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm.
+
+Cross Sections
+  Selecting the Cross Sections option in the Sample Details combobox will allow you to enter coherent,
+  incoherent and attenuation cross sections for the Sample and Container (units in barns).
+
+Run
+  Runs the processing configured on the current tab.
+
+Plot
+  Plots the parameter selected in the neighbouring combobox.
 
 Save Result
-  If Clicked the corrected workspace and (if *Keep Correction Factors* is
-  checked) the correction factor workspace will be saved as a NeXus file in the
-  default save directory.
+  Saves the result in the default save directory.
+
+Shape Details
+~~~~~~~~~~~~~
+
+Depending on the shape of the sample different parameters for the sample
+dimension are required and are detailed below.
 
 Flat Plate
-~~~~~~~~~~
+##########
 
 .. interface:: Corrections
   :widget: pgAbsCorFlatPlate
@@ -338,7 +349,7 @@ Sample Thickness
   Thickness of the sample in :math:`cm`.
 
 Sample Angle
-  Angle of the sample to the beam in radians.
+  Angle of the sample to the beam in degrees.
 
 Container Front Thickness
   Thickness of the front of the container in :math:`cm`.
@@ -347,7 +358,7 @@ Container Back Thickness
   Thickness of the back of the container in :math:`cm`.
 
 Annulus
-~~~~~~~
+#######
 
 .. interface:: Corrections
   :widget: pgAbsCorAnnulus
@@ -371,7 +382,7 @@ Sample Height
   Height of the sample in :math:`cm`.
 
 Cylinder
-~~~~~~~~
+########
 
 .. interface:: Corrections
   :widget: pgAbsCorCylinder
@@ -388,42 +399,83 @@ Container Radius
 Sample Height
   Height of the sample in :math:`cm`.
 
+Apply Absorption Corrections
+----------------------------
 
-Container Subtraction
----------------------
+The Apply Corrections tab applies the corrections calculated in the Calculate Paalman 
+Pings or Calculate Monte Carlo Absorption tabs of the Indirect Data Corrections interface.
 
-.. interface:: Corrections
-  :widget: tabContainerSubtraction
-  
-The Container Subtraction Tab is used to remove the containers contribution to a run.
+This uses the :ref:`ApplyPaalmanPingsCorrection
+<algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
+the form of the Paalman & Pings correction factors. When *Use Container* is disabled
+only the :math:`A_{s,s}` factor must be provided, when using a container the
+additional factors must be provided: :math:`A_{c,sc}`, :math:`A_{s,sc}` and
+:math:`A_{c,c}`.
 
-Once run the corrected output and can correction is shown in the preview plot, the Spectrum 
-spin box can be used to scroll through each spectrum. Note that when this plot shows the 
-result of a calculation the X axis is always in wavelength, however when data is initially 
-selected the X axis unit matches that of the sample workspace.
+Once run the corrected output and container correction is shown in the preview plot. Note 
+that when this plot shows the result of a calculation the X axis is always in
+wavelength, however when data is initially selected the X axis unit matches that
+of the sample workspace.
 
 The input and container workspaces will be converted to wavelength (using
 :ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
 as their X unit.
- 
+
+The binning of the sample, container and corrections factor workspace must all
+match, if the sample and container do not match you will be given the option to
+rebin (using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) the sample to
+match the container, if the correction factors do not match you will be given
+the option to interpolate (:ref:`SplineInterpolation
+<algm-SplineInterpolation>`) the correction factor to match the sample.
+
+.. interface:: Corrections
+  :widget: tabApplyAbsorptionCorrections
+
 Options
 ~~~~~~~
 
-Input Sample
-  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the sample.
-  
-Input Container
-  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the container.
-  
-Scale Can by Factor
-  Allows the container intensity to be scaled by a given scale factor before being used in the corrections calculation.
+Sample
+  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+
+Corrections
+  The calculated corrections workspace produced from one of the preview two tabs.
+
+Geometry
+  Sets the sample geometry (this must match the sample shape used when calculating
+  the corrections).
+
+Use Container
+  If checked allows you to select a workspace for the container in the format of
+  either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
+  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+
+Scale Container by factor
+  Allows the container intensity to be scaled by a given scale factor before
+  being used in the corrections calculation.
+
+Shift X-values by Adding
+  Allows the X-values of the container to be shifted by a specified amount.
+
+Rebin Container to Sample
+  Rebins the container to the sample.
+
+Spectrum
+  Changes the spectrum displayed in the preview plot.
+
+Plot Current Preview
+  Plots the currently selected preview plot in a separate external window
+
+Run
+  Runs the processing configured on the current tab.
 
 Plot Spectrum
-  Gives the option to create a plot of the spectrum selected in the spin box for the corrected workspace.
+  Gives the option to create a plot of the spectrum selected in the spin box for
+  the corrected workspace.
 
 Plot Contour
   Gives the option to create a contour plot of the corrected workspace.
-  
+
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
 

@@ -10,18 +10,16 @@
 
 # std imports
 import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+
 
 # 3rdparty imports
 from mantid.api import WorkspaceFactory
+from mantid.py3compat import mock
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QDialogButtonBox
 
 # local imports
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.dialogs.spectraselectordialog import (get_spectra_selection, parse_selection_str,
                                                     SpectraSelectionDialog)
 

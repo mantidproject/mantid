@@ -9,26 +9,23 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
+
+import numpy as np
+
+from mantid import AnalysisDataService
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_child_algorithm
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
-from sans.algorithm_detail.crop_helper import get_component_name
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.algorithm_detail.single_execution import perform_can_subtraction
-from mantid import AnalysisDataService
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
-
-try:
-    import mantidplot
-except (Exception, Warning):
-    mantidplot = None
-# this should happen when this is called from outside Mantidplot and only then,
-# the result is that attempting to plot will raise an exception
+from sans.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentrefinder, plot_workspace_quartiles
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.single_execution import perform_can_subtraction
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.general_functions import create_child_algorithm
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
@@ -116,8 +113,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def PyExec(self):
         state = self._get_state()
         state_serialized = state.property_manager
-        logger = Logger("CentreFinder")
-        logger.notice("Starting centre finder routine...")
+        self.logger = Logger("CentreFinder")
+        self.logger.notice("Starting centre finder routine...")
         progress = self._get_progress()
         self.scale_1 = 1000
         self.scale_2 = 1000
@@ -166,8 +163,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         residueTB = []
         centre_1_hold = x_start
         centre_2_hold = y_start
+
+        do_plotting = can_plot_beamcentrefinder()
+
         for j in range(0, max_iterations + 1):
-            if(j != 0):
+            if j != 0:
                 centre1 += position_1_step
                 centre2 += position_2_step
 
@@ -183,7 +183,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 for key in sample_quartiles:
                     sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            if mantidplot:
+            if do_plotting:
                 output_workspaces = self._publish_to_ADS(sample_quartiles)
                 if verbose:
                     self._rename_and_group_workspaces(j, output_workspaces)
@@ -192,12 +192,15 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                                                        sample_quartiles[MaskingQuadrant.Right]))
             residueTB.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                        sample_quartiles[MaskingQuadrant.Bottom]))
-            if(j == 0):
-                logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
-                              format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
-                if mantidplot:
-                    self._plot_quartiles(output_workspaces, state.data.sample_scatter)
-
+            if j == 0:
+                self.logger.notice("Itr {0}: ( {1:.3f}, {2:.3f} )  SX={3:.5f}  SY={4:.5f}".
+                                   format(j, self.scale_1 * centre1,
+                                          self.scale_2 * centre2, residueLR[j], residueTB[j]))
+                if do_plotting:
+                    break_loop = self._plot_workspaces(output_workspaces, state.data.sample_scatter)
+                    if break_loop:
+                        # If workspaces contain NaN values, stop the process.
+                        break
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR[j] > residueLR[j-1]:
@@ -206,25 +209,38 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB[j] > residueTB[j-1]:
                     position_2_step = - position_2_step / 2
 
-                logger.notice("Itr {0}: ( {1}, {2} )  SX={3:.5g}  SY={4:.5g}".
-                              format(j, self.scale_1 * centre1, self.scale_2 * centre2, residueLR[j], residueTB[j]))
+                self.logger.notice("Itr {0}: ( {1:.3f}, {2:.3f} )  SX={3:.5f}  SY={4:.5f}".
+                                   format(j, self.scale_1 * centre1,
+                                          self.scale_2 * centre2, residueLR[j], residueTB[j]))
 
-                if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or state.compatibility.use_compatibility_mode:
+                if (residueLR[j]+residueTB[j]) < (residueLR[j-1]+residueTB[j-1]) or \
+                        state.compatibility.use_compatibility_mode:
                     centre_1_hold = centre1
                     centre_2_hold = centre2
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center
-                    logger.notice("Converged - check if stuck in local minimum! ")
+                    self.logger.notice("Converged - check if stuck in local minimum! ")
                     break
 
             if j == max_iterations:
-                logger.notice("Out of iterations, new coordinates may not be the best")
+                self.logger.notice("Out of iterations, new coordinates may not be the best")
 
         self.setProperty("Centre1", centre_1_hold)
         self.setProperty("Centre2", centre_2_hold)
 
-        logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
+        self.logger.notice("Centre coordinates updated: [{}, {}]".format(centre_1_hold*self.scale_1, centre_2_hold*self.scale_2))
+
+    def _plot_workspaces(self, output_workspaces, sample_scatter):
+        try:
+            # Check for NaNs in workspaces
+            self._validate_workspaces(output_workspaces)
+        except ValueError as e:
+            self.logger.notice("Stopping process: {}. Check radius limits.".format(str(e)))
+            return True
+        else:
+            plot_workspace_quartiles(output_workspaces, sample_scatter)
+        return False
 
     def _rename_and_group_workspaces(self, index, output_workspaces):
         to_group = []
@@ -241,13 +257,20 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         return output_workspaces
 
-    def _plot_quartiles(self, output_workspaces, sample_scatter):
-        title = '{}_beam_centre_finder'.format(sample_scatter)
-        graph_handle = mantidplot.plotSpectrum(output_workspaces, 0)
-        graph_handle.activeLayer().logLogAxes()
-        graph_handle.activeLayer().setTitle(title)
-        graph_handle.setName(title)
-        return graph_handle
+    @staticmethod
+    def _validate_workspaces(workspaces):
+        """
+        This method checks if any of the workspaces to plot contain NaN values.
+        :param workspaces: A list of workspace names
+        :return: A list of workspaces (used in matplotlib plotting). Raises if NaN values present.
+        """
+        workspaces = AnalysisDataService.Instance().retrieveWorkspaces(workspaces, unrollGroups=True)
+        for ws in workspaces:
+            if np.isnan(ws.readY(0)).any():
+                # All data can be NaN if bounds are too close together
+                # this makes the data unplottable
+                raise ValueError("Workspace contains NaN values.")
+        return workspaces
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value

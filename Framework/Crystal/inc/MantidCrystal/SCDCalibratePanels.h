@@ -15,7 +15,6 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Quat.h"
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Crystal {

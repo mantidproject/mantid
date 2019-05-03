@@ -40,7 +40,7 @@
   <type name="undulator" is="Source"> </type>
   
   <component type="sample-position">
-    <location />
+    <location z="0.0" />
   </component>
   <type name="sample-position" is="SamplePos"></type>
   
@@ -137,14 +137,14 @@
     <component type="monitor">
       <location r="3.25800" t="180.0" p="0.0" />
       <!-- old position was 1.50400-->
-      <location r="1.60800" t="180.0" p="0.0" />
-      <location r="1.60800" t="180.0" p="0.0" />
-      <location r="1.60800" t="180.0" p="0.0" />
-      <location r="1.60800" t="180.0" p="0.0" /> 
-      <location r="4.24700" t="0.000" p="0.0" />
-      <location r="4.24700" t="0.000" p="0.0" />
-      <location r="4.24700" t="0.000" p="0.0" />
-      <location r="4.24700" t="0.000" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" />
+      <location r="1.6300"  t="180.0" p="0.0" /> 
+      <location r="4.22000" t="0.000" p="0.0" />
+      <location r="4.22000" t="0.000" p="0.0" />
+      <location r="4.22000" t="0.000" p="0.0" />
+      <location r="4.22000" t="0.000" p="0.0" />
     </component>
   </type>
 

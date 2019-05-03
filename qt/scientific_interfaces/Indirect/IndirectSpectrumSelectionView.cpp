@@ -248,8 +248,8 @@ void IndirectSpectrumSelectionView::enableMaskLineEdit(int doEnable) {
 }
 
 void IndirectSpectrumSelectionView::emitSpectraChanged(int modeIndex) {
-  const auto selectionMode = static_cast<SpectrumSelectionMode>(modeIndex);
-  if (selectionMode == SpectrumSelectionMode::RANGE)
+  const auto mode = static_cast<SpectrumSelectionMode>(modeIndex);
+  if (mode == SpectrumSelectionMode::RANGE)
     emitSpectraRangeChanged();
   else
     emitSpectraStringChanged();

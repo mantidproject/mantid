@@ -60,8 +60,10 @@ std::vector<std::string> splitStringBy(std::string const &str,
 }
 
 std::string getSpectraRange(std::string const &string) {
-  auto bounds = splitStringBy(string, "-");
-  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
+  auto const bounds = splitStringBy(string, "-");
+  return std::stoull(bounds[0]) > std::stoull(bounds[1])
+             ? bounds[1] + "-" + bounds[0]
+             : string;
 }
 
 std::string rearrangeSpectraSubString(std::string const &string) {
@@ -171,9 +173,9 @@ void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
-  const auto workspace = m_model->getWorkspace(m_activeIndex);
-  if (workspace) {
-    setSpectraRange(0, workspace->getNumberHistograms() - 1);
+  const auto ws = m_model->getWorkspace(m_activeIndex);
+  if (ws) {
+    setSpectraRange(0, ws->getNumberHistograms() - 1);
     const auto spectra = m_model->getSpectra(m_activeIndex);
     SetViewSpectra(m_view.get())(spectra);
     enableView();

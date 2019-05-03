@@ -10,11 +10,13 @@
 Description
 -----------
 
-Calculates and applies the lorentz correction weights to a workspace. The Lorentz correction *L* is calculated according to:
+Calculates the Lorentz correction for time-of-flight diffraction and
+and multiplies the input workspace by it. The Lorentz correction,
+``L``, is calculated according to:
 
-.. math:: 
-   L = \sin(\theta)^{2}/\lambda^{4}
-   
+.. math::
+   L = \frac{\sin^{2}\theta}{\lambda^{4}}
+
 Where :math:`\theta` is the scattering angle.
 
 The calculations performed in this Algorithm are a subset of those performed by the :ref:`algm-AnvredCorrection`
@@ -29,7 +31,7 @@ Usage
    tof = Load(Filename='HRP39180.RAW')
    lam = ConvertUnits(InputWorkspace=tof, Target='Wavelength')
    corrected = LorentzCorrection(InputWorkspace=lam)
-    
+
    y = corrected.readY(2)
    e = corrected.readE(2)
    # print first corrected yvalues
@@ -47,4 +49,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

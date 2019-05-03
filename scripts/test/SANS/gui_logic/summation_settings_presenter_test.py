@@ -5,18 +5,15 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
+
+from mantid.py3compat import mock
+from sans.common.enums import BinningType
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.models.binning_type import BinningType
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 from fake_signal import FakeSignal
 
 from assert_called import assert_called
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):
@@ -40,7 +37,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         return SummationSettingsPresenter(summation_settings, view, None)
 
     def test_sets_binning_type_when_changed(self):
-        new_binning_type = BinningType.Custom
+        new_binning_type = 0
         self.view.binningTypeChanged.emit(new_binning_type)
         self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.Custom)
 
@@ -65,7 +62,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.assertEqual(new_additional_time_shifts, self.summation_settings.additional_time_shifts)
 
     def test_refreshes_view_when_binning_type_changed(self):
-        new_binning_type = BinningType.Custom
+        new_binning_type = 0
         self.view.binningTypeChanged.emit(new_binning_type)
         self.assertEqual(2, self.view.draw_settings.call_count)
         self.view.draw_settings.assert_called_with(self.summation_settings)

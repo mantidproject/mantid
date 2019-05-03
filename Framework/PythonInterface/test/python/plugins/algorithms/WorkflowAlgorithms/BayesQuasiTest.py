@@ -140,7 +140,7 @@ if platform.system() == "Windows":
 
             # Test size/shape of probability
             self.assertTrue(isinstance(probability, MatrixWorkspace))
-            self.assertEquals(probability.getNumberHistograms(), 3)
+            self.assertEquals(probability.getNumberHistograms(), 4)
             self.assertEquals(probability.blocksize(), self._num_hists)
             self.assertEquals(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
 
@@ -152,7 +152,7 @@ if platform.system() == "Windows":
             for i in range (group.getNumberOfEntries()):
                 sub_ws = group.getItem(i)
                 self.assertTrue(isinstance(sub_ws, MatrixWorkspace))
-                self.assertEqual(sub_ws.getNumberHistograms(), 5)
+                self.assertEqual(sub_ws.getNumberHistograms(), 7)
                 self.assertEquals(sub_ws.getAxis(0).getUnit().unitID(), 'DeltaE')
 
 

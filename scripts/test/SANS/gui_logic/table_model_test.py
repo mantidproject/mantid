@@ -8,14 +8,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel)
+from mantid.py3compat import mock
+from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel, SampleShapeColumnModel, options_column_bool)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
-from PyQt4.QtCore import QCoreApplication
+from qtpy.QtCore import QCoreApplication
 from sans.common.enums import (RowState, SampleShape)
-try:
-    from unittest import mock
-except:
-    import mock
 
 
 class TableModelTest(unittest.TestCase):
@@ -194,19 +191,27 @@ class TableModelTest(unittest.TestCase):
     def test_that_OptionsColumnModel_get_permissable_properties_returns_correct_properties(self):
         permissable_properties = OptionsColumnModel._get_permissible_properties()
 
-        self.assertEqual(permissable_properties, {"WavelengthMin": float, "WavelengthMax": float, "EventSlices": str,
-                                                  "MergeScale": float, "MergeShift": float})
+        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str,
+                                                  "MergeScale": float, "MergeShift": float, "PhiMin": float,
+                                                  "PhiMax": float, "UseMirror": options_column_bool})
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
         hint_strategy = OptionsColumnModel.get_hint_strategy()
-        expected_hint_strategy = BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
-                                  "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
-                                  "MergeScale": 'The scale applied to the HAB when mergeing',
-                                  "MergeShift": 'The shift applied to the HAB when mergeing',
-                                  "EventSlices": 'The event slices to reduce.'
-                                  ' The format is the same as for the event slices'
-                                  ' box in settings, however if a comma separated list is given '
-                                  'it must be enclosed in quotes'})
+        expected_hint_strategy = BasicHintStrategy({
+                                    "WavelengthMin": 'The min value of the wavelength when converting from TOF.',
+                                    "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                    "PhiMin": 'The min angle of the detector to accept.'
+                                              ' Anti-clockwise from horizontal.',
+                                    "PhiMax": 'The max angle of the detector to accept.'
+                                              ' Anti-clockwise from horizontal.',
+                                    "UseMirror": 'True or False. Whether or not to accept phi angle'
+                                                 ' in opposing quadrant',
+                                    "MergeScale": 'The scale applied to the HAB when merging',
+                                    "MergeShift": 'The shift applied to the HAB when merging',
+                                    "EventSlices": 'The event slices to reduce.'
+                                                   ' The format is the same as for the event slices'
+                                                   ' box in settings, however if a comma separated list is given '
+                                                   'it must be enclosed in quotes'})
 
         self.assertEqual(expected_hint_strategy, hint_strategy)
 
@@ -266,16 +271,82 @@ class TableModelTest(unittest.TestCase):
         self.assertEqual(options_string, 'EventSlices=1-6,5-9,4:5:89, MergeScale=1.5,'
                                          ' WavelengthMax=78.0, WavelengthMin=9.0')
 
+    def test_that_truthy_options_are_evaluated_True(self):
+        options_column_model = OptionsColumnModel('UseMirror=True')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': True})
+
+        options_column_model = OptionsColumnModel('UseMirror=1')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': True})
+
+        options_column_model = OptionsColumnModel('UseMirror=Yes')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': True})
+
+        options_column_model = OptionsColumnModel('UseMirror=T')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': True})
+
+        options_column_model = OptionsColumnModel('UseMirror=Y')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': True})
+
+        options_column_model = OptionsColumnModel('UseMirror=tRuE')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': True})
+
+    def test_that_falsy_options_are_evaluated_False(self):
+        options_column_model = OptionsColumnModel('UseMirror=False')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
+
+        options_column_model = OptionsColumnModel('UseMirror=0')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
+
+        options_column_model = OptionsColumnModel('UseMirror=No')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
+
+        options_column_model = OptionsColumnModel('UseMirror=F')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
+
+        options_column_model = OptionsColumnModel('UseMirror=N')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
+
+        options_column_model = OptionsColumnModel('UseMirror=fAlSE')
+        self.assertEqual(options_column_model.get_options(), {'UseMirror': False})
+
+    def test_that_non_bool_option_raises_error_if_option_is_bool(self):
+        try:
+            options_column_model = OptionsColumnModel('UseMirror=SomeString')
+        except ValueError as e:
+            self.assertEqual(str(e), 'Could not evaluate SomeString as a boolean value. It should be True or False.')
+        else:
+            self.assertTrue(False, 'A RuntimeError should be raised.')
+            
     def test_that_to_batch_list_is_correct_format(self):
         test_row = ['SANS2D00022024  ', '', 'SANS2D00022025 ', '', '   SANS2D00022026 ', '', '', '', '', '', '', '',
                     '    out_file', 'a_user_file ', 1.0, '', '', 'Disc', 'WavelengthMax=5.0']
         table_index_model = TableIndexModel(*test_row)
 
         actual_list = table_index_model.to_batch_list()
-        expected_list = ["SANS2D00022024", "out_file", "SANS2D00022025", "SANS2D00022026",
-                         "", "", "", "a_user_file"]
+        expected_list = ["SANS2D00022024", "SANS2D00022025", "SANS2D00022026",
+                         "", "", "",  "out_file", "a_user_file"]
 
         self.assertEqual(actual_list, expected_list)
+
+    def test_that_get_non_empty_rows_returns_non_empty_rows(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel("", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        table_index_model = TableIndexModel('', "", "", "", "", "", "",
+                                            "", "", "", "5", "", "")
+        table_model.add_table_entry(2, table_index_model)
+        table_index_model = TableIndexModel("", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(3, table_index_model)
+
+        non_empty_rows_actual = table_model.get_non_empty_rows([0, 1, 2, 3])
+        non_empty_rows_expected = [1, 2]
+
+        self.assertEqual(non_empty_rows_actual, non_empty_rows_expected)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

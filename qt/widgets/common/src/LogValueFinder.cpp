@@ -40,8 +40,9 @@ std::vector<std::string> LogValueFinder::getLogNames() const {
   if (ads.doesExist(wsName)) {
     const auto &workspace = ads.retrieveWS<MatrixWorkspace>(wsName);
     const auto &logs = workspace->run().getLogData();
+    logNames.reserve(logs.size());
     for (const auto &log : logs) {
-      logNames.push_back(log->name());
+      logNames.emplace_back(log->name());
     }
   }
   return logNames;

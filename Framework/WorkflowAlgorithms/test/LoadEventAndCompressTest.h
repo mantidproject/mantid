@@ -18,7 +18,14 @@ using Mantid::WorkflowAlgorithms::LoadEventAndCompress;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
+namespace {
+const std::string FILENAME{"ARCS_sim_event.nxs"};
+const double CHUNKSIZE{.00001}; // REALLY small file
+const size_t NUMEVENTS(117760);
+} // anonymous namespace
+
 class LoadEventAndCompressTest : public CxxTest::TestSuite {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -34,8 +41,6 @@ public:
   }
 
   void test_exec() {
-    const std::string FILENAME("ARCS_sim_event.nxs");
-
     // run without chunks
     const std::string WS_NAME_NO_CHUNKS("LoadEventAndCompress_no_chunks");
     LoadEventAndCompress algWithoutChunks;
@@ -57,6 +62,7 @@ public:
     if (!wsNoChunks)
       return;
     TS_ASSERT_EQUALS(wsNoChunks->getEventType(), EventType::WEIGHTED_NOTIME);
+    TS_ASSERT_EQUALS(wsNoChunks->getNEvents(), NUMEVENTS);
 
     // run without chunks
     const std::string WS_NAME_CHUNKS("LoadEventAndCompress_chunks");
@@ -68,7 +74,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         algWithChunks.setPropertyValue("OutputWorkspace", WS_NAME_CHUNKS));
     TS_ASSERT_THROWS_NOTHING(
-        algWithChunks.setProperty("MaxChunkSize", .005)); // REALLY small file
+        algWithChunks.setProperty("MaxChunkSize", CHUNKSIZE));
     TS_ASSERT_THROWS_NOTHING(algWithChunks.execute(););
     TS_ASSERT(algWithChunks.isExecuted());
 
@@ -83,6 +89,7 @@ public:
     if (!wsWithChunks)
       return;
     TS_ASSERT_EQUALS(wsWithChunks->getEventType(), EventType::WEIGHTED_NOTIME);
+    TS_ASSERT_EQUALS(wsWithChunks->getNEvents(), NUMEVENTS);
 
     // compare the two workspaces
     TS_ASSERT_EQUALS(wsWithChunks->getNumberEvents(),
@@ -96,6 +103,34 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WS_NAME_NO_CHUNKS);
     AnalysisDataService::Instance().remove(WS_NAME_CHUNKS);
+  }
+
+  void test_execNoFilter() {
+    // run without chunks
+    const std::string WS_NAME("LoadEventAndCompress_no_filter");
+    LoadEventAndCompress alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", FILENAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterBadPulses", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxChunkSize", CHUNKSIZE));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service
+    EventWorkspace_sptr wksp;
+    TS_ASSERT_THROWS_NOTHING(
+        wksp = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+            WS_NAME));
+    TS_ASSERT(wksp);
+    if (!wksp)
+      return;
+    TS_ASSERT_EQUALS(wksp->getEventType(), EventType::WEIGHTED_NOTIME);
+    TS_ASSERT_EQUALS(wksp->getNEvents(), NUMEVENTS);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(WS_NAME);
   }
 };
 

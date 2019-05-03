@@ -12,7 +12,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Plotting/Qwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include "ui_LineViewer.h"
 #include <QWidget>
@@ -89,11 +89,12 @@ public slots:
 
 signals:
   /// Signal emitted when the planar width changes
-  void changedPlanarWidth(double);
+  void changedPlanarWidth(double /*_t1*/);
   /// Signal emitted when the start or end position has changed
-  void changedStartOrEnd(Mantid::Kernel::VMD, Mantid::Kernel::VMD);
+  void changedStartOrEnd(Mantid::Kernel::VMD /*_t1*/,
+                         Mantid::Kernel::VMD /*_t2*/);
   /// Signal emitted when changing fixed bin width mode
-  void changedFixedBinWidth(bool, double);
+  void changedFixedBinWidth(bool /*_t1*/, double /*_t2*/);
 
 private:
   Mantid::API::IAlgorithm_sptr

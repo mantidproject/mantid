@@ -5,30 +5,23 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 from PyQt4 import QtGui
 
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
-
-from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
-
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
-from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common import mock_widget
-
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 from mantid.api import FileFinder
+from mantid.py3compat import mock
+
+import Muon.GUI.Common.utilities.muon_file_utils as file_utils
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 
 
 class LoadRunWidgetPresenterTest(unittest.TestCase):
@@ -42,15 +35,16 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonLoadData()
+        setup_context_for_tests(self)
+        self.context.instrument = 'EMU'
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
-        self.load_file_model = BrowseFileWidgetModel(self.data)
-        self.load_run_model = LoadRunWidgetModel(self.data)
+        self.load_file_model = BrowseFileWidgetModel(self.loaded_data, self.context)
+        self.load_run_model = LoadRunWidgetModel(self.loaded_data, self.context)
 
         self.presenter = LoadWidgetPresenter(
             LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view),
-            LoadWidgetModel(self.data))
+            LoadWidgetModel(self.loaded_data, self.context))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 
@@ -65,7 +59,8 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.addCleanup(self.load_run_patcher.stop)
         self.load_run_mock = self.load_run_patcher.start()
 
-        self.mock_loading_from_browse([1], "C:\dir1\dir2\dir3\EMU0001234.nxs", 1234)
+        self.mock_workspace = self.create_fake_workspace(1)
+        self.mock_loading_from_browse(self.mock_workspace, "C:\dir1\dir2\dir3\EMU0001234.nxs", 1234)
         file_utils.get_current_run_filename = mock.Mock(return_value="C:\dir1\dir2\dir3\EMU0001234.nxs")
 
         self.presenter.load_file_widget._view.warning_popup = mock.MagicMock()
@@ -77,6 +72,14 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def tearDown(self):
         self.obj = None
+
+    def create_fake_workspace(self, name):
+        workspace_mock = mock.MagicMock()
+        instrument_mock = mock.MagicMock()
+        instrument_mock.getName.return_value = 'EMU'
+        workspace_mock.workspace.getInstrument.return_value = instrument_mock
+
+        return {'OutputWorkspace': [workspace_mock], 'MainFieldDirection': 'transverse'}
 
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
@@ -117,8 +120,8 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
         self.assertEqual(self.presenter._model.filenames, ["C:\dir1\dir2\dir3\EMU0001234.nxs"])
-        self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [1234])
+        self.assertEqual(self.presenter._model.workspaces, [self.mock_workspace])
+        self.assertEqual(self.presenter._model.runs, [[1234]])
 
     def test_that_loading_single_file_via_browse_sets_run_and_file_view(self):
         self.presenter.load_file_widget.on_browse_button_clicked()
@@ -139,17 +142,17 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.enable_load_buttons.call_count, 1)
 
     def test_that_loading_single_file_via_user_input_file_is_loaded_into_model_correctly(self):
-        self.mock_user_input_single_file([1], "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
+        self.mock_user_input_single_file(self.mock_workspace, "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
 
         self.presenter.load_file_widget.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
         self.assertEqual(self.presenter._model.filenames, ["C:\dir1\dir2\dir3\EMU0001111.nxs"])
-        self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [1111])
+        self.assertEqual(self.presenter._model.workspaces, [self.mock_workspace])
+        self.assertEqual(self.presenter._model.runs, [[1111]])
 
     def test_that_loading_single_file_via_user_input_file_is_displayed_correctly_in_the_interface(self):
-        self.mock_user_input_single_file([1], "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
+        self.mock_user_input_single_file(self.mock_workspace, "C:\dir1\dir2\dir3\EMU0001111.nxs", 1111)
 
         self.presenter.load_file_widget.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
@@ -171,17 +174,17 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.enable_load_buttons.call_count, 1)
 
     def test_that_loading_via_load_current_run_is_loaded_into_model_correctly(self):
-        self.mock_loading_from_current_run([1], "\\\\EMU\\data\\EMU0083420.nxs", 83420)
+        self.mock_loading_from_current_run(self.mock_workspace, "\\\\EMU\\data\\EMU0083420.nxs", 83420)
 
         self.presenter.load_run_widget.handle_load_current_run()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
 
         self.assertEqual(self.presenter._model.filenames, ["\\\\EMU\\data\\EMU0083420.nxs"])
-        self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [83420])
+        self.assertEqual(self.presenter._model.workspaces, [self.mock_workspace])
+        self.assertEqual(self.presenter._model.runs, [[83420]])
 
     def test_that_loading_via_load_current_run_is_displayed_correctly_in_the_interface(self):
-        self.mock_loading_from_current_run([1], "\\\\EMU\\data\\EMU0083420.nxs", 83420)
+        self.mock_loading_from_current_run(self.mock_workspace, "\\\\EMU\\data\\EMU0083420.nxs", 83420)
 
         self.presenter.load_run_widget.handle_load_current_run()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
@@ -190,7 +193,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.get_run_edit_text(), "83420")
 
     def test_that_loading_via_load_current_run_disables_all_load_buttons(self):
-        self.mock_loading_from_current_run([1], "\\\\EMU\\data\\EMU0083420.nxs", 83420)
+        self.mock_loading_from_current_run(self.mock_workspace, "\\\\EMU\\data\\EMU0083420.nxs", 83420)
         self.mock_disabling_buttons_in_run_and_file_widget()
 
         self.presenter.load_run_widget.handle_load_current_run()
@@ -202,18 +205,18 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.enable_load_buttons.call_count, 2)
 
     def test_that_user_input_run_is_loaded_into_model_correctly(self):
-        self.mock_user_input_single_run([1], "EMU00012345.nxs", 12345)
+        self.mock_user_input_single_run(self.mock_workspace, "EMU00012345.nxs", 12345)
         self.presenter.load_run_widget.set_current_instrument('EMU')
 
         self.presenter.load_run_widget.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter.load_run_widget._load_thread)
 
         self.assertEqual(self.presenter._model.filenames, ["EMU00012345.nxs"])
-        self.assertEqual(self.presenter._model.workspaces, [[1]])
-        self.assertEqual(self.presenter._model.runs, [12345])
+        self.assertEqual(self.presenter._model.workspaces, [self.mock_workspace])
+        self.assertEqual(self.presenter._model.runs, [[12345]])
 
     def test_that_user_input_run_is_displayed_correctly_in_the_interface(self):
-        self.mock_user_input_single_run([1], "EMU00012345.nxs", 12345)
+        self.mock_user_input_single_run(self.mock_workspace, "EMU00012345.nxs", 12345)
         self.presenter.load_run_widget.set_current_instrument('EMU')
 
         self.presenter.load_run_widget.handle_run_changed_by_user()
@@ -223,7 +226,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.load_run_view.get_run_edit_text(), "12345")
 
     def test_that_loading_via_user_input_run_disables_all_load_buttons(self):
-        self.mock_user_input_single_run([1], "EMU00012345.nxs", 12345)
+        self.mock_user_input_single_run(self.mock_workspace, "EMU00012345.nxs", 12345)
         self.presenter.load_run_widget.set_current_instrument('EMU')
 
         self.mock_disabling_buttons_in_run_and_file_widget()

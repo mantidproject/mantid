@@ -159,8 +159,8 @@ class SANSConvertToQ(DistributedDataProcessorAlgorithm):
         # Extract relevant settings
         convert_to_q = state.convert_to_q
         max_q_xy = convert_to_q.q_xy_max
-        delta_q_prefix = -1. if convert_to_q.q_xy_step_type is RangeStepType.Log else 1.
-        delta_q = delta_q_prefix*convert_to_q.q_xy_step
+        log_binning = True if convert_to_q.q_xy_step_type is RangeStepType.Log else False
+        delta_q = convert_to_q.q_xy_step
         radius_cutoff = convert_to_q.radius_cutoff / 1000.  # Qxy expects the radius cutoff to be in mm
         wavelength_cutoff = convert_to_q.wavelength_cutoff
         use_gravity = convert_to_q.use_gravity
@@ -171,6 +171,7 @@ class SANSConvertToQ(DistributedDataProcessorAlgorithm):
                        "OutputWorkspace": EMPTY_NAME,
                        "MaxQxy": max_q_xy,
                        "DeltaQ": delta_q,
+                       "IQxQyLogBinning": log_binning,
                        "AccountForGravity": use_gravity,
                        "RadiusCut": radius_cutoff,
                        "WaveCut": wavelength_cutoff,

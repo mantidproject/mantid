@@ -6,32 +6,35 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 
 from Muon.GUI.Common.utilities import table_utils
 
 
-class MaxEntView(QtGui.QWidget):
+construct = "Construct"
+
+
+class MaxEntView(QtWidgets.QWidget):
 
     """
     The view for the MaxEnt widget. This
     creates the look of the widget
     """
     # signals
-    maxEntButtonSignal = QtCore.pyqtSignal()
-    cancelSignal = QtCore.pyqtSignal()
-    phaseSignal = QtCore.pyqtSignal(object, object)
+    maxEntButtonSignal = QtCore.Signal()
+    cancelSignal = QtCore.Signal()
+    phaseSignal = QtCore.Signal(object, object)
 
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
-        self.grid = QtGui.QVBoxLayout(self)
+        self.grid = QtWidgets.QVBoxLayout(self)
 
         # add splitter for resizing
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
         self.run = None
         # make table
-        self.table = QtGui.QTableWidget(self)
+        self.table = QtWidgets.QTableWidget(self)
         self.table.resize(800, 800)
 
         self.table.setRowCount(11)
@@ -63,9 +66,10 @@ class MaxEntView(QtGui.QWidget):
         self.use_phaseTable_box = table_utils.addCheckBoxToTable(
             self.table, False, 4)
 
-        table_utils.setRowName(self.table, 5, "Construct Phase Table")
-        self.phaseTable_box = table_utils.addCheckBoxToTable(
-            self.table, True, 5)
+        table_utils.setRowName(self.table, 5, "Select Phase Table")
+        options = [construct]
+        self.phaseTable_box = table_utils.addComboToTable(
+            self.table, 5, options)
 
         table_utils.setRowName(self.table, 6, "Fix phases")
         self.fix_phase_box = table_utils.addCheckBoxToTable(
@@ -93,9 +97,9 @@ class MaxEntView(QtGui.QWidget):
         self.table.resizeRowsToContents()
 
         # advanced options table
-        self.advancedLabel = QtGui.QLabel("\n  Advanced Options")
+        self.advancedLabel = QtWidgets.QLabel("\n  Advanced Options")
         # make table
-        self.tableA = QtGui.QTableWidget(self)
+        self.tableA = QtWidgets.QTableWidget(self)
         self.tableA.resize(800, 800)
 
         self.tableA.setRowCount(7)
@@ -138,9 +142,9 @@ class MaxEntView(QtGui.QWidget):
         self.tableA.setMinimumSize(40, 207)
 
         # make buttons
-        self.button = QtGui.QPushButton('Calculate MaxEnt', self)
+        self.button = QtWidgets.QPushButton('Calculate MaxEnt', self)
         self.button.setStyleSheet("background-color:lightgrey")
-        self.cancel = QtGui.QPushButton('Cancel', self)
+        self.cancel = QtWidgets.QPushButton('Cancel', self)
         self.cancel.setStyleSheet("background-color:lightgrey")
         self.cancel.setEnabled(False)
         # connects
@@ -148,7 +152,7 @@ class MaxEntView(QtGui.QWidget):
         self.cancel.clicked.connect(self.cancelClick)
         self.table.cellClicked.connect(self.phaseBoxClick)
         # button layout
-        self.buttonLayout = QtGui.QHBoxLayout()
+        self.buttonLayout = QtWidgets.QHBoxLayout()
         self.buttonLayout.addWidget(self.button)
         self.buttonLayout.addWidget(self.cancel)
         # add to layout
@@ -165,6 +169,22 @@ class MaxEntView(QtGui.QWidget):
     def addItems(self, options):
         self.ws.clear()
         self.ws.addItems(options)
+
+    def clearPhaseTables(self):
+        self.phaseTable_box.clear()
+        self.phaseTable_box.addItems([construct])
+
+    def getPhaseTableIndex(self):
+        return self.phaseTable_box.currentIndex()
+
+    def setPhaseTableIndex(self, index):
+        self.phaseTable_box.setCurrentIndex(index)
+
+    def getPhaseTableOptions(self):
+        return [self.phaseTable_box.itemText(j) for j in range(self.phaseTable_box.count())]
+
+    def addPhaseTableToGUI(self, option):
+        self.phaseTable_box.addItem(option)
 
     def addNPoints(self, options):
         self.N_points.clear()
@@ -205,11 +225,10 @@ class MaxEntView(QtGui.QWidget):
 
         inputs["Npts"] = int(self.N_points.currentText())
         inputs["MaxField"] = float(self.max_field.text())
-        inputs["FixPhases"] = self.fix_phase_box.checkState()
-        inputs["FitDeadTime"] = self.dead_box.checkState()
-        inputs["DoublePulse"] = self.double_pulse_box.checkState()
-        inputs["OuterIterations"] = int(self.inner_loop.text())
-        inputs["InnerIterations"] = int(self.outer_loop.text())
+        inputs["FitDeadTime"] = self.dead_box.checkState() == QtCore.Qt.Checked
+        inputs["DoublePulse"] = self.double_pulse_box.checkState() == QtCore.Qt.Checked
+        inputs["OuterIterations"] = int(self.outer_loop.text())
+        inputs["InnerIterations"] = int(self.inner_loop.text())
         inputs["DefaultLevel"] = float(self.AConst.text())
         inputs["Factor"] = float(self.factor.text())
 
@@ -220,7 +239,11 @@ class MaxEntView(QtGui.QWidget):
         return inputs
 
     def addPhaseTable(self, inputs):
-        inputs['InputPhaseTable'] = "PhaseTable"
+        inputs["FixPhases"] = self.fix_phase_box.checkState() == QtCore.Qt.Checked
+        if self.usePhases() and self.phaseTable_box.currentText() == construct:
+            inputs['InputPhaseTable'] = "PhaseTable"
+        elif self.usePhases():
+            inputs['InputPhaseTable'] = self.phaseTable_box.currentText()
 
     def outputPhases(self):
         return self.output_phase_box.checkState() == QtCore.Qt.Checked
@@ -251,7 +274,7 @@ class MaxEntView(QtGui.QWidget):
             str(self.ws.currentText()) + ";TimeDomain;MaxEnt"
 
     def calcPhases(self):
-        return self.phaseTable_box.checkState() == QtCore.Qt.Checked
+        return self.phaseTable_box.currentText() == construct
 
     def usePhases(self):
         return self.use_phaseTable_box.checkState() == QtCore.Qt.Checked

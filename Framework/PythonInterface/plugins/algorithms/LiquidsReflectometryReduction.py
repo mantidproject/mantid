@@ -102,7 +102,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                              "Pixel range to use for calculating the primary fraction correction.")
 
     #pylint: disable=too-many-locals,too-many-branches
-    def PyExec(self):
+    def PyExec(self): # noqa
         # The old reduction code had a tolerance value for matching the
         # slit parameters to get the scaling factors
         self.TOLERANCE = self.getProperty("SlitTolerance").value
@@ -443,7 +443,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         return cropped
 
     #pylint: disable=too-many-locals,too-many-branches
-    def apply_scaling_factor(self, workspace):
+    def apply_scaling_factor(self, workspace): # noqa
         """
             Apply scaling factor from reference scaling data
             @param workspace: Mantid workspace

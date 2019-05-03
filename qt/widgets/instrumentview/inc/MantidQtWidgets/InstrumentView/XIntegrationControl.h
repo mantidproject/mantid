@@ -31,8 +31,8 @@ public:
   double getWidth() const;
   void set(double minimum, double maximum);
 signals:
-  void changed(double, double);
-  void running(double, double);
+  void changed(double /*_t1*/, double /*_t2*/);
+  void running(double /*_t1*/, double /*_t2*/);
 
 protected:
   void mouseMoveEvent(QMouseEvent *e) override;
@@ -68,12 +68,12 @@ public:
   double getMaximum() const;
   double getWidth() const;
 signals:
-  void changed(double, double);
+  void changed(double /*_t1*/, double /*_t2*/);
 public slots:
   void setWholeRange();
 private slots:
-  void sliderChanged(double, double);
-  void sliderRunning(double, double);
+  void sliderChanged(double /*minimum*/, double /*maximum*/);
+  void sliderRunning(double /*minimum*/, double /*maximum*/);
   void setMinimum();
   void setMaximum();
 

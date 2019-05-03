@@ -107,13 +107,19 @@ void EstimateDivergence::exec() {
     const double vertical = vertical_numerator / (sintwotheta * sintwotheta);
 
     // solid angle
-    double solidangle = 0.0;
-    for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
-      // No scanning support for solidAngle currently, use only first component
-      // of index, ignore time index
-      if (!detectorInfo.isMasked(index.first))
-        solidangle += componentInfo.solidAngle(index.first, samplepos);
-    }
+    auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+    // No scanning support for solidAngle currently, use only first component
+    // of index, ignore time index
+    const double solidangle = std::accumulate(
+        spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+        [&componentInfo, &detectorInfo, &samplepos](const auto sum,
+                                                    const auto &index) {
+          if (!detectorInfo.isMasked(index.first)) {
+            return sum + componentInfo.solidAngle(index.first, samplepos);
+          } else {
+            return sum;
+          }
+        });
     solidangletotal += solidangle;
     const double deltatwotheta = sqrt(solidangle);
 

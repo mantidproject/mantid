@@ -157,7 +157,6 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low == 1.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high == 12.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order == 0)
-        self.assertTrue(adjustment.show_transmission)
 
         # Wavelength and Pixel Adjustment
         wavelength_and_pixel_adjustment = adjustment.wavelength_and_pixel_adjustment

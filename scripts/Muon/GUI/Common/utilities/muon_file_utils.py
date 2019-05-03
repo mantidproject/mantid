@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
+allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS"]
 allowed_extensions = ["nxs"]
 FILE_SEP = os.sep
 
@@ -26,8 +26,6 @@ def get_instrument_directory(instrument):
     """
     if instrument in allowed_instruments:
         instrument_directory = instrument
-        if instrument == "CHRONUS":
-            instrument_directory = "NDW1030"
         return instrument_directory
     else:
         raise RuntimeError('Instrument {} not in list of allowed instruments'.format(instrument))

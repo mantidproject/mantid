@@ -16,10 +16,8 @@
 
 #include "MantidKernel/Logger.h"
 
-#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <gsl/gsl_blas.h>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -41,7 +39,7 @@ DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
 
 /// Initialize minimizer, i.e. pass a function to minimize.
 void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
-                                            size_t) {
+                                            size_t /*maxIterations*/) {
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           function);
@@ -53,7 +51,7 @@ void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
 }
 
 /// Do one iteration.
-bool DampedGaussNewtonMinimizer::iterate(size_t) {
+bool DampedGaussNewtonMinimizer::iterate(size_t /*iteration*/) {
   const bool verbose = getProperty("Verbose");
   const double damping = getProperty("Damping");
 

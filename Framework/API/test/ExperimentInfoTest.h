@@ -586,6 +586,26 @@ public:
     TS_ASSERT_DIFFERS(boevs.find("TEST1_ValidDateOverlap"), std::string::npos);
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         instDir);
+
+    std::vector<std::string> formats = {"xml"};
+    std::vector<std::string> dirs;
+    dirs.push_back(testDir);
+    std::vector<std::string> fnames = helper.getResourceFilenames(
+        "ARGUS", formats, dirs, "1909-01-31 22:59:59");
+    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
+                      std::string::npos);
+    TS_ASSERT_EQUALS(fnames.size(), 1);
+    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
+                                         "1909-03-31 22:59:59");
+    TS_ASSERT_DIFFERS(fnames[0].find("TEST2_ValidDateOverlap"),
+                      std::string::npos);
+    TS_ASSERT_DIFFERS(fnames[1].find("TEST1_ValidDateOverlap"),
+                      std::string::npos);
+    fnames = helper.getResourceFilenames("ARGUS", formats, dirs,
+                                         "1909-05-31 22:59:59");
+    TS_ASSERT_DIFFERS(fnames[0].find("TEST1_ValidDateOverlap"),
+                      std::string::npos);
+    TS_ASSERT_EQUALS(fnames.size(), 1);
   }
 
   void test_nexus_geometry_getInstrumentFilename() {

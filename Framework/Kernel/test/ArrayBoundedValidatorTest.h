@@ -8,10 +8,8 @@
 #define ARRAYBOUNDEDVALIDATORTEST_H_
 
 #include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/BoundedValidator.h"
+#include <array>
 #include <cxxtest/TestSuite.h>
-#include <string>
-#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace std;
@@ -32,38 +30,99 @@ public:
 
   void testDoubleParamConstructor() {
     ArrayBoundedValidator<double> v(2, 5);
-    // Test that all the base class member variables are correctly assigned to
-    TS_ASSERT_EQUALS(v.getValidator()->hasLower(), true);
-    TS_ASSERT_EQUALS(v.getValidator()->hasUpper(), true);
-    TS_ASSERT_EQUALS(v.getValidator()->lower(), 2);
-    TS_ASSERT_EQUALS(v.getValidator()->upper(), 5);
+    TS_ASSERT_EQUALS(v.hasLower(), true);
+    TS_ASSERT_EQUALS(v.hasUpper(), true);
+    TS_ASSERT_EQUALS(v.lower(), 2);
+    TS_ASSERT_EQUALS(v.upper(), 5);
   }
 
   void testIntParamConstructor() {
     ArrayBoundedValidator<int> v(1, 8);
     // Test that all the base class member variables are correctly assigned to
-    TS_ASSERT_EQUALS(v.getValidator()->hasLower(), true);
-    TS_ASSERT_EQUALS(v.getValidator()->hasUpper(), true);
-    TS_ASSERT_EQUALS(v.getValidator()->lower(), 1);
-    TS_ASSERT_EQUALS(v.getValidator()->upper(), 8);
+    TS_ASSERT_EQUALS(v.hasLower(), true);
+    TS_ASSERT_EQUALS(v.hasUpper(), true);
+    TS_ASSERT_EQUALS(v.lower(), 1);
+    TS_ASSERT_EQUALS(v.upper(), 8);
+  }
+
+  void testExclusiveConstructor() {
+    const std::array<bool, 2> exclusives{{true, false}};
+    for (const auto exclusive : exclusives) {
+      ArrayBoundedValidator<int> v(1, 8, exclusive);
+      TS_ASSERT_EQUALS(v.hasLower(), true);
+      TS_ASSERT_EQUALS(v.hasUpper(), true);
+      TS_ASSERT_EQUALS(v.lower(), 1);
+      TS_ASSERT_EQUALS(v.upper(), 8);
+      TS_ASSERT_EQUALS(v.isLowerExclusive(), exclusive)
+      TS_ASSERT_EQUALS(v.isUpperExclusive(), exclusive)
+    }
   }
 
   void testDoubleBoundedValidatorConstructor() {
     BoundedValidator<double> bv(3, 9);
     ArrayBoundedValidator<double> v(bv);
-    TS_ASSERT_EQUALS(v.getValidator()->hasLower(), true);
-    TS_ASSERT_EQUALS(v.getValidator()->hasUpper(), true);
-    TS_ASSERT_EQUALS(v.getValidator()->lower(), 3);
-    TS_ASSERT_EQUALS(v.getValidator()->upper(), 9);
+    TS_ASSERT_EQUALS(v.hasLower(), true);
+    TS_ASSERT_EQUALS(v.hasUpper(), true);
+    TS_ASSERT_EQUALS(v.lower(), 3);
+    TS_ASSERT_EQUALS(v.upper(), 9);
+  }
+
+  void testSetLowerSetUpper() {
+    BoundedValidator<int> v;
+    TS_ASSERT(!v.hasLower())
+    TS_ASSERT(!v.hasUpper())
+    v.setLower(3);
+    TS_ASSERT_EQUALS(v.lower(), 3)
+    v.setUpper(9);
+    TS_ASSERT_EQUALS(v.upper(), 9)
+  }
+
+  void testHasLowerHasUpper() {
+    BoundedValidator<int> v;
+    TS_ASSERT(!v.hasLower())
+    TS_ASSERT(!v.hasUpper())
+    v.setLower(1);
+    TS_ASSERT(v.hasLower())
+    TS_ASSERT(!v.hasUpper())
+    v.clearLower();
+    v.setUpper(9);
+    TS_ASSERT(!v.hasLower())
+    TS_ASSERT(v.hasUpper())
+  }
+
+  void testClearLowerClearUpper() {
+    BoundedValidator<int> v(2, 9);
+    TS_ASSERT(v.hasLower())
+    TS_ASSERT(v.hasUpper())
+    v.clearLower();
+    TS_ASSERT(!v.hasLower())
+    TS_ASSERT(v.hasUpper())
+    v.setLower(2);
+    v.clearUpper();
+    TS_ASSERT(v.hasLower())
+    TS_ASSERT(!v.hasUpper())
+  }
+
+  void testSetExclusive() {
+    BoundedValidator<int> v;
+    TS_ASSERT(!v.isLowerExclusive())
+    TS_ASSERT(!v.isUpperExclusive())
+    v.setLowerExclusive(true);
+    TS_ASSERT(v.isLowerExclusive())
+    v.setUpperExclusive(true);
+    TS_ASSERT(v.isUpperExclusive())
+    v.setExclusive(false);
+    TS_ASSERT(!v.isLowerExclusive())
+    TS_ASSERT(!v.isUpperExclusive())
   }
 
   void testArrayValidation() {
-    string index_start("At index ");
-    string index_end(": ");
-    string start("Selected value ");
-    string end(")");
-    string greaterThan(" is > the upper bound (");
-    string lessThan(" is < the lower bound (");
+    const string index_start("At index ");
+    const string index_end(": ");
+    const string start("Selected value ");
+    const string end(")");
+    const string greaterThan(" is > the upper bound (");
+    const string lessThan(" is < the lower bound (");
 
     ArrayBoundedValidator<int> vi(0, 10);
     vector<int> ai{10, 3, -1, 2, 11, 0};
@@ -73,11 +132,11 @@ public:
                                          index_start + "4" + index_end + start +
                                          "11" + greaterThan + "10" + end);
 
-    vi.getValidator()->clearLower();
+    vi.clearLower();
     TS_ASSERT_EQUALS(vi.isValid(ai), index_start + "4" + index_end + start +
                                          "11" + greaterThan + "10" + end);
 
-    vi.getValidator()->clearUpper();
+    vi.clearUpper();
     TS_ASSERT_EQUALS(vi.isValid(ai), "");
 
     ArrayBoundedValidator<double> vd(0, 10);
@@ -91,13 +150,13 @@ public:
                          greaterThan + "10" + end + index_start + "5" +
                          index_end + start + "-0.01" + lessThan + "0" + end);
 
-    vd.getValidator()->clearUpper();
+    vd.clearUpper();
     TS_ASSERT_EQUALS(vd.isValid(ad), index_start + "2" + index_end + start +
                                          "-1" + lessThan + "0" + end +
                                          index_start + "5" + index_end + start +
                                          "-0.01" + lessThan + "0" + end);
 
-    vd.getValidator()->clearLower();
+    vd.clearLower();
     TS_ASSERT_EQUALS(vd.isValid(ad), "");
   }
 };

@@ -11,15 +11,15 @@
 #include "Poco/Net/TCPServerConnectionFactory.h"
 #include "Poco/Net/TCPServerParams.h"
 
+#include "MantidKernel/Logger.h"
 #include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
-
-#include <iostream>
 
 namespace Mantid {
 namespace LiveData {
 
 /// connect to an event mode control progam and read live events
 int liveData(const std::string &host) {
+  Kernel::Logger g_log = Kernel::Logger("example");
   static char *junk_buffer[10000];
   Poco::Net::StreamSocket s;
   Poco::UInt16 port = 10000;
@@ -33,7 +33,7 @@ int liveData(const std::string &host) {
   if (!setup.isValid()) {
     throw std::runtime_error("version wrong");
   }
-  std::cerr << "run number " << setup.head_setup.run_number << '\n';
+  g_log.information() << "run number " << setup.head_setup.run_number << '\n';
   TCPStreamEventDataNeutron events;
   while (true) {
     while (s.available() < static_cast<int>(sizeof(events.head))) {
@@ -80,12 +80,12 @@ int liveData(const std::string &host) {
     }
     // TCPStreamEventHeader& head = events.head;
     TCPStreamEventHeaderNeutron &head_n = events.head_n;
-    std::cerr << "Read " << nread << " events for frame number "
-              << head_n.frame_number << " time " << head_n.frame_time_zero
-              << '\n';
+    g_log.information() << "Read " << nread << " events for frame number "
+                        << head_n.frame_number << " time "
+                        << head_n.frame_time_zero << '\n';
     for (int i = 0; i < 10; ++i) {
-      std::cerr << events.data[i].time_of_flight << " "
-                << events.data[i].spectrum << '\n';
+      g_log.information() << events.data[i].time_of_flight << " "
+                          << events.data[i].spectrum << '\n';
     }
   }
   s.close();

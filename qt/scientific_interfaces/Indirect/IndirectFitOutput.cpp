@@ -176,6 +176,12 @@ void renameResult(Workspace_sptr resultWorkspace,
     renameWorkspace(name, newName);
 }
 
+void renameResult(WorkspaceGroup_sptr resultWorkspace,
+                  IndirectFitData const *fitData) {
+  for (auto const &workspace : *resultWorkspace)
+    renameResult(workspace, fitData);
+}
+
 void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,
                                 const FitDataIterator &fitDataBegin,
                                 const FitDataIterator &fitDataEnd) {
@@ -395,8 +401,8 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
 
   auto update = [&](IndirectFitData const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
-    auto workspace = inputData->workspace().get();
-    auto &indices = findOrCreateDefaultInMap(resultIndices, workspace);
+    auto ws = inputData->workspace().get();
+    auto &indices = findOrCreateDefaultInMap(resultIndices, ws);
     return UnstructuredResultAdder(resultGroup, fitResults, indices, index);
   };
   applyData(update, fitDataBegin, fitDataEnd);

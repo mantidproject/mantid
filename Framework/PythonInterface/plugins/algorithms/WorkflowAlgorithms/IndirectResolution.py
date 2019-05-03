@@ -67,7 +67,7 @@ class IndirectResolution(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        iet_alg = self.createChildAlgorithm(name='ISISIndirectEnergyTransfer', startProgress=0.0,
+        iet_alg = self.createChildAlgorithm(name='ISISIndirectEnergyTransferWrapper', startProgress=0.0,
                                             endProgress=0.7, enableLogging=True)
         iet_alg.setProperty('Instrument', self._instrument)
         iet_alg.setProperty('Analyser', self._analyser)

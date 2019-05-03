@@ -7,9 +7,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISCALIBRATION_H_
 
-#include "../General/UserInputValidator.h"
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ISISCalibration.h"
 
 namespace MantidQt {
@@ -37,7 +37,7 @@ public:
 
   QString peakRangeString() const;
   QString backgroundRangeString() const;
-  QString instrumentDetectorRangeString() const;
+  QString instrumentDetectorRangeString();
   QString outputWorkspaceName() const;
   QString resolutionDetectorRangeString() const;
   QString rebinString() const;
@@ -54,9 +54,9 @@ private slots:
   void algorithmComplete(bool error);
   void calPlotRaw();
   void calPlotEnergy();
-  void calMinChanged(double);
-  void calMaxChanged(double);
-  void calUpdateRS(QtProperty *, double);
+  void calMinChanged(double /*val*/);
+  void calMaxChanged(double /*val*/);
+  void calUpdateRS(QtProperty * /*prop*/, double /*val*/);
   void calSetDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
   void resCheck(bool state); ///< handles checking/unchecking of "Create RES
   /// File" checkbox
@@ -82,14 +82,14 @@ private slots:
   void setPlotIsPlotting(bool plotting);
 
 private:
+  void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
   void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,
                       const double &minimum, const double &maximum,
                       const QString &minPropertyName,
                       const QString &maxPropertyName);
-  Mantid::API::IAlgorithm_sptr
-  calibrationAlgorithm(const QString &inputFiles) const;
+  Mantid::API::IAlgorithm_sptr calibrationAlgorithm(const QString &inputFiles);
   Mantid::API::IAlgorithm_sptr
   resolutionAlgorithm(const QString &inputFiles) const;
   Mantid::API::IAlgorithm_sptr

@@ -61,14 +61,14 @@ signals:
   void spectraAdded(const QStringList&);
 
 public slots:
-  void setFittingRangeGlobal(bool);
-  void setFittingRange(int, double, double);
+  void setFittingRangeGlobal(bool /*on*/);
+  void setFittingRange(int /*i*/, double /*startX*/, double /*endX*/);
 
 private slots:
   void addWorkspace();
   void workspaceSelectionChanged();
   void removeSelectedSpectra();
-  void updateDataset(int, int);
+  void updateDataset(int /*row*/, int /*unused*/);
 
 private:
   MultiDatasetFit *owner() const;

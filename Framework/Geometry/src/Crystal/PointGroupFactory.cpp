@@ -65,9 +65,8 @@ PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
   pointGroups.reserve(m_generatorMap.size());
   for (const auto &generator : m_generatorMap) {
-    pointGroups.push_back(generator.first);
+    pointGroups.emplace_back(generator.first);
   }
-
   return pointGroups;
 }
 

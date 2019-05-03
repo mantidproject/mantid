@@ -98,7 +98,7 @@ public:
   void clearView() override;
   std::string getFilterText() const override;
   SaveFileType getSaveFileType() const override;
-  void saveWorkspace(SaveFileType type) override;
+  void saveWorkspace(const std::string &wsName, SaveFileType type) override;
   void
   saveWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void filterWorkspaces(const std::string &filterText) override;
@@ -171,7 +171,7 @@ private:
   whichCriteria(SortCriteria criteria);
 
 public slots:
-  void clickedWorkspace(QTreeWidgetItem *, int);
+  void clickedWorkspace(QTreeWidgetItem * /*item*/, int /*unused*/);
   void saveWorkspaceCollection();
   void onClickDeleteWorkspaces();
   void renameWorkspace();
@@ -182,7 +182,7 @@ public slots:
   void chooseByName();
   void chooseByLastModified();
   void chooseByMemorySize();
-  void keyPressEvent(QKeyEvent *) override;
+  void keyPressEvent(QKeyEvent * /*unused*/) override;
 
 protected slots:
   void popupMenu(const QPoint &pos);
@@ -270,11 +270,11 @@ private:
   mutable QMutex m_mutex;
 
 private slots:
-  void handleUpdateTree(const TopLevelItems &);
+  void handleUpdateTree(const TopLevelItems & /*items*/);
   void handleClearView();
 signals:
   void signalClearView();
-  void signalUpdateTree(const TopLevelItems &);
+  void signalUpdateTree(const TopLevelItems & /*_t1*/);
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

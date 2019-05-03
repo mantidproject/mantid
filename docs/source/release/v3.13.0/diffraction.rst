@@ -16,16 +16,15 @@ New
 .. figure:: ../../images/D2B_calib.png
     :align: center
 
-    D2B calibration constants generated from PowderDiffILLDetEffCorr
-    :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr-v1>`
+    D2B calibration constants generated from **PowderDiffILLDetEffCorr**.
 
 
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is extended to apply vertical and horizontal tube alignment for D2B, based on the IPF.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is modified to comply with the U-shape convention for tube numbering for D2B.
-- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
-- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` is extended to provide automatic masking of the pixels with spurious calibration constants.
-- :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` will now ignore the last scan point data, if some of the input files have 26 points, instead of 25.
-- :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` is extended to provide initial masking of the top and bottom parts of the tubes, and final masking of the 2D outputs.
+- **PowderDiffILLDetEffCorr** is extended to compute the detector efficiencies also for the 2-dimensional scanning diffractometer D2B at the ILL.
+- **PowderDiffILLDetEffCorr** is extended to provide automatic masking of the pixels with spurious calibration constants.
+- **PowderDiffILLDetEffCorr** will now ignore the last scan point data, if some of the input files have 26 points, instead of 25.
+- **PowderDiffILLDetScanReduction** is extended to provide initial masking of the top and bottom parts of the tubes, and final masking of the 2D outputs.
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` performs powder diffraction data reduction for WAND² with calibration, monitor normalisation and background subtraction.
 - New NOMAD instrument geometry for 2018 run cycle
 - New POWGEN instrument geometry for 2018 run cycle
@@ -111,5 +110,3 @@ Improvements
 - PeaksWorkspace has column added for the unique peak number so peaks can be found after sorting or filtering.
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has option to use a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
-
-

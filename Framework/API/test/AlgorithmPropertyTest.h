@@ -14,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHasProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include <json/value.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -79,17 +80,19 @@ public:
   static void destroySuite(AlgorithmPropertyTest *suite) { delete suite; }
 
   AlgorithmPropertyTest() {
-    Mantid::API::AlgorithmFactory::Instance().subscribe<SimpleSum>();
-    Mantid::API::AlgorithmFactory::Instance().subscribe<HasAlgProp>();
-    Mantid::API::AlgorithmFactory::Instance()
-        .subscribe<HasAlgPropAndValidator>();
+    using Mantid::API::AlgorithmFactory;
+    auto &algmFactory = AlgorithmFactory::Instance();
+    algmFactory.subscribe<SimpleSum>();
+    algmFactory.subscribe<HasAlgProp>();
+    algmFactory.subscribe<HasAlgPropAndValidator>();
   }
 
   ~AlgorithmPropertyTest() override {
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("HasAlgProp1", 1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe(
-        "HasAlgPropAndValidator1", 1);
+    using Mantid::API::AlgorithmFactory;
+    auto &algmFactory = AlgorithmFactory::Instance();
+    algmFactory.unsubscribe("SimpleSum", 1);
+    algmFactory.unsubscribe("HasAlgProp1", 1);
+    algmFactory.unsubscribe("HasAlgPropAndValidator1", 1);
   }
 
   void test_A_Valid_Alg_String_Is_Accepted() {
@@ -143,6 +146,73 @@ public:
     // Add the required property so now it should pass
     adder->initialize();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("CalculateStep", adder));
+  }
+
+  void test_ValueAsJson() {
+    AlgorithmProperty prop("name");
+    SimpleSum adder;
+    adder.initialize();
+    adder.execute();
+    prop.setValue(adder.toString());
+    const auto jsonValue = prop.valueAsJson();
+    TS_ASSERT_EQUALS(Json::objectValue, jsonValue.type());
+    TS_ASSERT_EQUALS(adder.name(), jsonValue["name"].asString());
+    TS_ASSERT_EQUALS(adder.version(), jsonValue["version"].asInt());
+    TS_ASSERT_EQUALS(3, jsonValue["properties"]["Output1"].asInt());
+  }
+
+  void test_SetValueFromJson_With_Valid_Json() {
+    AlgorithmProperty prop("PropName");
+    const std::string helpMessage{prop.setValueFromJson(createAlgorithmJson())};
+
+    TS_ASSERT(helpMessage.empty());
+    auto algorithm = prop();
+    TS_ASSERT_EQUALS(algorithm->toString(), prop.value());
+    auto getIntProperty = [&algorithm](const std::string &name) {
+      return static_cast<int>(algorithm->getProperty(name));
+    };
+    TS_ASSERT_EQUALS(5, getIntProperty("Input1"));
+    TS_ASSERT_EQUALS(10, getIntProperty("Input2"));
+    TS_ASSERT_EQUALS(15, getIntProperty("Output1"));
+  }
+
+  void test_SetValueFromJson_With_Invalid_Json() {
+    Json::Value algm{1};
+    AlgorithmProperty prop("PropName");
+    const std::string helpMessage{prop.setValueFromJson(algm)};
+    TS_ASSERT(!helpMessage.empty());
+  }
+
+  void test_Copy_Constructor() {
+    AlgorithmProperty src("PropName");
+    src.setValueFromJson(createAlgorithmJson());
+    AlgorithmProperty dest{src};
+
+    TS_ASSERT_EQUALS(src.value(), dest.value());
+    TS_ASSERT_EQUALS(src.valueAsJson(), dest.valueAsJson());
+  }
+
+  void test_Move_Constructor() {
+    AlgorithmProperty src("PropName");
+    const auto algJson = createAlgorithmJson();
+    src.setValueFromJson(algJson);
+    AlgorithmProperty dest{std::move(src)};
+
+    TS_ASSERT_EQUALS(Algorithm::fromJson(algJson)->toString(), dest.value());
+    TS_ASSERT_EQUALS(algJson, dest.valueAsJson());
+  }
+
+private:
+  Json::Value createAlgorithmJson() {
+    Json::Value algm;
+    algm["name"] = "SimpleSum";
+    algm["version"] = 1;
+    Json::Value properties;
+    properties["Input1"] = 5;
+    properties["Input2"] = 10;
+    properties["Output1"] = 15;
+    algm["properties"] = properties;
+    return algm;
   }
 };
 

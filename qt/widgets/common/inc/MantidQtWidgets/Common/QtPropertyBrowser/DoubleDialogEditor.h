@@ -26,7 +26,7 @@ class DoubleDialogEditor : public QWidget {
 public:
   DoubleDialogEditor(QtProperty *property, QWidget *parent, bool hasOption = false, bool isOptionSet = false);
 signals:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected slots:
@@ -40,7 +40,7 @@ protected slots:
   QString getText() const;
 
 private:
-  bool eventFilter(QObject *, QEvent *) override;
+  bool eventFilter(QObject * /*obj*/, QEvent * /*evt*/) override;
   DoubleEditor *m_editor;
   QPushButton *m_button;
   QCheckBox *m_checkBox;
@@ -67,12 +67,14 @@ public:
     QtProperty *property,
     QWidget *parent) override;
 signals:
-  void buttonClicked(QtProperty *);
+  void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
 
 protected:
-  void connectPropertyManager(ParameterPropertyManager *) override {}
-  void disconnectPropertyManager(ParameterPropertyManager *) override {}
+  void connectPropertyManager(ParameterPropertyManager * /*manager*/) override {
+  }
+  void
+  disconnectPropertyManager(ParameterPropertyManager * /*manager*/) override {}
   bool m_hasOption;
 };
 

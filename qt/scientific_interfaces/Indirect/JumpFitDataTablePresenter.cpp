@@ -17,7 +17,7 @@ QStringList jumpFitHeaders() {
           << "WS Index"
           << "StartX"
           << "EndX"
-          << "Exclude";
+          << "Mask X Range";
   return headers;
 }
 } // namespace

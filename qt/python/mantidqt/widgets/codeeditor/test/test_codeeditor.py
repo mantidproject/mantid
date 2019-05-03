@@ -14,7 +14,7 @@ import unittest
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
-from mantidqt.utils.qt.test import GuiTest
+from mantidqt.utils.qt.testing import GuiTest
 
 TEST_LANG = "Python"
 

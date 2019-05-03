@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 19 properties here", 19,
+    TSM_ASSERT_EQUALS("should be 21 properties here", 21,
                       (size_t)(alg.getProperties().size()));
   }
 
@@ -120,20 +120,50 @@ public:
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &sample(ws->sample());
     const Geometry::SampleEnvironment environment = sample.getEnvironment();
-    const auto can = environment.container();
-    const auto material = can->material();
+    const auto &can = environment.getContainer();
+    const auto &material = can.material();
     TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
-    TS_ASSERT(can->hasValidShape());
+    TS_ASSERT(can.hasValidShape());
     TS_ASSERT_EQUALS(environment.name(), "testName");
     TS_ASSERT_EQUALS(material.numberDensity(), 1);
     TS_ASSERT_EQUALS(material.name(), "");
+  }
+
+  void testSetMaterialNumberDensityInFormulaUnits() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    constexpr int nvectors{2}, nbins{10};
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", path))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "outputWorkspace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("EnvironmentName", "testName"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetMaterial", true))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChemicalFormula", "Al2 O3"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SampleNumberDensity", 0.23))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("NumberDensityUnit", "Formula Units"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
+    const auto &material =
+        ws->sample().getEnvironment().getContainer().material();
+    TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12);
   }
 
 private:
   // load a cube into a meshobject
   std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path);
+    constexpr ScaleUnits unit = ScaleUnits::metres;
+    auto loader = LoadBinaryStl(path, unit);
     auto cube = loader.readStl();
     return cube;
   }

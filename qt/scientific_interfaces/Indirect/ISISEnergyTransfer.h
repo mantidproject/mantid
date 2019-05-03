@@ -7,7 +7,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 #define MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 
-#include "../General/Background.h"
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
 #include "ui_ISISEnergyTransfer.h"
@@ -59,30 +58,38 @@ private slots:
   void plotClicked();
   void saveClicked();
 
-  void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
                        QString const message = "Run",
                        QString const tooltip = "");
-  void setPlotIsPlotting(bool plotting);
 
 private:
-  Ui::ISISEnergyTransfer m_uiForm;
+  void setInstrumentDefault(QMap<QString, QString> const &instDetails);
+  void setInstrumentCheckBoxProperty(QCheckBox *checkbox,
+                                     QMap<QString, QString> const &instDetails,
+                                     QString const &instrumentProperty);
 
   std::pair<std::string, std::string> createMapFile(
       const std::string
           &groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
-  std::vector<std::string>
-      m_outputWorkspaces; ///< get a vector of workspaces to plot
+
   bool numberInCorrectRange(std::size_t const &spectraNumber) const;
   QString checkCustomGroupingNumbersInRange(
       std::vector<std::size_t> const &customGroupingNumbers) const;
   QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
+
+  void setRunEnabled(bool enable);
+  void setPlotEnabled(bool enable);
+  void setPlotTimeEnabled(bool enable);
+  void setSaveEnabled(bool enable);
+  void setPlotIsPlotting(bool plotting);
+  void setPlotTimeIsPlotting(bool plotting);
+
+  std::string m_outputGroupName;
+  std::vector<std::string> m_outputWorkspaces;
+  Ui::ISISEnergyTransfer m_uiForm;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

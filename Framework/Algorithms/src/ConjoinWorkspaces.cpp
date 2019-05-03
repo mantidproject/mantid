@@ -69,7 +69,7 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (eventWs1 && eventWs2) {
-    this->validateInputs(*eventWs1, *eventWs2, false);
+    this->checkCompatibility(*eventWs1, *eventWs2);
     auto output = conjoinEvents(*eventWs1, *eventWs2);
     setYUnitAndLabel(*output);
     // Set the result workspace to the first input
@@ -149,7 +149,7 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
 API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
                                  const DataObjects::EventWorkspace &ws2) {
-  this->validateInputs(ws1, ws2, false);
+  this->checkCompatibility(ws1, ws2);
 
   // Check there is no overlap
   if (this->getProperty("CheckOverlapping")) {
@@ -176,7 +176,7 @@ API::MatrixWorkspace_sptr
 ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2) {
   // Check that the input workspaces meet the requirements for this algorithm
-  this->validateInputs(ws1, ws2, false);
+  this->checkCompatibility(ws1, ws2);
 
   if (this->getProperty("CheckOverlapping")) {
     this->checkForOverlap(ws1, ws2, true);

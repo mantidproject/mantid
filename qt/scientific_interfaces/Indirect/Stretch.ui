@@ -191,7 +191,7 @@
        <item>
         <widget class="QLabel" name="lbPreviewSpectrum">
          <property name="text">
-          <string>Current Spectrum:</string>
+          <string>Preview Spectrum:</string>
          </property>
         </widget>
        </item>
@@ -415,15 +415,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::PreviewPlot</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -6,11 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSignal
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal
 
-from . import ui_summation_settings_widget
-from sans.gui_logic.models.binning_type import BinningType
+from mantidqt.utils.qt import load_ui
+from sans.common.enums import BinningType
+
+Ui_SummationSettingsWidget, _ = load_ui(__file__, "summation_settings_widget.ui")
 
 
 def set_checked_without_signal(checkable, should_be_checked):
@@ -19,12 +21,12 @@ def set_checked_without_signal(checkable, should_be_checked):
     checkable.blockSignals(False)
 
 
-class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_SummationSettingsWidget):
-    binningTypeChanged = pyqtSignal(int)
-    preserveEventsChanged = pyqtSignal(bool)
-    binSettingsChanged = pyqtSignal()
-    additionalTimeShiftsChanged = pyqtSignal()
-    sum = pyqtSignal()
+class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
+    binningTypeChanged = Signal(int)
+    preserveEventsChanged = Signal(bool)
+    binSettingsChanged = Signal()
+    additionalTimeShiftsChanged = Signal()
+    sum = Signal()
 
     def __init__(self, parent=None):
         super(SummationSettingsWidget, self).__init__(parent)
@@ -32,7 +34,7 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         self._connect_signals()
 
     def setupUi(self, other):
-        ui_summation_settings_widget.Ui_SummationSettingsWidget.setupUi(self, other)
+        Ui_SummationSettingsWidget.setupUi(self, other)
         self._setupBinningTypes()
 
     def _setupBinningTypes(self):
@@ -49,17 +51,17 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         self.overlayEventWorkspacesCheckbox.stateChanged.connect(self._handle_overlay_ews_changed)
         self.binningOptionsLineEdit.editingFinished.connect(self._handle_binning_options_line_edit_changed)
 
-    def _binning_type_index_to_type(self, index):
-        if index == 0:
-            return BinningType.Custom
-        elif index == 1:
-            return BinningType.FromMonitors
-        elif index == 2:
-            return BinningType.SaveAsEventData
+    @staticmethod
+    def _binning_type_to_index(bin_type):
+        if bin_type == BinningType.Custom:
+            return 0
+        elif bin_type == BinningType.FromMonitors:
+            return 1
+        elif bin_type == BinningType.SaveAsEventData:
+            return 2
 
     def _handle_binning_type_changed(self, index):
-        binning_type = self._binning_type_index_to_type(index)
-        self.binningTypeChanged.emit(binning_type)
+        self.binningTypeChanged.emit(index)
 
     def _handle_binning_options_line_edit_changed(self):
         # Since the text box is shared we don't
@@ -72,6 +74,7 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
         self.preserveEventsChanged.emit(state != 0)
 
     def draw_settings(self, settings):
+        self._draw_binning_type(settings)
         self._draw_bin_settings(settings)
         self._draw_additional_time_shifts(settings)
         self._draw_overlay_event_workspaces(settings)
@@ -92,6 +95,11 @@ class SummationSettingsWidget(QtGui.QWidget, ui_summation_settings_widget.Ui_Sum
             set_checked_without_signal(
                 self.overlayEventWorkspacesCheckbox, False)
             self.overlayEventWorkspacesCheckbox.setVisible(False)
+
+    def _draw_binning_type(self, settings):
+        index = self._binning_type_to_index(settings.type)
+        if index is not None:
+            self.binningType.setCurrentIndex(index)
 
     def _draw_bin_settings(self, settings):
         if settings.has_bin_settings():

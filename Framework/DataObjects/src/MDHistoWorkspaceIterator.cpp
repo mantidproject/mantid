@@ -279,6 +279,9 @@ MDHistoWorkspaceIterator::jumpToNearest(const VMD &fromLocation) {
   for (size_t d = 0; d < m_nd; ++d) {
     coord_t dExact = getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
     size_t dRound = std::lround(dExact); // Round to nearest bin edge.
+    if (dRound >= m_indexMax[d]) {
+      dRound = m_indexMax[d] - 1;
+    }
     sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) *
               m_binWidth[d] * m_binWidth[d];
     indexes[d] = dRound;

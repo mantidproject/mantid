@@ -174,7 +174,7 @@ Desktop.ini
 .tags
 .tags_sorted_by_file
 
-#Dynamically created files
+# Dynamically created files
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
 qt/applications/workbench/setup.py

@@ -4,23 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
 import os
+import unittest
+from PyQt4 import QtGui
+
+from mantid.py3compat import mock
 
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
-from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-
-import unittest
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
-
-from PyQt4 import QtGui
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
@@ -43,13 +37,13 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonLoadData()
+        setup_context_for_tests(self)
+
         self.view = LoadRunWidgetView(parent=self.obj)
-        self.model = LoadRunWidgetModel(self.data)
+        self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
-        self.presenter.enable_multiple_files(False)
         self.presenter.set_current_instrument("EMU")
 
         patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_model.load_utils')
@@ -65,7 +59,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def load_single_run(self):
         self._loaded_run = 1234
         self._loaded_filename = "EMU00001234.nxs"
-        self._loaded_workspace = [1, 2, 3]
+        self._loaded_workspace = {'MainFieldDirection': 'transverse'}
 
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
             return_value=(self._loaded_workspace, self._loaded_run, self._loaded_filename))
@@ -75,7 +69,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
     def assert_model_has_not_changed(self):
         self.assertEqual(self.model.loaded_workspaces, [self._loaded_workspace])
-        self.assertEqual(self.model.loaded_runs, [self._loaded_run])
+        self.assertEqual(self.model.loaded_runs, [[self._loaded_run]])
         self.assertEqual(self.model.loaded_filenames, [self._loaded_filename])
 
     def assert_view_has_not_changed(self):
@@ -116,34 +110,34 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.assertEqual(os.path.basename(filename), new_filename)
 
     @run_test_with_and_without_threading
-    def test_that_decrement_run_loads_the_data_correctly_by_overwriting_previous_run(self):
+    def test_that_decrement_run_loads_the_data_correctly(self):
         new_run = self._loaded_run - 1
         new_filename = "EMU00001233.nxs"
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename))
 
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [new_run])
-        self.assertEqual(self.presenter.workspaces, [[1]])
+        self.assertEqual(self.presenter.filenames, [self._loaded_filename, new_filename])
+        self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
+        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, {'MainFieldDirection': 'transverse'}])
 
-        self.assertEqual(self.view.get_run_edit_text(), str(new_run))
+        self.assertEqual(self.view.get_run_edit_text(), '1233')
 
     @run_test_with_and_without_threading
-    def test_that_increment_run_loads_the_data_correctly_by_overwriting_previous_run(self):
+    def test_that_increment_run_loads_the_data_correctly(self):
         new_run = self._loaded_run + 1
         new_filename = "EMU00001235.nxs"
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], new_run, new_filename))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=({'MainFieldDirection': 'transverse'}, new_run, new_filename))
 
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.presenter.filenames, [new_filename])
-        self.assertEqual(self.presenter.runs, [new_run])
-        self.assertEqual(self.presenter.workspaces, [[1]])
+        self.assertEqual(self.presenter.filenames, [self._loaded_filename, new_filename])
+        self.assertEqual(self.presenter.runs, [[self._loaded_run], [new_run]])
+        self.assertEqual(self.presenter.workspaces, [self._loaded_workspace, {'MainFieldDirection': 'transverse'}])
 
-        self.assertEqual(self.view.get_run_edit_text(), str(new_run))
+        self.assertEqual(self.view.get_run_edit_text(), '1235')
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_the_data_are_returned_to_previous_state(self):
@@ -153,8 +147,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
-        self.assert_view_has_not_changed()
-#
+        self.assertEqual(self.view.get_run_edit_text(), '')
+
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
@@ -163,7 +157,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         self.assert_model_has_not_changed()
-        self.assert_view_has_not_changed()
+        self.assertEqual(self.view.get_run_edit_text(), '')
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_warning_message_is_displayed(self):

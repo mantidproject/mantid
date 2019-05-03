@@ -30,8 +30,7 @@ protected:
   API::ITableWorkspace_sptr
   determineChunk(const std::string &filename) override;
   API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex) override;
-  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp,
-                                         double filterBadPulses);
+  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp);
 
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
@@ -42,6 +41,7 @@ private:
   void exec() override;
 
   API::ITableWorkspace_sptr m_chunkingTable;
+  double m_filterBadPulses;
 };
 
 } // namespace WorkflowAlgorithms

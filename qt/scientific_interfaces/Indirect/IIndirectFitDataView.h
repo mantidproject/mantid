@@ -7,8 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QObject>
 #include <QTabWidget>
@@ -44,6 +44,10 @@ public:
   virtual void setResolutionWSSuffices(QStringList const &suffices) = 0;
   virtual void setResolutionFBSuffices(QStringList const &suffices) = 0;
 
+  virtual bool isSampleWorkspaceSelectorVisible() const = 0;
+  virtual void
+  setSampleWorkspaceSelectorIndex(QString const &workspaceName) = 0;
+
   virtual void readSettings(QSettings const &settings) = 0;
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
 
@@ -55,8 +59,8 @@ public slots:
   virtual void setEndX(double) = 0;
 
 signals:
-  void sampleLoaded(QString const &);
-  void resolutionLoaded(QString const &);
+  void sampleLoaded(QString const & /*_t1*/);
+  void resolutionLoaded(QString const & /*_t1*/);
   void addClicked();
   void removeClicked();
   void multipleDataViewSelected();

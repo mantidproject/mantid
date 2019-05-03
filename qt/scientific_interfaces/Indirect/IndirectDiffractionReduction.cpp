@@ -208,11 +208,7 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
  */
 void IndirectDiffractionReduction::plotResults() {
   setPlotIsPlotting(true);
-
-  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
-  QString plotType = m_uiForm.cbPlotType->currentText();
+  const QString plotType = m_uiForm.cbPlotType->currentText();
 
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 
@@ -560,17 +556,18 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
 void IndirectDiffractionReduction::createGroupingWorkspace(
     const std::string &outputWsName) {
-  IAlgorithm_sptr groupingAlg =
+  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
+  auto const numberOfGroups = m_uiForm.spNumberGroups->value();
+  auto const instrument = instrumentConfig->getInstrumentName().toStdString();
+  auto const analyser = instrumentConfig->getAnalyserName().toStdString();
+  auto const componentName = analyser == "diffraction" ? "bank" : analyser;
+
+  auto groupingAlg =
       AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   groupingAlg->initialize();
-
-  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
-
-  groupingAlg->setProperty("FixedGroupCount", m_uiForm.spNumberGroups->value());
-  groupingAlg->setProperty("InstrumentName",
-                           instrumentConfig->getInstrumentName().toStdString());
-  groupingAlg->setProperty("ComponentName",
-                           instrumentConfig->getAnalyserName().toStdString());
+  groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
+  groupingAlg->setProperty("InstrumentName", instrument);
+  groupingAlg->setProperty("ComponentName", componentName);
   groupingAlg->setProperty("OutputWorkspace", outputWsName);
 
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
@@ -645,6 +642,8 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfVanadiumFile->setInstrumentOverride(instrumentName);
+  m_uiForm.rfCalFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());

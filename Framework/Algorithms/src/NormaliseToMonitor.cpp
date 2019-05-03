@@ -10,7 +10,6 @@
 #include "MantidAPI/SingleCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -160,11 +159,9 @@ bool MonIDPropChanger::monitorIdReader(
 
 bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
                                        const size_t timeIndex) {
-
-  for (const auto &spec : specDef)
-    if (spec.second != timeIndex)
-      return false;
-  return true;
+  return std::none_of(
+      specDef.cbegin(), specDef.cend(),
+      [timeIndex](const auto &spec) { return spec.second != timeIndex; });
 }
 
 // Register with the algorithm factory
@@ -417,7 +414,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = WorkspaceHelpers::commonBoundaries(*inputWorkspace);
+  m_commonBins = inputWorkspace->isCommonBins();
 
   // Check the monitor spectrum or workspace and extract into new workspace
   m_monitor = sepWS ? getMonitorWorkspace(inputWorkspace)

@@ -7,10 +7,13 @@
 #ifndef MANTID_DATAOBJECTS_MDLEANEVENT_H_
 #define MANTID_DATAOBJECTS_MDLEANEVENT_H_
 
+#include "MantidDataObjects/MortonIndex/BitInterleaving.h"
+#include "MantidDataObjects/MortonIndex/CoordinateConversion.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -38,7 +41,59 @@ namespace DataObjects {
  * @date Dec 3, 2010
  *
  * */
+
+template <size_t nd> class MDLeanEvent;
+
+template <size_t nd> void swap(MDLeanEvent<nd> &first, MDLeanEvent<nd> &second);
+
+/**
+ * Structure to mark the classes, which can switch the
+ * "physical" meaning of the union used in MDLeanEvent
+ * to store coordinates or index. If some class is
+ * defines the type EventAccessType = EventAccessor,
+ * it can call private retrieve functions throuhg the
+ * api described in MDLeanEvent (struct AccessFor).
+ * Keeping the event state in the coordinates mode
+ * is the concern of EventAccessor itself.
+ */
+struct EventAccessor {};
+
 template <size_t nd> class DLLExport MDLeanEvent {
+public:
+  /**
+   * Additional index type defenitions
+   */
+  using IntT = typename morton_index::IndexTypes<nd, coord_t>::IntType;
+  using MortonT = typename morton_index::IndexTypes<nd, coord_t>::MortonType;
+
+  template <class Accessor>
+  /**
+   * Internal structure to avoid the direct exposing of API
+   * functions, which change the state of event (switch between
+   * union fields)
+   */
+  struct AccessFor {
+    static std::enable_if_t<
+        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
+    convertToCoordinates(MDLeanEvent<nd> &event,
+                         const morton_index::MDSpaceBounds<nd> &space) {
+      event.convertToCoordinates(space);
+    }
+    static std::enable_if_t<
+        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value>
+    convertToIndex(MDLeanEvent<nd> &event,
+                   const morton_index::MDSpaceBounds<nd> &space) {
+      event.convertToIndex(space);
+    }
+    static typename std::enable_if<
+        std::is_same<EventAccessor, typename Accessor::EventAccessType>::value,
+        MortonT>::type
+    getIndex(const MDLeanEvent<nd> &event) {
+      return event.getIndex();
+    }
+  };
+  template <class Accessor> friend struct AccessFor;
+
 protected:
   /** The signal (aka weight) from the neutron event.
    * Will be exactly 1.0 unless modified at some point.
@@ -53,8 +108,41 @@ protected:
 
   /** The N-dimensional coordinates of the center of the event.
    * A simple fixed-sized array of (floats or doubles).
+   * Second member is an index that can be utilized for faster
+   * creating the box structure
    */
-  coord_t center[nd];
+#pragma pack(push, 1)
+  union {
+    coord_t center[nd];
+    MortonT index;
+  };
+#pragma pack(pop)
+
+private:
+  /**
+   * Calculate Morton index for center coordinates for
+   * given space and ovveride the memory used for
+   * storing center with index
+   * @param space :: given space
+   */
+  void convertToIndex(const morton_index::MDSpaceBounds<nd> &space) {
+    index = morton_index::coordinatesToIndex<nd, IntT, MortonT>(center, space);
+  }
+
+  /**
+   * Calculate coordinates of the center of event from it
+   * Morton index in known space and oveerride index with
+   * coordinates in memory
+   * @param space :: known space
+   */
+  void convertToCoordinates(const morton_index::MDSpaceBounds<nd> &space) {
+    auto coords =
+        morton_index::indexToCoordinates<nd, IntT, MortonT>(index, space);
+    for (unsigned i = 0; i < nd; ++i)
+      center[i] = coords[i];
+  }
+
+  const MortonT getIndex() const { return index; }
 
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
@@ -141,6 +229,13 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------
+  friend void swap<nd>(MDLeanEvent &first, MDLeanEvent &second);
+
+  MDLeanEvent &operator=(MDLeanEvent other) {
+    swap(*this, other);
+    return *this;
+  }
+
   /** @return the n-th coordinate axis value.
    * @param n :: index (0-based) of the dimension you want.
    * */
@@ -308,6 +403,14 @@ public:
     }
   }
 };
+
+template <size_t ND>
+void swap(MDLeanEvent<ND> &first, MDLeanEvent<ND> &second) {
+  std::swap(first.signal, second.signal);
+  std::swap(first.errorSquared, second.errorSquared);
+  // Index always of the same size as center
+  std::swap(first.index, second.index);
+}
 
 } // namespace DataObjects
 } // namespace Mantid

@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -64,6 +64,8 @@ Stretch::Stretch(QWidget *parent)
   m_propTree->addProperty(m_properties["SampleBinning"]);
   m_propTree->addProperty(m_properties["Sigma"]);
   m_propTree->addProperty(m_properties["Beta"]);
+
+  formatTreeWidget(m_propTree, m_properties);
 
   // default values
   m_dblManager->setValue(m_properties["Sigma"], 50);

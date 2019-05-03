@@ -376,8 +376,8 @@ void PlotPeakByLogValue::exec() {
       interruption_point();
 
       if (individual) {
-        for (size_t i = 0; i < initialParams.size(); ++i) {
-          ifun->setParameter(i, initialParams[i]);
+        for (size_t k = 0; k < initialParams.size(); ++k) {
+          ifun->setParameter(k, initialParams[k]);
         }
       }
     } // for(;j < jend;++j)
@@ -631,14 +631,14 @@ PlotPeakByLogValue::makeNames() const {
       API::WorkspaceGroup_sptr wsg =
           boost::dynamic_pointer_cast<API::WorkspaceGroup>(ws);
       if (wsg) {
-        std::vector<std::string> wsNames = wsg->getNames();
-        for (auto &wsName : wsNames) {
-          nameList.push_back(InputData(wsName, wi, -1, period, start, end));
+        const std::vector<std::string> wsNames = wsg->getNames();
+        for (const auto &wsName : wsNames) {
+          nameList.emplace_back(InputData(wsName, wi, -1, period, start, end));
         }
         continue;
       }
     }
-    nameList.push_back(InputData(name, wi, spec, period, start, end));
+    nameList.emplace_back(name, wi, spec, period, start, end);
   }
   return nameList;
 }

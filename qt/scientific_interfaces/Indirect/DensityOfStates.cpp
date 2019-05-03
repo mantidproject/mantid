@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DensityOfStates.h"
 
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -128,8 +128,8 @@ void DensityOfStates::run() {
 
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
-    for (auto it = items.begin(); it != items.end(); ++it)
-      selectedIons.push_back((*it)->text().toStdString());
+    for (auto &item : items)
+      selectedIons.push_back(item->text().toStdString());
     dosAlgo->setProperty("Ions", selectedIons);
   } else if (specType == "IR") {
     dosAlgo->setProperty("SpectrumType", "IR_Active");
@@ -174,11 +174,8 @@ void DensityOfStates::handleFileChange() {
   bool isPhononFile = fileInfo.suffix() == "phonon";
 
   std::string filePropName("CASTEPFile");
-  if (isPhononFile)
-    filePropName = "PHONONFile";
-
-  // Need a .phonon file for ion contributions
   if (isPhononFile) {
+    filePropName = "PHONONFile";
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo =
         AlgorithmManager::Instance().create("SimulatedDensityOfStates");

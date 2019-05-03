@@ -178,6 +178,7 @@ search_patterns.each do |pattern|
 end
 
 #We'll use macdeployqt to fix qt dependencies.
+# Remove the qt4 libraries in the mantidqt package
 Qt_Executables = "-executable=Contents/MacOS/#{File.basename(qscintilla2_lib)} "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt5.so "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/widgets/instrumentview/_instrumentviewqt5.so "
@@ -287,12 +288,21 @@ end
 
 #Copy over python libraries not included with OSX.
 #currently missing epics
+python_exe = `which python`
 system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
-pip_site_packages = "/Library/Python/2.7/site-packages"
+homebrew_pip_site_packages = "/usr/local/lib/python2.7/site-packages"
+if python_exe.start_with?("/usr/local")
+  pip_site_packages = homebrew_pip_site_packages
+elsif python_exe.start_with?("/usr/bin")
+  pip_site_packages = "/Library/Python/2.7/site-packages"
+else
+  p "Unknown python distribution at #{python_exe}"
+end
+
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
                "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
-               "pywt","skimage"]
+               "skimage","psutil"]
 directories.each do |directory|
   module_dir = "#{pip_site_packages}/#{directory}"
   if !File.exist?(module_dir)
@@ -305,6 +315,10 @@ directories.each do |directory|
   addPythonLibrary(module_dir,"Contents/MacOS/")
 end
 
+# older versions of psutil had _psutil shared libraries outside of the package
+copyOptionalFile("#{pip_site_packages}/_psutil_osx.so")
+copyOptionalFile("#{pip_site_packages}/_psutil_posix.so")
+
 # Some versions of mpltool_kits are missing their __init__ file
 mpltoolkit_init = "Contents/MacOS/mpl_toolkits/__init__.py"
 if !File.exist?(mpltoolkit_init)
@@ -312,11 +326,18 @@ if !File.exist?(mpltoolkit_init)
   `touch #{mpltoolkit_init}`
 end
 
+files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py","six.py"]
+files.each do |file|
+  copyFile("#{pip_site_packages}/#{file}")
+end
+
+# mistune.so isn't present in v0.7
+copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 # ---------------------------------------------
 # H5Py section
 # ---------------------------------------------
-h5py_path = "/usr/local/lib/python2.7/site-packages"
+h5py_path = homebrew_pip_site_packages
 h5py_directories = ["h5py"]
 h5py_directories.each do |directory|
   addPythonLibrary("#{h5py_path}/#{directory}","Contents/MacOS/")
@@ -345,14 +366,6 @@ h5py_patterns.each do |pattern|
     end
   end
 end
-
-files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py"]
-files.each do |file|
-  copyFile("#{pip_site_packages}/#{file}")
-end
-
-# mistune.so isn't present in v0.7
-copyOptionalFile("#{pip_site_packages}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`

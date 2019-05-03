@@ -7,28 +7,27 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__  import absolute_import
+from __future__ import absolute_import
 
 # std imports
 from unittest import TestCase, main
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 # third party imports
-from mantid.api import AnalysisDataService, WorkspaceFactory
 # register mantid projection
 import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
-from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 import numpy as np
 
 # local imports
+from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.plots import MantidAxes
+from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                         plot, plot_from_names, pcolormesh_from_names)
+                                         manage_workspace_names, plot, plot_from_names,
+                                         pcolormesh_from_names)
+from mantid.py3compat import mock
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -38,6 +37,11 @@ class FakeWorkspace(object):
 
     def name(self):
         return self._name
+
+
+@manage_workspace_names
+def workspace_names_dummy_func(workspaces):
+    return workspaces
 
 
 class FunctionsTest(TestCase):
@@ -84,6 +88,19 @@ class FunctionsTest(TestCase):
     def test_figure_title_with_empty_list_raises_assertion(self):
         with self.assertRaises(AssertionError):
             figure_title([], 5)
+
+    def test_that_plot_can_accept_workspace_names(self):
+        ws_name1 = "some_workspace"
+        AnalysisDataService.Instance().addOrReplace(ws_name1, self._test_ws)
+
+        try:
+            result_workspaces = workspace_names_dummy_func([ws_name1])
+        except ValueError:
+            self.assertFalse(True, "Passing workspace names should not raise a value error.")
+        else:
+            # The list of workspace names we pass in should have been converted
+            # to a list of workspaces
+            self.assertNotEqual(result_workspaces, [ws_name1])
 
     @mock.patch('mantidqt.plotting.functions.get_spectra_selection')
     @mock.patch('mantidqt.plotting.functions.plot')
@@ -149,6 +166,49 @@ class FunctionsTest(TestCase):
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
 
+    def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual(len(ax.lines), 2)
+
+    def test_title_preserved_when_workspace_plotted_on_scripted_plot(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.title("My Title")
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual("My Title", ax.get_title())
+
+    def test_different_line_colors_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        line_colors = [line.get_color() for line in ax.get_lines()]
+        self.assertNotEqual(line_colors[0], line_colors[1])
+
+    def test_workspace_tracked_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertIn(ws.name(), ax.tracked_workspaces)
+
+    def test_from_mpl_axes_success_with_default_args(self):
+        plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.plot([0, 2], [0, 2])
+        ax = plt.gca()
+        mantid_ax = MantidAxes.from_mpl_axes(ax)
+        self.assertEqual(len(mantid_ax.lines), 2)
+        self.assertIsInstance(mantid_ax, MantidAxes)
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
@@ -164,6 +224,11 @@ class FunctionsTest(TestCase):
         AnalysisDataService.Instance().addOrReplace(table_name, table)
         result = pcolormesh_from_names([table_name])
         self.assertTrue(result is None)
+
+    def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
+        ws = ["some_workspace", self._test_ws]
+        AnalysisDataService.Instance().addOrReplace("some_workspace", self._test_ws)
+        self.assertRaises(TypeError, workspace_names_dummy_func(ws))
 
     # ------------- Private -------------------
     def _do_plot_from_names_test(self, get_spectra_selection_mock, expected_labels,

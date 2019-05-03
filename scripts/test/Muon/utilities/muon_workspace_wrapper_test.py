@@ -178,15 +178,6 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         self.assertEqual(workspace_handle.name, "new_name")
 
-    def test_that_running_show_twice_with_different_names_causes_the_workspace_to_be_moved(self):
-        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
-
-        workspace_handle.show("name1")
-        workspace_handle.show("name2")
-
-        self.assertFalse(simpleapi.mtd.doesExist("name1"))
-        self.assertTrue(simpleapi.mtd.doesExist("name2"))
-
     def test_that_cannot_change_name_when_workspace_in_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 

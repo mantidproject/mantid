@@ -186,14 +186,6 @@ public:
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create(FermiName),
         Mantid::Kernel::Exception::NotFoundError);
 
-    Mantid::Kernel::ConfigService::Instance().setFacility(SNSFac);
-    TSM_ASSERT_THROWS(
-        "create() with " + SCARFName + "in a facility other than " + ISISFac +
-            " should fail",
-        Mantid::API::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create(SCARFName),
-        Mantid::Kernel::Exception::NotFoundError);
-
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
   }
@@ -218,15 +210,6 @@ public:
             Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
         Mantid::Kernel::Exception::NotFoundError);
 
-    Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
-    TSM_ASSERT_THROWS(
-        "create() with " + SCARFName +
-            " should throw because its job manager is not declared",
-        Mantid::API::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create(
-                "SCARF@STFC"),
-        Mantid::Kernel::Exception::NotFoundError);
-
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
   }
@@ -237,12 +220,10 @@ private:
   static const std::string SNSFac;
   static const std::string ISISFac;
   static const std::string FermiName;
-  static const std::string SCARFName;
 };
 
 const std::string RemoteJobManagerFactoryTest::SNSFac = "SNS";
 const std::string RemoteJobManagerFactoryTest::ISISFac = "ISIS";
 const std::string RemoteJobManagerFactoryTest::FermiName = "Fermi";
-const std::string RemoteJobManagerFactoryTest::SCARFName = "SCARF@STFC";
 
 #endif /* REMOTEJOBMANAGERFACTORYTEST_H_ */

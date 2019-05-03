@@ -7,6 +7,7 @@ function ( add_python_package pkg_name )
   # Create a setup.py file if necessary
   set ( _setup_py ${CMAKE_CURRENT_SOURCE_DIR}/setup.py )
   set ( _setup_py_build_root ${CMAKE_CURRENT_BINARY_DIR} )
+
   if ( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" )
     set ( SETUPTOOLS_BUILD_COMMANDS_DEF
 "def patch_setuptools_command(cmd_cls_name):
@@ -33,7 +34,17 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   endif ()
 
   set ( _egg_link_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
-  set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
+
+  # Parses ARGN and adds the expected parameter EGGLINKNAME as a new variable
+  cmake_parse_arguments(_additional_args "" "EGGLINKNAME" "" ${ARGN})
+
+  # If a custom egg-link name WAs specified use that for the link
+  if (_additional_args_EGGLINKNAME)
+    set ( _egg_link ${_egg_link_dir}/${_egg_link_name}.egg-link )
+  else()
+    # if no egg-link name is specified, then use the target name
+    set ( _egg_link ${_egg_link_dir}/${pkg_name}.egg-link )
+  endif()
 
   if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )
     if ( WIN32 )
@@ -63,8 +74,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     DEPENDS ${_outputs}
   )
 
-
-  if ( ${PACKAGE_WORKBENCH} )
+  if ( ${ENABLE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
     # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
     # --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific install directories so we can have a flat
@@ -88,6 +98,16 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     install(DIRECTORY ${_package_source_directory}
             DESTINATION ${_package_install_destination}
             PATTERN "test" EXCLUDE )
+
+    if (APPLE AND "${pkg_name}" STREQUAL "mantidqt")
+      # Horrible hack to get mantidqt into the MantidPlot.app bundle too.
+      # Remove this when MantidPlot is removed!!
+      set ( _package_install_destination ${BIN_DIR} )
+      # Registers the "installed" components with CMake so it will carry them over
+      install(DIRECTORY ${_package_source_directory}
+              DESTINATION ${_package_install_destination}
+              PATTERN "test" EXCLUDE )
+    endif()
 
     # install the generated executable - only tested with "workbench"
     if ( ARGC GREATER 1 AND "${ARGN}" STREQUAL "EXECUTABLE" )

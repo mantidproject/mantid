@@ -30,6 +30,8 @@ public:
 
   virtual void removePDFWorkspace() = 0;
 
+  virtual bool
+  isSelectedGroupPlottable(std::string const &selectedGroup) const = 0;
   virtual bool isResultGroupPlottable() const = 0;
   virtual bool isPDFGroupPlottable() const = 0;
 
@@ -48,6 +50,10 @@ public:
 
   virtual bool
   isResultGroupSelected(std::string const &selectedGroup) const = 0;
+
+  virtual void replaceFitResult(std::string const &inputName,
+                                std::string const &singleFitName,
+                                std::string const &outputName) = 0;
 };
 
 } // namespace IDA

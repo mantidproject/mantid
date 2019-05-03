@@ -154,7 +154,7 @@ void RemoveBins::exec() {
        rangeUnit != m_inputWorkspace->getAxis(0)->unit()->unitID());
   if (unitChange)
     m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
-  const bool commonBins = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
+  const bool commonBins = m_inputWorkspace->isCommonBins();
   const int index = getProperty("WorkspaceIndex");
   const bool singleSpectrum = !isEmpty(index);
   const bool recalcRange = (unitChange || !commonBins);

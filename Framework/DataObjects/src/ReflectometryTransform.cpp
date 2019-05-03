@@ -402,9 +402,8 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 
   for (size_t nHistoIndex = 0; nHistoIndex < inputWs->getNumberHistograms();
        ++nHistoIndex) {
-    const MantidVec X = inputWs->readX(nHistoIndex);
-    const MantidVec Y = inputWs->readY(nHistoIndex);
-    const MantidVec E = inputWs->readE(nHistoIndex);
+    const auto &Y = inputWs->y(nHistoIndex);
+    const auto &E = inputWs->e(nHistoIndex);
 
     const size_t numBins = Y.size();
     for (size_t nBinIndex = 0; nBinIndex < numBins; ++nBinIndex) {

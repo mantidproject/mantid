@@ -14,11 +14,12 @@ import Muon.GUI.Common.utilities.load_utils as load_utils
 
 class BrowseFileWidgetModel(object):
 
-    def __init__(self, loaded_data_store=MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData(), context=None):
         # Temporary list of filenames used for load thread
         self._filenames = []
 
         self._loaded_data_store = loaded_data_store
+        self._data_context = context.data_context
 
     @property
     def loaded_filenames(self):
@@ -50,11 +51,14 @@ class BrowseFileWidgetModel(object):
         for filename in self._filenames:
             try:
                 ws, run, filename = load_utils.load_workspace_from_filename(filename)
-            except Exception:
-                failed_files += [filename]
+            except Exception as error:
+                failed_files += [(filename, error)]
                 continue
-            self._loaded_data_store.remove_data(run=run)
-            self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
+
+            instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
+
+            self._loaded_data_store.remove_data(run=[run])
+            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=instrument_from_workspace)
         if failed_files:
             message = load_utils.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
@@ -80,3 +84,25 @@ class BrowseFileWidgetModel(object):
         if dirs:
             for directory in dirs:
                 ConfigService.Instance().appendDataSearchDir(directory.encode('ascii', 'ignore'))
+
+    def get_data(self, *args, **kwargs):
+        return self._loaded_data_store.get_data(**kwargs)
+
+    def get_instrument_from_latest_run(self):
+        return self._loaded_data_store.get_latest_data()['workspace']['OutputWorkspace'][0].workspace.getInstrument().getName()
+
+    @property
+    def instrument(self):
+        return self._data_context.instrument
+
+    @instrument.setter
+    def instrument(self, value):
+        self._data_context.instrument = value
+
+    @property
+    def current_runs(self):
+        return self._data_context.current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._data_context.current_runs = value

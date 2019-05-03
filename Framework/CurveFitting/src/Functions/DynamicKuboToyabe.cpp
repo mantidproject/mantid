@@ -302,8 +302,9 @@ void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain &domain,
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
  */
-void DynamicKuboToyabe::functionDeriv1D(API::Jacobian *, const double *,
-                                        const size_t) {
+void DynamicKuboToyabe::functionDeriv1D(API::Jacobian * /*jacobian*/,
+                                        const double * /*xValues*/,
+                                        const size_t /*nData*/) {
   throw Mantid::Kernel::Exception::NotImplementedError(
       "functionDeriv1D is not implemented for DynamicKuboToyabe.");
 }

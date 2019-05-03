@@ -35,7 +35,7 @@
       <item>
        <widget class="QLabel" name="lbPlotOutput">
         <property name="text">
-         <string>Plot Output:</string>
+         <string>Plot:</string>
         </property>
        </widget>
       </item>
@@ -125,6 +125,16 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbEditResult">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Edit Result</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pbSave">

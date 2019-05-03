@@ -105,7 +105,7 @@ void ExtractSpectra::init() {
 void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
   m_histogram = m_inputWorkspace->isHistogramData();
-  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
+  m_commonBoundaries = m_inputWorkspace->isCommonBins();
   this->checkProperties();
 
   if (m_workspaceIndexList.empty()) {
@@ -278,10 +278,10 @@ void ExtractSpectra::checkProperties() {
     }
     m_croppingInX = true;
   }
-  if (!m_commonBoundaries)
+  if (!m_commonBoundaries) {
     m_minX = 0;
-  if (!m_commonBoundaries)
     m_maxX = static_cast<int>(m_inputWorkspace->x(0).size());
+  }
 
   // The hierarchy of inputs is (one is being selected):
   // 1. DetectorList

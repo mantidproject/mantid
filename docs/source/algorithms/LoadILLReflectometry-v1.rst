@@ -10,7 +10,8 @@ Description
 -----------
 
 Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_. Both time-of-flight and monochromatic instrument configurations are supported. In general, this loader reads detector and monitor counts and adds x-axis and error values. The output workspace contains histogram data. The x-axis can have units in time-of-flight or wavelength with non-varying and varying bins, respectively. The conversion to wavelength uses the algorithm :ref:`algm-ConvertUnits`.
-The sample logs associated to the output workspace contain an additional entry, :literal:`Facility`, set to :literal:`ILL`.
+The sample logs associated to the output workspace contain two additional entries, :literal:`Facility`, set to :literal:`ILL`, and :literal:`loader.two_theta` which writes the angle used to rotate the detector.
+Detector indices and spectrum numbers start with zero like workspace indices.
 
 Time of flight axis
 -------------------
@@ -24,7 +25,7 @@ with the following variables: channel width :math:`w_{\mathrm{channel}}`, time-o
 Detector position
 -----------------
 
-This loader will update the detector position from what is defined in the instrument definition files. The detector will be moved to the current distance from origin and rotated around the it either on the horizontal or vertical plane.
+This loader will update the detector position from what is defined in the instrument definition files. The detector will be moved to the current distance from origin and rotated around it either on the horizontal or vertical plane.
 
 The rotation angle can be one of the following:
 

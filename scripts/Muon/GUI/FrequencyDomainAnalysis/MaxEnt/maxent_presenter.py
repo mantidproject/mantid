@@ -9,6 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import math
 from Muon.GUI.Common import thread_model
+import mantid.simpleapi as mantid
+
+raw_data = "_raw_data"
 
 
 class MaxEntPresenter(object):
@@ -33,12 +36,26 @@ class MaxEntPresenter(object):
     def widget(self):
         return self.view
 
+    def runChanged(self):
+        self.getWorkspaceNames()
+
+    def clear(self):
+        self.view.addItems([])
+        self.view.clearPhaseTables()
+
     # functions
     def getWorkspaceNames(self):
         final_options = self.load.getGroupedWorkspaceNames()
         run = self.load.getRunName()
-        self.view.setRun(run)
-        final_options.append(run)
+
+        # backwards compatable
+        if self.load.version == 1:
+            self.view.setRun(run)
+        else:
+            self.view.setRun("")
+
+        if run is not "None":
+            final_options.append(run)
         self.view.addItems(final_options)
         start = int(
             math.ceil(math.log(self.load.getNPoints()) / math.log(2.0)))
@@ -87,7 +104,7 @@ class MaxEntPresenter(object):
                 phaseTable["LastGoodData"] = self.view.getLastGoodData()
                 phaseTable["InputWorkspace"] = self.view.getInputWS()
 
-                if "MuonAnalysisGrouped" not in phaseTable["InputWorkspace"]:
+                if self.load.version == 1 and "MuonAnalysisGrouped" not in phaseTable["InputWorkspace"]:
                     phaseTable["InputWorkspace"] = "MuonAnalysis"
 
                 phaseTable["DetectorTable"] = "PhaseTable"
@@ -97,6 +114,11 @@ class MaxEntPresenter(object):
             self.view.addPhaseTable(maxentInputs)
 
         inputs["maxent"] = maxentInputs
+
+        # for new version 2 of FDA
+        if self.load.version == 2:
+            inputs["Run"] = self.view.getInputWS().split("_", 1)[0]
+
         self.thread.loadData(inputs)
         self.thread.start()
 
@@ -105,11 +127,29 @@ class MaxEntPresenter(object):
         self.activate()
         self.thread.deleteLater()
         self.thread = None
+        self.updatePhaseOptions()
+
+    def updatePhaseOptions(self):
+        inputs = {}
+        self.view.addOutputPhases(inputs)
+        name = inputs['OutputPhaseTable']
+        if self.load.version == 2:
+            name = name[1:]
+
+        current_list = self.view.getPhaseTableOptions()
+        if self.phaseTableAdded(name) and name not in current_list:
+            index = self.view.getPhaseTableIndex()
+            self.view.addPhaseTableToGUI(name)
+            self.view.setPhaseTableIndex(index)
+
+    def phaseTableAdded(self, name):
+        return mantid.AnalysisDataService.doesExist(name)
 
     def getMaxEntInput(self):
         inputs = self.view.initMaxEntInput()
-        if "MuonAnalysisGrouped" not in inputs["InputWorkspace"]:
+        if "MuonAnalysisGrouped" not in inputs["InputWorkspace"] and self.load.version == 1:
             inputs["InputWorkspace"] = "MuonAnalysis"
+
         if self.view.outputPhases():
             self.view.addOutputPhases(inputs)
 
@@ -121,4 +161,20 @@ class MaxEntPresenter(object):
 
         if self.view.outputTime():
             self.view.addOutputTime(inputs)
+
+        # for new version 2 of FDA
+        if self.load.version == 2:
+            self.cleanOutputsForVersion2(inputs)
         return inputs
+
+    def cleanOutputsForVersion2(self, inputs):
+        inputs["InputWorkspace"] = self.view.getInputWS()
+        keys = [
+            "OutputWorkspace",
+            "OutputPhaseTable",
+            "OutputDeadTimeTable",
+            "PhaseConvergenceTable",
+            "ReconstructedSpectra"]
+        for output in keys:
+            if output in inputs:
+                inputs[output] = inputs[output][1:]

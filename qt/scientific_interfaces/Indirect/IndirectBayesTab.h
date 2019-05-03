@@ -8,21 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
 #include "IndirectTab.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtDoublePropertyManager>
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager>
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser>
-
-#include <QDoubleValidator>
-#include <QMap>
 #include <QSettings>
-#include <QWidget>
-
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -75,6 +61,9 @@ protected slots:
 protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
+  /// Formats the tree widget to make it easier to read
+  void formatTreeWidget(QtTreePropertyBrowser *treeWidget,
+                        QMap<QString, QtProperty *> const &properties) const;
   /// Tree of the properties
   QtTreePropertyBrowser *m_propTree;
 };

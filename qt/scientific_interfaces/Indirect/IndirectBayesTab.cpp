@@ -5,17 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayesTab.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
 IndirectBayesTab::IndirectBayesTab(QWidget *parent)
     : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
@@ -25,9 +18,6 @@ IndirectBayesTab::IndirectBayesTab(QWidget *parent)
           SLOT(updateProperties(QtProperty *, double)));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 IndirectBayesTab::~IndirectBayesTab() {}
 
 /**
@@ -39,5 +29,22 @@ IndirectBayesTab::~IndirectBayesTab() {}
 void IndirectBayesTab::runPythonScript(const QString &pyInput) {
   emit runAsPythonScript(pyInput, true);
 }
+
+/**
+ * Format the tree widget so its easier to read the contents. It changes the
+ * background colour and item indentation.
+ *
+ * @param treeWidget :: The tree widget to format
+ * @param properties :: The properties within the tree widget
+ */
+void IndirectBayesTab::formatTreeWidget(
+    QtTreePropertyBrowser *treeWidget,
+    QMap<QString, QtProperty *> const &properties) const {
+  treeWidget->setIndentation(0);
+  for (auto const &item : properties)
+    treeWidget->setBackgroundColor(treeWidget->topLevelItem(item),
+                                   QColor(246, 246, 246));
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -4,15 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-
-import sys
+from mantid.py3compat import mock
 import systemtesting
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter # noqa
-
-if sys.version_info.major < 3:
-    import mock
-else:
-    from unittest import mock
 
 
 class ErrorReportServerTests(systemtesting.MantidSystemTest):

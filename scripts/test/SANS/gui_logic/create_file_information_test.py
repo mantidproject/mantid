@@ -4,18 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from qtpy.QtCore import QCoreApplication
+import unittest
 
+from mantid.py3compat import mock
 from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
-import sys
-import unittest
-from PyQt4.QtCore import QCoreApplication
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
-
 
 class CreateFileInformationTest(unittest.TestCase):
     def setUp(self):

@@ -303,9 +303,9 @@ void Q1D2::exec() {
       communicator().send(0, tag, normError2.rawData().data(), size);
       const auto detIdSet = outputWS->getSpectrum(0).getDetectorIDs();
       std::vector<detid_t> detIds(detIdSet.begin(), detIdSet.end());
-      auto size = static_cast<int>(detIds.size());
-      communicator().send(0, tag, size);
-      communicator().send(0, tag, detIds.data(), size);
+      const auto nDets = static_cast<int>(detIds.size());
+      communicator().send(0, tag, nDets);
+      communicator().send(0, tag, detIds.data(), nDets);
     }
   }
 

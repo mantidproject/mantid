@@ -8,6 +8,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/PropertyHistory.h"
 
+#include <json/value.h>
+
 namespace Mantid {
 namespace API {
 /** Constructor.
@@ -46,7 +48,8 @@ operator=(const boost::shared_ptr<IFunction> &value) {
 
 //--------------------------------------------------------------------------------------
 /// Add the value of another property
-FunctionProperty &FunctionProperty::operator+=(Kernel::Property const *) {
+FunctionProperty &FunctionProperty::
+operator+=(Kernel::Property const * /*right*/) {
   throw Kernel::Exception::NotImplementedError(
       "+= operator is not implemented for FunctionProperty.");
   return *this;
@@ -60,6 +63,14 @@ std::string FunctionProperty::value() const {
     return m_value->asString();
   else
     return getDefault();
+}
+
+/**
+ * @return A Json::Value object encoding the string representation of the
+ * function
+ */
+Json::Value FunctionProperty::valueAsJson() const {
+  return Json::Value(value());
 }
 
 /** Get the value the property was initialised with -its default value
@@ -82,6 +93,20 @@ std::string FunctionProperty::setValue(const std::string &value) {
     error = e.what();
   }
   return error;
+}
+
+/**
+ * Assumes the Json object is a string and parses it to create the function
+ * @param value A Json::Value containing a string
+ * @return An empty string indicating success otherwise the string will contain
+ * the value of the error.
+ */
+std::string FunctionProperty::setValueFromJson(const Json::Value &value) {
+  try {
+    return setValue(value.asString());
+  } catch (std::exception &exc) {
+    return exc.what();
+  }
 }
 
 /** Checks whether the entered function is valid.

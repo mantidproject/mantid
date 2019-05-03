@@ -5,12 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
-#include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 
@@ -27,8 +27,6 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
   m_spectra = 0;
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleGeometryChange(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this,
@@ -309,21 +307,17 @@ void ApplyAbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = QStrSampleWsName.length();
 
-  QString correctionType;
-  switch (m_uiForm.cbGeometry->currentIndex()) {
-  case 0:
-    correctionType = "flt";
-    break;
-  case 1:
-    correctionType = "cyl";
-    break;
-  case 2:
-    correctionType = "anl";
-    break;
+  QString geometryType;
+  if (correctionsWsName.contains("FlatPlate")) {
+    geometryType = "_flt";
+  } else if (correctionsWsName.contains("Annulus")) {
+    geometryType = "_anl";
+  } else if (correctionsWsName.contains("Cylinder")) {
+    geometryType = "_cyl";
   }
 
   QString outputWsName = QStrSampleWsName.left(nameCutIndex);
-  outputWsName += "_" + correctionType + "_Corrected";
+  outputWsName += geometryType + "_Corrected";
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
@@ -331,10 +325,10 @@ void ApplyAbsorptionCorrections::run() {
         m_uiForm.dsContainer->getCurrentDataName().toStdString();
     MatrixWorkspace_sptr containerWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canName);
-    auto run = containerWs->run();
-    if (run.hasProperty("run_number")) {
+    auto logs = containerWs->run();
+    if (logs.hasProperty("run_number")) {
       outputWsName +=
-          "_" + QString::fromStdString(run.getProperty("run_number")->value());
+          "_" + QString::fromStdString(logs.getProperty("run_number")->value());
     } else {
       auto canCutIndex = QString::fromStdString(canName).indexOf("_");
       outputWsName += "_" + QString::fromStdString(canName).left(canCutIndex);
@@ -400,6 +394,7 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
+  setRunIsRunning(false);
 
   if (!error) {
     if (m_uiForm.ckUseCan->isChecked()) {
@@ -421,7 +416,6 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
-    setRunIsRunning(false);
     setPlotSpectrumEnabled(false);
     setPlotContourEnabled(false);
     setSaveResultEnabled(false);
@@ -523,31 +517,6 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCorrections->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
-}
-
-/**
- * Handles when the type of geometry changes
- *
- * Updates the file extension to search for
- */
-void ApplyAbsorptionCorrections::handleGeometryChange(int index) {
-  QString ext("");
-  switch (index) {
-  case 0:
-    // Geometry is flat
-    ext = "_flt_abs";
-    break;
-  case 1:
-    // Geometry is cylinder
-    ext = "_cyl_abs";
-    break;
-  case 2:
-    // Geometry is annulus
-    ext = "_ann_abs";
-    break;
-  }
-  m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-  m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
 }
 
 /**

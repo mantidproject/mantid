@@ -42,18 +42,18 @@ public:
   bool isLogCheckboxTicked() const;
 
 signals:
-  void logOptionsChecked(bool);
+  void logOptionsChecked(bool /*_t1*/);
 
 private slots:
-  void valueChanged(int, int);
-  void setAllValues(double);
-  void fixParameter(int, bool);
-  void setAllFixed(bool);
-  void setTie(int, QString);
-  void setTieAll(QString);
+  void valueChanged(int /*row*/, int /*col*/);
+  void setAllValues(double /*value*/);
+  void fixParameter(int /*index*/, bool /*fix*/);
+  void setAllFixed(bool /*fix*/);
+  void setTie(int /*index*/, QString /*tie*/);
+  void setTieAll(QString /*tie*/);
   void copy();
   void paste();
-  void setValueToLog(int);
+  void setValueToLog(int /*i*/);
   void setAllValuesToLog();
 
 private:

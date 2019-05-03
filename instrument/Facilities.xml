@@ -7,10 +7,6 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
 
-  <computeResource name="SCARF@STFC" jobmanagertype="SCARFLSFJobManager">
-    <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
-  </computeResource>
-
   <catalog name="ICat4Catalog">
     <soapendpoint url="https://icatisis.esc.rl.ac.uk/ICATService/ICAT"></soapendpoint>
     <externaldownload url="https://isisicatds.stfc.ac.uk/ids/"></externaldownload>
@@ -137,6 +133,9 @@
   <instrument name="MARI" shortname="MAR">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata>
+      <connection name="kafka_event" address="livedata.isis.cclrc.ac.uk:9092" listener="KafkaEventListener" />
+    </livedata>
     <livedata>
       <connection name="histo" address="NDXMARI:6789" listener="ISISHistoDataListener" />
     </livedata>
@@ -692,6 +691,12 @@
     <technique>Reflectometry</technique>
   </instrument>
 
+  <instrument name="PANTHER">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
@@ -843,7 +848,7 @@
 </facility>
 
 <!-- ANSTO -->
-<facility name="ANSTO" FileExtensions=".nxs,.tar">
+<facility name="ANSTO" FileExtensions=".nxs,.tar,.hdf">
   <timezone>Australia/Sydney</timezone>
 
   <instrument name="Bilby">
@@ -855,6 +860,11 @@
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
 
+  <instrument name="PELICAN">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Inelastic Neutron Scattering</technique>
+  </instrument>
+  
 </facility>
 
 <!-- HZB -->

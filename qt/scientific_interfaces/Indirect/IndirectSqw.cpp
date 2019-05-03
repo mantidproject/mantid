@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSqw.h"
-#include "../General/UserInputValidator.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -122,23 +122,20 @@ void IndirectSqw::run() {
     m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
   }
 
-  auto const eFixed = getInstrumentDetails()["Efixed"];
+  auto const eFixed = getInstrumentDetail("Efixed").toStdString();
 
   auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
   sqwAlg->initialize();
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
-  if (rebinInEnergy)
-    sqwInputProps["InputWorkspace"] = eRebinWsName.toStdString();
-  else
-    sqwInputProps["InputWorkspace"] = sampleWsName.toStdString();
-
   sqwAlg->setProperty("OutputWorkspace", sqwWsName.toStdString());
   sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
   sqwAlg->setProperty("EMode", "Indirect");
-  sqwAlg->setProperty("EFixed", eFixed.toStdString());
+  sqwAlg->setProperty("EFixed", eFixed);
   sqwAlg->setProperty("Method", "NormalisedPolygon");
   sqwAlg->setProperty("ReplaceNaNs", true);
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
+  sqwInputProps["InputWorkspace"] =
+      rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString();
 
   m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
@@ -198,9 +195,11 @@ void IndirectSqw::plotRqwContour() {
 
     convertToSpectrumAxis(sampleName, outputName);
 
-    auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-    if (rqwWorkspace)
-      m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    if (AnalysisDataService::Instance().doesExist(outputName)) {
+      auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
+      if (rqwWorkspace)
+        m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
+    }
   } else {
     emit showMessageBox("Invalid filename.");
   }

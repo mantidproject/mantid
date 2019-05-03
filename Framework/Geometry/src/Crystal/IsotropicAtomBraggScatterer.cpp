@@ -161,10 +161,10 @@ operator()() const {
   Mantid::Kernel::StringTokenizer tokens(
       m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   std::vector<BraggScatterer_sptr> scatterers;
+  scatterers.reserve(tokens.size());
   for (const auto &token : tokens) {
-    scatterers.push_back(getScatterer(token));
+    scatterers.emplace_back(getScatterer(token));
   }
-
   return scatterers;
 }
 

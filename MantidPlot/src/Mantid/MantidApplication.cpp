@@ -18,8 +18,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#include <iostream>
-
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidApplication");
@@ -90,12 +88,13 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   }
 
   if (error && Mantid::Kernel::UsageService::Instance().isEnabled()) {
-    QString pythonCode("from ErrorReporter.error_report_presenter import "
-                       "ErrorReporterPresenter"
-                       "\nfrom ErrorReporter.errorreport import CrashReportPage"
-                       "\npage = CrashReportPage(show_continue_terminate=True)"
-                       "\npresenter = ErrorReporterPresenter(page, '')"
-                       "\npresenter.show_view()");
+    QString pythonCode(
+        "from ErrorReporter.error_report_presenter import "
+        "ErrorReporterPresenter"
+        "\nfrom ErrorReporter.errorreport import CrashReportPage"
+        "\npage = CrashReportPage(show_continue_terminate=True)"
+        "\npresenter = ErrorReporterPresenter(page, '', 'mantidplot')"
+        "\npresenter.show_view()");
 
     emit runAsPythonScript(pythonCode);
   } else if (error) {

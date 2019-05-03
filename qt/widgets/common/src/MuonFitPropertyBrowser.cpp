@@ -79,7 +79,8 @@ namespace MantidWidgets {
 
 using namespace Mantid::API;
 
-const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
+const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX = {
+    "MuonSimulFit_"};
 
 /**
  * Constructor
@@ -610,8 +611,7 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
   m_registeredFunctions.clear();
   m_registeredPeaks.clear();
   m_registeredBackgrounds.clear();
-  for (size_t i = 0; i < names.size(); i++) {
-    std::string fnName = names[i];
+  for (auto fnName : names) {
     QString qfnName = QString::fromStdString(fnName);
     if (qfnName == "MultiBG")
       continue;
@@ -619,9 +619,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     auto f = FunctionFactory::Instance().createFunction(fnName);
     const std::vector<std::string> categories = f->categories();
     bool muon = false;
-    for (size_t j = 0; j < categories.size(); ++j) {
-      if ((categories[j] == "Muon") || (categories[j] == "General") ||
-          (categories[j] == "Background"))
+    for (const auto &category : categories) {
+      if ((category == "Muon") || (category == "General") ||
+          (category == "Background"))
         muon = true;
     }
     if (muon) {
@@ -1232,11 +1232,11 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
         auto index = func->parameterIndex(name);
         if (func->isFixed(index) && func->getNumberDomains() > 1) {
           // get domain
-          auto index = name.find_first_of(".");
-          std::string domainStr = name.substr(1, index - 1);
+          auto separatorIndex = name.find_first_of(".");
+          std::string domainStr = name.substr(1, separatorIndex - 1);
           int domain = std::stoi(domainStr);
           // remove domain from name
-          auto newName = name.substr(index + 1);
+          auto newName = name.substr(separatorIndex + 1);
           // set fix
           m_functionBrowser->setLocalParameterFixed(
               QString::fromStdString(newName), domain, true);
@@ -1406,8 +1406,6 @@ void MuonFitPropertyBrowser::clearGroupCheckboxes() {
  */
 void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
   m_groupBoxes.insert(name, m_boolManager->addProperty(name));
-  int j = m_enumManager->value(m_groupsToFit);
-  auto option = m_groupsToFitOptions[j].toStdString();
 }
 /**
  * Returns a list of the selected groups (checked boxes)
@@ -1455,12 +1453,10 @@ void MuonFitPropertyBrowser::setAllPairs() {
   clearChosenGroups();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
-    bool isItGroup = false;
-    for (const auto &group : m_groupsList) {
-      if (iter.key().toStdString() == group) {
-        isItGroup = true;
-      }
-    }
+    const auto keyString = iter.key().toStdString();
+    const bool isItGroup = std::any_of(
+        m_groupsList.cbegin(), m_groupsList.cend(),
+        [&keyString](const auto &group) { return group == keyString; });
     if (!isItGroup) {
       m_boolManager->setValue(iter.value(), true);
     }
@@ -1507,9 +1503,6 @@ void MuonFitPropertyBrowser::setAllPeriods() {
  * @param numPeriods :: [input] Number of periods
  */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
-  // has to go here to get the original value
-  int j = m_enumManager->value(m_periodsToFit);
-  auto selected = getChosenPeriods();
   // delete period checkboxes
   clearPeriodCheckboxes();
   if (!m_periodsToFitOptions.empty()) {
@@ -1538,16 +1531,12 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
     // for now always reset to all groups when data is changed
     // the commented out code can be used to keep the selection when changing
     // run - but has a bug
-    // if (j >= m_periodsToFitOptions.size()) {
-    // set all groups if the selection is no longer available (0 index)
-    j = 0;
-    //}
     m_multiFitSettingsGroup->property()->insertSubProperty(m_periodsToFit,
                                                            m_showGroup);
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
     m_generateBtn->setDisabled(false);
 
-    updatePeriods(j); // , selected);
+    updatePeriods(0);
   }
 }
 /**

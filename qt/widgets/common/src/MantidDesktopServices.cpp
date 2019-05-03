@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <QDesktopServices>
+#include <QUrl>
 
 #ifdef __linux__
 #include <QProcessEnvironment>
@@ -17,8 +18,6 @@ namespace {
 constexpr const char *LDPRELOAD_ENV = "LD_PRELOAD";
 } // namespace
 #endif
-
-#include <iostream>
 
 namespace MantidQt {
 namespace API {
@@ -50,6 +49,10 @@ bool MantidDesktopServices::openUrl(const QUrl &url) {
   }
   return status;
 #endif
+}
+
+bool MantidDesktopServices::openUrl(const QString &url) {
+  return openUrl(QUrl(url));
 }
 
 /**

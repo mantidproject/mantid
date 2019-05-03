@@ -130,16 +130,12 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   int phaseCount = 0;
   int asymmetryCount = 0;
   for (const std::string &name : names) {
-    for (const std::string &goodName : phaseNames) {
-      if (name == goodName) {
-        phaseCount += 1;
-      }
-    }
-    for (const std::string &goodName : asymmNames) {
-      if (name == goodName) {
-        asymmetryCount += 1;
-      }
-    }
+    phaseCount += static_cast<int>(std::count_if(
+        phaseNames.cbegin(), phaseNames.cend(),
+        [&name](const auto &goodName) { return goodName == name; }));
+    asymmetryCount += static_cast<int>(std::count_if(
+        asymmNames.cbegin(), asymmNames.cend(),
+        [&name](const auto &goodName) { return goodName == name; }));
   }
   if (phaseCount == 0) {
     result["PhaseTable"] = "PhaseTable needs phases column";
@@ -262,7 +258,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     for (size_t h = 0; h < nspec; h++) {
       emptySpectrum.push_back(
           std::all_of(ws->y(h).begin(), ws->y(h).end(),
-                      [](double value) { return value == 0.; }));
+                      [](double value) { return value == 0.; }) ||
+          phase->Double(h, asymmetryIndex) == ASYMM_ERROR);
       if (!emptySpectrum[h]) {
         const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
         const double phi = phase->Double(h, phaseIndex);

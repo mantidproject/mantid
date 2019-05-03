@@ -1,4 +1,4 @@
-set ( SRC_FILES
+set(SRC_FILES
     AbsorptionCorrections.cpp
     ApplyAbsorptionCorrections.cpp
     CalculatePaalmanPings.cpp
@@ -26,6 +26,7 @@ set ( SRC_FILES
     IndirectDataReductionTab.cpp
     IndirectDataTablePresenter.cpp
     IndirectDiffractionReduction.cpp
+    IndirectEditResultsDialog.cpp
     IndirectFitAnalysisTab.cpp
     IndirectFitData.cpp
     IndirectFitDataPresenter.cpp
@@ -39,6 +40,7 @@ set ( SRC_FILES
     IndirectFitPlotView.cpp
     IndirectFitPropertyBrowser.cpp
     IndirectFittingModel.cpp
+    IndirectInstrumentConfig.cpp
     IndirectLoadILL.cpp
     IndirectMolDyn.cpp
     IndirectMoments.cpp
@@ -67,12 +69,12 @@ set ( SRC_FILES
     MSDFitModel.cpp
     Quasi.cpp
     ResNorm.cpp
-    Stretch.cpp
-)
+    Stretch.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
-set ( INC_FILES
+# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
+# find it.
+set(INC_FILES
     DllConfig.h
     AbsorptionCorrections.h
     ApplyAbsorptionCorrections.h
@@ -106,6 +108,7 @@ set ( INC_FILES
     IndirectDataReductionTab.h
     IndirectDataTablePresenter.h
     IndirectDiffractionReduction.h
+    IndirectEditResultsDialog.h
     IndirectFitAnalysisTab.h
     IndirectFitData.h
     IndirectFitDataPresenter.h
@@ -130,7 +133,6 @@ set ( INC_FILES
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTab.h
-    IndirectTools.h
     IndirectToolsTab.h
     IndirectTransmission.h
     IndirectTransmissionCalc.h
@@ -148,10 +150,9 @@ set ( INC_FILES
     MSDFitModel.h
     Quasi.h
     ResNorm.h
-    Stretch.h
-)
+    Stretch.h)
 
-set ( MOC_FILES
+set(MOC_FILES
     AbsorptionCorrections.h
     ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
@@ -166,7 +167,6 @@ set ( MOC_FILES
     FunctionTemplateBrowser.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
-    IIndirectFitOutputOptionsModel.h
     IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
     ILLEnergyTransfer.h
@@ -180,6 +180,7 @@ set ( MOC_FILES
     IndirectDataReductionTab.h
     IndirectDataTablePresenter.h
     IndirectDiffractionReduction.h
+    IndirectEditResultsDialog.h
     IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
@@ -188,6 +189,7 @@ set ( MOC_FILES
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectFitPropertyBrowser.h
+    IndirectInstrumentConfig.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
@@ -217,83 +219,83 @@ set ( MOC_FILES
     Stretch.h
     ISISCalibration.h
     ISISDiagnostics.h
-    ISISEnergyTransfer.h
-)
+    ISISEnergyTransfer.h)
 
-set ( UI_FILES
-   AbsorptionCorrections.ui
-   ApplyAbsorptionCorrections.ui
-   CalculatePaalmanPings.ui
-   ContainerSubtraction.ui
-   ConvFit.ui
-   ConvFitAddWorkspaceDialog.ui
-   DensityOfStates.ui
-   Elwin.ui
-   ILLEnergyTransfer.ui
-   IndirectAddWorkspaceDialog.ui
-   IndirectBayes.ui
-   IndirectCorrections.ui
-   IndirectDataAnalysis.ui
-   IndirectDataReduction.ui
-   IndirectDiffractionReduction.ui
-   IndirectFitDataView.ui
-   IndirectFitOutputOptions.ui
-   IndirectFitPreviewPlot.ui
-   IndirectLoadILL.ui
-   IndirectMolDyn.ui
-   IndirectMoments.ui
-   IndirectSassena.ui
-   IndirectSimulation.ui
-   IndirectSpectrumSelector.ui
-   IndirectSqw.ui
-   IndirectSymmetrise.ui
-   IndirectTools.ui
-   IndirectTransmission.ui
-   IndirectTransmissionCalc.ui
-   Iqt.ui
-   IqtFit.ui
-   JumpFit.ui
-   JumpFitAddWorkspaceDialog.ui
-   MSDFit.ui
-   Quasi.ui
-   ResNorm.ui
-   Stretch.ui
-   ISISCalibration.ui
-   ISISDiagnostics.ui
-   ISISEnergyTransfer.ui
-)
+set(UI_FILES
+    AbsorptionCorrections.ui
+    ApplyAbsorptionCorrections.ui
+    CalculatePaalmanPings.ui
+    ContainerSubtraction.ui
+    ConvFit.ui
+    ConvFitAddWorkspaceDialog.ui
+    DensityOfStates.ui
+    Elwin.ui
+    ILLEnergyTransfer.ui
+    IndirectAddWorkspaceDialog.ui
+    IndirectBayes.ui
+    IndirectCorrections.ui
+    IndirectDataAnalysis.ui
+    IndirectDataReduction.ui
+    IndirectDiffractionReduction.ui
+    IndirectEditResultsDialog.ui
+    IndirectFitDataView.ui
+    IndirectFitOutputOptions.ui
+    IndirectFitPreviewPlot.ui
+    IndirectInstrumentConfig.ui
+    IndirectLoadILL.ui
+    IndirectMolDyn.ui
+    IndirectMoments.ui
+    IndirectSassena.ui
+    IndirectSimulation.ui
+    IndirectSpectrumSelector.ui
+    IndirectSqw.ui
+    IndirectSymmetrise.ui
+    IndirectTransmission.ui
+    IndirectTransmissionCalc.ui
+    IndirectTools.ui
+    Iqt.ui
+    IqtFit.ui
+    JumpFit.ui
+    JumpFitAddWorkspaceDialog.ui
+    MSDFit.ui
+    Quasi.ui
+    ResNorm.ui
+    Stretch.ui
+    ISISCalibration.ui
+    ISISDiagnostics.ui
+    ISISEnergyTransfer.ui)
 
-mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
-  QT_VERSION 4
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
-  NOMOC ${INC_FILES}
-  UI ${UI_FILES}
-  DEFS IN_MANTIDQT_INDIRECT
-  PRECOMPILED PrecompiledHeader.h
-  INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}
-  LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    ${CORE_MANTIDLIBS}
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${JSONCPP_LIBRARIES}
-  QT4_LINK_LIBS
-    Qwt5
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-    MantidQtWidgetsLegacyQwt
-    MantidScientificInterfacesGeneral
-  INSTALL_DIR_BASE
-    ${PLUGINS_DIR}
-  OSX_INSTALL_RPATH
-    @loader_path/../../Contents/MacOS
-    @loader_path/../../plugins/qt4
-  LINUX_INSTALL_RPATH
-    "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
-
-)
+mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
+                   QT_VERSION 4
+                   SRC ${SRC_FILES}
+                   MOC ${MOC_FILES}
+                   NOMOC ${INC_FILES}
+                   UI ${UI_FILES}
+                   DEFS IN_MANTIDQT_INDIRECT
+                   PRECOMPILED PrecompiledHeader.h
+                   INCLUDE_DIRS
+                     ${CMAKE_CURRENT_SOURCE_DIR}
+                   SYSTEM_INCLUDE_DIRS
+                     ${Boost_INCLUDE_DIRS}
+                   LINK_LIBS
+                     ${TCMALLOC_LIBRARIES_LINKTIME}
+                     ${CORE_MANTIDLIBS}
+                     ${POCO_LIBRARIES}
+                     ${Boost_LIBRARIES}
+                     ${JSONCPP_LIBRARIES}
+                   QT4_LINK_LIBS
+                     Qwt5
+                   MTD_QT_LINK_LIBS
+                     MantidQtWidgetsCommon
+                     MantidQtWidgetsPlotting
+                     MantidScientificInterfacesGeneral
+                   INSTALL_DIR_BASE
+                     ${PLUGINS_DIR}
+                   OSX_INSTALL_RPATH
+                     @loader_path/../../Contents/MacOS
+                     @loader_path/../../plugins/qt4
+                   LINUX_INSTALL_RPATH
+                     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
 
 # Testing target
-add_subdirectory ( test )
+add_subdirectory(test)

@@ -1,8 +1,8 @@
 .. _DetectorInfo:
 
-=============
+============
 DetectorInfo
-=============
+============
 
 .. contents::
   :local:
@@ -16,30 +16,29 @@ Introduction
 Python Interface
 ----------------
 
-Examples of using ``DetectorInfo`` in python
+Example of using ``DetectorInfo`` in python
 
-Mask detectors at some distance from the source
+**Mask detectors at some distance from the source**
 
-.. code-block:: python 
 
-  from mantid.simpleapi import CreateSampleWorkspace
+.. testcode:: mask_detectors 
 
-  # Test workspace with instrument
-  ws = CreateSampleWorkspace()
-  det_info = ws.detectorInfo();
-  for item in det_info:
-      if not item.isMonitor and item.l2 > 2.0:
-          item.setMasked(True)
+   from mantid.simpleapi import CreateSampleWorkspace
+   
+   # Test workspace with instrument
+   ws = CreateSampleWorkspace()
+   det_info = ws.detectorInfo();
+   mask_count = 0
+   for item in det_info:
+       if not item.isMonitor and item.l2 > 2.0:
+           item.setMasked(True)
+           mask_count += 1
+   print('masked {} detectors'.format(mask_count))
 
-Print detectors with scattering angle
+Output:
 
-.. code-block:: python 
-
-  from mantid.simpleapi import CreateSampleWorkspace
-
-  # Test workspace with instrument
-  ws = CreateSampleWorkspace()
-  det_info = ws.detectorInfo()
-  for item in det_info:
-      if item.l2 > 0.01:
-         print(item.index) 
+.. testoutput:: mask_detectors
+  
+   masked 200 detectors
+  
+.. categories:: Concepts

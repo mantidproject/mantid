@@ -23,8 +23,6 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalMapper>
-// System headers
-#include <iostream>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -137,7 +135,7 @@ void FitControl::finishIndividualFit(bool error) {
   if (error) {
     return;
   }
-  std::cout << "FitControl::finishIndividualFit\n";
+  g_log.debug() << "FitControl::finishIndividualFit\n";
   Mantid::API::IFunction_sptr fun;
   fun = m_fitRunner->getAlgorithm()->getProperty("Function");
   // prevent the function browser to emit signal after update
@@ -272,31 +270,31 @@ void FitControl::fitSimultaneous() {
  */
 void FitControl::fitIndividual(const bool &isEvaluation) {
   try {
-    std::cout << "FitControl::fitIndividual\n";
+    g_log.debug() << "FitControl::fitIndividual\n";
     auto fun = m_functionBrowser->getFunction();
-    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
-    fit->initialize();
-    fit->setProperty("Function", fun);
-    fit->setPropertyValue("InputWorkspace",
-                          m_inputDataControl->getWorkspaceName());
+    auto fitAlg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    fitAlg->initialize();
+    fitAlg->setProperty("Function", fun);
+    fitAlg->setPropertyValue("InputWorkspace",
+                             m_inputDataControl->getWorkspaceName());
     auto index = static_cast<int>(m_inputDataControl->getWorkspaceIndex());
-    fit->setProperty("WorkspaceIndex", index);
-    m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
+    fitAlg->setProperty("WorkspaceIndex", index);
+    m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fitAlg);
     m_fitRunner.reset(new API::AlgorithmRunner());
     if (isEvaluation) {
-      fit->setPropertyValue("Output", m_modelEvaluationName);
-      fit->setProperty("MaxIterations", 0);
+      fitAlg->setPropertyValue("Output", m_modelEvaluationName);
+      fitAlg->setProperty("MaxIterations", 0);
       auto range = m_inputDataControl->getCurrentRange();
-      fit->setProperty("StartX", range.first);
-      fit->setProperty("EndX", range.second);
+      fitAlg->setProperty("StartX", range.first);
+      fitAlg->setProperty("EndX", range.second);
       connect(m_fitRunner.get(), SIGNAL(algorithmComplete(bool)), this,
               SLOT(finishModelEvaluation(bool)), Qt::QueuedConnection);
     } else {
-      fit->setPropertyValue("Output", m_individualFitName);
+      fitAlg->setPropertyValue("Output", m_individualFitName);
       connect(m_fitRunner.get(), SIGNAL(algorithmComplete(bool)), this,
               SLOT(finishIndividualFit(bool)), Qt::QueuedConnection);
     }
-    m_fitRunner->startAlgorithm(fit);
+    m_fitRunner->startAlgorithm(fitAlg);
   } catch (std::exception &e) {
     QString mess(e.what());
     const int maxSize = 500;

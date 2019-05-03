@@ -19,10 +19,10 @@ void export_DetectorInfoPythonIterator() {
   // Export to Python
   class_<DetectorInfoPythonIterator>("DetectorInfoPythonIterator", no_init)
       .def("__iter__", objects::identity_function())
-#ifdef IS_PY3K
-      .def("__next__", &DetectorInfoPythonIterator::next)
-#else
+#ifdef IS_PY2K
       .def("next", &DetectorInfoPythonIterator::next)
+#else
+      .def("__next__", &DetectorInfoPythonIterator::next)
 #endif
       ;
 }

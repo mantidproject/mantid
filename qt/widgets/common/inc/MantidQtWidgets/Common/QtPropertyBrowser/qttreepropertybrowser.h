@@ -168,7 +168,8 @@ Q_SIGNALS:
 
   void collapsed(QtBrowserItem *item);
   void expanded(QtBrowserItem *item);
-  void optionChanged(QtProperty *, const QString &, bool);
+  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/,
+                     bool /*_t3*/);
 
 public Q_SLOTS:
 
@@ -200,7 +201,7 @@ public:
         m_checked(property->checkOption(optionName)) {
     setFocusPolicy(Qt::StrongFocus);
   }
-  void paintEvent(QPaintEvent *) override {
+  void paintEvent(QPaintEvent * /*unused*/) override {
     QStyleOptionButton opt;
     auto state = isChecked() ? QStyle::State_On : QStyle::State_Off;
     opt.state |= state;
@@ -220,7 +221,8 @@ public:
   void setChecked(bool on) { m_checked = on; }
   bool isChecked() const { return m_checked; }
 signals:
-  void optionChanged(QtProperty *, const QString &, bool);
+  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/,
+                     bool /*_t3*/);
 
 private:
   QtProperty *m_property;
@@ -291,7 +293,8 @@ public:
   void disableItem(QtBrowserItem *item);
 
   void slotCurrentBrowserItemChanged(QtBrowserItem *item);
-  void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem *);
+  void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem,
+                                  QTreeWidgetItem * /*unused*/);
 
   QTreeWidgetItem *editedItem() const;
   void closeEditor();
@@ -341,10 +344,11 @@ public:
   QSize sizeHint(const QStyleOptionViewItem &option,
                  const QModelIndex &index) const override;
 
-  void setModelData(QWidget *, QAbstractItemModel *,
-                    const QModelIndex &) const override {}
+  void setModelData(QWidget * /*editor*/, QAbstractItemModel * /*model*/,
+                    const QModelIndex & /*index*/) const override {}
 
-  void setEditorData(QWidget *, const QModelIndex &) const override {}
+  void setEditorData(QWidget * /*editor*/,
+                     const QModelIndex & /*index*/) const override {}
 
   bool eventFilter(QObject *object, QEvent *event) override;
   void closeEditor(QtProperty *property);
@@ -352,7 +356,8 @@ public:
   QTreeWidgetItem *editedItem() const { return m_editedItem; }
 
 signals:
-  void optionChanged(QtProperty *, const QString &, bool);
+  void optionChanged(QtProperty * /*_t1*/, const QString & /*_t2*/,
+                     bool /*_t3*/);
 
 private slots:
   void slotEditorDestroyed(QObject *object);

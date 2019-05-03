@@ -150,7 +150,7 @@ private:
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
+  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
   int m_minSpectrum;

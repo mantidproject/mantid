@@ -23,7 +23,7 @@ namespace {
 namespace Prop {
 const std::string DETECTOR_RESOLUTION{"DetectorResolution"};
 const std::string DIRECT_FOREGROUND{"DirectForeground"};
-const std::string DIRECT_WS{"DirectBeamWorkspace"};
+const std::string DIRECT_WS{"DirectLineWorkspace"};
 const std::string FIRST_SLIT_NAME{"FirstSlitName"};
 const std::string FIRST_SLIT_SIZE_LOG{"FirstSlitSizeSampleLog"};
 const std::string PIXEL_SIZE{"PixelSize"};
@@ -42,21 +42,21 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryBeamStatistics)
 
-const std::string ReflectometryBeamStatistics::LogEntry::BEAM_RMS_VARIATION{
-    "beam_stats.beam_rms_variation"};
-const std::string ReflectometryBeamStatistics::LogEntry::BENT_SAMPLE{
-    "beam_stats.bent_sample"};
+const std::string ReflectometryBeamStatistics::LogEntry::BEAM_RMS_VARIATION(
+    "beam_stats.beam_rms_variation");
+const std::string ReflectometryBeamStatistics::LogEntry::BENT_SAMPLE(
+    "beam_stats.bent_sample");
 const std::string
-    ReflectometryBeamStatistics::LogEntry::FIRST_SLIT_ANGULAR_SPREAD{
-        "beam_stats.first_slit_angular_spread"};
+    ReflectometryBeamStatistics::LogEntry::FIRST_SLIT_ANGULAR_SPREAD(
+        "beam_stats.first_slit_angular_spread");
 const std::string
-    ReflectometryBeamStatistics::LogEntry::INCIDENT_ANGULAR_SPREAD{
-        "beam_stats.incident_angular_spread"};
-const std::string ReflectometryBeamStatistics::LogEntry::SAMPLE_WAVINESS{
-    "beam_stats.sample_waviness"};
+    ReflectometryBeamStatistics::LogEntry::INCIDENT_ANGULAR_SPREAD(
+        "beam_stats.incident_angular_spread");
+const std::string ReflectometryBeamStatistics::LogEntry::SAMPLE_WAVINESS(
+    "beam_stats.sample_waviness");
 const std::string
-    ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD{
-        "beam_stats.second_slit_angular_spread"};
+    ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD(
+        "beam_stats.second_slit_angular_spread");
 
 /** Give the gap between the two slits, in meters.
  *

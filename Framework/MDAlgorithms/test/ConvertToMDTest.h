@@ -89,7 +89,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize())
     TS_ASSERT(pAlg->isInitialized())
 
-    TSM_ASSERT_EQUALS("algorithm should have 25 properties", 25,
+    TSM_ASSERT_EQUALS("algorithm should have 26 properties", 26,
                       (size_t)(pAlg->getProperties().size()));
   }
 
@@ -572,6 +572,9 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr inWs2D;
   Mantid::API::MatrixWorkspace_sptr inWsEv;
 
+  Mantid::MDAlgorithms::ConvertToMD convertAlgDefault;
+  Mantid::MDAlgorithms::ConvertToMD convertAlgIndexed;
+
   WorkspaceCreationHelper::MockAlgorithm reporter;
 
   boost::shared_ptr<ConvToMDBase> pConvMethods;
@@ -660,6 +663,7 @@ public:
         "Time to complete: <EventWSType,Q3D,Indir,ConvFromTOF,CrystType>: " +
         boost::lexical_cast<std::string>(sec) + " sec");
   }
+
   void test_HistoFromTOFConv() {
 
     NumericAxis *pAxis0 = new NumericAxis(2);
@@ -740,6 +744,26 @@ public:
         boost::lexical_cast<std::string>(sec) + " sec");
   }
 
+  void test_EventFromTOFConvBuildTreeDefault() { convertAlgDefault.execute(); }
+
+  void test_EventFromTOFConvBuildTreeIndexed() { convertAlgIndexed.execute(); }
+
+  static void setUpConvAlg(Mantid::MDAlgorithms::ConvertToMD &convAlg,
+                           const std::string &type, const std::string &inName) {
+    static uint32_t cnt = 0;
+    std::vector<int> splits(3, 2);
+    convAlg.initialize();
+    convAlg.setProperty("SplitInto", splits);
+    convAlg.setProperty("SplitThreshold", 10);
+    convAlg.setPropertyValue("InputWorkspace", inName);
+    convAlg.setPropertyValue("OutputWorkspace", std::to_string(cnt++) + "_ws");
+    convAlg.setProperty("QDimensions", "Q3D");
+    convAlg.setProperty("dEAnalysisMode", "Elastic");
+    convAlg.setProperty("Q3DFrames", "Q_lab");
+    convAlg.setProperty("ConverterType", type);
+    convAlg.setRethrows(true);
+  }
+
   ConvertToMDTestPerformance() : Rot(3, 3) {
     numHist = 100 * 100;
     size_t nEvents = 1000;
@@ -797,6 +821,24 @@ public:
     // this will be used to display progress
     pMockAlgorithm =
         Mantid::Kernel::make_unique<WorkspaceCreationHelper::MockAlgorithm>();
+
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "CreateSampleWorkspace");
+    alg->initialize();
+    alg->setProperty("WorkspaceType", "Event");
+    alg->setProperty("Function", "Flat background");
+    alg->setProperty("XMin", 10000.0);
+    alg->setProperty("XMax", 100000.0);
+    alg->setProperty("NumEvents", 1000);
+    alg->setProperty("BankPixelWidth", 20);
+    alg->setProperty("Random", false);
+    std::string inWsSampleName = "dummy";
+    alg->setPropertyValue("OutputWorkspace", inWsSampleName);
+    alg->setRethrows(true);
+    alg->execute();
+
+    setUpConvAlg(convertAlgDefault, "Default", inWsSampleName);
+    setUpConvAlg(convertAlgIndexed, "Indexed", inWsSampleName);
   }
 };
 

@@ -14,56 +14,27 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MockRNG.h"
 
-#include <algorithm>
-#include <cmath>
-#include <ctime>
 #include <cxxtest/TestSuite.h>
-#include <ostream>
-#include <vector>
 
 #include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
-#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
 using detail::ShapeInfo;
-
-namespace {
-// -----------------------------------------------------------------------------
-// Mock Random Number Generator
-// -----------------------------------------------------------------------------
-class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(nextValue, double());
-  MOCK_METHOD2(nextValue, double(double, double));
-  MOCK_METHOD2(nextInt, int(int, int));
-  MOCK_METHOD0(restart, void());
-  MOCK_METHOD0(save, void());
-  MOCK_METHOD0(restore, void());
-  MOCK_METHOD1(setSeed, void(size_t));
-  MOCK_METHOD2(setRange, void(const double, const double));
-  MOCK_CONST_METHOD0(min, double());
-  MOCK_CONST_METHOD0(max, double());
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
-} // namespace
 
 class CSGObjectTest : public CxxTest::TestSuite {
 
@@ -92,16 +63,16 @@ public:
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     ShapeInfo::GeometryShape objType;
-    double radius(-1.0), height(-1.0);
+    double radius(-1.0), height(-1.0), innerRadius(0.0);
     std::vector<V3D> pts;
     auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original.GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, innerRadius, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
     // The copy should be a primitive object with a GeometryHandler
-    copy.GetObjectGeom(objType, pts, radius, height);
+    copy.GetObjectGeom(objType, pts, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
     auto handlerCopy = copy.getGeometryHandler();
@@ -118,17 +89,17 @@ public:
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
     ShapeInfo::GeometryShape objType;
-    double radius(-1.0), height(-1.0);
+    double radius(-1.0), height(-1.0), innerRadius(0.0);
     std::vector<V3D> pts;
     auto handler = original.getGeometryHandler();
     TS_ASSERT(handler->hasShapeInfo());
-    original.GetObjectGeom(objType, pts, radius, height);
+    original.GetObjectGeom(objType, pts, innerRadius, radius, height);
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
-    lhs.GetObjectGeom(objType, pts, radius, height);
+    lhs.GetObjectGeom(objType, pts, innerRadius, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
     TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
@@ -271,24 +242,31 @@ public:
   void testCalcValidTypeSphere() {
     auto geom_obj = ComponentCreationHelper::createSphere(4.1);
     // entry on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(1, 0, 0)),
+                     TrackDirection::ENTERING);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(-1, 0, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(1, 0, 0)), -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(-1, 0, 0)), 1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, 1, 0)), 1);
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(1, 0, 0)),
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(-1, 0, 0)),
+                     TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, 1, 0)),
+                     TrackDirection::ENTERING);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -4.1, 0), V3D(0, -1, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, 1, 0)), -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, -1, 0)), 1);
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, 1, 0)),
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 4.1, 0), V3D(0, -1, 0)),
+                     TrackDirection::ENTERING);
 
     // a glancing blow
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0, 1, 0)), 0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0, 1, 0)),
+                     TrackDirection::INVALID);
     // not quite on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1, 0, 0), V3D(0.5, 0.5, 0)),
-                     1);
+                     TrackDirection::ENTERING);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1, 0, 0), V3D(0.5, 0.5, 0)),
-                     -1);
+                     TrackDirection::LEAVING);
   }
 
   void testGetBoundingBoxForSphere() {
@@ -308,23 +286,31 @@ public:
   void testCalcValidTypeCappedCylinder() {
     auto geom_obj = createCappedCylinder();
     // entry on the normal
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)), 1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(1, 0, 0)),
+                     TrackDirection::ENTERING);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(-1, 0, 0)),
-                     -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(1, 0, 0)), -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(-1, 0, 0)), 1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, 1, 0)), 1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, -1, 0)), -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, 1, 0)), -1);
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, -1, 0)), 1);
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(1, 0, 0)),
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(-1, 0, 0)),
+                     TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, 1, 0)),
+                     TrackDirection::ENTERING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, -3, 0), V3D(0, -1, 0)),
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, 1, 0)),
+                     TrackDirection::LEAVING);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0, 3, 0), V3D(0, -1, 0)),
+                     TrackDirection::ENTERING);
 
     // a glancing blow
-    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0, 1, 0)), 0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0, 1, 0)),
+                     TrackDirection::INVALID);
     // not quite on the normal
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2, 0, 0), V3D(0.5, 0.5, 0)),
-                     1);
+                     TrackDirection::ENTERING);
     TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2, 0, 0), V3D(0.5, 0.5, 0)),
-                     -1);
+                     TrackDirection::LEAVING);
   }
 
   void testInterceptSurfaceSphereZ() {
@@ -404,7 +390,9 @@ public:
     std::vector<Link>
         expectedResults; // left empty as there are no expected results
     auto geom_obj = createCappedCylinder();
-    Track track(V3D(-10, 0, 0), V3D(1, 1, 0));
+    V3D dir(1., 1., 0.);
+    dir.normalize();
+    Track track(V3D(-10, 0, 0), dir);
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -720,15 +708,154 @@ public:
     // inner radius=0.5, outer=1. Random sequence set up so as to give point
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
-    size_t maxAttempts(1);
+    constexpr size_t maxAttempts{1};
     V3D point;
     TS_ASSERT_THROWS_NOTHING(
         point = shell->generatePointInObject(rng, maxAttempts));
 
-    const double tolerance(1e-10);
+    constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
     TS_ASSERT_DELTA(-1. + 2. * 0.65, point.Y(), tolerance);
     TS_ASSERT_DELTA(-1. + 2. * 0.70, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideCuboid() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randX{0.55};
+    constexpr double randY{0.65};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+
+    constexpr double xLength{0.3};
+    constexpr double yLength{0.5};
+    constexpr double zLength{0.2};
+    auto cuboid =
+        ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = cuboid->generatePointInObject(rng, maxAttempts));
+
+    constexpr double tolerance{1e-10};
+    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point.X(), tolerance);
+    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point.Y(), tolerance);
+    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideCylinder() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randR{0.55};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+
+    constexpr double radius{0.3};
+    constexpr double height{0.5};
+    const V3D axis{0., 0., 1.};
+    const V3D bottomCentre{
+        -1.,
+        2.,
+        -3.,
+    };
+    auto cylinder = ComponentCreationHelper::createCappedCylinder(
+        radius, height, bottomCentre, axis, "cyl");
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = cylinder->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    point -= bottomCentre;
+    constexpr double tolerance{1e-10};
+    const double polarAngle{2. * M_PI * randT};
+    const double radialLength{radius * std::sqrt(randR)};
+    const double axisLength{height * randZ};
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideHollowCylinder() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randR{0.55};
+    constexpr double randZ{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
+
+    constexpr double innerRadius{0.29};
+    constexpr double radius{0.3};
+    constexpr double height{0.5};
+    const V3D axis{0., 0., 1.};
+    const V3D bottomCentre{
+        -1.,
+        2.,
+        -3.,
+    };
+    auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
+        innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = hollowCylinder->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    point -= bottomCentre;
+    constexpr double tolerance{1e-10};
+    const double polarAngle{2. * M_PI * randT};
+    const double c1 = std::pow(innerRadius, 2);
+    const double c2 = std::pow(radius, 2);
+    const double radialLength{std::sqrt(c1 + (c2 - c1) * randR)};
+    const double axisLength{height * randZ};
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+  }
+
+  void testGeneratePointInsideSphere() {
+    using namespace ::testing;
+
+    // Generate "random" sequence
+    MockRNG rng;
+    Sequence rand;
+    constexpr double randT{0.65};
+    constexpr double randF{0.55};
+    constexpr double randR{0.70};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randT));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randF));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randR));
+
+    constexpr double radius{0.23};
+    auto sphere = ComponentCreationHelper::createSphere(radius);
+    constexpr size_t maxAttempts{0};
+    V3D point;
+    TS_ASSERT_THROWS_NOTHING(
+        point = sphere->generatePointInObject(rng, maxAttempts));
+    // Global->cylinder local coordinates
+    constexpr double tolerance{1e-10};
+    const double azimuthalAngle{2. * M_PI * randT};
+    const double polarAngle{std::acos(2. * randF - 1.)};
+    const double r{radius * randR};
+    TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle),
+                    point.X(), tolerance);
+    TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle),
+                    point.Y(), tolerance);
+    TS_ASSERT_DELTA(r * std::cos(polarAngle), point.Z(), tolerance);
   }
 
   void testGeneratePointInsideRespectsMaxAttempts() {
@@ -744,7 +871,7 @@ public:
     // inner radius=0.5, outer=1. Random sequence set up so as to give point
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
-    size_t maxAttempts(1);
+    constexpr size_t maxAttempts{1};
     TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
                      std::runtime_error);
   }
@@ -755,22 +882,26 @@ public:
     // Generate "random" sequence.
     MockRNG rng;
     Sequence rand;
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.01));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.02));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(0.03));
+    constexpr double randX{0.92};
+    constexpr double randY{0.14};
+    constexpr double randZ{0.83};
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
+    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
 
-    // Radius=0.5
-    auto ball = ComponentCreationHelper::createSphere(0.5);
+    constexpr double halfWidth{0.75};
+    auto ball = ComponentCreationHelper::createCuboid(halfWidth);
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
-    size_t maxAttempts(1);
+    constexpr size_t maxAttempts{1};
     V3D point;
     TS_ASSERT_THROWS_NOTHING(
         point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
-    const double tolerance(1e-10);
-    TS_ASSERT_DELTA(-0.1 + 0.01 * 0.2, point.X(), tolerance);
-    TS_ASSERT_DELTA(-0.1 + 0.02 * 0.2, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-0.1 + 0.03 * 0.2, point.Z(), tolerance);
+    // We should get the point generated from the second 'random' triplet.
+    constexpr double tolerance{1e-10};
+    TS_ASSERT_DELTA(-0.1 + randX * 0.2, point.X(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randY * 0.2, point.Y(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point.Z(), tolerance)
   }
 
   void testSolidAngleSphere()
@@ -816,30 +947,30 @@ public:
     // approx WISH cylinder
     // We intentionally exclude the cylinder end caps so they this should
     // produce 0
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0,
                     satol);
     // Other end
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.0,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.497, 0.0, 0.0)),
+                    0.0, satol);
 
     // Side values
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0.1)), 0.00301186,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -0.1)), 0.00301186,
-                    satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0.1)),
+                    0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -0.1)),
+                    0.00301186, satol);
     // Sweep in the axis of the cylinder angle to see if the solid angle
     // decreases (as we are excluding the end caps)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0.1, 0.0, 0.1)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0.1, 0.0, 0.1)),
                     0.00100267, satol);
 
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.999, 0.0, 0.0)),
                     4 * M_PI, satol);
 
     // surface points
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0.0, 0.0)), 2 * M_PI,
-                    satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0.0, 0.0)),
+                    2 * M_PI, satol);
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-0.997, 0.0, 0.0)),
                     2 * M_PI, satol);
   }
 
@@ -856,17 +987,17 @@ public:
     //
     // tests for Triangulated cube
     //
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(1.0, 0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(1.0, 0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(-1.0, 0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 1.0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 1.0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, -1.0, 0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, -1.0, 0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 1.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 1.0)),
                     M_PI * 2.0 / 3.0, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -1.0)),
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, -1.0)),
                     M_PI * 2.0 / 3.0, satol);
   }
 
@@ -877,8 +1008,9 @@ public:
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     double expected = M_PI * 2.0 / 3.0;
     V3D scaleFactor(2.0, 2.0, 2.0);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2.0, 0, 0), scaleFactor),
-                    expected, satol);
+    TS_ASSERT_DELTA(
+        geom_obj->triangulatedSolidAngle(V3D(2.0, 0, 0), scaleFactor), expected,
+        satol);
   }
 
   void testExactVolumeCuboid() {
@@ -939,6 +1071,28 @@ public:
     auto cuboid = shapeFactory.createShape(typeElement);
     const double cylinderVolume = height * M_PI * radius * radius;
     TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
+  }
+
+  void testExactVolumeHollowCylinder() {
+    using namespace Poco::XML;
+    constexpr double innerRadius = 0.98;
+    constexpr double radius = 0.99;
+    constexpr double height = 88;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testHollowCylinder");
+    AutoPtr<Element> shapeElement = createHollowCylinderTypeElement(
+        "hollow-cylinder-shape", height, innerRadius, radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "hollow-cylinder-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double hollowCylinderVolume =
+        M_PI * height * (radius * radius - innerRadius * innerRadius);
+    TS_ASSERT_DELTA(cuboid->volume(), hollowCylinderVolume, 1e-6)
   }
 
   void testMonteCarloVolume() {
@@ -1086,51 +1240,29 @@ public:
 
     double satol = 1e-3; // typical result tolerance
 
-    //    if(timeTest)
-    //    {
-    //      // block to test time of solid angle methods
-    //      // change false to true to include
-    //      int iter=4000;
-    //      int starttime=clock();
-    //      for (int i=0;i<iter;i++)
-    //        saTri=geom_obj->triangleSolidAngle(observer);
-    //      int endtime=clock();
-    //      std::cout << std::endl << "Cyl tri time=" <<
-    //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      '\n';
-    //      iter=50;
-    //      starttime=clock();
-    //      for (int i=0;i<iter;i++)
-    //        saRay=geom_obj->rayTraceSolidAngle(observer);
-    //      endtime=clock();
-    //      std::cout << "Cyl ray time=" <<
-    //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      '\n';
-    //    }
-
-    saTri = geom_obj->triangleSolidAngle(observer);
+    saTri = geom_obj->triangulatedSolidAngle(observer);
     saRay = geom_obj->rayTraceSolidAngle(observer);
     TS_ASSERT_DELTA(saTri, 1.840302, 0.001);
     TS_ASSERT_DELTA(saRay, 1.840302, 0.01);
 
     observer = V3D(-7.2, 0, 0);
-    saTri = geom_obj->triangleSolidAngle(observer);
+    saTri = geom_obj->triangulatedSolidAngle(observer);
     saRay = geom_obj->rayTraceSolidAngle(observer);
 
     TS_ASSERT_DELTA(saTri, 1.25663708, 0.001);
     TS_ASSERT_DELTA(saRay, 1.25663708, 0.001);
 
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 7)), 0.7531,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 7)), 0.7531,
                     0.753 * satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 7, 0)), 0.7531,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 7, 0)), 0.7531,
                     0.753 * satol);
 
-    saTri = geom_obj->triangleSolidAngle(V3D(20, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(20, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.07850147, satol * 0.0785);
-    saTri = geom_obj->triangleSolidAngle(V3D(200, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(200, 0, 0));
     TS_ASSERT_DELTA(saTri, 0.000715295, satol * 0.000715);
-    saTri = geom_obj->triangleSolidAngle(V3D(2000, 0, 0));
+    saTri = geom_obj->triangulatedSolidAngle(V3D(2000, 0, 0));
     TS_ASSERT_DELTA(saTri, 7.08131e-6, satol * 7.08e-6);
   }
   void testSolidAngleSphereTri()
@@ -1146,13 +1278,13 @@ public:
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(8.1, 0, 0)), 0.864364,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(8.1, 0, 0)), 0.864364,
                     satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(0, 0, 0)), 4 * M_PI,
                     satol);
     // surface point
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
+    TS_ASSERT_DELTA(geom_obj->triangulatedSolidAngle(V3D(4.1, 0, 0)), 2 * M_PI,
                     satol);
   }
 
@@ -1537,6 +1669,34 @@ private:
     shapeElement->appendChild(element);
     return shapeElement;
   }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element> createHollowCylinderTypeElement(
+      const std::string &id, const double height, const double innerRadius,
+      const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("hollow-cylinder");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre-of-bottom-base");
+    element->setAttribute("x", std::to_string(-height / 2));
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("axis");
+    element->setAttribute("x", "1.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("outer-radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("inner-radius");
+    element->setAttribute("val", std::to_string(innerRadius));
+    shapeElement->appendChild(element);
+    element = document->createElement("height");
+    element->setAttribute("val", std::to_string(height));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -1552,28 +1712,68 @@ public:
   static void destroySuite(CSGObjectTestPerformance *suite) { delete suite; }
 
   CSGObjectTestPerformance()
-      : rng(200000), solid(ComponentCreationHelper::createSphere(0.1)),
-        shell(ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
+      : m_rng(200000), m_activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1),
+        m_cuboid(ComponentCreationHelper::createCuboid(0.2, 0.2, 0.1)),
+        m_cylinder(ComponentCreationHelper::createCappedCylinder(
+            0.1, 0.4, V3D{0., 0., 0.}, V3D{0., 1., 0.}, "cyl")),
+        m_rotatedCuboid(
+            ComponentCreationHelper::createCuboid(0.01, 0.12, 0.12, M_PI / 4.)),
+        m_sphere(ComponentCreationHelper::createSphere(0.1)),
+        m_sphericalShell(
+            ComponentCreationHelper::createHollowShell(0.009, 0.01)) {}
 
-  void test_generatePointInside_Solid_Primitive() {
-    const size_t maxAttempts(500);
-    for (size_t i = 0; i < npoints; ++i) {
-      solid->generatePointInObject(rng, maxAttempts);
+  void test_generatePointInside_Cuboid_With_ActiveRegion() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i{0}; i < m_npoints; ++i) {
+      m_cuboid->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
     }
   }
 
-  void test_Point_Inside_Solid_Composite_With_Hole() {
-    const size_t maxAttempts(500);
-    for (size_t i = 0; i < npoints; ++i) {
-      shell->generatePointInObject(rng, maxAttempts);
+  void test_generatePointInside_Cylinder_With_ActiveRegion() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i{0}; i < m_npoints; ++i) {
+      m_cylinder->generatePointInObject(m_rng, m_activeRegion, maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_Rotated_Cuboid() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_rotatedCuboid->generatePointInObject(m_rng, maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_Rotated_Cuboid_With_ActiveRegion() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_rotatedCuboid->generatePointInObject(m_rng, m_activeRegion,
+                                             maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_Sphere() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_sphere->generatePointInObject(m_rng, maxAttempts);
+    }
+  }
+
+  void test_generatePointInside_sphericalShell() {
+    constexpr size_t maxAttempts{500};
+    for (size_t i = 0; i < m_npoints; ++i) {
+      m_sphericalShell->generatePointInObject(m_rng, maxAttempts);
     }
   }
 
 private:
-  const size_t npoints = 20000;
-  Mantid::Kernel::MersenneTwister rng;
-  IObject_sptr solid;
-  IObject_sptr shell;
+  static constexpr size_t m_npoints{1000000};
+  Mantid::Kernel::MersenneTwister m_rng;
+  BoundingBox m_activeRegion;
+  IObject_sptr m_cuboid;
+  IObject_sptr m_cylinder;
+  IObject_sptr m_rotatedCuboid;
+  IObject_sptr m_sphere;
+  IObject_sptr m_sphericalShell;
 };
 
 #endif // MANTID_TESTCSGOBJECT__

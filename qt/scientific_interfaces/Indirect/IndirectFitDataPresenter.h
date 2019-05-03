@@ -13,6 +13,7 @@
 #include "IndirectFittingModel.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
@@ -21,15 +22,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
+    : public QObject,
+      public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
                            IIndirectFitDataView *view);
-
   IndirectFitDataPresenter(
       IndirectFittingModel *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+  ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
@@ -44,6 +47,9 @@ public:
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
+  void replaceHandle(const std::string &workspaceName,
+                     const Workspace_sptr &workspace) override;
+
 public slots:
   void updateSpectraInTable(std::size_t dataIndex);
 
@@ -56,7 +62,6 @@ protected slots:
   virtual void closeDialog();
 
 signals:
-  void singleSampleLoaded();
   void singleResolutionLoaded();
   void dataAdded();
   void dataRemoved();
@@ -67,6 +72,7 @@ signals:
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
+  void updateAvailableFitTypes();
 
 protected:
   IIndirectFitDataView const *getView() const;
@@ -84,6 +90,8 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(std::size_t dataIndex);
+
+  void selectReplacedWorkspace(const QString &workspaceName);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;

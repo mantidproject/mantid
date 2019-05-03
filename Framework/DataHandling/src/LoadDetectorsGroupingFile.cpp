@@ -35,25 +35,41 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+namespace PropertyNames {
+const std::string INPUT_FILE("InputFile");
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+} // namespace PropertyNames
+} // namespace
+
 DECLARE_ALGORITHM(LoadDetectorsGroupingFile)
 
 void LoadDetectorsGroupingFile::init() {
   /// Initialise the properties
 
   const std::vector<std::string> exts{".xml", ".map"};
-  declareProperty(Kernel::make_unique<FileProperty>("InputFile", "",
-                                                    FileProperty::Load, exts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PropertyNames::INPUT_FILE, "", FileProperty::Load, exts),
                   "The XML or Map file with full path.");
 
   declareProperty(
+      make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
+      "Optional: An input workspace with the instrument we want to use. This "
+      "will override what is specified in the grouping file.");
+
+  declareProperty(
       make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+          PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "The output workspace containing the loaded grouping information.");
 }
 
 /// Run the algorithm
 void LoadDetectorsGroupingFile::exec() {
-  Poco::Path inputFile(static_cast<std::string>(getProperty("InputFile")));
+  Poco::Path inputFile(
+      static_cast<std::string>(getProperty(PropertyNames::INPUT_FILE)));
 
   std::string ext = Poco::toLower(inputFile.getExtension());
 
@@ -71,8 +87,12 @@ void LoadDetectorsGroupingFile::exec() {
     LoadGroupXMLFile loader;
     loader.loadXMLFile(inputFile.toString());
 
-    // Load an instrument, if given
-    if (loader.isGivenInstrumentName()) {
+    MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
+    if (inputWS) {
+      // use the instrument from the input workspace
+      m_instrument = inputWS->getInstrument();
+    } else if (loader.isGivenInstrumentName()) {
+      // Load an instrument, if given
       const std::string instrumentName = loader.getInstrumentName();
 
       std::string date;
@@ -503,8 +523,8 @@ void LoadGroupXMLFile::parseXML() {
     } // "group"
     else if (pNode->nodeName() == "component") {
       // Node "component" = value
-      auto it = m_groupComponentsMap.find(curgroupid);
-      if (it == m_groupComponentsMap.end()) {
+      auto groupIt = m_groupComponentsMap.find(curgroupid);
+      if (groupIt == m_groupComponentsMap.end()) {
         std::stringstream ss;
         ss << "XML File (component) heirachial error!"
            << "  Inner Text = " << pNode->innerText() << '\n';
@@ -520,14 +540,14 @@ void LoadGroupXMLFile::parseXML() {
           finalvalue = val_value;
         else
           finalvalue = value;
-        it->second.push_back(finalvalue);
+        groupIt->second.emplace_back(finalvalue);
       }
 
     } // Component
     else if (pNode->nodeName() == "detids") {
       // Node "detids"
-      auto it = m_groupDetectorsMap.find(curgroupid);
-      if (it == m_groupDetectorsMap.end()) {
+      auto groupIt = m_groupDetectorsMap.find(curgroupid);
+      if (groupIt == m_groupDetectorsMap.end()) {
         std::stringstream ss;
         ss << "XML File (detids) hierarchal error!"
            << "  Inner Text = " << pNode->innerText() << '\n';
@@ -545,14 +565,14 @@ void LoadGroupXMLFile::parseXML() {
           finalvalue = value;
 
         std::vector<int> parsedRange = Strings::parseRange(finalvalue);
-        it->second.insert(it->second.end(), parsedRange.begin(),
-                          parsedRange.end());
+        groupIt->second.insert(groupIt->second.end(), parsedRange.begin(),
+                               parsedRange.end());
       }
     } // "detids"
     else if (pNode->nodeName() == "ids") {
       // Node ids: for spectrum number
-      auto it = m_groupSpectraMap.find(curgroupid);
-      if (it == m_groupSpectraMap.end()) {
+      auto groupIt = m_groupSpectraMap.find(curgroupid);
+      if (groupIt == m_groupSpectraMap.end()) {
         std::stringstream ss;
         ss << "XML File (ids) hierarchal error! "
            << "  Inner Text = " << pNode->innerText() << '\n';
@@ -570,8 +590,8 @@ void LoadGroupXMLFile::parseXML() {
           finalvalue = value;
 
         std::vector<int> parsedRange = Strings::parseRange(finalvalue);
-        it->second.insert(it->second.end(), parsedRange.begin(),
-                          parsedRange.end());
+        groupIt->second.insert(groupIt->second.end(), parsedRange.begin(),
+                               parsedRange.end());
       }
     }
 

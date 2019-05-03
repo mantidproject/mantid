@@ -1125,6 +1125,7 @@ private:
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < NHIST; i++) {
       Detector *d = new Detector("det", i, nullptr);
+      d->setPos(1. + static_cast<double>(i) * 0.1, 0., 1.);
       instr->add(d);
       instr->markAsDetector(d);
     }

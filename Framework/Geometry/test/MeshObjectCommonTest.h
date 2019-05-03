@@ -27,14 +27,14 @@ public:
     const V3D vertex2{1, 0, 0};
     const V3D vertex3{1, 1, 0};
     V3D intersectionPoint;
-    int entryExitFlag;
+    TrackDirection entryExitFlag;
 
     // Direct intersection through triangle body
     auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
         start, direction, vertex1, vertex2, vertex3, intersectionPoint,
         entryExitFlag);
     TS_ASSERT(doesIntersect);
-    TS_ASSERT_EQUALS(entryExitFlag, -1);
+    TS_ASSERT_EQUALS(entryExitFlag, TrackDirection::LEAVING);
     TS_ASSERT((start + (direction * 1) - intersectionPoint).norm2() < 1e-9);
   }
 
@@ -51,7 +51,7 @@ public:
     const V3D vertex2{1, 0, 0};
     const V3D vertex3{1, 1, 0};
     V3D intersectionPoint;
-    int entryExitFlag;
+    TrackDirection entryExitFlag;
 
     // Test ray going through vertex of triangle
     V3D start = vertex1 - direction;
@@ -90,7 +90,7 @@ public:
     const V3D vertex2{1, 0, 0};
     const V3D vertex3{1, 1, 0};
     V3D intersectionPoint;
-    int entryExitFlag;
+    TrackDirection entryExitFlag;
     // Triangle now behind start. Should not intersect
     start = V3D{0, 0, 10};
     auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(

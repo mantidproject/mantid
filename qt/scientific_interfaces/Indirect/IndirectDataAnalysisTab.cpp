@@ -61,7 +61,7 @@ void IndirectDataAnalysisTab::inputChanged() { validate(); }
  * @return  The input workspace to be used in data analysis.
  */
 MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
-  return m_inputWorkspace.lock();
+  return m_inputWorkspace;
 }
 
 /**

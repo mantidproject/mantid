@@ -264,7 +264,8 @@ void WorkspacePresenter::deleteWorkspaces() {
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {
-  m_view->saveWorkspace(m_view->getSaveFileType());
+  m_view->saveWorkspace(m_view->getSelectedWorkspace()->getName(),
+                        m_view->getSaveFileType());
 }
 
 void WorkspacePresenter::saveWorkspaceCollection() {

@@ -15,7 +15,7 @@ associated long range diffusive motions of molecules.
 
 The Chudley-Elliot Jump diffusion model [1]_ has the form:
 
-.. math:: HWHM(Q) = \frac{\hbar}{\tau} \cdot \frac{1 - sin(Ql)}{Ql}
+.. math:: HWHM(Q) = \frac{\hbar}{\tau} \cdot \left(1 - \frac{sin(Ql)}{Ql}\right)
 
 Units of :math:`l` are inverse units of :math:`Q`.
 

@@ -12,10 +12,10 @@ import unittest
 
 import matplotlib
 import numpy as np
-from mock import Mock
 
 import mantid.api
 import mantid.plots.helperfunctions as funcs
+from mantid.py3compat.mock import Mock
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
@@ -169,7 +169,12 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_get_axes_label_2d_MDWS(self):
         axs = funcs.get_axes_labels(self.ws_MD_2d)
         # should get the first two dimension labels only
-        self.assertEqual(axs, ('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)'))
+        self.assertEqual(axs, ('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)', ''))
+
+    def test_get_axes_label_2d_MDWS_indices(self):
+        axs = funcs.get_axes_labels(self.ws_MD_2d, indices=(0,slice(None),0))
+        # should get the first two dimension labels only
+        self.assertEqual(axs, ('Intensity', 'Dim2 (EnergyTransfer)', 'Dim1=-2.4; Dim3=0.0;'))
 
     def test_get_data_uneven_flag(self):
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
@@ -265,6 +270,26 @@ class HelperFunctionsTest(unittest.TestCase):
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo_rag, True, histogram2D=True)
         np.testing.assert_allclose(x, np.array([[1, 2, 3, 4, 5], [2, 4, 6, 8, 10], [2, 4, 6, 8, 10]]))
         np.testing.assert_allclose(y, np.array([[5, 5, 5, 5, 5], [7, 7, 7, 7, 7], [9, 9, 9, 9, 9]]))
+        # check that fails for uneven data
+        self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
+
+    def test_get_matrix_2d_data_ragged(self):
+        # contour from ragged point data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, True, histogram2D=False)
+        np.testing.assert_allclose(x, np.array([1., 2., 3., 4., 5., 6., 7., 8.]))
+        np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
+        # contour from ragged histo data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=False)
+        np.testing.assert_allclose(x, np.array([1.5, 2.4375, 3.375, 4.3125, 5.25, 6.1875, 7.125, 8.0625, 9.]))
+        np.testing.assert_allclose(y, np.array([4., 6., 8., 10.]))
+        # mesh from ragged point data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_point_rag, True, histogram2D=True)
+        np.testing.assert_allclose(x, np.array([0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5]))
+        np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
+        # mesh from ragged histo data
+        x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=True)
+        np.testing.assert_allclose(x, np.array([1.03125, 1.96875, 2.90625, 3.84375, 4.78125, 5.71875, 6.65625, 7.59375, 8.53125, 9.46875]))
+        np.testing.assert_allclose(y, np.array([4., 6, 8., 10.]))
         # check that fails for uneven data
         self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
 
@@ -526,25 +551,48 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], dy))
 
-    @add_md_workspace_with_data()
-    def test_get_md_data2d_bin_bounds(self, mdws):
-        coord1, coord2, data = funcs.get_md_data2d_bin_bounds(mdws, False)
-        self.assertEqual(11, len(coord1))
-        self.assertEqual(-3, coord1[0])
-        self.assertEqual(3, coord1[-1])
-
-        self.assertEqual(11, len(coord2))
-        self.assertEqual(-10, coord2[0])
-        self.assertEqual(10, coord2[-1])
-
-        self.assertTrue(all(len(d) == 10 for d in data))
-        self.assertEqual(0.0, data[0][0])
-        self.assertEqual(99.0, data[-1][-1])
-
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):
         self.assertRaises(AssertionError, funcs.get_md_data2d_bin_bounds, mdws, False)
 
+    @add_md_workspace_with_data(dimensions=3)
+    def test_get_md_data2d_bin_bounds_indices(self, mdws):
+        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (0,slice(None),slice(None)))
+        np.testing.assert_allclose(range(-10,12,2), x)
+        np.testing.assert_allclose(range(-20,24,4), y)
+
+    @add_md_workspace_with_data(dimensions=3)
+    def test_get_md_data2d_bin_bounds_indices2(self, mdws):
+        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (slice(None),0,slice(None)))
+        np.testing.assert_allclose(np.arange(-3,3.6,0.6), x, atol=1e-14)
+        np.testing.assert_allclose(range(-20,24,4), y)
+
+    def test_pointToIndex(self):
+        d=self.ws_MD_2d.getDimension(0)
+        self.assertEqual(funcs.pointToIndex(d,-10), 0)
+        self.assertEqual(funcs.pointToIndex(d,-3), 0)
+        self.assertEqual(funcs.pointToIndex(d,0), 2)
+        self.assertEqual(funcs.pointToIndex(d,3), 4)
+        self.assertEqual(funcs.pointToIndex(d,10), 4)
+
+    def test_get_indices(self):
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d)
+        self.assertIsNone(indices)
+        self.assertNotIn('label', kwargs)
+
+        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, indices=(0,slice(None)))
+        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, slicepoint=(0,None))
+        self.assertRaises(ValueError, funcs.get_indices, self.ws_MD_2d, indices=(1,2), slicepoint=(3,4))
+
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d,indices=(1,slice(None),slice(None)))
+        np.testing.assert_equal(indices, (1,slice(None),slice(None)))
+        self.assertIn('label', kwargs)
+        self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
+
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d,slicepoint=(-1,None,None))
+        np.testing.assert_equal(indices, (1,slice(None),slice(None)))
+        self.assertIn('label', kwargs)
+        self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
 
 if __name__ == '__main__':
     unittest.main()

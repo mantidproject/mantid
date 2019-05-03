@@ -11,7 +11,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
 #include <array>
 #include <iomanip>
@@ -248,8 +248,7 @@ void EnggDiffFittingViewQtWidget::plotFittedPeaksStateChanged() {
 }
 
 void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
-    QListWidgetItem *clickedItem) {
-  const auto label = clickedItem->text();
+    QListWidgetItem *) {
   m_presenter->notify(IEnggDiffFittingPresenter::selectRun);
 }
 

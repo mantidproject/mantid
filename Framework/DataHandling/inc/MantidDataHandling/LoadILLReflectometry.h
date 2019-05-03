@@ -67,6 +67,7 @@ private:
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
   double peakOffsetAngle();
+  void addSampleLogs();
   double detectorRotation();
   void placeDetector();
   void placeSlits();
@@ -85,7 +86,6 @@ private:
   double m_channelWidth{0.0};
   std::string m_detectorAngleName;
   std::string m_sampleAngleName;
-  std::string m_offsetName;
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;

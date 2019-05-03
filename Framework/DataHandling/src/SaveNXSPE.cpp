@@ -11,7 +11,6 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
@@ -88,12 +87,6 @@ void SaveNXSPE::exec() {
   // Retrieve the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
-    g_log.error("The input workspace must have common bins");
-    throw std::invalid_argument("The input workspace must have common bins");
-  }
-
   // Number of spectra
   const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
   // Number of energy bins
@@ -135,8 +128,7 @@ void SaveNXSPE::exec() {
   // TODO: Check that this is the way round we want to do it.
   const API::Run &run = inputWS->run();
   if (run.hasProperty("Ei")) {
-    Kernel::Property *propEi = run.getProperty("Ei");
-    efixed = boost::lexical_cast<double, std::string>(propEi->value());
+    efixed = run.getPropertyValueAsType<double>("Ei");
   }
   nxFile.writeData("fixed_energy", efixed);
   nxFile.openData("fixed_energy");

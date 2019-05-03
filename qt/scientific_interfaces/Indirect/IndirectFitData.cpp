@@ -31,10 +31,10 @@ template <class Vector, typename T>
 std::vector<T> outOfRange(const Vector &values, const T &minimum,
                           const T &maximum) {
   std::vector<T> result;
-  for (auto &&value : values) {
-    if (value < minimum || value > maximum)
-      result.emplace_back(value);
-  }
+  std::copy_if(values.begin(), values.end(), std::back_inserter(result),
+               [&minimum, &maximum](const auto &value) {
+                 return value < minimum || value > maximum;
+               });
   return result;
 }
 
@@ -93,8 +93,10 @@ std::vector<std::string> splitStringBy(std::string const &str,
 }
 
 std::string getSpectraRange(std::string const &string) {
-  auto bounds = splitStringBy(string, "-");
-  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
+  auto const bounds = splitStringBy(string, "-");
+  return std::stoull(bounds[0]) > std::stoull(bounds[1])
+             ? bounds[1] + "-" + bounds[0]
+             : string;
 }
 
 std::string rearrangeSpectraSubString(std::string const &string) {
@@ -182,14 +184,14 @@ std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
 }
 
 double convertBoundToDoubleAndFormat(std::string const &str) {
-  return std::round(std::stod(str) * 10) / 10;
+  return std::round(std::stod(str) * 1000) / 1000;
 }
 
 std::string constructExcludeRegionString(std::vector<double> const &bounds) {
   std::string excludeRegion;
   for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    auto splitDouble = splitStringBy(std::to_string(*it), ".");
-    excludeRegion += splitDouble[0] + "." + splitDouble[1].front();
+    auto const splitDouble = splitStringBy(std::to_string(*it), ".");
+    excludeRegion += splitDouble[0] + "." + splitDouble[1].substr(0, 3);
     excludeRegion += it == bounds.end() - 1 ? "" : ",";
   }
   return excludeRegion;

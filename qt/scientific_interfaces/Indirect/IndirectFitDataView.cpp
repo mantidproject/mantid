@@ -101,6 +101,16 @@ void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffices) {
   m_dataForm->dsResolution->setFBSuffixes(suffices);
 }
 
+bool IndirectFitDataView::isSampleWorkspaceSelectorVisible() const {
+  return m_dataForm->dsSample->isWorkspaceSelectorVisible();
+}
+
+void IndirectFitDataView::setSampleWorkspaceSelectorIndex(
+    const QString &workspaceName) {
+  m_dataForm->dsSample->setWorkspaceSelectorIndex(workspaceName);
+  m_dataForm->dsSample->setSelectorIndex(1);
+}
+
 UserInputValidator &
 IndirectFitDataView::validate(UserInputValidator &validator) {
   if (currentIndex() == 0)

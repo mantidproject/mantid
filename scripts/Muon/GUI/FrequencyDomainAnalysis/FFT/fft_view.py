@@ -6,32 +6,33 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common.utilities import table_utils
+from Muon.GUI.Common.message_box import warning
 
 
-class FFTView(QtGui.QWidget):
+class FFTView(QtWidgets.QWidget):
 
     """
     creates the layout for the FFT GUI
     """
     # signals
-    buttonSignal = QtCore.pyqtSignal()
-    tableClickSignal = QtCore.pyqtSignal(object, object)
-    phaseCheckSignal = QtCore.pyqtSignal()
+    buttonSignal = QtCore.Signal()
+    tableClickSignal = QtCore.Signal(object, object)
+    phaseCheckSignal = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(FFTView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtWidgets.QGridLayout(self)
 
         # add splitter for resizing
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
         # make table
-        self.FFTTable = QtGui.QTableWidget(self)
+        self.FFTTable = QtWidgets.QTableWidget(self)
         self.FFTTable.resize(800, 800)
         self.FFTTable.setRowCount(9)
         self.FFTTable.setColumnCount(2)
@@ -84,8 +85,8 @@ class FFTView(QtGui.QWidget):
 
         self.FFTTable.resizeRowsToContents()
         # make advanced table options
-        self.advancedLabel = QtGui.QLabel("\n Advanced Options")
-        self.FFTTableA = QtGui.QTableWidget(self)
+        self.advancedLabel = QtWidgets.QLabel("\n Advanced Options")
+        self.FFTTableA = QtWidgets.QTableWidget(self)
         self.FFTTableA.resize(800, 800)
         self.FFTTableA.setRowCount(4)
         self.FFTTableA.setColumnCount(2)
@@ -97,7 +98,7 @@ class FFTView(QtGui.QWidget):
             ("Advanced Property;Value").split(";"))
 
         table_utils.setRowName(self.FFTTableA, 0, "Apodization Function")
-        options = ["None", "Lorentz", "Gaussian"]
+        options = ["Lorentz", "Gaussian", "None"]
         self.apodization = table_utils.addComboToTable(
             self.FFTTableA, 0, options)
 
@@ -105,7 +106,7 @@ class FFTView(QtGui.QWidget):
             self.FFTTableA,
             1,
             "Decay Constant (micro seconds)")
-        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 1.4, 1)
+        self.decay = table_utils.addDoubleToTable(self.FFTTableA, 4.4, 1)
 
         table_utils.setRowName(self.FFTTableA, 2, "Negative Padding")
         self.negativePadding = table_utils.addCheckBoxToTable(
@@ -116,7 +117,7 @@ class FFTView(QtGui.QWidget):
         self.FFTTableA.resizeRowsToContents()
 
         # make button
-        self.button = QtGui.QPushButton('Calculate FFT', self)
+        self.button = QtWidgets.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")
         # connects
         self.FFTTable.cellClicked.connect(self.tableClick)
@@ -147,6 +148,26 @@ class FFTView(QtGui.QWidget):
         self.Im_ws.addItems(options)
         self.phaseQuadChanged()
 
+    def removeIm(self, pattern):
+        index = self.Im_ws.findText(pattern)
+        self.Im_ws.removeItem(index)
+
+    def removeRe(self, pattern):
+        index = self.ws.findText(pattern)
+        self.ws.removeItem(index)
+
+    def setReTo(self, name):
+        index = self.ws.findText(name)
+        if index == -1:
+            return
+        self.ws.setCurrentIndex(index)
+
+    def setImTo(self, name):
+        index = self.Im_ws.findText(name)
+        if index == -1:
+            return
+        self.Im_ws.setCurrentIndex(index)
+
     # connect signals
     def phaseCheck(self):
         self.phaseCheckSignal.emit()
@@ -157,6 +178,12 @@ class FFTView(QtGui.QWidget):
     def buttonClick(self):
         self.buttonSignal.emit()
 
+    def getInputWS(self):
+        return self.ws.currentText()
+
+    def getInputImWS(self):
+        return self.Im_ws.currentText()
+
     # responses to commands
     def activateButton(self):
         self.button.setEnabled(True)
@@ -165,7 +192,7 @@ class FFTView(QtGui.QWidget):
         self.button.setEnabled(False)
 
     def setPhaseBox(self):
-        self.FFTTable.setRowHidden(8, self.getWS() != "PhaseQuad")
+        self.FFTTable.setRowHidden(8, "PhaseQuad" not in self.getWS())
 
     def changed(self, box, row):
         self.FFTTable.setRowHidden(row, box.checkState() == QtCore.Qt.Checked)
@@ -175,10 +202,10 @@ class FFTView(QtGui.QWidget):
 
     def phaseQuadChanged(self):
         # show axis
-        self.FFTTable.setRowHidden(6, self.getWS() != "PhaseQuad")
-        self.FFTTable.setRowHidden(7, self.getWS() != "PhaseQuad")
+        self.FFTTable.setRowHidden(6, "PhaseQuad" not in self.getWS())
+        self.FFTTable.setRowHidden(7, "PhaseQuad" not in self.getWS())
         # hide complex ws
-        self.FFTTable.setRowHidden(2, self.getWS() == "PhaseQuad")
+        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.getWS())
 
     # these are for getting inputs
     def getRunName(self):
@@ -188,13 +215,15 @@ class FFTView(QtGui.QWidget):
             tmpWS = mantid.AnalysisDataService.retrieve("MuonAnalysis")
         return tmpWS.getInstrument().getName() + str(tmpWS.getRunNumber()).zfill(8)
 
-    def initFFTInput(self):
+    def initFFTInput(self, run=None):
         inputs = {}
         inputs[
-            'InputWorkspace'] = "__ReTmp__"  # str( self.ws.currentText()).replace(";","; ")
+            'InputWorkspace'] = "__ReTmp__"  #
         inputs['Real'] = 0  # always zero
         out = str(self.ws.currentText()).replace(";", "; ")
-        inputs['OutputWorkspace'] = self.getRunName() + ";" + out + ";FFT"
+        if run is None:
+            run = self.getRunName()
+        inputs['OutputWorkspace'] = run + ";" + out + ";FFT"
         inputs["AcceptXRoundingErrors"] = True
         return inputs
 
@@ -254,6 +283,20 @@ class FFTView(QtGui.QWidget):
     def isRaw(self):
         return self.Raw_box.checkState() == QtCore.Qt.Checked
 
+    def set_raw_checkbox_state(self, state):
+        if state:
+            self.Raw_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            self.Raw_box.setCheckState(QtCore.Qt.Unchecked)
+
+    def setup_raw_checkbox_changed(self, slot):
+        self.FFTTable.itemChanged.connect(self.raw_checkbox_changed)
+        self.signal_raw_option_changed = slot
+
+    def raw_checkbox_changed(self, table_item):
+        if table_item == self.Raw_box:
+            self.signal_raw_option_changed()
+
     def getImBoxRow(self):
         return self.Im_box_row
 
@@ -277,3 +320,6 @@ class FFTView(QtGui.QWidget):
 
     def isPhaseBoxShown(self):
         return self.FFTTable.isRowHidden(8)
+
+    def warning_popup(self, message):
+        warning(message, parent=self)

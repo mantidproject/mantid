@@ -7,14 +7,14 @@
 #ifndef PROPERTYWITHVALUETEST_H_
 #define PROPERTYWITHVALUETEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include <cxxtest/TestSuite.h>
+#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
@@ -129,7 +129,7 @@ public:
     delete pv;
   }
 
-  void testSetValue() {
+  void testSetValueFromString() {
     PropertyWithValue<int> i("test", 1);
     TS_ASSERT_EQUALS(i.setValue("10"), "");
     TS_ASSERT_EQUALS(i, 10);
@@ -173,9 +173,20 @@ public:
             l.type());
   }
 
+  void testSetValueFromJson() {
+    PropertyWithValue<int> intProp("test", 1);
+    TS_ASSERT_EQUALS("", intProp.setValueFromJson(Json::Value(10)));
+    TS_ASSERT_EQUALS(10, intProp);
+
+    const auto helpMsg = intProp.setValueFromJson(Json::Value("7.99"));
+    TSM_ASSERT("Expected error when setting string to int property",
+               !helpMsg.empty());
+    TS_ASSERT_EQUALS(10, intProp);
+  }
+
 private:
   class DataObjectOne : public DataItem {
-    const std::string &getName() const override { return m_name; };
+    const std::string &getName() const override { return m_name; }
     const std::string id() const override { return "DataObjectOne"; }
     bool threadSafe() const override { return true; }
     const std::string toString() const override { return m_name; }
