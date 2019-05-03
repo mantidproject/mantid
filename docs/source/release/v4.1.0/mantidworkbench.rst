@@ -15,6 +15,7 @@ Improvements
 - You can now plot workspaces on top of figures you've created using scripts. Simply create a matplotlib figure in the
   script window, then drag and drop a workspace on top of it.
 - Mantid's offline help is now available in Workbench.
+- A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
 
 Bugfixes
 ########
