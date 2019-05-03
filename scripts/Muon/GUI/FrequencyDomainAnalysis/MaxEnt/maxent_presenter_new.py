@@ -6,30 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-
-import math
-from Muon.GUI.Common import thread_model
-import mantid.simpleapi as mantid
-from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
-import re
-from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 import functools
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, get_base_data_directory
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+import math
+import re
 
+import mantid.simpleapi as mantid
+
+from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, \
+    get_base_data_directory
+from Muon.GUI.Common.observer_pattern import GenericObserver
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
 raw_data = "_raw_data"
-
-
-class GenericObserver(Observer):
-    def __init__(self, callback):
-        Observer.__init__(self)
-        self.callback = callback
-
-    def update(self, observable, arg):
-        self.callback()
-
 
 optional_output_suffixes = {'OutputPhaseTable': '_phase_table', 'OutputDeadTimeTable': '_dead_times',
                             'ReconstructedSpectra': '_reconstructed_spectra', 'PhaseConvergenceTable': '_phase_convergence'}
@@ -123,7 +114,7 @@ class MaxEntPresenter(object):
         inputs['InputWorkspace'] = self.view.input_workspace
         run = [float(re.search('[0-9]+', inputs['InputWorkspace']).group())]
 
-        if self.view.phase_table:
+        if self.view.phase_table != 'Construct':
             inputs['InputPhaseTable'] = self.view.phase_table
 
         if self.load.dead_time_table(run):
@@ -153,6 +144,7 @@ class MaxEntPresenter(object):
 
     def update_phase_table_options(self):
         phase_table_list = self.load.phase_context.get_phase_table_list(self.load.data_context.instrument)
+        phase_table_list.insert(0, 'Construct')
 
         self.view.update_phase_table_combo(phase_table_list)
 

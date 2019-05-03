@@ -114,17 +114,19 @@ class FFTPresenter(object):
         self.view.warning_popup(error)
 
     def get_pre_inputs(self):
-        pre_inputs = {}
-
+        pre_inputs = self._get_generic_apodiazation_and_padding_inputs()
         pre_inputs['InputWorkspace'] = self.view.workspace
-        pre_inputs["ApodizationFunction"] = self.view.apodization_function
-        pre_inputs["DecayConstant"] = self.view.decay_constant
-        pre_inputs["NegativePadding"] = self.view.negative_padding
-        pre_inputs["Padding"] = self.view.padding_value
 
         return pre_inputs
 
     def get_imaginary_inputs(self):
+        pre_inputs = self._get_generic_apodiazation_and_padding_inputs()
+
+        pre_inputs['InputWorkspace'] = self.view.imaginary_workspace
+
+        return pre_inputs
+
+    def _get_generic_apodiazation_and_padding_inputs(self):
         pre_inputs = {}
 
         pre_inputs['InputWorkspace'] = self.view.imaginary_workspace

@@ -83,7 +83,6 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.assertEquals(parameters, {'DefaultLevel': 0.1, 'DoublePulse': False, 'Factor': 1.04, 'FirstGoodTime': 0.11,
                                        'FitDeadTime': True, 'InnerIterations': 10,
                                        'InputDeadTimeTable': 'deadtime_table_name',
-                                       'InputPhaseTable': 'MUSR22222_phase_table',
                                        'InputWorkspace': 'MUSR22725_raw_data',
                                        'LastGoodTime': 13.25, 'MaxField': 1000.0, 'Npts': 2048, 'OuterIterations': 10})
 
@@ -94,7 +93,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter.update_phase_table_options()
 
         self.assertEquals(retrieve_combobox_info(self.view.phase_table_combo),
-                          ['MUSR22222_phase_table', 'MUSR33333_phase_table'])
+                          ['Construct', 'MUSR22222_phase_table', 'MUSR33333_phase_table'])
 
     @mock.patch('Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_presenter_new.MuonWorkspaceWrapper')
     def test_add_maxent_workspace_to_ADS(self, workspace_wrapper_mock):

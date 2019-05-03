@@ -9,14 +9,14 @@ class PhaseTableContext(object):
         self.phase_quad = []
 
     def add_phase_table(self, workspace):
-        self.phase_tables = [x for x in self.phase_tables if x.workspace_name != workspace.workspace_name]
+        self.phase_tables = [phase_table for phase_table in self.phase_tables if phase_table.workspace_name != workspace.workspace_name]
         self.phase_tables.append(workspace)
 
     def get_phase_table_list(self, instrument):
         return [phase_table.workspace_name for phase_table in self.phase_tables if instrument in phase_table.workspace_name]
 
     def add_phase_quad(self, workspace):
-        self.phase_quad = [x for x in self.phase_quad if x.workspace_name != workspace.workspace_name]
+        self.phase_quad = [item for item in self.phase_quad if item.workspace_name != workspace.workspace_name]
         self.phase_quad.append(workspace)
 
     def get_phase_quad(self, instrument, run):

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import re
-from mantid.api import AnalysisDataService, WorkspaceGroup
 
 
 def get_raw_data_workspace_name(context, run, period='1'):
@@ -98,36 +97,6 @@ def get_pair_data_directory(context, run):
         return context.data_context._base_run_name(run) + " Pairs/"
 
 
-def calculate_base_name_and_group_for_phase_table(context, table_name):
-    run = re.search('[0-9]+', table_name).group()
-    base_name = table_name + '; ' + context.phase_context.options_dict['forward_group']
-    base_name += ', ' + context.phase_context.options_dict['backward_group']
-
-    group = context.data_context._base_run_name(run) + ' PhaseTables'
-
-    if not AnalysisDataService.doesExist(group) or type(AnalysisDataService.retrieve(group)) is not WorkspaceGroup:
-        new_group = WorkspaceGroup()
-        AnalysisDataService.addOrReplace(group, new_group)
-        AnalysisDataService.addToGroup(context.data_context._base_run_name(run), group)
-
-    return base_name, group
-
-
-def calculate_base_name_and_group_for_phasequad(context, input_workspace, phase_table):
-    base_name = input_workspace.split('_')[0] + '; PhaseQuad; ' \
-        + phase_table
-
-    run = re.search('[0-9]+', input_workspace).group()
-    group = context.data_context._base_run_name(run) + ' PhaseTables'
-
-    if not AnalysisDataService.doesExist(group) or type(AnalysisDataService.retrieve(group)) is not WorkspaceGroup:
-        new_group = WorkspaceGroup()
-        AnalysisDataService.addOrReplace(group, new_group)
-        AnalysisDataService.addToGroup(context.data_context._base_run_name(run), group)
-
-    return base_name, group
-
-
 def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
     workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
     workspace_name += '; ' + forward_group + ', ' + backward_group
@@ -143,7 +112,7 @@ def get_base_run_name(run, instrument):
 
 def get_phase_table_workspace_group_name(insertion_workspace_name, instrument):
     run = re.search('[0-9]+', insertion_workspace_name).group()
-    group = get_base_run_name(run, instrument) + ' PhaseTables/'
+    group = get_base_run_name(run, instrument) + ' Phase Tab/'
 
     return group
 
@@ -164,7 +133,10 @@ def get_fitting_workspace_name(base_name):
 
 
 def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
-    return 'FFT; Re ' + input_workspace + '; Im ' + imaginary_input_workspace
+    if imaginary_input_workspace:
+        return 'FFT; Re ' + input_workspace + '; Im ' + imaginary_input_workspace
+    else:
+        return 'FFT; Re ' + input_workspace
 
 
 def get_maxent_workspace_name(input_workspace):
