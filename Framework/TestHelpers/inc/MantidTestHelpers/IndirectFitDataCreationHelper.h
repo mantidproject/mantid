@@ -98,6 +98,19 @@ struct SetUpADSWithWorkspace {
   }
 };
 
+/// This is used to compare Spectra which is implemented as a boost::variant
+struct AreSpectraEqual : public boost::static_visitor<bool> {
+
+  template <typename T, typename U>
+  bool operator()(const T &, const U &) const {
+    return false; // cannot compare different types
+  }
+
+  template <typename T> bool operator()(const T &lhs, const T &rhs) const {
+    return lhs == rhs;
+  }
+};
+
 } // namespace IndirectFitDataCreationHelper
 } // namespace Mantid
 

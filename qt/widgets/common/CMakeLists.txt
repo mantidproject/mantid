@@ -286,6 +286,7 @@ set(SRC_FILES
     src/HelpWindow.cpp
     src/FlowLayout.cpp
     src/Hint.cpp
+    src/IndirectFitPropertyBrowser.cpp
     src/InterfaceManager.cpp
     src/ListPropertyWidget.cpp
     src/LocalParameterEditor.cpp
@@ -449,6 +450,7 @@ set(MOC_FILES
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
+  inc/MantidQtWidgets/Common/IndirectFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/LocalParameterEditor.h
   inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
