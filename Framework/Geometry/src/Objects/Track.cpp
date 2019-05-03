@@ -21,7 +21,7 @@ using Kernel::V3D;
 /**
  * Default constructor
  */
-Track::Track() : Track(V3D(), V3D(0, 0, 1)) {}
+Track::Track() : m_line(V3D(), V3D(0., 0., 1.)) {}
 
 /**
  * Constructor
@@ -29,7 +29,7 @@ Track::Track() : Track(V3D(), V3D(0, 0, 1)) {}
  * @param unitVector :: Directional vector. It must be unit vector.
  */
 Track::Track(const V3D &startPt, const V3D &unitVector)
-    : m_startPoint(startPt), m_unitVector(unitVector) {
+    : m_line(startPt, unitVector) {
   if (!unitVector.unitVector()) {
     throw std::invalid_argument(
         "Failed to construct track: direction is not a unit vector.");
@@ -48,8 +48,7 @@ void Track::reset(const V3D &startPoint, const V3D &direction) {
     throw std::invalid_argument(
         "Failed to reset track: direction is not a unit vector.");
   }
-  m_startPoint = startPoint;
-  m_unitVector = direction;
+  m_line.setLine(startPoint, direction);
 }
 
 /**
@@ -70,7 +69,7 @@ int Track::nonComplete() const {
     return 0;
   }
   auto ac = m_links.cbegin();
-  if (m_startPoint.distance(ac->entryPoint) > Tolerance) {
+  if (m_line.getOrigin().distance(ac->entryPoint) > Tolerance) {
     return 1;
   }
   auto bc = ac;
@@ -127,8 +126,8 @@ void Track::removeCojoins() {
  */
 void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
                      const IObject &obj, const ComponentID compID) {
-  IntersectionPoint newPoint(direction, endPoint,
-                             endPoint.distance(m_startPoint), obj, compID);
+  IntersectionPoint newPoint(
+      direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
   auto lowestPtr =
       std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
   m_surfPoints.insert(lowestPtr, newPoint);
@@ -183,7 +182,7 @@ void Track::buildLink() {
          ac->direction != TrackDirection::ENTERING) // stepping from an object.
   {
     if (ac->direction == TrackDirection::LEAVING) {
-      addLink(m_startPoint, ac->endPoint, ac->distFromStart, *ac->object,
+      addLink(m_line.getOrigin(), ac->endPoint, ac->distFromStart, *ac->object,
               ac->componentID); // from the void
     }
     ++ac;

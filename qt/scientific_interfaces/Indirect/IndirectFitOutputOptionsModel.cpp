@@ -103,10 +103,11 @@ bool workspaceIsPlottable(MatrixWorkspace_const_sptr workspace) {
 }
 
 bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
-  for (auto const &workspace : *groupWorkspace)
-    if (workspaceIsPlottable(convertToMatrixWorkspace(workspace)))
-      return true;
-  return false;
+  return std::any_of(groupWorkspace->begin(), groupWorkspace->end(),
+                     [](auto const &workspace) {
+                       return workspaceIsPlottable(
+                           convertToMatrixWorkspace(workspace));
+                     });
 }
 
 std::vector<std::string>

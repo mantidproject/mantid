@@ -57,10 +57,14 @@ public:
   Line *clone() const;
 
   Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
-  Kernel::V3D getOrigin() const { return Origin; } ///< returns the origin
-  Kernel::V3D getDirect() const { return Direct; } ///< returns the direction
-  double distance(const Kernel::V3D &) const;      ///< distance from line
-  int isValid(const Kernel::V3D &) const;          ///< Is the point on the line
+  const Kernel::V3D &getOrigin() const {
+    return Origin;
+  } ///< returns the origin
+  const Kernel::V3D &getDirect() const {
+    return Direct;
+  }                                           ///< returns the direction
+  double distance(const Kernel::V3D &) const; ///< distance from line
+  int isValid(const Kernel::V3D &) const;     ///< Is the point on the line
   void print() const;
 
   void rotate(const Kernel::Matrix<double> &);

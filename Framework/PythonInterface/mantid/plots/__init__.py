@@ -187,6 +187,8 @@ class MantidAxes(Axes):
         :param ignore_artists: List of Artist types to ignore
         :returns: A MantidAxes object
         """
+        if not ignore_artists:
+            ignore_artists = []
         prop_cycler = ax._get_lines.prop_cycler  # tracks line color cycle
         artists = ax.get_children()
         mantid_axes = ax.figure.add_subplot(111, projection='mantid',

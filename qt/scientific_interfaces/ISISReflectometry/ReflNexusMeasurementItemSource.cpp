@@ -62,18 +62,18 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
     algLoadRun->setProperty("Workspace", hostWorkspace);
     algLoadRun->execute();
 
-    auto run = hostWorkspace->run();
+    const auto &logs = hostWorkspace->run();
     const std::string measurementItemId =
-        run.getPropertyValueAsType<std::string>("measurement_id");
+        logs.getPropertyValueAsType<std::string>("measurement_id");
     const std::string measurementItemSubId =
-        run.getPropertyValueAsType<std::string>("measurement_subid");
+        logs.getPropertyValueAsType<std::string>("measurement_subid");
     const std::string measurementItemLabel =
-        run.getPropertyValueAsType<std::string>("measurement_label");
+        logs.getPropertyValueAsType<std::string>("measurement_label");
     const std::string measurementItemType =
-        run.getPropertyValueAsType<std::string>("measurement_type");
+        logs.getPropertyValueAsType<std::string>("measurement_type");
     std::string runNumber;
     try {
-      runNumber = run.getPropertyValueAsType<std::string>("run_number");
+      runNumber = logs.getPropertyValueAsType<std::string>("run_number");
     } catch (Exception::NotFoundError &) {
       boost::regex re("([0-9]*)$");
       boost::smatch match;
@@ -84,14 +84,14 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
     }
     std::string runTitle;
     try {
-      runTitle = run.getPropertyValueAsType<std::string>("run_title");
+      runTitle = logs.getPropertyValueAsType<std::string>("run_title");
     } catch (Exception::NotFoundError &) {
       // OK, runTitle will be empty
     }
 
     double theta = -1.0;
     try {
-      Property *prop = run.getProperty("stheta");
+      Property *prop = logs.getProperty("stheta");
       if (TimeSeriesProperty<double> *tsp =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
         theta = tsp->valuesAsVector().back();

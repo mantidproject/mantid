@@ -162,11 +162,11 @@ void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectra() {
-  const auto workspace = m_model->getWorkspace(m_activeIndex);
-  if (workspace) {
-    setSpectraRange(0, workspace->getNumberHistograms() - 1);
-    const auto spectra = m_model->getSpectra(m_activeIndex);
-    boost::apply_visitor(SetViewSpectra(m_view.get()), spectra);
+  const auto ws = m_model->getWorkspace(m_activeIndex);
+  if (ws) {
+    setSpectraRange(0, ws->getNumberHistograms() - 1);
+    const auto activeSpectra = m_model->getSpectra(m_activeIndex);
+    boost::apply_visitor(SetViewSpectra(m_view.get()), activeSpectra);
     enableView();
   } else {
     m_view->clear();
