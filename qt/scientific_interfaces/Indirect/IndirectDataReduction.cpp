@@ -120,10 +120,10 @@ void IndirectDataReduction::initLayout() {
 }
 
 void IndirectDataReduction::applySettings(
-    std::map<std::string, QVariant> &settings) {
+    std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->filterInputData(settings["RestrictInput"].toBool());
-    tab->second->setPlotErrorBars(settings["ErrorBars"].toBool());
+    tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->setPlotErrorBars(settings.at("ErrorBars").toBool());
   }
 }
 

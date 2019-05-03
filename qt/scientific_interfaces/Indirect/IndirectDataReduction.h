@@ -85,7 +85,7 @@ private slots:
 private:
   std::string documentationPage() const override;
 
-  void applySettings(std::map<std::string, QVariant> &settings) override;
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   QString
   getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp,

@@ -45,7 +45,7 @@ public: // public constructor, destructor and functions
 private:
   std::string documentationPage() const override;
 
-  void applySettings(std::map<std::string, QVariant> &settings) override;
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   /// Called upon a close event.
   void closeEvent(QCloseEvent * /*unused*/) override;

@@ -40,7 +40,7 @@ void IndirectInterface::applySettings() {
 }
 
 void IndirectInterface::applySettings(
-    std::map<std::string, QVariant> &settings) {
+    std::map<std::string, QVariant> const &settings) {
   UNUSED_ARG(settings);
 }
 

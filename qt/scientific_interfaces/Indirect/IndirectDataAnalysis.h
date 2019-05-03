@@ -76,7 +76,7 @@ private slots:
 private:
   std::string documentationPage() const override;
 
-  void applySettings(std::map<std::string, QVariant> &settings) override;
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   /// UI form containing all Qt elements.
   Ui::IndirectDataAnalysis m_uiForm;

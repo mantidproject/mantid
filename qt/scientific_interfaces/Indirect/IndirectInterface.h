@@ -36,7 +36,7 @@ private:
   virtual void initLayout() override{};
   virtual std::string documentationPage() const { return ""; };
 
-  virtual void applySettings(std::map<std::string, QVariant> &settings);
+  virtual void applySettings(std::map<std::string, QVariant> const &settings);
 
   std::unique_ptr<IndirectSettings> m_settings;
 };

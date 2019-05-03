@@ -27,7 +27,7 @@ public:
   explicit IndirectSettingsPresenter(IndirectSettingsModel *model,
                                      IIndirectSettingsView *view);
 
-  IIndirectSettingsView *IndirectSettingsPresenter::getView();
+  IIndirectSettingsView *getView();
 
   void loadSettings();
 
