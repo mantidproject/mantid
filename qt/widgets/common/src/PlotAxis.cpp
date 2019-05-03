@@ -100,7 +100,8 @@ void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace,
   // no
   // custom label. See MatrixWorkspace::YUnitLabel
 
-  const std::string customLabel = workspace.YUnitLabel();
+  const std::string customLabel =
+      workspace.YUnitLabel(false, plottingDistribution);
   const std::string yunit = workspace.YUnit();
   if ((yunit == customLabel) ||
       (customLabel.find("per") != std::string::npos)) {

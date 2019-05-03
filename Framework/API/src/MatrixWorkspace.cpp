@@ -952,15 +952,16 @@ std::string replacePerWithLatex(std::string yLabel) {
 }
 
 /** Append the x-unit of the workspace to the y-unit label as a denominator
-* E.g. if a workspace has y-unit label "Counts" and x-unit meV, the y-unit label
-* becomes "Counts per angstrom". Or if useLatex is true "Counts per $\AA$"
-* @param yLabel :: The y-axis label
-* @param workspace :: Pointer to workspace
-* @param useLatex :: Boolean, if true use latex else use ascii
-*/
+ * E.g. if a workspace has y-unit label "Counts" and x-unit angstrom, the y-unit
+ * label becomes "Counts per angstrom". Or if useLatex is true "Counts per
+ * $\AA$"
+ * @param yLabel :: The y-axis label
+ * @param workspace :: Pointer to workspace
+ * @param useLatex :: Boolean, if true use latex else use ascii
+ */
 std::string appendUnitDenominatorUsingPer(std::string yLabel,
-                                  const MatrixWorkspace *workspace,
-                                  bool useLatex) {
+                                          const MatrixWorkspace *workspace,
+                                          bool useLatex) {
   if (useLatex) {
     yLabel += " per $" + workspace->getAxis(0)->unit()->label().latex() + "$";
   } else {
@@ -989,15 +990,12 @@ MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
     if (!retVal.empty() && this->isDistribution() && this->axes() &&
         this->getAxis(0)->unit()) {
       retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
-    } else {
-      if (plotAsDistribution && !this->isDistribution()) {
-        retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
-      }
+    } else if (plotAsDistribution && !this->isDistribution()) {
+      retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
     }
   }
-  if (useLatex) {
+  if (useLatex)
     retVal = replacePerWithLatex(retVal);
-  }
   return retVal;
 }
 
