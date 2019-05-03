@@ -109,6 +109,20 @@ def addCheckBoxToTable(table,state,row,col=1):
     return box
 
 
+def addCheckBoxWidgetToTable(table,state,row,col=1):
+    check_box_widget = QtWidgets.QWidget()
+    layout = QtWidgets.QHBoxLayout(check_box_widget)
+    layout.setAlignment(QtCore.Qt.AlignCenter)
+    layout.setContentsMargins(0, 0, 0, 0)
+    box = QtWidgets.QCheckBox()
+    box.setChecked(state)
+
+    layout.addWidget(box)
+
+    table.setCellWidget(row,col, check_box_widget)
+    return box
+
+
 def addSpinBoxToTable(table,default,row,col=1):
     box = QtWidgets.QSpinBox()
     if default > 99:
