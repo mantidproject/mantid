@@ -3,7 +3,7 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 1.4.0
+Version: 1.4.1
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
