@@ -13,6 +13,8 @@
 
 #include "DllConfig.h"
 
+#include <memory>
+
 #include <QObject>
 
 namespace MantidQt {
