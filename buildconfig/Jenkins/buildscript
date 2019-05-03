@@ -396,7 +396,7 @@ userprops_file=$userconfig_dir/Mantid.user.properties
 echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
-  run_with_xvfb $CTEST_EXE -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+  run_with_xvfb $CTEST_EXE --no-compress-output -T Test -j${BUILD_THREADS:?} --schedule-random --output-on-failure
 fi
 
 ###############################################################################
