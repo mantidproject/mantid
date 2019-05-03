@@ -11,7 +11,7 @@
 #include "IndirectFitOutput.h"
 
 #include "DllConfig.h"
-#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IAlgorithm.h"
 
 #include <boost/optional.hpp>
@@ -67,9 +67,8 @@ public:
   virtual boost::optional<std::string> isInvalidFunction() const;
   virtual std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
-  std::size_t getNumberOfDatasets() const;
   std::vector<std::string> getFitParameterNames() const;
-  virtual Mantid::API::MultiDomainFunction_sptr getFittingFunction() const;
+  virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
   virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
 
@@ -93,7 +92,7 @@ public:
   virtual void removeWorkspace(std::size_t index);
   virtual PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
-  virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
+  virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   virtual void setDefaultParameterValue(const std::string &name, double value,
                                         std::size_t dataIndex);
   void addSingleFitOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
@@ -115,8 +114,8 @@ public:
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
   virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
-  Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex, std::size_t spectrum) const;
-  Mantid::API::IFunction_sptr getSingleFunction(std::size_t dataIndex, std::size_t spectrum) const;
+  Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
+                                            std::size_t spectrum) const;
   std::string getOutputBasename() const;
 
   void cleanFailedRun(Mantid::API::IAlgorithm_sptr fittingAlgorithm);
@@ -128,10 +127,10 @@ protected:
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
-  createSimultaneousFit(Mantid::API::MultiDomainFunction_sptr function) const;
+  createSimultaneousFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFitWithEqualRange(
       Mantid::API::IFunction_sptr function) const;
-  virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
+  virtual Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const;
   std::string createSingleFitOutputName(const std::string &formatString,
@@ -202,7 +201,7 @@ private:
 
   std::unique_ptr<IndirectFitOutput> m_fitOutput;
   std::vector<std::unique_ptr<IndirectFitData>> m_fittingData;
-  Mantid::API::MultiDomainFunction_sptr m_activeFunction;
+  Mantid::API::IFunction_sptr m_activeFunction;
   Mantid::API::IFunction_sptr m_fitFunction;
   std::vector<std::unordered_map<std::string, ParameterValue>>
       m_defaultParameters;

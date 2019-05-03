@@ -12,7 +12,6 @@
 #include "IndirectFitPlotModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
@@ -31,21 +30,18 @@ namespace {
 /// The name of the conjoined input and guess workspaces
 std::string const INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 
-std::string getFittingFunctionString(std::string const &workspaceName, size_t nSpec) {
-  auto const singleFunctionString = 
-    "(composite=CompositeFunction,$domains=i;name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-    "(composite=Convolution,FixResolution=true;"
-    "name=Resolution,Workspace="+ workspaceName+",WorkspaceIndex=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175))";
-  std::string functionString("composite=MultiDomainFunction");
-  for (size_t i = 0; i < nSpec; ++i) {
-    functionString += ";" + singleFunctionString;
-  }
-  return functionString;
+std::string getFittingFunctionString(std::string const &workspaceName) {
+  return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+         "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+         "name=Resolution,Workspace=" +
+         workspaceName +
+         ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+         "false;name=Lorentzian,Amplitude=1,PeakCentre=1,FWHM=0."
+         "0175)))";
 }
 
-MultiDomainFunction_sptr getFunction(std::string const &functionString) {
-  auto fun = FunctionFactory::Instance().createInitialized(functionString);
-  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+IFunction_sptr getFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitialized(functionString);
 }
 
 /// A dummy class used to create a model to pass to IndirectFitPlotModel's
@@ -73,9 +69,8 @@ private:
 void setFittingFunction(IndirectFittingModel *model,
                         std::string const &functionString,
                         bool setFitFunction) {
-  if (setFitFunction) {
-    model->setFitFunction(getFunction("composite=MultiDomainFunction;(" + functionString + ")"));
-  }
+  if (setFitFunction)
+    model->setFitFunction(getFunction(functionString));
 }
 
 IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
@@ -87,7 +82,7 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
   auto model = getEmptyDummyModel();
   SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
-  setFittingFunction(model, getFittingFunctionString(workspaceName, 20),
+  setFittingFunction(model, getFittingFunctionString(workspaceName),
                      setFitFunction);
   return model;
 }
@@ -148,9 +143,9 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
 IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
                                      MatrixWorkspace_sptr workspace,
                                      std::string const &workspaceName) {
-  setFittingFunction(model, getFittingFunctionString(workspaceName, 1), true);
+  setFittingFunction(model, getFittingFunctionString(workspaceName), true);
   auto alg =
-      setupFitAlgorithm(workspace, getFittingFunctionString(workspaceName, 1));
+      setupFitAlgorithm(workspace, getFittingFunctionString(workspaceName));
   return alg;
 }
 
@@ -210,14 +205,14 @@ public:
     TS_ASSERT_EQUALS(model.getWorkspace()->getNumberHistograms(), 10);
   }
 
-  //void
-  //test_that_getGuessWorkspace_will_create_and_then_return_a_guess_workspace_with_the_correct_number_of_spectra() {
-  //  /// Only creates a guess for the active spectra of the selected workspace
-  //  auto const model = getFitPlotModel();
+  void
+  test_that_getGuessWorkspace_will_create_and_then_return_a_guess_workspace_with_the_correct_number_of_spectra() {
+    /// Only creates a guess for the active spectra of the selected workspace
+    auto const model = getFitPlotModel();
 
-  //  TS_ASSERT(model.getGuessWorkspace());
-  //  TS_ASSERT_EQUALS(model.getGuessWorkspace()->getNumberHistograms(), 1);
-  //}
+    TS_ASSERT(model.getGuessWorkspace());
+    TS_ASSERT_EQUALS(model.getGuessWorkspace()->getNumberHistograms(), 1);
+  }
 
   void
   test_that_getResultWorkspace_returns_a_nullptr_if_a_fit_has_not_yet_been_run() {
@@ -225,38 +220,38 @@ public:
     TS_ASSERT(!model.getResultWorkspace());
   }
 
-  //void
-  //test_that_getResultWorkspace_returns_a_workspace_when_data_has_been_fit() {
-  //  auto const model = getFitPlotModelWithFitData();
-  //  TS_ASSERT(model.getResultWorkspace());
-  //}
+  void
+  test_that_getResultWorkspace_returns_a_workspace_when_data_has_been_fit() {
+    auto const model = getFitPlotModelWithFitData();
+    TS_ASSERT(model.getResultWorkspace());
+  }
 
   void
   test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
     auto const model = getFitPlotModel();
 
-    Spectra const spectra = Spectra(0u, 9u);
+    Spectra const spectra = std::make_pair(0u, 9u);
     Spectra const storedSpectra = model.getSpectra();
 
-    TS_ASSERT_EQUALS(storedSpectra, spectra);
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), storedSpectra, spectra));
   }
 
-  //void
-  //test_that_appendGuessToInput_returns_a_workspace_that_is_the_combination_of_the_input_and_guess_workspaces() {
-  //  auto const model = getFitPlotModel();
-  //  auto const guess = model.getGuessWorkspace();
+  void
+  test_that_appendGuessToInput_returns_a_workspace_that_is_the_combination_of_the_input_and_guess_workspaces() {
+    auto const model = getFitPlotModel();
+    auto const guess = model.getGuessWorkspace();
 
-  //  auto const resultWorkspace = model.appendGuessToInput(guess);
+    auto const resultWorkspace = model.appendGuessToInput(guess);
 
-  //  TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
-  //  TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(0), "Sample");
-  //  TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(1), "Guess");
-  //  /// Only two spectra because the guessWorkspace will only ever have one
-  //  /// spectra, and then spectra are extracted from the input workspace between
-  //  /// m_activeSpectrum and m_activeSpectrum and so only 1 spectrum is
-  //  /// extracted. 1 + 1 = 2
-  //  TS_ASSERT_EQUALS(resultWorkspace->getNumberHistograms(), 2);
-  //}
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
+    TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(0), "Sample");
+    TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(1), "Guess");
+    /// Only two spectra because the guessWorkspace will only ever have one
+    /// spectra, and then spectra are extracted from the input workspace between
+    /// m_activeSpectrum and m_activeSpectrum and so only 1 spectrum is
+    /// extracted. 1 + 1 = 2
+    TS_ASSERT_EQUALS(resultWorkspace->getNumberHistograms(), 2);
+  }
 
   void
   test_that_getActiveDataIndex_returns_the_index_which_it_has_been_set_to() {
@@ -342,17 +337,17 @@ public:
     TS_ASSERT_DIFFERS(model.getResultRange().second, 10.0);
   }
 
-  //void
-  //test_that_getFirstHWHM_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
-  //  auto const model = getFitPlotModel();
-  //  TS_ASSERT_EQUALS(model.getFirstHWHM(), 0.0175 / 2);
-  //}
+  void
+  test_that_getFirstHWHM_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_EQUALS(model.getFirstHWHM(), 0.0175 / 2);
+  }
 
-  //void
-  //test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
-  //  auto const model = getFitPlotModel();
-  //  TS_ASSERT_EQUALS(model.getFirstPeakCentre(), 1.0);
-  //}
+  void
+  test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_EQUALS(model.getFirstPeakCentre(), 1.0);
+  }
 
   void
   test_that_getFirstBackgroundLevel_returns_the_value_of_the_first_background_level_in_the_fitting_function() {
@@ -360,25 +355,25 @@ public:
     TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), 0.0);
   }
 
-  //void test_that_calculateHWHMMaximum_returns_the_value_expected() {
-  //  auto const model = getFitPlotModel();
+  void test_that_calculateHWHMMaximum_returns_the_value_expected() {
+    auto const model = getFitPlotModel();
 
-  //  auto const hwhm = model.getFirstHWHM();
-  //  auto const peakCentre = model.getFirstPeakCentre().get_value_or(0.);
+    auto const hwhm = model.getFirstHWHM();
+    auto const peakCentre = model.getFirstPeakCentre().get_value_or(0.);
 
-  //  auto const minimum = peakCentre + *hwhm;
-  //  TS_ASSERT_EQUALS(model.calculateHWHMMaximum(minimum), 0.99125);
-  //}
+    auto const minimum = peakCentre + *hwhm;
+    TS_ASSERT_EQUALS(model.calculateHWHMMaximum(minimum), 0.99125);
+  }
 
-  //void test_that_calculateHWHMMinimum_returns_the_value_expected() {
-  //  auto const model = getFitPlotModel();
+  void test_that_calculateHWHMMinimum_returns_the_value_expected() {
+    auto const model = getFitPlotModel();
 
-  //  auto const hwhm = model.getFirstHWHM();
-  //  auto const peakCentre = model.getFirstPeakCentre().get_value_or(0.);
+    auto const hwhm = model.getFirstHWHM();
+    auto const peakCentre = model.getFirstPeakCentre().get_value_or(0.);
 
-  //  auto const maximum = peakCentre - *hwhm;
-  //  TS_ASSERT_EQUALS(model.calculateHWHMMinimum(maximum), 1.00875);
-  //}
+    auto const maximum = peakCentre - *hwhm;
+    TS_ASSERT_EQUALS(model.calculateHWHMMinimum(maximum), 1.00875);
+  }
 
   void
   test_that_canCalculateGuess_returns_false_when_there_is_no_fitting_function() {
@@ -392,37 +387,37 @@ public:
     TS_ASSERT(model.canCalculateGuess());
   }
 
-  //void
-  //test_that_setFWHM_will_change_the_value_of_the_FWHM_in_the_fitting_function() {
-  //  auto model = getFitPlotModel();
+  void
+  test_that_setFWHM_will_change_the_value_of_the_FWHM_in_the_fitting_function() {
+    auto model = getFitPlotModel();
 
-  //  auto const fwhm = 1.1;
-  //  model.setFWHM(fwhm);
+    auto const fwhm = 1.1;
+    model.setFWHM(fwhm);
 
-  //  TS_ASSERT_EQUALS(model.getFirstHWHM(), fwhm / 2);
-  //}
+    TS_ASSERT_EQUALS(model.getFirstHWHM(), fwhm / 2);
+  }
 
-  //void
-  //test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {
-  //  auto model = getFitPlotModel();
+  void
+  test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {
+    auto model = getFitPlotModel();
 
-  //  auto const background = 0.12;
-  //  model.setBackground(background);
+    auto const background = 0.12;
+    model.setBackground(background);
 
-  //  TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), background);
-  //}
+    TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), background);
+  }
 
-  //void
-  //test_that_deleteExternalGuessWorkspace_removes_the_guess_workspace_from_the_ADS() {
-  //  auto model = getFitPlotModel();
+  void
+  test_that_deleteExternalGuessWorkspace_removes_the_guess_workspace_from_the_ADS() {
+    auto model = getFitPlotModel();
 
-  //  auto const guess = model.getGuessWorkspace();
-  //  (void)model.appendGuessToInput(guess);
+    auto const guess = model.getGuessWorkspace();
+    (void)model.appendGuessToInput(guess);
 
-  //  TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
-  //  model.deleteExternalGuessWorkspace();
-  //  TS_ASSERT(!AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
-  //}
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
+    model.deleteExternalGuessWorkspace();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
+  }
 
   void
   test_that_deleteExternalGuessWorkspace_does_not_throw_if_the_guess_workspace_does_not_exist() {

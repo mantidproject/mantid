@@ -19,7 +19,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
-std::string rangeToString(const std::pair<size_t, size_t> &range,
+std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
                           const std::string &delimiter = "-") {
   if (range.first != range.second)
     return std::to_string(range.first) + delimiter +
@@ -27,8 +27,8 @@ std::string rangeToString(const std::pair<size_t, size_t> &range,
   return std::to_string(range.first);
 }
 
-template <class Vector, typename T>
-std::vector<T> outOfRange(const Vector &values, const T &minimum,
+template <template <typename...> class Vector, typename T, typename... Ts>
+std::vector<T> outOfRange(const Vector<T, Ts...> &values, const T &minimum,
                           const T &maximum) {
   std::vector<T> result;
   std::copy_if(values.begin(), values.end(), std::back_inserter(result),
@@ -38,38 +38,62 @@ std::vector<T> outOfRange(const Vector &values, const T &minimum,
   return result;
 }
 
-struct SpectraOutOfRange {
-  SpectraOutOfRange(const size_t &minimum, const size_t &maximum)
+template <typename T>
+struct SpectraOutOfRange : boost::static_visitor<std::vector<T>> {
+  SpectraOutOfRange(const T &minimum, const T &maximum)
       : m_minimum(minimum), m_maximum(maximum) {}
 
-  auto operator()(const Spectra &spectra) const {
+  std::vector<T> operator()(const std::pair<T, T> &range) const {
+    std::vector<T> notInRange;
+    if (range.first < m_minimum)
+      notInRange.emplace_back(m_minimum);
+    if (range.second > m_maximum)
+      notInRange.emplace_back(m_maximum);
+    return notInRange;
+  }
+
+  std::vector<T> operator()(const DiscontinuousSpectra<T> &spectra) const {
     return outOfRange(spectra, m_minimum, m_maximum);
   }
 
 private:
-  const size_t m_minimum, m_maximum;
+  const T m_minimum, m_maximum;
 };
 
-struct CheckZeroSpectrum {
-  bool operator()(const Spectra &spectra) const {
+struct CheckZeroSpectrum : boost::static_visitor<bool> {
+  bool
+  operator()(const std::pair<std::size_t, std::size_t> & /*unused*/) const {
+    return false;
+  }
+  bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.empty();
   }
 };
 
-struct NumberOfSpectra {
-  size_t
-  operator()(const Spectra &spectra) const {
+struct NumberOfSpectra : boost::static_visitor<std::size_t> {
+  std::size_t
+  operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+    return 1 + (spectra.second - spectra.first);
+  }
+
+  std::size_t
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.size();
   }
 };
 
-struct SpectraToString {
+struct SpectraToString : boost::static_visitor<std::string> {
   explicit SpectraToString(const std::string &rangeDelimiter = "-")
       : m_rangeDelimiter(rangeDelimiter) {}
 
   std::string
-  operator()(const Spectra &spectra) const {
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra.getString();
+  }
+
+  std::string
+  operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+    return rangeToString(spectra, m_rangeDelimiter);
   }
 
 private:
@@ -125,23 +149,42 @@ std::string createSpectraString(std::string string) {
   return constructSpectraString(spectras);
 }
 
-struct CombineSpectra {
+struct CombineSpectra : boost::static_visitor<Spectra> {
+  Spectra
+  operator()(const std::pair<std::size_t, std::size_t> &spectra1,
+             const std::pair<std::size_t, std::size_t> &spectra2) const {
+    if (spectra1.second + 1 == spectra2.first)
+      return std::make_pair(spectra1.first, spectra2.second);
+    else if (spectra2.second + 1 == spectra1.first)
+      return std::make_pair(spectra2.first, spectra1.second);
+    else {
+      return DiscontinuousSpectra<std::size_t>(createSpectraString(
+          rangeToString(spectra1) + "," + rangeToString(spectra2)));
+    }
+  }
+
   Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
-    return Spectra(createSpectraString(
-        SpectraToString()(spectra1) + "," +
-        SpectraToString()(spectra2)));
+    return DiscontinuousSpectra<std::size_t>(createSpectraString(
+        boost::apply_visitor(SpectraToString(), spectra1) + "," +
+        boost::apply_visitor(SpectraToString(), spectra2)));
   }
 };
 
-struct GetSpectrum {
-  explicit GetSpectrum(size_t index) : m_index(index) {}
-  size_t
-  operator()(const Spectra &spectra) const {
+struct GetSpectrum : boost::static_visitor<std::size_t> {
+  explicit GetSpectrum(std::size_t index) : m_index(index) {}
+
+  std::size_t
+  operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+    return spectra.first + m_index;
+  }
+
+  std::size_t
+  operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
     return spectra[m_index];
   }
 
 private:
-  size_t m_index;
+  std::size_t m_index;
 };
 
 template <typename T>
@@ -158,7 +201,7 @@ std::string join(const std::vector<T> &values, const char *delimiter) {
 
 template <typename T, typename... Ts>
 std::vector<T, Ts...> subvector(const std::vector<T, Ts...> vec,
-                                size_t start, size_t end) {
+                                std::size_t start, std::size_t end) {
   return std::vector<T, Ts...>(vec.begin() + start, vec.begin() + end);
 }
 
@@ -229,7 +272,7 @@ namespace IDA {
 
 IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
                                  const Spectra &spectra)
-    : m_workspace(workspace), m_spectra(Spectra("")) {
+    : m_workspace(workspace), m_spectra(DiscontinuousSpectra<std::size_t>("")) {
   setSpectra(spectra);
 }
 
@@ -237,7 +280,8 @@ std::string
 IndirectFitData::displayName(const std::string &formatString,
                              const std::string &rangeDelimiter) const {
   const auto workspaceName = getBasename();
-  const auto spectraString = SpectraToString(rangeDelimiter)(m_spectra);
+  const auto spectraString =
+      boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
 
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
@@ -249,7 +293,7 @@ IndirectFitData::displayName(const std::string &formatString,
 }
 
 std::string IndirectFitData::displayName(const std::string &formatString,
-                                         size_t spectrum) const {
+                                         std::size_t spectrum) const {
   const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
@@ -268,32 +312,29 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {
 
 const Spectra &IndirectFitData::spectra() const { return m_spectra; }
 
-size_t IndirectFitData::getSpectrum(size_t index) const {
-  return GetSpectrum(index)(m_spectra);
+std::size_t IndirectFitData::getSpectrum(std::size_t index) const {
+  return boost::apply_visitor(GetSpectrum(index), m_spectra);
 }
 
-size_t IndirectFitData::numberOfSpectra() const {
-  return NumberOfSpectra()(m_spectra);
+std::size_t IndirectFitData::numberOfSpectra() const {
+  return boost::apply_visitor(NumberOfSpectra(), m_spectra);
 }
 
 bool IndirectFitData::zeroSpectra() const {
   if (m_workspace->getNumberHistograms())
-    return CheckZeroSpectrum()(m_spectra);
+    return boost::apply_visitor(CheckZeroSpectrum(), m_spectra);
   return true;
 }
 
 std::pair<double, double>
-IndirectFitData::getRange(size_t spectrum) const {
-  auto range = m_ranges.find(spectrum);
-  if (range != m_ranges.end())
-    return range->second;
-  range = m_ranges.find(0);
+IndirectFitData::getRange(std::size_t spectrum) const {
+  const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     return range->second;
   return getBinRange(m_workspace);
 }
 
-std::string IndirectFitData::getExcludeRegion(size_t spectrum) const {
+std::string IndirectFitData::getExcludeRegion(std::size_t spectrum) const {
   const auto region = m_excludeRegions.find(spectrum);
   if (region != m_excludeRegions.end())
     return region->second;
@@ -301,14 +342,14 @@ std::string IndirectFitData::getExcludeRegion(size_t spectrum) const {
 }
 
 std::vector<double>
-IndirectFitData::excludeRegionsVector(size_t spectrum) const {
+IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
 }
 
 void IndirectFitData::setSpectra(std::string const &spectra) {
   try {
     const Spectra spec =
-        Spectra(createSpectraString(spectra));
+        DiscontinuousSpectra<std::size_t>(createSpectraString(spectra));
     setSpectra(spec);
   } catch (std::exception &ex) {
     throw std::runtime_error("Spectra too large for cast: " +
@@ -328,8 +369,8 @@ void IndirectFitData::setSpectra(Spectra const &spectra) {
 
 void IndirectFitData::validateSpectra(Spectra const &spectra) {
   const auto visitor =
-      SpectraOutOfRange(0, workspace()->getNumberHistograms() - 1);
-  auto notInRange = visitor(spectra);
+      SpectraOutOfRange<std::size_t>(0, workspace()->getNumberHistograms() - 1);
+  auto notInRange = boost::apply_visitor(visitor, spectra);
   if (!notInRange.empty()) {
     if (notInRange.size() > 5)
       throw std::runtime_error("Spectra out of range: " +
@@ -339,7 +380,7 @@ void IndirectFitData::validateSpectra(Spectra const &spectra) {
 }
 
 void IndirectFitData::setStartX(double const &startX,
-                                size_t const &spectrum) {
+                                std::size_t const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.first = startX;
@@ -350,7 +391,7 @@ void IndirectFitData::setStartX(double const &startX,
         "Unable to set StartX: Workspace no longer exists.");
 }
 
-void IndirectFitData::setEndX(double const &endX, size_t const &spectrum) {
+void IndirectFitData::setEndX(double const &endX, std::size_t const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;
@@ -361,7 +402,7 @@ void IndirectFitData::setEndX(double const &endX, size_t const &spectrum) {
 }
 
 void IndirectFitData::setExcludeRegionString(
-    std::string const &excludeRegionString, size_t const &spectrum) {
+    std::string const &excludeRegionString, std::size_t const &spectrum) {
   if (!excludeRegionString.empty())
     m_excludeRegions[spectrum] = createExcludeRegionString(excludeRegionString);
   else
@@ -371,7 +412,7 @@ void IndirectFitData::setExcludeRegionString(
 IndirectFitData &IndirectFitData::combine(IndirectFitData const &fitData) {
   m_workspace = fitData.m_workspace;
   setSpectra(
-      CombineSpectra()(m_spectra, fitData.m_spectra));
+      boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra));
   m_excludeRegions.insert(std::begin(fitData.m_excludeRegions),
                           std::end(fitData.m_excludeRegions));
   m_ranges.insert(std::begin(fitData.m_ranges), std::end(fitData.m_ranges));

@@ -80,7 +80,16 @@
    <item>
     <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -123,7 +132,40 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pbAdd</sender>
+   <signal>clicked()</signal>
+   <receiver>IndirectAddWorkspaceDialog</receiver>
+   <slot>addData()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>283</x>
+     <y>157</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>248</x>
+     <y>294</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbClose</sender>
+   <signal>clicked()</signal>
+   <receiver>IndirectAddWorkspaceDialog</receiver>
+   <slot>closeDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>358</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>354</x>
+     <y>227</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>addData()</slot>
   <slot>closeDialog()</slot>

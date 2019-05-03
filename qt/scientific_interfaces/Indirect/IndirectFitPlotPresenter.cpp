@@ -9,7 +9,7 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::Spectra;
+using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
 
 std::string createPlotString(const std::string &workspaceName,
@@ -24,17 +24,16 @@ std::string createPlotString(const std::string &workspaceName,
   return createPlotString(workspaceName, std::to_string(spectrum));
 }
 
-struct UpdateAvailableSpectra {
+struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
   explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
 
-  void operator()(const Spectra &spectra) {
-    if (spectra.isContinuous()) {
-      auto const minmax = spectra.getMinMax();
-      m_view->setAvailableSpectra(minmax.first, minmax.second);
-    } else {
-      m_view->setAvailableSpectra(spectra.begin(), spectra.end());
-    }
+  void operator()(const std::pair<std::size_t, std::size_t> &spectra) {
+    m_view->setAvailableSpectra(spectra.first, spectra.second);
+  }
+
+  void operator()(const DiscontinuousSpectra<std::size_t> &spectra) {
+    m_view->setAvailableSpectra(spectra.begin(), spectra.end());
   }
 
 private:
@@ -149,11 +148,11 @@ void IndirectFitPlotPresenter::setModelEndX(double endX) {
 }
 
 void IndirectFitPlotPresenter::setModelHWHM(double minimum, double maximum) {
-//  m_model->setFWHM(maximum - minimum);
+  m_model->setFWHM(maximum - minimum);
 }
 
 void IndirectFitPlotPresenter::setModelBackground(double background) {
-//  m_model->setBackground(background);
+  m_model->setBackground(background);
 }
 
 void IndirectFitPlotPresenter::hideMultipleDataSelection() {
@@ -233,7 +232,7 @@ void IndirectFitPlotPresenter::updateAvailableSpectra() {
   if (m_model->getWorkspace()) {
     enableAllDataSelection();
     auto updateSpectra = UpdateAvailableSpectra(m_view);
-    updateSpectra(m_model->getSpectra());
+    m_model->getSpectra().apply_visitor(updateSpectra);
     setActiveSpectrum(m_view->getSelectedSpectrum());
   } else
     disableAllDataSelection();

@@ -57,7 +57,7 @@ MatrixWorkspace_sptr createPopulatedworkspace(int const &numberOfSpectra) {
 
 IndirectFitData getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  Spectra const spec = Spectra(0u, workspace->getNumberHistograms() - 1);
+  Spectra const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
   IndirectFitData data(workspace, spec);
   return data;
 }
@@ -306,11 +306,11 @@ public:
     TS_ASSERT(m_ads->doesExist("ConvFit_1L_Result"));
   }
 
-  //void
-  //test_that_the_resultworkspace_is_renamed_to_have_the_correct_name_after_a_fit_is_executed_with_multiple_data() {
-  //  (void)getFitOutputData();
-  //  TS_ASSERT(m_ads->doesExist("MultiConvFit_1L_Workspaces_1__s0_to_4_Result"));
-  //}
+  void
+  test_that_the_resultworkspace_is_renamed_to_have_the_correct_name_after_a_fit_is_executed_with_multiple_data() {
+    (void)getFitOutputData();
+    TS_ASSERT(m_ads->doesExist("MultiConvFit_1L_Workspaces_1__s0_to_4_Result"));
+  }
 
 private:
   /// This will return fit output with workspaces still stored in the ADS

@@ -98,12 +98,9 @@ public:
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
-  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &));
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
-  MOCK_METHOD1(setStartX, void(double));
-  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model

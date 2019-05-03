@@ -20,14 +20,14 @@ public:
   ConvFitModel();
   ~ConvFitModel() override;
 
-  Mantid::API::MultiDomainFunction_sptr getFittingFunction() const override;
+  Mantid::API::IFunction_sptr getFittingFunction() const override;
   boost::optional<double> getInstrumentResolution(std::size_t dataIndex) const;
   std::size_t getNumberHistograms(std::size_t index) const;
   Mantid::API::MatrixWorkspace_sptr getResolution(std::size_t index) const;
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
 
-  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
+  void setFitFunction(Mantid::API::IFunction_sptr function) override;
   void setTemperature(const boost::optional<double> &temperature);
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -47,7 +47,7 @@ private:
   std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override;
-  Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
+  Mantid::API::CompositeFunction_sptr getMultiDomainFunction() const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(std::size_t index) const override;
   std::unordered_map<std::string, std::string>

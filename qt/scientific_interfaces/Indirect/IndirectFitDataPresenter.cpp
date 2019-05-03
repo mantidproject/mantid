@@ -50,8 +50,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SLOT(removeSelectedData()));
   connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataRemoved()));
   connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataChanged()));
-  connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 
   connect(m_tablePresenter.get(),
           SIGNAL(startXChanged(double, std::size_t, std::size_t)), this,
@@ -96,13 +94,11 @@ void IndirectFitDataPresenter::setResolutionFBSuffices(
 void IndirectFitDataPresenter::setStartX(double startX, std::size_t dataIndex,
                                          int spectrumIndex) {
   m_tablePresenter->setStartX(startX, dataIndex, spectrumIndex);
-  m_view->setStartX(startX);
 }
 
 void IndirectFitDataPresenter::setEndX(double endX, std::size_t dataIndex,
                                        int spectrumIndex) {
   m_tablePresenter->setEndX(endX, dataIndex, spectrumIndex);
-  m_view->setEndX(endX);
 }
 
 void IndirectFitDataPresenter::setExclude(const std::string &exclude,
@@ -220,8 +216,6 @@ void IndirectFitDataPresenter::addDataToModel(
 void IndirectFitDataPresenter::setSingleModelData(const std::string &name) {
   m_model->clearWorkspaces();
   addModelData(name);
-  auto const range = m_model->getFittingRange(0, 0);
-  m_view->setXRange(range);
 }
 
 void IndirectFitDataPresenter::addModelData(const std::string &name) {

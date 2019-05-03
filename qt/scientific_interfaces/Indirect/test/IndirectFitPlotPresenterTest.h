@@ -15,13 +15,10 @@
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
-
-#include <QString>
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -31,20 +28,19 @@ using namespace testing;
 
 namespace {
 
-MultiDomainFunction_sptr getFunction(QString const &functionString) {
-  auto fun = FunctionFactory::Instance().createInitialized(functionString.toStdString());
-  return boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+IFunction_sptr getFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitialized(functionString);
 }
 
-MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspaceName, size_t nSpec) {
-  auto const singleFunctionString = QString(
-      "(composite=CompositeFunction,$domains=i;name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true;"
-      "name=Resolution,Workspace=%1,WorkspaceIndex=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175))").arg(QString::fromStdString(workspaceName));
-  QString functionString("composite=MultiDomainFunction");
-  for (size_t i = 0; i < nSpec; ++i) {
-    functionString += ";" + singleFunctionString;
-  }
+IFunction_sptr getFunctionWithWorkspaceName(std::string const &workspaceName) {
+  std::string const functionString =
+      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+      "name=Resolution,Workspace=" +
+      workspaceName +
+      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+      "0175)))";
   return getFunction(functionString);
 }
 
@@ -162,7 +158,7 @@ public:
                                  std::size_t dataIndex));
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
-  MOCK_CONST_METHOD0(getFittingFunction, MultiDomainFunction_sptr());
+  MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
 
   MOCK_METHOD3(setStartX, void(double startX, std::size_t dataIndex,
                                std::size_t spectrum));
@@ -340,7 +336,7 @@ public:
   test_that_the_selectedFitDataChanged_signal_will_enable_PlotGuess_when_there_is_a_fit_function_and_workspace() {
     std::size_t const index(0);
     std::string const workspaceName("WorkspaceName");
-    auto const fitFunction = getFunctionWithWorkspaceName(workspaceName, 10);
+    auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
 
     ON_CALL(*m_fittingModel, getFittingFunction())
         .WillByDefault(Return(fitFunction));
@@ -429,7 +425,7 @@ public:
     std::size_t const index(0);
     std::string const workspaceName("WorkspaceName");
     auto const range = std::make_pair(1.0, 2.0);
-    auto const fitFunction = getFunctionWithWorkspaceName(workspaceName, 10);
+    auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
 
     ON_CALL(*m_fittingModel, getFittingRange(index, 0))
         .WillByDefault(Return(range));
@@ -479,24 +475,24 @@ public:
     m_view->emitHWHMMinimumChanged(2.0);
   }
 
-  //void
-  //test_that_the_backgroundChanged_signal_will_set_the_functions_background() {
-  //  double const background(1.2);
-  //  auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName", 10);
+  void
+  test_that_the_backgroundChanged_signal_will_set_the_functions_background() {
+    double const background(1.2);
+    auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
 
-  //  ON_CALL(*m_fittingModel, getFittingFunction())
-  //      .WillByDefault(Return(fitFunction));
+    ON_CALL(*m_fittingModel, getFittingFunction())
+        .WillByDefault(Return(fitFunction));
 
-  //  Expectation setDefault =
-  //      EXPECT_CALL(*m_fittingModel,
-  //                  setDefaultParameterValue("A0", background, 0))
-  //          .Times(1);
-  //  EXPECT_CALL(*m_fittingModel, getFittingFunction())
-  //      .Times(1)
-  //      .After(setDefault);
+    Expectation setDefault =
+        EXPECT_CALL(*m_fittingModel,
+                    setDefaultParameterValue("A0", background, 0))
+            .Times(1);
+    EXPECT_CALL(*m_fittingModel, getFittingFunction())
+        .Times(1)
+        .After(setDefault);
 
-  //  m_view->emitBackgroundChanged(background);
-  //}
+    m_view->emitBackgroundChanged(background);
+  }
 
   ///----------------------------------------------------------------------
   /// Unit Tests that test the methods and slots
@@ -545,7 +541,7 @@ public:
   }
 
   void test_that_updateRangeSelectors_will_update_the_background_selector() {
-    auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName", 10);
+    auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
 
     ON_CALL(*m_fittingModel, getFittingFunction())
         .WillByDefault(Return(fitFunction));
@@ -557,19 +553,19 @@ public:
     m_presenter->updateRangeSelectors();
   }
 
-  //void test_that_updateRangeSelectors_will_update_the_hwhm_selector() {
-  //  auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName", 10);
+  void test_that_updateRangeSelectors_will_update_the_hwhm_selector() {
+    auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
 
-  //  ON_CALL(*m_fittingModel, getFittingFunction())
-  //      .WillByDefault(Return(fitFunction));
+    ON_CALL(*m_fittingModel, getFittingFunction())
+        .WillByDefault(Return(fitFunction));
 
-  //  Expectation setVisible =
-  //      EXPECT_CALL(*m_view, setHWHMRangeVisible(true)).Times(1);
-  //  EXPECT_CALL(*m_view, setHWHMMinimum(-0.00875)).Times(1).After(setVisible);
-  //  EXPECT_CALL(*m_view, setHWHMMaximum(0.00875)).Times(1).After(setVisible);
+    Expectation setVisible =
+        EXPECT_CALL(*m_view, setHWHMRangeVisible(true)).Times(1);
+    EXPECT_CALL(*m_view, setHWHMMinimum(-0.00875)).Times(1).After(setVisible);
+    EXPECT_CALL(*m_view, setHWHMMaximum(0.00875)).Times(1).After(setVisible);
 
-  //  m_presenter->updateRangeSelectors();
-  //}
+    m_presenter->updateRangeSelectors();
+  }
 
   void
   test_that_appendLastDataToSelection_will_set_the_name_of_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_equal() {

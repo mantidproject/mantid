@@ -36,13 +36,6 @@
     <string>Single Input</string>
    </attribute>
    <layout class="QGridLayout" name="gridLayout" columnstretch="0,1">
-    <item row="1" column="0">
-     <widget class="QLabel" name="lbResolution">
-      <property name="text">
-       <string>Resolution</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0">
      <widget class="QLabel" name="lbSample">
       <property name="text">
@@ -50,16 +43,10 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
-      <property name="autoLoad" stdset="0">
-       <bool>true</bool>
-      </property>
-      <property name="ShowGroups" stdset="0">
-       <bool>false</bool>
-      </property>
-      <property name="showLoad" stdset="0">
-       <bool>false</bool>
+    <item row="1" column="0">
+     <widget class="QLabel" name="lbResolution">
+      <property name="text">
+       <string>Resolution</string>
       </property>
      </widget>
     </item>
@@ -76,66 +63,16 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0">
-      <item>
-       <widget class="QDoubleSpinBox" name="dsbStartX">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>End X</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="dsbEndX">
-        <property name="minimumSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-1000000000.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>1000000000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Start X</string>
+    <item row="1" column="1">
+     <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
+      <property name="autoLoad" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="ShowGroups" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="showLoad" stdset="0">
+       <bool>false</bool>
       </property>
      </widget>
     </item>

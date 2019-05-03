@@ -11,7 +11,6 @@ set(SRC_FILES
     ConvFitModel.cpp
     DensityOfStates.cpp
     Elwin.cpp
-    FunctionTemplateBrowser.cpp
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
@@ -38,7 +37,6 @@ set(SRC_FILES
     IndirectFitPlotModel.cpp
     IndirectFitPlotPresenter.cpp
     IndirectFitPlotView.cpp
-    IndirectFitPropertyBrowser.cpp
     IndirectFittingModel.cpp
     IndirectInstrumentConfig.cpp
     IndirectLoadILL.cpp
@@ -59,7 +57,6 @@ set(SRC_FILES
     Iqt.cpp
     IqtFit.cpp
     IqtFitModel.cpp
-    IqtTemplateBrowser.cpp
     JumpFit.cpp
     JumpFitAddWorkspaceDialog.cpp
     JumpFitDataPresenter.cpp
@@ -88,7 +85,6 @@ set(INC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
-    FunctionTemplateBrowser.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
     IIndirectFitOutputOptionsModel.h
@@ -120,7 +116,6 @@ set(INC_FILES
     IndirectFitPlotModel.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
-    IndirectFitPropertyBrowser.h
     IndirectFittingModel.h
     IndirectLoadILL.h
     IndirectMolDyn.h
@@ -139,7 +134,6 @@ set(INC_FILES
     Iqt.h
     IqtFit.h
     IqtFitModel.h
-    IqtTemplateBrowser.h
     JumpFit.h
     JumpFitAddWorkspaceDialog.h
     JumpFitDataPresenter.h
@@ -164,7 +158,6 @@ set(MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
-    FunctionTemplateBrowser.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
     IIndirectFitOutputOptionsView.h
@@ -188,7 +181,6 @@ set(MOC_FILES
     IndirectFitOutputOptionsView.h
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
-    IndirectFitPropertyBrowser.h
     IndirectInstrumentConfig.h
     IndirectLoadILL.h
     IndirectMolDyn.h
@@ -207,7 +199,6 @@ set(MOC_FILES
     IndirectTab.h
     Iqt.h
     IqtFit.h
-    IqtTemplateBrowser.h
     JumpFit.h
     JumpFitAddWorkspaceDialog.h
     JumpFitDataPresenter.h

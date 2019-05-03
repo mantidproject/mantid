@@ -16,6 +16,7 @@
 #include <QRegExpValidator>
 
 namespace {
+using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
 using MantidQt::CustomInterfaces::IDA::Spectra;
 
 namespace Regexes {
@@ -88,8 +89,9 @@ pairsToSpectra(const std::vector<std::pair<std::size_t, std::size_t>> &pairs) {
   if (pairs.empty())
     return boost::none;
   else if (pairs.size() == 1)
-    return Spectra(pairs[0].first, pairs[0].second);
-  return Spectra(pairsToString(pairs));
+    return boost::optional<Spectra>(pairs[0]);
+  return boost::optional<Spectra>(
+      DiscontinuousSpectra<std::size_t>(pairsToString(pairs)));
 }
 
 QVariant getVariant(std::size_t i) {

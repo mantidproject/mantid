@@ -45,7 +45,6 @@ public slots:
   void displayBinMask();
   void disableView();
   void enableView();
-  void initSpectraSelectionWidget(int index);
 
 private slots:
   void setBinMask(std::string const &maskString);

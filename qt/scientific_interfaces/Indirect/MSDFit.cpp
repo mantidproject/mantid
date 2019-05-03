@@ -49,9 +49,9 @@ void MSDFit::setupFitTab() {
   auto gaussian = functionFactory.createFunction("MSDGauss");
   auto peters = functionFactory.createFunction("MSDPeters");
   auto yi = functionFactory.createFunction("MSDYi");
-  //addComboBoxFunctionGroup("Gaussian", {gaussian});
-  //addComboBoxFunctionGroup("Peters", {peters});
-  //addComboBoxFunctionGroup("Yi", {yi});
+  addComboBoxFunctionGroup("Gaussian", {gaussian});
+  addComboBoxFunctionGroup("Peters", {peters});
+  addComboBoxFunctionGroup("Yi", {yi});
 
   setSampleWSSuffices({"_eq"});
   setSampleFBSuffices({"_eq.nxs"});

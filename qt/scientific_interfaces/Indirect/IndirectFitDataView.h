@@ -51,15 +51,11 @@ public:
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
 
-  void setXRange(std::pair<double, double> const &range);
-
 public slots:
   void displayWarning(const std::string &warning) override;
 
 protected slots:
   void emitViewSelected(int index);
-  void setStartX(double) override;
-  void setEndX(double) override;
 
 private:
   UserInputValidator &validateMultipleData(UserInputValidator &validator);
