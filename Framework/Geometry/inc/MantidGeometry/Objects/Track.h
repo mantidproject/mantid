@@ -14,6 +14,9 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Tolerance.h"
+
+#include <boost/container/small_vector.hpp>
+
 #include <iosfwd>
 #include <list>
 
@@ -141,8 +144,8 @@ struct IntersectionPoint {
  */
 class MANTID_GEOMETRY_DLL Track {
 public:
-  using LType = std::vector<Link>;
-  using PType = std::vector<IntersectionPoint>;
+  using LType = boost::container::small_vector<Link, 5>;
+  using PType = boost::container::small_vector<IntersectionPoint, 5>;
 
 public:
   /// Default constructor
@@ -160,7 +163,6 @@ public:
   void removeCojoins();
   /// Construct links between added points
   void buildLink();
-
   /// Set a starting point and direction
   void reset(const Kernel::V3D &startPoint, const Kernel::V3D &direction);
   /// Clear the current set of intersection results
