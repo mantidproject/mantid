@@ -9,6 +9,7 @@ class FittingTabPresenter(object):
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(self.context.data_context.current_runs,
                                                                                self.context.data_context.instrument,
+                                                                               self.selected_data,
                                                                                self.view)
 
         if dialog_return:
