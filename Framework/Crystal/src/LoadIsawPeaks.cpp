@@ -543,11 +543,10 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     prog.report(in.tellg());
   }
   if (m_isModulatedStructure) {
-    FindUBUsingIndexedPeaks alg2;
-    alg2.initialize();
-    alg2.setPropertyValue("ToleranceForSatellite", "0.05");
-    alg2.setProperty("PeaksWorkspace", outWS);
-    alg2.execute();
+    IAlgorithm_sptr findUB = createChildAlgorithm("FindUBUsingIndexedPeaks");
+    findUB->setPropertyValue("ToleranceForSatellite", "0.05");
+    findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace", outWS);
+    findUB->executeAsChildAlg();
 
     if (outWS->mutableSample().hasOrientedLattice()) {
       OrientedLattice o_lattice = outWS->mutableSample().getOrientedLattice();
