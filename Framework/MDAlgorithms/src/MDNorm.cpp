@@ -387,10 +387,10 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
       for (size_t i = 0; i < numNormDims; i++) {
         const auto dim1 = tempNormWS->getDimension(i);
         const auto dim2 = tempDataWS->getDimension(i);
-        if (!((dim1->getMinimum() == dim2->getMinimum()) &&
-              (dim1->getMaximum() == dim2->getMaximum()) &&
-              (dim1->getNBins() == dim2->getNBins()) &&
-              (dim1->getName() == dim2->getName()))) {
+        if ((dim1->getMinimum() != dim2->getMinimum()) ||
+              (dim1->getMaximum() != dim2->getMaximum()) ||
+              (dim1->getNBins() != dim2->getNBins()) ||
+              (dim1->getName() != dim2->getName())) {
           errorMessage.emplace("TemporaryDataWorkspace",
                                "Binning for TemporaryNormalizationWorkspaces "
                                "and TemporaryDataWorkspace must be the same.");
@@ -744,142 +744,10 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
     const Mantid::API::IMDHistoWorkspace_sptr tempDataWS) {
 
   // make sure the number of dimensions is the same for both workspaces
-  size_t numDimsInput = m_inputWS->getNumDims();
   size_t numDimsTemp = tempDataWS->getNumDims();
 
-  if (numDimsInput != numDimsTemp) {
-    throw(std::invalid_argument("InputWorkspace and TempDataWorkspace "
-                                "must have the same number of dimensions."));
-  } else {
 
-    // sort out which axes are dimensional and check names
-    size_t parametersIndex = 0;
-    std::vector<size_t> dimensionIndex(
-        numDimsInput + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
-    std::vector<size_t>
-        nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
-    for (auto const &p : parameters) {
-      auto key = p.first;
-      auto value = p.second;
-      if (value.find("QDimension0") != std::string::npos) {
-        dimensionIndex[0] = parametersIndex;
-        const std::string dimXName =
-            tempDataWS->getDimension(parametersIndex)->getName();
-        if (m_isRLU) { // hkl
-          if (dimXName.compare(QDimensionName(m_Q0Basis)) != 0) {
-            std::stringstream errorMessage;
-            std::stringstream debugMessage;
-            errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension " << parametersIndex;
-            debugMessage << "QDimension0 Names: Output will be: "
-                         << QDimensionName(m_Q0Basis);
-            debugMessage << " TemporaryDataWorkspace: " << dimXName;
-            g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
-          }
-        } else {
-          if (dimXName.compare(QDimensionNameQSample(0)) != 0) {
-            std::stringstream errorMessage;
-            std::stringstream debugMessage;
-            errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension " << parametersIndex;
-            debugMessage << "QDimension0 Names: Output will be: "
-                         << QDimensionNameQSample(0);
-            debugMessage << " TemporaryDataWorkspace: " << dimXName;
-            g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
-          }
-        }
-      } else if (value.find("QDimension1") != std::string::npos) {
-        dimensionIndex[1] = parametersIndex;
-        const std::string dimYName =
-            tempDataWS->getDimension(parametersIndex)->getName();
-        if (m_isRLU) { // hkl
-          if (dimYName.compare(QDimensionName(m_Q1Basis)) != 0) {
-            std::stringstream errorMessage;
-            std::stringstream debugMessage;
-            errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension " << parametersIndex;
-            debugMessage << "QDimension1 Names: Output will be: "
-                         << QDimensionName(m_Q1Basis);
-            debugMessage << " TemporaryDataWorkspace: " << dimYName;
-            g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
-          }
-        } else {
-          if (dimYName.compare(QDimensionNameQSample(1)) != 0) {
-            std::stringstream errorMessage;
-            std::stringstream debugMessage;
-            errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension " << parametersIndex;
-            debugMessage << "QDimension1 Names: Output will be: "
-                         << QDimensionNameQSample(1);
-            debugMessage << " TemporaryDataWorkspace: " << dimYName;
-            g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
-          }
-        }
-      } else if (value.find("QDimension2") != std::string::npos) {
-        dimensionIndex[2] = parametersIndex;
-        const std::string dimZName =
-            tempDataWS->getDimension(parametersIndex)->getName();
-        if (m_isRLU) { // hkl
-          if (dimZName.compare(QDimensionName(m_Q2Basis)) != 0) {
-            std::stringstream errorMessage;
-            std::stringstream debugMessage;
-            errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension " << parametersIndex;
-            debugMessage << "QDimension2 Names: Output will be: "
-                         << QDimensionName(m_Q2Basis);
-            debugMessage << " TemporaryDataWorkspace: " << dimZName;
-            g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
-          }
-        } else {
-          if (dimZName.compare(QDimensionNameQSample(2)) != 0) {
-            std::stringstream errorMessage;
-            std::stringstream debugMessage;
-            errorMessage << "TemporaryDataWorkspace does not have the  ";
-            errorMessage << "correct name for dimension " << parametersIndex;
-            debugMessage << "QDimension2 Names: Output will be: "
-                         << QDimensionNameQSample(2);
-            debugMessage << " TemporaryDataWorkspace: " << dimZName;
-            g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
-          }
-        }
-
-      } else if ((key.find("OutputBins") == std::string::npos) &&
-                 (key.find("OutputExtents") == std::string::npos)) {
-        nonDimensionIndex.push_back(parametersIndex);
-      }
-      parametersIndex++;
-    }
-    for (auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it) {
-      if (!(*it < numDimsInput + 1))
-        throw(std::invalid_argument("Cannot find at least one of QDimension0, "
-                                    "QDimension1, or QDimension2"));
-    }
-
-    // make sure the names of non-directional dimensions are the same
-    if (!(nonDimensionIndex.empty())) {
-      for (auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end();
-           ++it) {
-        const size_t indexID = *it;
-        const std::string nameInput =
-            m_inputWS->getDimension(indexID)->getName();
-        const std::string nameData =
-            tempDataWS->getDimension(indexID)->getName();
-        if (nameInput.compare(nameData) != 0) {
-          throw(
-              std::invalid_argument("TemporaryDataWorkspace does not have the "
-                                    "same dimension names as InputWorkspace."));
-        }
-      }
-    }
-  }
-
-  // make sure the binning parameters are also valid
+  // parse the paramters map and get extents from tempDataWS
   std::string numBinsStr = parameters.at("OutputBins");
   std::string extentsStr = parameters.at("OutputExtents");
   std::string tmp;
@@ -903,20 +771,153 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   }
 
   // parse the input data workspace
-  for (size_t i = 0; i < numDimsInput; i++) {
+  for (size_t i = 0; i < numDimsTemp; i++) {
     auto ax = tempDataWS->getDimension(i);
     numBinsTempData.push_back(ax->getNBins());
     extentsTempData.push_back(ax->getMinimum());
     extentsTempData.push_back(ax->getMaximum());
   }
-  if ((numBins.size() != numDimsInput) ||
-      (numBinsTempData.size() != numDimsInput) ||
-      extents.size() != 2 * numDimsInput ||
-      extentsTempData.size() != 2 * numDimsInput) {
-    throw(std::invalid_argument("Cannot parse binning dimensions for MDNorm."));
+  if ((numBins.size() != numDimsTemp) ||
+      (numBinsTempData.size() != numDimsTemp) ||
+      extents.size() != 2 * numDimsTemp ||
+      extentsTempData.size() != 2 * numDimsTemp) {
+    throw(std::invalid_argument("The number of output dimensions does not "
+                                "match the number of dimensions in "
+                                "TemporaryDataWorkspace."));
   }
+
+
+
+  // sort out which axes are dimensional and check names
+  size_t parametersIndex = 0;
+  std::vector<size_t> dimensionIndex(
+      numDimsTemp + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
+  std::vector<size_t>
+      nonDimensionIndex; // stores non-h,k,l or non-Qx,Qy,Qz dimensions
+  for (auto const &p : parameters) {
+    auto key = p.first;
+    auto value = p.second;
+    if (value.find("QDimension0") != std::string::npos) {
+      dimensionIndex[0] = parametersIndex;
+      const std::string dimXName =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (m_isRLU) { // hkl
+        if (dimXName.compare(QDimensionName(m_Q0Basis)) != 0) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension0 Names: Output will be: "
+                       << QDimensionName(m_Q0Basis);
+          debugMessage << " TemporaryDataWorkspace: " << dimXName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      } else {
+        if (dimXName.compare(QDimensionNameQSample(0)) != 0) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension0 Names: Output will be: "
+                       << QDimensionNameQSample(0);
+          debugMessage << " TemporaryDataWorkspace: " << dimXName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      }
+    } else if (value.find("QDimension1") != std::string::npos) {
+      dimensionIndex[1] = parametersIndex;
+      const std::string dimYName =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (m_isRLU) { // hkl
+        if (dimYName.compare(QDimensionName(m_Q1Basis)) != 0) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension1 Names: Output will be: "
+                       << QDimensionName(m_Q1Basis);
+          debugMessage << " TemporaryDataWorkspace: " << dimYName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      } else {
+        if (dimYName.compare(QDimensionNameQSample(1)) != 0) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension1 Names: Output will be: "
+                       << QDimensionNameQSample(1);
+          debugMessage << " TemporaryDataWorkspace: " << dimYName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      }
+    } else if (value.find("QDimension2") != std::string::npos) {
+      dimensionIndex[2] = parametersIndex;
+      const std::string dimZName =
+          tempDataWS->getDimension(parametersIndex)->getName();
+      if (m_isRLU) { // hkl
+        if (dimZName.compare(QDimensionName(m_Q2Basis)) != 0) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension2 Names: Output will be: "
+                       << QDimensionName(m_Q2Basis);
+          debugMessage << " TemporaryDataWorkspace: " << dimZName;
+          g_log.warning(debugMessage.str());
+            throw(std::invalid_argument(errorMessage.str()));
+        }
+      } else {
+        if (dimZName.compare(QDimensionNameQSample(2)) != 0) {
+          std::stringstream errorMessage;
+          std::stringstream debugMessage;
+          errorMessage << "TemporaryDataWorkspace does not have the  ";
+          errorMessage << "correct name for dimension " << parametersIndex;
+          debugMessage << "QDimension2 Names: Output will be: "
+                       << QDimensionNameQSample(2);
+          debugMessage << " TemporaryDataWorkspace: " << dimZName;
+          g_log.warning(debugMessage.str());
+          throw(std::invalid_argument(errorMessage.str()));
+        }
+      }
+
+    } else if ((key.find("OutputBins") == std::string::npos) &&
+               (key.find("OutputExtents") == std::string::npos)) {
+      nonDimensionIndex.push_back(parametersIndex);
+    }
+    parametersIndex++;
+  }
+  for (auto it = dimensionIndex.begin(); it != dimensionIndex.end(); ++it) {
+    if (!(*it < numDimsTemp + 1))
+      throw(std::invalid_argument("Cannot find at least one of QDimension0, "
+                                  "QDimension1, or QDimension2"));
+  }
+
+  // make sure the names of non-directional dimensions are the same
+  if (!(nonDimensionIndex.empty())) {
+    for (auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end();
+         ++it) {
+      const size_t indexID = *it;
+      const std::string nameInput =
+          m_inputWS->getDimension(indexID)->getName();
+      const std::string nameData =
+          tempDataWS->getDimension(indexID)->getName();
+      if (nameInput.compare(nameData) != 0) {
+        throw(
+            std::invalid_argument("TemporaryDataWorkspace does not have the "
+                                  "same dimension names as InputWorkspace."));
+      }
+    }
+  }
+ 
+
+
   // compare the arrays
-  for (size_t i = 0; i < numDimsInput; i++) {
+  for (size_t i = 0; i < numDimsTemp; i++) {
 
     if (std::abs(extents[2 * i] - extentsTempData[2 * i]) > 1.e-5 ||
         std::abs(extents[2 * i + 1] - extentsTempData[2 * i + 1]) > 1.e-5) {
