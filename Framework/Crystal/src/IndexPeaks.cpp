@@ -107,7 +107,7 @@ void IndexPeaks::exec() {
   double average_sate_error;
   double tolerance = this->getProperty("Tolerance");
 
-  if (commonUB && offsets1 == V3D(0, 0, 0)) {
+  if (commonUB && o_lattice.getModVec(0) == V3D(0, 0, 0)) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
