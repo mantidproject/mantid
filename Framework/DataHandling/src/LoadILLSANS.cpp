@@ -418,12 +418,13 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
   const HistogramData::BinEdges binEdges(timeBinning);
   size_t spec = firstIndex;
 
-  for (size_t i = 0; i < numberOfTubes; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
       m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-      ++spec;
+      PARALLEL_CRITICAL() { ++spec; }
     }
   }
 
