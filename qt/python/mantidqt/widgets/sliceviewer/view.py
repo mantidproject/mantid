@@ -8,11 +8,12 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import QWidget, QVBoxLayout
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from qtpy.QtCore import Qt
 from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from .dimensionwidget import DimensionWidget
+from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 
 
 class SliceViewerView(QWidget):
@@ -30,11 +31,17 @@ class SliceViewerView(QWidget):
         self.dimensions.dimensionsChanged.connect(self.presenter.new_plot)
         self.dimensions.valueChanged.connect(self.presenter.update_plot_data)
 
-        # MPL figure
+        # MPL figure + colorbar
+        self.mpl_layout = QHBoxLayout()
         self.fig = Figure()
+        self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.fig.set_tight_layout(True)
         self.canvas = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, projection='mantid')
+        self.mpl_layout.addWidget(self.canvas)
+        self.colorbar = ColorbarWidget(self)
+        self.colorbar.colorbarChanged.connect(self.canvas.draw_idle)
+        self.mpl_layout.addWidget(self.colorbar)
 
         # MPL toolbar
         self.mpl_toolbar = NavigationToolbar(self.canvas, self)
@@ -43,7 +50,7 @@ class SliceViewerView(QWidget):
         self.layout = QVBoxLayout(self)
         self.layout.addWidget(self.dimensions)
         self.layout.addWidget(self.mpl_toolbar)
-        self.layout.addWidget(self.canvas, stretch=1)
+        self.layout.addLayout(self.mpl_layout, stretch=1)
 
         self.show()
 
@@ -52,23 +59,19 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using the workspace
         """
         self.ax.clear()
-        try:
-            self.colorbar.remove()
-        except AttributeError:
-            pass
-        self.im = self.ax.imshow(ws, origin='lower', **kwargs)
+        self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
+                                 norm=self.colorbar.get_norm(), **kwargs)
         self.ax.set_title('')
-        self.colorbar = self.fig.colorbar(self.im)
+        self.colorbar.set_mappable(self.im)
         self.mpl_toolbar.update() # clear nav stack
-        self.fig.canvas.draw_idle()
+        self.canvas.draw_idle()
 
     def update_plot_data(self, data):
         """
         This just updates the plot data without creating a new plot
         """
         self.im.set_data(data.T)
-        self.im.set_clim(data.min(), data.max())
-        self.fig.canvas.draw_idle()
+        self.colorbar.update_clim()
 
     def closeEvent(self, event):
         self.deleteLater()
