@@ -25,10 +25,6 @@ public:
   }
   static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
 
-  LoadILLIndirect2Test()
-      : m_dataFile2013("ILLIN16B_034745.nxs"),
-        m_dataFile2015("ILLIN16B_127500.nxs") {}
-
   void test_Init() {
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
@@ -46,7 +42,7 @@ public:
   }
 
   void test_Load_2013_Format() {
-    doExecTest(m_dataFile2013, 2057); // all single detectors
+    doExecTest(m_dataFile2013, 2057, 1024); // all single detectors
   }
 
   void test_Load_2015_Format() {
@@ -66,7 +62,12 @@ public:
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 
-  void doExecTest(const std::string &file, int numHist) {
+  void test_bats() {
+      doExecTest(m_batsFile);
+  }
+
+  void doExecTest(const std::string &file, int numHist = 2051,
+                  int numChannels = 2048) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
@@ -83,12 +84,10 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
 
-    if (!output)
-      return;
-
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
+    TS_ASSERT_EQUALS(output2D->blocksize(), numChannels);
 
     const Mantid::API::Run &runlogs = output->run();
     TS_ASSERT(runlogs.hasProperty("Facility"));
@@ -99,8 +98,9 @@ public:
   }
 
 private:
-  std::string m_dataFile2013;
-  std::string m_dataFile2015;
+  std::string m_dataFile2013{"ILLIN16B_034745.nxs"};
+  std::string m_dataFile2015{"ILLIN16B_127500.nxs"};
+  std::string m_batsFile{"ILL/IN16B/215962.nxs"};
 };
 
 class LoadILLIndirect2TestPerformance : public CxxTest::TestSuite {
