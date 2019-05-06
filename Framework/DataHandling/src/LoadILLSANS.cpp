@@ -424,7 +424,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
       m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-      PARALLEL_CRITICAL() { ++spec; }
+      PARALLEL_CRITICAL(BumpSpectrumIndex) { ++spec; }
     }
   }
 
