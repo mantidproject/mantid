@@ -388,9 +388,9 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
         const auto dim1 = tempNormWS->getDimension(i);
         const auto dim2 = tempDataWS->getDimension(i);
         if ((dim1->getMinimum() != dim2->getMinimum()) ||
-              (dim1->getMaximum() != dim2->getMaximum()) ||
-              (dim1->getNBins() != dim2->getNBins()) ||
-              (dim1->getName() != dim2->getName())) {
+            (dim1->getMaximum() != dim2->getMaximum()) ||
+            (dim1->getNBins() != dim2->getNBins()) ||
+            (dim1->getName() != dim2->getName())) {
           errorMessage.emplace("TemporaryDataWorkspace",
                                "Binning for TemporaryNormalizationWorkspaces "
                                "and TemporaryDataWorkspace must be the same.");
@@ -746,7 +746,6 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   // make sure the number of dimensions is the same for both workspaces
   size_t numDimsTemp = tempDataWS->getNumDims();
 
-
   // parse the paramters map and get extents from tempDataWS
   std::string numBinsStr = parameters.at("OutputBins");
   std::string extentsStr = parameters.at("OutputExtents");
@@ -785,8 +784,6 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
                                 "match the number of dimensions in "
                                 "TemporaryDataWorkspace."));
   }
-
-
 
   // sort out which axes are dimensional and check names
   size_t parametersIndex = 0;
@@ -869,7 +866,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
                        << QDimensionName(m_Q2Basis);
           debugMessage << " TemporaryDataWorkspace: " << dimZName;
           g_log.warning(debugMessage.str());
-            throw(std::invalid_argument(errorMessage.str()));
+          throw(std::invalid_argument(errorMessage.str()));
         }
       } else {
         if (dimZName.compare(QDimensionNameQSample(2)) != 0) {
@@ -902,19 +899,14 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
     for (auto it = nonDimensionIndex.begin(); it != nonDimensionIndex.end();
          ++it) {
       const size_t indexID = *it;
-      const std::string nameInput =
-          m_inputWS->getDimension(indexID)->getName();
-      const std::string nameData =
-          tempDataWS->getDimension(indexID)->getName();
+      const std::string nameInput = m_inputWS->getDimension(indexID)->getName();
+      const std::string nameData = tempDataWS->getDimension(indexID)->getName();
       if (nameInput.compare(nameData) != 0) {
-        throw(
-            std::invalid_argument("TemporaryDataWorkspace does not have the "
-                                  "same dimension names as InputWorkspace."));
+        throw(std::invalid_argument("TemporaryDataWorkspace does not have the "
+                                    "same dimension names as InputWorkspace."));
       }
     }
   }
- 
-
 
   // compare the arrays
   for (size_t i = 0; i < numDimsTemp; i++) {
