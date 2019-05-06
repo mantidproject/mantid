@@ -12,7 +12,7 @@
     </parameter>
 
     <parameter name="reflection" type="string">
-      <value val="111" />
+      <value val="311" />
     </parameter>
 
     <parameter name="Efixed">
