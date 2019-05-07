@@ -75,9 +75,11 @@ class SliceViewerView(QWidget):
         self.ax.clear()
         if use_imshow(ws):
             self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
+                                     transpose=self.dimensions.transpose,
                                      norm=self.colorbar.get_norm(), **kwargs)
         else:
-            self.im = self.ax.pcolormesh(ws, norm=self.colorbar.get_norm(), **kwargs)
+            self.im = self.ax.pcolormesh(ws, transpose=self.dimensions.transpose,
+                                         norm=self.colorbar.get_norm(), **kwargs)
         self.ax.set_title('')
         self.colorbar.set_mappable(self.im)
         self.mpl_toolbar.update() # clear nav stack
