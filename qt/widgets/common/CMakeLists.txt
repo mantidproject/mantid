@@ -110,7 +110,8 @@ set(QT5_SRC_FILES
     src/QtPropertyBrowser/StringEditorFactory.cpp
     src/QtPropertyBrowser/WorkspaceEditorFactory.cpp)
 
-set(QT5_MOC_FILES
+set(
+  QT5_MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -408,7 +409,8 @@ set(SRC_FILES
     src/QtPropertyBrowser/StringEditorFactory.cpp
     src/QtPropertyBrowser/WorkspaceEditorFactory.cpp)
 
-set(MOC_FILES
+set(
+  MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -514,7 +516,8 @@ set(MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set(INC_FILES
+set(
+  INC_FILES
   ${MOC_FILES}
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
@@ -735,185 +738,196 @@ if(ENABLE_WORKBENCH)
   find_package(QScintillaQt5 REQUIRED)
 endif()
 
-mtd_add_qt_library(TARGET_NAME MantidQtWidgetsCommon
-                   QT_VERSION 4
-                   SRC ${SRC_FILES}
-                   MOC ${MOC_FILES}
-                   NOMOC ${INC_FILES}
-                   UI ${UI_FILES}
+mtd_add_qt_library(TARGET_NAME
+                   MantidQtWidgetsCommon
+                   QT_VERSION
+                   4
+                   SRC
+                   ${SRC_FILES}
+                   MOC
+                   ${MOC_FILES}
+                   NOMOC
+                   ${INC_FILES}
+                   UI
+                   ${UI_FILES}
                    DEFS
-                     IN_MANTIDQT_COMMON
-                     QSCINTILLA_DLL
+                   IN_MANTIDQT_COMMON
+                   QSCINTILLA_DLL
                    QT4_DEFS
-                     USE_QTWEBKIT
+                   USE_QTWEBKIT
                    INCLUDE_DIRS
-                     inc
+                   inc
                    SYSTEM_INCLUDE_DIRS
-                     ${Boost_INCLUDE_DIRS}
+                   ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
-                     ${TARGET_LIBRARIES}
+                   ${TARGET_LIBRARIES}
                    QT4_LINK_LIBS
-                     Qt4::QtHelp
-                     Qt4::QtNetwork
-                     Qt4::QtWebKit
-                     Qt4::Qscintilla
+                   Qt4::QtHelp
+                   Qt4::QtNetwork
+                   Qt4::QtWebKit
+                   Qt4::Qscintilla
                    INSTALL_DIR
-                     ${LIB_DIR}
+                   ${LIB_DIR}
                    OSX_INSTALL_RPATH
-                     @loader_path/../MacOS
-                     @loader_path/../Libraries
+                   @loader_path/../MacOS
+                   @loader_path/../Libraries
                    LINUX_INSTALL_RPATH
-                     "\$ORIGIN/../${LIB_DIR}")
+                   "\$ORIGIN/../${LIB_DIR}")
 
-mtd_add_qt_library(TARGET_NAME MantidQtWidgetsCommon
-                   QT_VERSION 5
-                   SRC ${QT5_SRC_FILES}
-                   MOC ${QT5_MOC_FILES}
-                   NOMOC ${QT5_INC_FILES}
-                   UI ${QT5_UI_FILES}
+mtd_add_qt_library(TARGET_NAME
+                   MantidQtWidgetsCommon
+                   QT_VERSION
+                   5
+                   SRC
+                   ${QT5_SRC_FILES}
+                   MOC
+                   ${QT5_MOC_FILES}
+                   NOMOC
+                   ${QT5_INC_FILES}
+                   UI
+                   ${QT5_UI_FILES}
                    DEFS
-                     IN_MANTIDQT_COMMON
-                     QSCINTILLA_DLL
+                   IN_MANTIDQT_COMMON
+                   QSCINTILLA_DLL
                    QT5_DEFS
-                     ${_webengine_def}
+                   ${_webengine_def}
                    INCLUDE_DIRS
-                     inc
-                     ${PYTHON_INCLUDE_PATH}
+                   inc
+                   ${PYTHON_INCLUDE_PATH}
                    LINK_LIBS
-                     ${TARGET_LIBRARIES}
+                   ${TARGET_LIBRARIES}
                    QT5_LINK_LIBS
-                     Qt5::Concurrent
-                     Qt5::Help
-                     Qt5::Network
-                     Qt5::PrintSupport
-                     ${_webwidgets_tgt}
-                     Qt5::Qscintilla
+                   Qt5::Concurrent
+                   Qt5::Help
+                   Qt5::Network
+                   Qt5::PrintSupport
+                   ${_webwidgets_tgt}
+                   Qt5::Qscintilla
                    INSTALL_DIR
-                     ${LIB_DIR}
-                     ${WORKBENCH_LIB_DIR}
+                   ${LIB_DIR}
+                   ${WORKBENCH_LIB_DIR}
                    OSX_INSTALL_RPATH
-                     @loader_path/../MacOS
-                     @loader_path/../Libraries
+                   @loader_path/../MacOS
+                   @loader_path/../Libraries
                    LINUX_INSTALL_RPATH
-                     "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
+                   "\$ORIGIN/../${WORKBENCH_LIB_DIR}")
 
 # Testing
-set( TEST_FILES
-  test/BatchAlgorithmRunnerTest.h
-  test/FileDialogHandlerTest.h
-  test/FindFilesThreadPoolManagerTest.h
-  test/FindFilesWorkerTest.h
-  test/InterfaceManagerTest.h
-  test/NonOrthogonalTest.h
-  test/PlotAxisTest.h
-  test/SelectionNotificationServiceTest.h
-  test/SignalBlockerTest.h
-  test/AlgorithmHintStrategyTest.h
-  test/TrackedActionTest.h
+set(TEST_FILES
+    test/AlgorithmHintStrategyTest.h
+    test/BatchAlgorithmRunnerTest.h
+    test/FileDialogHandlerTest.h
+    test/FindFilesThreadPoolManagerTest.h
+    test/FindFilesWorkerTest.h
+    test/InterfaceManagerTest.h
+    test/NonOrthogonalTest.h
+    test/ParseKeyValueStringTest.h
+    test/PlotAxisTest.h
+    test/ProgressableViewTest.h
+    test/ProjectSaveModelTest.h
+    test/ProjectSavePresenterTest.h
+    test/SelectionNotificationServiceTest.h
+    test/SignalBlockerTest.h
+    test/TrackedActionTest.h
+    test/Batch/BuildSubtreeItemsTest.h
+    test/Batch/ExtractSubtreesTest.h
+    test/Batch/FindSubtreeRootsTest.h
+    test/Batch/QtAdaptedModelTest.h
+    test/Batch/RowLocationTest.h
+    test/DataProcessorUI/CommandsTest.h
+    test/DataProcessorUI/GenerateNotebookTest.h
+    test/DataProcessorUI/GenericDataProcessorPresenterTest.h
+    test/DataProcessorUI/OneLevelTreeManagerTest.h
+    test/DataProcessorUI/PostprocessingAlgorithmTest.h
+    test/DataProcessorUI/PreprocessingAlgorithmTest.h
+    test/DataProcessorUI/PreprocessMapTest.h
+    test/DataProcessorUI/ProcessingAlgorithmBaseTest.h
+    test/DataProcessorUI/ProcessingAlgorithmTest.h
+    test/DataProcessorUI/QOneLevelTreeModelTest.h
+    test/DataProcessorUI/QTwoLevelTreeModelTest.h
+    test/DataProcessorUI/TwoLevelTreeManagerTest.h
+    test/DataProcessorUI/WhiteListTest.h
+    test/WorkspacePresenter/ADSAdapterTest.h
+    test/WorkspacePresenter/WorkspacePresenterTest.h)
 
-  test/DataProcessorUI/CommandsTest.h
-  test/DataProcessorUI/GenerateNotebookTest.h
-  test/DataProcessorUI/OneLevelTreeManagerTest.h
-  test/DataProcessorUI/PostprocessingAlgorithmTest.h
-  test/DataProcessorUI/PreprocessingAlgorithmTest.h
-  test/DataProcessorUI/PreprocessMapTest.h
-  test/DataProcessorUI/ProcessingAlgorithmBaseTest.h
-  test/DataProcessorUI/ProcessingAlgorithmTest.h
-  test/DataProcessorUI/TwoLevelTreeManagerTest.h
-  test/DataProcessorUI/WhiteListTest.h
-  test/DataProcessorUI/GenericDataProcessorPresenterTest.h
+mtd_add_qt_tests(TARGET_NAME
+                 MantidQtWidgetsCommonTest
+                 QT_VERSION
+                 4
+                 SRC
+                 ${TEST_FILES}
+                 INCLUDE_DIRS
+                 ../../../Framework/TestHelpers/inc
+                 ../../../Framework/DataObjects/inc
+                 ../../../Framework/Crystal/inc
+                 TEST_HELPER_SRCS
+                 ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+                 ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                 ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
+                 ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                 ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                 LINK_LIBS
+                 ${TARGET_LIBRARIES}
+                 DataObjects
+                 ${GMOCK_LIBRARIES}
+                 ${GTEST_LIBRARIES}
+                 MTD_QT_LINK_LIBS
+                 MantidQtWidgetsCommon
+                 PARENT_DEPENDENCIES
+                 GUITests)
 
-  test/Batch/QtAdaptedModelTest.h
-  test/Batch/RowLocationTest.h
-  test/Batch/FindSubtreeRootsTest.h
-  test/Batch/ExtractSubtreesTest.h
-  test/Batch/BuildSubtreeItemsTest.h
+set(QT5_TEST_FILES
+    test/BatchAlgorithmRunnerTest.h
+    test/FileDialogHandlerTest.h
+    test/FindFilesThreadPoolManagerTest.h
+    test/FindFilesWorkerTest.h
+    test/InterfaceManagerTest.h
+    test/AlgorithmProgress/AlgorithmProgressPresenterTest.h
+    test/AlgorithmProgress/AlgorithmProgressDialogPresenterTest.h
+    test/WorkspacePresenter/ADSAdapterTest.h
+    test/WorkspacePresenter/WorkspacePresenterTest.h)
 
-  test/ParseKeyValueStringTest.h
-  test/DataProcessorUI/QOneLevelTreeModelTest.h
-  test/DataProcessorUI/QTwoLevelTreeModelTest.h
-  test/ProgressableViewTest.h
-  test/ProjectSaveModelTest.h
-  test/ProjectSavePresenterTest.h
-  test/WorkspacePresenter/ADSAdapterTest.h
-  test/WorkspacePresenter/WorkspacePresenterTest.h
-)
+mtd_add_qt_tests(TARGET_NAME
+                 MantidQtWidgetsCommonTest
+                 QT_VERSION
+                 5
+                 SRC
+                 ${QT5_TEST_FILES}
+                 INCLUDE_DIRS
+                 ../../../Framework/TestHelpers/inc
+                 ../../../Framework/DataObjects/inc
+                 ../../../Framework/Crystal/inc
+                 ${GMOCK_INCLUDE_DIR}
+                 TEST_HELPER_SRCS
+                 ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+                 ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                 ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                 ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                 LINK_LIBS
+                 ${TARGET_LIBRARIES}
+                 DataObjects
+                 ${GMOCK_LIBRARIES}
+                 ${GTEST_LIBRARIES}
+                 MTD_QT_LINK_LIBS
+                 MantidQtWidgetsCommon
+                 PARENT_DEPENDENCIES
+                 GUITests)
 
-mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 4
-  SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/TestHelpers/inc
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES
-    GUITests
-)
-
-set( QT5_TEST_FILES
-  test/BatchAlgorithmRunnerTest.h
-  test/FileDialogHandlerTest.h
-  test/FindFilesThreadPoolManagerTest.h
-  test/FindFilesWorkerTest.h
-  test/InterfaceManagerTest.h
-
-  test/AlgorithmProgress/AlgorithmProgressPresenterTest.h
-  test/AlgorithmProgress/AlgorithmProgressDialogPresenterTest.h
-
-  test/WorkspacePresenter/ADSAdapterTest.h
-  test/WorkspacePresenter/WorkspacePresenterTest.h
-)
-
-mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 5
-  SRC ${QT5_TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/TestHelpers/inc
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-    ${GMOCK_INCLUDE_DIR}
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES
-    GUITests
-)
-
-
-###########################################################################
-# Windows: Generate a qt.conf file so that the dev build finds the qt
-# plugins in third party. Done in two steps to get it into the build
-# directory that is selected at build time.
-# This file is NOT packaged. See installers/WinInstaller for the package
-# version.
-###########################################################################
-if ( WIN32 AND ENABLE_MANTIDPLOT)
-  set ( QT_CONF qt.conf )
-  configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
-  add_custom_command ( TARGET MantidQtWidgetsCommonQt4 POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                               ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
-                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
+#
+# Windows: Generate a qt.conf file so that the dev build finds the qt plugins in
+# third party. Done in two steps to get it into the build directory that is
+# selected at build time. This file is NOT packaged. See installers/WinInstaller
+# for the package version.
+#
+if(WIN32 AND ENABLE_MANTIDPLOT)
+  set(QT_CONF qt.conf)
+  configure_file(qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY)
+  add_custom_command(
+    TARGET MantidQtWidgetsCommonQt4 POST_BUILD
+    COMMAND
+      ${CMAKE_COMMAND}
+      ARGS -E
+           copy_if_different
+           ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
+           ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF})
 endif()
