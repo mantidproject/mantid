@@ -24,6 +24,7 @@ from qtpy.QtWidgets import QActionGroup, QMenu
 
 # local imports
 from mantid.api import AnalysisDataService as ads
+from mantid.plots.helperfunctions import get_axes_labels
 from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -163,9 +164,7 @@ class FigureInteraction(object):
         is_normalized = self._is_normalized(axes)
         if is_normalized:
             norm_action.setChecked(True)
-            none_action.setChecked(False)
         else:
-            norm_action.setChecked(False)
             none_action.setChecked(True)
 
         menu.addMenu(norm_menu)
@@ -174,10 +173,28 @@ class FigureInteraction(object):
         return axes[0].tracked_workspaces.values()[0][0].is_distribution
 
     def _normalize_bin_width(self):
-        print('Normalize')
+        self._toggle_normalization(is_normalized=False)
 
     def _normalize_none(self):
-        print('None')
+        self._toggle_normalization(is_normalized=True)
+
+    def _toggle_normalization(self, is_normalized):
+        axes = self.canvas.figure.get_axes()
+        for ax in axes:
+            ax.set_prop_cycle(None)  # reset the color cycler
+            for ws_name, artists in ax.tracked_workspaces.items():
+                workspace = ads.retrieve(ws_name)
+                if not workspace.isDistribution():
+                    for artist in artists:
+                        spec_num = artist.spec_num
+                        ax.remove_workspace_artist(ws_name, artist)
+                        ax.plot(workspace, specNum=spec_num,
+                                plot_as_distribution=(not is_normalized))
+            ax.set_ylabel(get_axes_labels(workspace)[0])
+            ax.relim()
+            ax.autoscale()
+
+        self.canvas.draw()
 
     def _can_toggle_normalization(self, axes):
         """
@@ -193,9 +210,9 @@ class FigureInteraction(object):
                     plotted_as_distribution += [a.is_distribution for a in artists]
                 else:
                     return False
-        if len(set(plotted_as_distribution)) > 1:
-            return False
-        return True
+        if all(plotted_as_distribution) or not any(plotted_as_distribution):
+            return True
+        return False
 
     def _get_axes_scale_types(self):
         """Return a 2-tuple containing the axis scale types if all Axes on the figure are the same

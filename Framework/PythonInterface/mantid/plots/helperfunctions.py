@@ -50,6 +50,20 @@ def get_distribution(workspace, **kwargs):
     return bool(distribution), kwargs
 
 
+def get_plot_as_distribution(workspace, pop=True, **kwargs):
+    """
+    Determine whether or not the workspace should be plotted as a
+    distribution.
+    :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
+    :param pop: Bool. Set to True to remove 'plot_as_distribution' from 'kwargs'
+    """
+    getter_func = 'pop' if pop else 'get'
+    plot_as_distribution = getattr(kwargs, getter_func)(
+        'plot_as_distribution',
+        mantid.kernel.config['graph1d.autodistribution'].lower() == 'on')
+    return (not workspace.isDistribution() and plot_as_distribution), kwargs
+
+
 def get_normalization(md_workspace, **kwargs):
     """
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
@@ -251,18 +265,15 @@ def get_md_data(workspace, normalization, indices=None, withError=False):
     return dim_arrays, data, err
 
 
-def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False):
+def get_spectrum(workspace, wkspIndex, plot_as_distribution, withDy=False, withDx=False):
     """
     Extract a single spectrum and process the data into a frequency
 
     :param workspace: a Workspace2D or an EventWorkspace
     :param wkspIndex: workspace index
-    :param distribution: flag to divide the data by bin width. It happens only
-        when this flag is False, the workspace contains histogram data, and
-        the mantid configuration is set up to divide such workspaces by bin
-        width. The same effect can be obtained by running the
-        :ref:`algm-ConvertToDistribution` algorithm
-
+    :param plot_as_distribution: flag to divide the data by bin width. The same
+        effect can be obtained by running the :ref:`algm-ConvertToDistribution`
+        algorithm
     :param withDy: if True, it will return the error in the "counts", otherwise None
     :param with Dx: if True, and workspace has them, it will return errors
         in the x coordinate, otherwise None
@@ -282,7 +293,7 @@ def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
-        if (not distribution) and (mantid.kernel.config['graph1d.autodistribution'] == 'On'):
+        if plot_as_distribution:
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])

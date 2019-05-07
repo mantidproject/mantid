@@ -53,7 +53,7 @@ except ImportError:
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-from mantid.kernel import config
+from mantid.plots.helperfunctions import get_plot_as_distribution
 
 
 def plot_decorator(func):
@@ -106,7 +106,7 @@ class _WorkspaceArtists(object):
                     pass
 
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
-            axes.legend()
+            axes.legend().draggable()
 
     def replace_data(self, workspace):
         """Replace or replot artists based on a new workspace
@@ -225,8 +225,8 @@ class MantidAxes(Axes):
         else:
             return None
 
-    def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
-                               spec_num=None):
+    def track_workspace_artist(self, workspace, artists, is_distribution,
+                               data_replace_cb=None, spec_num=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -235,7 +235,9 @@ class MantidAxes(Axes):
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
         :param spec_num: The spectrum number associated with the artist (optional)
-
+        :param is_distribution: bool. The line being plotted is a distribution.
+            This can be from either a distribution workspace or a workspace being
+            plotted as a distribution
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -244,11 +246,9 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
-            plotted_as_distribution = (workspace.isDistribution() or
-                                       self._on_off_to_bool(config['graph1d.autodistribution']))
-            self.check_axes_distribution_consistency(plotted_as_distribution)
+            self.check_axes_distribution_consistency(is_distribution)
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 plotted_as_distribution,
+                                                 is_distribution,
                                                  spec_num))
         return artists
 
@@ -260,7 +260,7 @@ class MantidAxes(Axes):
             return False
         raise ValueError("Argument must be 'On' or 'Off'!")
 
-    def check_axes_distribution_consistency(self, plotted_as_distribution):
+    def check_axes_distribution_consistency(self, is_distribution):
         """
         Checks if new workspace to be plotted is consistent with current
         workspaces on axes in regard to being plotted as distributions.
@@ -271,7 +271,7 @@ class MantidAxes(Axes):
             for artist in artists:
                 tracked_ws_distributions.append(artist.is_distribution)
         if len(tracked_ws_distributions) > 0:
-            if any(tracked_ws_distributions) != plotted_as_distribution:
+            if any(tracked_ws_distributions) != is_distribution:
                 logger.warning("You are overlaying distribution and "
                                "non-distribution data!")
 
@@ -292,12 +292,22 @@ class MantidAxes(Axes):
             workspace_artist.remove(self)
         return self.is_empty(self)
 
+    def remove_workspace_artist(self, workspace_name, artist):
+        artist.remove(self)
+        try:
+            self.tracked_workspaces[workspace_name].remove(artist)
+            if not self.tracked_workspaces[workspace_name]:
+                self.tracked_workspaces.pop(workspace_name)
+        except ValueError:
+            return False
+        return True
+
     def replace_workspace_artists(self, workspace):
         """
         Replace the data of any artists relating to this workspace.
         The axes are NOT redrawn
         :param workspace: The workspace containing the new data
-        :return : True if data was replace, false otherwise
+        :return : True if data was replaced, false otherwise
         """
         try:
             artist_info = self.tracked_workspaces[workspace.name()]
@@ -403,7 +413,8 @@ class MantidAxes(Axes):
 
             def _data_update(artists, workspace):
                 # It's only possible to plot 1 line at a time from a workspace
-                x, y, _, __ = plotfunctions._plot_impl(self, workspace, args, kwargs)
+                x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
+                                                       kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
                 self.autoscale()
@@ -411,9 +422,12 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
+            plot_as_dist, _ = get_plot_as_distribution(workspace, pop=False,
+                                                       **kwargs)
+            is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
-                _data_update, spec_num)
+                is_distribution, _data_update, spec_num)
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -493,9 +507,11 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            return self.track_workspace_artist(workspace,
-                                               plotfunctions.errorbar(self, *args, **kwargs),
-                                               _data_update, spec_num=spec_num)
+            plot_as_dist, _ = get_plot_as_distribution(workspace, pop=False,
+                                                       **kwargs)
+            return self.track_workspace_artist(
+                workspace, plotfunctions.plot(self, *args, **kwargs),
+                plot_as_dist, _data_update, spec_num)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
