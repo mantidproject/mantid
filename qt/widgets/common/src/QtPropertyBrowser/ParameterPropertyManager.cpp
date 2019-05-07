@@ -12,8 +12,10 @@
 
 const QString ParameterPropertyManager::ERROR_TOOLTIP(" (Error)");
 
-ParameterPropertyManager::ParameterPropertyManager(QObject *parent, bool hasGlobalOption)
-    : QtDoublePropertyManager(parent), m_errors(), m_errorsEnabled(false), m_hasGlobalOption(hasGlobalOption) {}
+ParameterPropertyManager::ParameterPropertyManager(QObject *parent,
+                                                   bool hasGlobalOption)
+    : QtDoublePropertyManager(parent), m_errors(), m_errorsEnabled(false),
+      m_hasGlobalOption(hasGlobalOption) {}
 
 /**
  * Throws if property error is not set
@@ -128,7 +130,8 @@ void ParameterPropertyManager::setErrorsEnabled(bool enabled) {
  * @param option :: New parameter's global state
  */
 void ParameterPropertyManager::setGlobal(QtProperty *property, bool option) {
-  if (option == isGlobal(property)) return;
+  if (option == isGlobal(property))
+    return;
   if (option) {
     m_globals.insert(property);
   } else {
@@ -157,8 +160,7 @@ QString ParameterPropertyManager::valueText(const QtProperty *property) const {
     double absVal = fabs(value(property));
     char format = absVal > 1e5 || (absVal != 0 && absVal < 1e-5) ? 'e' : 'f';
 
-    originalValueText +=
-           QString(" (%1)").arg(propError, 0, format, precision);
+    originalValueText += QString(" (%1)").arg(propError, 0, format, precision);
   }
   if (m_hasGlobalOption) {
     QString gText(isGlobal(property) ? "G" : "L");

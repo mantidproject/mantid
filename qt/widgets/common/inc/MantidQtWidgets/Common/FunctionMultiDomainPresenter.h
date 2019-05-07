@@ -12,8 +12,8 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
-#include <boost/optional.hpp>
 #include <QObject>
+#include <boost/optional.hpp>
 #include <memory>
 #include <vector>
 
@@ -26,7 +26,7 @@ class EditLocalParameterDialog;
 
 using namespace Mantid::API;
 
-class EXPORT_OPT_MANTIDQT_COMMON FunctionMultiDomainPresenter: public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionMultiDomainPresenter : public QObject {
   Q_OBJECT
 public:
   FunctionMultiDomainPresenter(IFunctionView *view);
@@ -59,7 +59,8 @@ public:
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;
   void setLocalParameterValue(const QString &parName, int i, double value);
-  void setLocalParameterValue(const QString &parName, int i, double value, double error);
+  void setLocalParameterValue(const QString &parName, int i, double value,
+                              double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, QString tie);
   QStringList getGlobalParameters() const;
@@ -77,18 +78,21 @@ private slots:
   void viewAddedFunction(const QString &funStr);
   void viewRemovedFunction(const QString &functionIndex);
   void viewChangedTie(const QString &parName, const QString &tie);
-  void viewAddedConstraint(const QString &functionIndex, const QString &constraint);
+  void viewAddedConstraint(const QString &functionIndex,
+                           const QString &constraint);
   void viewRemovedConstraint(const QString &parName);
   void viewRequestedCopyToClipboard();
-  void viewChangedGlobals(const QStringList&globalParameters);
+  void viewChangedGlobals(const QStringList &globalParameters);
   void editLocalParameter(const QString &parName);
   void editLocalParameterFinish(int result);
+
 private:
   IFunctionView *m_view;
   std::unique_ptr<MultiDomainFunctionModel> m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
+
 public:
-  IFunctionView *view() const {return m_view;}
+  IFunctionView *view() const { return m_view; }
 };
 
 } // namespace MantidWidgets

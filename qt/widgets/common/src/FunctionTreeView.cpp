@@ -16,11 +16,11 @@
 
 #include "MantidKernel/Logger.h"
 
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h"
-#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 #include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
 
@@ -61,8 +61,10 @@ namespace MantidWidgets {
  * @param parent :: The parent widget.
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
-FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories)
-    : IFunctionView(parent), m_multiDataset(multi), m_allowedCategories(categories), m_selectFunctionDialog(nullptr)
+FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi,
+                                   const std::vector<std::string> &categories)
+    : IFunctionView(parent), m_multiDataset(multi),
+      m_allowedCategories(categories), m_selectFunctionDialog(nullptr)
 
 {
   // create m_browser
@@ -199,7 +201,8 @@ void FunctionTreeView::createBrowser() {
 void FunctionTreeView::createActions() {
   m_actionAddFunction = new QAction("Add function", this);
   m_actionAddFunction->setObjectName("add_function");
-  connect(m_actionAddFunction, SIGNAL(triggered()), this, SLOT(addFunctionBegin()));
+  connect(m_actionAddFunction, SIGNAL(triggered()), this,
+          SLOT(addFunctionBegin()));
 
   m_actionRemoveFunction = new QAction("Remove function", this);
   m_actionRemoveFunction->setObjectName("remove_function");
@@ -374,7 +377,7 @@ FunctionTreeView::addFunctionProperty(QtProperty *parent, QString funName) {
  */
 FunctionTreeView::AProperty
 FunctionTreeView::addParameterProperty(QtProperty *parent, QString paramName,
-                                      QString paramDesc, double paramValue) {
+                                       QString paramDesc, double paramValue) {
   // check that parent is a function property
   if (!parent || dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) !=
                      parent->propertyManager()) {
@@ -399,10 +402,10 @@ FunctionTreeView::addParameterProperty(QtProperty *parent, QString paramName,
  * @param fun :: A function
  */
 void FunctionTreeView::setFunction(QtProperty *prop,
-                                  Mantid::API::IFunction_sptr fun) {
+                                   Mantid::API::IFunction_sptr fun) {
   auto children = prop->subProperties();
   foreach (QtProperty *child, children) { removeProperty(child); }
-  //m_localParameterValues.clear();
+  // m_localParameterValues.clear();
   addAttributeAndParameterProperties(prop, fun);
 }
 
@@ -412,7 +415,7 @@ void FunctionTreeView::setFunction(QtProperty *prop,
  * @param fun :: FunctionFactory function creation string
  */
 void FunctionTreeView::addFunction(QtProperty *prop,
-                                  Mantid::API::IFunction_sptr fun) {
+                                   Mantid::API::IFunction_sptr fun) {
   if (!prop) {
     AProperty ap =
         addFunctionProperty(nullptr, QString::fromStdString(fun->name()));
@@ -442,7 +445,8 @@ class CreateAttributePropertyForFunctionTreeView
           FunctionTreeView::AProperty> {
 public:
   CreateAttributePropertyForFunctionTreeView(FunctionTreeView *browser,
-                                            QtProperty *parent, QString attName)
+                                             QtProperty *parent,
+                                             QString attName)
       : m_browser(browser), m_parent(parent), m_attName(attName) {
     // check that parent is a function property
     if (!m_parent ||
@@ -659,7 +663,8 @@ void FunctionTreeView::addAttributeAndParameterProperties(
  * property wasn't added
  *  because it is the top function
  */
-FunctionTreeView::AProperty FunctionTreeView::addIndexProperty(QtProperty *prop) {
+FunctionTreeView::AProperty
+FunctionTreeView::addIndexProperty(QtProperty *prop) {
   AProperty ap;
   ap.item = nullptr;
   ap.parent = nullptr;
@@ -958,7 +963,8 @@ QString FunctionTreeView::getTie(QtProperty *prop) const {
  * @param constraint :: A constraint string
  */
 QList<FunctionTreeView::AProperty>
-FunctionTreeView::addConstraintProperties(QtProperty *prop, QString constraint) {
+FunctionTreeView::addConstraintProperties(QtProperty *prop,
+                                          QString constraint) {
   if (!isParameter(prop))
     return QList<FunctionTreeView::AProperty>();
   QString lowerBoundStr = "";
@@ -1090,8 +1096,8 @@ bool FunctionTreeView::hasUpperBound(QtProperty *prop) const {
 
 /// Get a constraint string
 QString FunctionTreeView::getConstraint(const QString &paramName,
-                                       const QString &lowerBound,
-                                       const QString &upperBound) const {
+                                        const QString &lowerBound,
+                                        const QString &upperBound) const {
   QString constraint;
   if (!lowerBound.isEmpty()) {
     constraint += lowerBound + "<";
@@ -1190,8 +1196,10 @@ void FunctionTreeView::addFunctionBegin() {
 
   // Start the dialog
   if (!m_selectFunctionDialog) {
-    m_selectFunctionDialog = new SelectFunctionDialog(this, m_allowedCategories);
-    connect(m_selectFunctionDialog, SIGNAL(finished(int)), this, SLOT(addFunctionEnd(int)));
+    m_selectFunctionDialog =
+        new SelectFunctionDialog(this, m_allowedCategories);
+    connect(m_selectFunctionDialog, SIGNAL(finished(int)), this,
+            SLOT(addFunctionEnd(int)));
   }
   m_selectedFunctionProperty = prop;
   m_selectFunctionDialog->open();
@@ -1239,7 +1247,7 @@ void FunctionTreeView::addFunctionEnd(int result) {
  * @param prop :: A property with the name and value of the attribute.
  */
 void FunctionTreeView::setAttributeToFunction(Mantid::API::IFunction &fun,
-                                             QtProperty *prop) {
+                                              QtProperty *prop) {
   std::string attName = prop->propertyName().toStdString();
   SetAttributeFromProperty setter(this, prop);
   Mantid::API::IFunction::Attribute attr = fun.getAttribute(attName);
@@ -1261,7 +1269,7 @@ void FunctionTreeView::setAttributeToFunction(Mantid::API::IFunction &fun,
  * @param attributesOnly :: Only set attributes
  */
 Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
-                                                         bool attributesOnly) {
+                                                          bool attributesOnly) {
   if (prop == nullptr) { // get overall function
     auto props = m_browser->properties();
     if (props.isEmpty())
@@ -1324,9 +1332,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
       }
     }
     // remove failed ties from the browser
-    foreach (QtProperty *p, failedTies) {
-      removeProperty(p);
-    }
+    foreach (QtProperty *p, failedTies) { removeProperty(p); }
   }
 
   // add constraints
@@ -1545,7 +1551,8 @@ void FunctionTreeView::addTie() {
                             "Syntax errors found in tie: " + tie);
     } catch (std::exception &e) {
       QMessageBox::critical(this, "MantidPlot - Error",
-                            QString::fromLatin1("Errors found in tie: ") + e.what());
+                            QString::fromLatin1("Errors found in tie: ") +
+                                e.what());
     }
   }
 }
@@ -1575,9 +1582,7 @@ void FunctionTreeView::pasteFromClipboard() {
 /**
  * Copy function to the clipboard
  */
-void FunctionTreeView::copyToClipboard() {
-  emit copyToClipboardRequest();
-}
+void FunctionTreeView::copyToClipboard() { emit copyToClipboardRequest(); }
 
 /**
  * Add both constraints to current parameter
@@ -1610,7 +1615,7 @@ void FunctionTreeView::addConstraints10() {
   QString functionIndex, name;
   std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
   auto const constraint = QString::number(val * 0.9) + "<" + name + "<" +
-    QString::number(val * 1.1);
+                          QString::number(val * 1.1);
   addConstraintProperties(prop, constraint);
   emit parameterConstraintAdded(functionIndex, constraint);
 }
@@ -1629,7 +1634,7 @@ void FunctionTreeView::addConstraints50() {
   QString functionIndex, name;
   std::tie(functionIndex, name) = splitParameterName(getParameterName(prop));
   auto const constraint = QString::number(val * 0.5) + "<" + name + "<" +
-    QString::number(val * 1.5);
+                          QString::number(val * 1.5);
   addConstraintProperties(prop, constraint);
   emit parameterConstraintAdded(functionIndex, constraint);
 }
@@ -1644,7 +1649,7 @@ void FunctionTreeView::removeConstraints() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  //const bool isLocal = isLocalParameterProperty(prop);
+  // const bool isLocal = isLocalParameterProperty(prop);
   auto props = prop->subProperties();
   foreach (QtProperty *p, props) {
     if (isConstraint(p)) {
@@ -1675,7 +1680,8 @@ void FunctionTreeView::removeConstraint() {
   }
 }
 
-std::pair<QString, QString> FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
+std::pair<QString, QString>
+FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
   auto const parName = getParameterName(prop);
   QString lower, upper;
   for (auto p : prop->subProperties()) {
@@ -1853,7 +1859,8 @@ void FunctionTreeView::updateCurrentFunctionIndex() {
   }
 }
 
-void FunctionTreeView::setParameterTie(const QString &paramName, const QString &tie) {
+void FunctionTreeView::setParameterTie(const QString &paramName,
+                                       const QString &tie) {
   auto paramProp = getParameterProperty(paramName);
   auto tieProp = getTieProperty(paramProp);
   if (!tie.isEmpty()) {
@@ -1878,27 +1885,30 @@ QStringList FunctionTreeView::getGlobalParameters() const {
   return globals;
 }
 
-void FunctionTreeView::setGlobalParameters(const QStringList&globals) {
+void FunctionTreeView::setGlobalParameters(const QStringList &globals) {
   for (auto ap : m_properties) {
     auto prop = ap.prop;
-    if (!prop->hasOption(globalOptionName)) continue;
+    if (!prop->hasOption(globalOptionName))
+      continue;
     auto isGlobal = globals.contains(getParameterName(prop));
     prop->setOption(globalOptionName, isGlobal);
   }
 }
 
-QTreeWidgetItem *FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const
-{
+QTreeWidgetItem *
+FunctionTreeView::getPropertyWidgetItem(QtProperty *prop) const {
   return m_browser->getItemWidget(m_properties.find(prop)->item);
 }
 
 QRect FunctionTreeView::visualItemRect(QtProperty *prop) const {
-  if (!prop) return QRect();
+  if (!prop)
+    return QRect();
   auto item = getPropertyWidgetItem(prop);
   return item->treeWidget()->visualItemRect(item);
 }
 
-QRect FunctionTreeView::getVisualRectFunctionProperty(const QString &index) const {
+QRect FunctionTreeView::getVisualRectFunctionProperty(
+    const QString &index) const {
   QRect rect;
   QtProperty *prop{nullptr};
   try {
@@ -1909,28 +1919,25 @@ QRect FunctionTreeView::getVisualRectFunctionProperty(const QString &index) cons
   return rect;
 }
 
-QRect FunctionTreeView::getVisualRectParameterProperty(const QString & paramName) const
-{
+QRect FunctionTreeView::getVisualRectParameterProperty(
+    const QString &paramName) const {
   QRect rect;
-  QtProperty *prop{ nullptr };
+  QtProperty *prop{nullptr};
   try {
     prop = getParameterProperty(paramName);
     rect = visualItemRect(prop);
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
   }
   return rect;
 }
 
-QWidget * FunctionTreeView::getParamWidget(const QString & paramName) const
-{
-  QtProperty *prop{ nullptr };
+QWidget *FunctionTreeView::getParamWidget(const QString &paramName) const {
+  QtProperty *prop{nullptr};
   try {
     prop = getParameterProperty(paramName);
     auto item = getPropertyWidgetItem(prop);
     return item->treeWidget()->itemWidget(item, 1);
-  }
-  catch (std::exception &) {
+  } catch (std::exception &) {
   }
   return nullptr;
 }

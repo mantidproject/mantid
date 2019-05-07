@@ -184,8 +184,8 @@ void MultiDatasetFit::initLayout() {
           SLOT(setCurrentDataset(int)));
   connect(m_dataController, SIGNAL(spectraRemoved(QList<int>)),
           m_functionBrowser, SLOT(removeDatasets(QList<int>)));
-  connect(m_dataController, SIGNAL(spectraAdded(const QStringList&)), m_functionBrowser,
-          SLOT(addDatasets(const QStringList&)));
+  connect(m_dataController, SIGNAL(spectraAdded(const QStringList &)),
+          m_functionBrowser, SLOT(addDatasets(const QStringList &)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
       nullptr,

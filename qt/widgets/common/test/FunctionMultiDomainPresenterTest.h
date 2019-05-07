@@ -8,16 +8,16 @@
 #ifndef MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
 #define MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
 
-#include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
-#include "MantidQtWidgets/Common/FunctionModel.h"
-#include "MantidQtWidgets/Common/IFunctionView.h"
-#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
-#include <cxxtest/TestSuite.h>
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
+#include "MantidQtWidgets/Common/IFunctionView.h"
 #include <QApplication>
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -47,9 +47,7 @@ static QApplicationHolder MAIN_QAPPLICATION;
 class MockFunctionView : public IFunctionView {
 public:
   // Mock implementation of the interface
-  void clear() override {
-    m_function = IFunction_sptr();
-  }
+  void clear() override { m_function = IFunction_sptr(); }
   void setFunction(IFunction_sptr fun) override {
     if (fun)
       m_function = fun->clone();
@@ -80,26 +78,25 @@ public:
   void setParameterTie(const QString &paramName, const QString &tie) override {
     if (!tie.isEmpty()) {
       m_function->tie(paramName.toStdString(), tie.toStdString());
-    }
-    else {
+    } else {
       m_function->removeTie(paramName.toStdString());
     }
   }
 
-  void setGlobalParameters(const QStringList& globals) {
-    m_globals = globals;
-  }
+  void setGlobalParameters(const QStringList &globals) { m_globals = globals; }
 
   // Mock user action
-  void addFunction(const QString &prefix, const QString& funStr) {
+  void addFunction(const QString &prefix, const QString &funStr) {
     m_currentFunctionIndex = prefix;
     if (prefix.isEmpty()) {
       auto fun = m_function ? m_function->asString() + ";" : "";
-      m_function = FunctionFactory::Instance().createInitialized(fun + funStr.toStdString());
+      m_function = FunctionFactory::Instance().createInitialized(
+          fun + funStr.toStdString());
     } else {
       auto parentFun = boost::dynamic_pointer_cast<CompositeFunction>(
-        getFunctionWithPrefix(prefix, m_function));
-      parentFun->addFunction(FunctionFactory::Instance().createInitialized(funStr.toStdString()));
+          getFunctionWithPrefix(prefix, m_function));
+      parentFun->addFunction(
+          FunctionFactory::Instance().createInitialized(funStr.toStdString()));
     }
     emit functionAdded(funStr);
   }
@@ -113,7 +110,8 @@ public:
     QString parentPrefix;
     int i;
     std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
-    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(getFunctionWithPrefix(parentPrefix, m_function));
+    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+        getFunctionWithPrefix(parentPrefix, m_function));
     if (i >= 0)
       fun->removeFunction(i);
     else
@@ -122,10 +120,11 @@ public:
   }
 
   IFunction_sptr getFunction() const { return m_function; }
+
 private:
   IFunction_sptr m_function;
   boost::optional<QString> m_currentFunctionIndex;
-  bool m_areErrorsEnabled{ true };
+  bool m_areErrorsEnabled{true};
   QStringList m_globals;
 };
 
@@ -135,7 +134,9 @@ public:
   static FunctionMultiDomainPresenterTest *createSuite() {
     return new FunctionMultiDomainPresenterTest;
   }
-  static void destroySuite(FunctionMultiDomainPresenterTest *suite) { delete suite; }
+  static void destroySuite(FunctionMultiDomainPresenterTest *suite) {
+    delete suite;
+  }
 
   FunctionMultiDomainPresenterTest() {
     // To make sure API is initialized properly
@@ -174,14 +175,16 @@ public:
     TS_ASSERT_DELTA(view->getParameter("A1"), 2.0, 1e-15);
     auto fun = presenter.getFitFunction();
     TS_ASSERT(fun);
-    if (!fun) return;
+    if (!fun)
+      return;
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
   }
 
   void test_view_addFunction() {
     auto view = make_unique<MockFunctionView>();
     FunctionMultiDomainPresenter presenter(view.get());
-    presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;name=FlatBackground,A0=2)");
+    presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;"
+                                "name=FlatBackground,A0=2)");
     view->addFunction("f1.", "name=LinearBackground");
     auto newFun = presenter.getFunction()->getFunction(1)->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
@@ -215,15 +218,22 @@ public:
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 3);
-    presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;name=FlatBackground,A0=2)");
+    presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;"
+                                "name=FlatBackground,A0=2)");
     view->addFunction("f1.", "name=LinearBackground");
     auto newFun = presenter.getFunction()->getFunction(1)->getFunction(2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
-    newFun = presenter.getFitFunction()->getFunction(0)->getFunction(1)->getFunction(2);
+    newFun =
+        presenter.getFitFunction()->getFunction(0)->getFunction(1)->getFunction(
+            2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
-    newFun = presenter.getFitFunction()->getFunction(1)->getFunction(1)->getFunction(2);
+    newFun =
+        presenter.getFitFunction()->getFunction(1)->getFunction(1)->getFunction(
+            2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
-    newFun = presenter.getFitFunction()->getFunction(2)->getFunction(1)->getFunction(2);
+    newFun =
+        presenter.getFitFunction()->getFunction(2)->getFunction(1)->getFunction(
+            2);
     TS_ASSERT_EQUALS(newFun->name(), "LinearBackground");
   }
 
@@ -429,7 +439,8 @@ public:
     TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 5);
     auto ffun = presenter.getFitFunction();
     TS_ASSERT_EQUALS(ffun->getNumberDomains(), 5);
-    QList<int> indices; indices << 2 << 4 << 1;
+    QList<int> indices;
+    indices << 2 << 4 << 1;
     presenter.removeDatasets(indices);
     ffun = presenter.getFitFunction();
     TS_ASSERT_EQUALS(ffun->getNumberDomains(), 2);

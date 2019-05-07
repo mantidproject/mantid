@@ -7,13 +7,13 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 
-#include "MantidQtWidgets/Common/LogValueFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidQtWidgets/Common/LogValueFinder.h"
 
 #include <QStringList>
 #include <cxxtest/TestSuite.h>

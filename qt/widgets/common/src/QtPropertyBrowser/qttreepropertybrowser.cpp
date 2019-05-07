@@ -701,7 +701,8 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem) {
   }
 }
 
-QTreeWidgetItem *QtTreePropertyBrowserPrivate::getItemWidget(QtBrowserItem *browserItem) {
+QTreeWidgetItem *
+QtTreePropertyBrowserPrivate::getItemWidget(QtBrowserItem *browserItem) {
   return m_indexToItem.value(browserItem, 0);
 }
 
@@ -1094,9 +1095,7 @@ QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) {
   return d_ptr->getItemWidget(item);
 }
 
-QTreeWidget *QtTreePropertyBrowser::treeWidget() {
-  return d_ptr->treeWidget();
-}
+QTreeWidget *QtTreePropertyBrowser::treeWidget() { return d_ptr->treeWidget(); }
 
 void QtTreePropertyBrowser::closeEditor() { d_ptr->closeEditor(); }
 

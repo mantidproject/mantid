@@ -27,7 +27,7 @@ MuonFunctionBrowser::~MuonFunctionBrowser() {}
 // * Ask user to select a function and return it
 // * @returns :: function string
 // */
-//QString MuonFunctionBrowser::getUserFunctionFromDialog() {
+// QString MuonFunctionBrowser::getUserFunctionFromDialog() {
 //  SelectFunctionDialog dlg(this, {"Muon", "General", "Background"});
 //  if (dlg.exec() == QDialog::Accepted) {
 //    return dlg.getFunction();

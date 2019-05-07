@@ -24,7 +24,8 @@ class QPushButton;
 class DoubleDialogEditor : public QWidget {
   Q_OBJECT
 public:
-  DoubleDialogEditor(QtProperty *property, QWidget *parent, bool hasOption = false, bool isOptionSet = false);
+  DoubleDialogEditor(QtProperty *property, QWidget *parent,
+                     bool hasOption = false, bool isOptionSet = false);
 signals:
   void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();
@@ -62,10 +63,11 @@ class EXPORT_OPT_MANTIDQT_COMMON DoubleDialogEditorFactory
   Q_OBJECT
 public:
   DoubleDialogEditorFactory(QObject *parent = nullptr, bool hasOption = false)
-      : QtAbstractEditorFactory<ParameterPropertyManager>(parent), m_hasOption(hasOption) {}
+      : QtAbstractEditorFactory<ParameterPropertyManager>(parent),
+        m_hasOption(hasOption) {}
   QWidget *createEditorForManager(ParameterPropertyManager *,
-    QtProperty *property,
-    QWidget *parent) override;
+                                  QtProperty *property,
+                                  QWidget *parent) override;
 signals:
   void buttonClicked(QtProperty * /*_t1*/);
   void closeEditor();

@@ -120,5 +120,5 @@ QString SelectFunctionDialog::getFunction() const {
   return items[0]->text(0);
 }
 
-} // MantidQt
-} // MantidWidgets
+} // namespace MantidWidgets
+} // namespace MantidQt

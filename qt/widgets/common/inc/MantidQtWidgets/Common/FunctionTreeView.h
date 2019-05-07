@@ -13,9 +13,9 @@
 #include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
+#include <QRect>
 #include <QStringList>
 #include <QWidget>
-#include <QRect>
 
 /* Forward declarations */
 
@@ -83,7 +83,9 @@ public:
   };
 
   /// Constructor
-  FunctionTreeView(QWidget *parent, bool multi, const std::vector<std::string>& categories = std::vector<std::string>());
+  FunctionTreeView(
+      QWidget *parent, bool multi,
+      const std::vector<std::string> &categories = std::vector<std::string>());
   /// Destructor
   ~FunctionTreeView() override;
   /// Clear the contents
@@ -107,12 +109,13 @@ public:
   /// Set a tie
   void setParameterTie(const QString &paramName, const QString &tie) override;
   /// Set new global parameters.
-  void setGlobalParameters(const QStringList&) override;
+  void setGlobalParameters(const QStringList &) override;
   /// Get a list of global parameters
   QStringList getGlobalParameters() const;
 
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr, bool attributesOnly = false);
+  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
+                                          bool attributesOnly = false);
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
@@ -173,7 +176,7 @@ protected:
   /// Get function property for the index
   QtProperty *getFunctionProperty(const QString &index) const;
   ///// Get a property for a parameter
-  //QtProperty *getParameterProperty(const QString &paramName) const;
+  // QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter
   QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter which is a parent of a given
@@ -205,7 +208,8 @@ protected:
   /// Get a constraint string
   QString getConstraint(const QString &paramName, const QString &lowerBound,
                         const QString &upperBound) const;
-  /// Get a pair of function index (eg f0.f2.) and constraint expression given a parameter property
+  /// Get a pair of function index (eg f0.f2.) and constraint expression given a
+  /// parameter property
   std::pair<QString, QString> getFunctionAndConstraint(QtProperty *prop) const;
 
 protected slots:

@@ -11,9 +11,9 @@
 
 #include "MantidAPI/IFunction_fwd.h"
 
-#include <boost/optional.hpp>
 #include <QString>
 #include <QWidget>
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -23,10 +23,10 @@ using namespace Mantid::API;
 /**
  * The interface to a function view.
  */
-class EXPORT_OPT_MANTIDQT_COMMON IFunctionView: public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON IFunctionView : public QWidget {
   Q_OBJECT
 public:
-  IFunctionView(QWidget *parent=nullptr) : QWidget(parent) {}
+  IFunctionView(QWidget *parent = nullptr) : QWidget(parent) {}
   virtual ~IFunctionView() {}
   virtual void clear() = 0;
   virtual void setFunction(IFunction_sptr fun) = 0;
@@ -37,8 +37,9 @@ public:
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
-  virtual void setParameterTie(const QString &paramName, const QString &tie) = 0;
-  virtual void setGlobalParameters(const QStringList&) = 0;
+  virtual void setParameterTie(const QString &paramName,
+                               const QString &tie) = 0;
+  virtual void setGlobalParameters(const QStringList &) = 0;
 
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)
@@ -56,13 +57,14 @@ signals:
   /// User sets a tie
   void parameterTieChanged(const QString &parName, const QString &tie);
   /// User sets a constraint
-  void parameterConstraintAdded(const QString &functionIndex, const QString &constraint);
+  void parameterConstraintAdded(const QString &functionIndex,
+                                const QString &constraint);
   /// User removes a constraint
   void parameterConstraintRemoved(const QString &paramName);
   /// User requested copy function to clipboard
   void copyToClipboardRequest();
   /// User changed the list of global parameters.
-  void globalsChanged(const QStringList&);
+  void globalsChanged(const QStringList &);
 };
 
 } // namespace MantidWidgets

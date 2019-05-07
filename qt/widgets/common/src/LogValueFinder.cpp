@@ -57,9 +57,10 @@ std::vector<std::string> LogValueFinder::getLogNames() const {
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if index is not in range
  */
-double LogValueFinder::getLogValue(
-    const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
-    int index) const {
+double
+LogValueFinder::getLogValue(const QString &logName,
+                            const Mantid::Kernel::Math::StatisticType &function,
+                            int index) const {
   if (index > m_wsNames.size() - 1 || index < 0) {
     std::ostringstream message;
     message << "Index " << index
@@ -79,9 +80,10 @@ double LogValueFinder::getLogValue(
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if workspace not found
  */
-double LogValueFinder::getLogValue(
-    const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
-    const QString &wsName) const {
+double
+LogValueFinder::getLogValue(const QString &logName,
+                            const Mantid::Kernel::Math::StatisticType &function,
+                            const QString &wsName) const {
   auto &ads = AnalysisDataService::Instance();
   const auto &workspace = wsName.toStdString();
   if (ads.doesExist(workspace)) {

@@ -22,7 +22,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ParameterPropertyManager
   Q_OBJECT
 
 public:
-  ParameterPropertyManager(QObject *parent = nullptr, bool hasGlobalOption=false);
+  ParameterPropertyManager(QObject *parent = nullptr,
+                           bool hasGlobalOption = false);
 
   /// Get parameter error
   double error(const QtProperty *property) const;

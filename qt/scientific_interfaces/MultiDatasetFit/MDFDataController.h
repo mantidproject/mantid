@@ -58,7 +58,7 @@ signals:
   void dataSetUpdated(int i);
   void hasSelection(bool);
   void spectraRemoved(QList<int>);
-  void spectraAdded(const QStringList&);
+  void spectraAdded(const QStringList &);
 
 public slots:
   void setFittingRangeGlobal(bool /*on*/);

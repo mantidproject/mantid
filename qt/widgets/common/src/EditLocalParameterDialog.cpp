@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
-#include "MantidKernel/make_unique.h"
 
 #include <QClipboard>
 #include <QMenu>

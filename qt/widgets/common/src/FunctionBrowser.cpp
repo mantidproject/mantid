@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
-#include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/Expression.h"
@@ -42,17 +42,19 @@ using namespace Mantid::Kernel;
  * @param parent :: The parent widget.
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
-FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<std::string>& categories)
-    : QWidget(parent)
-{
+FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi,
+                                 const std::vector<std::string> &categories)
+    : QWidget(parent) {
   auto view = new FunctionTreeView(this, multi, categories);
   m_presenter = make_unique<FunctionMultiDomainPresenter>(view);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->addWidget(view);
-  connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
-  connect(m_presenter.get(), SIGNAL(parameterChanged(const QString &, const QString &)),
-    this, SIGNAL(parameterChanged(const QString &, const QString &)));
+  connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this,
+          SIGNAL(functionStructureChanged()));
+  connect(m_presenter.get(),
+          SIGNAL(parameterChanged(const QString &, const QString &)), this,
+          SIGNAL(parameterChanged(const QString &, const QString &)));
 }
 
 /**
@@ -63,9 +65,7 @@ FunctionBrowser::~FunctionBrowser() {}
 /**
  * Clear the contents
  */
-void FunctionBrowser::clear() {
-  m_presenter->clear();
-}
+void FunctionBrowser::clear() { m_presenter->clear(); }
 
 /**
  * Set the function in the browser
@@ -89,7 +89,7 @@ void FunctionBrowser::setFunction(IFunction_sptr fun) {
  * @return Function at index, or null pointer if not found
  */
 IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
-    return m_presenter->getFunctionByIndex(index);
+  return m_presenter->getFunctionByIndex(index);
 }
 
 /**
@@ -138,9 +138,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction() {
   return m_presenter->getFunction();
 }
 
-bool FunctionBrowser::hasFunction() const {
-  return m_presenter->hasFunction();
-}
+bool FunctionBrowser::hasFunction() const { return m_presenter->hasFunction(); }
 
 /// Get the number of datasets
 int FunctionBrowser::getNumberOfDatasets() const {
@@ -201,8 +199,7 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
 
 /// Add some datasets to those already set.
 /// @param names :: A list of names fr the new datasets.
-void FunctionBrowser::addDatasets(const QStringList & names)
-{
+void FunctionBrowser::addDatasets(const QStringList &names) {
   auto allNames = m_presenter->getDatasetNames();
   allNames.append(names);
   m_presenter->setNumberOfDatasets(allNames.size());
@@ -256,8 +253,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
 }
 
 /// Get the index of the current dataset.
-int FunctionBrowser::getCurrentDataset() const
-{
+int FunctionBrowser::getCurrentDataset() const {
   return m_presenter->getCurrentDataset();
 }
 
@@ -280,9 +276,7 @@ void FunctionBrowser::setErrorsEnabled(bool enabled) {
 /**
  * Clear all errors, if they are set
  */
-void FunctionBrowser::clearErrors() {
-  m_presenter->clearErrors();
-}
+void FunctionBrowser::clearErrors() { m_presenter->clearErrors(); }
 
 QStringList FunctionBrowser::getGlobalParameters() const {
   return m_presenter->getGlobalParameters();
@@ -300,10 +294,11 @@ boost::optional<QString> FunctionBrowser::currentFunctionIndex() {
   return m_presenter->currentFunctionIndex();
 }
 
-FunctionTreeView *FunctionBrowser::view() const { return dynamic_cast<FunctionTreeView*>(m_presenter->view()); }
+FunctionTreeView *FunctionBrowser::view() const {
+  return dynamic_cast<FunctionTreeView *>(m_presenter->view());
+}
 
-QString FunctionBrowser::getFitFunctionString() const
-{
+QString FunctionBrowser::getFitFunctionString() const {
   return m_presenter->getFitFunctionString();
 }
 

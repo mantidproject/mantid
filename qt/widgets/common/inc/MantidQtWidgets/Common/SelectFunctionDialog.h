@@ -50,7 +50,7 @@ private:
                         const std::vector<std::string> &restrictions);
 };
 
-} // MantidQt
-} // MantidWidgets
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_

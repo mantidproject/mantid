@@ -21,8 +21,10 @@
  * @param property :: A property to edit.
  * @param parent :: A widget parent for the editor widget.
  */
-DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent, bool hasOption, bool isOptionSet)
-    : QWidget(parent), m_property(property), m_hasOption(hasOption), m_isOptionSet(isOptionSet) {
+DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
+                                       bool hasOption, bool isOptionSet)
+    : QWidget(parent), m_property(property), m_hasOption(hasOption),
+      m_isOptionSet(isOptionSet) {
   QHBoxLayout *layout = new QHBoxLayout;
   m_editor = new DoubleEditor(property, this);
   layout->addWidget(m_editor);
@@ -100,14 +102,14 @@ void DoubleDialogEditor::optionToggled(bool option) {
   updateProperty();
 }
 
-QWidget *DoubleDialogEditorFactory::createEditorForManager(ParameterPropertyManager *mgr,
-  QtProperty *property,
-  QWidget *parent) {
+QWidget *DoubleDialogEditorFactory::createEditorForManager(
+    ParameterPropertyManager *mgr, QtProperty *property, QWidget *parent) {
   bool isOptionSet = m_hasOption ? mgr->isGlobal(property) : false;
-  auto editor = new DoubleDialogEditor(property, parent, m_hasOption, isOptionSet);
+  auto editor =
+      new DoubleDialogEditor(property, parent, m_hasOption, isOptionSet);
   connect(editor, SIGNAL(buttonClicked(QtProperty *)), this,
-    SIGNAL(buttonClicked(QtProperty *)));
+          SIGNAL(buttonClicked(QtProperty *)));
   connect(editor, SIGNAL(closeEditor()), this, SIGNAL(closeEditor()),
-    Qt::QueuedConnection);
+          Qt::QueuedConnection);
   return editor;
 }

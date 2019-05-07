@@ -43,7 +43,9 @@ class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser : public QWidget,
   Q_OBJECT
 public:
   /// Constructor
-  FunctionBrowser(QWidget *parent = nullptr, bool multi = false, const std::vector<std::string>& categories = std::vector<std::string>());
+  FunctionBrowser(
+      QWidget *parent = nullptr, bool multi = false,
+      const std::vector<std::string> &categories = std::vector<std::string>());
   /// Destructor
   virtual ~FunctionBrowser() override;
   /// Clear the contents
@@ -111,8 +113,7 @@ public:
   void clearErrors() override;
 
 signals:
-  void parameterChanged(const QString &funcIndex,
-                        const QString &paramName);
+  void parameterChanged(const QString &funcIndex, const QString &paramName);
   void functionStructureChanged();
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
@@ -135,6 +136,7 @@ public slots:
 
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;
+
 public:
   // Intended for testing only
   FunctionTreeView *view() const;
