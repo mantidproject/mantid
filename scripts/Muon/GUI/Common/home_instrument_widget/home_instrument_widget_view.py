@@ -30,22 +30,22 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_file_loader_hidden(True)
         self.dead_time_other_file_hidden(True)
 
-        self.deadtime_selector.currentIndexChanged.connect(
+        self.dead_time_selector.currentIndexChanged.connect(
             self.on_dead_time_combo_changed)
         self.rebin_selector.currentIndexChanged.connect(
             self.on_rebin_combo_changed)
-        self.timezero_checkbox.stateChanged.connect(
+        self.time_zero_checkbox.stateChanged.connect(
             self.on_time_zero_checkbox_state_change)
-        self.firstgooddata_checkbox.stateChanged.connect(
+        self.first_good_data_checkbox.stateChanged.connect(
             self.on_first_good_data_checkbox_state_change)
-        self.lastgooddata_checkbox.stateChanged.connect(
+        self.last_good_data_checkbox.stateChanged.connect(
             self.on_last_good_data_checkbox_state_change)
 
         self._on_dead_time_from_data_selected = None
         self._on_dead_time_from_other_file_selected = lambda: 0
 
-        self.firstgooddata_checkbox.setChecked(True)
-        self.timezero_checkbox.setChecked(True)
+        self.first_good_data_checkbox.setChecked(True)
+        self.time_zero_checkbox.setChecked(True)
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
         self.last_good_data_edit_enabled(True)
@@ -56,13 +56,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._on_dead_time_file_option_selected = lambda: 0
         self._on_dead_time_unselected = lambda: 0
 
-        self.timezero_edit.editingFinished.connect(
+        self.time_zero_edit.editingFinished.connect(
             lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
-        self.firstgooddata_edit.editingFinished.connect(
+        self.first_good_data_edit.editingFinished.connect(
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
-        self.lastgooddata_edit.editingFinished.connect(
+        self.last_good_data_edit.editingFinished.connect(
             lambda: self._on_last_good_data_changed() if not self.is_last_good_data_checked() else None)
-        self.deadtime_file_selector.currentIndexChanged.connect(
+        self.dead_time_file_selector.currentIndexChanged.connect(
             self.on_dead_time_file_combo_changed)
 
     def setup_interface(self):
@@ -92,7 +92,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.group2 = QtWidgets.QGroupBox("Rebin")
         self.group2.setFlat(False)
 
-        self.group2.setLayout(self.horizontal_layout_6)
+        self.group2.setLayout(self.rebin_layout)
 
         self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
@@ -115,13 +115,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.rebin_selector.setCurrentIndex(0)
         self.rebin_fixed_hidden(True)
         self.rebin_variable_hidden(True)
-        self.deadtime_selector.setCurrentIndex(0)
+        self.dead_time_selector.setCurrentIndex(0)
         self.dead_time_data_info_hidden(True)
         self.dead_time_file_loader_hidden(True)
 
     def set_checkboxes_to_defualt(self):
-        self.timezero_checkbox.setChecked(True)
-        self.firstgooddata_checkbox.setChecked(True)
+        self.time_zero_checkbox.setChecked(True)
+        self.first_good_data_checkbox.setChecked(True)
 
     def warning_popup(self, message):
         warning(message, parent=self)
@@ -200,60 +200,60 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_time_zero_row(self):
-        self.timezero_label = QtWidgets.QLabel(self)
-        self.timezero_label.setText("Time Zero : ")
+        self.time_zero_label = QtWidgets.QLabel(self)
+        self.time_zero_label.setText("Time Zero : ")
 
-        self.timezero_edit = QtWidgets.QLineEdit(self)
+        self.time_zero_edit = QtWidgets.QLineEdit(self)
         timezero_validator = QtGui.QRegExpValidator(
             QtCore.QRegExp(valid_float_regex),
-            self.timezero_edit)
-        self.timezero_edit.setValidator(timezero_validator)
-        self.timezero_edit.setText("")
+            self.time_zero_edit)
+        self.time_zero_edit.setValidator(timezero_validator)
+        self.time_zero_edit.setText("")
 
-        self.timezero_unit_label = QtWidgets.QLabel(self)
-        self.timezero_unit_label.setText(u"\u03BCs (From data file ")
+        self.time_zero_unit_label = QtWidgets.QLabel(self)
+        self.time_zero_unit_label.setText(u"\u03BCs (From data file ")
 
-        self.timezero_checkbox = QtWidgets.QCheckBox(self)
-        self.timezero_checkbox.setChecked(True)
+        self.time_zero_checkbox = QtWidgets.QCheckBox(self)
+        self.time_zero_checkbox.setChecked(True)
 
-        self.timezero_label_2 = QtWidgets.QLabel(self)
-        self.timezero_label_2.setText(" )")
+        self.time_zero_label_2 = QtWidgets.QLabel(self)
+        self.time_zero_label_2.setText(" )")
 
-        self.horizontal_layout_2 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_2.addSpacing(10)
-        self.horizontal_layout_2.addWidget(self.timezero_unit_label)
-        self.horizontal_layout_2.addWidget(self.timezero_checkbox)
-        self.horizontal_layout_2.addWidget(self.timezero_label_2)
-        self.horizontal_layout_2.addStretch(0)
+        self.time_zero_layout = QtWidgets.QHBoxLayout()
+        self.time_zero_layout.addSpacing(10)
+        self.time_zero_layout.addWidget(self.time_zero_unit_label)
+        self.time_zero_layout.addWidget(self.time_zero_checkbox)
+        self.time_zero_layout.addWidget(self.time_zero_label_2)
+        self.time_zero_layout.addStretch(0)
 
-        self.layout.addWidget(self.timezero_label, 1, 0)
-        self.layout.addWidget(self.timezero_edit, 1, 1)
-        self.layout.addItem(self.horizontal_layout_2, 1, 2)
+        self.layout.addWidget(self.time_zero_label, 1, 0)
+        self.layout.addWidget(self.time_zero_edit, 1, 1)
+        self.layout.addItem(self.time_zero_layout, 1, 2)
 
     def set_time_zero(self, time_zero):
-        self.timezero_edit.setText(
+        self.time_zero_edit.setText(
             "{0:.3f}".format(round(float(time_zero), 3)))
 
     def get_time_zero(self):
-        return float(self.timezero_edit.text())
+        return float(self.time_zero_edit.text())
 
     def time_zero_edit_enabled(self, enabled):
-        self.timezero_edit.setEnabled(not enabled)
+        self.time_zero_edit.setEnabled(not enabled)
 
     def is_time_zero_checked(self):
-        return self.timezero_checkbox.isChecked()
+        return self.time_zero_checkbox.isChecked()
 
     def on_time_zero_changed(self, slot):
         self._on_time_zero_changed = slot
 
     def on_time_zero_checkState_changed(self, slot):
-        self.timezero_checkbox.stateChanged.connect(slot)
+        self.time_zero_checkbox.stateChanged.connect(slot)
 
     def time_zero_state(self):
-        return self.timezero_checkbox.isChecked()
+        return self.time_zero_checkbox.isChecked()
 
     def on_time_zero_checkbox_state_change(self):
-        self.time_zero_edit_enabled(self.timezero_checkbox.isChecked())
+        self.time_zero_edit_enabled(self.time_zero_checkbox.isChecked())
 
     # ------------------------------------------------------------------------------------------------------------------
     # First good data
@@ -261,62 +261,62 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def setup_first_good_data_row(self):
 
-        self.firstgooddata_label = QtWidgets.QLabel(self)
-        self.firstgooddata_label.setText("First Good Data : ")
+        self.first_good_data_label = QtWidgets.QLabel(self)
+        self.first_good_data_label.setText("First Good Data : ")
 
-        self.firstgooddata_edit = QtWidgets.QLineEdit(self)
+        self.first_good_data_edit = QtWidgets.QLineEdit(self)
 
-        firstgooddata_validator = QtGui.QRegExpValidator(
+        first_good_data_validator = QtGui.QRegExpValidator(
             QtCore.QRegExp(valid_float_regex),
-            self.timezero_edit)
-        self.firstgooddata_edit.setValidator(firstgooddata_validator)
-        self.firstgooddata_edit.setText("")
+            self.time_zero_edit)
+        self.first_good_data_edit.setValidator(first_good_data_validator)
+        self.first_good_data_edit.setText("")
 
-        self.firstgooddata_unit_label = QtWidgets.QLabel(self)
-        self.firstgooddata_unit_label.setText(u" \u03BCs (From data file ")
+        self.first_good_data_unit_label = QtWidgets.QLabel(self)
+        self.first_good_data_unit_label.setText(u" \u03BCs (From data file ")
 
-        self.firstgooddata_checkbox = QtWidgets.QCheckBox(self)
-        self.firstgooddata_checkbox.setChecked(True)
+        self.first_good_data_checkbox = QtWidgets.QCheckBox(self)
+        self.first_good_data_checkbox.setChecked(True)
 
-        self.firstgooddata_label_2 = QtWidgets.QLabel(self)
-        self.firstgooddata_label_2.setText(" )")
+        self.first_good_data_label_2 = QtWidgets.QLabel(self)
+        self.first_good_data_label_2.setText(" )")
 
-        self.horizontal_layout_3 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_3.addSpacing(10)
-        self.horizontal_layout_3.addWidget(self.firstgooddata_unit_label)
-        self.horizontal_layout_3.addWidget(self.firstgooddata_checkbox)
-        self.horizontal_layout_3.addWidget(self.firstgooddata_label_2)
-        self.horizontal_layout_3.addStretch(0)
+        self.first_good_data_layout = QtWidgets.QHBoxLayout()
+        self.first_good_data_layout.addSpacing(10)
+        self.first_good_data_layout.addWidget(self.first_good_data_unit_label)
+        self.first_good_data_layout.addWidget(self.first_good_data_checkbox)
+        self.first_good_data_layout.addWidget(self.first_good_data_label_2)
+        self.first_good_data_layout.addStretch(0)
 
-        self.layout.addWidget(self.firstgooddata_label, 2, 0)
-        self.layout.addWidget(self.firstgooddata_edit, 2, 1)
-        self.layout.addItem(self.horizontal_layout_3, 2, 2)
+        self.layout.addWidget(self.first_good_data_label, 2, 0)
+        self.layout.addWidget(self.first_good_data_edit, 2, 1)
+        self.layout.addItem(self.first_good_data_layout, 2, 2)
 
     def on_first_good_data_changed(self, slot):
         self._on_first_good_data_changed = slot
 
     def set_first_good_data(self, first_good_data):
-        self.firstgooddata_edit.setText(
+        self.first_good_data_edit.setText(
             "{0:.3f}".format(round(float(first_good_data), 3)))
 
     def on_first_good_data_checkState_changed(self, slot):
-        self.firstgooddata_checkbox.stateChanged.connect(slot)
+        self.first_good_data_checkbox.stateChanged.connect(slot)
 
     def first_good_data_state(self):
-        return self.firstgooddata_checkbox.checkState()
+        return self.first_good_data_checkbox.checkState()
 
     def is_first_good_data_checked(self):
-        return self.firstgooddata_checkbox.checkState()
+        return self.first_good_data_checkbox.checkState()
 
     def on_first_good_data_checkbox_state_change(self):
         self.first_good_data_edit_enabled(
-            self.firstgooddata_checkbox.checkState())
+            self.first_good_data_checkbox.checkState())
 
     def first_good_data_edit_enabled(self, disabled):
-        self.firstgooddata_edit.setEnabled(not disabled)
+        self.first_good_data_edit.setEnabled(not disabled)
 
     def get_first_good_data(self):
-        return float(self.firstgooddata_edit.text())
+        return float(self.first_good_data_edit.text())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Last Good Data
@@ -324,113 +324,113 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def setup_last_good_data_row(self):
 
-        self.lastgooddata_label = QtWidgets.QLabel(self)
-        self.lastgooddata_label.setText("Last Good Data : ")
+        self.last_good_data_label = QtWidgets.QLabel(self)
+        self.last_good_data_label.setText("Last Good Data : ")
 
-        self.lastgooddata_edit = QtWidgets.QLineEdit(self)
+        self.last_good_data_edit = QtWidgets.QLineEdit(self)
 
-        lastgooddata_validator = QtGui.QRegExpValidator(
+        last_good_data_validator = QtGui.QRegExpValidator(
             QtCore.QRegExp(valid_float_regex),
-            self.firstgooddata_edit)
-        self.lastgooddata_edit.setValidator(lastgooddata_validator)
-        self.lastgooddata_edit.setText("")
+            self.first_good_data_edit)
+        self.last_good_data_edit.setValidator(last_good_data_validator)
+        self.last_good_data_edit.setText("")
 
-        self.lastgooddata_unit_label = QtWidgets.QLabel(self)
-        self.lastgooddata_unit_label.setText(u" \u03BCs (From data file ")
+        self.last_good_data_unit_label = QtWidgets.QLabel(self)
+        self.last_good_data_unit_label.setText(u" \u03BCs (From data file ")
 
-        self.lastgooddata_checkbox = QtWidgets.QCheckBox(self)
-        self.lastgooddata_checkbox.setChecked(True)
+        self.last_good_data_checkbox = QtWidgets.QCheckBox(self)
+        self.last_good_data_checkbox.setChecked(True)
 
-        self.lastgooddata_label_2 = QtWidgets.QLabel(self)
-        self.lastgooddata_label_2.setText(" )")
+        self.last_good_data_label_2 = QtWidgets.QLabel(self)
+        self.last_good_data_label_2.setText(" )")
 
-        self.horizontal_layout_4 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_4.addSpacing(10)
-        self.horizontal_layout_4.addWidget(self.lastgooddata_unit_label)
-        self.horizontal_layout_4.addWidget(self.lastgooddata_checkbox)
-        self.horizontal_layout_4.addWidget(self.lastgooddata_label_2)
-        self.horizontal_layout_4.addStretch(0)
+        self.last_good_data_layout = QtWidgets.QHBoxLayout()
+        self.last_good_data_layout.addSpacing(10)
+        self.last_good_data_layout.addWidget(self.last_good_data_unit_label)
+        self.last_good_data_layout.addWidget(self.last_good_data_checkbox)
+        self.last_good_data_layout.addWidget(self.last_good_data_label_2)
+        self.last_good_data_layout.addStretch(0)
 
-        self.layout.addWidget(self.lastgooddata_label, 3, 0)
-        self.layout.addWidget(self.lastgooddata_edit, 3, 1)
-        self.layout.addItem(self.horizontal_layout_4, 3, 2)
+        self.layout.addWidget(self.last_good_data_label, 3, 0)
+        self.layout.addWidget(self.last_good_data_edit, 3, 1)
+        self.layout.addItem(self.last_good_data_layout, 3, 2)
 
     def on_last_good_data_changed(self, slot):
         self._on_last_good_data_changed = slot
 
     def set_last_good_data(self, last_good_data):
-        self.lastgooddata_edit.setText(
+        self.last_good_data_edit.setText(
             "{0:.3f}".format(round(float(last_good_data), 3)))
 
     def on_last_good_data_checkState_changed(self, slot):
-        self.lastgooddata_checkbox.stateChanged.connect(slot)
+        self.last_good_data_checkbox.stateChanged.connect(slot)
 
     def last_good_data_state(self):
-        return self.lastgooddata_checkbox.checkState()
+        return self.last_good_data_checkbox.checkState()
 
     def is_last_good_data_checked(self):
-        return self.lastgooddata_checkbox.checkState()
+        return self.last_good_data_checkbox.checkState()
 
     def on_last_good_data_checkbox_state_change(self):
         self.last_good_data_edit_enabled(
-            self.lastgooddata_checkbox.checkState())
+            self.last_good_data_checkbox.checkState())
 
     def last_good_data_edit_enabled(self, disabled):
-        self.lastgooddata_edit.setEnabled(not disabled)
+        self.last_good_data_edit.setEnabled(not disabled)
 
     def get_last_good_data(self):
-        return float(self.lastgooddata_edit.text())
+        return float(self.last_good_data_edit.text())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead time correction
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_dead_time_row(self):
-        self.deadtime_label = QtWidgets.QLabel(self)
-        self.deadtime_label.setText("Dead Time : ")
+        self.dead_time_label = QtWidgets.QLabel(self)
+        self.dead_time_label.setText("Dead Time : ")
 
-        self.deadtime_selector = QtWidgets.QComboBox(self)
-        self.deadtime_selector.addItems(
+        self.dead_time_selector = QtWidgets.QComboBox(self)
+        self.dead_time_selector.addItems(
             ["None",
              "From data file",
              "From table workspace",
              "From other file"])
 
-        self.deadtime_label_2 = QtWidgets.QLabel(self)
-        self.deadtime_label_2.setText("Dead Time Workspace : ")
+        self.dead_time_label_2 = QtWidgets.QLabel(self)
+        self.dead_time_label_2.setText("Dead Time Workspace : ")
 
-        self.deadtime_label_3 = QtWidgets.QLabel(self)
-        self.deadtime_label_3.setText("")
+        self.dead_time_label_3 = QtWidgets.QLabel(self)
+        self.dead_time_label_3.setText("")
 
-        self.deadtime_file_selector = QtWidgets.QComboBox(self)
-        self.deadtime_file_selector.addItem("None")
-        self.deadtime_file_selector.setToolTip(
+        self.dead_time_file_selector = QtWidgets.QComboBox(self)
+        self.dead_time_file_selector.addItem("None")
+        self.dead_time_file_selector.setToolTip(
             "Select a table which is loaded into the ADS.")
 
-        self.deadtime_browse_button = QtWidgets.QPushButton(self)
-        self.deadtime_browse_button.setText("Browse")
-        self.deadtime_browse_button.setToolTip("Browse for a .nxs file to load dead times from. If valid, the "
-                                               "dead times will be saved as a table, and automatically selected "
-                                               "as the dead time for the current data.")
+        self.dead_time_browse_button = QtWidgets.QPushButton(self)
+        self.dead_time_browse_button.setText("Browse")
+        self.dead_time_browse_button.setToolTip("Browse for a .nxs file to load dead times from. If valid, the "
+                                                "dead times will be saved as a table, and automatically selected "
+                                                "as the dead time for the current data.")
 
-        self.horizontal_layout_5 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_5.addSpacing(10)
-        self.horizontal_layout_5.addWidget(self.deadtime_label_3)
+        self.dead_time_layout = QtWidgets.QHBoxLayout()
+        self.dead_time_layout.addSpacing(10)
+        self.dead_time_layout.addWidget(self.dead_time_label_3)
 
         self.dead_time_file_layout = QtWidgets.QHBoxLayout()
-        self.dead_time_file_layout.addWidget(self.deadtime_browse_button)
+        self.dead_time_file_layout.addWidget(self.dead_time_browse_button)
         self.dead_time_file_layout.addStretch(0)
 
         self.dead_time_other_file_label = QtWidgets.QLabel(self)
         self.dead_time_other_file_label.setText("From other file : ")
 
-        self.layout.addWidget(self.deadtime_label, 4, 0)
-        self.layout.addWidget(self.deadtime_selector, 4, 1)
-        self.layout.addItem(self.horizontal_layout_5, 4, 2)
-        self.layout.addWidget(self.deadtime_label_2, 5, 0)
-        self.layout.addWidget(self.deadtime_file_selector, 5, 1)
+        self.layout.addWidget(self.dead_time_label, 4, 0)
+        self.layout.addWidget(self.dead_time_selector, 4, 1)
+        self.layout.addItem(self.dead_time_layout, 4, 2)
+        self.layout.addWidget(self.dead_time_label_2, 5, 0)
+        self.layout.addWidget(self.dead_time_file_selector, 5, 1)
         self.layout.addWidget(self.dead_time_other_file_label, 6, 0)
-        self.layout.addWidget(self.deadtime_browse_button, 6, 1)
+        self.layout.addWidget(self.dead_time_browse_button, 6, 1)
 
     def on_dead_time_file_option_changed(self, slot):
         self._on_dead_time_file_option_selected = slot
@@ -442,63 +442,63 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self._on_dead_time_unselected = slot
 
     def on_dead_time_browse_clicked(self, slot):
-        self.deadtime_browse_button.clicked.connect(slot)
+        self.dead_time_browse_button.clicked.connect(slot)
 
     def on_dead_time_from_file_selected(self, slot):
         self._on_dead_time_from_file_selected = slot
 
     def populate_dead_time_combo(self, names):
-        self.deadtime_file_selector.blockSignals(True)
-        self.deadtime_file_selector.clear()
-        self.deadtime_file_selector.addItem("None")
+        self.dead_time_file_selector.blockSignals(True)
+        self.dead_time_file_selector.clear()
+        self.dead_time_file_selector.addItem("None")
         for name in names:
-            self.deadtime_file_selector.addItem(name)
-        self.deadtime_file_selector.blockSignals(False)
+            self.dead_time_file_selector.addItem(name)
+        self.dead_time_file_selector.blockSignals(False)
 
     def get_dead_time_file_selection(self):
-        return self.deadtime_file_selector.currentText()
+        return self.dead_time_file_selector.currentText()
 
     def set_dead_time_file_selection_text(self, text):
-        index = self.deadtime_file_selector.findText(text)
+        index = self.dead_time_file_selector.findText(text)
         if index >= 0:
-            self.deadtime_file_selector.setCurrentIndex(index)
+            self.dead_time_file_selector.setCurrentIndex(index)
             return True
         return False
 
     def set_dead_time_file_selection(self, index):
-        self.deadtime_file_selector.setCurrentIndex(index)
+        self.dead_time_file_selector.setCurrentIndex(index)
 
     def set_dead_time_selection(self, index):
-        self.deadtime_selector.setCurrentIndex(index)
+        self.dead_time_selector.setCurrentIndex(index)
 
     def dead_time_file_loader_hidden(self, hidden=True):
         if hidden:
-            self.deadtime_file_selector.hide()
+            self.dead_time_file_selector.hide()
 
-            self.deadtime_label_2.hide()
+            self.dead_time_label_2.hide()
             self.dead_time_data_info_hidden(hidden)
         if not hidden:
-            self.deadtime_file_selector.setVisible(True)
-            self.deadtime_label_2.setVisible(True)
+            self.dead_time_file_selector.setVisible(True)
+            self.dead_time_label_2.setVisible(True)
             self.dead_time_data_info_hidden(hidden)
 
     def dead_time_other_file_hidden(self, hidden):
         if hidden:
             self.dead_time_other_file_label.hide()
-            self.deadtime_browse_button.hide()
+            self.dead_time_browse_button.hide()
 
         if not hidden:
-            self.deadtime_browse_button.setVisible(True)
+            self.dead_time_browse_button.setVisible(True)
             self.dead_time_other_file_label.setVisible(True)
 
     def dead_time_data_info_hidden(self, hidden=True):
         if hidden:
-            self.deadtime_label_3.hide()
+            self.dead_time_label_3.hide()
         if not hidden:
-            self.deadtime_label_3.setVisible(True)
+            self.dead_time_label_3.setVisible(True)
 
     def set_dead_time_label(self, text):
-        self.deadtime_label_3.setText(text)
+        self.dead_time_label_3.setText(text)
 
     def on_dead_time_combo_changed(self, index):
         if index == 0:
@@ -562,18 +562,18 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
-        self.horizontal_layout_6 = QtWidgets.QHBoxLayout()
-        self.horizontal_layout_6.addSpacing(10)
+        self.rebin_layout = QtWidgets.QHBoxLayout()
+        self.rebin_layout.addSpacing(10)
 
-        self.horizontal_layout_6.addWidget(self.rebin_label)
-        self.horizontal_layout_6.addWidget(self.rebin_selector)
+        self.rebin_layout.addWidget(self.rebin_label)
+        self.rebin_layout.addWidget(self.rebin_selector)
 
-        self.horizontal_layout_6.addWidget(self.rebin_steps_label)
-        self.horizontal_layout_6.addWidget(self.rebin_steps_edit)
-        self.horizontal_layout_6.addWidget(self.rebin_variable_label)
-        self.horizontal_layout_6.addWidget(self.rebin_variable_edit)
-        self.horizontal_layout_6.addStretch(0)
-        self.horizontal_layout_6.addSpacing(10)
+        self.rebin_layout.addWidget(self.rebin_steps_label)
+        self.rebin_layout.addWidget(self.rebin_steps_edit)
+        self.rebin_layout.addWidget(self.rebin_variable_label)
+        self.rebin_layout.addWidget(self.rebin_variable_edit)
+        self.rebin_layout.addStretch(0)
+        self.rebin_layout.addSpacing(10)
 
         self.rebin_steps_label.hide()
         self.rebin_steps_edit.hide()
