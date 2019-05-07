@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>list_selector</class>
+ <widget class="QWidget" name="list_selector">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>518</width>
-    <height>300</height>
+    <height>331</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLineEdit" name="filter_line_edit"/>
-   </item>
-   <item row="0" column="1">
+   <item row="0" column="2" colspan="2">
     <widget class="QComboBox" name="filter_type_combo_box">
      <item>
       <property name="text">
@@ -31,23 +28,38 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QTableWidget" name="item_table_widget">
-     <property name="columnCount">
-      <number>2</number>
+   <item row="1" column="0" colspan="4">
+    <layout class="QGridLayout" name="list_layout"/>
+   </item>
+   <item row="2" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <attribute name="horizontalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <attribute name="horizontalHeaderStretchLastSection">
-      <bool>true</bool>
-     </attribute>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <column/>
-     <column/>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>332</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Select/Unselect All</string>
+     </property>
     </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QCheckBox" name="select_all_checkbox">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLineEdit" name="filter_line_edit"/>
    </item>
   </layout>
  </widget>

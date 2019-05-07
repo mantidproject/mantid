@@ -8,11 +8,9 @@ from qtpy import QtWidgets
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDropEvent
-from qtpy.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem, QWidget, QHBoxLayout, \
-    QApplication
+from qtpy.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem
 
 from mantidqt.utils.qt import load_ui
-import functools
 from Muon.GUI.Common.utilities import table_utils
 
 ui_list_selector, _ = load_ui(__file__, "list_selector.ui")
@@ -23,7 +21,16 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         super(QtWidgets.QWidget, self).__init__(parent=parent_widget)
         self.setupUi(self)
 
+        self.item_table_widget = TableWidgetDragRows()
+
+        self.item_table_widget.setColumnCount(2)
         self.item_table_widget.setColumnWidth(0, 350)
+        self.item_table_widget.verticalHeader().setVisible(False)
+        self.item_table_widget.horizontalHeader().setStretchLastSection(True)
+        self.item_table_widget.horizontalHeader().setVisible(False)
+
+        self.list_layout.addWidget(self.item_table_widget)
+        self.list_layout.setContentsMargins(0, 0, 0, 0)
 
         self._item_selection_changed_action = lambda a, b: 0
 
@@ -36,22 +43,29 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
             insertion_index = self.item_table_widget.rowCount()
             self.item_table_widget.setRowCount(insertion_index + 1)
             table_utils.setRowName(self.item_table_widget, insertion_index, row[0])
-            check_box = table_utils.addCheckBoxWidgetToTable(self.item_table_widget, row[1] ,insertion_index, 1)
-            item_selection_changed_action_with_row_encoded = functools.partial(self._item_selection_changed_action, row[0])
-            check_box.stateChanged.connect(item_selection_changed_action_with_row_encoded)
+            table_utils.addCheckBoxToTable(self.item_table_widget, row[1], insertion_index, 1)
             self.set_row_enabled(insertion_index, row[2])
+            self.item_table_widget.cellChanged.connect(self.handle_cell_changed_signal)
 
     def clearItems(self):
-        for row in range(self.item_table_widget.rowCount()):
-            self.item_table_widget.takeItem(row, 0)
-            self.item_table_widget.removeCellWidget(row, 1)
+        self.item_table_widget.clearContents()
         self.item_table_widget.setRowCount(0)
 
     def set_row_enabled(self, row, enabled):
-        for col in range(self.item_table_widget.columnCount()):
-            item = self.item_table_widget.cellWidget(row, col)
-            if item:
-                item.setEnabled(enabled)
+        item = self.item_table_widget.item(row, 0)
+        if enabled:
+            item.setFlags(
+                Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+        else:
+            item.setFlags(
+                Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+        item = self.item_table_widget.item(row, 1)
+        if enabled:
+            item.setFlags(
+                Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
+        else:
+            item.setFlags(
+                Qt.ItemIsUserCheckable | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
 
     def set_filter_line_edit_changed_action(self, action):
         self.filter_line_edit.textChanged.connect(action)
@@ -61,6 +75,15 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
 
     def set_filter_type_combo_changed_action(self, action):
         self.filter_type_combo_box.currentIndexChanged.connect(action)
+
+    def set_select_all_checkbox_action(self, action):
+        self.select_all_checkbox.stateChanged.connect(action)
+
+    def handle_cell_changed_signal(self, row, col):
+        if col == 1:
+            name = self.item_table_widget.item(row, 0).text()
+            state = self.item_table_widget.item(row, 1).checkState() == Qt.Checked
+            self._item_selection_changed_action(name, state)
 
 
 class TableWidgetDragRows(QTableWidget):
@@ -82,8 +105,9 @@ class TableWidgetDragRows(QTableWidget):
             drop_row = self.drop_on(event)
 
             rows = sorted(set(item.row() for item in self.selectedItems()))
-            rows_to_move = [[QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())]
-                            for row_index in rows]
+            rows_to_move = [
+                [QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())]
+                for row_index in rows]
             for row_index in reversed(rows):
                 self.removeRow(row_index)
                 if row_index < drop_row:
@@ -115,4 +139,5 @@ class TableWidgetDragRows(QTableWidget):
         elif rect.bottom() - pos.y() < margin:
             return True
         # noinspection PyTypeChecker
-        return rect.contains(pos, True) and not (int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
+        return rect.contains(pos, True) and not (
+            int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()

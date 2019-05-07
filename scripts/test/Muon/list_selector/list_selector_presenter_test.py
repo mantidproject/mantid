@@ -43,12 +43,18 @@ class TestListSelectorPresenter(unittest.TestCase):
         self.assertEqual(self.presenter.get_selected_items(), ['property_one'])
 
     def test_set_filter_type_changes_filter_type_and_updated_view(self):
-        self.presenter.set_filter_type('Exclude')
+        self.view.filter_type_combo_box.currentText.return_value = 'Exclude'
+        self.presenter.set_filter_type()
         self.presenter.handle_filter_changed('one')
 
         self.assertEqual(self.presenter.filter_type, 'Exclude')
 
         self.view.addItems.assert_called_with([['property_two', False, False]])
+
+    def test_select_all_presenter_checkbox_changed_updates_current_filter_list_to_match_itself(self):
+        self.presenter.handle_select_all_checkbox_changed(True)
+
+        self.view.addItems.assert_called_with([['property_one', True, True], ['property_two', True, False]])
 
 
 if __name__ == '__main__':
