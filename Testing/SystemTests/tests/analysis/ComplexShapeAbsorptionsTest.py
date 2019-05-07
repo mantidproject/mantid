@@ -82,4 +82,3 @@ class RotatedSampleShapeAndSampleEnvironment(RotatedSampleShape):
 
     def validate(self):
         return "ws", "complexShapeRotatedAbsorbEnvironment.nxs"
-
