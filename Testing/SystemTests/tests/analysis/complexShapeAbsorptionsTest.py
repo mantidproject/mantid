@@ -111,3 +111,46 @@ class TranslatedAndRotatedSampleEnvironment(SampleEnvironment):
 
     def validate(self):
         return "ws", "complexEnvironmentRotatedTranslatedAbsorb.nxs"
+
+
+class MultiPartEnvironmentTranslate(SampleEnvironment):
+
+    def handleEnvironment(self):
+        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"),
+                                     Scale="cm", SetMaterial=True, ChemicalFormula="V",
+                                     SampleNumberDensity=0.1, TranslationVector="0,2.5,0")
+        mantid.LoadSampleEnvironment(InputWorkspace="ws",OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"),
+                                     Scale="cm", SetMaterial=True, ChemicalFormula="V",
+                                     SampleNumberDensity=0.1, TranslationVector="0,-2.5,0", Add=True)
+
+    def validate(self):
+        return "ws", "complexEnvironmentMultiPartTranslated.nxs"
+
+
+class MultiPartEnvironmentRotate(SampleEnvironment):
+
+    def handleEnvironment(self):
+        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"),
+                                     Scale="cm", SetMaterial=True, ChemicalFormula="V",
+                                     SampleNumberDensity=0.1)
+        mantid.LoadSampleEnvironment(InputWorkspace="ws",OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"),
+                                     Scale="cm", SetMaterial=True, ChemicalFormula="V",
+                                     SampleNumberDensity=0.1,XDegrees=90, Add=True)
+
+    def validate(self):
+        return "ws", "complexEnvironmentMultiPartRotated.nxs"
+
+
+class MultiPartSampleEnvironmentOverlap(SampleShapeBase):
+
+    def handleEnvironment(self):
+        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"), Scale="cm", SetMaterial=True,
+                                     ChemicalFormula="V", SampleNumberDensity=0.1)
+        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"), Scale="cm", SetMaterial=True,
+                                     ChemicalFormula="V", SampleNumberDensity=0.1, Add=True)
