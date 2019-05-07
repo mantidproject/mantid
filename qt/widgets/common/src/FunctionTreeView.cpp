@@ -60,6 +60,8 @@ namespace MantidWidgets {
  * Constructor
  * @param parent :: The parent widget.
  * @param multi  :: Option to use the browser for multi-dataset fitting.
+ * @param categories :: Function categories to be included to the Add Function
+ * dialog. An empty vector means include all available categories.
  */
 FunctionTreeView::FunctionTreeView(QWidget *parent, bool multi,
                                    const std::vector<std::string> &categories)
