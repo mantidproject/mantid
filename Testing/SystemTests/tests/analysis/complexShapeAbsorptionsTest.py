@@ -99,3 +99,15 @@ class TranslatedSampleEnvironment(SampleEnvironment):
 
     def validate(self):
         return "ws", "complexEnvironmentTranslatedAbsorb.nxs"
+
+
+class TranslatedAndRotatedSampleEnvironment(SampleEnvironment):
+
+    def handleEnvironment(self):
+        mantid.LoadSampleEnvironment(InputWorkspace="ws", OutputWorkspace="ws",
+                                     Filename=os.path.join(data_dir, "cube.stl"), scale="cm", SetMaterial=True,
+                                     ChemicalFormula="V", SampleNumberDensity=0.1, TranslationVector="0,2.5,0",
+                                     XDegrees=45)
+
+    def validate(self):
+        return "ws", "complexEnvironmentRotatedTranslatedAbsorb.nxs"
