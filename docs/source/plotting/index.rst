@@ -266,7 +266,7 @@ Some data should be visualized as two dimensional colormaps
    # generate a nice 2D multi-dimensional workspace
    data = Load('CNCS_7860')
    data = ConvertUnits(InputWorkspace=data,Target='DeltaE', EMode='Direct', EFixed=3)
-   data = Rebin(InputWorkspace=data, Params='-3,0.025,3')
+   data = Rebin(InputWorkspace=data, Params='-3,0.025,3', PreserveEvents=False)
    md = ConvertToMD(InputWorkspace=data,
                     QDimensions='|Q|',
                     dEAnalysisMode='Direct')
