@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/LogValueFinder.h"
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
