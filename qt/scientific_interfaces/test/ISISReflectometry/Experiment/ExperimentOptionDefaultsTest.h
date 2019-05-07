@@ -38,14 +38,14 @@ public:
   ExperimentOptionDefaultsTest() { Mantid::API::FrameworkManager::Instance(); }
 
   void testValidAnalysisMode() {
-    auto result = getDefaults("All");
+    auto result = getDefaults("Experiment");
     TS_ASSERT_EQUALS(result.analysisMode(), AnalysisMode::MultiDetector);
   }
 
   void testInvalidAnalysisMode() { getDefaultsThrows("Analysis_Invalid"); }
 
   void testValidReductionOptions() {
-    auto result = getDefaults("All");
+    auto result = getDefaults("Experiment");
     TS_ASSERT_EQUALS(result.summationType(), SummationType::SumInQ);
     TS_ASSERT_EQUALS(result.reductionType(), ReductionType::NonFlatSample);
     TS_ASSERT_EQUALS(result.includePartialBins(), true);
@@ -54,12 +54,12 @@ public:
   void testInvalidReductionOptions() { getDefaultsThrows("Reduction_Invalid"); }
 
   void testValidDebugOptions() {
-    auto result = getDefaults("All");
+    auto result = getDefaults("Experiment");
     TS_ASSERT_EQUALS(result.debug(), true);
   }
 
   void testValidPerThetaOptions() {
-    auto result = getDefaults("All");
+    auto result = getDefaults("Experiment");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      RangeInQ(0.01, 0.03, 0.2), 0.7,
                                      std::string("390-415"));
@@ -70,7 +70,7 @@ public:
   void testInvalidPerThetaOptions() { getDefaultsThrows("PerTheta_Invalid"); }
 
   void testValidTransmissionRunRange() {
-    auto result = getDefaults("All");
+    auto result = getDefaults("Experiment");
     auto const expected = RangeInLambda{10.0, 12.0};
     TS_ASSERT_EQUALS(result.transmissionRunRange(), expected);
   }
@@ -80,7 +80,7 @@ public:
   }
 
   void testValidCorrectionOptions() {
-    auto result = getDefaults("All");
+    auto result = getDefaults("Experiment");
     TS_ASSERT_EQUALS(result.polarizationCorrections().correctionType(),
                      PolarizationCorrectionType::ParameterFile);
     TS_ASSERT_EQUALS(result.floodCorrections().correctionType(),
