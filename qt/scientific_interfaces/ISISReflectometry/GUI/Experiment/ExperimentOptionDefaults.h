@@ -16,7 +16,8 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentOptionDefaults {
 public:
   virtual ~IExperimentOptionDefaults() = default;
-  virtual Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
+  virtual Experiment
+  get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults

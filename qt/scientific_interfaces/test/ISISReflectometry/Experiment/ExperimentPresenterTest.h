@@ -13,8 +13,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ReflectometryHelper.h"
-#include "MockExperimentView.h"
 #include "MockExperimentOptionDefaults.h"
+#include "MockExperimentView.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -507,8 +507,8 @@ public:
 
   void testRestoreDefaultsUpdatesPerThetaInView() {
     auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                             RangeInQ(0.01, 0.03, 0.2),
-                                             0.7, std::string("390-415"));
+                                             RangeInQ(0.01, 0.03, 0.2), 0.7,
+                                             std::string("390-415"));
     auto model = makeModelWithPerThetaDefaults(std::move(perThetaDefaults));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
@@ -521,10 +521,9 @@ public:
   }
 
   void testRestoreDefaultsUpdatesPerThetaInModel() {
-    auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(boost::none,
-                                                                TransmissionRunPair(),
-                                                                RangeInQ(0.01, 0.03, 0.2),
-                                                                0.7, std::string("390-415")));
+    auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(
+        boost::none, TransmissionRunPair(), RangeInQ(0.01, 0.03, 0.2), 0.7,
+        std::string("390-415")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
@@ -572,8 +571,9 @@ public:
   }
 
   void testRestoreDefaultsUpdatesCorrectionInModel() {
-    auto model = makeModelWithCorrections(PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
-                                          FloodCorrections(FloodCorrectionType::ParameterFile));
+    auto model = makeModelWithCorrections(
+        PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
+        FloodCorrections(FloodCorrectionType::ParameterFile));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
@@ -594,48 +594,46 @@ private:
   PolarizationCorrections makePolarizationCorrections() {
     return PolarizationCorrections(PolarizationCorrectionType::None);
   }
-  
+
   FloodCorrections makeFloodCorrections() {
     return FloodCorrections(FloodCorrectionType::Workspace);
   }
 
-  RangeInLambda makeTransmissionRunRange() {
-    return RangeInLambda{0, 0};
-  }
+  RangeInLambda makeTransmissionRunRange() { return RangeInLambda{0, 0}; }
 
   std::map<std::string, std::string> makeStitchParameters() {
     return std::map<std::string, std::string>();
   }
 
   std::vector<PerThetaDefaults> makePerThetaDefaults() {
-    auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                             RangeInQ(boost::none, boost::none, boost::none),
-                                             boost::none, boost::none);
+    auto perThetaDefaults =
+        PerThetaDefaults(boost::none, TransmissionRunPair(),
+                         RangeInQ(boost::none, boost::none, boost::none),
+                         boost::none, boost::none);
     return std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
   }
 
   Experiment makeModel() {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
-                      makePolarizationCorrections(),
-                      makeFloodCorrections(), makeTransmissionRunRange(),
-                      makeStitchParameters(), makePerThetaDefaults());
+                      makePolarizationCorrections(), makeFloodCorrections(),
+                      makeTransmissionRunRange(), makeStitchParameters(),
+                      makePerThetaDefaults());
   }
 
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
     return Experiment(analysisMode, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
-                      makePolarizationCorrections(),
-                      makeFloodCorrections(), makeTransmissionRunRange(),
-                      makeStitchParameters(), makePerThetaDefaults());
+                      makePolarizationCorrections(), makeFloodCorrections(),
+                      makeTransmissionRunRange(), makeStitchParameters(),
+                      makePerThetaDefaults());
   }
 
   Experiment makeModelWithReduction(SummationType summationType,
                                     ReductionType reductionType,
                                     bool includePartialBins) {
-    return Experiment(AnalysisMode::PointDetector, reductionType,
-                      summationType, includePartialBins, false,
-                      makePolarizationCorrections(),
+    return Experiment(AnalysisMode::PointDetector, reductionType, summationType,
+                      includePartialBins, false, makePolarizationCorrections(),
                       makeFloodCorrections(), makeTransmissionRunRange(),
                       makeStitchParameters(), makePerThetaDefaults());
   }
@@ -643,9 +641,9 @@ private:
   Experiment makeModelWithDebug(bool debug) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, debug,
-                      makePolarizationCorrections(),
-                      makeFloodCorrections(), makeTransmissionRunRange(),
-                      makeStitchParameters(), makePerThetaDefaults());
+                      makePolarizationCorrections(), makeFloodCorrections(),
+                      makeTransmissionRunRange(), makeStitchParameters(),
+                      makePerThetaDefaults());
   }
 
   Experiment makeModelWithPerThetaDefaults(PerThetaDefaults perThetaDefaults) {
@@ -653,21 +651,22 @@ private:
     perThetaList.emplace_back(std::move(perThetaDefaults));
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
-                      makePolarizationCorrections(),
-                      makeFloodCorrections(), makeTransmissionRunRange(),
-                      makeStitchParameters(), std::move(perThetaList));
+                      makePolarizationCorrections(), makeFloodCorrections(),
+                      makeTransmissionRunRange(), makeStitchParameters(),
+                      std::move(perThetaList));
   }
 
   Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
-                      makePolarizationCorrections(),
-                      makeFloodCorrections(), std::move(range),
-                      makeStitchParameters(), makePerThetaDefaults());
+                      makePolarizationCorrections(), makeFloodCorrections(),
+                      std::move(range), makeStitchParameters(),
+                      makePerThetaDefaults());
   }
 
-  Experiment makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
-                                      FloodCorrections floodCorrections) {
+  Experiment
+  makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
+                           FloodCorrections floodCorrections) {
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda, false, false,
                       std::move(polarizationCorrections),

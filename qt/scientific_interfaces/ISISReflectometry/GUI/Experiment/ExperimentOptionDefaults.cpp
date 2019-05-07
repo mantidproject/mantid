@@ -7,8 +7,8 @@
 #include "ExperimentOptionDefaults.h"
 #include "Common/OptionDefaults.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "Reduction/Experiment.h"
 #include "PerThetaDefaultsTableValidator.h"
+#include "Reduction/Experiment.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -65,27 +65,28 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto const theta = std::string("");
   auto const firstTransmissionRun = std::string("");
   auto const secondTransmissionRun = std::string("");
-  auto const qMin = stringValueOrEmpty(defaults.getOptionalValue<double>(
-      "MomentumTransferMin", "QMin"));
-  auto const qMax = stringValueOrEmpty(defaults.getOptionalValue<double>(
-      "MomentumTransferMax", "QMax"));
-  auto const qStep = stringValueOrEmpty(defaults.getOptionalValue<double>(
-      "MomentumTransferStep", "dQ/Q"));
+  auto const qMin = stringValueOrEmpty(
+      defaults.getOptionalValue<double>("MomentumTransferMin", "QMin"));
+  auto const qMax = stringValueOrEmpty(
+      defaults.getOptionalValue<double>("MomentumTransferMax", "QMax"));
+  auto const qStep = stringValueOrEmpty(
+      defaults.getOptionalValue<double>("MomentumTransferStep", "dQ/Q"));
   auto const maybeScaleFactor =
       defaults.getOptionalValue<double>("ScaleFactor", "ScaleFactor");
   auto const scaleFactor = stringValueOrEmpty(maybeScaleFactor);
-  auto const processingInstructions = defaults.getStringOrEmpty("ProcessingInstructions",
-                                                                "ProcessingInstructions");
+  auto const processingInstructions = defaults.getStringOrEmpty(
+      "ProcessingInstructions", "ProcessingInstructions");
   auto perThetaDefaults = std::vector<std::array<std::string, 8>>();
   perThetaDefaults.emplace_back(std::array<std::string, 8>{
-      theta,firstTransmissionRun, secondTransmissionRun,
-      qMin, qMax, qStep, scaleFactor, processingInstructions});
+      theta, firstTransmissionRun, secondTransmissionRun, qMin, qMax, qStep,
+      scaleFactor, processingInstructions});
   auto validate = PerThetaDefaultsTableValidator();
   auto const tolerance = 0.0; // irrelevant because theta is empty
   auto perThetaValidationResult = validate(perThetaDefaults, tolerance);
   if (!perThetaValidationResult.isValid())
-    throw std::invalid_argument("Errors were found in the per-angle default values");
-  
+    throw std::invalid_argument(
+        "Errors were found in the per-angle default values");
+
   return Experiment(
       analysisMode, reductionType, summationType, includePartialBins, debug,
       std::move(polarizationCorrections), std::move(floodCorrections),
@@ -95,7 +96,7 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
 } // unnamed namespace
 
 Experiment ExperimentOptionDefaults::get(
-      Mantid::Geometry::Instrument_const_sptr instrument) {
+    Mantid::Geometry::Instrument_const_sptr instrument) {
   return getExperimentDefaults(instrument);
 }
 } // namespace CustomInterfaces

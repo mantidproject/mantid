@@ -45,8 +45,7 @@ OptionDefaults::getStringOrDefault(std::string const &propertyName,
 std::string
 OptionDefaults::getStringOrEmpty(std::string const &propertyName,
                                  std::string const &parameterName) const {
-  return getValueOrDefault<std::string>(propertyName, parameterName,
-                                        "");
+  return getValueOrDefault<std::string>(propertyName, parameterName, "");
 }
 
 std::string OptionDefaults::getString(std::string const &propertyName,
