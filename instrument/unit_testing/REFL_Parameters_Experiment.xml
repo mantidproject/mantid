@@ -47,42 +47,6 @@
       <value val="1"/>
   </parameter>
 
-  <!-- Detector -->
-
-  <parameter name="CorrectDetectors">
-      <value val="1"/>
-  </parameter>
-
-  <parameter name="DetectorCorrectionType" type="string">
-    <value val="RotateAroundSample"/>
-  </parameter>
-
-  <!-- Monitor options -->
-
-  <parameter name="I0MonitorIndex">
-      <value val="2"/>
-  </parameter>
-
-  <parameter name="MonitorBackgroundMin">
-    <value val="17.0"/>
-  </parameter>
-
-  <parameter name="MonitorBackgroundMax">
-    <value val="18.0"/>
-  </parameter>
-
-  <parameter name="NormalizeByIntegratedMonitors">
-    <value val="1"/>
-  </parameter>
-
-  <parameter name="MonitorIntegralMin">
-    <value val="4.0"/>
-  </parameter>
-
-  <parameter name="MonitorIntegralMax">
-    <value val="10.0"/>
-  </parameter>
-
   <!-- Per Theta options -->
 
   <parameter name="QMin">
@@ -115,7 +79,7 @@
     <value val="12.0"/>
   </parameter>
 
-  <!-- Wavelength range -->
+  <!-- Wavelength range - not part of experiment options but mandatory -->
 
   <parameter name="LambdaMin">
     <value val="1.5"/>
