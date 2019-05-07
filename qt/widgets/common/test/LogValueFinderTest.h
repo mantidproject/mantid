@@ -26,14 +26,14 @@ using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 using MantidQt::MantidWidgets::LogValueFinder;
 
-class MDFLogValueFinderTest : public CxxTest::TestSuite {
+class LogValueFinderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDFLogValueFinderTest *createSuite() {
-    return new MDFLogValueFinderTest();
+  static LogValueFinderTest *createSuite() {
+    return new LogValueFinderTest();
   }
-  static void destroySuite(MDFLogValueFinderTest *suite) { delete suite; }
+  static void destroySuite(LogValueFinderTest *suite) { delete suite; }
 
   void test_getLogNames() {
     ScopedWorkspace ws1(createTestWS(1));
