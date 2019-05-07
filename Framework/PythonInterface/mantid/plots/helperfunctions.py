@@ -315,7 +315,7 @@ def get_bins(workspace, wkspIndex, withDy=False):
     return x, y, dy, dx
 
 
-def get_md_data2d_bin_bounds(workspace, normalization, indices=None):
+def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin boundaries in each
@@ -325,10 +325,13 @@ def get_md_data2d_bin_bounds(workspace, normalization, indices=None):
     """
     coordinate, data, _ = get_md_data(workspace, normalization, indices, withError=False)
     assert len(coordinate) == 2, 'The workspace is not 2D'
-    return coordinate[0], coordinate[1], data
+    if transpose:
+        return coordinate[1], coordinate[0], data.T
+    else:
+        return coordinate[0], coordinate[1], data
 
 
-def get_md_data2d_bin_centers(workspace, normalization, indices=None):
+def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=False):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin centers in each
@@ -337,7 +340,7 @@ def get_md_data2d_bin_centers(workspace, normalization, indices=None):
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    x, y, data = get_md_data2d_bin_bounds(workspace, normalization, indices)
+    x, y, data = get_md_data2d_bin_bounds(workspace, normalization, indices, transpose)
     x = points_from_boundaries(x)
     y = points_from_boundaries(y)
     return x, y, data
@@ -366,7 +369,7 @@ def common_x(arr):
     return numpy.all(arr == arr[0, :], axis=(1, 0))
 
 
-def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
+def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=False):
     num_hist = workspace.getNumberHistograms()
     delta = numpy.finfo(numpy.float64).max
     min_value = numpy.finfo(numpy.float64).max
@@ -395,10 +398,13 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
         x = mantid.plots.helperfunctions.boundaries_from_points(x_centers)
     else:
         x = x_centers
-    return x,y,z
+    if transpose:
+        return y.T,x.T,z.T
+    else:
+        return x,y,z
 
 
-def get_matrix_2d_data(workspace, distribution, histogram2D=False):
+def get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=False):
     '''
     Get all data from a Matrix workspace that has the same number of bins
     in every spectrum. It is used for 2D plots
@@ -446,7 +452,10 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False):
                 y = points_from_boundaries(y)
     y = numpy.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
     z = numpy.ma.masked_invalid(z)
-    return x, y, z
+    if transpose:
+        return y.T,x.T,z.T
+    else:
+        return x,y,z
 
 
 def get_uneven_data(workspace, distribution):

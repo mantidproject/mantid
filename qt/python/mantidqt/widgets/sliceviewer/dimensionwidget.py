@@ -52,6 +52,7 @@ class DimensionWidget(QWidget):
             self.layout.addWidget(widget)
 
         self.set_initial_states()
+        self.transpose = False
 
     def change_dims(self, number):
         states = [d.get_state() for n, d in enumerate(self.dims)]
@@ -73,7 +74,16 @@ class DimensionWidget(QWidget):
                 if n != number and d.get_state() == State.Y:
                     d.set_state(State.NONE)
 
+        self.check_transpose()
+
         self.dimensionsChanged.emit()
+
+    def check_transpose(self):
+        for d in reversed(self.dims):
+            if d.get_state() == State.X:
+                self.transpose = False
+            elif d.get_state() == State.Y:
+                self.transpose = True
 
     def set_initial_states(self):
         # set first 2 State.NONE dimensions as x and y

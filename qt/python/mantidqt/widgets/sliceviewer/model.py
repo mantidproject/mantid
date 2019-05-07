@@ -26,9 +26,12 @@ class SliceViewerModel(object):
     def get_ws(self):
         return self._ws
 
-    def get_data(self, slicepoint):
+    def get_data(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
-        return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices])
+        if transpose:
+            return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices]).T
+        else:
+            return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices])
 
     def get_dim_info(self, n):
         """

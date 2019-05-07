@@ -24,4 +24,4 @@ class SliceViewer(object):
         self.view.plot(self.model.get_ws(), slicepoint=self.view.dimensions.get_slicepoint())
 
     def update_plot_data(self):
-        self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint()))
+        self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint(), self.view.dimensions.transpose))
