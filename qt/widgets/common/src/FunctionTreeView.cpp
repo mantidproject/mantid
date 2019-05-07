@@ -1359,7 +1359,6 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
 
 /**
  * Updates the function parameter value
- * @param funcIndex :: Index of the function
  * @param paramName :: Parameter name
  * @param value :: New value
  */
@@ -1370,7 +1369,6 @@ void FunctionTreeView::setParameter(const QString &paramName, double value) {
 
 /**
  * Updates the function parameter error
- * @param funcIndex :: Index of the function
  * @param paramName :: Parameter name
  * @param error :: New error
  */
@@ -1390,7 +1388,6 @@ void FunctionTreeView::setParamError(const QString &paramName, double error) {
 
 /**
  * Get a value of a parameter
- * @param funcIndex :: Index of the function
  * @param paramName :: Parameter name
  */
 double FunctionTreeView::getParameter(const QString &paramName) const {

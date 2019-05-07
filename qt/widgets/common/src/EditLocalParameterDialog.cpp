@@ -29,8 +29,6 @@ namespace MantidWidgets {
  * @param funcBrowser :: [input] Function browser this is working with
  * @param parName :: [input] Name of parameter to edit in this dialog
  * @param wsNames :: [input] Names of workspaces being fitted
- * @param wsIndices :: [input] Indices of which spectrum in each workspace is
- * fitted
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, FunctionMultiDomainPresenter *funcBrowser,
@@ -57,8 +55,6 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * m_ties and set up the UI first
  * @param parName :: [input] Name of parameter to edit in this dialog
  * @param wsNames :: [input] Names of workspaces being fitted
- * @param wsIndices :: [input] Indices of which spectrum in each workspace is
- * fitted
  */
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &wsNames) {

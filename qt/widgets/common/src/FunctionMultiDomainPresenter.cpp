@@ -336,8 +336,6 @@ void FunctionMultiDomainPresenter::viewChangedParameter(
 /**
  * Launches the Edit Local Parameter dialog and deals with the input from it.
  * @param parName :: Name of parameter that button was clicked for.
- * @param wsNames :: Names of the workspaces the datasets came from.
- * @param wsIndices :: The workspace indices of the datasets.
  */
 void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
   m_editLocalParameterDialog = new EditLocalParameterDialog(
