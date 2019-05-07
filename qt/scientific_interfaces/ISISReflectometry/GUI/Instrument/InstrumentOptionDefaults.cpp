@@ -23,6 +23,8 @@ getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto wavelengthRange =
       RangeInLambda(getValue<double>("WavelengthMin", "LambdaMin"),
                     getValue<double>("WavelengthMax", "LambdaMax"));
+  if (!wavelengthRange.isValid(false))
+    throw std::invalid_argument("Invalid wavelength range");
 
   auto monitorIndex = defaults.getIntOrZero("I0MonitorIndex", "I0MonitorIndex");
   if (monitorIndex < 0)
