@@ -87,7 +87,7 @@ public:
                               double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, QString tie);
-  void changeTie(const QString &parName, const QString &tie);
+  void changeTie(const QString &parName, const QString &tie) override;
   void addConstraint(const QString &functionIndex,
                      const QString &constraint) override;
   void removeConstraint(const QString &paramName) override;

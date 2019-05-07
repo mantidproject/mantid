@@ -261,8 +261,9 @@ void FunctionMultiDomainPresenter::viewPastedFunction(const QString &funStr) {
 }
 
 void FunctionMultiDomainPresenter::viewAddedFunction(const QString &funStr) {
-  auto prefix = m_view->currentFunctionIndex();
-  m_model->addFunction(prefix.value_or(""), funStr);
+  auto const prefix = m_view->currentFunctionIndex();
+  auto const prefixValue = prefix ? prefix.value() : "";
+  m_model->addFunction(prefixValue, funStr);
   m_view->setGlobalParameters(m_model->getGlobalParameters());
   emit functionStructureChanged();
 }

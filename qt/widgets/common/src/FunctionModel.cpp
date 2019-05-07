@@ -44,7 +44,7 @@ void MultiDomainFunctionModel::setFunction(IFunction_sptr fun) {
   }
   m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
   if (fun) {
-    auto const nf = m_numberDomains > 0 ? m_numberDomains : 1;
+    auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
     for (int i = 0; i < nf; ++i) {
       m_function->addFunction(fun->clone());
       m_function->setDomainIndex(i, i);
@@ -95,7 +95,7 @@ void MultiDomainFunctionModel::addFunction(const QString &prefix,
   }
   auto newFun =
       FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  auto const nf = m_numberDomains > 0 ? m_numberDomains : 1;
+  auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     auto fun = getSingleFunction(i);
     auto parentFun = getFunctionWithPrefix(prefix, fun);
@@ -121,7 +121,7 @@ void MultiDomainFunctionModel::removeFunction(const QString &functionIndex) {
     clear();
     return;
   }
-  auto const nf = m_numberDomains > 0 ? m_numberDomains : 1;
+  auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     auto fun = getSingleFunction(i);
     auto parentFun = getFunctionWithPrefix(prefix, fun);
