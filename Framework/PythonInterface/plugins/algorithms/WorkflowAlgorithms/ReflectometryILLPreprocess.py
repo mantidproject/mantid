@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory,
                         DataProcessorAlgorithm,
                         FileAction,
@@ -106,9 +107,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Execute the algorithm."""
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
-        self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = common.WSNameSource(wsPrefix, cleanupMode)
+        self._names = utils.NameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
 
@@ -141,8 +142,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         nonnegativeInt = IntBoundedValidator(lower=0)
         wsIndexRange = IntBoundedValidator(lower=0, upper=255)
-        nonnegativeIntArray = IntArrayBoundedValidator()
-        nonnegativeIntArray.setLower(0)
+        nonnegativeIntArray = IntArrayBoundedValidator(lower=0)
         maxTwoNonnegativeInts = CompositeValidator()
         maxTwoNonnegativeInts.add(IntArrayLengthValidator(lenmin=0, lenmax=2))
         maxTwoNonnegativeInts.add(nonnegativeIntArray)
@@ -176,8 +176,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
                              doc='Enable or disable child algorithm logging.')
         self.declareProperty(Prop.CLEANUP,
-                             defaultValue=common.WSCleanup.ON,
-                             validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
+                             defaultValue=utils.Cleanup.ON,
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
                              doc='Enable or disable intermediate workspace cleanup.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.WATER_REFERENCE,
                                                      defaultValue='',

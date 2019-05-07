@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
@@ -67,9 +68,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Execute the algorithm."""
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
-        self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
+        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = common.WSNameSource(wsPrefix, cleanupMode)
+        self._names = utils.NameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
         processReflected = not self._directOnly()
@@ -94,11 +95,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         threeNonnegativeInts = CompositeValidator()
         threeNonnegativeInts.add(IntArrayLengthValidator(3))
-        nonnegativeInts = IntArrayBoundedValidator()
-        nonnegativeInts.setLower(0)
+        nonnegativeInts = IntArrayBoundedValidator(lower=0)
         threeNonnegativeInts.add(nonnegativeInts)
-        nonnegativeFloatArray = FloatArrayBoundedValidator()
-        nonnegativeFloatArray.setLower(0.)
+        nonnegativeFloatArray = FloatArrayBoundedValidator(lower=0.)
         inWavelength = WorkspaceUnitValidator('Wavelength')
         self.declareProperty(
             MatrixWorkspaceProperty(
@@ -120,8 +119,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             doc='Enable or disable child algorithm logging.')
         self.declareProperty(
             Prop.CLEANUP,
-            defaultValue=common.WSCleanup.ON,
-            validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
+            defaultValue=utils.Cleanup.ON,
+            validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
             doc='Enable or disable intermediate workspace cleanup.')
         self.declareProperty(
             Prop.SUM_TYPE,

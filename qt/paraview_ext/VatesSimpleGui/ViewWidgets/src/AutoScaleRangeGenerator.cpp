@@ -96,7 +96,6 @@ VsiColorScale AutoScaleRangeGenerator::getColorScale() {
   default:
     colorScaleContainer.maxValue = 1.0;
     colorScaleContainer.minValue = 0.0;
-    colorScaleContainer.useLogScale = false;
 
     break;
   }

@@ -81,7 +81,13 @@ from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
+import platform
 from six import with_metaclass
+
+
+def current_OS_has_GSLv2():
+    """ Check whether the current OS should be running GSLv2 """
+    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''
 
 
 class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
@@ -856,9 +862,14 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
+        # gsl v2 gives a slightly different result than v1 for II.OSIRISFuryFitSeq
         self.tolerance = 1e-3
-        return ['II.OSIRISFury.nxs',
-                'II.OSIRISFuryFitSeq.nxs']
+        reference_files = ['II.OSIRISFury.nxs']
+        if current_OS_has_GSLv2():
+            reference_files += ['II.OSIRISFuryFitSeq_gslv2.nxs']
+        else:
+            reference_files += ['II.OSIRISFuryFitSeq.nxs']
+        return reference_files
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -884,10 +895,14 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
-        # gsl v2 gives a slightly different result than v1 for II.IRISFuryFitSeq (Hence the high tolerance)
+        # gsl v2 gives a slightly different result than v1 for II.IRISFuryFitSeq
         self.tolerance = 1e-1
-        ref_files = ['II.IRISFury.nxs', 'II.IRISFuryFitSeq.nxs']
-        return ref_files
+        reference_files = ['II.IRISFury.nxs']
+        if current_OS_has_GSLv2():
+            reference_files += ['II.IRISFuryFitSeq_gslv2.nxs']
+        else:
+            reference_files += ['II.IRISFuryFitSeq.nxs']
+        return reference_files
 
 #==============================================================================
 
@@ -1089,7 +1104,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
 
     def get_reference_files(self):
         self.tolerance = 0.3
-        return ['II.OSIRISConvFitSeq.nxs']
+        # gsl v2 gives a slightly different result than v1
+        return ['II.OSIRISConvFitSeq_gslv2.nxs'] if current_OS_has_GSLv2() else ['II.OSIRISConvFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -1116,7 +1132,8 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
 
     def get_reference_files(self):
         self.tolerance = 0.2
-        return ['II.IRISConvFitSeq.nxs']
+        # gsl v2 gives a slightly different result than v1
+        return ['II.IRISConvFitSeq_gslv2.nxs'] if current_OS_has_GSLv2() else ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
 # Transmission Monitor Test

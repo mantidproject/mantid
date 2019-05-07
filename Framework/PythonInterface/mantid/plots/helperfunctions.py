@@ -62,6 +62,55 @@ def get_normalization(md_workspace, **kwargs):
     return normalization, kwargs
 
 
+def get_indices(md_workspace, **kwargs):
+    """
+    Gets the indices of an MDHistoWorkspace to select the plane to plot.
+
+    Set the legend to provide the selected axes values
+
+    :param md_workspace: :class:`mantid.api.IMDHistoWorkspace` to extract the data from
+    """
+    if 'slicepoint' in kwargs and 'indices' in kwargs:
+        raise ValueError("Must specify either 'slicepoint' or 'indices', not both")
+
+    if 'slicepoint' in kwargs:
+        slicepoint = kwargs.pop('slicepoint')
+        assert md_workspace.getNumDims() == len(slicepoint), "slicepoint provided do not match the dimensions of the workspace"
+        indices = []
+        for n, p in enumerate(slicepoint):
+            if p is None:
+                indices.append(slice(None))
+            else:
+                indices.append(pointToIndex(md_workspace.getDimension(n), p))
+        indices = tuple(indices)
+    elif 'indices' in kwargs:
+        indices = kwargs.pop('indices')
+        assert md_workspace.getNumDims() == len(indices), "indices provided do not match the dimensions of the workspace"
+    else:
+        indices = None
+
+    if indices and 'label' not in kwargs:
+        ws_name = md_workspace.name()
+        labels = '; '.join('{0}={1:.4}'.format(md_workspace.getDimension(n).name,
+                                               (md_workspace.getDimension(n).getX(indices[n]) +
+                                                md_workspace.getDimension(n).getX(indices[n]+1))/2)
+                           for n in range(md_workspace.getNumDims()) if indices[n] != slice(None))
+        if ws_name:
+            kwargs['label'] = '{0}: {1}'.format(ws_name, labels)
+        else:
+            kwargs['label'] = labels
+
+    return indices, kwargs
+
+
+def pointToIndex(dim, point):
+    """
+    Finds the bin index of which the point falls into.
+    """
+    i = (point-dim.getX(0))/dim.getBinWidth()
+    return int(min(max(i, 0), dim.getNBins()-1))
+
+
 def points_from_boundaries(input_array):
     """
     The function returns bin centers from bin boundaries
@@ -152,40 +201,45 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     return workspace_index, spectrum_number, kwargs
 
 
-def get_md_data1d(workspace, normalization):
+def get_md_data1d(workspace, normalization, indices=None):
     """
     Function to transform data in an MDHisto workspace with exactly
     one non-integrated dimension into arrays of bin centers, data,
     and error, to be used in 1D plots (plot, scatter, errorbar)
     """
-    coordinate, data, err = get_md_data(workspace, normalization, withError=True)
+    coordinate, data, err = get_md_data(workspace, normalization, indices, withError=True)
     assert len(coordinate) == 1, 'The workspace is not 1D'
     coordinate = points_from_boundaries(coordinate[0])
     return coordinate, data, err
 
 
-def get_md_data(workspace, normalization, withError=False):
+def get_md_data(workspace, normalization, indices=None, withError=False):
     """
     Generic function to extract data from an MDHisto workspace
 
     :param workspace: :class:`mantid.api.IMDHistoWorkspace` containing data
     :param normalization: if :class:`mantid.api.MDNormalization.NumEventsNormalization`
         it will divide intensity by the number of corresponding MDEvents
+    :param indices: slice indices to select data
     :param withError: flag for if the error is calculated. If False, err is returned as None
 
     returns a tuple containing bin boundaries for each dimension, the (maybe normalized)
     signal and error arrays
     """
-    dims = workspace.getNonIntegratedDimensions()
+    if indices is None:
+        dims = workspace.getNonIntegratedDimensions()
+        indices = Ellipsis
+    else:
+        dims =  [workspace.getDimension(n) for n in range(workspace.getNumDims()) if indices[n] == slice(None)]
     dim_arrays = [_dim2array(d) for d in dims]
     # get data
-    data = workspace.getSignalArray() * 1.
+    data = workspace.getSignalArray()[indices].copy()
     if normalization == mantid.api.MDNormalization.NumEventsNormalization:
-        nev = workspace.getNumEventsArray()
+        nev = workspace.getNumEventsArray()[indices]
         data /= nev
     err = None
     if withError:
-        err2 = workspace.getErrorSquaredArray() * 1.
+        err2 = workspace.getErrorSquaredArray()[indices].copy()
         if normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= (nev * nev)
         err = numpy.sqrt(err2)
@@ -261,7 +315,7 @@ def get_bins(workspace, wkspIndex, withDy=False):
     return x, y, dy, dx
 
 
-def get_md_data2d_bin_bounds(workspace, normalization):
+def get_md_data2d_bin_bounds(workspace, normalization, indices=None):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin boundaries in each
@@ -269,12 +323,12 @@ def get_md_data2d_bin_bounds(workspace, normalization):
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    coordinate, data, _ = get_md_data(workspace, normalization, withError=False)
+    coordinate, data, _ = get_md_data(workspace, normalization, indices, withError=False)
     assert len(coordinate) == 2, 'The workspace is not 2D'
     return coordinate[0], coordinate[1], data
 
 
-def get_md_data2d_bin_centers(workspace, normalization):
+def get_md_data2d_bin_centers(workspace, normalization, indices=None):
     """
     Function to transform data in an MDHisto workspace with exactly
     two non-integrated dimension into arrays of bin centers in each
@@ -283,7 +337,7 @@ def get_md_data2d_bin_centers(workspace, normalization):
 
     Note: return coordinates are 1d vectors. Use numpy.meshgrid to generate 2d versions
     """
-    x, y, data = get_md_data2d_bin_bounds(workspace, normalization)
+    x, y, data = get_md_data2d_bin_bounds(workspace, normalization, indices)
     x = points_from_boundaries(x)
     y = points_from_boundaries(y)
     return x, y, data
@@ -329,7 +383,7 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False):
         max_value = max(max_value, xtmp.max())
         diff = xtmp[1:] - xtmp[:-1]
         delta = min(delta, diff.min())
-    num_edges = int(numpy.ceil((max_value - min_value)/delta)) + 1 
+    num_edges = int(numpy.ceil((max_value - min_value)/delta)) + 1
     x_centers = numpy.linspace(min_value, max_value, num=num_edges)
     y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
@@ -503,18 +557,31 @@ def get_sample_log(workspace, **kwargs):
 # ====================================================
 
 
-def get_axes_labels(workspace):
+def get_axes_labels(workspace, indices=None):
     """
     Get axis labels from a Workspace2D or an MDHistoWorkspace
     Returns a tuple. The first element is the quantity label, such as "Intensity" or "Counts".
     All other elements in the tuple are labels for axes.
     Some of them are latex formatted already.
 
+    If MDWorkspace then the last element will be the values selected by the indices, to be set as title.
+
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
     """
     if isinstance(workspace, MultipleExperimentInfos):
         axes = ['Intensity']
-        dims = workspace.getNonIntegratedDimensions()
+        title = ''
+        if indices is None:
+            dims = workspace.getNonIntegratedDimensions()
+        else:
+            dims = []
+            for n in range(workspace.getNumDims()):
+                d = workspace.getDimension(n)
+                if indices[n] == slice(None):
+                    dims.append(d)
+                else:
+                    title += '{0}={1:.4}; '.format(d.name,
+                                                   (d.getX(indices[n])+d.getX(indices[n]+1))/2)
         for d in dims:
             axis_title = d.name.replace('DeltaE', r'$\Delta E$')
             axis_unit = d.getUnits().replace('Angstrom^-1', r'$\AA^{-1}$')
@@ -522,6 +589,7 @@ def get_axes_labels(workspace):
             axis_unit = axis_unit.replace('Angstrom', r'$\AA$')
             axis_unit = axis_unit.replace('MomentumTransfer', r'$\AA^{-1}$')
             axes.append('{0} ({1})'.format(axis_title, axis_unit))
+        axes.append(title.strip())
     else:
         '''For matrix workspaces, return a tuple of ``(YUnit, <other units>)``'''
         axes = [workspace.YUnit()]  # TODO: deal with distribution

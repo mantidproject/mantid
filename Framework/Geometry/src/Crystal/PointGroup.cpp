@@ -103,11 +103,9 @@ bool PointGroup::isEquivalent(const Kernel::V3D &hkl,
 std::vector<V3D> PointGroup::getAllEquivalents(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
-
   for (const auto &operation : m_allOperations) {
     equivalents.emplace_back(operation.transformHKL(hkl));
   }
-
   return equivalents;
 }
 
@@ -204,16 +202,14 @@ PointGroup::LatticeSystem PointGroup::getLatticeSystemFromCrystalSystemAndGroup(
 
 /** @return a vector with all possible PointGroup objects */
 std::vector<PointGroup_sptr> getAllPointGroups() {
+  auto &pointGroupFactory = PointGroupFactory::Instance();
   std::vector<std::string> allSymbols =
-      PointGroupFactory::Instance().getAllPointGroupSymbols();
-
+      pointGroupFactory.getAllPointGroupSymbols();
   std::vector<PointGroup_sptr> out;
   out.reserve(allSymbols.size());
-
-  for (auto &symbol : allSymbols) {
-    out.push_back(PointGroupFactory::Instance().createPointGroup(symbol));
+  for (const auto &symbol : allSymbols) {
+    out.emplace_back(pointGroupFactory.createPointGroup(symbol));
   }
-
   return out;
 }
 

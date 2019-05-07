@@ -24,8 +24,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "AlgorithmDialogFactory.h"
 #include "DllOption.h"
-#include "InterfaceFactory.h"
 
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here
@@ -251,7 +251,7 @@ protected:
   /// GenericDialogDemo.cpp
 public:
   /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm_sptr);
+  void setAlgorithm(Mantid::API::IAlgorithm_sptr /*alg*/);
   /// Set a list of suggested values
   void setPresetValues(const QHash<QString, QString> &presetValues);
   /// Set whether this is intended for use from a script or not

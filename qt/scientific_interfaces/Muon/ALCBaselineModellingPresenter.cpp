@@ -10,7 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
+#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
 using namespace Mantid::API;
 
@@ -144,9 +144,9 @@ void ALCBaselineModellingPresenter::onSectionRowModified(int row) {
   double endX = sectionRow.second.toDouble();
 
   int index(row); // That's what we make sure of in addSection()
-  IALCBaselineModellingView::SectionSelector sectionSelector(startX, endX);
+  IALCBaselineModellingView::SectionSelector selector(startX, endX);
 
-  m_view->updateSectionSelector(index, sectionSelector);
+  m_view->updateSectionSelector(index, selector);
 }
 
 /**
@@ -165,10 +165,10 @@ void ALCBaselineModellingPresenter::onSectionSelectorModified(int index) {
 }
 
 void ALCBaselineModellingPresenter::updateDataCurve() {
-  MatrixWorkspace_const_sptr data = m_model->data();
-  assert(data);
-  m_view->setDataCurve(*(QwtHelper::curveDataFromWs(data, 0)),
-                       QwtHelper::curveErrorsFromWs(data, 0));
+  MatrixWorkspace_const_sptr dataWs = m_model->data();
+  assert(dataWs);
+  m_view->setDataCurve(*(QwtHelper::curveDataFromWs(dataWs, 0)),
+                       QwtHelper::curveErrorsFromWs(dataWs, 0));
   // Delete all section selectors
   int noRows = m_view->noOfSectionRows() - 1;
   for (int j = noRows; j > -1; --j) {

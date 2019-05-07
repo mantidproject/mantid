@@ -91,7 +91,8 @@ void Projection3D::resize(int w, int h) {
 /**
  * Draw the instrument on MantidGLWidget.
  */
-void Projection3D::drawSurface(MantidGLWidget *, bool picking) const {
+void Projection3D::drawSurface(MantidGLWidget * /*widget*/,
+                               bool picking) const {
   OpenGLError::check("GL3DWidget::draw3D()[begin]");
 
   glEnable(GL_DEPTH_TEST);
@@ -294,10 +295,9 @@ void Projection3D::componentSelected(size_t componentIndex) {
   }
 
   auto pos = componentInfo.position(componentIndex);
-  auto compDir = pos - componentInfo.samplePosition();
   Quat rot;
   try {
-    compDir.normalize();
+    const auto compDir = normalize(pos - componentInfo.samplePosition());
     V3D up(0, 0, 1);
     V3D x = up.cross_prod(compDir);
     up = compDir.cross_prod(x);

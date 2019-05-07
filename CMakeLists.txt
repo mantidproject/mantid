@@ -45,9 +45,12 @@ endif()
 # Packaging configuration
 set(CPACK_PACKAGE_SUFFIX "unstable"
     CACHE STRING "suffix used to determine the deployment type")
-set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY
-			 STRINGS nightly unstable "") 
-			 # empty string and release are treated as the same thing
+set_property(CACHE CPACK_PACKAGE_SUFFIX
+             PROPERTY STRINGS
+                      nightly
+                      unstable
+                      "")
+# empty string and release are treated as the same thing
 
 # Set package name here
 set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
@@ -152,8 +155,6 @@ set(FULL_PACKAGE_BUILD 1)
 set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
-set(CXXTEST_SINGLE_LOGFILE
-    CACHE BOOL "Switch to have the tests for each package run together")
 set(CXXTEST_ADD_PERFORMANCE OFF
     CACHE BOOL
           "Switch to add Performance tests to the list of tests run by ctest?")
@@ -260,20 +261,18 @@ add_subdirectory(Testing/SystemTests/scripts)
 
 if(COVERALLS)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
-	set(SRCS_FILE "")
-	foreach(SRC ${ALL_SRCS})
-		set(SRCS_FILE "${SRCS_FILE}\n${SRC}")
-	endforeach()
-	# remove initial \n
-	string(SUBSTRING ${SRCS_FILE}
+  set(SRCS_FILE "")
+  foreach(SRC ${ALL_SRCS})
+    set(SRCS_FILE "${SRCS_FILE}\n${SRC}")
+  endforeach()
+  # remove initial \n
+  string(SUBSTRING ${SRCS_FILE}
                    1
                    -1
                    SRCS_FILE)
   set(SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt")
   file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
-  coveralls_setup(${SRCS_FILENAME}
-				  OFF
-				  "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+  coveralls_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 endif()
 
 # Installation settings
@@ -281,18 +280,58 @@ endif()
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
 install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
-# Install the files (.desktop and icon) to create a menu item, but only if
-# installing to /opt/Mantid
-if(ENABLE_MANTIDPLOT
-   AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux"
-   AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid")
-  install(
-    FILES
-      ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
-    DESTINATION /usr/share/applications)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/MantidPlot_Icon_32offset.png
-          DESTINATION /usr/share/pixmaps
-          RENAME mantidplot.png)
+# Install the files (.desktop and icon) to create a menu items
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  function(uppercase_first_letter output_var input)
+  string(LENGTH ${input} _inputlen)
+  string(TOUPPER ${input} _allupper)
+  string(SUBSTRING ${_allupper} 0 1 _first)
+  string(SUBSTRING ${input} 1 ${_inputlen} _rest)
+  set(${output_var} ${_first}${_rest} PARENT_SCOPE)
+  endfunction()
+
+  function(install_desktop_files filename app_name exec_cmd icon_file)
+    set(DESKTOP_NAME ${app_name})
+    set(DESKTOP_EXEC_CMD ${exec_cmd})
+    get_filename_component(DESKTOP_ICON ${icon_file} NAME_WE)
+    set(_output_file ${CMAKE_CURRENT_BINARY_DIR}/${filename}.install)
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/launcher-template.desktop.in
+      ${_output_file} @ONLY)
+    install(FILES ${_output_file}
+            DESTINATION /usr/share/applications
+            RENAME ${filename})
+    install(FILES ${icon_file}
+            DESTINATION /usr/share/pixmaps
+            RENAME ${DESKTOP_ICON}.png)
+  endfunction()
+
+  set( IMAGES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/images )
+  set(_app_name_suffix)
+  if(CPACK_PACKAGE_SUFFIX)
+    uppercase_first_letter(_app_name_suffix ${CPACK_PACKAGE_SUFFIX})
+  endif()
+  if(ENABLE_MANTIDPLOT)
+    set(_icon_filename ${IMAGES_DIR}/mantidplot)
+    if(CPACK_PACKAGE_SUFFIX)
+      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
+    endif()
+    install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
+                          MantidPlot${_app_name_suffix}
+                          ${CMAKE_INSTALL_PREFIX}/bin/MantidPlot
+                          ${_icon_filename}.png)
+  endif()
+
+  if(ENABLE_WORKBENCH)
+    set(_icon_filename ${IMAGES_DIR}/mantid_workbench)
+    if(CPACK_PACKAGE_SUFFIX)
+      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
+    endif()
+    install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
+                          MantidWorkbench${_app_name_suffix}
+                          ${CMAKE_INSTALL_PREFIX}/bin/mantidworkbench
+                          ${_icon_filename}.png)
+  endif()
 endif()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See

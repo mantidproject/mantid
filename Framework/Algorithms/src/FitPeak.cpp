@@ -1504,22 +1504,20 @@ void FitPeak::setupOutput(
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
   auto &vecX = m_dataWS->x(m_wsIndex);
-  size_t i_minFitX = getIndex(vecX, m_minFitX);
-  size_t i_maxFitX = getIndex(vecX, m_maxFitX);
+  const size_t i_minFitX = getIndex(vecX, m_minFitX);
+  const size_t i_maxFitX = getIndex(vecX, m_maxFitX);
 
   // Data workspace
-  size_t nspec = 3;
+  const size_t nspec = 3;
   // Get a vector for fit window
 
-  size_t vecsize = i_maxFitX - i_minFitX + 1;
-  vector<double> vecoutx(vecsize);
+  vector<double> vecoutx(i_maxFitX - i_minFitX + 1);
   for (size_t i = i_minFitX; i <= i_maxFitX; ++i)
     vecoutx[i - i_minFitX] = vecX[i];
 
   // Create workspace
-  size_t sizex = vecoutx.size();
-  size_t sizey = vecoutx.size();
-
+  const size_t sizex = vecoutx.size();
+  const auto sizey = sizex;
   HistogramBuilder builder;
   builder.setX(sizex);
   builder.setY(sizey);
@@ -1557,8 +1555,8 @@ void FitPeak::setupOutput(
   // Parameter vector
   vector<double> vec_fitpeak;
   vec_fitpeak.reserve(m_peakParameterNames.size());
-  for (auto &peakParameterName : m_peakParameterNames) {
-    vec_fitpeak.push_back(m_peakFunc->getParameter(peakParameterName));
+  for (const auto &peakParameterName : m_peakParameterNames) {
+    vec_fitpeak.emplace_back(m_peakFunc->getParameter(peakParameterName));
   }
 
   setProperty("FittedPeakParameterValues", vec_fitpeak);
@@ -1567,7 +1565,7 @@ void FitPeak::setupOutput(
   vector<double> vec_fitbkgd;
   vec_fitpeak.reserve(m_bkgdParameterNames.size());
   for (auto &bkgdParameterName : m_bkgdParameterNames) {
-    vec_fitbkgd.push_back(m_bkgdFunc->getParameter(bkgdParameterName));
+    vec_fitbkgd.emplace_back(m_bkgdFunc->getParameter(bkgdParameterName));
   }
 
   setProperty("FittedBackgroundParameterValues", vec_fitbkgd);

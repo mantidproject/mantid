@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 20 properties here", 20,
+    TSM_ASSERT_EQUALS("should be 21 properties here", 21,
                       (size_t)(alg.getProperties().size()));
   }
 
@@ -120,10 +120,10 @@ public:
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &sample(ws->sample());
     const Geometry::SampleEnvironment environment = sample.getEnvironment();
-    const auto can = environment.container();
-    const auto &material = can->material();
+    const auto &can = environment.getContainer();
+    const auto &material = can.material();
     TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
-    TS_ASSERT(can->hasValidShape());
+    TS_ASSERT(can.hasValidShape());
     TS_ASSERT_EQUALS(environment.name(), "testName");
     TS_ASSERT_EQUALS(material.numberDensity(), 1);
     TS_ASSERT_EQUALS(material.name(), "");
@@ -154,7 +154,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
     const auto &material =
-        ws->sample().getEnvironment().container()->material();
+        ws->sample().getEnvironment().getContainer().material();
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12);
   }
 
@@ -162,7 +162,8 @@ private:
   // load a cube into a meshobject
   std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    auto loader = LoadBinaryStl(path);
+    constexpr ScaleUnits unit = ScaleUnits::metres;
+    auto loader = LoadBinaryStl(path, unit);
     auto cube = loader.readStl();
     return cube;
   }

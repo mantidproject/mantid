@@ -1,13 +1,13 @@
-import six
 import unittest
 
+import six
 from mantid.py3compat import mock
-from Muon.GUI.Common import mock_widget
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.Common.muon_data_context import MuonDataContext
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class IteratorWithException:
@@ -56,11 +56,10 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
 
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
-        self.data = MuonLoadData()
-        self.context = MuonDataContext
-        self.context.instrument = 'EMU'
+        setup_context_for_tests(self)
+        self.data_context.instrument = 'EMU'
         self.view = BrowseFileWidgetView()
-        self.model = BrowseFileWidgetModel(self.data, self.context)
+        self.model = BrowseFileWidgetModel(self.loaded_data, self.context)
 
         self.view.disable_load_buttons = mock.Mock()
         self.view.enable_load_buttons = mock.Mock()

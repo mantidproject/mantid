@@ -697,10 +697,10 @@ void GenericDataProcessorPresenter::processNextItem() {
 }
 
 void GenericDataProcessorPresenter::completedGroupReductionSuccessfully(
-    GroupData const &, std::string const &) {}
+    GroupData const & /*unused*/, std::string const & /*unused*/) {}
 
 void GenericDataProcessorPresenter::completedRowReductionSuccessfully(
-    GroupData const &, std::string const &) {}
+    GroupData const & /*unused*/, std::string const & /*unused*/) {}
 
 /*
 Reduce the current row asynchronously
@@ -1904,7 +1904,7 @@ std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
   workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
-    workspaces.push_back(
+    workspaces.emplace_back(
         Mantid::Kernel::make_unique<WorkspaceCommand>(this, name));
   }
   return workspaces;

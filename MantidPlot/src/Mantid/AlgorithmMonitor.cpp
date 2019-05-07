@@ -177,7 +177,7 @@ MonitorDlg::MonitorDlg(QWidget *parent, AlgorithmMonitor *algMonitor)
   layout->addLayout(buttonLayout);
   setLayout(layout);
   setWindowTitle("Mantid - Algorithm progress");
-  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  setWindowIcon(QIcon(":/mantidplot.png"));
   resize(500, 300);
 }
 

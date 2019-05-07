@@ -24,8 +24,8 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "InterfaceFactory.h"
 #include "PythonRunner.h"
+#include "UserSubWindowFactory.h"
 
 #include <QLabel>
 #include <QMainWindow>
@@ -88,7 +88,7 @@ public:
 
 signals:
   /// Emitted to start a (generally small) script running
-  void runAsPythonScript(const QString &code, bool);
+  void runAsPythonScript(const QString &code, bool /*_t2*/);
 
   /// Thrown when used fit property browser should be changed to given one
   void

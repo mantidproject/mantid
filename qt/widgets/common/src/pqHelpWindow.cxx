@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QPointer>
-#include <QPrinter>
 #include <QPrintDialog>
+#include <QPrinter>
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QTextStream>
@@ -206,6 +206,8 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
                            Qt::WindowFlags parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != nullptr);
+  // Take ownership of the engine
+  m_helpEngine->setParent(this);
 
   Ui::pqHelpWindow ui;
   ui.setupUi(this);
@@ -241,12 +243,9 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
 
   this->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
 
-  // get contents and index added
-  this->tabifyDockWidget(ui.contentsDock, ui.indexDock);
+  // create index and search dock tabs
   this->tabifyDockWidget(ui.indexDock, ui.searchDock);
-  ui.contentsDock->setWidget(this->m_helpEngine->contentWidget());
   ui.indexDock->setWidget(this->m_helpEngine->indexWidget());
-  ui.contentsDock->raise();
 
   // setup the search tab
   QWidget *searchPane = new QWidget(this);
@@ -287,7 +286,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
   connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this,
-          SLOT(showPage(QUrl)));
+          SLOT(showLinkedPage(QUrl)));
   // set up the status bar
   connect(m_browser->page(), SIGNAL(linkHovered(QString)), this,
           SLOT(linkHovered(QString)));
@@ -328,22 +327,32 @@ void pqHelpWindow::errorMissingPage(const QUrl &url) {
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QString &url) {
-  this->showPage(QUrl::fromUserInput(url));
+void pqHelpWindow::showPage(const QString &url,
+                            bool linkClicked /* = false */) {
+  this->showPage(QUrl::fromUserInput(url), linkClicked);
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::showPage(const QUrl &url) {
+void pqHelpWindow::showPage(const QUrl &url, bool linkClicked /* = false */) {
   if (url.scheme() == "qthelp") {
-    if (this->m_helpEngine->findFile(url).isValid())
-      this->m_browser->setUrl(url);
-    else
+    if (this->m_helpEngine->findFile(url).isValid()) {
+      if (!linkClicked)
+        this->m_browser->setUrl(url);
+    } else {
       errorMissingPage(url);
-    this->updateNavButtons();
+    }
+    if (m_browser->history()->count() > 0)
+      m_backward->setEnabled(true);
+    m_forward->setEnabled(false);
   } else {
     using MantidQt::API::MantidDesktopServices;
     MantidDesktopServices::openUrl(url);
   }
+}
+
+//-----------------------------------------------------------------------------
+void pqHelpWindow::showLinkedPage(const QUrl &url) {
+  this->showPage(url, true);
 }
 
 //-----------------------------------------------------------------------------

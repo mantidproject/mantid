@@ -1,15 +1,16 @@
-from PyQt4 import QtGui
 import unittest
+from PyQt4 import QtGui
 
 from mantid.py3compat import mock
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_model import PairingTableModel
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_data_context import MuonDataContext
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
+
 
 def pair_name():
     name = []
@@ -24,9 +25,9 @@ class AlphaTest(unittest.TestCase):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
 
-        self.data = MuonDataContext()
+        setup_context_for_tests(self)
 
-        self.model = PairingTableModel(data=self.data)
+        self.model = GroupingTabModel(context=self.context)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
 
@@ -49,9 +50,9 @@ class AlphaTest(unittest.TestCase):
         group1 = MuonGroup(group_name="my_group_0", detector_ids=[1])
         group2 = MuonGroup(group_name="my_group_1", detector_ids=[2])
         group3 = MuonGroup(group_name="my_group_2", detector_ids=[3])
-        self.data.add_group(group1)
-        self.data.add_group(group2)
-        self.data.add_group(group3)
+        self.group_context.add_group(group1)
+        self.group_context.add_group(group2)
+        self.group_context.add_group(group3)
 
     def add_two_pairs_to_table(self):
         pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)

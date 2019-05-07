@@ -669,8 +669,7 @@ bool Peak::findDetector() {
  */
 bool Peak::findDetector(const InstrumentRayTracer &tracer) {
   // Scattered beam direction
-  V3D beam = detPos - samplePos;
-  beam.normalize();
+  const V3D beam = normalize(detPos - samplePos);
 
   return findDetector(beam, tracer);
 }

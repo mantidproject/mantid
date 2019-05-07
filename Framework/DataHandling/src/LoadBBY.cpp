@@ -23,9 +23,18 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 #include <Poco/AutoPtr.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 
@@ -196,11 +205,6 @@ void LoadBBY::exec() {
   API::Progress prog(this, 0.0, 1.0, Progress_Total);
   prog.doReport("creating instrument");
 
-  // create instrument
-  InstrumentInfo instrumentInfo;
-
-  createInstrument(tarFile, /* ref */ instrumentInfo);
-
   // create workspace
   DataObjects::EventWorkspace_sptr eventWS =
       boost::make_shared<DataObjects::EventWorkspace>();
@@ -208,6 +212,12 @@ void LoadBBY::exec() {
   eventWS->initialize(HISTO_BINS_Y * HISTO_BINS_X,
                       2, // number of TOF bin boundaries
                       1);
+
+  // create instrument
+  InstrumentInfo instrumentInfo;
+  std::map<std::string, double> logParams;
+  std::map<std::string, std::string> allParams;
+  createInstrument(tarFile, instrumentInfo, logParams, allParams);
 
   // set the units
   if (instrumentInfo.is_tof)
@@ -249,10 +259,14 @@ void LoadBBY::exec() {
   double period = periodSlave;
   double shift = -1.0 / 6.0 * periodMaster - periodSlave * phaseSlave / 360.0;
 
+  // get the start time from the file
+  Types::Core::DateAndTime startTime(instrumentInfo.start_time);
+  auto startInNanosec = startTime.totalNanoseconds();
+
   // count total events per pixel to reserve necessary memory
   ANSTO::EventCounter eventCounter(
-      roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
-      timeMinBoundary, timeMaxBoundary, eventCounts);
+      roi, HISTO_BINS_Y, period, shift, startInNanosec, tofMinBoundary,
+      tofMaxBoundary, timeMinBoundary, timeMaxBoundary, eventCounts);
 
   loadEvents(prog, "loading neutron counts", tarFile, eventCounter);
 
@@ -277,29 +291,37 @@ void LoadBBY::exec() {
 
   if (instrumentInfo.is_tof) {
     ANSTO::EventAssigner eventAssigner(
-        roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
-        timeMinBoundary, timeMaxBoundary, eventVectors);
+        roi, HISTO_BINS_Y, period, shift, startInNanosec, tofMinBoundary,
+        tofMaxBoundary, timeMinBoundary, timeMaxBoundary, eventVectors);
 
     loadEvents(prog, "loading neutron events (TOF)", tarFile, eventAssigner);
   } else {
     ANSTO::EventAssignerFixedWavelength eventAssigner(
         roi, HISTO_BINS_Y, instrumentInfo.wavelength, period, shift,
-        tofMinBoundary, tofMaxBoundary, timeMinBoundary, timeMaxBoundary,
-        eventVectors);
+        startInNanosec, tofMinBoundary, tofMaxBoundary, timeMinBoundary,
+        timeMaxBoundary, eventVectors);
 
     loadEvents(prog, "loading neutron events (Wavelength)", tarFile,
                eventAssigner);
   }
 
+  auto getParam = [&allParams](std::string tag, double defValue) {
+    try {
+      return std::stod(allParams[tag]);
+    } catch (std::invalid_argument) {
+      return defValue;
+    }
+  };
   if (instrumentInfo.is_tof) {
     // just to make sure the bins hold it all
     eventWS->setAllX(
         HistogramData::BinEdges{std::max(0.0, floor(eventCounter.tofMin())),
                                 eventCounter.tofMax() + 1});
   } else {
-    // +/-10%
-    eventWS->setAllX(HistogramData::BinEdges{instrumentInfo.wavelength * 0.9,
-                                             instrumentInfo.wavelength * 1.1});
+    double lof = getParam("wavelength_extn_lo", 0.95);
+    double hif = getParam("wavelength_extn_hi", 1.05);
+    eventWS->setAllX(HistogramData::BinEdges{instrumentInfo.wavelength * lof,
+                                             instrumentInfo.wavelength * hif});
   }
 
   // count total number of masked bins
@@ -342,10 +364,11 @@ void LoadBBY::exec() {
   Types::Core::time_duration duration = boost::posix_time::microseconds(
       static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
-  Types::Core::DateAndTime start_time("2000-01-01T00:00:00");
+  Types::Core::DateAndTime start_time(instrumentInfo.start_time);
   Types::Core::DateAndTime end_time(start_time + duration);
 
   logManager.addProperty("start_time", start_time.toISO8601String());
+  logManager.addProperty("run_start", start_time.toISO8601String());
   logManager.addProperty("end_time", end_time.toISO8601String());
   logManager.addProperty("is_tof", instrumentInfo.is_tof);
 
@@ -355,59 +378,15 @@ void LoadBBY::exec() {
                                    instrumentInfo.sample_name);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_description",
                                    instrumentInfo.sample_description);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_aperture",
-                                   instrumentInfo.sample_aperture);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_x",
-                                   instrumentInfo.sample_x);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_y",
-                                   instrumentInfo.sample_y);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "sample_z",
-                                   instrumentInfo.sample_z);
-
   AddSinglePointTimeSeriesProperty(logManager, time_str, "wavelength",
                                    instrumentInfo.wavelength);
-
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "source_aperture",
-                                   instrumentInfo.source_aperture);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "master1_chopper_id",
                                    instrumentInfo.master1_chopper_id);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "master2_chopper_id",
                                    instrumentInfo.master2_chopper_id);
-
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "Lt0_value",
-                                   instrumentInfo.Lt0_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "Ltof_curtainl_value",
-                                   instrumentInfo.Ltof_curtainl_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "Ltof_curtainr_value",
-                                   instrumentInfo.Ltof_curtainr_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "Ltof_curtainu_value",
-                                   instrumentInfo.Ltof_curtainu_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "Ltof_curtaind_value",
-                                   instrumentInfo.Ltof_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L1_chopper_value",
-                                   instrumentInfo.L1_chopper_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L1",
-                                   instrumentInfo.L1_source_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_det_value",
-                                   instrumentInfo.L2_det_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainl_value",
-                                   instrumentInfo.L2_curtainl_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainr_value",
-                                   instrumentInfo.L2_curtainr_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainu_value",
-                                   instrumentInfo.L2_curtainu_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtaind_value",
-                                   instrumentInfo.L2_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainl_value",
-                                   instrumentInfo.D_curtainl_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainr_value",
-                                   instrumentInfo.D_curtainr_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainu_value",
-                                   instrumentInfo.D_curtainu_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtaind_value",
-                                   instrumentInfo.D_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "curtain_rotation",
-                                   10.0);
+  for (auto &x : logParams) {
+    AddSinglePointTimeSeriesProperty(logManager, time_str, x.first, x.second);
+  }
 
   API::IAlgorithm_sptr loadInstrumentAlg =
       createChildAlgorithm("LoadInstrument");
@@ -471,51 +450,104 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
   return result;
 }
 
+// loading instrument parameters
+void LoadBBY::loadInstrumentParameters(
+    NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
+    std::map<std::string, std::string> &allParams) {
+
+  std::string idfDirectory =
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "instrumentDefinition.directory");
+
+  try {
+    std::string parameterFilename = idfDirectory + "BILBY_Parameters.xml";
+    // Set up the DOM parser and parse xml file
+    Poco::XML::DOMParser pParser;
+    Poco::XML::AutoPtr<Poco::XML::Document> pDoc;
+    try {
+      pDoc = pParser.parse(parameterFilename);
+    } catch (...) {
+      throw Kernel::Exception::FileError("Unable to parse File:",
+                                         parameterFilename);
+    }
+    Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Poco::XML::Node *pNode = it.nextNode();
+    while (pNode) {
+      if (pNode->nodeName() == "parameter") {
+        auto pElem = dynamic_cast<Poco::XML::Element *>(pNode);
+        std::string name = pElem->getAttribute("name");
+        auto nodeList = pElem->childNodes();
+        for (unsigned long i = 0; i < nodeList->length(); i++) {
+          auto cNode = nodeList->item(i);
+          if (cNode->nodeName() == "value") {
+            auto cElem = dynamic_cast<Poco::XML::Element *>(cNode);
+            std::string value = cElem->getAttribute("val");
+            allParams[name] = value;
+          }
+        }
+      }
+      pNode = it.nextNode();
+    }
+
+    float tmpFloat = 0.0f;
+    for (auto &x : allParams) {
+      if (x.first.find("log_") == 0) {
+        auto logTag = boost::algorithm::trim_copy(x.first.substr(4));
+        auto line = x.second;
+
+        // comma separated details
+        std::vector<std::string> details;
+        boost::split(details, line, boost::is_any_of(","));
+        auto hdfTag = boost::algorithm::trim_copy(details[0]);
+        try {
+          // extract the parameter and add it to the parameter dictionary
+          if (!hdfTag.empty() && loadNXDataSet(entry, hdfTag, tmpFloat)) {
+            auto factor = std::stod(details[1]);
+            logParams[logTag] = factor * tmpFloat;
+          } else {
+            logParams[logTag] = std::stod(details[2]);
+            if (!hdfTag.empty())
+              g_log.warning() << "Cannot find hdf parameter "
+
+                              << hdfTag << ", using default.\n";
+          }
+
+        } catch (std::invalid_argument) {
+          g_log.warning() << "Invalid format for BILBY parameter " << x.first
+                          << std::endl;
+        }
+      }
+    }
+  } catch (std::exception &ex) {
+    g_log.warning() << "Failed to load instrument with error: " << ex.what()
+                    << ". The current facility may not be fully "
+                       "supported.\n";
+  }
+}
+
 // instrument creation
 void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
-                               InstrumentInfo &instrumentInfo) {
+                               InstrumentInfo &instrumentInfo,
+                               std::map<std::string, double> &logParams,
+                               std::map<std::string, std::string> &allParams) {
 
   const double toMeters = 1.0 / 1000;
 
-  instrumentInfo.bm_counts = 0;
-  instrumentInfo.att_pos = 0;
-  instrumentInfo.is_tof = true;
-  instrumentInfo.wavelength = 0.0;
-
   instrumentInfo.sample_name = "UNKNOWN";
   instrumentInfo.sample_description = "UNKNOWN";
-  instrumentInfo.sample_aperture = 0.0;
-  instrumentInfo.sample_x = 0.0;
-  instrumentInfo.sample_y = 0.0;
-  instrumentInfo.sample_z = 0.0;
+  instrumentInfo.start_time = "2000-01-01T00:00:00";
 
-  instrumentInfo.source_aperture = 0.0;
+  instrumentInfo.bm_counts = 0;
+  instrumentInfo.att_pos = 0;
   instrumentInfo.master1_chopper_id = -1;
   instrumentInfo.master2_chopper_id = -1;
+
+  instrumentInfo.is_tof = true;
+  instrumentInfo.wavelength = 0.0;
 
   instrumentInfo.period_master = 0.0;
   instrumentInfo.period_slave = (1.0 / 50.0) * 1.0e6;
   instrumentInfo.phase_slave = 0.0;
-
-  instrumentInfo.Lt0_value = 0.0;
-  instrumentInfo.Ltof_curtainl_value = 0.0;
-  instrumentInfo.Ltof_curtainr_value = 0.0;
-  instrumentInfo.Ltof_curtainu_value = 0.0;
-  instrumentInfo.Ltof_curtaind_value = 0.0;
-
-  instrumentInfo.L1_chopper_value = 18.47258984375;
-  instrumentInfo.L1_source_value = 16.671;
-  instrumentInfo.L2_det_value = 33.15616015625;
-
-  instrumentInfo.L2_curtainl_value = 23.28446093750;
-  instrumentInfo.L2_curtainr_value = 23.28201953125;
-  instrumentInfo.L2_curtainu_value = 24.28616015625;
-  instrumentInfo.L2_curtaind_value = 24.28235937500;
-
-  instrumentInfo.D_curtainl_value = 0.3816;
-  instrumentInfo.D_curtainr_value = 0.4024;
-  instrumentInfo.D_curtainu_value = 0.3947;
-  instrumentInfo.D_curtaind_value = 0.3978;
 
   // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
@@ -553,17 +585,9 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
         instrumentInfo.sample_name = tmp_str;
       if (loadNXString(entry, "sample/description", tmp_str))
         instrumentInfo.sample_description = tmp_str;
-      if (loadNXDataSet(entry, "sample/sample_aperture", tmp_float))
-        instrumentInfo.sample_aperture = tmp_float;
-      if (loadNXDataSet(entry, "sample/samx", tmp_float))
-        instrumentInfo.sample_x = tmp_float;
-      if (loadNXDataSet(entry, "sample/samy", tmp_float))
-        instrumentInfo.sample_y = tmp_float;
-      if (loadNXDataSet(entry, "sample/samz", tmp_float))
-        instrumentInfo.sample_z = tmp_float;
+      if (loadNXString(entry, "start_time", tmp_str))
+        instrumentInfo.start_time = tmp_str;
 
-      if (loadNXDataSet(entry, "instrument/source_aperture", tmp_float))
-        instrumentInfo.source_aperture = tmp_float;
       if (loadNXDataSet(entry, "instrument/master1_chopper_id", tmp_int32))
         instrumentInfo.master1_chopper_id = tmp_int32;
       if (loadNXDataSet(entry, "instrument/master2_chopper_id", tmp_int32))
@@ -583,42 +607,17 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
         instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
 
-      if (loadNXDataSet(entry, "instrument/Lt0", tmp_float))
-        instrumentInfo.Lt0_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/Ltof_curtainl", tmp_float))
-        instrumentInfo.Ltof_curtainl_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/Ltof_curtainr", tmp_float))
-        instrumentInfo.Ltof_curtainr_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/Ltof_curtainu", tmp_float))
-        instrumentInfo.Ltof_curtainu_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/Ltof_curtaind", tmp_float))
-        instrumentInfo.Ltof_curtaind_value = tmp_float * toMeters;
+      loadInstrumentParameters(entry, logParams, allParams);
 
-      if (loadNXDataSet(entry, "instrument/L2_det", tmp_float))
-        instrumentInfo.L2_det_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
-        instrumentInfo.L1_chopper_value =
-            tmp_float * toMeters - instrumentInfo.L2_det_value;
-      if (loadNXDataSet(entry, "instrument/L1", tmp_float))
-        instrumentInfo.L1_source_value = tmp_float * toMeters;
-
-      if (loadNXDataSet(entry, "instrument/L2_curtainl", tmp_float))
-        instrumentInfo.L2_curtainl_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/L2_curtainr", tmp_float))
-        instrumentInfo.L2_curtainr_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/L2_curtainu", tmp_float))
-        instrumentInfo.L2_curtainu_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/L2_curtaind", tmp_float))
-        instrumentInfo.L2_curtaind_value = tmp_float * toMeters;
-
-      if (loadNXDataSet(entry, "instrument/detector/curtainl", tmp_float))
-        instrumentInfo.D_curtainl_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/detector/curtainr", tmp_float))
-        instrumentInfo.D_curtainr_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/detector/curtainu", tmp_float))
-        instrumentInfo.D_curtainu_value = tmp_float * toMeters;
-      if (loadNXDataSet(entry, "instrument/detector/curtaind", tmp_float))
-        instrumentInfo.D_curtaind_value = tmp_float * toMeters;
+      // adjust parameters
+      try {
+        logParams["L1_chopper_value"] =
+            logParams["Ltof_det_value"] - logParams["L2_det_value"];
+      } catch (std::invalid_argument) {
+        logParams["L1_chopper_value"] = 18.47258984375;
+        g_log.warning() << "Cannot find parameter 'L1_chopper_value'"
+                        << ", using default.\n";
+      }
     }
   }
 
@@ -640,10 +639,6 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
 
     if (conf->hasProperty("SampleName"))
       instrumentInfo.sample_name = conf->getString("SampleName");
-    if (conf->hasProperty("SampleAperture"))
-      instrumentInfo.sample_aperture = conf->getDouble("SampleAperture");
-    if (conf->hasProperty("SourceAperture"))
-      instrumentInfo.source_aperture = conf->getDouble("SourceAperture");
 
     if (conf->hasProperty("MasterChopperFreq")) {
       auto tmp = conf->getDouble("MasterChopperFreq");
@@ -665,35 +660,35 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     if (conf->hasProperty("Wavelength"))
       instrumentInfo.wavelength = conf->getDouble("Wavelength");
 
+    if (conf->hasProperty("SampleAperture"))
+      logParams["sample_aperture"] = conf->getDouble("SampleAperture");
+    if (conf->hasProperty("SourceAperture"))
+      logParams["source_aperture"] = conf->getDouble("SourceAperture");
     if (conf->hasProperty("L1"))
-      instrumentInfo.L1_source_value = conf->getDouble("L1") * toMeters;
+      logParams["L1_source_value"] = conf->getDouble("L1") * toMeters;
     if (conf->hasProperty("LTofDet"))
-      instrumentInfo.L1_chopper_value =
-          conf->getDouble("LTofDet") * toMeters - instrumentInfo.L2_det_value;
+      logParams["L1_chopper_value"] =
+          conf->getDouble("LTofDet") * toMeters - logParams["L2_det_value"];
     if (conf->hasProperty("L2Det"))
-      instrumentInfo.L2_det_value = conf->getDouble("L2Det") * toMeters;
+      logParams["L2_det_value"] = conf->getDouble("L2Det") * toMeters;
 
     if (conf->hasProperty("L2CurtainL"))
-      instrumentInfo.L2_curtainl_value =
-          conf->getDouble("L2CurtainL") * toMeters;
+      logParams["L2_curtainl_value"] = conf->getDouble("L2CurtainL") * toMeters;
     if (conf->hasProperty("L2CurtainR"))
-      instrumentInfo.L2_curtainr_value =
-          conf->getDouble("L2CurtainR") * toMeters;
+      logParams["L2_curtainr_value"] = conf->getDouble("L2CurtainR") * toMeters;
     if (conf->hasProperty("L2CurtainU"))
-      instrumentInfo.L2_curtainu_value =
-          conf->getDouble("L2CurtainU") * toMeters;
+      logParams["L2_curtainu_value"] = conf->getDouble("L2CurtainU") * toMeters;
     if (conf->hasProperty("L2CurtainD"))
-      instrumentInfo.L2_curtaind_value =
-          conf->getDouble("L2CurtainD") * toMeters;
+      logParams["L2_curtaind_value"] = conf->getDouble("L2CurtainD") * toMeters;
 
     if (conf->hasProperty("CurtainL"))
-      instrumentInfo.D_curtainl_value = conf->getDouble("CurtainL") * toMeters;
+      logParams["D_curtainl_value"] = conf->getDouble("CurtainL") * toMeters;
     if (conf->hasProperty("CurtainR"))
-      instrumentInfo.D_curtainr_value = conf->getDouble("CurtainR") * toMeters;
+      logParams["D_curtainr_value"] = conf->getDouble("CurtainR") * toMeters;
     if (conf->hasProperty("CurtainU"))
-      instrumentInfo.D_curtainu_value = conf->getDouble("CurtainU") * toMeters;
+      logParams["D_curtainu_value"] = conf->getDouble("CurtainU") * toMeters;
     if (conf->hasProperty("CurtainD"))
-      instrumentInfo.D_curtaind_value = conf->getDouble("CurtainD") * toMeters;
+      logParams["D_curtaind_value"] = conf->getDouble("CurtainD") * toMeters;
   }
 }
 
@@ -734,12 +729,14 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   // select bin file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  for (const auto &file : files)
-    if (file.rfind(".bin") == file.length() - 4) {
-      tarFile.select(file.c_str());
-      fileSize = tarFile.selected_size();
-      break;
-    }
+  const auto found =
+      std::find_if(files.cbegin(), files.cend(), [](const auto &file) {
+        return file.rfind(".bin") == file.length() - 4;
+      });
+  if (found != files.cend()) {
+    tarFile.select(found->c_str());
+    fileSize = tarFile.selected_size();
+  }
 
   // for progress notifications
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,

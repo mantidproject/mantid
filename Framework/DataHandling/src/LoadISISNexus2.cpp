@@ -27,8 +27,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/lexical_cast.hpp>
-
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -378,7 +376,7 @@ void LoadISISNexus2::exec() {
       // lo
       prepareSpectraBlocks(m_monitors, m_monBlockInfo);
 
-      int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
+      firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, monitor_workspace, true);
       local_workspace->setMonitorWorkspace(monitor_workspace);
 
@@ -757,10 +755,11 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   }
 
   // Count the number of spectra.
-  size_t nSpec = 0;
-  for (auto &spectraBlock : m_spectraBlocks) {
-    nSpec += spectraBlock.last - spectraBlock.first + 1;
-  }
+  const auto nSpec = std::accumulate(
+      m_spectraBlocks.cbegin(), m_spectraBlocks.cend(), static_cast<size_t>(0),
+      [](size_t sum, const auto &spectraBlock) {
+        return sum + spectraBlock.last - spectraBlock.first + 1;
+      });
   return nSpec;
 }
 

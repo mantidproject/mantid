@@ -162,7 +162,6 @@ class MaskingTablePresenter(object):
             self._presenter.on_processing_error_masking_display(error)
 
     def __init__(self, parent_presenter):
-        super(MaskingTablePresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
         self._work_handler = WorkHandler()
@@ -170,7 +169,7 @@ class MaskingTablePresenter(object):
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
-        state = self.get_state(row_index, file_lookup=False)
+        state = self.get_state(row_index, file_lookup=False, suppress_warnings=True)
         if state:
             self.display_masking_information(state)
 
@@ -248,8 +247,9 @@ class MaskingTablePresenter(object):
         self._view.update_rows([])
         self.display_masking_information(state=None)
 
-    def get_state(self, index, file_lookup=True):
-        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup)
+    def get_state(self, index, file_lookup=True, suppress_warnings=False):
+        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup,
+                                                        suppress_warnings=suppress_warnings)
 
     @staticmethod
     def _append_single_spectrum_mask(spectrum_mask, container, detector_name, prefix):

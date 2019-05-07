@@ -99,14 +99,14 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
  */
 template <typename TYPE>
 std::vector<double> getZscore(const vector<TYPE> &data) {
+  std::vector<double> Zscore;
   if (data.size() < 3) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  std::vector<double> Zscore;
   Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
@@ -122,14 +122,14 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
 template <typename TYPE>
 std::vector<double> getWeightedZscore(const vector<TYPE> &data,
                                       const vector<TYPE> &weights) {
+  std::vector<double> Zscore;
   if (data.size() < 3) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  std::vector<double> Zscore;
   Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
   double sumWeights = 0.0;

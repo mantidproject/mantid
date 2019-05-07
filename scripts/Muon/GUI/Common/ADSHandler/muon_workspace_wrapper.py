@@ -92,6 +92,10 @@ class MuonWorkspaceWrapper(object):
         return self._directory_structure + self._workspace_name
 
     @property
+    def workspace_name(self):
+        return self._workspace_name
+
+    @property
     def workspace(self):
         """The Workspace object."""
         if not self.is_hidden:

@@ -31,10 +31,10 @@ template <template <typename...> class Vector, typename T, typename... Ts>
 std::vector<T> outOfRange(const Vector<T, Ts...> &values, const T &minimum,
                           const T &maximum) {
   std::vector<T> result;
-  for (auto &&value : values) {
-    if (value < minimum || value > maximum)
-      result.emplace_back(value);
-  }
+  std::copy_if(values.begin(), values.end(), std::back_inserter(result),
+               [&minimum, &maximum](const auto &value) {
+                 return value < minimum || value > maximum;
+               });
   return result;
 }
 
@@ -61,7 +61,8 @@ private:
 };
 
 struct CheckZeroSpectrum : boost::static_visitor<bool> {
-  bool operator()(const std::pair<std::size_t, std::size_t> &) const {
+  bool
+  operator()(const std::pair<std::size_t, std::size_t> & /*unused*/) const {
     return false;
   }
   bool operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {

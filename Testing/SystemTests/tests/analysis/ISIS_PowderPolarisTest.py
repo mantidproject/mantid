@@ -104,6 +104,34 @@ class FocusTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
+class FocusTestChopperMode(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+    tolerance = 1e-11
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_no_chopper("98533")
+
+    def validate(self):
+        # This will only pass if instead of failing or deafaulting to PDF it correctly picks Rietveld
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), 'Si')
+        return self.focus_results.getName(), "ISIS_Powder-POLARIS98533_Auto_chopper.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+
+
 class TotalScatteringTest(systemtesting.MantidSystemTest):
 
     pdf_output = None
@@ -178,15 +206,34 @@ def run_focus():
                              sample_empty_scale=sample_empty_scale)
 
 
+def run_focus_no_chopper(run_number):
+    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+    sample_empty_scale = 0.5  # Set it to 50% scale
+
+    # Copy the required splined file into place first (instead of relying on generated one)
+    splined_file_name = "POLARIS00098532_splined.nxs"
+
+    original_splined_path = os.path.join(input_dir, splined_file_name)
+    shutil.copy(original_splined_path, spline_path)
+
+    inst_object = setup_inst_object(None)
+    return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
+                             do_absorb_corrections=False, sample_empty=sample_empty,
+                             sample_empty_scale=sample_empty_scale)
+
+
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
 
 
 def setup_inst_object(mode):
     user_name = "Test"
-
-    inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                       calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+    if mode:
+        inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
+                           calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+    else:
+        inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
+                           calibration_directory=calibration_dir, output_directory=output_dir)
 
     sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
     sample_details.set_material(chemical_formula='Si')

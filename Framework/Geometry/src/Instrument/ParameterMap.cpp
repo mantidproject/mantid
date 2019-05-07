@@ -973,7 +973,7 @@ Parameter_sptr ParameterMap::getRecursive(const IComponent *comp,
 std::string ParameterMap::getString(const IComponent *comp,
                                     const std::string &name,
                                     bool recursive) const {
-  Parameter_sptr param = get(comp, name);
+  Parameter_sptr param;
   if (recursive) {
     param = getRecursive(comp, name);
   } else {

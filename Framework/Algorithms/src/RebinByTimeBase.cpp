@@ -74,8 +74,6 @@ void RebinByTimeBase::exec() {
         algName + " Algorithm requires an EventWorkspace as an input.");
   }
 
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-
   // retrieve the properties
   const std::vector<double> inParams = getProperty("Params");
   std::vector<double> rebinningParams;
@@ -130,7 +128,7 @@ void RebinByTimeBase::exec() {
   std::transform(XValues_new->begin(), XValues_new->end(),
                  OutXValues_scaled.begin(), transformToRelativeT);
 
-  outputWS = DataObjects::create<DataObjects::Workspace2D>(
+  MatrixWorkspace_sptr outputWS = DataObjects::create<DataObjects::Workspace2D>(
       *inWS, histnumber, HistogramData::BinEdges(*XValues_new));
 
   // Copy all the axes

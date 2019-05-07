@@ -51,6 +51,7 @@ set(SRC_FILES
     src/LoadDspacemap.cpp
     src/LoadEmptyInstrument.cpp
     src/LoadEMU.cpp
+    src/LoadOff.cpp
     src/LoadPLN.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
@@ -248,6 +249,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadEMU.h
+    inc/MantidDataHandling/LoadOff.h
     inc/MantidDataHandling/LoadPLN.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
@@ -308,6 +310,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
     inc/MantidDataHandling/LoadSassena.h
+    inc/MantidDataHandling/LoadShape.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h
@@ -606,7 +609,7 @@ endif()
 set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
 target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
-target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
+target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(DataHandling
                       LINK_PRIVATE

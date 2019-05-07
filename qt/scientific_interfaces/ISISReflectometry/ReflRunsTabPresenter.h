@@ -82,7 +82,7 @@ public:
   void settingsChanged(int group) override;
   void completedGroupReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
-      std::string const &) override;
+      std::string const & /*workspaceName*/) override;
   void completedRowReductionSuccessfully(
       MantidWidgets::DataProcessor::GroupData const &group,
       std::string const &workspaceNames) override;

@@ -7,8 +7,9 @@
 import unittest
 
 from mantid.py3compat import mock
+
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class AxisChangerTwoViewTest(unittest.TestCase):

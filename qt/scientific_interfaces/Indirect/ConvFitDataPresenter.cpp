@@ -40,9 +40,9 @@ ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
 }
 
 void ConvFitDataPresenter::setModelResolution(const QString &name) {
-  auto const numberOfWorkspaces = m_convModel->numberOfWorkspaces();
-  auto const index = m_convModel->getWorkspace(0) ? numberOfWorkspaces - 1
-                                                  : numberOfWorkspaces;
+  auto const workspaceCount = m_convModel->numberOfWorkspaces();
+  auto const index =
+      m_convModel->getWorkspace(0) ? workspaceCount - 1 : workspaceCount;
   setModelResolution(name.toStdString(), index);
 }
 

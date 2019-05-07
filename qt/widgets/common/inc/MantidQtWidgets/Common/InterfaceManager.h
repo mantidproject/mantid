@@ -116,6 +116,11 @@ public:
   /// @param name of interface to show help for
   void showCustomInterfaceHelp(const QString &name);
 
+  /// @param url of web page to open in browser
+  void showWebPage(const QString &url);
+
+  void closeHelpWindow();
+
   /**
    * Registration function for the help window factory.
    * @param factory the factory instance

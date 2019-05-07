@@ -631,9 +631,9 @@ void FunctionBrowser::addAttributeAndParameterProperties(
 
   // add attribute properties
   auto attributeNames = fun->getAttributeNames();
-  for (auto att = attributeNames.begin(); att != attributeNames.end(); ++att) {
-    QString attName = QString::fromStdString(*att);
-    addAttributeProperty(prop, attName, fun->getAttribute(*att));
+  for (auto &attributeName : attributeNames) {
+    QString attName = QString::fromStdString(attributeName);
+    addAttributeProperty(prop, attName, fun->getAttribute(attributeName));
   }
 
   auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
@@ -739,9 +739,8 @@ FunctionBrowser::AProperty FunctionBrowser::getFunctionProperty() const {
  */
 QStringList FunctionBrowser::getGlobalParameters() const {
   QStringList out;
-  for (auto propIt = m_properties.begin(); propIt != m_properties.end();
-       ++propIt) {
-    QtProperty *prop = propIt->prop;
+  for (const auto &property : m_properties) {
+    QtProperty *prop = property.prop;
     if (isGlobalParameterProperty(prop)) {
       out << getIndex(prop) + prop->propertyName();
     }
@@ -752,9 +751,8 @@ QStringList FunctionBrowser::getGlobalParameters() const {
  * Get a list of names of global parameters
  */
 void FunctionBrowser::setGlobalParameters(QStringList &globals) {
-  for (auto propIt = m_properties.begin(); propIt != m_properties.end();
-       ++propIt) {
-    QtProperty *prop = propIt->prop;
+  for (auto &property : m_properties) {
+    QtProperty *prop = property.prop;
     QString tmp = getIndex(prop) + prop->propertyName();
     for (auto &global : globals) {
       if (tmp == global) {
@@ -768,9 +766,8 @@ void FunctionBrowser::setGlobalParameters(QStringList &globals) {
  */
 QStringList FunctionBrowser::getLocalParameters() const {
   QStringList out;
-  for (auto propIt = m_properties.begin(); propIt != m_properties.end();
-       ++propIt) {
-    QtProperty *prop = propIt->prop;
+  for (const auto &property : m_properties) {
+    QtProperty *prop = property.prop;
     if (isLocalParameterProperty(prop)) {
       out << getIndex(prop) + prop->propertyName();
     }
@@ -886,9 +883,9 @@ QString FunctionBrowser::getIndex(QtProperty *prop) const {
     auto props = prop->subProperties();
     if (props.isEmpty())
       return "";
-    for (auto it = props.begin(); it != props.end(); ++it) {
-      if (isIndex(*it)) {
-        return m_indexManager->value(*it);
+    for (auto &prop : props) {
+      if (isIndex(prop)) {
+        return m_indexManager->value(prop);
       }
     }
     return "";
@@ -935,10 +932,6 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (!prop) {
     throw std::runtime_error("FunctionBrowser: null property pointer");
   }
-  AProperty ap;
-  ap.item = nullptr;
-  ap.prop = nullptr;
-  ap.parent = nullptr;
 
   if (!isParameter(prop))
     return;
@@ -949,7 +942,7 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
-  ap = addProperty(prop, tieProp);
+  addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
   const auto parName = getParameterName(prop);
@@ -1175,7 +1168,7 @@ QString FunctionBrowser::getConstraint(const QString &paramName,
 /**
  * Show a pop up menu.
  */
-void FunctionBrowser::popupMenu(const QPoint &) {
+void FunctionBrowser::popupMenu(const QPoint & /*unused*/) {
   auto item = m_browser->currentItem();
   if (!item) {
     QMenu context(this);
@@ -1562,21 +1555,25 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
 /// property (tie or constraint).
 QtProperty *
 FunctionBrowser::getParentParameterProperty(QtProperty *prop) const {
-  for (auto &tie : m_ties) {
-    if (tie.tieProp == prop) {
-      return tie.paramProp;
+  const auto foundTie =
+      std::find_if(m_ties.begin(), m_ties.end(),
+                   [prop](const auto &tie) { return tie.tieProp == prop; });
+  if (foundTie != m_ties.end()) {
+    return foundTie->paramProp;
+  } else {
+    const auto foundConstraint = std::find_if(
+        m_constraints.begin(), m_constraints.end(),
+        [prop](const auto &constraint) {
+          return constraint.lower == prop || constraint.upper == prop;
+        });
+    if (foundConstraint != m_constraints.end()) {
+      return foundConstraint->paramProp;
+    } else {
+      throw std::logic_error(
+          "QtProperty " + prop->propertyName().toStdString() +
+          " is not a child of a property for any function parameter.");
     }
   }
-
-  for (auto &constraint : m_constraints) {
-    if (constraint.lower == prop || constraint.upper == prop) {
-      return constraint.paramProp;
-    }
-  }
-
-  throw std::logic_error(
-      "QtProperty " + prop->propertyName().toStdString() +
-      " is not a child of a property for any function parameter.");
 }
 
 /**
@@ -2248,8 +2245,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
       const auto parName = QString::fromStdString(parameterName);
       if (globalParams.contains(parName))
         continue;
-      auto tie = fun1->getTie(j);
-      if (tie) {
+      if (fun1->getTie(j)) {
         // If parameter has a tie at this stage then it gets it from the
         // currently displayed function. But the i-th local parameters may not
         // have this tie, so remove it
@@ -2436,7 +2432,9 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
 /**
  * Emit a signal when any of the Global options change.
  */
-void FunctionBrowser::globalChanged(QtProperty *, const QString &, bool) {
+void FunctionBrowser::globalChanged(QtProperty * /*unused*/,
+                                    const QString & /*unused*/,
+                                    bool /*unused*/) {
   emit globalsChanged();
 }
 

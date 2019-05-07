@@ -94,8 +94,9 @@ void CreateFloodWorkspace::init() {
                   "A spectrum number of the central pixel.");
 
   std::vector<std::string> allowedValues;
-  for (auto i : funMap)
-    allowedValues.push_back(i.first);
+  allowedValues.reserve(funMap.size());
+  for (const auto &i : funMap)
+    allowedValues.emplace_back(i.first);
   auto backgroundValidator =
       boost::make_shared<ListValidator<std::string>>(allowedValues);
   declareProperty(Prop::BACKGROUND, "Linear", backgroundValidator,

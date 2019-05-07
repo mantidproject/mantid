@@ -388,11 +388,8 @@ void FilterEvents::examineAndSortEventWS() {
   } // END-IF-ELSE
 
   // sort events
-  DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
-  if (m_filterByPulseTime)
-    sortType = DataObjects::PULSETIME_SORT;
-  else
-    sortType = DataObjects::PULSETIMETOF_SORT;
+  const auto sortType = m_filterByPulseTime ? DataObjects::PULSETIME_SORT
+                                            : DataObjects::PULSETIMETOF_SORT;
 
   // This runs the SortEvents algorithm in parallel
   m_eventWS->sortAll(sortType, nullptr);
@@ -1118,13 +1115,13 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Determine the minimum group index number
   int minwsgroup = INT_MAX;
-  for (auto wsgroup : m_targetWorkspaceIndexSet) {
+  for (const auto wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < minwsgroup && wsgroup >= 0)
       minwsgroup = wsgroup;
   }
   g_log.debug() << "Min WS Group = " << minwsgroup << "\n";
 
-  bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
+  const bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
   int delta_wsindex = 0;
   if (from1) {
     delta_wsindex = 1 - minwsgroup;
@@ -1503,7 +1500,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   else if (colnames[0] == "Spectrum")
     usedetid = false;
   else {
-    usedetid = false;
     stringstream errss;
     errss << "First column must be either DetectorID or Spectrum. "
           << colnames[0] << " is not supported. ";

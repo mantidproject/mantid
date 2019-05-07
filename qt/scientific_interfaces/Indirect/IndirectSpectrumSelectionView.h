@@ -9,10 +9,10 @@
 
 #include "ui_IndirectSpectrumSelector.h"
 
-#include "../General/UserInputValidator.h"
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <cstddef>
 
@@ -74,10 +74,10 @@ public slots:
   void clearMaskString();
 
 signals:
-  void selectedSpectraChanged(const std::string &);
-  void selectedSpectraChanged(std::size_t, std::size_t);
-  void maskSpectrumChanged(int);
-  void maskChanged(const std::string &);
+  void selectedSpectraChanged(const std::string & /*_t1*/);
+  void selectedSpectraChanged(std::size_t /*_t1*/, std::size_t /*_t2*/);
+  void maskSpectrumChanged(int /*_t1*/);
+  void maskChanged(const std::string & /*_t1*/);
 
 private slots:
   void emitMaskChanged();

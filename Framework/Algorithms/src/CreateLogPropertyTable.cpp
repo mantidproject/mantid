@@ -176,12 +176,13 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
   std::vector<MatrixWorkspace_sptr> matrixWsList;
 
   // Get all the workspaces which are to be inspected for log proeprties.
+  auto &ADS = AnalysisDataService::Instance();
   for (const auto &wsName : wsNames) {
-    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieve(wsName));
+
+    WorkspaceGroup_sptr wsGroup =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(ADS.retrieve(wsName));
     MatrixWorkspace_sptr matrixWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(wsName));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(ADS.retrieve(wsName));
 
     if (wsGroup) {
       const std::vector<std::string> childNames = wsGroup->getNames();
@@ -195,22 +196,20 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
       std::vector<MatrixWorkspace_sptr> childWsList;
       childWsList.reserve(childNames.size());
       for (const auto &childName : childNames) {
-        childWsList.push_back(
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                childName));
+        childWsList.emplace_back(ADS.retrieveWS<MatrixWorkspace>(childName));
       }
 
       // Deal with child workspaces according to policy.
       switch (groupPolicy) {
       case ALL: {
         // Append all the children to the list.
-        for (auto &childWs : childWsList)
-          matrixWsList.push_back(childWs);
+        std::move(childWsList.cbegin(), childWsList.cend(),
+                  std::back_inserter(matrixWsList));
         break;
       }
       case FIRST:
         // Append only the first child to the list.
-        matrixWsList.push_back(childWsList[0]);
+        matrixWsList.emplace_back(childWsList[0]);
         break;
       case NONE:
         // Add nothing to the list.
@@ -220,7 +219,7 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
         assert(false);
       }
     } else if (matrixWs) {
-      matrixWsList.push_back(matrixWs);
+      matrixWsList.emplace_back(matrixWs);
     }
   }
 

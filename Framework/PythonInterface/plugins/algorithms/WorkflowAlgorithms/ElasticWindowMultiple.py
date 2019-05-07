@@ -13,6 +13,12 @@ from mantid.api import *
 import numpy as np
 
 
+def workspaces_have_same_size(workspaces):
+    first_size = len(workspaces[0].readY(0))
+    differently_sized_workspaces = [workspace for workspace in workspaces[1:] if len(workspace.readY(0)) != first_size]
+    return len(differently_sized_workspaces) == 0
+
+
 def _normalize_by_index(workspace, index):
     """
     Normalize each spectra of the specified workspace by the
@@ -186,6 +192,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_workspace = q_workspaces[0]
             q2_workspace = q2_workspaces[0]
         else:
+            if not workspaces_have_same_size(q_workspaces) or not workspaces_have_same_size(q2_workspaces):
+                raise RuntimeError('The ElasticWindow algorithm produced differently sized workspaces. Please check '
+                                   'the input files are compatible.')
             q_workspace = _append_all(q_workspaces)
             q2_workspace = _append_all(q2_workspaces)
 

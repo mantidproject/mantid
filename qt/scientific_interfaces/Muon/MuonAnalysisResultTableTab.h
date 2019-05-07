@@ -45,8 +45,8 @@ signals:
 
 private slots:
   void helpResultsClicked();
-  void selectAllLogs(bool);
-  void selectAllFittings(bool);
+  void selectAllLogs(bool /*state*/);
+  void selectAllFittings(bool /*state*/);
 
   /// Executed when "Create table" button is clicked
   void onCreateTableClicked();

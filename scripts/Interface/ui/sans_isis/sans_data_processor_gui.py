@@ -22,19 +22,18 @@ from mantid.kernel import (Logger)
 from mantidqt import icons
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
-from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
+from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_default_file, load_property, set_setting,
+                                       load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.models.summation_settings import SummationSettings
-from sans.gui_logic.models.binning_type import BinningType
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
@@ -134,6 +133,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_reduction_dimensionality_changed(self, is_1d):
+            pass
+
+        @abstractmethod
         def on_data_changed(self, row, column, new_value, old_value):
             pass
 
@@ -195,6 +198,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
         self.__user_file_key = "user_file"
+        self.__batch_file_key = "batch_file"
         self.__mask_file_input_path_key = "mask_files"
         self.__output_mode_key = "output_mode"
         self.__save_can_key = "save_can"
@@ -228,6 +232,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
 
         self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
+        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
         # Attach validators
         self._attach_validators()
@@ -554,6 +559,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.save_can_checkBox.setChecked(value)
         set_setting(self.__generic_settings, self.__save_can_key, value)
 
+    def _on_reduction_dimensionality_changed(self, is_1d):
+        self._call_settings_listeners(lambda listener: listener.on_reduction_dimensionality_changed(is_1d))
+
     def _on_user_file_load(self):
         """
         Load the user file
@@ -563,21 +571,19 @@ class SANSDataProcessorGui(QMainWindow,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
-        set_setting(self.__generic_settings, self.__user_file_key, self.get_user_file_path())
+        self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
 
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        set_setting(self.__generic_settings, self.__user_file_key, "")
+        self.gui_properties_handler.set_setting("user_file", "")
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):
         """
         Load a default user file, called on view set-up
         """
-        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
-
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
@@ -609,7 +615,7 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
