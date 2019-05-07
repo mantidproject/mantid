@@ -72,15 +72,15 @@ void LoadSampleEnvironment::init() {
   // New Can or Add
   declareProperty("Add", false);
 
-  // Vector to translate mesh
-  declareProperty(
-      make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
-      "Vector by which to translate the loaded environment");
-
   // Rotation angles
   declareProperty("XDegrees", 0.0, "The degrees to rotate on the x axis by");
   declareProperty("YDegrees", 0.0, "The degrees to rotate on the y axis by");
   declareProperty("ZDegrees", 0.0, "The degrees to rotate on the z axis by");
+
+  // Vector to translate mesh
+  declareProperty(
+      make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+      "Vector by which to translate the loaded environment");
 
   declareProperty("SetMaterial", false);
 
@@ -247,8 +247,8 @@ void LoadSampleEnvironment::exec() {
     throw Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
   }
-  environmentMesh = translate(environmentMesh);
   environmentMesh = rotate(environmentMesh);
+  environmentMesh = translate(environmentMesh);
 
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
