@@ -8,8 +8,7 @@ from qtpy.QtTest import QTest
 
 from mantid import FrameworkManager, FunctionFactory
 from mantid.fitfunctions import FunctionWrapper
-from mantidqt.utils.qt.test.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin,
-                                                    get_child, click_on)
+from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin, get_child, click_on)
 from mantidqt.utils.qt import import_qt
 
 
