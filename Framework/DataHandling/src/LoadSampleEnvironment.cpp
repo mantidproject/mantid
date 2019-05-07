@@ -248,7 +248,7 @@ void LoadSampleEnvironment::exec() {
         "Could not read file, did not match either STL Format", filename, 0);
   }
   environmentMesh = rotate(environmentMesh);
-  environmentMesh = translate(environmentMesh);
+  environmentMesh = translate(environmentMesh, scaleType);
 
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
@@ -299,8 +299,9 @@ void LoadSampleEnvironment::exec() {
  * @param environmentMesh The environment to translate
  * @returns a shared pointer to the newly translated environment
  */
-boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
-    boost::shared_ptr<MeshObject> environmentMesh) {
+boost::shared_ptr<MeshObject>
+LoadSampleEnvironment::translate(boost::shared_ptr<MeshObject> environmentMesh,
+                                 ScaleUnits scaleType) {
   const std::vector<double> translationVector =
       getProperty("TranslationVector");
   std::vector<double> checkVector = std::vector<double>(3, 0.0);
@@ -310,7 +311,7 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
           "Invalid Translation vector, must have exactly 3 dimensions");
     }
     V3D translate =
-        V3D(translationVector[0], translationVector[1], translationVector[2]);
+        createScaledV3D(translationVector[0], translationVector[1], translationVector[2],scaleType);
     environmentMesh->translate(translate);
   }
   return environmentMesh;
@@ -378,6 +379,26 @@ Matrix<double> LoadSampleEnvironment::generateZRotation() {
   const double cosZ = cos(zRotation);
   std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
   return Kernel::Matrix<double>(matrixList);
+}
+
+Kernel::V3D LoadSampleEnvironment::createScaledV3D(double xVal, double yVal,
+                                                   double zVal,
+                                                   ScaleUnits scaleType) {
+  switch (scaleType) {
+  case ScaleUnits::centimetres:
+    xVal = xVal / 100;
+    yVal = yVal / 100;
+    zVal = zVal / 100;
+    break;
+  case ScaleUnits::millimetres:
+    xVal = xVal / 1000;
+    yVal = yVal / 1000;
+    zVal = zVal / 1000;
+    break;
+  case ScaleUnits::metres:
+    break;
+  }
+  return Kernel::V3D(double(xVal), double(yVal), double(zVal));
 }
 
 } // namespace DataHandling
