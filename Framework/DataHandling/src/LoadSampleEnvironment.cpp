@@ -329,7 +329,8 @@ LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
 }
 
 /**
- * Generates a rotation Matrix applying the x rotation then y rotation, then z rotation
+ * Generates a rotation Matrix applying the x rotation then y rotation, then z
+ * rotation
  * @returns a matrix of doubles to use as the rotation matrix
  */
 Matrix<double> LoadSampleEnvironment::generateMatrix() {

@@ -45,7 +45,6 @@ public:
     return "DataHandling\\Instrument";
   }
 
-
   boost::shared_ptr<Geometry::MeshObject>
   translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
   boost::shared_ptr<Geometry::MeshObject>
