@@ -8,7 +8,7 @@ from qtpy.QtTest import QTest
 
 from mantid import FrameworkManager, FunctionFactory
 from mantid.fitfunctions import FunctionWrapper
-from mantidqt.utils.qt.test.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin, print_tree, discover_children,
+from mantidqt.utils.qt.test.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin,
                                                     get_child, click_on)
 from mantidqt.utils.qt import import_qt
 
@@ -81,7 +81,6 @@ def test_browser_parameters_view(self):
     browser = self.widget
     browser.setFunction('name=FlatBackground;name=FlatBackground,A0=1')
     view = browser.view()
-    # discover_children(view, QAction)
     self.assertEqual(view.getNumberOfQtProperties(), 8)
     self.assertGreater(len(browser.getFunctionString()), 0)
     pos = view.getVisualRectFunctionProperty('f1.').center()
@@ -256,7 +255,6 @@ def test_add_function(self):
     yield self.mouse_trigger_action('add_function', pause=0)
     yield self.wait_for_modal()
     dlg = self.get_active_modal_widget()
-    # discover_children(dlg)
     tree = get_child(dlg, 'fitTree')
     item = tree.findItems('Background', Qt.MatchExactly)[0]
     item.setExpanded(True)
