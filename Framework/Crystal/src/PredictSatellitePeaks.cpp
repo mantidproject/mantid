@@ -143,6 +143,8 @@ void PredictSatellitePeaks::exec() {
   int maxOrder = getProperty("MaxOrder");
   bool crossTerms = getProperty("CrossTerms");
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
+  // boolean for only including order zero once
+  bool notOrderZero = false;
 
   if (Peaks->getNumberPeaks() <= 0) {
     g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
@@ -226,10 +228,11 @@ void PredictSatellitePeaks::exec() {
     } else {
       predictOffsets(0, offsets1, maxOrder, hkl, lambdaFilter,
                      includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
+      // do not include integer hkl again
       predictOffsets(1, offsets2, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
+                     includePeaksInRange, notOrderZero, AlreadyDonePeaks);
       predictOffsets(2, offsets3, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
+                     includePeaksInRange, notOrderZero, AlreadyDonePeaks);
     }
   }
   // Sort peaks by run number so that peaks with equal goniometer matrices are
