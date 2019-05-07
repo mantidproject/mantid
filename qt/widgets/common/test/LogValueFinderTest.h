@@ -30,9 +30,7 @@ class LogValueFinderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LogValueFinderTest *createSuite() {
-    return new LogValueFinderTest();
-  }
+  static LogValueFinderTest *createSuite() { return new LogValueFinderTest(); }
   static void destroySuite(LogValueFinderTest *suite) { delete suite; }
 
   void test_getLogNames() {
