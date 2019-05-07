@@ -37,8 +37,8 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
-  void testValidAnalysisMode() { 
-    auto result = getDefaults("Analysis");
+  void testValidAnalysisMode() {
+    auto result = getDefaults("All");
     TS_ASSERT_EQUALS(result.analysisMode(),
                      AnalysisMode::MultiDetector);
   }
@@ -48,7 +48,7 @@ public:
   }
 
   void testValidReductionOptions() {
-    auto result = getDefaults("Reduction");
+    auto result = getDefaults("All");
     TS_ASSERT_EQUALS(result.summationType(),
                      SummationType::SumInQ);
     TS_ASSERT_EQUALS(result.reductionType(),
@@ -61,16 +61,12 @@ public:
   }
 
   void testValidDebugOptions() {
-    auto result = getDefaults("Debug");
+    auto result = getDefaults("All");
     TS_ASSERT_EQUALS(result.debug(), true);
   }
 
-  void testInvalidDebugOptions() {
-    getDefaultsThrows("Debug_Invalid");
-  }
-
   void testValidPerThetaOptions() {
-    auto result = getDefaults("PerTheta");
+    auto result = getDefaults("All");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      RangeInQ(0.01, 0.03, 0.2), 0.7,
                                      std::string("390-415"));
@@ -84,7 +80,7 @@ public:
   }
 
   void testValidTransmissionRunRange() {
-    auto result = getDefaults("TransmissionRunRange");
+    auto result = getDefaults("All");
     auto const expected = RangeInLambda{10.0, 12.0};
     TS_ASSERT_EQUALS(result.transmissionRunRange(), expected);
   }
@@ -94,7 +90,7 @@ public:
   }
 
   void testValidCorrectionOptions() {
-    auto result = getDefaults("Correction");
+    auto result = getDefaults("All");
     TS_ASSERT_EQUALS(
         result.polarizationCorrections().correctionType(),
         PolarizationCorrectionType::ParameterFile);

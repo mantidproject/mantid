@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <!-- Analysis mode -->
+  
+  <parameter name="AnalysisMode" type="string">
+      <value val="MultiDetectorAnalysis"/>
+  </parameter>
+
+  <parameter name="PointDetectorStart">
+    <value val="3"/>
+  </parameter>
+
+  <parameter name="PointDetectorStop">
+    <value val="3"/>
+  </parameter>
+
+  <!-- Reduction options -->
+
+  <parameter name="SummationType" type="string">
+      <value val="SumInQ"/>
+  </parameter>
+
+  <parameter name="ReductionType" type="string">
+      <value val="NonFlatSample"/>
+  </parameter>
+
+  <parameter name="IncludePartialBins">
+      <value val="1"/>
+  </parameter>
+
+  <!-- Corrections -->
+
+  <parameter name="PolarizationAnalysis" type="string">
+      <value val="ParameterFile"/>
+  </parameter>
+
+  <parameter name="FloodCorrection" type="string">
+      <value val="ParameterFile"/>
+  </parameter>
+
+  <!-- Debug -->
+
+  <parameter name="Debug">
+      <value val="1"/>
+  </parameter>
+
+  <!-- Detector -->
+
+  <parameter name="CorrectDetectors">
+      <value val="1"/>
+  </parameter>
+
+  <parameter name="DetectorCorrectionType" type="string">
+    <value val="RotateAroundSample"/>
+  </parameter>
+
+  <!-- Monitor options -->
+
+  <parameter name="I0MonitorIndex">
+      <value val="2"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="17.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="18.0"/>
+  </parameter>
+
+  <parameter name="NormalizeByIntegratedMonitors">
+    <value val="1"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+    <value val="10.0"/>
+  </parameter>
+
+  <!-- Per Theta options -->
+
+  <parameter name="QMin">
+    <value val="0.01"/>
+  </parameter>
+
+  <parameter name="dQ/Q">
+    <value val="0.03"/>
+  </parameter>
+
+  <parameter name="QMax">
+    <value val="0.2"/>
+  </parameter>
+
+  <parameter name="ScaleFactor">
+    <value val="0.7"/>
+  </parameter>
+
+  <parameter name="ProcessingInstructions" type="string"> 
+    <value val="390-415"/>
+  </parameter>
+
+  <!-- Transmission overlap range -->
+
+  <parameter name="TransRunStartOverlap">
+    <value val="10.0"/>
+  </parameter>
+
+  <parameter name="TransRunEndOverlap"> 
+    <value val="12.0"/>
+  </parameter>
+
+  <!-- Wavelength range -->
+
+  <parameter name="LambdaMin">
+    <value val="1.5"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="17.0"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>
