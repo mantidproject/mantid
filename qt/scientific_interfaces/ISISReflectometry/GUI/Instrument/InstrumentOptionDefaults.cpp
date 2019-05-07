@@ -11,15 +11,25 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
 Instrument
-instrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(instrument);
 
   auto wavelengthRange =
       RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),
                     defaults.getValue<double>("WavelengthMax", "LambdaMax"));
+  if (!wavelengthRange.isValid(false))
+    throw std::invalid_argument("Invalid wavelength range");
 
   auto monitorIndex = defaults.getIntOrZero("I0MonitorIndex", "I0MonitorIndex");
+  if (monitorIndex < 0)
+    throw std::invalid_argument("Monitor index cannot be negative");
+
   auto integrate = defaults.getBoolOrFalse("NormalizeByIntegratedMonitors",
                                            "NormalizeByIntegratedMonitors");
   auto backgroundRange =
@@ -27,11 +37,17 @@ instrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
                                              "MonitorBackgroundMin"),
                     defaults.getDoubleOrZero("MonitorBackgroundWavelengthMax",
                                              "MonitorBackgroundMax"));
+  if (!backgroundRange.isValid(true))
+    throw std::invalid_argument("Invalid monitor background range");
+
   auto integralRange =
       RangeInLambda(defaults.getDoubleOrZero("MonitorIntegrationWavelengthMin",
                                              "MonitorIntegralMin"),
                     defaults.getDoubleOrZero("MonitorIntegrationWavelengthMax",
                                              "MonitorIntegralMax"));
+  if (!integralRange.isValid(false))
+    throw std::invalid_argument("Invalid monitor integral range");
+
   auto monitorCorrections = MonitorCorrections(monitorIndex, integrate,
                                                backgroundRange, integralRange);
 
@@ -43,6 +59,12 @@ instrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
 
   return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
                     std::move(detectorCorrections));
+}
+} // unnamed namespace
+
+Instrument InstrumentOptionDefaults::get(
+    Mantid::Geometry::Instrument_const_sptr instrument) {
+  return getInstrumentDefaults(instrument);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

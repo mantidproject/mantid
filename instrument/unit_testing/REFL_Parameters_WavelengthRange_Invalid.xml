@@ -3,13 +3,12 @@
 
 <component-link name="REFL" >
 
-  <!-- These are mandatory parameters without which the reduction will fail -->
   <parameter name="LambdaMin">
-    <value val="0.0"/>
+    <value val="6.5"/>
   </parameter>
 
   <parameter name="LambdaMax">
-    <value val="0.0"/>
+    <value val="2.5"/>
   </parameter>
 
 </component-link>

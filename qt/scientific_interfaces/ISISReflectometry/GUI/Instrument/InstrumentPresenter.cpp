@@ -22,9 +22,11 @@ boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range,
 }
 } // namespace
 
-InstrumentPresenter::InstrumentPresenter(IInstrumentView *view,
-                                         Instrument instrument)
-    : m_view(view), m_model(std::move(instrument)) {
+InstrumentPresenter::InstrumentPresenter(
+    IInstrumentView *view, Instrument instrument,
+    std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults)
+    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view),
+      m_model(std::move(instrument)) {
   m_view->subscribe(this);
 }
 
@@ -107,7 +109,7 @@ void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
 }
 
 void InstrumentPresenter::restoreDefaults() {
-  m_model = instrumentDefaults(m_mainPresenter->instrument());
+  m_model = m_instrumentDefaults->get(m_mainPresenter->instrument());
   updateViewFromModel();
 }
 

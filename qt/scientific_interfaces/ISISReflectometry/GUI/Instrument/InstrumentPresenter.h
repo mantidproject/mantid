@@ -11,6 +11,7 @@
 #include "Common/DllConfig.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
+#include "InstrumentOptionDefaults.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include <boost/optional.hpp>
 
@@ -26,7 +27,10 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
     : public InstrumentViewSubscriber,
       public IInstrumentPresenter {
 public:
-  InstrumentPresenter(IInstrumentView *view, Instrument instrument);
+  InstrumentPresenter(
+      IInstrumentView *view, Instrument instrument,
+      std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults =
+          std::make_unique<InstrumentOptionDefaults>());
   Instrument const &instrument() const override;
 
   // IInstrumentPresenver overrides
@@ -40,6 +44,9 @@ public:
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
   void notifyRestoreDefaultsRequested() override;
+
+protected:
+  std::unique_ptr<IInstrumentOptionDefaults> m_instrumentDefaults;
 
 private:
   IInstrumentView *m_view;
