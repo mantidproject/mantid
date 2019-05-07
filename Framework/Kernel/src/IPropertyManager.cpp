@@ -7,6 +7,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Logger.h"
 
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)
@@ -30,6 +31,8 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string>>)
 
 namespace Mantid {
 namespace Kernel {
+namespace{
+Logger g_log("property manager");}
 // This template implementation has been left in because although you can't
 // assign to an existing string
 // via the getProperty() method, you can construct a local variable by saying,
@@ -79,7 +82,9 @@ void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
   for (auto &prop : props) {
     const std::string propName = (*prop).name();
     if (other.existsProperty(propName)) {
-      (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
+      auto err = (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
+      if(err!="")
+        g_log.error(err);
     }
   }
 }
