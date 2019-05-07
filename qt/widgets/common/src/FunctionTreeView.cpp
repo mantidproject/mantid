@@ -1766,8 +1766,8 @@ void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
   if (tieProp && !tieProp->isEnabled()) {
     // it is a fixed tie
     QString newTie = QString("%1=%2")
-                  .arg(prop->propertyName())
-                  .arg(m_parameterManager->value(prop));
+                         .arg(prop->propertyName())
+                         .arg(m_parameterManager->value(prop));
     if (!newTie.isEmpty()) {
       m_tieManager->setValue(tieProp, newTie);
     }
