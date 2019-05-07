@@ -205,10 +205,10 @@ IFunction_sptr MultiDomainFunctionModel::getCurrentFunction() const {
 }
 
 void MultiDomainFunctionModel::setNumberDomains(int nDomains) {
-  auto const nd = static_cast<size_t>(nDomains);
-  if (nd < 0) {
+  if (nDomains < 0) {
     throw std::runtime_error("Number of domains shouldn't be less than 0.");
   }
+  auto const nd = static_cast<size_t>(nDomains);
   if (nd == m_numberDomains) {
     return;
   }

@@ -1762,17 +1762,12 @@ void FunctionTreeView::attributeVectorDoubleChanged(QtProperty *prop) {
 }
 
 void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
-  bool isGlobal = true;
-  QString newTie;
-
   auto tieProp = getTieProperty(prop);
   if (tieProp && !tieProp->isEnabled()) {
-    if (isGlobal) {
-      // it is a fixed tie
-      newTie = QString("%1=%2")
-                   .arg(prop->propertyName())
-                   .arg(m_parameterManager->value(prop));
-    }
+    // it is a fixed tie
+    QString newTie = QString("%1=%2")
+                  .arg(prop->propertyName())
+                  .arg(m_parameterManager->value(prop));
     if (!newTie.isEmpty()) {
       m_tieManager->setValue(tieProp, newTie);
     }
@@ -1910,10 +1905,8 @@ QRect FunctionTreeView::visualItemRect(QtProperty *prop) const {
 QRect FunctionTreeView::getVisualRectFunctionProperty(
     const QString &index) const {
   QRect rect;
-  QtProperty *prop{nullptr};
   try {
-    prop = getFunctionProperty(index);
-    rect = visualItemRect(prop);
+    rect = visualItemRect(getFunctionProperty(index));
   } catch (std::exception &) {
   }
   return rect;
@@ -1922,20 +1915,16 @@ QRect FunctionTreeView::getVisualRectFunctionProperty(
 QRect FunctionTreeView::getVisualRectParameterProperty(
     const QString &paramName) const {
   QRect rect;
-  QtProperty *prop{nullptr};
   try {
-    prop = getParameterProperty(paramName);
-    rect = visualItemRect(prop);
+    rect = visualItemRect(getParameterProperty(paramName));
   } catch (std::exception &) {
   }
   return rect;
 }
 
 QWidget *FunctionTreeView::getParamWidget(const QString &paramName) const {
-  QtProperty *prop{nullptr};
   try {
-    prop = getParameterProperty(paramName);
-    auto item = getPropertyWidgetItem(prop);
+    auto item = getPropertyWidgetItem(getParameterProperty(paramName));
     return item->treeWidget()->itemWidget(item, 1);
   } catch (std::exception &) {
   }
