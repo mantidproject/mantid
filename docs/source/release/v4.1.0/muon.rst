@@ -14,4 +14,11 @@ MuSR Changes
 
 New
 ###
+
 * Added phase tab for calculating :ref:`phase tables <algm-CalMuonDetectorPhases>` and :ref:`PhaseQuad <algm-PhaseQuad>` workspaces to Frequency Domain Analysis GUI.
+
+Improvements
+############
+
+* Phase table and phase Quad options from frequency domain transform tab moved to phase calculations tab.
+
