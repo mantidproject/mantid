@@ -221,9 +221,10 @@ def load_workspace_from_filename(filename,
         if not is_psi_data:
             load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
             load_result["DeadTimeTable"] = None
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
         else:
             load_result["DataDeadTimeTable"] = None
-        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
@@ -232,9 +233,10 @@ def load_workspace_from_filename(filename,
         if not is_psi_data:
             load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
             load_result["DeadTimeTable"] = None
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
         else:
             load_result["DataDeadTimeTable"] = None
-        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
 
     filename = alg.getProperty("Filename").value
 
