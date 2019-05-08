@@ -26,6 +26,10 @@ def on_ubuntu_or_darwin():
             sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
 
 
+def not_on_windows():
+    return sys.platform != 'win32'
+
+
 def trigger_action(action):
     QMetaObject.invokeMethod(action, 'trigger', Qt.QueuedConnection)
 

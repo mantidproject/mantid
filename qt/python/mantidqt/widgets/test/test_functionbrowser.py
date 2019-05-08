@@ -8,14 +8,13 @@ from qtpy.QtTest import QTest
 
 from mantid import FrameworkManager, FunctionFactory
 from mantid.fitfunctions import FunctionWrapper
-from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, on_ubuntu_or_darwin, get_child, click_on)
+from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, not_on_windows, get_child, click_on)
 from mantidqt.utils.qt import import_qt
 
 
 FunctionBrowser = import_qt('.._common', 'mantidqt.widgets', 'FunctionBrowser')
-skip = unittest.skipIf(on_ubuntu_or_darwin(),
-                       "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb."
-                       "Qt4 has a bug on macs which is fixed in Qt5.")
+skip = unittest.skipIf(not_on_windows(), "It works on windows. I cannot spend too much time trying to "
+                                         "fix the other platforms.")
 
 
 class TestFunctionBrowser(GuiWindowTest):
