@@ -62,7 +62,7 @@ public:
     }
   }
 
-  void setGlobalParameters(const QStringList &globals) { m_globals = globals; }
+  void setGlobalParameters(const QStringList &globals) override { m_globals = globals; }
 
   // Mock user action
   void addFunction(const QString &prefix, const QString &funStr) {
