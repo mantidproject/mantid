@@ -20,6 +20,11 @@ public:
   get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 
+/** @class ExperimentOptionDefaults
+
+    This class gets the defaults for the "Experiment" settings tab in the
+    reflectometry GUI
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults
     : public IExperimentOptionDefaults {
 public:
