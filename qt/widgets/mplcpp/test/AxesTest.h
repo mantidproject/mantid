@@ -69,6 +69,14 @@ public:
     TS_ASSERT_EQUALS(format[1], line.pyobj().attr("get_marker")());
   }
 
+  void testPlotSetsLabelIfProvided() {
+    Axes axes(pyAxes());
+    QString label{"mylabel"};
+    auto line = axes.plot({1, 2, 3}, {1, 2, 3}, "b-", label);
+    TS_ASSERT_EQUALS(label.toLatin1().constData(),
+                     line.pyobj().attr("get_label")());
+  }
+
   void testSetXScaleWithKnownScaleType() {
     Axes axes(pyAxes());
     axes.setXScale("symlog");

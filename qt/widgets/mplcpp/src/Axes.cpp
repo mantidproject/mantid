@@ -81,6 +81,28 @@ void Axes::setTitle(const char *label) {
 }
 
 /**
+/**
+ * @brief Take the data and draw a single Line2D on the axes
+ * @param xdata A vector containing the X data
+ * @param ydata A vector containing the Y data
+ * @param format A format string accepted by matplotlib.axes.Axes.plot.
+ * @param label A label for the line
+ * @return A new Line2D object that owns the xdata, ydata vectors. If the
+ * return value is not captured the line will be automatically removed from
+ * the canvas as the vector data will be destroyed.
+ */
+Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
+                  QString format, QString label) {
+  GlobalInterpreterLock lock;
+  auto line2d =
+      plot(std::move(xdata), std::move(ydata), format.toLatin1().constData());
+  if (!label.isEmpty()) {
+    line2d.pyobj().attr("set_label")(label.toLatin1().constData());
+  }
+  return line2d;
+}
+
+/**
  * @brief Take the data and draw a single Line2D on the axes
  * @param xdata A vector containing the X data
  * @param ydata A vector containing the Y data
@@ -112,7 +134,6 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   try {
     return Line2D{pyobj().attr("plot")(xarray, yarray, format)[0],
                   std::move(xdata), std::move(ydata)};
-
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }
