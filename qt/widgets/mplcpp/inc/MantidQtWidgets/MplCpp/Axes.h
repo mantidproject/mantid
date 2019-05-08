@@ -31,6 +31,8 @@ public:
 
   /// @name Drawing
   /// @{
+  Artist legend(const bool draggable);
+  Artist legendInstance() const;
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
               const char *format = "b-");
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,

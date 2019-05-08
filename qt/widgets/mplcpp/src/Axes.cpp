@@ -81,6 +81,25 @@ void Axes::setTitle(const char *label) {
 }
 
 /**
+ * (Re-)generate a legend on the axes
+ * @param draggable If true the legend will be draggable
+ * @return An artist object representing the legend
+ */
+Artist Axes::legend(const bool draggable) {
+  GlobalInterpreterLock lock;
+  Artist legend{pyobj().attr("legend")()};
+  legend.pyobj().attr("draggable")(draggable);
+  return legend;
+}
+
+/**
+ * @return The legend instance if exists. None otherwise.
+ */
+Artist Axes::legendInstance() const {
+  GlobalInterpreterLock lock;
+  return Artist{pyobj().attr("legend_")};
+}
+
 /**
  * @brief Take the data and draw a single Line2D on the axes
  * @param xdata A vector containing the X data

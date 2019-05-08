@@ -9,12 +9,17 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
+#include <QAction>
+#include <QContextMenuEvent>
+#include <QEvent>
+#include <QMenu>
 #include <QVBoxLayout>
 
 #include <algorithm>
 
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
+constexpr bool DRAGGABLE_LEGEND{true};
 } // namespace
 
 namespace MantidQt {
@@ -29,12 +34,10 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, parent)}, m_lines{},
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
-  auto plotLayout = new QVBoxLayout(this);
-  plotLayout->setContentsMargins(0, 0, 0, 0);
-  plotLayout->setSpacing(0);
-  plotLayout->addWidget(m_canvas, 0, 0);
-  setLayout(plotLayout);
+  createLayout();
+  createActions();
 
+  m_canvas->installEventFilterToMplCanvas(this);
   if (watchADS) {
     auto &ads = AnalysisDataService::Instance();
     ads.notificationCenter.addObserver(m_wsRemovedObserver);
@@ -53,57 +56,59 @@ PreviewPlot::~PreviewPlot() {
 }
 
 /**
- * Add a curve for a given spectrum to the plot
- * @param curveName A string label for the curve
+ * Add a line for a given spectrum to the plot
+ * @param lineName A string label for the line
  * @param ws A MatrixWorkspace that contains the data
  * @param wsIndex The index of the workspace to access
- * @param curveColour Defines the color of the curve
+ * @param lineColour Defines the color of the line
  */
-void PreviewPlot::addSpectrum(const QString &curveName,
+void PreviewPlot::addSpectrum(const QString &lineName,
                               const Mantid::API::MatrixWorkspace_sptr &ws,
-                              const size_t wsIndex, const QColor &curveColour) {
-  if (curveName.isEmpty()) {
-    g_log.warning("Cannot plot with empty curve name");
+                              const size_t wsIndex, const QColor &lineColour) {
+  if (lineName.isEmpty()) {
+    g_log.warning("Cannot plot with empty line name");
     return;
   }
   if (!ws) {
     g_log.warning("Cannot plot null workspace");
     return;
   }
-  removeSpectrum(curveName);
+  removeSpectrum(lineName);
   auto axes = m_canvas->gca();
-  m_lines.emplace_back(Line2DInfo{createLine(axes, *ws, wsIndex, curveColour),
-                                  curveName, ws.get(), wsIndex, curveColour});
-  m_canvas->draw();
+  m_lines.emplace_back(
+      createLineInfo(axes, *ws, wsIndex, lineName, lineColour));
+  regenerateLegend();
   axes.relim();
+  m_canvas->draw();
 }
 
 /**
- * Add a curve for a given spectrum to the plot
- * @param curveName A string label for the curve
+ * Add a line for a given spectrum to the plot
+ * @param lineName A string label for the line
  * @param wsName A name of a MatrixWorkspace that contains the data
  * @param wsIndex The index of the workspace to access
- * @param curveColour Defines the color of the curve
+ * @param lineColour Defines the color of the line
  */
-void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
-                              const size_t wsIndex, const QColor &curveColour) {
-  addSpectrum(curveName,
+void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
+                              const size_t wsIndex, const QColor &lineColour) {
+  addSpectrum(lineName,
               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
                   wsName.toStdString()),
-              wsIndex, curveColour);
+              wsIndex, lineColour);
 }
 
 /**
- * Remove the named curve from the plot
- * @param curveName A name of a given curve on the plot. If the curveName is
+ * Remove the named line from the plot
+ * @param lineName A name of a given line on the plot. If the lineName is
  * not known then this does nothing
  */
-void PreviewPlot::removeSpectrum(const QString &curveName) {
-  auto curveIter = std::find_if(
+void PreviewPlot::removeSpectrum(const QString &lineName) {
+  auto lineIter = std::find_if(
       m_lines.cbegin(), m_lines.cend(),
-      [&curveName](const auto &curve) { return curve.name == curveName; });
-  if (curveIter != m_lines.cend()) {
-    m_lines.erase(curveIter);
+      [&lineName](const auto &line) { return line.label == lineName; });
+  if (lineIter != m_lines.cend()) {
+    m_lines.erase(lineIter);
+    regenerateLegend();
   }
 }
 
@@ -125,14 +130,73 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
 }
 
 /**
- * Clear all curves from the plot
+ * Clear all lines from the plot
  */
-void PreviewPlot::clear() { m_lines.clear(); }
+void PreviewPlot::clear() {
+  m_lines.clear();
+  regenerateLegend();
+}
 
 /**
  * Resize the X axis to encompass all of the data
  */
 void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
+
+/**
+ * Toggle for programatic legend visibility toggle
+ * @param visible If True the legend is visible on the canvas
+ */
+void PreviewPlot::showLegend(const bool visible) {
+  m_contextLegend->setChecked(visible);
+}
+
+/**
+ * Capture events destined for the canvas
+ * @param watched Target object (Unused)
+ * @param evt A pointer to the event object
+ * @return True if the event should be stopped, false otherwise
+ */
+bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
+  Q_UNUSED(watched);
+  bool stopEvent{false};
+  switch (evt->type()) {
+  case QEvent::ContextMenu:
+    showContextMenu(static_cast<QContextMenuEvent *>(evt));
+    stopEvent = true;
+    break;
+  default:
+    break;
+  }
+  return stopEvent;
+}
+
+/**
+ * Initialize the layout for the widget
+ */
+void PreviewPlot::createLayout() {
+  auto plotLayout = new QVBoxLayout(this);
+  plotLayout->setContentsMargins(0, 0, 0, 0);
+  plotLayout->setSpacing(0);
+  plotLayout->addWidget(m_canvas, 0, 0);
+  setLayout(plotLayout);
+}
+
+/**
+ * Create the menu actions items
+ */
+void PreviewPlot::createActions() {
+  m_contextLegend = new QAction("Legend", this);
+  m_contextLegend->setCheckable(true);
+  m_contextLegend->setChecked(true);
+  connect(m_contextLegend, &QAction::toggled, this, &PreviewPlot::toggleLegend);
+}
+
+/**
+ * @return True if the legend is visible, false otherwise
+ */
+bool PreviewPlot::legendIsVisible() const {
+  return m_contextLegend->isChecked() && !m_lines.empty();
+}
 
 /**
  * Observer method called when a workspace is removed from the ADS
@@ -165,41 +229,60 @@ void PreviewPlot::onWorkspaceReplaced(
 }
 
 /**
+ * Add a line to the canvas using the data from the workspace and return a
+ * struct describing the line
+ * @param axes A reference to the axes to contain the lines
+ * @param ws A reference to the workspace
+ * @param wsIndex The wsIndex
+ * @param lineLabel A label for the line
+ * @param lineColour The color required for the line
+ * @return A Line2DInfo describing the line
+ */
+PreviewPlot::Line2DInfo PreviewPlot::createLineInfo(
+    Widgets::MplCpp::Axes &axes, const Mantid::API::MatrixWorkspace &ws,
+    const size_t wsIndex, const QString &lineName, const QColor &lineColour) {
+  return Line2DInfo{createLine(axes, ws, wsIndex, lineName, lineColour), &ws,
+                    wsIndex, lineName, lineColour};
+}
+
+/**
  * Add a line to the canvas using the data from the workspace
  * @param axes A reference to the axes to contain the lines
  * @param ws A reference to the workspace
  * @param wsIndex The wsIndex
- * @param lineColor The color required for the line
+ * @param label A label for the line
+ * @param colour The color required for the line
  */
 Line2D PreviewPlot::createLine(Widgets::MplCpp::Axes &axes,
                                const Mantid::API::MatrixWorkspace &ws,
-                               const size_t wsIndex, const QColor &lineColor) {
+                               const size_t wsIndex, const QString &label,
+                               const QColor &lineColor) {
   const auto &histogram = ws.histogram(wsIndex);
   const auto xpts = histogram.points();
   const auto signal = histogram.y();
-  const QString hexColor = lineColor.name(QColor::HexRgb);
   return axes.plot(xpts.data().rawData(), signal.rawData(),
-                   hexColor.toLatin1().constData());
+                   lineColor.name(QColor::HexRgb), label);
 }
 
 /**
- * Remove all curves based on a given workspace
+ * Remove all lines based on a given workspace
  * @param ws A reference to a workspace
  */
 void PreviewPlot::removeLines(const Mantid::API::MatrixWorkspace &ws) {
-  decltype(m_lines.cbegin()) curveIter{m_lines.cbegin()};
-  while (curveIter != m_lines.cend()) {
-    curveIter =
+  decltype(m_lines.cbegin()) lineIter{m_lines.cbegin()};
+  while (lineIter != m_lines.cend()) {
+    lineIter =
         std::find_if(m_lines.cbegin(), m_lines.cend(),
                      [&ws](const auto &info) { return info.workspace == &ws; });
-    if (curveIter != m_lines.cend()) {
-      m_lines.erase(curveIter);
+    if (lineIter != m_lines.cend()) {
+      m_lines.erase(lineIter);
     }
   };
+  regenerateLegend();
 }
 
 /**
- * Replace any curves based on the old workspace with data from the new
+ * Replace any lines based on the old workspace with data from the new
  * workspace
  * @param oldWS A reference to the existing workspace
  * @param newWS A reference to the replacement workspace
@@ -209,11 +292,54 @@ void PreviewPlot::replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
   auto axes = m_canvas->gca();
   for (auto &info : m_lines) {
     if (info.workspace == &oldWS) {
-      info.line = createLine(axes, newWS, info.wsIndex, info.curveColour);
+      info.line =
+          createLine(axes, newWS, info.wsIndex, info.label, info.colour);
       info.workspace = &newWS;
     }
   }
+  regenerateLegend();
   axes.relim();
+  m_canvas->draw();
+}
+
+/**
+ * If the legend is visible regenerate it based on the current content
+ */
+void PreviewPlot::regenerateLegend() {
+  if (legendIsVisible()) {
+    m_canvas->gca().legend(DRAGGABLE_LEGEND);
+  }
+}
+
+/**
+ * If the legend is visible remove it from the canvas
+ */
+void PreviewPlot::removeLegend() {
+  auto legend{m_canvas->gca().legendInstance()};
+  if (!legend.pyobj().is_none()) {
+    m_canvas->gca().legendInstance().remove();
+  }
+}
+
+/**
+ * Display the context menu for the canvas
+ */
+void PreviewPlot::showContextMenu(QContextMenuEvent *evt) {
+  QMenu contextMenu{this};
+  contextMenu.addAction(m_contextLegend);
+  contextMenu.exec(evt->globalPos());
+}
+
+/**
+ * Toggle the legend visibility state
+ * @param checked True if the state should be visible, false otherwise
+ */
+void PreviewPlot::toggleLegend(const bool checked) {
+  if (checked) {
+    regenerateLegend();
+  } else {
+    removeLegend();
+  }
   m_canvas->draw();
 }
 
