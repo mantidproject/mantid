@@ -27,8 +27,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -747,45 +747,45 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
   // parse the paramters map and get extents from tempDataWS
   const std::string numBinsStr = parameters.at("OutputBins");
   const std::string extentsStr = parameters.at("OutputExtents");
-  const std::vector<size_t> numBins = VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
-  const std::vector<double> extents = VectorHelper::splitStringIntoVector<double>(extentsStr);
+  const std::vector<size_t> numBins =
+      VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
+  const std::vector<double> extents =
+      VectorHelper::splitStringIntoVector<double>(extentsStr);
 
   // make sure the number of dimensions is the same for both workspaces
   size_t numDimsTemp = tempDataWS->getNumDims();
-  if((numBins.size() != numDimsTemp) || (extents.size() != numDimsTemp*2)){
+  if ((numBins.size() != numDimsTemp) || (extents.size() != numDimsTemp * 2)) {
     std::stringstream errorMessage;
-    errorMessage <<"The number of dimensions in the output and ";
-    errorMessage <<"TemporaryDataWorkspace are not the same.";
+    errorMessage << "The number of dimensions in the output and ";
+    errorMessage << "TemporaryDataWorkspace are not the same.";
     throw(std::invalid_argument(errorMessage.str()));
   }
 
   // compare the extents and number of bins
   for (size_t i = 0; i < numDimsTemp; i++) {
     auto ax = tempDataWS->getDimension(i);
-    if(numBins[i] != ax->getNBins()){
-        std::stringstream errorMessage;
-        errorMessage <<"The number of bins output and number of bins in ";
-        errorMessage <<"TemporaryDataWorkspace are not the same along ";
-        errorMessage <<"dimension "<<i;
-        throw(std::invalid_argument(errorMessage.str()));
+    if (numBins[i] != ax->getNBins()) {
+      std::stringstream errorMessage;
+      errorMessage << "The number of bins output and number of bins in ";
+      errorMessage << "TemporaryDataWorkspace are not the same along ";
+      errorMessage << "dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
     }
-    if(std::abs(extents[2*i] - ax->getMinimum())>1.e-5){
-        std::stringstream errorMessage;
-        errorMessage <<"The minimum binning value for the output and ";
-        errorMessage <<"TemporaryDataWorkspace are not the same along ";
-        errorMessage <<"dimension "<<i;
-        throw(std::invalid_argument(errorMessage.str()));
-
+    if (std::abs(extents[2 * i] - ax->getMinimum()) > 1.e-5) {
+      std::stringstream errorMessage;
+      errorMessage << "The minimum binning value for the output and ";
+      errorMessage << "TemporaryDataWorkspace are not the same along ";
+      errorMessage << "dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
     }
-    if(std::abs(extents[2*i+1] - ax->getMaximum())>1.e-5){
-        std::stringstream errorMessage;
-        errorMessage <<"The maximum binning value for the output and ";
-        errorMessage <<"TemporaryDataWorkspace are not the same along ";
-        errorMessage <<"dimension "<<i;
-        throw(std::invalid_argument(errorMessage.str()));
+    if (std::abs(extents[2 * i + 1] - ax->getMaximum()) > 1.e-5) {
+      std::stringstream errorMessage;
+      errorMessage << "The maximum binning value for the output and ";
+      errorMessage << "TemporaryDataWorkspace are not the same along ";
+      errorMessage << "dimension " << i;
+      throw(std::invalid_argument(errorMessage.str()));
     }
   }
-
 
   // sort out which axes are dimensional and check names
   size_t parametersIndex = 0;
