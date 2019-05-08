@@ -76,8 +76,6 @@ public:
   void setPlotErrorBars(bool errorBars);
 
 protected:
-  /// Function to run a string as python code
-  void runPythonScript(const QString &pyInput);
   /// Check the binning between two workspaces match
   bool
   checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,

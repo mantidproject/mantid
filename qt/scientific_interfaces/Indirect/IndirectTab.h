@@ -142,10 +142,6 @@ protected:
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
 
-  /// Resizes the specified plot range
-  void resizePlotRange(MantidWidgets::PreviewPlot *preview,
-                       QPair<double, double> range);
-
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
   std::unordered_map<std::string, size_t>
