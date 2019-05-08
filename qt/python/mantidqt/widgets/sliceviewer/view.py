@@ -63,10 +63,7 @@ class SliceViewerView(QWidget):
         self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
                                  transpose=self.dimensions.transpose,
                                  norm=self.colorbar.get_norm(), **kwargs)
-        self.ax.set_title('')
-        self.colorbar.set_mappable(self.im)
-        self.mpl_toolbar.update() # clear nav stack
-        self.canvas.draw_idle()
+        self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
         """
@@ -74,14 +71,16 @@ class SliceViewerView(QWidget):
         """
         self.ax.clear()
         if use_imshow(ws):
-            self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
-                                     transpose=self.dimensions.transpose,
-                                     norm=self.colorbar.get_norm(), **kwargs)
+            self.plot_MDH(ws, **kwargs) # Make same call to imshow as MDHistoWorkspace
         else:
             self.im = self.ax.pcolormesh(ws, transpose=self.dimensions.transpose,
                                          norm=self.colorbar.get_norm(), **kwargs)
+            self.draw_plot()
+
+    def draw_plot(self):
         self.ax.set_title('')
         self.colorbar.set_mappable(self.im)
+        self.colorbar.update_clim()
         self.mpl_toolbar.update() # clear nav stack
         self.canvas.draw_idle()
 
