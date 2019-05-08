@@ -9,10 +9,9 @@ from qtpy.QtTest import QTest
 from mantid import FrameworkManager, FunctionFactory
 from mantid.fitfunctions import FunctionWrapper
 from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, not_on_windows, get_child, click_on)
-from mantidqt.utils.qt import import_qt
+from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 
-FunctionBrowser = import_qt('.._common', 'mantidqt.widgets', 'FunctionBrowser')
 skip = unittest.skipIf(not_on_windows(), "It works on windows. I cannot spend too much time trying to "
                                          "fix the other platforms.")
 
