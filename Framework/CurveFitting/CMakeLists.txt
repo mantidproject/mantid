@@ -43,7 +43,6 @@ set(SRC_FILES
     src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
     src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
     src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
-    src/FuncMinimizers/LocalSearchMinimizer.cpp
     src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
     src/FuncMinimizers/SimplexMinimizer.cpp
     src/FuncMinimizers/SteepestDescentMinimizer.cpp
@@ -55,7 +54,6 @@ set(SRC_FILES
     src/Functions/BackgroundFunction.cpp
     src/Functions/BivariateNormal.cpp
     src/Functions/Bk2BkExpConvPV.cpp
-    src/Functions/Chebfun.cpp
     src/Functions/ChebfunBase.cpp
     src/Functions/Chebyshev.cpp
     src/Functions/ComptonPeakProfile.cpp
@@ -211,7 +209,6 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
     inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
     inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
-    inc/MantidCurveFitting/FuncMinimizers/LocalSearchMinimizer.h
     inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
     inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
     inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
@@ -223,7 +220,6 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
     inc/MantidCurveFitting/Functions/BivariateNormal.h
     inc/MantidCurveFitting/Functions/Bk2BkExpConvPV.h
-    inc/MantidCurveFitting/Functions/Chebfun.h
     inc/MantidCurveFitting/Functions/ChebfunBase.h
     inc/MantidCurveFitting/Functions/Chebyshev.h
     inc/MantidCurveFitting/Functions/ComptonPeakProfile.h
@@ -382,7 +378,6 @@ set(TEST_FILES
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
     Functions/Bk2BkExpConvPVTest.h
-    Functions/ChebfunTest.h
     Functions/ChebfunBaseTest.h
     Functions/ChebyshevTest.h
     Functions/ComptonPeakProfileTest.h
@@ -466,7 +461,6 @@ set(TEST_FILES
     IPeakFunctionIntensityTest.h
     LatticeDomainCreatorTest.h
     LatticeFunctionTest.h
-    LocalSearchMinimizerTest.h
     MultiDomainCreatorTest.h
     MultiDomainFunctionTest.h
     ParameterEstimatorTest.h

@@ -33,8 +33,6 @@ public:
                 double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
   SimpleChebfun(const std::vector<double> &x, const std::vector<double> &y);
-  /// Constructor
-  SimpleChebfun(ChebfunBase_sptr base);
   /// Number of points in the approximation.
   size_t size() const { return m_base->size(); }
   /// Order of the approximating polynomial.
@@ -53,16 +51,10 @@ public:
   const std::vector<double> &yPoints() const { return m_P; }
   /// Get a reference to the Chebyshev expansion coefficients
   const std::vector<double> &coeffs() const;
-  /// Set the y-points
-  void setYPoints(const std::vector<double>& p);
-  /// Set both the y-points and the expansion coefficients
-  void setData(const std::vector<double>& p, const std::vector<double>& a);
   /// Evaluate the function.
   double operator()(double x) const;
   /// Evaluate the function.
   std::vector<double> operator()(const std::vector<double> &x) const;
-  /// Evaluate th efunction on a range
-  void evaluate(double *xvalues, size_t n) const;
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
   /// Get the accuracy of the approximation
@@ -79,6 +71,8 @@ public:
   SimpleChebfun &operator+=(ChebfunFunctionType fun);
 
 private:
+  /// Constructor
+  SimpleChebfun(ChebfunBase_sptr base);
   /// Underlying base that does actual job.
   ChebfunBase_sptr m_base;
   /// Function values at the chebfun x-points.

@@ -11,8 +11,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFittingAlgorithm.h"
-//=====================================================
-#include "MantidCurveFitting/GSLVector.h"
 
 namespace Mantid {
 
@@ -24,10 +22,6 @@ class IFuncMinimizer;
 } // namespace API
 
 namespace CurveFitting {
-namespace CostFunctions {
-  class CostFuncFitting;
-}
-
 namespace Algorithms {
 /**
 
@@ -114,10 +108,6 @@ private:
   boost::shared_ptr<API::IFuncMinimizer> m_minimizer;
   /// Max number of iterations
   size_t m_maxIterations;
-  void outputSurface();
-  void pushParameters(const CostFunctions::CostFuncFitting& fun);
-
-  std::vector<GSLVector> m_points;
 };
 
 } // namespace Algorithms

@@ -84,8 +84,7 @@ SimpleChebfun::SimpleChebfun(const std::vector<double> &x,
 }
 
 /// Construct an empty SimpleChebfun with shared base.
-SimpleChebfun::SimpleChebfun(ChebfunBase_sptr base)
-    : m_badFit(false) {
+SimpleChebfun::SimpleChebfun(ChebfunBase_sptr base) : m_badFit(false) {
   assert(base);
   m_base = base;
   m_P.resize(base->size());
@@ -97,30 +96,6 @@ const std::vector<double> &SimpleChebfun::coeffs() const {
     m_A = m_base->calcA(m_P);
   }
   return m_A;
-}
-
-/// Set the y-points
-/// @param p :: New y-points. Must have the same size as x-points.
-void SimpleChebfun::setYPoints(const std::vector<double>& p) {
-  if (p.size() != size()) {
-    throw std::runtime_error("SimpleChebfun: cannot set y-points - wrong vector size.");
-  }
-  m_P = p;
-  m_A.clear();
-}
-
-/// Set both the y-points and the expansion coefficients
-/// @param p :: New y-points. Must have the same size as x-points.
-/// @param a :: New expansion coefficients. Must be consistent with p. No check is made.
-void SimpleChebfun::setData(const std::vector<double>& p, const std::vector<double>& a) {
-  if (p.size() != size()) {
-    throw std::runtime_error("SimpleChebfun: cannot set y-points - wrong vector size.");
-  }
-  if (a.size() != size()) {
-    throw std::runtime_error("SimpleChebfun: cannot set coefficients - wrong vector size.");
-  }
-  m_P = p;
-  m_A = a;
 }
 
 /// Evaluate the function.
@@ -136,13 +111,10 @@ operator()(const std::vector<double> &x) const {
   return m_base->evalVector(x, m_P);
 }
 
-/// Evaluate th efunction on a range
-void SimpleChebfun::evaluate(double *xvalues, size_t n) const {}
-
 /// Create a vector of x values linearly spaced on the approximation interval.
 /// @param n :: Number of points in the vector.
 std::vector<double> SimpleChebfun::linspace(size_t n) const {
-  return ChebfunBase::linspace(n, m_base->startX(), m_base->endX());
+  return m_base->linspace(n);
 }
 
 /// Get the accuracy of the approximation
@@ -176,22 +148,8 @@ SimpleChebfun SimpleChebfun::integral() const {
 /// @param level :: An optional right-hand-side of equation (*this)(x) == level.
 std::vector<double> SimpleChebfun::roughRoots(double level) const {
   std::vector<double> rs;
-  if (m_P.empty()) {
+  if (m_P.empty())
     return rs;
-  }
-  // If size is small accurate roots are prefered.
-  if (size() <= 10) {
-    if (m_A.empty()) {
-      m_A = m_base->calcA(m_P);
-    }
-    m_A.front() -= level;
-    rs = m_base->roots(coeffs());
-    std::sort(rs.begin(), rs.end());
-    m_A.front() += level;
-    return rs;
-  }
-
-  // FOr large sizes find rough estimates.
   auto &x = m_base->xPoints();
   auto y1 = m_P.front() - level;
   for (size_t i = 1; i < m_P.size(); ++i) {

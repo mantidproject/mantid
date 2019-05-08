@@ -120,8 +120,6 @@ void ChebfunBase::calcX() {
     size_t j = m_n - i;
     m_x[i] = x0 + b * cos(double(j) * pin);
   }
-  m_x.front() = m_start;
-  m_x.back() = m_end;
 }
 
 /**
@@ -228,24 +226,13 @@ double ChebfunBase::eval(double x, const std::vector<double> &p) const {
  */
 void ChebfunBase::evalVector(const std::vector<double> &x,
                              const std::vector<double> &p,
-                             std::vector<double> &res, size_t start,
-                             size_t end) const {
+                             std::vector<double> &res) const {
   if (x.empty()) {
     throw std::invalid_argument("Vector of x-values cannot be empty.");
   }
 
-  if (end == 0) end = x.size();
-
-  if (start >= end) {
-    throw std::invalid_argument("Vector of x-values cannot be empty.");
-  }
-
-  size_t xSize = end - start;
-
-  res.resize(xSize, 0.0);
-  auto xBegin = x.begin() + start;
-  auto xEnd = x.begin() + end;
-  auto ix = std::lower_bound(m_x.begin(), m_x.end(), *xBegin);
+  res.resize(x.size(), 0.0);
+  auto ix = std::lower_bound(m_x.begin(), m_x.end(), x.front());
   if (ix == m_x.end()) {
     return;
   }
@@ -255,13 +242,13 @@ void ChebfunBase::evalVector(const std::vector<double> &x,
   auto pBegin = p.begin();
   auto bwBegin = m_bw.begin();
 
-  size_t i = start;
-  for (; i < end; ++i) {
+  size_t i = 0;
+  for (; i < x.size(); ++i) {
     if (x[i] >= m_start)
       break;
   }
 
-  for (; i < end; ++i) {
+  for (; i < x.size(); ++i) {
     double xi = x[i];
     while (ix != mXEnd && xi > *ix)
       ++ix;
@@ -292,11 +279,11 @@ void ChebfunBase::evalVector(const std::vector<double> &x,
  * @param p :: The y-points of a function.
  * @return :: Output result. res.size() == x.size()
  */
-std::vector<double> ChebfunBase::evalVector(const std::vector<double> &x,
-                                            const std::vector<double> &p,
-                                            size_t start, size_t end) const {
+std::vector<double>
+ChebfunBase::evalVector(const std::vector<double> &x,
+                        const std::vector<double> &p) const {
   std::vector<double> res;
-  evalVector(x, p, res, start, end);
+  evalVector(x, p, res);
   return res;
 }
 
@@ -384,7 +371,7 @@ template <class FunctionType>
 ChebfunBase_sptr
 ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
                           std::vector<double> &p, std::vector<double> &a,
-                          double tolerance, size_t maxSize, double maxA) {
+                          double maxA, double tolerance, size_t maxSize) {
 
   std::vector<double> p1, p2;
   const size_t n0 = 8;
@@ -475,55 +462,43 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
 ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
                                       ChebfunFunctionType f,
                                       std::vector<double> &p,
-                                      std::vector<double> &a,
-                                      double tolerance, size_t maxSize, double maxA) {
-  return bestFitTempl(start, end, f, p, a, tolerance, maxSize, maxA);
+                                      std::vector<double> &a, double maxA,
+                                      double tolerance, size_t maxSize) {
+  return bestFitTempl(start, end, f, p, a, maxA, tolerance, maxSize);
 }
 
 /// Template specialization for IFunction
 ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
                                       const API::IFunction &f,
                                       std::vector<double> &p,
-                                      std::vector<double> &a,
-                                      double tolerance, size_t maxSize, double maxA) {
-  return bestFitTempl<const API::IFunction &>(start, end, f, p, a,
-                                              tolerance, maxSize, maxA);
+                                      std::vector<double> &a, double maxA,
+                                      double tolerance, size_t maxSize) {
+  return bestFitTempl<const API::IFunction &>(start, end, f, p, a, maxA,
+                                              tolerance, maxSize);
 }
 
 /**
- * Return a vector of linearly spaced values in an interval: startX <= x <= endX
+ * Return a vector of linearly spaced values in the domain interval m_start <= x
+ * <= m_end
  * @param n :: Number of points in the output vector.
- * @param startX :: Start of the interval.
- * @param endX :: End of the interval.
  */
-std::vector<double> ChebfunBase::linspace(size_t n, double startX, double endX){
-  if (n < 2){
-    throw std::runtime_error("linspace must have at least two points.");
-  }
+std::vector<double> ChebfunBase::linspace(size_t n) const {
   std::vector<double> space(n);
-  double x = startX;
-  const double dx = (endX - startX) / double(n - 1);
-  for (auto s = space.begin(); s != space.end(); ++s) {
-    *s = x;
+  double x = m_start;
+  const double dx = width() / double(n - 1);
+  for (double &s : space) {
+    s = x;
     x += dx;
   }
-  space.back() = endX;
+  space.back() = m_end;
   return space;
 }
 
 /**
- * Return a vector of linearly spaced values in the approximation interval: m_start <= x <= m_end
- * @param n :: Number of points in the output vector.
+ * Calculate the chebyshev expansion coefficients given function values
+ * at the x-points.
+ * @param p :: Function values at chebyshev points.
  */
-std::vector<double> ChebfunBase::linspace(size_t n) const {
-  return linspace(n, m_start, m_end);
-}
-
-/**
-* Calculate the chebyshev expansion coefficients given function values
-* at the x-points.
-* @param p :: Function values at chebyshev points.
-*/
 std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
   const size_t nn = m_n + 1;
 

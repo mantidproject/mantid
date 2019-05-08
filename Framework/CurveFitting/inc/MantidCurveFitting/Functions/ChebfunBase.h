@@ -100,12 +100,10 @@ public:
   double eval(double x, const std::vector<double> &p) const;
   /// Evaluate a function
   void evalVector(const std::vector<double> &x, const std::vector<double> &p,
-                  std::vector<double> &res, size_t start = 0,
-                  size_t end = 0) const;
+                  std::vector<double> &res) const;
   /// Evaluate a function
   std::vector<double> evalVector(const std::vector<double> &x,
-                                 const std::vector<double> &p, size_t start = 0,
-                                 size_t end = 0) const;
+                                 const std::vector<double> &p) const;
   /// Calculate the derivative
   void derivative(const std::vector<double> &a,
                   std::vector<double> &aout) const;
@@ -118,19 +116,15 @@ public:
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
   bestFit(double start, double end, ChebfunFunctionType, std::vector<double> &p,
-          std::vector<double> &a, double tolerance = 0.0,
-          size_t maxSize = 0, double maxA = 0.0);
+          std::vector<double> &a, double maxA = 0.0, double tolerance = 0.0,
+          size_t maxSize = 0);
   /// Fit a function until full convergence
   static boost::shared_ptr<ChebfunBase>
   bestFit(double start, double end, const API::IFunction &,
-          std::vector<double> &p, std::vector<double> &a,
-          double tolerance = 0.0, size_t maxSize = 0, double maxA = 0.0);
+          std::vector<double> &p, std::vector<double> &a, double maxA = 0.0,
+          double tolerance = 0.0, size_t maxSize = 0);
   /// Tolerance for comparing doubles
   double tolerance() { return m_tolerance; }
-  /// Default tolerance for comparing doubles
-  static double defaultTolerance() { return g_tolerance; }
-  /// Get maximum possible size
-  static size_t maximumSize() { return g_maxNumberPoints; }
 
   /// Find best fit with highest possible tolerance (to be used with noisy
   /// data).
@@ -138,12 +132,10 @@ public:
   static boost::shared_ptr<ChebfunBase>
   bestFitAnyTolerance(double start, double end, FunctionType f,
                       std::vector<double> &p, std::vector<double> &a,
-                      double tolerance = 0.0, size_t maxSize = 0,
-                      double maxA = 0.0);
+                      double maxA = 0.0, double tolerance = 0.0,
+                      size_t maxSize = 0);
 
-  /// Create a vector of x values linearly spaced on an interval
-  static std::vector<double> linspace(size_t n, double startX, double endX);
-  /// Create a vector of x values linearly spaced on the approxiamtion interval
+  /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
   std::vector<double> smooth(const std::vector<double> &xvalues,
                              const std::vector<double> &yvalues) const;
@@ -170,8 +162,8 @@ private:
   template <class FunctionType>
   static boost::shared_ptr<ChebfunBase>
   bestFitTempl(double start, double end, FunctionType f, std::vector<double> &p,
-               std::vector<double> &a, double tolerance, size_t maxSize,
-               double maxA);
+               std::vector<double> &a, double maxA, double tolerance,
+               size_t maxSize);
 
   /// Actual tolerance in comparing doubles
   const double m_tolerance;
@@ -199,11 +191,13 @@ using ChebfunBase_sptr = boost::shared_ptr<ChebfunBase>;
 template <class FunctionType>
 boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
     double start, double end, FunctionType f, std::vector<double> &p,
-    std::vector<double> &a, double tolerance, size_t maxSize, double maxA) {
+    std::vector<double> &a, double maxA, double tolerance, size_t maxSize) {
   if (tolerance == 0.0)
     tolerance = g_tolerance;
-  for (double tol = tolerance; tol < 0.1; tol *= 100) {
-    auto base = bestFit(start, end, f, p, a, tol, maxSize, maxA);
+
+  double tol = tolerance;
+  while (tol < 0.1) {
+    auto base = bestFit(start, end, f, p, a, maxA, tol, maxSize);
     if (base) {
       return base;
     }
