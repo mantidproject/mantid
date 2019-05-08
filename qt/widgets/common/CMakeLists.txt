@@ -145,7 +145,6 @@ set(QT5_MOC_FILES
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
-  inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/LocalParameterEditor.h
@@ -222,6 +221,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/IFunctionView.h
+    inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
