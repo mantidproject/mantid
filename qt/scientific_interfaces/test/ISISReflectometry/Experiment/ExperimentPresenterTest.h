@@ -435,33 +435,34 @@ public:
   }
 
   void testRestoreDefaultsNotifiesMainPresenter() {
-    auto presenter = makePresenter();
+    auto defaultOptions = expectDefaults(makeModel());
+    auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_mainPresenter, notifyRestoreDefaultsRequested())
         .Times(AtLeast(1));
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesAnalysisModeInView() {
+  void testRestoreDefaultsUpdatesAnalysisModeInView() {
     auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setAnalysisMode("MultiDetectorAnalysis")).Times(1);
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesAnalysisModeInModel() {
+  void testRestoreDefaultsUpdatesAnalysisModeInModel() {
     auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
                      AnalysisMode::MultiDetector);
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesReductionOptionsInView() {
+  void testRestoreDefaultsUpdatesReductionOptionsInView() {
     auto model = makeModelWithReduction(SummationType::SumInQ,
                                         ReductionType::NonFlatSample, true);
     auto defaultOptions = expectDefaults(model);
@@ -469,16 +470,16 @@ public:
     EXPECT_CALL(m_view, setSummationType("SumInQ")).Times(1);
     EXPECT_CALL(m_view, setReductionType("NonFlatSample")).Times(1);
     EXPECT_CALL(m_view, setIncludePartialBins(true)).Times(1);
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesReductionOptionsInModel() {
+  void testRestoreDefaultsUpdatesReductionOptionsInModel() {
     auto model = makeModelWithReduction(SummationType::SumInQ,
                                         ReductionType::NonFlatSample, true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(presenter.experiment().summationType(),
                      SummationType::SumInQ);
     TS_ASSERT_EQUALS(presenter.experiment().reductionType(),
@@ -487,25 +488,25 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesDebugOptionsInView() {
+  void testRestoreDefaultsUpdatesDebugOptionsInView() {
     auto model = makeModelWithDebug(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setDebugOption(true)).Times(1);
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesDebugOptionsInModel() {
+  void testRestoreDefaultsUpdatesDebugOptionsInModel() {
     auto model = makeModelWithDebug(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(presenter.experiment().debug(), true);
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesPerThetaInView() {
+  void testRestoreDefaultsUpdatesPerThetaInView() {
     auto perThetaDefaults = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                              RangeInQ(0.01, 0.03, 0.2), 0.7,
                                              std::string("390-415"));
@@ -516,17 +517,17 @@ public:
         {"", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
          "390-415"}};
     EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesPerThetaInModel() {
+  void testRestoreDefaultsUpdatesPerThetaInModel() {
     auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(
         boost::none, TransmissionRunPair(), RangeInQ(0.01, 0.03, 0.2), 0.7,
         std::string("390-415")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      RangeInQ(0.01, 0.03, 0.2), 0.7,
                                      std::string("390-415"));
@@ -536,28 +537,28 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesTransmissionRunRangeInView() {
+  void testRestoreDefaultsUpdatesTransmissionRunRangeInView() {
     auto model = makeModelWithTransmissionRunRange(RangeInLambda{10.0, 12.0});
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setTransmissionStartOverlap(10.0)).Times(1);
     EXPECT_CALL(m_view, setTransmissionEndOverlap(12.0)).Times(1);
     EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesTransmissionRunRangeInModel() {
+  void testRestoreDefaultsUpdatesTransmissionRunRangeInModel() {
     auto model = makeModelWithTransmissionRunRange(RangeInLambda{10.0, 12.0});
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     auto const expected = RangeInLambda{10.0, 12.0};
     TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), expected);
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesCorrectionInView() {
+  void testRestoreDefaultsUpdatesCorrectionInView() {
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
         FloodCorrections(FloodCorrectionType::ParameterFile));
@@ -566,17 +567,17 @@ public:
     EXPECT_CALL(m_view, setPolarizationCorrectionType("ParameterFile"))
         .Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testInstrumentChangedUpdatesCorrectionInModel() {
+  void testRestoreDefaultsUpdatesCorrectionInModel() {
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
         FloodCorrections(FloodCorrectionType::ParameterFile));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.instrumentChanged("INTER");
+    presenter.notifyRestoreDefaultsRequested();
     TS_ASSERT_EQUALS(
         presenter.experiment().polarizationCorrections().correctionType(),
         PolarizationCorrectionType::ParameterFile);

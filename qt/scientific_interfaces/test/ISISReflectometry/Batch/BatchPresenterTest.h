@@ -69,20 +69,6 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedWhenRestoreDefaultsRequested() {
-    auto presenter = makePresenter();
-    // Set the instrument first
-    auto const instrument = std::string("INTER");
-    presenter.notifyInstrumentChanged(instrument);
-    // Now when we restore defaults, it should call instrument changed with the
-    // existing instrument
-    EXPECT_CALL(*m_runsPresenter, instrumentChanged(instrument)).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, instrumentChanged(instrument)).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, instrumentChanged(instrument)).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
-    verifyAndClear();
-  }
-
   void testChildPresentersUpdatedWhenSettingsChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, settingsChanged()).Times(1);

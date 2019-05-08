@@ -89,6 +89,7 @@ private:
   void autoreductionPaused();
   void autoreductionCompleted();
   void instrumentChanged(const std::string &instName);
+  void updateInstrument(const std::string &instName);
   void settingsChanged();
 
   IBatchView *m_view;

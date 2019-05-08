@@ -9,6 +9,7 @@
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "RowLocation.h"
+#include <iostream>
 namespace MantidQt {
 namespace CustomInterfaces {
 

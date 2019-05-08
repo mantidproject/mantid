@@ -29,6 +29,7 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
+  Experiment();
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
              SummationType summationType, bool includePartialBins, bool debug,
              PolarizationCorrections polarizationCorrections,

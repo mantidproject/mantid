@@ -27,6 +27,7 @@ public:
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
   virtual void instrumentChanged(std::string const &instrumentName) = 0;
+  virtual void restoreDefaults() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

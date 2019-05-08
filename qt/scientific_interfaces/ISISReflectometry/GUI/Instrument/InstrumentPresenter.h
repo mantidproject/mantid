@@ -40,6 +40,7 @@ public:
   void autoreductionPaused() override;
   void autoreductionResumed() override;
   void instrumentChanged(std::string const &instrumentName) override;
+  void restoreDefaults() override;
 
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
@@ -53,7 +54,6 @@ private:
   Instrument m_model;
   IBatchPresenter *m_mainPresenter;
 
-  void restoreDefaults();
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();
   boost::optional<RangeInLambda> monitorIntegralRangeFromView();

@@ -8,11 +8,14 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "InstrumentOptionDefaults.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include <ostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
 boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range,
                                            bool bothOrNoneMustBeSet) {
   if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
@@ -41,7 +44,9 @@ void InstrumentPresenter::notifySettingsChanged() {
 }
 
 void InstrumentPresenter::notifyRestoreDefaultsRequested() {
+  // Notify main presenter first to make sure instrument is up to date
   m_mainPresenter->notifyRestoreDefaultsRequested();
+  restoreDefaults();
 }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
@@ -108,7 +113,17 @@ void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
 }
 
 void InstrumentPresenter::restoreDefaults() {
-  m_model = m_instrumentDefaults->get(m_mainPresenter->instrument());
+  auto const instrument = m_mainPresenter->instrument();
+  try {
+    m_model = m_instrumentDefaults->get(instrument);
+  } catch (std::invalid_argument &ex) {
+    std::ostringstream msg;
+    msg << "Error setting default Instrument Settings: " << ex.what()
+        << ". Please check the " << instrument->getName()
+        << " parameters file.";
+    g_log.error(msg.str());
+    m_model = Instrument();
+  }
   updateViewFromModel();
 }
 

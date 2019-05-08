@@ -81,9 +81,9 @@ void BatchPresenter::notifyInstrumentChanged(
 }
 
 void BatchPresenter::notifyRestoreDefaultsRequested() {
-  // We need to re-load the instrument and restore defaults from it, just as if
-  // we had changed instrument.
-  instrumentChanged(m_instrument->getName());
+  // We need to reload the instrument parameters file so that we can get
+  // up-to-date defaults
+  updateInstrument(m_instrument->getName());
 }
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
@@ -236,6 +236,13 @@ void BatchPresenter::autoreductionPaused() {
 void BatchPresenter::autoreductionCompleted() {}
 
 void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
+  updateInstrument(instrumentName);
+  m_runsPresenter->instrumentChanged(instrumentName);
+  m_experimentPresenter->instrumentChanged(instrumentName);
+  m_instrumentPresenter->instrumentChanged(instrumentName);
+}
+
+void BatchPresenter::updateInstrument(const std::string &instrumentName) {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrumentName);
   g_log.information() << "Instrument changed to " << instrumentName;
@@ -251,10 +258,6 @@ void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   loadAlg->execute();
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
   m_instrument = instWorkspace->getInstrument();
-
-  m_runsPresenter->instrumentChanged(instrumentName);
-  m_experimentPresenter->instrumentChanged(instrumentName);
-  m_instrumentPresenter->instrumentChanged(instrumentName);
 }
 
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {

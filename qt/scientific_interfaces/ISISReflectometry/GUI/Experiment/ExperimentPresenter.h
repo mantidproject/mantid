@@ -67,14 +67,13 @@ public:
   void autoreductionPaused() override;
   void autoreductionResumed() override;
   void instrumentChanged(std::string const &instrumentName) override;
+  void restoreDefaults() override;
 
 protected:
   std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
 
 private:
   IBatchPresenter *m_mainPresenter;
-
-  void restoreDefaults();
 
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();

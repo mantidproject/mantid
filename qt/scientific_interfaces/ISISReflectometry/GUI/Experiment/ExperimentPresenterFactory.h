@@ -22,28 +22,12 @@ public:
       : m_thetaTolerance(thetaTolerance) {}
 
   std::unique_ptr<IExperimentPresenter> make(IExperimentView *view) {
-    return std::make_unique<ExperimentPresenter>(view, makeModel(),
+    return std::make_unique<ExperimentPresenter>(view, Experiment(),
                                                  m_thetaTolerance);
   }
 
 private:
   double m_thetaTolerance;
-
-  Experiment makeModel() {
-    // TODO inject model instead of creating it here
-    auto polarizationCorrections =
-        PolarizationCorrections(PolarizationCorrectionType::None);
-    auto floodCorrections(FloodCorrectionType::Workspace);
-    auto stitchParameters = std::map<std::string, std::string>();
-    auto perThetaDefaults = std::vector<PerThetaDefaults>(
-        {PerThetaDefaults(boost::none, TransmissionRunPair(), RangeInQ(),
-                          boost::none, ProcessingInstructions())});
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      std::move(polarizationCorrections),
-                      std::move(floodCorrections), boost::none,
-                      std::move(stitchParameters), std::move(perThetaDefaults));
-  }
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

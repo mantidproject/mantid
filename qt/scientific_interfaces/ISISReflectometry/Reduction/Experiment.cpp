@@ -7,10 +7,22 @@
 #include "Experiment.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cmath>
-#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+Experiment::Experiment()
+    : m_analysisMode(AnalysisMode::PointDetector),
+      m_reductionType(ReductionType::Normal),
+      m_summationType(SummationType::SumInLambda), m_includePartialBins(false),
+      m_debug(false), m_polarizationCorrections(PolarizationCorrections(
+                          PolarizationCorrectionType::None)),
+      m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)),
+      m_transmissionRunRange(boost::none),
+      m_stitchParameters(std::map<std::string, std::string>()),
+      m_perThetaDefaults(std::vector<PerThetaDefaults>(
+          {PerThetaDefaults(boost::none, TransmissionRunPair(), RangeInQ(),
+                            boost::none, ProcessingInstructions())})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        SummationType summationType, bool includePartialBins,

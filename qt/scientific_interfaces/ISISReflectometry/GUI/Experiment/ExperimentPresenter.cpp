@@ -13,6 +13,10 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+}
 
 ExperimentPresenter::ExperimentPresenter(
     IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
@@ -36,7 +40,9 @@ void ExperimentPresenter::notifySettingsChanged() {
 }
 
 void ExperimentPresenter::notifyRestoreDefaultsRequested() {
+  // Notify main presenter first to make sure instrument is up to date
   m_mainPresenter->notifyRestoreDefaultsRequested();
+  restoreDefaults();
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {
@@ -111,7 +117,17 @@ void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
 }
 
 void ExperimentPresenter::restoreDefaults() {
-  m_model = m_experimentDefaults->get(m_mainPresenter->instrument());
+  auto const instrument = m_mainPresenter->instrument();
+  try {
+    m_model = m_experimentDefaults->get(instrument);
+  } catch (std::invalid_argument &ex) {
+    std::ostringstream msg;
+    msg << "Error setting default Experiment Settings: " << ex.what()
+        << ". Please check the " << instrument->getName()
+        << " parameters file.";
+    g_log.error(msg.str());
+    m_model = Experiment();
+  }
   updateViewFromModel();
 }
 
