@@ -64,41 +64,6 @@ class FigureErrorsManagerTest(GuiTest):
             any(FigureErrorsManager.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertEqual(3, len(added_menu.children()))
 
-    def test_add_errorbar_for(self):
-        self.ax.plot(self.ws2d_histo, specNum=1)
-        self.ax.plot(self.ws2d_histo, specNum=2)
-        self.errors_manager.add_errorbar_for(0)
-        legend = self.ax.legend()
-
-        # the first spectrum should be in the first place,
-        # as it uses our override of the legend, which doesn't always
-        # append errors at the bottom of the legend
-        self.assertTrue("spec 1" in legend.texts[0].get_text())
-        # axes should be NOLEGEND as they have errors
-        self.assertEqual(MantidAxes.MPL_NOLEGEND, self.ax.lines[0].get_label())
-        # a single error container should be present
-        self.assertEqual(1, len(self.ax.containers))
-        # check that the first error container references the first line on the plot
-        self.assertEqual(self.ax.lines[0], self.ax.containers[0][0])
-        # check that the error line is visible
-        self.assertTrue(self.ax.containers[0][2][0].get_visible())
-
-        self.assertTrue("spec 2" in legend.texts[1].get_text())
-
-        # --------------------------------------------
-        # Add a second error bar
-        # --------------------------------------------
-        self.errors_manager.add_errorbar_for(1)
-        self.assertTrue("spec 2" in legend.texts[1].get_text())
-
-        self.assertEqual(MantidAxes.MPL_NOLEGEND, self.ax.lines[1].get_label())
-        # a single error container should be present
-        self.assertEqual(2, len(self.ax.containers))
-        # check that the first error container references the first line on the plot
-        self.assertEqual(self.ax.lines[1], self.ax.containers[1][0])
-        # check that the error line is visible
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-
     def test_show_error_bar_for(self):
         self.ax.plot(self.ws2d_histo, specNum=1)
         # assert plot does not have errors
@@ -132,7 +97,6 @@ class FigureErrorsManagerTest(GuiTest):
         self.errors_manager.hide_error_bar_for(0)
         # assert that the errors have been hidden
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
-        self.assertEqual(self.ax.lines[0], self.ax.containers[0][0])
 
         # Add an actual line with errors
         self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=True)
@@ -179,6 +143,31 @@ class FigureErrorsManagerTest(GuiTest):
         self.errors_manager.toggle_all_error_bars(make_visible=False)
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
         self.assertFalse(self.ax.containers[1][2][0].get_visible())
+
+    def test_get_data_lines(self):
+        self.ax.errorbar(self.ws2d_histo, specNum=1)
+        data_lines = self.errors_manager.get_data_lines(self.ax)
+        self.assertEqual(1, len(data_lines))
+
+        self.ax.errorbar(self.ws2d_histo, specNum=2)
+        data_lines = self.errors_manager.get_data_lines(self.ax)
+        self.assertEqual(2, len(data_lines))
+
+    def test_get_data_lines_keeps_order(self):
+        self.ax.errorbar(self.ws2d_histo, specNum=1)
+        self.ax.errorbar(self.ws2d_histo, specNum=2)
+        self.ax.errorbar(self.ws2d_histo, specNum=3)
+
+        data_lines = self.errors_manager.get_data_lines(self.ax)
+
+        index = 0
+        # iterate all lines
+        for line in data_lines:
+            # while the current line is not in the `lines` list, we keep moving forward
+            # if the order is kept this will pass
+            # if the order is changed, this will fail with an IndexError
+            while line != self.ax.lines[index]:
+                index += 1
 
 
 class ScriptedPlotFigureErrorsManagerTest(GuiTest):
@@ -333,5 +322,6 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
     def test_scripted_plot_show_unsupported_axis_raises_not_implemented(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
 
-        self.assertRaises(NotImplementedError, self.errors_manager.show_error_bar_for, 0)
+        self.assertRaisesRegexp(ValueError, FigureErrorsManager.AXES_NOT_MANTIDAXES_ERR_MESSAGE,
+                                self.errors_manager.show_error_bar_for, 0)
         self.tearDown()

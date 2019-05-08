@@ -21,8 +21,37 @@ class FigureErrorsManager(object):
     SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
     HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
 
+    AXES_NOT_MANTIDAXES_ERR_MESSAGE = "Plot axes are not MantidAxes. There is no way to automatically load error data."
+
     def __init__(self, canvas):
         self.canvas = canvas
+
+    @staticmethod
+    def get_data_lines(ax):
+        """
+        Gets all the lines that are not used to draw caps on error lines.
+
+        :param ax: The Ax from where the lines will be inspected
+        :return: A new list containing the references to the lines that are used to plot data.
+                 This list has the same order as creation_args.
+        """
+        all_cap_lines = []
+
+        for container in ax.containers:
+            # subtract lines that are used to draw line caps
+            all_cap_lines.extend(container[1])
+
+        # converting to set makes the `if item not in` check constant time
+        all_cap_lines_set = set(all_cap_lines)
+        lines = [item for item in ax.lines if item not in all_cap_lines_set]
+
+        return lines
+
+    def iterate_data_lines(self, ax):
+        lines = self.get_data_lines(ax)
+
+        for index, line in enumerate(lines):
+            yield index, line
 
     def add_error_bars_menu(self, menu):
         """
@@ -43,12 +72,7 @@ class FigureErrorsManager(object):
         # but we can toggle existing ones
         ax_is_supported = self._supported_ax(ax)
 
-        lines = ax.lines
-
         error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
-        # if there's more than one line plotted, then
-        # add a sub menu, containing an action to hide the
-        # error bar for each line
         error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
                                   partial(self._update_plot_after,
                                           self.toggle_all_error_bars, make_visible=True))
@@ -56,12 +80,14 @@ class FigureErrorsManager(object):
                                   partial(self._update_plot_after,
                                           self.toggle_all_error_bars, make_visible=False))
         menu.addMenu(error_bars_menu)
-        if len(lines) > 1:
-            # add into the correct menu,
-            # if there is a single line, then
-            # add the action to the main menu
 
-            for index, line in enumerate(lines):
+        data_lines = self.get_data_lines(ax)
+
+        # if there's more than one line plotted, then
+        # add a sub menu, containing an action to hide the
+        # error bar for each line
+        if len(data_lines) > 1:
+            for index, line in enumerate(data_lines):
                 if line.get_label() == MantidAxes.MPL_NOLEGEND:
                     self._add_line_with_existing_errors(containers, error_bars_menu, index, line)
                 else:
@@ -71,14 +97,14 @@ class FigureErrorsManager(object):
         errorbar_container = find_errorbar_container(line, containers)
 
         # the line had no label, but it does not have errors either
-        # if errorbar_container is None:
-        #     return
+        if errorbar_container is None:
+            return
 
         y_err_index = self._find_yerr_index(errorbar_container)
         if y_err_index is not None:
             label = errorbar_container.get_label()
             action = error_bars_menu.addAction(label, partial(self._update_plot_after,
-                                                              self._toggle_error_bar_for, index))
+                                                              self._toggle_error_bar_for, index, errorbar_container))
             action.setCheckable(True)
             action.setChecked(errorbar_container[2][y_err_index].get_visible())
 
@@ -89,29 +115,31 @@ class FigureErrorsManager(object):
         # if we are operating on a MantidAxes
         if ax_is_supported:
             action = error_bars_menu.addAction(label, partial(self._update_plot_after,
-                                                              self._toggle_error_bar_for, index))  # type:QAction
+                                                              self._add_errorbar_for, index, line))  # type: QAction
             # lines being added here are guaranteed to not have errors at all
             action.setCheckable(True)
             action.setChecked(False)
 
-    def add_errorbar_for(self, index, make_visible=None):
+    def _add_errorbar_for(self, creation_args_index, line, make_visible=None):
         """
         Adds an errorbar for the line at the provided `index`.
         This will plot a new line by calling the `axes.errorbar` function,
         then the old line will be replaced in the plot, and deleted.
 
-        :param index: Current index of the line in `lines` and `creation_args`.
+        :param creation_args_index: Current index of the line in `lines` and `creation_args`.
                       Used to swap the newly added errorbar line with the old line
-        :type index: int
+        :type creation_args_index: int
         :param make_visible:
         :type make_visible: bool
+
+        :rtype ErrorbarContainer
         """
-        ax = self.canvas.figure.axes[0]  # type: MantidAxes
+        ax = self.canvas.figure.axes[0]  # type: matplotlib.axes.Axes
 
         # To do the errorbar plot we need to get the
         # original workspace for the axis so that the data can be read from it
-        ws = mtd[ax.creation_args[index]["workspaces"]]
-        specNum = ax.creation_args[index]["specNum"]
+        ws = mtd[ax.creation_args[creation_args_index]["workspaces"]]
+        specNum = ax.creation_args[creation_args_index]["specNum"]
 
         # if a forced state is passed, use that for the error plotting
         state_kwarg = {} if make_visible is None else {MantidAxKwargs.ERRORS_VISIBLE: make_visible}
@@ -119,54 +147,77 @@ class FigureErrorsManager(object):
         # This will append it to the bottom of the `lines` and `containers` lists.
         errorbar_container = ax.errorbar(ws, specNum=specNum, **state_kwarg)
 
-        lines = ax.lines
         # change the color of the new data & error lines to match the original
-        errorbar_container[0].set_color(lines[index].get_color())
-        errorbar_container[2][0].set_color(lines[index].get_color())
-
-        # The swaps are done do pretend the line was replaced 'inplace'
-        # this keeps the legend order the same.
-
-        # swap in .lines, remove the old line reference
-        lines[index], lines[-1] = lines[-1], lines[index]
-        # delete the reference to the old line
-        del lines[-1]
+        errorbar_container[0].set_color(line.get_color())
+        errorbar_container[2][0].set_color(line.get_color())
 
         # swap in .creation_args, remove the old args reference
         cargs = self.canvas.figure.axes[0].creation_args
-        cargs[index], cargs[-1] = cargs[-1], cargs[index]
+        cargs[creation_args_index], cargs[-1] = cargs[-1], cargs[creation_args_index]
 
         # add the creation args default argument,
         # use the make_visible, or set to True by default
-        cargs[index][MantidAxKwargs.ERRORS_VISIBLE] = True if make_visible is None else make_visible
+        cargs[creation_args_index][MantidAxKwargs.ERRORS_VISIBLE] = True if make_visible is None else make_visible
         # delete the reference to the old creation args
         del cargs[-1]
 
-    def hide_error_bar_for(self, index):
+        # The swaps are done to pretend the line was replaced 'inplace'
+        # this keeps the legend order the same.
+        lines_index = ax.lines.index(line)
+        errorline_index = ax.lines.index(errorbar_container[0])
+        lines = ax.lines
+
+        # swap in .lines, remove the old line reference
+        lines[lines_index], lines[errorline_index] = lines[errorline_index], lines[lines_index]
+        # delete the reference to the old line
+        del lines[errorline_index]
+
+        return errorbar_container
+
+    def hide_error_bar_for(self, data_lines_index):
         """
         Hides the errors for the line at `index`.
-        This index is the position in the `axes.lines` list.
 
-        This function does not update the plot after it's done any changes.
+        This function does not redraw the plot after it's done any changes.
 
-        :param index: Current index of the line in `lines` and `creation_args`.
-                      Used to swap the newly added errorbar line with the old line
-        :type index: int
+        :param data_lines_index: Current index of the line in `creation_args`.
+                                 Also the position of the line in the list created by FigureErrorsManager.get_data_lines
+                                 Used to swap the newly added errorbar line with the old line
+        :type data_lines_index: int
         """
-        self._toggle_error_bar_for(index, make_visible=False)
+        errorbar_container = self._ensure_errorbar_present(data_lines_index)
 
-    def show_error_bar_for(self, index):
+        self._toggle_error_bar_for(data_lines_index, errorbar_container, make_visible=False)
+
+    def _ensure_errorbar_present(self, data_lines_index):
         """
-        Shows the errors for the line at `index`.
-        This index is the position in the `axes.lines` list.
-
-        This function does not update the plot after it's done any changes.
-
-        :param index: Current index of the line in `lines` and `creation_args`.
-                      Used to swap the newly added errorbar line with the old line
-        :type index: int
+        Ensures an errorbar is present for the line at the provided index.
+        :param data_lines_index:
+        :return:
         """
-        self._toggle_error_bar_for(index, make_visible=True)
+        ax = self.canvas.figure.axes[0]  # type: matplotlib.axes.Axes
+        data_lines = self.get_data_lines(ax)
+        line = data_lines[data_lines_index]
+        errorbar_container = find_errorbar_container(line, ax.containers)
+        if errorbar_container is None:
+            if not self._supported_ax(ax):
+                raise ValueError(self.AXES_NOT_MANTIDAXES_ERR_MESSAGE)
+            errorbar_container = self._add_errorbar_for(data_lines_index, line)
+        return errorbar_container
+
+    def show_error_bar_for(self, data_lines_index):
+        """
+        Shows the errors for the line at `data_line_index`.
+
+        This function does not redraw the plot after it's done any changes.
+
+        :param data_lines_index: Current index of the line in `creation_args`.
+                                 Also the position of the line in the list created by FigureErrorsManager.get_data_lines
+                                 Used to swap the newly added errorbar line with the old line
+        :type data_lines_index: int
+        """
+        errorbar_container = self._ensure_errorbar_present(data_lines_index)
+        self._toggle_error_bar_for(data_lines_index, errorbar_container, make_visible=True)
 
     def toggle_all_error_bars(self, make_visible=None):
         """
@@ -177,15 +228,19 @@ class FigureErrorsManager(object):
         :param make_visible: Force visibility state on all lines.
         :type make_visible: bool
         """
-        ax = self.canvas.figure.axes[0]  # type: MantidAxes
-        lines = ax.lines
+        ax = self.canvas.figure.axes[0]  # type: matplotlib.axes.Axes
 
         # iterates over all lines, in order to
         # toggle error bar on lines that have errors already
-        for index, line in enumerate(lines):
+        data_lines = self.get_data_lines(ax)
+        for index, container in enumerate(ax.containers):
+            data_line = container[0]
+
             # extract the line reference from the container
-            if line.get_label() == MantidAxes.MPL_NOLEGEND:
-                self._toggle_error_bar_for(index, make_visible)
+            if data_line.get_label() == MantidAxes.MPL_NOLEGEND:
+                self._toggle_error_bar_for(data_lines.index(data_line),
+                                           errorbar_container=container,
+                                           make_visible=make_visible)
 
         # errors can't be added dynamically while working with axes that aren't supported
         if not self._supported_ax(ax):
@@ -197,46 +252,26 @@ class FigureErrorsManager(object):
         # and errors are added at the end of the list, the next element is moved 1 position up.
         # Therefore the index should only be increased
         # if the line it is looking for already has errors plotted
-        index = 0
-        while index < len(lines):
-            line = lines[index]
-            # line doesn't have errors, add them
-            # this will remove the line from the current index,
-            # and move the next one to the current index
-            if line.get_label() != MantidAxes.MPL_NOLEGEND:
-                self.add_errorbar_for(index, make_visible)
-            else:
-                # the line has errors, move forwards in the iteration
-                index += 1
+        for index, data_line in enumerate(data_lines):
+            if data_line.get_label() != MantidAxes.MPL_NOLEGEND:
+                self._add_errorbar_for(index, data_line, make_visible)
 
-    def _toggle_error_bar_for(self, index, make_visible=None):
+    def _toggle_error_bar_for(self, index, errorbar_container, make_visible=None):
         """
         :param make_visible: Forces this visibility state on all lines.
         :type make_visible: bool
         :param index: The index in the creation_args
-                                    that contains the information about recreating the errorbar
         :type index: int
         :return:
         """
-        ax = self.canvas.figure.axes[0]  # type: MantidAxes
 
-        errorbar_container = find_errorbar_container(ax.lines[index], ax.containers)
-        if errorbar_container is None:
-            if not isinstance(ax, MantidAxes):
-                # The public interface should NOT allow adding errors for lines that
-                # are not plotted on MantidAxes, as there is no way of obtaining that information.
-                raise NotImplementedError(
-                    "This function does not know how to add errors for a line plotted on axes that are not MantidAxes, "
-                    "and should not be called from the public interface with axes that are not MantidAxes.")
-            # make the error line invisible, because the `not` below will flip it and make it visible
-            # and if a forced state is provided that will overwrite it anyway
-            self.add_errorbar_for(index, make_visible=False)
-            errorbar_container = find_errorbar_container(ax.lines[index], ax.containers)
+        ax = self.canvas.figure.axes[0]  # type: matplotlib.axes.Axes
 
         # Currently the X errors are not touched at all.
         # Only operations on the Y errors are done.
         y_err_index = self._find_yerr_index(errorbar_container)
 
+        # if the yerr is plotted on the plot
         if y_err_index is not None:
             error_line = errorbar_container.lines[2][y_err_index]
             # the container has the errors there
@@ -246,10 +281,15 @@ class FigureErrorsManager(object):
             # updates the creation args state if the plot would be saved out
             if self._supported_ax(ax):
                 creation_args = ax.creation_args
-                print("These are the current creation_args:", creation_args)
                 creation_args[index][MantidAxKwargs.ERRORS_VISIBLE] = new_state
 
             error_line.set_visible(new_state)
+
+            # set the proper visibility for caps on the error lines
+            error_caps_lines = errorbar_container[1]
+            if len(error_caps_lines) > 0:
+                for cap in error_caps_lines:
+                    cap.set_visible(new_state)
 
     def _find_yerr_index(self, errorbar_container):
         """
