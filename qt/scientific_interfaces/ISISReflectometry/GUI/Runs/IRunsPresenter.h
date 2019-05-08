@@ -7,7 +7,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H
 
-#include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/RunsTable.h"
 #include <string>
 
