@@ -109,9 +109,6 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config['datasearch.directories']
 
-
-
-
     def requiredFiles(self):
         return _gen_required_files()
 
