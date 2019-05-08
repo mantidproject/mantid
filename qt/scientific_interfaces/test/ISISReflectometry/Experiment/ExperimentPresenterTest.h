@@ -588,7 +588,6 @@ public:
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
-  NiceMock<MockExperimentOptionDefaults> m_defaultOptions;
   double m_thetaTolerance{0.01};
 
   PolarizationCorrections makePolarizationCorrections() {
