@@ -319,9 +319,9 @@ class Abins(PythonAlgorithm):
                                                     element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
                                                     s_atom_data=s_atom_data, substitution=sub))
         if atom_numbers is not None:
-                for atom_number in atom_numbers:
-                        result.extend(self._atom_number_s(atom_number=atom_number, s_data_extracted=s_data_extracted,
-                                                          s_atom_data=s_atom_data))
+            for atom_number in atom_numbers:
+                result.extend(self._atom_number_s(atom_number=atom_number, s_data_extracted=s_data_extracted,
+                                                  s_atom_data=s_atom_data))
         return result
 
     def _atom_number_s(self, atom_number=None, s_data_extracted=None, s_atom_data=None):
@@ -349,7 +349,6 @@ class Abins(PythonAlgorithm):
         s_atom_data.fill(0.0)
         atom_label = "atom_%s" % atom_number
         symbol = self._extracted_ab_initio_data["atom_%s" % atom_number]["symbol"]
-        mass = self._extracted_ab_initio_data["atom_%s" % atom_number]["mass"]
         z_number = Atom(symbol=symbol).z_number
 
         for i, order in enumerate(range(AbinsModules.AbinsConstants.FUNDAMENTALS,
@@ -367,8 +366,6 @@ class Abins(PythonAlgorithm):
                                                       s_points=np.copy(s_atom_data),
                                                       protons_number=z_number))
         return atom_workspaces
-
-
 
     def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, element_symbol=None, temp_s_atom_data=None,
                      s_atom_data=None, substitution=None):
