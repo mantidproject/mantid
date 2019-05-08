@@ -124,7 +124,7 @@ public:
   }
 
   void
-  test_Passing_Workspace_Not_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data() {
+  test_Passing_Workspace_Not_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data_No_X_Unit() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setYUnit("Counts");
@@ -132,11 +132,47 @@ public:
   }
 
   void
-  test_Passing_Workspace_And_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data() {
+  test_Passing_Workspace_And_Plotting_As_Distribution_Creates_UnitLess_Title_For_Y_Data_No_X_Unit() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setYUnit("Counts");
     TS_ASSERT_EQUALS("Counts", PlotAxis(true, *ws).title());
+  }
+
+  void test_Passing_Workspace_And_Plotting_As_Distribution_Adds_XUnit() {
+    using MantidQt::API::PlotAxis;
+    using MantidQt::API::toQStringInternal;
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    ws->setDistribution(false);
+    ws->setYUnit("Counts");
+    ws->getAxis(0)->setUnit("Energy");
+    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"),
+                     PlotAxis(true, *ws).title());
+  }
+
+  void
+  test_Passing_Workspace_And_Not_Plotting_As_Distribution_Does_Not_Add_XUnit() {
+    using MantidQt::API::PlotAxis;
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    ws->setDistribution(false);
+    ws->setYUnit("Counts");
+    ws->getAxis(0)->setUnit("Energy");
+    TS_ASSERT_EQUALS("Counts", PlotAxis(false, *ws).title());
+  }
+
+  void test_Passing_Distribution_Workspace_Does_Not_Append_X_Unit() {
+    using MantidQt::API::PlotAxis;
+    using MantidQt::API::toQStringInternal;
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    ws->setDistribution(true);
+    ws->setYUnit("Counts per meV");
+    ws->getAxis(0)->setUnit("Energy");
+    QString titleWithPlotAsDist = PlotAxis(true, *ws).title();
+    QString titleWithNoPlotAsDist = PlotAxis(false, *ws).title();
+    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"),
+                     titleWithNoPlotAsDist);
+    TS_ASSERT_EQUALS("Counts (meV)" + toQStringInternal(L"\u207b\u00b9"),
+                     titleWithPlotAsDist);
   }
 
   void test_title_from_just_dimension() {

@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace MantidQt {
@@ -86,6 +88,34 @@ void PlotAxis::titleFromDimension(const Mantid::Geometry::IMDDimension &dim) {
   }
 }
 
+QString
+replacePerWithNegativeIndice(const std::string &label,
+                             const bool &plotAsDistribution,
+                             const Mantid::Kernel::UnitLabel xLabel = "") {
+  std::vector<std::string> splitVec;
+  QString negativeOnePower = toQStringInternal(L"\u207b\u00b9");
+  QString newLabel;
+
+  boost::split_regex(splitVec, label, boost::regex(" per "));
+  if (splitVec.size() > 1) {
+    newLabel = QString::fromStdString(splitVec[0]);
+    splitVec.erase(splitVec.begin());
+    std::string unitString = boost::algorithm::join(splitVec, " ");
+    newLabel += " (" + QString::fromStdString(unitString);
+    if (plotAsDistribution && xLabel != "") {
+      newLabel += " " + toQStringInternal(xLabel.utf8());
+    }
+    newLabel += ")" + negativeOnePower;
+  } else {
+    newLabel = QString::fromStdString(label);
+    if (plotAsDistribution && xLabel != "") {
+      newLabel +=
+          " (" + toQStringInternal(xLabel.utf8()) + ")" + negativeOnePower;
+    }
+  }
+  return newLabel;
+}
+
 /**
  * Constructs a title using the unicode methods of the UnitLabel
  * @param workspace The workspace containing the Y title information
@@ -94,29 +124,15 @@ void PlotAxis::titleFromDimension(const Mantid::Geometry::IMDDimension &dim) {
  */
 void PlotAxis::titleFromYData(const Mantid::API::MatrixWorkspace &workspace,
                               const bool plottingDistribution) {
-  // The workspace can have a custom label so we should use that as a
-  // preference.
-  // The workspace.YUnitLabel does some mangling of the string if the user set
-  // no
-  // custom label. See MatrixWorkspace::YUnitLabel
-
-  const std::string customLabel =
-      workspace.YUnitLabel(false, plottingDistribution);
-  const std::string yunit = workspace.YUnit();
-  if ((yunit == customLabel) ||
-      (customLabel.find("per") != std::string::npos)) {
-    m_title = QString::fromStdString(yunit);
-    if (plottingDistribution && workspace.axes() > 0 &&
-        workspace.getAxis(0)->unit()) {
-      const auto xunit = workspace.getAxis(0)->unit();
-      const auto lbl = xunit->label();
-      if (!lbl.utf8().empty()) {
-        m_title += " (" + toQStringInternal(lbl.utf8()) + ")" +
-                   toQStringInternal(L"\u207b\u00b9");
-      }
-    }
+  std::string yLabel = workspace.YUnitLabel();
+  if (yLabel.empty()) {
+    yLabel = workspace.YUnit();
+  }
+  if (!workspace.isDistribution() && plottingDistribution) {
+    const auto xLabel = workspace.getAxis(0)->unit()->label();
+    m_title = replacePerWithNegativeIndice(yLabel, true, xLabel);
   } else {
-    m_title = QString::fromStdString(customLabel);
+    m_title = replacePerWithNegativeIndice(yLabel, false);
   }
 }
 

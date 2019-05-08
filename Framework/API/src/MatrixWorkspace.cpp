@@ -982,15 +982,9 @@ MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
     // one we must adjust the unit
     if (plotAsDistribution && !this->isDistribution())
       retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
-
   } else {
     retVal = m_YUnit;
-    // If this workspace is a distribution & has at least one axis & this axis
-    // has its unit set then append that unit to the string to be returned
-    if (!retVal.empty() && this->isDistribution() && this->axes() &&
-        this->getAxis(0)->unit()) {
-      retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
-    } else if (plotAsDistribution && !this->isDistribution()) {
+    if (plotAsDistribution && !this->isDistribution()) {
       retVal = appendUnitDenominatorUsingPer(retVal, this, useLatex);
     }
   }
