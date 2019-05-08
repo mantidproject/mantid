@@ -166,7 +166,7 @@ void SaveIsawUB::exec() {
       out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(0) << setw(12) << setprecision(4)
           << lattice.getdkerr(0) << setw(12) << setprecision(4)
-          << lattice.getdlerr(0) << " \n\n";
+          << lattice.getdlerr(0) << " \n";
     }
     if (ModDim >= 2) {
       out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
@@ -176,7 +176,7 @@ void SaveIsawUB::exec() {
       out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(1) << setw(12) << setprecision(4)
           << lattice.getdkerr(1) << setw(12) << setprecision(4)
-          << lattice.getdlerr(1) << " \n\n";
+          << lattice.getdlerr(1) << " \n";
     }
     if (ModDim == 3) {
       out << "Modulation Vector 3:   " << setw(12) << setprecision(4)
@@ -186,8 +186,9 @@ void SaveIsawUB::exec() {
       out << "Modulation Vector 3 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(2) << setw(12) << setprecision(4)
           << lattice.getdkerr(2) << setw(12) << setprecision(4)
-          << lattice.getdlerr(2) << " \n\n";
+          << lattice.getdlerr(2) << " \n";
     }
+    out << "\n";
     if (ModDim >= 1) {
       out << "Max Order:        " << lattice.getMaxOrder() << " \n";
       out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
