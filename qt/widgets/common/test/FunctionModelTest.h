@@ -115,7 +115,6 @@ public:
     model.setNumberDomains(1);
     TS_ASSERT_EQUALS(model.getNumberDomains(), 1);
   }
-
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONMODELTEST_H_
