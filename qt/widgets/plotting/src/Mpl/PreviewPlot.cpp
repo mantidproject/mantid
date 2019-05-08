@@ -72,8 +72,8 @@ void PreviewPlot::addSpectrum(const QString &curveName,
   }
   removeSpectrum(curveName);
   auto axes = m_canvas->gca();
-  m_lines.emplace_back(
-      Line2DInfo{createLine(axes, *ws, wsIndex), curveName, ws.get(), wsIndex});
+  m_lines.emplace_back(Line2DInfo{createLine(axes, *ws, wsIndex, curveColour),
+                                  curveName, ws.get(), wsIndex, curveColour});
   m_canvas->draw();
   axes.relim();
 }
@@ -153,16 +153,20 @@ void PreviewPlot::onWorkspaceReplaced(
 
 /**
  * Add a line to the canvas using the data from the workspace
+ * @param axes A reference to the axes to contain the lines
  * @param ws A reference to the workspace
  * @param wsIndex The wsIndex
+ * @param lineColor The color required for the line
  */
 Line2D PreviewPlot::createLine(Widgets::MplCpp::Axes &axes,
                                const Mantid::API::MatrixWorkspace &ws,
-                               const size_t wsIndex) {
+                               const size_t wsIndex, const QColor &lineColor) {
   const auto &histogram = ws.histogram(wsIndex);
   const auto xpts = histogram.points();
   const auto signal = histogram.y();
-  return axes.plot(xpts.data().rawData(), signal.rawData());
+  const QString hexColor = lineColor.name(QColor::HexRgb);
+  return axes.plot(xpts.data().rawData(), signal.rawData(),
+                   hexColor.toLatin1().constData());
 }
 
 /**
@@ -192,7 +196,7 @@ void PreviewPlot::replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
   auto axes = m_canvas->gca();
   for (auto &info : m_lines) {
     if (info.workspace == &oldWS) {
-      info.line = createLine(axes, newWS, info.wsIndex);
+      info.line = createLine(axes, newWS, info.wsIndex, info.curveColour);
       info.workspace = &newWS;
     }
   }

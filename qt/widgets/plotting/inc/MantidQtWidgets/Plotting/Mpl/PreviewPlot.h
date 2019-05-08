@@ -58,7 +58,7 @@ private:
   onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
   Widgets::MplCpp::Line2D createLine(Widgets::MplCpp::Axes &axes,
                                      const Mantid::API::MatrixWorkspace &ws,
-                                     const size_t wsIndex);
+                                     const size_t wsIndex, const QColor &lineColor);
   void removeLines(const Mantid::API::MatrixWorkspace &ws);
   void replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
                     const Mantid::API::MatrixWorkspace &newWS);
@@ -70,6 +70,7 @@ private:
     // It is only safe to compare this with another workspace pointer
     const Mantid::API::MatrixWorkspace * workspace;
     const size_t wsIndex;
+    const QColor curveColour;
   };
 
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
