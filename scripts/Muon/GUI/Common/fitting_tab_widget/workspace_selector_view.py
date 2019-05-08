@@ -40,9 +40,11 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         filtered_list = [item for item in filtered_list if any([filter in item for filter in filter_types])]
 
-        expanded_list = [[item, item in self.current_workspaces, True] for item in filtered_list]
+        model_dict = {}
+        for index, item in enumerate(filtered_list):
+            model_dict.update({item: [index, item in self.current_workspaces, True]})
 
-        return expanded_list
+        return model_dict
 
     def get_selected_list(self):
         return self.list_selector_presenter.get_selected_items()

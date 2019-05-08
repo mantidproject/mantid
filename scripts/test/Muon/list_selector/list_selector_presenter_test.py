@@ -15,15 +15,22 @@ class TestListSelectorPresenter(unittest.TestCase):
     def setUp(self):
         # self.qapp = mockQapp()
         self.view = mock.MagicMock()#ListSelectorView()
-        self.model = [['property_one', True, True], ['property_two', False, False]]
+        self.model = {'property_one': [2, True, True], 'property_two': [1, False, False]}
         self.presenter = ListSelectorPresenter(self.view, self.model)
 
     def test_presenter_initialised_with_correct_variables(self):
         self.assertEqual(self.presenter.model, self.model)
         self.assertEqual(self.presenter.view, self.view)
 
-    def test_handle_filter_changed_creates_filtered_model_and_updates_view_accordingly(self):
+    def test_get_filtered_list_returns_correctly_filtered_list_in_correct_order(self):
+        self.presenter.filter_string = 'one'
+        self.model.update({'test_one': [0, False, False]})
 
+        filtered_list = self.presenter.get_filtered_list()
+
+        self.assertEqual(filtered_list, [['test_one', False, False], ['property_one', True, True]])
+
+    def test_handle_filter_changed_creates_filtered_model_and_updates_view_accordingly(self):
         self.presenter.handle_filter_changed('one')
 
         self.view.addItems.assert_called_once_with([['property_one', True, True]])
@@ -32,12 +39,12 @@ class TestListSelectorPresenter(unittest.TestCase):
 
         self.presenter.handle_filter_changed('')
 
-        self.view.addItems.assert_called_once_with([['property_one', True, True], ['property_two', False, False]])
+        self.view.addItems.assert_called_once_with([['property_two', False, False], ['property_one', True, True]])
 
     def test_handle_selction_changed_updates_model_accordingly(self):
         self.presenter.handle_selection_changed('property_two', True)
 
-        self.assertEqual(self.model[1][1], True)
+        self.assertEqual(self.model['property_two'][1], True)
 
     def test_get_selected_items_returns_items_names_of_selected_items(self):
         self.assertEqual(self.presenter.get_selected_items(), ['property_one'])
@@ -54,7 +61,10 @@ class TestListSelectorPresenter(unittest.TestCase):
     def test_select_all_presenter_checkbox_changed_updates_current_filter_list_to_match_itself(self):
         self.presenter.handle_select_all_checkbox_changed(True)
 
-        self.view.addItems.assert_called_with([['property_one', True, True], ['property_two', True, False]])
+        self.view.addItems.assert_called_with([['property_two', False, False], ['property_one', True, True]])
+
+    def test_handle_row_moved(self):
+        self.presenter.handle_row_moved()
 
 
 if __name__ == '__main__':

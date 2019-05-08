@@ -7,9 +7,7 @@
 from qtpy import QtWidgets
 
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QDropEvent
-from qtpy.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem
-
+from Muon.GUI.Common.list_selector.TableWidgetDragRows import TableWidgetDragRows
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.utilities import table_utils
 
@@ -33,23 +31,27 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.list_layout.setContentsMargins(0, 0, 0, 0)
 
         self._item_selection_changed_action = lambda a, b: 0
+        self.item_table_widget.cellChanged.connect(self.handle_cell_changed_signal)
 
     def addItems(self, item_list):
         """
         Adds all the items in item list to the table
         :param itemList: A list of tuples (item_name, check_state, enabled)
         """
+        self.item_table_widget.blockSignals(True)
         for index, row in enumerate(item_list):
             insertion_index = self.item_table_widget.rowCount()
             self.item_table_widget.setRowCount(insertion_index + 1)
             table_utils.setRowName(self.item_table_widget, insertion_index, row[0])
             table_utils.addCheckBoxToTable(self.item_table_widget, row[1], insertion_index, 1)
             self.set_row_enabled(insertion_index, row[2])
-            self.item_table_widget.cellChanged.connect(self.handle_cell_changed_signal)
+        self.item_table_widget.blockSignals(False)
 
     def clearItems(self):
+        self.item_table_widget.blockSignals(True)
         self.item_table_widget.clearContents()
         self.item_table_widget.setRowCount(0)
+        self.item_table_widget.blockSignals(False)
 
     def set_row_enabled(self, row, enabled):
         item = self.item_table_widget.item(row, 0)
@@ -79,65 +81,11 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
     def set_select_all_checkbox_action(self, action):
         self.select_all_checkbox.stateChanged.connect(action)
 
+    def set_row_moved_checkbox_action(self, action):
+        self.item_table_widget.rowMoved.connect(action)
+
     def handle_cell_changed_signal(self, row, col):
         if col == 1:
             name = self.item_table_widget.item(row, 0).text()
             state = self.item_table_widget.item(row, 1).checkState() == Qt.Checked
             self._item_selection_changed_action(name, state)
-
-
-class TableWidgetDragRows(QTableWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.setDragEnabled(True)
-        self.setAcceptDrops(True)
-        self.viewport().setAcceptDrops(True)
-        self.setDragDropOverwriteMode(False)
-        self.setDropIndicatorShown(True)
-
-        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.setDragDropMode(QAbstractItemView.InternalMove)
-
-    def dropEvent(self, event: QDropEvent):
-        if not event.isAccepted() and event.source() == self:
-            drop_row = self.drop_on(event)
-
-            rows = sorted(set(item.row() for item in self.selectedItems()))
-            rows_to_move = [
-                [QTableWidgetItem(self.item(row_index, column_index)) for column_index in range(self.columnCount())]
-                for row_index in rows]
-            for row_index in reversed(rows):
-                self.removeRow(row_index)
-                if row_index < drop_row:
-                    drop_row -= 1
-
-            for row_index, data in enumerate(rows_to_move):
-                row_index += drop_row
-                self.insertRow(row_index)
-                for column_index, column_data in enumerate(data):
-                    self.setItem(row_index, column_index, column_data)
-            event.accept()
-            for row_index in range(len(rows_to_move)):
-                self.item(drop_row + row_index, 0).setSelected(True)
-                self.item(drop_row + row_index, 1).setSelected(True)
-        super().dropEvent(event)
-
-    def drop_on(self, event):
-        index = self.indexAt(event.pos())
-        if not index.isValid():
-            return self.rowCount()
-
-        return index.row() + 1 if self.is_below(event.pos(), index) else index.row()
-
-    def is_below(self, pos, index):
-        rect = self.visualRect(index)
-        margin = 2
-        if pos.y() - rect.top() < margin:
-            return False
-        elif rect.bottom() - pos.y() < margin:
-            return True
-        # noinspection PyTypeChecker
-        return rect.contains(pos, True) and not (
-            int(self.model().flags(index)) & Qt.ItemIsDropEnabled) and pos.y() >= rect.center().y()
