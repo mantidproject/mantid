@@ -83,10 +83,7 @@ void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
   for (auto &prop : props) {
     const std::string propName = (*prop).name();
     if (other.existsProperty(propName)) {
-      auto err =
-          (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
-      if (err != "")
-        g_log.error(err);
+      (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
     }
   }
 }
