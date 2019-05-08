@@ -36,8 +36,7 @@ void ExperimentPresenter::notifySettingsChanged() {
 }
 
 void ExperimentPresenter::notifyRestoreDefaultsRequested() {
-  restoreDefaults();
-  m_mainPresenter->notifySettingsChanged();
+  m_mainPresenter->notifyRestoreDefaultsRequested();
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {

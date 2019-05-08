@@ -80,6 +80,12 @@ void BatchPresenter::notifyInstrumentChanged(
   instrumentChanged(instrumentName);
 }
 
+void BatchPresenter::notifyRestoreDefaultsRequested() {
+  // We need to re-load the instrument and restore defaults from it, just as if
+  // we had changed instrument.
+  instrumentChanged(m_instrument->getName());
+}
+
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
 void BatchPresenter::notifyReductionResumed() { resumeReduction(); }

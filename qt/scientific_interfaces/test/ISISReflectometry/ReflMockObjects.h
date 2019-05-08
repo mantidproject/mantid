@@ -86,6 +86,7 @@ public:
   MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
   MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
+  MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());

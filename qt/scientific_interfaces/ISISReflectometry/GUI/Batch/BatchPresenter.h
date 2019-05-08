@@ -60,6 +60,7 @@ public:
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
   void notifyInstrumentChanged(const std::string &instName) override;
+  void notifyRestoreDefaultsRequested() override;
   void notifySettingsChanged() override;
   bool hasPerAngleOptions() const override;
   MantidWidgets::DataProcessor::OptionsQMap

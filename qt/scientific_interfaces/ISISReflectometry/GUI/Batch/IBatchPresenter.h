@@ -33,6 +33,7 @@ public:
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
   virtual void notifyInstrumentChanged(const std::string &instName) = 0;
+  virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySettingsChanged() = 0;
 
   /// Transmission runs for a specific run angle

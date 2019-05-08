@@ -41,8 +41,7 @@ void InstrumentPresenter::notifySettingsChanged() {
 }
 
 void InstrumentPresenter::notifyRestoreDefaultsRequested() {
-  restoreDefaults();
-  m_mainPresenter->notifySettingsChanged();
+  m_mainPresenter->notifyRestoreDefaultsRequested();
 }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
