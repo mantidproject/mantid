@@ -11,9 +11,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
- * Defines an type to indentify an axis on a plot.
+ * Defines an type to indentify an axis on a plot. The values match those
+ * defined by Qwt
  */
-enum class AxisID : int { YLeft, YRight, XBottom, XTop };
+enum class AxisID : int { YLeft = 0, XBottom = 2 };
 
 /**
  * Return an integer from an AxisID that represents the same axis in Qwt

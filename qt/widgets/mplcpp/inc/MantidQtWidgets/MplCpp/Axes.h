@@ -50,7 +50,7 @@ public:
   void relim(bool visibleOnly = false);
   void autoscale(bool enable);
   void autoscaleView(bool scaleX = true, bool scaleY = true);
-  void autoscaleView(bool tight, bool scaleX = true, bool scaleY = true);
+  void autoscaleView(bool tight, bool scaleX, bool scaleY);
   /// @}
 };
 

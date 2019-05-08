@@ -107,9 +107,21 @@ void PreviewPlot::removeSpectrum(const QString &curveName) {
   }
 }
 
+/**
+ * Set the range of the specified axis
+ * @param range The new range
+ * @param axisID An enumeration defining the axis
+ */
 void PreviewPlot::setAxisRange(const QPair<double, double> &range,
                                AxisID axisID) {
-  throw std::runtime_error("setAxisRange unimplemented");
+  switch (axisID) {
+  case AxisID::XBottom:
+    m_canvas->gca().setXLim(range.first, range.second);
+    break;
+  case AxisID::YLeft:
+    m_canvas->gca().setYLim(range.first, range.second);
+    break;
+  }
 }
 
 /**
@@ -117,9 +129,10 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
  */
 void PreviewPlot::clear() { m_lines.clear(); }
 
-void PreviewPlot::resizeX() {
-  throw std::runtime_error("resizeX unimplemented");
-}
+/**
+ * Resize the X axis to encompass all of the data
+ */
+void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
 
 /**
  * Observer method called when a workspace is removed from the ADS
