@@ -314,7 +314,7 @@ void PredictSatellitePeaks::exec_peaks() {
                                    includeOrderZero, AlreadyDonePeaks);
     } else {
       predictOffsets(0, offsets1, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, notOrderZero, AlreadyDonePeaks);
+                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
       predictOffsets(1, offsets2, maxOrder, hkl, lambdaFilter,
                      includePeaksInRange, notOrderZero, AlreadyDonePeaks);
       predictOffsets(2, offsets3, maxOrder, hkl, lambdaFilter,
