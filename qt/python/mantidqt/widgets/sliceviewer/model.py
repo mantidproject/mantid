@@ -26,7 +26,7 @@ class SliceViewerModel(object):
         if isinstance(ws, MatrixWorkspace):
                 if ws.getNumberHistograms() < 2:
                         raise ValueError("workspace must contain at least 2 spectrum")
-                if ws.blocksize() < 2:
+                if ws.getDimension(0).getNBins() < 2: # Check number of x bins
                         raise ValueError("workspace must contain at least 2 bin")
         elif ws.isMDHistoWorkspace():
                 if len(ws.getNonIntegratedDimensions()) < 2:
