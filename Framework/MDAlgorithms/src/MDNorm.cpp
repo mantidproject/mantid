@@ -28,6 +28,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/VectorHelper.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -743,47 +744,48 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
     const std::map<std::string, std::string> &parameters,
     const Mantid::API::IMDHistoWorkspace_sptr tempDataWS) {
 
+  // parse the paramters map and get extents from tempDataWS
+  const std::string numBinsStr = parameters.at("OutputBins");
+  const std::string extentsStr = parameters.at("OutputExtents");
+  const std::vector<size_t> numBins = VectorHelper::splitStringIntoVector<size_t>(numBinsStr);
+  const std::vector<double> extents = VectorHelper::splitStringIntoVector<double>(extentsStr);
+
   // make sure the number of dimensions is the same for both workspaces
   size_t numDimsTemp = tempDataWS->getNumDims();
-
-  // parse the paramters map and get extents from tempDataWS
-  std::string numBinsStr = parameters.at("OutputBins");
-  std::string extentsStr = parameters.at("OutputExtents");
-  std::string tmp;
-  std::vector<size_t> numBins;
-  std::vector<double> extents;
-  std::vector<size_t> numBinsTempData;
-  std::vector<float> extentsTempData;
-  size_t pos = 0; // parse numbins
-
-  while ((pos = numBinsStr.find(",")) != std::string::npos) {
-    tmp = numBinsStr.substr(0, pos);
-    numBins.push_back(std::stoi(tmp));
-    numBinsStr.erase(0, pos + 1);
+  if((numBins.size() != numDimsTemp) || (extents.size() != numDimsTemp*2)){
+    std::stringstream errorMessage;
+    errorMessage <<"The number of dimensions in the output and ";
+    errorMessage <<"TemporaryDataWorkspace are not the same.";
+    throw(std::invalid_argument(errorMessage.str()));
   }
 
-  pos = 0; // parse extents
-  while ((pos = extentsStr.find(",")) != std::string::npos) {
-    tmp = extentsStr.substr(0, pos);
-    extents.push_back(std::stof(tmp));
-    extentsStr.erase(0, pos + 1);
-  }
-
-  // parse the input data workspace
+  // compare the extents and number of bins
   for (size_t i = 0; i < numDimsTemp; i++) {
     auto ax = tempDataWS->getDimension(i);
-    numBinsTempData.push_back(ax->getNBins());
-    extentsTempData.push_back(ax->getMinimum());
-    extentsTempData.push_back(ax->getMaximum());
+    if(numBins[i] != ax->getNBins()){
+        std::stringstream errorMessage;
+        errorMessage <<"The number of bins output and number of bins in ";
+        errorMessage <<"TemporaryDataWorkspace are not the same along ";
+        errorMessage <<"dimension "<<i;
+        throw(std::invalid_argument(errorMessage.str()));
+    }
+    if(std::abs(extents[2*i] - ax->getMinimum())>1.e-5){
+        std::stringstream errorMessage;
+        errorMessage <<"The minimum binning value for the output and ";
+        errorMessage <<"TemporaryDataWorkspace are not the same along ";
+        errorMessage <<"dimension "<<i;
+        throw(std::invalid_argument(errorMessage.str()));
+
+    }
+    if(std::abs(extents[2*i+1] - ax->getMaximum())>1.e-5){
+        std::stringstream errorMessage;
+        errorMessage <<"The maximum binning value for the output and ";
+        errorMessage <<"TemporaryDataWorkspace are not the same along ";
+        errorMessage <<"dimension "<<i;
+        throw(std::invalid_argument(errorMessage.str()));
+    }
   }
-  if ((numBins.size() != numDimsTemp) ||
-      (numBinsTempData.size() != numDimsTemp) ||
-      extents.size() != 2 * numDimsTemp ||
-      extentsTempData.size() != 2 * numDimsTemp) {
-    throw(std::invalid_argument("The number of output dimensions does not "
-                                "match the number of dimensions in "
-                                "TemporaryDataWorkspace."));
-  }
+
 
   // sort out which axes are dimensional and check names
   size_t parametersIndex = 0;
@@ -905,26 +907,6 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
         throw(std::invalid_argument("TemporaryDataWorkspace does not have the "
                                     "same dimension names as InputWorkspace."));
       }
-    }
-  }
-
-  // compare the arrays
-  for (size_t i = 0; i < numDimsTemp; i++) {
-
-    if (std::abs(extents[2 * i] - extentsTempData[2 * i]) > 1.e-5 ||
-        std::abs(extents[2 * i + 1] - extentsTempData[2 * i + 1]) > 1.e-5) {
-      std::stringstream errorMessage;
-      errorMessage
-          << "Binning extents are not the same for TemporaryDataWorkspace ";
-      errorMessage << "and the accumulating workspace along dimension " << i;
-      throw(std::invalid_argument(errorMessage.str()));
-    }
-    if (numBins[i] != numBinsTempData[i]) {
-      std::stringstream errorMessage;
-      errorMessage << "Number of bins along dimension " << i;
-      errorMessage
-          << " is not the same as in TemporaryDataWorkspace. Check bin size.";
-      throw(std::invalid_argument(errorMessage.str()));
     }
   }
 }
