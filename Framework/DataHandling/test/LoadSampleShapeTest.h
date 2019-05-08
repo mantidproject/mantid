@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 3 properties here", 3,
+    TSM_ASSERT_EQUALS("should be 4 properties here", 4,
                       (size_t)(alg.getProperties().size()));
   }
 
@@ -63,7 +63,7 @@ public:
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
-    TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
+    TS_ASSERT_DELTA(cube->volume(), 0.000001, 0.000001);
   }
 
   void test_off_L_shape() {
@@ -72,7 +72,7 @@ public:
     TS_ASSERT(shape->hasValidShape());
     TS_ASSERT_EQUALS(shape->numberOfVertices(), 12);
     TS_ASSERT_EQUALS(shape->numberOfTriangles(), 18);
-    TS_ASSERT_DELTA(shape->volume(), 3.0, 0.000001);
+    TS_ASSERT_DELTA(shape->volume(), 0.000003, 0.000001);
   }
 
   void test_off_cube_with_comments() {
@@ -81,7 +81,7 @@ public:
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
-    TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
+    TS_ASSERT_DELTA(cube->volume(), 0.000001, 0.000001);
   }
 
   void test_off_colored_cube() {
@@ -92,7 +92,7 @@ public:
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
-    TS_ASSERT_DELTA(cube->volume(), 1.0, 0.000001);
+    TS_ASSERT_DELTA(cube->volume(), 0.000001, 0.000001);
   }
 
   void test_fail_off_invalid_first_line() {

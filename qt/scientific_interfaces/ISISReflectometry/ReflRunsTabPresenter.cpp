@@ -331,13 +331,13 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
  */
 void ReflRunsTabPresenter::startNewAutoreduction() {
 
-  auto const group = selectedGroup();
+  auto const selected = selectedGroup();
 
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
-    auto tablePresenter = getTablePresenter(group);
+    auto tablePresenter = getTablePresenter(selected);
     tablePresenter->setPromptUser(false);
     try {
       tablePresenter->notify(DataProcessorPresenter::DeleteAllFlag);
@@ -346,7 +346,7 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
     }
   }
 
-  if (setupNewAutoreduction(group, m_view->getSearchString()))
+  if (setupNewAutoreduction(selected, m_view->getSearchString()))
     checkForNewRuns();
 }
 
@@ -426,8 +426,8 @@ bool ReflRunsTabPresenter::isProcessing(int group) const {
 
 bool ReflRunsTabPresenter::isProcessing() const {
   auto const numberOfGroups = static_cast<int>(m_tablePresenters.size());
-  for (int group = 0; group < numberOfGroups; ++group) {
-    if (isProcessing(group))
+  for (int groupIndex = 0; groupIndex < numberOfGroups; ++groupIndex) {
+    if (isProcessing(groupIndex))
       return true;
   }
   return false;
@@ -509,15 +509,15 @@ std::string ReflRunsTabPresenter::searchModelData(const int row,
 SearchResultMap ReflRunsTabPresenter::getSearchResultRunDetails(
     const std::set<int> &rowsToTransfer) {
 
-  SearchResultMap runDetails;
+  SearchResultMap foundRunDetails;
   for (const auto &row : rowsToTransfer) {
-    const auto run = searchModelData(row, 0);
+    const auto foundRun = searchModelData(row, 0);
     const auto description = searchModelData(row, 1);
     const auto location = searchModelData(row, 2);
-    runDetails[run] = SearchResult{description, location};
+    foundRunDetails[foundRun] = SearchResult{description, location};
   }
 
-  return runDetails;
+  return foundRunDetails;
 }
 
 /** Iterate through the rows to transfer and set/clear the error state
@@ -579,11 +579,11 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
   auto progress = setupProgressBar(rowsToTransfer);
 
   // Extract details of runs to transfer
-  auto runDetails = getSearchResultRunDetails(rowsToTransfer);
+  auto transferableRunDetails = getSearchResultRunDetails(rowsToTransfer);
 
   // Apply the transfer strategy
-  TransferResults transferDetails =
-      getTransferStrategy()->transferRuns(runDetails, progress, matchType);
+  TransferResults transferDetails = getTransferStrategy()->transferRuns(
+      transferableRunDetails, progress, matchType);
 
   // Handle any runs that cannot be transferred
   updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
@@ -830,8 +830,7 @@ ReflRunsTabPresenter::liveDataReductionOptions(const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tab. We
   // don't have a group associated with live data. This is not ideal but for
   // now just use the first group.
-  int const group = 0;
-  auto options = convertOptionsFromQMap(getProcessingOptions(group));
+  auto options = convertOptionsFromQMap(getProcessingOptions(0));
   // Add other required input properties to the live data reduction algorithnm
   options["Instrument"] = QString::fromStdString(instrument);
   options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";

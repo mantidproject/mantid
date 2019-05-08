@@ -564,18 +564,18 @@ const QString MWRunFiles::findFilesGetSearchText(QString &searchText) {
     // mantidproject.org/MultiFileLoading
     // Also allowing spaces between delimiters as this seems to work fine
     const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
-    boost::regex runNumbers(runNumberString, boost::regex::extended);
+    boost::regex runNumberExp(runNumberString, boost::regex::extended);
     // Regex to match a list of run numbers delimited by commas
     const std::string runListString =
         "(" + runNumberString + ")(, ?(" + runNumberString + "))*";
-    boost::regex runNumberList(runListString, boost::regex::extended);
+    boost::regex runNumberListExp(runListString, boost::regex::extended);
 
     // See if we can just prepend the instrument and be done
-    if (boost::regex_match(searchText.toStdString(), runNumbers)) {
+    if (boost::regex_match(searchText.toStdString(), runNumberExp)) {
       searchText = m_defaultInstrumentName + searchText;
     }
     // If it is a list we need to prepend the instrument to all run numbers
-    else if (boost::regex_match(searchText.toStdString(), runNumberList)) {
+    else if (boost::regex_match(searchText.toStdString(), runNumberListExp)) {
       QStringList runNumbers = searchText.split(",", QString::SkipEmptyParts);
       QStringList newRunNumbers;
 

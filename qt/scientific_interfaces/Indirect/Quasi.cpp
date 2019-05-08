@@ -122,7 +122,6 @@ bool Quasi::validate() {
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
-  auto test = errors.toStdString();
   if (!errors.isEmpty()) {
     emit showMessageBox(errors);
     return false;

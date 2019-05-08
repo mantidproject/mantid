@@ -96,8 +96,8 @@ void ConvertEmptyToTof::exec() {
   m_spectrumInfo = &m_inputWS->spectrumInfo();
   std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
   std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
-  int epp = getProperty("ElasticPeakPosition");
-  int eppSpectrum = getProperty("ElasticPeakPositionSpectrum");
+  const int epp = getProperty("ElasticPeakPosition");
+  const int eppSpectrum = getProperty("ElasticPeakPositionSpectrum");
 
   std::vector<double> tofAxis;
   double channelWidth{0.0};
@@ -105,7 +105,7 @@ void ConvertEmptyToTof::exec() {
     channelWidth =
         m_inputWS->run().getPropertyValueAsType<double>("channel_width");
   } else {
-    std::string mesg =
+    const std::string mesg =
         "No property channel_width found in the input workspace....";
     throw std::runtime_error(mesg);
   }
@@ -126,9 +126,9 @@ void ConvertEmptyToTof::exec() {
       throw std::runtime_error(mesg);
     }
 
-    double l1 = m_spectrumInfo->l1();
-    double l2 = m_spectrumInfo->l2(eppSpectrum);
-    double epTof =
+    const double l1 = m_spectrumInfo->l1();
+    const double l2 = m_spectrumInfo->l2(eppSpectrum);
+    const double epTof =
         (calculateTOF(l1, wavelength) + calculateTOF(l2, wavelength)) *
         1e6; // microsecs
 
@@ -143,15 +143,17 @@ void ConvertEmptyToTof::exec() {
     validateChannelIndices(channelIndices);
 
     // Map of spectra index, epp
-    std::map<int, int> eppMap =
+    const std::map<int, int> eppMap =
         findElasticPeakPositions(spectraIndices, channelIndices);
 
-    for (auto &epp : eppMap) {
-      g_log.debug() << "Spectra idx =" << epp.first << ", epp=" << epp.second
-                    << '\n';
+    if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+      for (auto &e : eppMap) {
+        g_log.debug() << "Spectra idx =" << e.first << ", epp=" << e.second
+                      << '\n';
+      }
     }
 
-    std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
+    const std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
 
     tofAxis = makeTofAxis(eppAndEpTof.first, eppAndEpTof.second,
                           m_inputWS->blocksize() + 1, channelWidth);
@@ -181,22 +183,24 @@ void ConvertEmptyToTof::validateWorkspaceIndices(std::vector<int> &v) {
         "the elastic peak.");
     // use all spectra indices
     v.reserve(nHist);
+
     for (unsigned int i = 0; i < nHist; ++i)
       v[i] = i;
   } else {
-    for (auto index : v) {
-      if (index < 0 || static_cast<size_t>(index) >= nHist) {
-        throw std::runtime_error("Spectra index out of limits: " +
-                                 std::to_string(index));
-      }
+    const auto found =
+        std::find_if(v.cbegin(), v.cend(), [nHist](const auto index) {
+          return index < 0 || static_cast<size_t>(index) >= nHist;
+        });
+    if (found != v.cend()) {
+      throw std::runtime_error("Spectra index out of limits: " +
+                               std::to_string(*found));
     }
   }
 }
 
 /**
  * Check if the channel indices are in the limits of the number of the block
- * size
- * in the input workspace. If v is empty, uses all channels.
+ * size in the input workspace. If v is empty, uses all channels.
  * @param v :: vector with the channel indices to use
  */
 void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
@@ -207,13 +211,15 @@ void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
     // use all channel indices
     v.reserve(blockSize);
     for (unsigned int i = 0; i < blockSize; ++i)
-      v[i] = i;
+      v.emplace_back(i);
   } else {
-    for (auto &index : v) {
-      if (index < 0 || static_cast<size_t>(index) >= blockSize) {
-        throw std::runtime_error("Channel index out of limits: " +
-                                 std::to_string(index));
-      }
+    const auto found =
+        std::find_if(v.cbegin(), v.cend(), [blockSize](const auto index) {
+          return index < 0 || static_cast<size_t>(index) >= blockSize;
+        });
+    if (found != v.cend()) {
+      throw std::runtime_error("Channel index out of limits: " +
+                               std::to_string(*found));
     }
   }
 }
@@ -501,7 +507,6 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
   g_log.debug() << "Setting the TOF X Axis for numberOfSpectra="
                 << numberOfSpectra << '\n';
 
-  auto axisPtr = Kernel::make_cow<HistogramData::HistogramX>(tofAxis);
   HistogramData::BinEdges edges(tofAxis);
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
 

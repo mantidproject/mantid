@@ -128,8 +128,7 @@ void AnvredCorrection::exec() {
   if (!m_onlySphericalAbsorption) {
     const API::Run &run = m_inputWS->run();
     if (run.hasProperty("LorentzCorrection")) {
-      Kernel::Property *prop = run.getProperty("LorentzCorrection");
-      bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
+      auto lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "

@@ -101,8 +101,9 @@ std::vector<std::string> ProjectSaveModel::getWindowNames(
     const std::vector<std::string> &wsNames) const {
   std::vector<std::string> names;
   auto windows = getUniqueWindows(wsNames);
+  names.reserve(windows.size());
   for (auto window : windows) {
-    names.push_back(window->getWindowName());
+    names.emplace_back(window->getWindowName());
   }
   return names;
 }
@@ -113,8 +114,9 @@ std::vector<std::string> ProjectSaveModel::getWindowNames(
  */
 std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
   std::vector<std::string> names;
+  names.reserve(m_workspaceWindows.size());
   for (auto &item : m_workspaceWindows) {
-    names.push_back(item.first);
+    names.emplace_back(item.first);
   }
 
   std::sort(names.begin(), names.end());

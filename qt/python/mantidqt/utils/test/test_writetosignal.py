@@ -10,7 +10,6 @@
 from __future__ import (absolute_import)
 
 from qtpy.QtCore import QCoreApplication, QObject
-import sys
 import unittest
 
 from mantid.py3compat.mock import patch
@@ -27,39 +26,36 @@ class Receiver(QObject):
 
 class WriteToSignalTest(GuiTest):
 
-    def setUp(self):
-        if not hasattr(sys.stdout, "fileno"):
-            # if not present in the test stdout, then add it as an
-            # attribute so that mock can replace it later.
-            sys.stdout.fileno = None
-
     def test_run_with_output_present(self):
-        with patch("sys.stdout.fileno", return_value=10) as mock_fileno:
-            writer = WriteToSignal(sys.stdout)
-            mock_fileno.assert_called_once_with()
-            self.assertEqual(writer._original_out, sys.stdout)
+        with patch("sys.stdout") as mock_stdout:
+            mock_stdout.fileno.return_value = 10
+            writer = WriteToSignal(mock_stdout)
+            mock_stdout.fileno.assert_called_once_with()
+            self.assertEqual(writer._original_out, mock_stdout)
 
     def test_run_without_output_present(self):
-        with patch("sys.stdout.fileno", return_value=-1) as mock_fileno:
-            writer = WriteToSignal(sys.stdout)
-            mock_fileno.assert_called_once_with()
+        with patch("sys.stdout") as mock_stdout:
+            mock_stdout.fileno.return_value = -1
+            writer = WriteToSignal(mock_stdout)
+            mock_stdout.fileno.assert_called_once_with()
             self.assertEqual(writer._original_out, None)
 
     def test_connected_receiver_receives_text(self):
-        with patch("sys.stdout.fileno", return_value=1) as mock_fileno:
+        with patch("sys.stdout") as mock_stdout:
+            mock_stdout.fileno.return_value = -1
             recv = Receiver()
-            writer = WriteToSignal(sys.stdout)
+            writer = WriteToSignal(mock_stdout)
             writer.sig_write_received.connect(recv.capture_text)
             txt = "I expect to see this"
             writer.write(txt)
             QCoreApplication.processEvents()
             self.assertEqual(txt, recv.captured_txt)
-            mock_fileno.assert_called_once_with()
+            mock_stdout.fileno.assert_called_once_with()
 
     def test_with_fileno_not_defined(self):
         with patch('sys.stdout') as mock_stdout:
             del mock_stdout.fileno
-            writer = WriteToSignal(sys.stdout)
+            writer = WriteToSignal(mock_stdout)
             self.assertEqual(writer._original_out, None)
 
 

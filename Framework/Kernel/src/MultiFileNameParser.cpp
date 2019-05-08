@@ -18,7 +18,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
 namespace Mantid {
@@ -299,13 +298,15 @@ void Parser::split() {
   if (base.empty())
     throw std::runtime_error("There does not appear to be any runs present.");
 
+  auto instrumentNameIt =
+      std::find_if(m_validInstNames.cbegin(), m_validInstNames.cend(),
+                   [&base](const auto &name) {
+                     return matchesFully(base, name + ".*", true);
+                   }); // USE CASELESS MATCHES HERE.
+
   // See if the user has typed in one of the available instrument names.
-  for (const auto &validInstName : m_validInstNames) {
-    // USE CASELESS MATCHES HERE.
-    if (matchesFully(base, validInstName + ".*", true)) {
-      m_instString = getMatchingString("^" + validInstName, base, true);
-      break;
-    }
+  if (instrumentNameIt != m_validInstNames.cend()) {
+    m_instString = getMatchingString("^" + *instrumentNameIt, base, true);
   }
 
   // If not, use the default, or throw if we encounter an unrecognisable

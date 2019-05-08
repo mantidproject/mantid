@@ -7,27 +7,27 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__  import absolute_import
+from __future__ import absolute_import
 
 # std imports
 from unittest import TestCase, main
 
-
 # third party imports
-from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.py3compat import mock
 # register mantid projection
 import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
-from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 import numpy as np
 
 # local imports
+from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.plots import MantidAxes
+from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,
                                          pcolormesh_from_names)
+from mantid.py3compat import mock
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -165,6 +165,49 @@ class FunctionsTest(TestCase):
 
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
+
+    def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual(len(ax.lines), 2)
+
+    def test_title_preserved_when_workspace_plotted_on_scripted_plot(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.title("My Title")
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual("My Title", ax.get_title())
+
+    def test_different_line_colors_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        line_colors = [line.get_color() for line in ax.get_lines()]
+        self.assertNotEqual(line_colors[0], line_colors[1])
+
+    def test_workspace_tracked_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertIn(ws.name(), ax.tracked_workspaces)
+
+    def test_from_mpl_axes_success_with_default_args(self):
+        plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.plot([0, 2], [0, 2])
+        ax = plt.gca()
+        mantid_ax = MantidAxes.from_mpl_axes(ax)
+        self.assertEqual(len(mantid_ax.lines), 2)
+        self.assertIsInstance(mantid_ax, MantidAxes)
 
     # ------------- Failure tests -------------
 

@@ -418,6 +418,9 @@ public:
   /// always safe to assume it is just 2
   size_t numberOfAxis() const;
 
+  /// Returns true if the workspace contains common X bins with log spacing
+  virtual bool isCommonLogBins() const;
+
   /// Returns true if the workspace contains data in histogram form (as
   /// opposed to point-like)
   virtual bool isHistogramData() const;

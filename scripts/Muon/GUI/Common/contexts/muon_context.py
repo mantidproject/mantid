@@ -25,7 +25,7 @@ class MuonContext(object):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
-        self.phase_context = muon_phase_context
+        self._phase_context = muon_phase_context
         self.base_directory = base_directory
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True})
@@ -41,6 +41,10 @@ class MuonContext(object):
     @property
     def group_pair_context(self):
         return self._group_pair_context
+
+    @property
+    def phase_context(self):
+        return self._phase_context
 
     def calculate_group(self, group_name, run, rebin=False):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
@@ -145,6 +149,7 @@ class MuonContext(object):
 
         for run in run_numbers:
             workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
+
             for name in pair_names:
                 workspace_options.append(
                     wsName.get_pair_data_workspace_name(self,

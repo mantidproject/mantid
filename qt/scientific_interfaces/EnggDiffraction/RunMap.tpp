@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -63,21 +64,20 @@ std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
 
 template <size_t NumBanks, typename T>
 size_t RunMap<NumBanks, T>::size() const {
-  size_t numElements = 0;
+  const size_t numElements = std::accumulate(
+      m_map.cbegin(), m_map.cend(), static_cast<size_t>(0),
+      [](size_t sum, const auto &bank) { return sum + bank.size(); });
 
-  for (const auto &bank : m_map) {
-    numElements += bank.size();
-  }
   return numElements;
 }
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::validateBankID(const size_t bank) const {
-  if (bank < 0 || bank >= NumBanks) {
+  if (bank >= NumBanks) {
     throw std::invalid_argument("Tried to access invalid bank: " +
                                 std::to_string(bank));
   }
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

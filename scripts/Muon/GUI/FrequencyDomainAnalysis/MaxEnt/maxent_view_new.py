@@ -12,9 +12,6 @@ from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
 
 
-construct = "Construct"
-
-
 class MaxEntView(QtWidgets.QWidget):
 
     """

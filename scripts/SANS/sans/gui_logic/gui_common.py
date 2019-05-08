@@ -4,10 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
-from qtpy.QtWidgets import (QFileDialog)  # noqa
-from qtpy.QtCore import (QSettings)  # noqa
 import os
+
+from qtpy.QtCore import QSettings
+from qtpy.QtWidgets import QFileDialog
+
+from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -125,7 +127,7 @@ def get_reduction_selection(instrument):
 
 def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
     reduction_selection = get_reduction_selection(instrument)
-    if reduction_selection and reduction_mode in list(reduction_selection.keys()):
+    if reduction_selection and reduction_mode in reduction_selection:
         return reduction_selection[reduction_mode]
     else:
         return None
@@ -134,7 +136,7 @@ def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
 def get_string_for_gui_from_instrument(instrument):
     instrument_selection = {SANSInstrument.SANS2D: 'SANS2D', SANSInstrument.LOQ: 'LOQ', SANSInstrument.LARMOR: 'LARMOR'
                             , SANSInstrument.ZOOM: 'ZOOM'}
-    if instrument in list(instrument_selection.keys()):
+    if instrument in instrument_selection:
         return instrument_selection[instrument]
     else:
         return None
@@ -244,3 +246,64 @@ def add_dir_to_datasearch(batch_file_path, current_directories):
 def remove_dir_from_datasearch(batch_file_path, directories):
     new_dirs = ";".join([path for path in directories.split(";") if path != batch_file_path])
     return new_dirs
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# GUI Property Defaults
+# ----------------------------------------------------------------------------------------------------------------------
+class SANSGuiPropertiesHandler(object):
+    """
+    This class handles the setting and getting
+    of SANSDataProcessorGUI default properties.
+    """
+    def __init__(self, keys, line_edits={}):
+        """
+        Initialise a properties handler for a particular pyqt view.
+        :param keys: A dict where keys are q_settings_key and values are a tuple of (update_function, type)
+                    where update function is method in the view to be called when loading a property and type
+                    is the data type of the property
+        :param line_edits: A dict where keys are the q_settings_key and values are a view's line edits to be updated
+        """
+        self.__generic_settings = GENERIC_SETTINGS
+
+        self.keys = keys
+        self.line_edits = line_edits
+
+        self._set_out_defaults()
+
+    def _set_out_defaults(self):
+        for property_key, (load_func, property_type) in self.keys.items():
+            args = []
+            if property_key in self.line_edits:
+                self._load_default_file(self.line_edits[property_key], self.__generic_settings, property_key)
+            else:
+                try:
+                    property_value = self._load_property(self.__generic_settings, property_key)
+                    args.append(property_value)
+                except RuntimeError:
+                    pass
+            load_func(*args)
+
+    @staticmethod
+    def _load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        default_file = settings.value(q_settings_key, "", type=str)
+        settings.endGroup()
+
+        line_edit_field.setText(default_file)
+
+    @staticmethod
+    def _load_property(q_settings_group_key, q_settings_key):
+        settings = QSettings()
+        settings.beginGroup(q_settings_group_key)
+        default_property = settings.value(q_settings_key, "", type=str)
+        settings.endGroup()
+
+        return default_property
+
+    def set_setting(self, q_settings_key, value):
+        settings = QSettings()
+        settings.beginGroup(self.__generic_settings)
+        settings.setValue(q_settings_key, value)
+        settings.endGroup()

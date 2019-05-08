@@ -249,16 +249,16 @@ JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace,
 
 std::unordered_map<std::string, JumpFitParameters>::const_iterator
 JumpFitModel::findJumpFitParameters(std::size_t dataIndex) const {
-  const auto workspace = getWorkspace(dataIndex);
-  if (!workspace)
+  const auto ws = getWorkspace(dataIndex);
+  if (!ws)
     return m_jumpParameters.end();
-  return m_jumpParameters.find(workspace->getName());
+  return m_jumpParameters.find(ws->getName());
 }
 
 std::string JumpFitModel::getFitParameterName(std::size_t dataIndex,
                                               std::size_t spectrum) const {
-  const auto workspace = getWorkspace(dataIndex);
-  const auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
+  const auto ws = getWorkspace(dataIndex);
+  const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
   return axis->label(spectrum);
 }
 

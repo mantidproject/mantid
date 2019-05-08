@@ -21,7 +21,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 #include <climits>
 #include <numeric>
 

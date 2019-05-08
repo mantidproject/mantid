@@ -116,9 +116,8 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
 
   // Try to create a Gaussian. Failing will mean that CurveFitting dll is not
   // loaded
-  boost::shared_ptr<Mantid::API::IFunction> f =
-      boost::shared_ptr<Mantid::API::IFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
+  boost::shared_ptr<Mantid::API::IFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction("Gaussian"));
   if (m_autoBgName.toLower() == "none") {
     m_autoBgName = "";
   } else {
@@ -607,7 +606,6 @@ void FitPropertyBrowser::updateSetupMenus() {
 void FitPropertyBrowser::executeCustomSetupLoad(const QString &name) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
-  QStringList names = settings.childKeys();
 
   QString str = settings.value(name).toString();
   loadFunction(str);
@@ -616,7 +614,6 @@ void FitPropertyBrowser::executeCustomSetupLoad(const QString &name) {
 void FitPropertyBrowser::executeCustomSetupRemove(const QString &name) {
   QSettings settings;
   settings.beginGroup("Mantid/FitBrowser/SavedFunctions");
-  QStringList names = settings.childKeys();
 
   settings.remove(name);
   updateSetupMenus();
@@ -1802,7 +1799,6 @@ void FitPropertyBrowser::addHandle(
   if (!isWorkspaceValid(ws) ||
       (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName)))
     return;
-  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(qName);
 
@@ -1829,7 +1825,6 @@ void FitPropertyBrowser::addHandle(
 
 /// workspace was removed
 void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
-  QStringList oldWorkspaces = m_workspaceNames;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0) {

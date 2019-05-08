@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
-#include <boost/lexical_cast.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_eigen.h>
