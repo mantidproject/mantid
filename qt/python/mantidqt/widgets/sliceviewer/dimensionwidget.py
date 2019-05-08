@@ -52,6 +52,9 @@ class DimensionWidget(QWidget):
             self.layout.addWidget(widget)
 
         self.set_initial_states()
+
+        self.normalize_name_widths()
+
         self.transpose = False
 
     def change_dims(self, number):
@@ -90,6 +93,13 @@ class DimensionWidget(QWidget):
         none_state_dims = [d for d in self.dims if d.state==State.NONE]
         none_state_dims[0].set_state(State.X)
         none_state_dims[1].set_state(State.Y)
+
+    def normalize_name_widths(self):
+        max_name_width = max(d.name.sizeHint().width() for d in self.dims)
+        max_unit_width = max(d.units.sizeHint().width() for d in self.dims)
+        for d in self.dims:
+            d.name.setMinimumWidth(max_name_width)
+            d.units.setMinimumWidth(max_unit_width)
 
     def get_slicepoint(self):
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
