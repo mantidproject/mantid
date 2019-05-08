@@ -23,27 +23,6 @@ using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-/// This QApplication object is required to construct the view
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-private:
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
-
 class MockFunctionView : public IFunctionView {
 public:
   // Mock implementation of the interface

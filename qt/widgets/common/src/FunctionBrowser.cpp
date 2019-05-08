@@ -27,7 +27,6 @@
 #include <boost/lexical_cast.hpp>
 
 namespace {
-const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
 } // namespace
 
@@ -177,7 +176,7 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
 
 void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
                                              double value, double error) {
-  m_presenter->setLocalParameterValue(parName, i, value);
+  m_presenter->setLocalParameterValue(parName, i, value, error);
 }
 
 /// Get error of a local parameter

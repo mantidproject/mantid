@@ -20,6 +20,27 @@ using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesThreadPoolManager;
 
+/// This QApplication object is required to construct the view
+class QApplicationHolder : CxxTest::GlobalFixture {
+public:
+  bool setUpWorld() override {
+    int argc(0);
+    char **argv = {};
+    m_app = new QApplication(argc, argv);
+    return true;
+  }
+
+  bool tearDownWorld() override {
+    delete m_app;
+    return true;
+  }
+
+private:
+  QApplication *m_app;
+};
+
+static QApplicationHolder MAIN_QAPPLICATION;
+
 class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
