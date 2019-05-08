@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisFitFunctionPresenter.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
-using MantidQt::MantidWidgets::EditLocalParameterDialog;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 
@@ -67,8 +65,6 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
       connect(funcBrowser,
               SIGNAL(parameterChanged(const QString &, const QString &)), this,
               SLOT(handleParameterEdited(const QString &, const QString &)));
-      connect(funcBrowser, SIGNAL(localParameterButtonClicked(const QString &)),
-              this, SLOT(editLocalParameterClicked(const QString &)));
     } else {
       disconnect(funcBrowser, SIGNAL(functionStructureChanged()), this,
                  SLOT(updateFunction()));
@@ -76,9 +72,6 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
                  SIGNAL(parameterChanged(const QString &, const QString &)),
                  this,
                  SLOT(handleParameterEdited(const QString &, const QString &)));
-      disconnect(funcBrowser,
-                 SIGNAL(localParameterButtonClicked(const QString &)), this,
-                 SLOT(editLocalParameterClicked(const QString &)));
     }
   }
 }

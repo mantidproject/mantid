@@ -108,6 +108,14 @@ public:
     locals = model.getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
+
+  void test_set_number_domains_after_clear() {
+    MultiDomainFunctionModel model;
+    model.clear();
+    model.setNumberDomains(1);
+    TS_ASSERT_EQUALS(model.getNumberDomains(), 1);
+  }
+
 };
 
 #endif // MANTIDWIDGETS_FUNCTIONMODELTEST_H_

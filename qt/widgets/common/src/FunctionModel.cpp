@@ -212,7 +212,7 @@ void MultiDomainFunctionModel::setNumberDomains(int nDomains) {
   if (nd == m_numberDomains) {
     return;
   }
-  if (!m_function) {
+  if (!hasFunction()) {
     m_numberDomains = nd;
     return;
   }
