@@ -7,6 +7,8 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 import Muon.GUI.Common.utilities.load_utils as load_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
@@ -21,21 +23,37 @@ from mantid.kernel import ConfigServiceImpl, ConfigService
 from Muon.GUI.Common.observer_pattern import Observable
 
 
+def get_grouping_psi(workspace):
+    grouping_list = []
+
+    for ii in range(0, workspace.getNumberHistograms()):
+        sample_log_label_name = "Label Spectra " + str(ii)
+        sample_log_value = ""
+        workspace_run = workspace.getRun()
+        if workspace_run.hasProperty(sample_log_label_name):
+            sample_log_value = workspace_run.getProperty(sample_log_label_name).value
+        grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+
+    return grouping_list, []
+
+
 def get_default_grouping(workspace, instrument, main_field_direction):
-    import pydevd_pycharm
-    pydevd_pycharm.settrace('localhost', port=8000, stdoutToServer=True, stderrToServer=True)
     parameter_name = "Default grouping file"
     if instrument == "MUSR" or instrument == 'CHRONUS':
         parameter_name += " - " + main_field_direction
-    try:
-        if isinstance(workspace, WorkspaceGroup):
-            grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
-        else:
-            grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
-    except IndexError:
-        return [], []
+
+    if instrument != "PSI":
+        try:
+            if isinstance(workspace, WorkspaceGroup):
+                grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+            else:
+                grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+        except IndexError:
+            return [], []
+    else:
+        return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
-    filename = instrument_directory + grouping_file
+    filename = os.path.join(instrument_directory, grouping_file)
     new_groups, new_pairs, description = xml_utils.load_grouping_from_XML(filename)
     return new_groups, new_pairs
 
