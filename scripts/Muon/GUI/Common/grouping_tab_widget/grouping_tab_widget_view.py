@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets
+from qtpy import QtWidgets, PYQT4
 from Muon.GUI.Common.message_box import warning, question
+from Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
 
 import os
 
@@ -119,19 +120,24 @@ class GroupingTabView(QtWidgets.QWidget):
 
     def show_file_browser_and_return_selection(
             self, file_filter, search_directories):
-        default_directory = search_directories[0]
-        chosen_file = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Select file", default_directory,
-            file_filter)
-        return str(chosen_file)
+        return show_file_browser_and_return_selection(self, file_filter, search_directories)[0]
 
     def show_file_save_browser_and_return_selection(self):
-        chosen_file = str(
-            QtWidgets.QFileDialog.getSaveFileName(
-                self,
-                "Select file",
-                '',
-                'XML files (*.xml)'))
+        if PYQT4:
+            chosen_file = str(
+                QtWidgets.QFileDialog.getSaveFileName(
+                    self,
+                    "Select file",
+                    '',
+                    'XML files (*.xml)'))
+        else:
+            chosen_file, _filter =\
+                QtWidgets.QFileDialog.getSaveFileName(
+                    self,
+                    "Select file",
+                    '',
+                    'XML files (*.xml)')
+            chosen_file = str(chosen_file)
         if chosen_file == '':
             return chosen_file
 

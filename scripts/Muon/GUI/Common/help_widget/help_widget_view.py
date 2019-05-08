@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 from qtpy import PYQT4
@@ -8,7 +7,7 @@ from qtpy import PYQT4
 # (outside of Mantid we cannot use the "Manage user directories" functionality)
 STANDALONE_EXEC = True
 try:
-    from mantidqtpython import MantidQt
+    from mantidqt.widgets import manageuserdirectories
 except:
     STANDALONE_EXEC = False
 
@@ -70,7 +69,7 @@ class HelpWidgetView(QtWidgets.QWidget):
 
     def show_directory_manager(self):
         if STANDALONE_EXEC:
-            MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
+            manageuserdirectories.ManageUserDirectories.openUserDirsDialog(self)
         else:
             self.warning_popup(
                 "Cannot open user directories dailog outside MantidPlot.")
