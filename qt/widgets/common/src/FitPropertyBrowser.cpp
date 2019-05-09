@@ -2068,9 +2068,8 @@ void FitPropertyBrowser::addTie() {
     return;
 
   bool ok = false;
-  QString tieStr =
-      QInputDialog::getText(this, "Mantid - Fit", "Enter tie expression",
-                            QLineEdit::Normal, "", &ok);
+  QString tieStr = QInputDialog::getText(
+      this, "Mantid - Fit", "Enter tie expression", QLineEdit::Normal, "", &ok);
   if (ok) {
     tieStr = tieStr.trimmed();
     if (!tieStr.contains('=')) {
