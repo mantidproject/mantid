@@ -806,8 +806,6 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
                                 "the expected instrument name: " +
                                 m_currentInst + ".\n\n" + explMsg);
   }
-  const std::string castMsg =
-      "It is not possible to interpret as an integer number ";
 
   instName = parts[0];
 }
@@ -1401,7 +1399,7 @@ std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
       runNumber.substr(runNumber.find(instStr) + instStr.size());
   std::vector<std::string> res;
   res.reserve(bankIDs.size());
-  std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
+  std::string prefix = instStr + "_" + runName + "_focused_texture_bank_";
   for (auto bankID : bankIDs) {
     res.emplace_back(prefix + boost::lexical_cast<std::string>(bankID) +
                      ".nxs");
