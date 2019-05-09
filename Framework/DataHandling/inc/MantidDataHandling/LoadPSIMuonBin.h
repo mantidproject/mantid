@@ -50,11 +50,7 @@ struct headerData {
   int32_t labelsOfHistograms[16];
   int16_t integerT0[16];
   int16_t firstGood[16];
-  int16_t
-      lastGood[16] = {32767, 32767, 32767, 32767, 32767, 32767,
-                      32767, 32767, 32767, 32767, 32767, 32767,
-                      32767, 32767, 32767, 32767}; // All 16 elements are the
-                                                   // max value they can be
+  int16_t lastGood[16];
   float realT0[16];
   float temperatures[4];
   float temperatureDeviation[4];
