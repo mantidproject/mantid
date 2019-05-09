@@ -338,11 +338,26 @@ operator=(PrivateFittingData &&fittingData) {
 IndirectFittingModel::IndirectFittingModel()
     : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
 
+bool IndirectFittingModel::hasWorkspace(
+    std::string const &workspaceName) const {
+  auto const names = getWorkspaceNames();
+  auto const iter = std::find(names.begin(), names.end(), workspaceName);
+  return iter != names.end();
+}
+
 MatrixWorkspace_sptr
 IndirectFittingModel::getWorkspace(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->workspace();
   return nullptr;
+}
+
+std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
+  std::vector<std::string> names;
+  names.reserve(m_fittingData.size());
+  for (auto i = 0u; i < m_fittingData.size(); ++i)
+    names.emplace_back(m_fittingData[i]->workspace()->getName());
+  return names;
 }
 
 Spectra IndirectFittingModel::getSpectra(std::size_t index) const {
@@ -557,7 +572,8 @@ void IndirectFittingModel::removeFittingData(std::size_t index) {
   if (m_fitOutput)
     m_fitOutput->removeOutput(m_fittingData[index].get());
   m_fittingData.erase(m_fittingData.begin() + index);
-  m_defaultParameters.erase(m_defaultParameters.begin() + index);
+  if (m_defaultParameters.size() > index)
+    m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
 
 PrivateFittingData IndirectFittingModel::clearWorkspaces() {

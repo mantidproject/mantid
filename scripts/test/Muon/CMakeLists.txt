@@ -3,7 +3,6 @@
 set ( TEST_PY_FILES
    FFTModel_test.py
    FFTPresenter_test.py
-   fft_presenter_new_test.py
    fft_presenter_context_interaction_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
@@ -22,6 +21,8 @@ set ( TEST_PY_FILES
    loading_tab/loadwidget_presenter_test.py
    loading_tab/loadwidget_presenter_multiple_file_test.py
    loading_tab/loadwidget_presenter_failure_test.py
+   phase_table_widget/phase_table_presenter_test.py
+   phase_table_widget/phase_table_context_test.py
    frequency_domain_context_test.py
    grouping_tab/grouping_table_presenter_test.py
    grouping_tab/pairing_table_presenter_test.py

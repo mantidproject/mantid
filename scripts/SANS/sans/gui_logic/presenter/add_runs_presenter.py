@@ -130,8 +130,16 @@ class AddRunsPagePresenter(object):
     def _handle_output_directory_changed(self):
         directory = self._view.display_save_directory_box("Save sum runs", self.save_directory)
         directory = os.path.join(directory, '')  # Add an OS specific trailing slash if it doesn't already exist
+        self.handle_new_save_directory(directory)
+
+    def handle_new_save_directory(self, directory):
+        """
+        This method is called when a new save directory is selected on the add runs page, but is also called
+        in the run_tab_presenter when a new default save directory is selected through Manage Directories.
+        :param directory: A string. The new path to the save directory
+        """
         self.set_output_directory(directory)
-        self.gui_properties_handler.update_default("add_runs_output_directory", directory)
+        self.gui_properties_handler.set_setting("add_runs_output_directory", directory)
 
     def _handle_sum(self):
         run_selection = self._run_selector_presenter.run_selection()

@@ -13,6 +13,7 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
@@ -20,11 +21,14 @@ from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
 
 class MuonContext(object):
     def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
-                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data'):
+                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext()):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
+        self._phase_context = muon_phase_context
         self.base_directory = base_directory
+
+        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True})
 
     @property
     def data_context(self):
@@ -37,6 +41,10 @@ class MuonContext(object):
     @property
     def group_pair_context(self):
         return self._group_pair_context
+
+    @property
+    def phase_context(self):
+        return self._phase_context
 
     def calculate_group(self, group_name, run, rebin=False):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
@@ -140,9 +148,8 @@ class MuonContext(object):
         workspace_options = []
 
         for run in run_numbers:
-            workspace_options += [
-                wsName.get_phase_quad_workspace_name(self, run_list_to_string(run), period=str(period + 1))
-                for period in range(self.data_context.num_periods(run))]
+            workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
+
             for name in pair_names:
                 workspace_options.append(
                     wsName.get_pair_data_workspace_name(self,
@@ -173,9 +180,37 @@ class MuonContext(object):
             for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
         return runs
 
-    @property
-    def first_good_data(self):
+    def first_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
         if self.gui_context['FirstGoodDataFromFile']:
-            return self.data_context.get_loaded_data_for_run(self.data_context.current_runs[-1])["FirstGoodData"]
+            return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            return self.gui_context['FirstGoodData']
+            if 'FirstGoodData' in self.gui_context:
+                return self.gui_context['FirstGoodData']
+            else:
+                self.gui_context['FirstGoodData'] = self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+                return self.gui_context['FirstGoodData']
+
+    def last_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
+        if self.gui_context['LastGoodDataFromFile']:
+            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
+        else:
+            if 'LastGoodData' in self.gui_context:
+                return self.gui_context['LastGoodData']
+            else:
+                self.gui_context['LastGoodData'] = round(max(self.data_context.get_loaded_data_for_run(run)
+                                                             ["OutputWorkspace"][0].workspace.dataX(0)), 2)
+                return self.gui_context['LastGoodData']
+
+    def dead_time_table(self, run):
+        if self.gui_context['DeadTimeSource'] == 'FromADS':
+            return self.gui_context['DeadTimeTable']
+        elif self.gui_context['DeadTimeSource'] == 'FromFile':
+            return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+        elif self.gui_context['DeadTimeSource'] == 'None':
+            return None

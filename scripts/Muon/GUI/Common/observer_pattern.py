@@ -51,3 +51,12 @@ class Observable(object):
     def notify_subscribers(self, arg=None, **kwargs):
         for observer in self._subscribers:
             observer.update(self, arg, **kwargs)
+
+
+class GenericObserver(Observer):
+    def __init__(self, callback):
+        Observer.__init__(self)
+        self.callback = callback
+
+    def update(self, observable, arg):
+        self.callback()

@@ -4,13 +4,14 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from matplotlib.gridspec import GridSpec
 import unittest
+from matplotlib.gridspec import GridSpec
 
 from mantid.py3compat import mock
-from MultiPlotting.subplot.subplot import subplot
+
 from MultiPlotting.multi_plotting_context import PlottingContext
-from Muon.GUI.Common import mock_widget
+from MultiPlotting.subplot.subplot import subplot
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 def rm_logic(name):

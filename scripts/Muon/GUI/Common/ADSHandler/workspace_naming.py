@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+import re
 
 
 def get_raw_data_workspace_name(context, run, period='1'):
@@ -96,5 +97,54 @@ def get_pair_data_directory(context, run):
         return context.data_context._base_run_name(run) + " Pairs/"
 
 
-def get_phase_quad_workspace_name(context, run, period):
-    return get_raw_data_workspace_name(context, run, period=str(period)) + " (PhaseQuad)"
+def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
+    workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
+    workspace_name += '; ' + forward_group + ', ' + backward_group
+    return workspace_name
+
+
+def get_base_run_name(run, instrument):
+    if isinstance(run, int):
+        return str(instrument) + str(run)
+    else:
+        return str(instrument) + run
+
+
+def get_phase_table_workspace_group_name(insertion_workspace_name, instrument):
+    run = re.search('[0-9]+', insertion_workspace_name).group()
+    group = get_base_run_name(run, instrument) + ' Phase Tab/'
+
+    return group
+
+
+def get_fft_workspace_group_name(insertion_workspace_name, instrument):
+    run = re.search('[0-9]+', insertion_workspace_name).group()
+    group = get_base_run_name(run, instrument) + ' FFT/'
+
+    return group
+
+
+def get_phase_quad_workspace_name(input_workspace, phase_table):
+    return input_workspace.replace('_raw_data', '; PhaseQuad') + ' ' + phase_table
+
+
+def get_fitting_workspace_name(base_name):
+    return base_name + '; fit_information'
+
+
+def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
+    if imaginary_input_workspace:
+        return 'FFT; Re ' + input_workspace + '; Im ' + imaginary_input_workspace
+    else:
+        return 'FFT; Re ' + input_workspace
+
+
+def get_maxent_workspace_name(input_workspace):
+    return input_workspace + '; MaxEnt'
+
+
+def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
+    run = re.search('[0-9]+', insertion_workspace_name).group()
+    group = get_base_run_name(run, instrument) + ' Maxent/'
+
+    return group

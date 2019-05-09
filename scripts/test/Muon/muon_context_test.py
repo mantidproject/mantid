@@ -113,6 +113,40 @@ class MuonContextTest(unittest.TestCase):
 
         self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489', 'EMU19489 Raw Data', 'EMU19489_raw_data', 'Muon Data'])
 
+    def test_that_first_good_data_returns_correctly_when_from_file_chosen_option(self):
+        self.gui_context.update({'FirstGoodDataFromFile': True})
+
+        first_good_data = self.context.first_good_data([19489])
+
+        self.assertEquals(first_good_data, 0.11)
+
+    def test_first_good_data_returns_correctly_when_manually_specified_used(self):
+        self.gui_context.update({'FirstGoodDataFromFile': False, 'FirstGoodData': 5})
+
+        first_good_data = self.context.first_good_data([19489])
+
+        self.assertEquals(first_good_data, 5)
+
+    def test_that_last_good_data_returns_correctly_when_from_file_chosen_option(self):
+        self.gui_context.update({'LastGoodDataFromFile': True})
+
+        last_good_data = self.context.last_good_data([19489])
+
+        self.assertEquals(last_good_data, 31.76)
+
+    def test_last_good_data_returns_correctly_when_manually_specified_used(self):
+        self.gui_context.update({'LastGoodDataFromFile': False, 'LastGoodData': 5})
+
+        last_good_data = self.context.last_good_data([19489])
+
+        self.assertEquals(last_good_data, 5)
+
+    def test_that_dead_time_table_from_ADS_returns_table_name(self):
+        self.gui_context.update({'DeadTimeSource': 'FromADS', 'DeadTimeTable': 'deadtime_table_name'})
+
+        deadtime_table = self.context.dead_time_table([19489])
+
+        self.assertEquals(deadtime_table, 'deadtime_table_name')
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

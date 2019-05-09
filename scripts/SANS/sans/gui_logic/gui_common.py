@@ -9,7 +9,6 @@ import os
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
-from mantid.kernel import Logger
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 
 
@@ -285,13 +284,6 @@ class SANSGuiPropertiesHandler(object):
                     pass
             load_func(*args)
 
-    def update_default(self, gui_property, value):
-        if gui_property in self.keys:
-            self._set_setting(self.__generic_settings, gui_property, value)
-        else:
-            Logger("SANSPropertyHandler").information("Trying to set property {} for which a default property "
-                                                      "does not exist".format(gui_property))
-
     @staticmethod
     def _load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
         settings = QSettings()
@@ -310,9 +302,8 @@ class SANSGuiPropertiesHandler(object):
 
         return default_property
 
-    @staticmethod
-    def _set_setting(q_settings_group_key, q_settings_key, value):
+    def set_setting(self, q_settings_key, value):
         settings = QSettings()
-        settings.beginGroup(q_settings_group_key)
+        settings.beginGroup(self.__generic_settings)
         settings.setValue(q_settings_key, value)
         settings.endGroup()

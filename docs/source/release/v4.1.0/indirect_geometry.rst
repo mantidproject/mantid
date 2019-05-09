@@ -59,6 +59,8 @@ Bug Fixes
 #########
 - Fixed an error caused by loading a Sample into ConvFit which does not have a resolution parameter for the analyser.
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
+- Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
+  interface.
 
 
 Data Corrections Interface

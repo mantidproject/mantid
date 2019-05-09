@@ -118,6 +118,9 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     # Mock objects used in the properties handler
     view.user_file_line_edit = mock.Mock()
 
+    # Mock the add runs presenter
+    view.add_runs_presenter = mock.Mock()
+
     # ---------------------
     # Mocking properties
     # ---------------------

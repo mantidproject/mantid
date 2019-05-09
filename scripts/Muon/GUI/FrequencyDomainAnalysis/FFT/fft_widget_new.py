@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_view import FFTView
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_view_new import FFTView
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter_new import FFTPresenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_model import FFTModel, FFTWrapper
 

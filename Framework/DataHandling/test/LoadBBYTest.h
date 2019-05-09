@@ -24,6 +24,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Types::Core;
 
 class LoadBBYTest : public CxxTest::TestSuite {
 public:
@@ -70,10 +71,10 @@ public:
 
     // test start and end time
     TS_ASSERT(
-        run.getProperty("start_time")->value().compare("2000-01-01T00:00:00") ==
+        run.getProperty("start_time")->value().compare("2014-06-17T09:59:31") ==
         0)
     TS_ASSERT(
-        run.getProperty("end_time")->value().find("2000-01-01T00:00:00.08") ==
+        run.getProperty("end_time")->value().find("2014-06-17T09:59:31.08") ==
         0)
 
     // test data properties
@@ -135,6 +136,49 @@ public:
                         run.getProperty("curtain_rotation"))
                         ->firstValue(),
                     10, 1.0e-7);
+  }
+
+  void test_filter_bby_algorithm() {
+    LoadBBY algToBeTested;
+
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    // Filter the event by pulse time when loading
+    // and confirm that the events are within the range
+    std::string outputSpace = "LoadBBYTest";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+    std::string inputFile = "BBY0000014.tar";
+    algToBeTested.setPropertyValue("Filename", inputFile);
+    algToBeTested.setPropertyValue("FilterByTimeStart", "0.04");
+    algToBeTested.setPropertyValue("FilterByTimeStop", "0.06");
+
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+
+    // check the filtered events
+
+    // get workspace generated
+    EventWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    auto run = output->run();
+
+    // check the number of events and the min and max pulse range
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 100000);
+    auto minPulseTime = output->getPulseTimeMin();
+    auto maxPulseTime = output->getPulseTimeMax();
+
+    DateAndTime runstart(run.getProperty("run_start")->value());
+    auto timeshift = runstart.totalNanoseconds();
+    double minTime =
+        static_cast<double>(minPulseTime.totalNanoseconds() - timeshift) *
+        1.0e-9;
+    double maxTime =
+        static_cast<double>(maxPulseTime.totalNanoseconds() - timeshift) *
+        1.0e-9;
+
+    TS_ASSERT_LESS_THAN(maxTime, 0.0600001);
+    TS_ASSERT_LESS_THAN(0.0399999, minTime);
   }
 };
 
