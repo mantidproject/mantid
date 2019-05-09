@@ -62,11 +62,6 @@ public:
     // End of assertions for the main progress bar
     //----------
 
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QApplication app(argc, &argv);
-
     auto widget = new QTreeWidgetItem();
     auto progressBar = new QProgressBar();
     auto returnPair = std::make_pair(widget, progressBar);
@@ -111,11 +106,6 @@ public:
     EXPECT_CALL(*mainProgressBar.get(), algorithmEnded()).Times(1);
     // End of assertions for the main progress bar
     //----------
-
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QApplication app(argc, &argv);
 
     // changing this will cause the test to fail the assertions
     // on the mainProgressBar, as the expected progress

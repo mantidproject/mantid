@@ -120,13 +120,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
   void testRealAlgorithmRunning() {
-    // This application is needed to run the QSignals triggered
-    // from the AlgorithmProgressModel on AlgorithmStart/Update/End
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QCoreApplication app(argc, &argv);
-
     EXPECT_CALL(*mockView.get(), algorithmStarted()).Times(1);
     int reports = 10;
     QString emptyQString;
