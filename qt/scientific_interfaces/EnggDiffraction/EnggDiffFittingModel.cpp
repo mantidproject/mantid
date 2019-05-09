@@ -498,7 +498,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
     API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
     auto ws_test = ADS.retrieveWS<API::Workspace>(temporaryWSName);
     const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws_test);
-    if(!ws){
+    if (!ws) {
       throw std::invalid_argument("Workspace is not a matrix workspace.");
     }
     const auto bank = guessBankID(ws);

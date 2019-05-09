@@ -322,7 +322,6 @@ void EnggDiffFittingPresenter::processLoad() {
     warnFileNotFound(ex);
     return;
   }
-  
 
   const auto runLabels = m_model->getRunLabels();
   std::vector<std::string> listWidgetLabels;
