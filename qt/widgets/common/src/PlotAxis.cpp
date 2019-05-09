@@ -18,6 +18,35 @@
 namespace MantidQt {
 namespace API {
 
+namespace {
+QString
+replacePerWithNegativeIndice(const std::string &label,
+                             const bool &plotAsDistribution,
+                             const Mantid::Kernel::UnitLabel xLabel = "") {
+  std::vector<std::string> splitVec;
+  QString negativeOnePower = toQStringInternal(L"\u207b\u00b9");
+  QString newLabel;
+
+  boost::split_regex(splitVec, label, boost::regex(" per "));
+  if (splitVec.size() > 1) {
+    newLabel = QString::fromStdString(splitVec[0]);
+    splitVec.erase(splitVec.begin());
+    std::string unitString = boost::algorithm::join(splitVec, " ");
+    newLabel += " (" + QString::fromStdString(unitString);
+    if (plotAsDistribution && xLabel != "") {
+      newLabel += " " + toQStringInternal(xLabel.utf8());
+    }
+    newLabel += ")" + negativeOnePower;
+  } else {
+    newLabel = QString::fromStdString(label);
+    if (plotAsDistribution && xLabel != "") {
+      newLabel +=
+          " (" + toQStringInternal(xLabel.utf8()) + ")" + negativeOnePower;
+    }
+  }
+  return newLabel;
+}
+} // namespace
 /**
  * The title will be filled with the caption & units from the given Axis object
  * of the workspace
@@ -86,34 +115,6 @@ void PlotAxis::titleFromDimension(const Mantid::Geometry::IMDDimension &dim) {
       m_title += " (" + QString::fromStdString(unitLbl.ascii()) + ")";
     }
   }
-}
-
-QString
-replacePerWithNegativeIndice(const std::string &label,
-                             const bool &plotAsDistribution,
-                             const Mantid::Kernel::UnitLabel xLabel = "") {
-  std::vector<std::string> splitVec;
-  QString negativeOnePower = toQStringInternal(L"\u207b\u00b9");
-  QString newLabel;
-
-  boost::split_regex(splitVec, label, boost::regex(" per "));
-  if (splitVec.size() > 1) {
-    newLabel = QString::fromStdString(splitVec[0]);
-    splitVec.erase(splitVec.begin());
-    std::string unitString = boost::algorithm::join(splitVec, " ");
-    newLabel += " (" + QString::fromStdString(unitString);
-    if (plotAsDistribution && xLabel != "") {
-      newLabel += " " + toQStringInternal(xLabel.utf8());
-    }
-    newLabel += ")" + negativeOnePower;
-  } else {
-    newLabel = QString::fromStdString(label);
-    if (plotAsDistribution && xLabel != "") {
-      newLabel +=
-          " (" + toQStringInternal(xLabel.utf8()) + ")" + negativeOnePower;
-    }
-  }
-  return newLabel;
 }
 
 /**

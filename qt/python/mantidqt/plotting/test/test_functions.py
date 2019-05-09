@@ -13,21 +13,21 @@ from __future__ import absolute_import
 from unittest import TestCase, main
 
 # third party imports
-# register mantid projection
-import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 
 # local imports
+# register mantid projection
+import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.plots import MantidAxes
+from mantid.py3compat import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,
                                          pcolormesh_from_names)
-from mantid.py3compat import mock
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class

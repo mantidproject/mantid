@@ -208,6 +208,18 @@ class HelperFunctionsTest(unittest.TestCase):
         labels = funcs.get_axes_labels(ws, plot_as_dist=True)
         self.assertEqual(labels[0], 'Counts (microAmp.hour $\\AA$)$^{-1}$')
 
+    def test_y_units_for_non_distribution_with_no_x_or_y_unit_and_autodist_on(self):
+        ws = self.ws1d_point
+        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        self.assertEqual(labels[0], '')
+
+    def test_y_units_for_non_distribution_with_no_x_unit_and_autodist_on(self):
+        ws = self.ws2d_point
+        ws.setYUnit("Counts")
+        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        self.assertEqual(labels[0], 'Counts')
+        ws.setYUnit('')
+
     def test_get_axes_label_2d_MDWS(self):
         axs = funcs.get_axes_labels(self.ws_MD_2d)
         # should get the first two dimension labels only
