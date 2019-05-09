@@ -1712,6 +1712,7 @@ void FunctionTreeView::attributeChanged(QtProperty *prop) {
   // delete and recreate all function's properties (attributes, parameters, etc)
   setFunction(funProp, fun);
   updateFunctionIndices();
+  emit functionReplaced(QString::fromStdString(fun->asString()));
 }
 
 /** Called when the size of a vector attribute is changed
