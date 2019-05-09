@@ -188,8 +188,8 @@ void SaveIsawUB::exec() {
           << lattice.getdkerr(2) << setw(12) << setprecision(4)
           << lattice.getdlerr(2) << " \n";
     }
-    out << "\n";
     if (ModDim >= 1) {
+      out << "\n";
       out << "Max Order:        " << lattice.getMaxOrder() << " \n";
       out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
     }
