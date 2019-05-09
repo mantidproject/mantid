@@ -253,8 +253,7 @@ public:
     ON_CALL(mockView, currentCalibSettings())
         .WillByDefault(Return(calibSettings));
 
-    EXPECT_CALL(mockView,
-                userWarning("No calibration directory selected", testing::_));
+    EXPECT_CALL(mockView, userWarning("Calibration Error", testing::_));
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
@@ -277,7 +276,7 @@ public:
     // them
     EnggDiffCalibSettings calibSettings;
 
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -318,7 +317,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -450,7 +449,7 @@ public:
     EnggDiffCalibSettings calibSettings;
 
     // doesn't get here
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -487,7 +486,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -535,7 +534,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
     // if it got here it would: .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
@@ -601,7 +600,7 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1);
     // if it was called it would: .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
@@ -1224,7 +1223,7 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
-        .Times(1)
+        .Times(2)
         .WillRepeatedly(Return(g_rebinRunNo));
 
     EXPECT_CALL(mockView, rebinningTimeBin())
@@ -1232,7 +1231,7 @@ public:
         .WillRepeatedly(Return(0.100000));
 
     // doesn't effectively finish the processing
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(2);
 
     // A warning complaining about the run number / path Because the
     // real QtView uses MWRunFile::getFilenames, if we give a run
@@ -1241,7 +1240,7 @@ public:
     // returning the run number without the path that would be
     // needed. EnggDiffractionPresenter::isValidRunNumber() will not
     // find the file (when it tries Poco::File(path).exists()).
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::RebinTime);
