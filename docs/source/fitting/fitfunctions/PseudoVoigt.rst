@@ -34,7 +34,7 @@ Native peak parameters
 
 Pseudo-voigt function in Mantid has the following native parameters
 
-- Peak intensity :math:`I`: shared peak height between Gaussian and Lorentzian.  
+- Peak intensity :math:`I`: shared peak height between Gaussian and Lorentzian.
 - Peak width FWHM :math:`\Gamma` (or :math:`H`): shared FWHM be between Gaussian and Lorentzian
 - Peak position :math:`x_0`
 - Gaussian ratio :math:`\eta`: ratio of intensity of Gaussian.
@@ -65,7 +65,7 @@ Thus both :math:`G'(x)` and :math:`L'(x)` are normalized.
 Effective peak parameters
 +++++++++++++++++++++++++
 
-- Peak height :math:`h`: 
+- Peak height :math:`h`:
 
 .. math:: h = I \cdot (\eta \cdot a_G + (1 - \eta) \cdot \frac{2}{\pi\cdot \Gamma}) = \frac{2 I}{\pi \Gamma} (1 + (\sqrt{\pi\ln{2}}-1)\eta)
 
@@ -104,7 +104,7 @@ For Gaussian part:
 
 .. math:: t_1 = \frac{-1}{\Gamma} a_G e^{-b_G(x-x_0)^2} = \frac{-1}{\Gamma} G'(x, \Gamma)
 
-.. math:: t_2 = a_G e^{-b_G(x-x_0)^2} (-1) (x-x_0)^2 \frac{\partial b_G}{\partial \Gamm} = G'(x, \Gamm) (-1) (x-x_0)^2 \frac{-2}{\Gamma} b_G = \frac{2 b_G (x-x_0)^2 G'(x, \Gamma)}{\Gamma}
+.. math:: t_2 = a_G e^{-b_G(x-x_0)^2} (-1) (x-x_0)^2 \frac{\partial b_G}{\partial \Gamma} = G'(x, \Gamma) (-1) (x-x_0)^2 \frac{-2}{\Gamma} b_G = \frac{2 b_G (x-x_0)^2 G'(x, \Gamma)}{\Gamma}
 
 For Lorentzian part:
 
@@ -131,7 +131,7 @@ Here is the summary:
 
 - Peak centre: No other parameter will be affected.
 
-- Mixing parameter :math:`\eta`: Peak height will be re-calculated. 
+- Mixing parameter :math:`\eta`: Peak height will be re-calculated.
 
 
 Estimating mixing parameter
@@ -149,7 +149,7 @@ Before Mantid release v3.14, the equation of Pseudo-Voigt is defined as
 
 This equation has several issues:
 
-1. It does not have normalized Gaussian and Lorentzian. 
+1. It does not have normalized Gaussian and Lorentzian.
 2. At :math:`x = x_0`, :math:`pV(x_0) = h`.  By this definition, the mixing ratio factor :math:`\eta` between Gaussian and Lorentzian is the the intensity ratio at :math:`x = x_0`.  But it does not make sense with other :math:`x` value. According to the literature or manual (Fullprof and GSAS), :math:`\eta` shall be the ratio of the intensities between Gaussian and Lorentzian.
 
 
