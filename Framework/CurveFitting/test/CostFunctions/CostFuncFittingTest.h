@@ -23,12 +23,11 @@ namespace {
 class CostFuncMock : public CostFuncFitting {
 public:
   std::string name() const override { return "CostFuncMock"; }
-  void addVal(FunctionDomain_sptr domain, FunctionValues_sptr values) const override {}
-  void addValDerivHessian(IFunction_sptr function,
-    FunctionDomain_sptr domain,
-    FunctionValues_sptr values,
-    bool evalDeriv = true,
-    bool evalHessian = true) const override {}
+  void addVal(FunctionDomain_sptr domain,
+              FunctionValues_sptr values) const override {}
+  void addValDerivHessian(IFunction_sptr function, FunctionDomain_sptr domain,
+                          FunctionValues_sptr values, bool evalDeriv = true,
+                          bool evalHessian = true) const override {}
   double val() const override { return 0.0; }
   void deriv(std::vector<double> &) const override {}
   double valAndDeriv(std::vector<double> &) const override { return 0.0; }

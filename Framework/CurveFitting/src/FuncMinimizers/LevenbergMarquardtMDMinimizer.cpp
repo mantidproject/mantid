@@ -47,8 +47,7 @@ LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()
 void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function,
                                                size_t) {
   m_costFunction =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          function);
+      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(function);
   if (!m_costFunction) {
     throw std::invalid_argument(
         "Levenberg-Marquardt minimizer works only with "

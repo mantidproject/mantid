@@ -30,20 +30,21 @@ namespace CostFunctions {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_CURVEFITTING_DLL CostFuncPoisson: public CostFuncFitting {
+class MANTID_CURVEFITTING_DLL CostFuncPoisson : public CostFuncFitting {
 public:
   CostFuncPoisson();
   /// Get name of minimizer
   virtual std::string name() const { return "Poisson"; }
   /// Get short name of minimizer - useful for say labels in guis
   virtual std::string shortName() const { return "Poisson"; };
+
 protected:
   void addVal(API::FunctionDomain_sptr domain,
-    API::FunctionValues_sptr values) const;
+              API::FunctionValues_sptr values) const;
   void addValDerivHessian(API::IFunction_sptr function,
-    API::FunctionDomain_sptr domain,
-    API::FunctionValues_sptr values,
-    bool evalDeriv = true, bool evalHessian = true) const;
+                          API::FunctionDomain_sptr domain,
+                          API::FunctionValues_sptr values,
+                          bool evalDeriv = true, bool evalHessian = true) const;
 };
 
 } // namespace CostFunctions

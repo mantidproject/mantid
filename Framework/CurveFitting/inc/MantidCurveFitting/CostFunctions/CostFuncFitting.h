@@ -46,16 +46,16 @@ public:
   /// Get all parameters into a GSLVector
   void getParameters(GSLVector &params) const;
 
-
   /// Calculate value of cost function
   virtual double val() const;
   /// Calculate the derivatives of the cost function
   virtual void deriv(std::vector<double> &der) const;
   /// Calculate the value and the derivatives of the cost function
   virtual double valAndDeriv(std::vector<double> &der) const;
-  /// Calculate the value, the first and the second derivatives of the cost function
+  /// Calculate the value, the first and the second derivatives of the cost
+  /// function
   virtual double valDerivHessian(bool evalDeriv = true,
-    bool evalHessian = true) const;
+                                 bool evalHessian = true) const;
   const GSLVector &getDeriv() const;
   const GSLMatrix &getHessian() const;
   void push();
@@ -93,7 +93,8 @@ protected:
   virtual void addVal(API::FunctionDomain_sptr domain,
                       API::FunctionValues_sptr values) const = 0;
 
-  /// Increments the cost function and its derivatives by evaluating them on a domain
+  /// Increments the cost function and its derivatives by evaluating them on a
+  /// domain
   virtual void addValDerivHessian(API::IFunction_sptr function,
                                   API::FunctionDomain_sptr domain,
                                   API::FunctionValues_sptr values,

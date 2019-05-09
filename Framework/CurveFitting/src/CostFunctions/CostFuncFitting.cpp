@@ -8,9 +8,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Exception.h"
 
 #include <gsl/gsl_multifit_nlin.h>
@@ -281,8 +281,8 @@ void CostFuncFitting::getParameters(GSLVector &params) const {
 }
 
 /** Calculate value of cost function
-* @return :: The value of the function
-*/
+ * @return :: The value of the function
+ */
 double CostFuncFitting::val() const {
   if (!m_dirtyVal) {
     return m_value;
@@ -296,8 +296,7 @@ double CostFuncFitting::val() const {
 
   if (seqDomain) {
     seqDomain->additiveCostFunctionVal(*this);
-  }
-  else {
+  } else {
     if (!m_values) {
       throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
@@ -320,10 +319,9 @@ double CostFuncFitting::val() const {
   return m_value;
 }
 
-
 /** Calculate the derivatives of the cost function
-* @param der :: Container to output the derivatives
-*/
+ * @param der :: Container to output the derivatives
+ */
 void CostFuncFitting::deriv(std::vector<double> &der) const {
   valDerivHessian(true, false);
 
@@ -336,9 +334,9 @@ void CostFuncFitting::deriv(std::vector<double> &der) const {
 }
 
 /** Calculate the value and the derivatives of the cost function
-* @param der :: Container to output the derivatives
-* @return :: The value of the function
-*/
+ * @param der :: Container to output the derivatives
+ * @return :: The value of the function
+ */
 double CostFuncFitting::valAndDeriv(std::vector<double> &der) const {
   valDerivHessian(true, false);
 
@@ -352,12 +350,12 @@ double CostFuncFitting::valAndDeriv(std::vector<double> &der) const {
 }
 
 /** Calculate the value and the first and second derivatives of the cost
-* function
-*  @param evalDeriv :: flag for evaluation of the first derivatives
-*  @param evalHessian :: flag for evaluation of the second derivatives
-*/
+ * function
+ *  @param evalDeriv :: flag for evaluation of the first derivatives
+ *  @param evalHessian :: flag for evaluation of the second derivatives
+ */
 double CostFuncFitting::valDerivHessian(bool evalDeriv,
-  bool evalHessian) const {
+                                        bool evalHessian) const {
   if (m_pushed || !evalDeriv) {
     return val();
   }
@@ -382,9 +380,9 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
   auto seqDomain = boost::dynamic_pointer_cast<SeqDomain>(m_domain);
 
   if (seqDomain) {
-    seqDomain->additiveCostFunctionValDerivHessian(*this, evalDeriv, evalHessian);
-  }
-  else {
+    seqDomain->additiveCostFunctionValDerivHessian(*this, evalDeriv,
+                                                   evalHessian);
+  } else {
     if (!m_values) {
       throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
@@ -441,10 +439,9 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
   return m_value;
 }
 
-
 /**
-* Return cached or calculate the drivatives.
-*/
+ * Return cached or calculate the drivatives.
+ */
 const GSLVector &CostFuncFitting::getDeriv() const {
   if (m_pushed) {
     return m_der;
@@ -456,8 +453,8 @@ const GSLVector &CostFuncFitting::getDeriv() const {
 }
 
 /**
-* Return cached or calculate the Hessian.
-*/
+ * Return cached or calculate the Hessian.
+ */
 const GSLMatrix &CostFuncFitting::getHessian() const {
   if (m_pushed) {
     return m_hessian;
@@ -469,8 +466,8 @@ const GSLMatrix &CostFuncFitting::getHessian() const {
 }
 
 /**
-* Save current parameters, derivatives and hessian.
-*/
+ * Save current parameters, derivatives and hessian.
+ */
 void CostFuncFitting::push() {
   if (m_pushed) {
     throw std::runtime_error("Least squares: double push.");
@@ -482,8 +479,8 @@ void CostFuncFitting::push() {
 }
 
 /**
-* Restore saved parameters, derivatives and hessian.
-*/
+ * Restore saved parameters, derivatives and hessian.
+ */
 void CostFuncFitting::pop() {
   if (!m_pushed) {
     throw std::runtime_error("Least squares: empty stack.");
@@ -497,8 +494,8 @@ void CostFuncFitting::pop() {
 }
 
 /**
-* Discard saved parameters, derivatives and hessian.
-*/
+ * Discard saved parameters, derivatives and hessian.
+ */
 void CostFuncFitting::drop() {
   if (!m_pushed) {
     throw std::runtime_error("Least squares: empty stack.");

@@ -150,10 +150,10 @@ CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr values) const {
 }
 
 /**
-  * Calculates covariance matrix for fitting function's active parameters.
-  * @param covar :: Output cavariance matrix.
-  * @param epsrel :: Tolerance.
-  */
+ * Calculates covariance matrix for fitting function's active parameters.
+ * @param covar :: Output cavariance matrix.
+ * @param epsrel :: Tolerance.
+ */
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
                                                      double epsrel) {
   UNUSED_ARG(epsrel);

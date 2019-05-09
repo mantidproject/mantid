@@ -10,9 +10,9 @@
 #include "MantidCurveFitting/GSLVector.h"
 
 #include <algorithm>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
 #include <gsl/gsl_blas.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <iomanip>
 #include <numeric>
 #include <sstream>

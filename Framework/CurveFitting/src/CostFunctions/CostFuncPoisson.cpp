@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncPoisson.h"
-#include "MantidCurveFitting/Jacobian.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -14,36 +14,33 @@ namespace CostFunctions {
 
 DECLARE_COSTFUNCTION(CostFuncPoisson, Poisson)
 
-const double absoluteCutOff =  0.0;
+const double absoluteCutOff = 0.0;
 const double effectiveCutOff = 0.0001;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-CostFuncPoisson::CostFuncPoisson():CostFuncFitting() {}
+CostFuncPoisson::CostFuncPoisson() : CostFuncFitting() {}
 
 /**
-* Add a contribution to the cost function value from the fitting function
-* evaluated on a particular domain.
-* @param domain :: A domain
-* @param values :: Values
-*/
+ * Add a contribution to the cost function value from the fitting function
+ * evaluated on a particular domain.
+ * @param domain :: A domain
+ * @param values :: Values
+ */
 void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
                              API::FunctionValues_sptr values) const {
-   m_function->function(*domain, *values);
-   size_t ny = values->size();
+  m_function->function(*domain, *values);
+  size_t ny = values->size();
 
   double retVal = 0.0;
 
   for (size_t i = 0; i < ny; i++) {
     const double y = values->getCalculated(i);
-    if (y <= absoluteCutOff)
-    {
+    if (y <= absoluteCutOff) {
       retVal = std::numeric_limits<double>::infinity();
       break;
-    }
-    else
-    {
+    } else {
       const double N = values->getFitData(i);
       if (y <= effectiveCutOff) {
         retVal += (effectiveCutOff - y) / (y - absoluteCutOff);
@@ -56,23 +53,23 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
   }
 
   PARALLEL_ATOMIC
-    m_value += 2.0 * retVal;
+  m_value += 2.0 * retVal;
 }
 
 /**
-* Update the cost function, derivatives and hessian by adding values calculated
-* on a domain.
-* @param function :: Function to use to calculate the value and the derivatives
-* @param domain :: The domain.
-* @param values :: The fit function values
-* @param evalDeriv :: Flag to evaluate the derivatives
-* @param evalHessian :: Flag to evaluate the Hessian
-*/
+ * Update the cost function, derivatives and hessian by adding values calculated
+ * on a domain.
+ * @param function :: Function to use to calculate the value and the derivatives
+ * @param domain :: The domain.
+ * @param values :: The fit function values
+ * @param evalDeriv :: Flag to evaluate the derivatives
+ * @param evalHessian :: Flag to evaluate the Hessian
+ */
 void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
-  API::FunctionDomain_sptr domain,
-  API::FunctionValues_sptr values,
-  bool evalDeriv,
-  bool evalHessian) const {
+                                         API::FunctionDomain_sptr domain,
+                                         API::FunctionValues_sptr values,
+                                         bool evalDeriv,
+                                         bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
   size_t np = function->nParams(); // number of parameters
   size_t ny = domain->size();      // number of data points
@@ -82,7 +79,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  //std::vector<double> weights = getFitWeights(values);
+  // std::vector<double> weights = getFitWeights(values);
 
   for (size_t ip = 0; ip < np; ++ip) {
     if (!function->isActive(ip))
@@ -125,7 +122,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
   }
 
   PARALLEL_ATOMIC
-    m_value += 2.0 * fVal;
+  m_value += 2.0 * fVal;
 
   if (!evalHessian)
     return;
@@ -135,7 +132,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
   {
     if (!function->isActive(i))
       continue;
-    size_t i2 = 0;                  // active parameter index
+    size_t i2 = 0; // active parameter index
     double p = function->getParameter(i);
     double dp = 1e-4;
     if (p != 0.0) {
@@ -153,7 +150,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
       for (size_t k = 0; k < ny; ++k) // over fitting data
       {
         double d2 = (jacobian2.get(k, j) - jacobian.get(k, j)) / dp;
-        
+
         double calc = values->getCalculated(k);
         double obs = values->getFitData(k);
         if (calc <= absoluteCutOff) {

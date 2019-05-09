@@ -43,7 +43,8 @@ public:
   /// Calculate the value of an additive cost function
   virtual void
   additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);
-  /// Calculate the value, first and second derivatives of an additive cost function.
+  /// Calculate the value, first and second derivatives of an additive cost
+  /// function.
   virtual void additiveCostFunctionValDerivHessian(
       const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
       bool evalHessian);
