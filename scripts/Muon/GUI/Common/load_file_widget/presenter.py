@@ -124,7 +124,7 @@ class BrowseFileWidgetPresenter(object):
 
     def on_loading_finished(self):
         instrument_from_workspace = self._model.get_instrument_from_latest_run()
-        if instrument_from_workspace != self._model._data_context.instrument:
+        if instrument_from_workspace != self._model._data_context.instrument or instrument_from_workspace == "PSI":
             self._model.instrument = instrument_from_workspace
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":

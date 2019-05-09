@@ -184,7 +184,7 @@ def load_dead_time_from_filename(filename):
     :param filename: The full path to the .nxs file.
     :return: The name of the workspace in the ADS.
     """
-    loaded_data, run, _ = load_workspace_from_filename(filename)
+    loaded_data, run, _, __ = load_workspace_from_filename(filename)
 
     if is_workspace_group(loaded_data["OutputWorkspace"]):
         dead_times = loaded_data["DataDeadTimeTable"][0]

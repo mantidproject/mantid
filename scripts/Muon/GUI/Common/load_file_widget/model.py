@@ -57,6 +57,7 @@ class BrowseFileWidgetModel(object):
             if not is_psi_data:
                 instrument_from_workspace = ws['OutputWorkspace'][0].workspace.getInstrument().getName()
             else:
+                # Load another instrument first
                 instrument_from_workspace = "PSI"
 
             self._loaded_data_store.remove_data(run=[run])
