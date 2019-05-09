@@ -14,6 +14,7 @@ from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT as Navigation
 from matplotlib.figure import Figure
 from .dimensionwidget import DimensionWidget
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
+from mantidqt.plotting.functions import use_imshow
 
 
 class SliceViewerView(QWidget):
@@ -54,16 +55,32 @@ class SliceViewerView(QWidget):
 
         self.show()
 
-    def plot(self, ws, **kwargs):
+    def plot_MDH(self, ws, **kwargs):
         """
-        clears the plot and creates a new one using the workspace
+        clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.ax.clear()
         self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
                                  transpose=self.dimensions.transpose,
                                  norm=self.colorbar.get_norm(), **kwargs)
+        self.draw_plot()
+
+    def plot_matrix(self, ws, **kwargs):
+        """
+        clears the plot and creates a new one using a MatrixWorkspace
+        """
+        self.ax.clear()
+        if use_imshow(ws):
+            self.plot_MDH(ws, **kwargs) # Make same call to imshow as MDHistoWorkspace
+        else:
+            self.im = self.ax.pcolormesh(ws, transpose=self.dimensions.transpose,
+                                         norm=self.colorbar.get_norm(), **kwargs)
+            self.draw_plot()
+
+    def draw_plot(self):
         self.ax.set_title('')
         self.colorbar.set_mappable(self.im)
+        self.colorbar.update_clim()
         self.mpl_toolbar.update() # clear nav stack
         self.canvas.draw_idle()
 

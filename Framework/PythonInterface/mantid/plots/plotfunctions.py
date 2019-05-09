@@ -408,7 +408,7 @@ def pcolor(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-            _setLabels2D(axes, workspace, transpose)
+            _setLabels2D(axes, workspace, transpose=transpose)
     return axes.pcolor(x, y, z, *args, **kwargs)
 
 
@@ -452,7 +452,7 @@ def pcolorfast(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose)
+        _setLabels2D(axes, workspace, transpose=transpose)
     return axes.pcolorfast(x, y, z, *args, **kwargs)
 
 
@@ -496,7 +496,7 @@ def pcolormesh(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose)
+        _setLabels2D(axes, workspace, transpose=transpose)
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
@@ -539,7 +539,7 @@ def imshow(axes, workspace, *args, **kwargs):
             (x, y, z) = get_matrix_2d_ragged(workspace, distribution, histogram2D=True, transpose=transpose)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose)
+        _setLabels2D(axes, workspace, transpose=transpose)
     if 'extent' not in kwargs:
         if x.ndim == 2 and y.ndim == 2:
             kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
@@ -586,7 +586,7 @@ def tripcolor(axes, workspace, *args, **kwargs):
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose)
+        _setLabels2D(axes, workspace, transpose=transpose)
     return axes.tripcolor(x.ravel(), y.ravel(), z.ravel(), *args, **kwargs)
 
 
@@ -629,7 +629,7 @@ def tricontour(axes, workspace, *args, **kwargs):
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose)
+        _setLabels2D(axes, workspace, transpose=transpose)
     # tricontour segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167
     x = x.ravel()
@@ -681,7 +681,7 @@ def tricontourf(axes, workspace, *args, **kwargs):
     else:
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
         (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=False, transpose=transpose)
-        _setLabels2D(axes, workspace, transpose)
+        _setLabels2D(axes, workspace, transpose=transpose)
     # tricontourf segfaults if many z values are not finite
     # https://github.com/matplotlib/matplotlib/issues/10167
     x = x.ravel()
