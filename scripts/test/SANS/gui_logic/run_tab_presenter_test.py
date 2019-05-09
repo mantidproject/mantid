@@ -1014,6 +1014,16 @@ class RunTabPresenterTest(unittest.TestCase):
         args, _ = presenter._view.can_sas_checkbox.setEnabled.call_args_list[-1]
         self.assertTrue(args[0], "Can SAS checkbox should have been enabled, since we switched to 1D reduction mode.")
 
+    def test_that_updating_default_save_directory_also_updates_add_runs_save_directory(self):
+        """This test checks that add runs presenter's save directory update method is called
+        when the defaultsave directory is updated."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._handle_output_directory_changed("a_new_directory")
+        presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():

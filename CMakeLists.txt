@@ -155,8 +155,6 @@ set(FULL_PACKAGE_BUILD 1)
 set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
-set(CXXTEST_SINGLE_LOGFILE
-    CACHE BOOL "Switch to have the tests for each package run together")
 set(CXXTEST_ADD_PERFORMANCE OFF
     CACHE BOOL
           "Switch to add Performance tests to the list of tests run by ctest?")
@@ -316,7 +314,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(ENABLE_MANTIDPLOT)
     set(_icon_filename ${IMAGES_DIR}/mantidplot)
     if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}_${CPACK_PACKAGE_SUFFIX})
+      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
     endif()
     install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
                           MantidPlot${_app_name_suffix}
@@ -327,7 +325,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(ENABLE_WORKBENCH)
     set(_icon_filename ${IMAGES_DIR}/mantid_workbench)
     if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}_${CPACK_PACKAGE_SUFFIX})
+      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
     endif()
     install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
                           MantidWorkbench${_app_name_suffix}
@@ -398,7 +396,7 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtAwesome,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
@@ -484,7 +482,6 @@ if(ENABLE_CPACK)
           "python3-skimage,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
-          "python3-qtawesome,"
           "ipython3-qtconsole") # transitional package for bionic
 
       if(ENABLE_MANTIDPLOT)
@@ -507,7 +504,6 @@ if(ENABLE_CPACK)
           "python-skimage,"
           "python-pycifrw (>= 4.2.1),"
           "python-yaml,"
-          "python-qtawesome,"
           "ipython-qtconsole")
 
       if(ENABLE_MANTIDPLOT)

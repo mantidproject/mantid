@@ -102,7 +102,7 @@ class SpectraSelectionDialogTest(GuiTest):
         dlg._ui.wkspIndices.setText("50-60")
         dlg._ui.buttonBox.button(QDialogButtonBox.Ok).click()
 
-        self._mock_get_icon.assert_called_once_with('fa.asterisk', color='red', scale_factor=0.6)
+        self._mock_get_icon.assert_called_once_with('mdi.asterisk', 'red', 0.6)
         self.assertTrue(dlg.selection is not None)
         self.assertTrue(dlg.selection.spectra is None)
         self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)

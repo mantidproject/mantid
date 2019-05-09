@@ -1,6 +1,7 @@
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 import unittest
-from Muon.GUI.Common import mock_widget
+
+from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class LoadRunWidgetViewTest(unittest.TestCase):

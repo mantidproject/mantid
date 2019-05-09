@@ -304,7 +304,6 @@ include ( PylintSetup )
 
 find_package ( CxxTest )
 if ( CXXTEST_FOUND )
-  enable_testing ()
   add_custom_target( check COMMAND ${CMAKE_CTEST_COMMAND} )
   make_directory( ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing )
   message ( STATUS "Added target ('check') for unit tests" )
@@ -312,17 +311,9 @@ else ()
   message ( STATUS "Could NOT find CxxTest - unit testing not available" )
 endif ()
 
-# Some unit tests need GMock/GTest
 include ( GoogleTest )
-
-find_package ( PyUnitTest )
-if ( PYUNITTEST_FOUND )
-  enable_testing ()
-  include ( Python-xmlrunner )
-  message (STATUS "Found pyunittest generator")
-else()
-  message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )
-endif()
+include ( PyUnitTest )
+enable_testing ()
 
 # GUI testing via Squish
 find_package ( Squish )

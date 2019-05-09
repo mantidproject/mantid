@@ -28,7 +28,7 @@ RED_ASTERISK = None
 def red_asterisk():
     global RED_ASTERISK
     if RED_ASTERISK is None:
-        RED_ASTERISK = get_icon('fa.asterisk', color='red', scale_factor=0.6)
+        RED_ASTERISK = get_icon('mdi.asterisk', 'red', 0.6)
     return RED_ASTERISK
 
 

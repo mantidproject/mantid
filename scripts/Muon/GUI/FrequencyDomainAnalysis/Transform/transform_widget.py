@@ -26,6 +26,7 @@ class TransformWidget(QtWidgets.QWidget):
         self.GroupPairObserver = GroupPairObserver(self)
         self.enable_observer = EnableObserver(self)
         self.disable_observer = DisableObserver(self)
+        self.phase_quad_observer = PhaseQuadObserver(self)
 
         groupedViews = self.getViews()
 
@@ -120,3 +121,12 @@ class DisableObserver(Observer):
 
     def update(self, observable, arg):
         self.outer.disable_view()
+
+
+class PhaseQuadObserver(Observer):
+    def __init__(self, outer):
+        Observer.__init__(self)
+        self.outer = outer
+
+    def update(self, observable, arg):
+        self.outer.handle_new_data_loaded()
