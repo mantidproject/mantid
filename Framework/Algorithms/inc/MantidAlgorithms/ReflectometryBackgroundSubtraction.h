@@ -26,8 +26,9 @@ public:
   const std::string summary() const override;
 
 private:
-  void calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
-                                          const std::vector<specnum_t> &spectraList);
+  void
+  calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
+                                     const std::vector<specnum_t> &spectraList);
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
                                      const std::vector<double> &indexRanges);
   std::vector<double> findIndexRanges(const std::vector<double> &indexList);
