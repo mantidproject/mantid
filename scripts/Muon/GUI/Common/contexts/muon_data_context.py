@@ -136,7 +136,6 @@ class MuonDataContext(object):
     @instrument.setter
     def instrument(self, value):
         if value != self.instrument:
-        if value != self.instrument or value == "PSI":
             ConfigService['default.instrument'] = value
             self._instrument = value
             self._main_field_direction = ''

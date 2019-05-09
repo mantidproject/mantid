@@ -56,6 +56,10 @@ class LoadRunWidgetPresenter(object):
         return str(self._instrument)
 
     def set_current_instrument(self, instrument):
+        if instrument == "PSI":
+            self._view.disable_load_buttons()
+        else:
+            self._view.enable_load_buttons()
         self._instrument = instrument
         self._view.set_current_instrument(instrument)
 
@@ -63,7 +67,8 @@ class LoadRunWidgetPresenter(object):
         self._view.disable_load_buttons()
 
     def enable_loading(self):
-        self._view.enable_load_buttons()
+        if not self._instrument == "PSI":
+            self._view.enable_load_buttons()
 
     def clear_loaded_data(self):
         self._view.clear()
