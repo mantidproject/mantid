@@ -49,6 +49,13 @@ class MuonContextTest(unittest.TestCase):
         self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0]._workspace,
                                                                  'EMU', '')
 
+    def populate_ADS(self):
+        self.context.calculate_all_groups()
+        self.context.show_all_groups()
+        self.context.calculate_all_pairs()
+        self.context.show_all_pairs()
+        self.context.phase_context.add_phase_quad('EMU19489; PhaseQuad; PhaseTable EMU19489')
+
     def test_reset_groups_and_pairs_to_default(self):
         self.assertEquals(self.group_pair_context.group_names, ['fwd', 'bwd'])
         self.assertEquals(self.group_pair_context.pair_names, ['long'])
@@ -147,6 +154,19 @@ class MuonContextTest(unittest.TestCase):
         deadtime_table = self.context.dead_time_table([19489])
 
         self.assertEquals(deadtime_table, 'deadtime_table_name')
+
+    def test_get_workspace_names_returns_all_stored_workspaces_if_all_selected(self):
+        self.populate_ADS()
+        workspace_list = self.context.get_names_of_workspaces_to_fit('All', 'All', 'All', True)
+
+        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; #1', 'EMU19489; Group; bwd; Asymmetry; #1',
+                                          'EMU19489; Pair Asym; long; #1','EMU19489; PhaseQuad; PhaseTable EMU19489'])
+
+    def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
+        self.populate_ADS()
+        workspace_list = self.context.get_names_of_workspaces_to_fit()
+
+        self.assertEqual(workspace_list, [])
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

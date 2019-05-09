@@ -15,7 +15,7 @@ ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")
 
 
 class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
-    def __init__(self, current_runs, instrument, current_workspaces, parent_widget=None):
+    def __init__(self, current_runs, instrument, current_workspaces, context, parent_widget=None):
         super(QtWidgets.QDialog, self).__init__(parent=parent_widget)
         self.setupUi(self)
         self.current_runs = current_runs
@@ -27,8 +27,11 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         self.list_selector_widget = ListSelectorView(self)
         self.list_selector_layout.addWidget(self.list_selector_widget, 0, 1, 4, 1)
+        self.list_selector_layout.setContentsMargins(0, 0, 0, 0)
         self.list_selector_presenter = ListSelectorPresenter(self.list_selector_widget, self.get_workspace_list())
         self.list_selector_presenter.update_view_from_model()
+
+        self.group_pair_line_edit.editingFinished.connect(self.handle_group_pair_selection_changed)
 
     def get_workspace_list(self):
         filter_types = ['Asymmetry', 'Pair', 'PhaseQuad']
@@ -40,6 +43,10 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         filtered_list = [item for item in filtered_list if any([filter in item for filter in filter_types])]
 
+        filtered_list = [item for item in filtered_list if item not in self.current_workspaces]
+
+        filtered_list = self.current_workspaces + filtered_list
+
         model_dict = {}
         for index, item in enumerate(filtered_list):
             model_dict.update({item: [index, item in self.current_workspaces, True]})
@@ -50,8 +57,8 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         return self.list_selector_presenter.get_selected_items()
 
     @staticmethod
-    def get_selected_data(current_runs, instrument, current_workspaces, parent):
-        dialog = WorkspaceSelectorView(current_runs, instrument, current_workspaces, parent)
+    def get_selected_data(current_runs, instrument, current_workspaces, context, parent):
+        dialog = WorkspaceSelectorView(current_runs, instrument, current_workspaces, context, parent)
 
         result = dialog.exec_()
 

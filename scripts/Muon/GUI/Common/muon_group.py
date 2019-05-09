@@ -90,3 +90,21 @@ class MuonGroup(object):
 
     def update_counts_workspace(self, counts_workspace, run):
         self._workspace.update({run: MuonWorkspaceWrapper(counts_workspace)})
+
+    def get_asymmetry_workspace_names(self, runs):
+        workspace_list = []
+
+        for run in runs:
+            if str(run) in self._asymmetry_estimate and self._asymmetry_estimate[str(run)].workspace_name:
+                workspace_list.append(self._asymmetry_estimate[str(run)].workspace_name)
+
+        return workspace_list
+
+    def get_asymmetry_workspace_names_rebinned(self, runs):
+        workspace_list = []
+
+        for run in runs:
+            if str(run) in self._asymmetry_estimate_rebin and self._asymmetry_estimate_rebin[str(run)].workspace_name:
+                workspace_list.append(self._asymmetry_estimate_rebin[str(run)].workspace_name)
+
+        return workspace_list

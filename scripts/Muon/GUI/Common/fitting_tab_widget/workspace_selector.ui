@@ -6,25 +6,78 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>691</width>
     <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Data Selection</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" colspan="2">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" rowspan="4" colspan="2">
     <layout class="QGridLayout" name="list_selector_layout"/>
    </item>
-   <item row="1" column="0">
+   <item row="0" column="2">
+    <widget class="QLineEdit" name="run_line_edit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>Run selection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QLineEdit" name="group_pair_line_edit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="placeholderText">
+      <string>Group &amp; Pair selection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QComboBox" name="time_domain_combo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Time Domain</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QComboBox" name="period_combo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>All</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="4" column="0">
     <widget class="QPushButton" name="select_button">
      <property name="text">
       <string>Select</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="4" column="2">
     <widget class="QPushButton" name="cancel_button">
      <property name="text">
       <string>Cancel</string>

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 class ListSelectorPresenter(object):
     def __init__(self, view, model):
         self.view = view
@@ -41,7 +47,7 @@ class ListSelectorPresenter(object):
 
     def handle_row_moved(self, insertion_index, rows_moved):
         filtered_list = self.get_filtered_list()
-        
+
         if insertion_index >= len(filtered_list):
             new_position = len(filtered_list)
         else:
