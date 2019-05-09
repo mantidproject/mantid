@@ -22,3 +22,8 @@ Improvements
 
 * Phase table and phase Quad options from frequency domain transform tab moved to phase calculations tab.
 
+Bug Fixes
+#########
+
+* Muon Analysis no longer crashes when `TF Asymmetry` mode is activated. 
+
