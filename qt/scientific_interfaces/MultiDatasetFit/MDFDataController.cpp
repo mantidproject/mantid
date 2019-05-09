@@ -86,7 +86,7 @@ void DataController::addWorkspace() {
       }
     } else {
       QMessageBox::warning(
-          owner(), "MantidPlot - Warning",
+          owner(), "Mantid - Warning",
           QString("Workspace \"%1\" doesn't exist.").arg(wsName));
     }
   }

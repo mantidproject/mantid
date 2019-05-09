@@ -1257,7 +1257,7 @@ void FunctionTreeView::setAttributeToFunction(Mantid::API::IFunction &fun,
   try {
     fun.setAttribute(attName, attr);
   } catch (std::exception &expt) {
-    QMessageBox::critical(this, "MantidPlot - Error",
+    QMessageBox::critical(this, "Mantid - Error",
                           "Cannot set attribute " +
                               QString::fromStdString(attName) +
                               " of function " + prop->propertyName() + ":\n\n" +
@@ -1546,10 +1546,10 @@ void FunctionTreeView::addTie() {
       addTieProperty(prop, tie);
       emit parameterTieChanged(getParameterName(prop), tie);
     } catch (Mantid::API::Expression::ParsingError &) {
-      QMessageBox::critical(this, "MantidPlot - Error",
+      QMessageBox::critical(this, "Mantid - Error",
                             "Syntax errors found in tie: " + tie);
     } catch (std::exception &e) {
-      QMessageBox::critical(this, "MantidPlot - Error",
+      QMessageBox::critical(this, "Mantid - Error",
                             QString::fromLatin1("Errors found in tie: ") +
                                 e.what());
     }
@@ -1572,7 +1572,7 @@ void FunctionTreeView::pasteFromClipboard() {
     emit functionReplaced(funStr);
   } catch (...) {
     // text in the clipboard isn't a function definition
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          "Text in the clipboard isn't a function definition"
                          " or contains errors.");
   }
