@@ -13,6 +13,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <muParser.h>
@@ -56,10 +57,12 @@ void FlippingRatioCorrectionMD::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
-      "An input MDEventWorkspace. Must be in Q_sample frame.");
+      "An input MDEventWorkspace.");
   declareProperty(
       Kernel::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
-          "FlippingRatio", "", Direction::Input),
+          "FlippingRatio", "",
+                  boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
+                  Direction::Input),
       "Formula to define the flipping ratio. It can depend on the variables in "
       "the list "
       "of sample logs defined below");
@@ -76,6 +79,19 @@ void FlippingRatioCorrectionMD::init() {
       Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace2", "", Direction::Output),
       "Output workspace 2. Equal to Input workspace multiplied by 1/(FR-1).");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Validate inputs
+ */
+std::map<std::string, std::string> FlippingRatioCorrectionMD::validateInputs() {
+  std::map<std::string, std::string> errors;
+  if(getPropertyValue("OutputWorkspace1") == getPropertyValue("OutputWorkspace2")) {
+    const std::string message("The two output workspace names must be different");
+    errors.emplace("OutputWorkspace1", message);
+    errors.emplace("OutputWorkspace2", message);
+  }
+  return errors;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -106,11 +122,12 @@ void FlippingRatioCorrectionMD::exec() {
       flippingRatio.push_back(muParser.Eval());
     } catch (mu::Parser::exception_type &e) {
       g_log.error() << "Parsing error in experiment info " << i << "\n"
-                    << e.GetMsg() << std::endl;
+                    << e.GetMsg() << std::endl << "Formula: "
+                    << inputFormula << std::endl;
       throw std::runtime_error("Parsing error");
     }
   }
-  for (auto &fr : flippingRatio) {
+  for (const auto &fr : flippingRatio) {
     C1.push_back(fr / (fr - 1.));
     C2.push_back(1. / (fr - 1.));
   }
@@ -118,6 +135,7 @@ void FlippingRatioCorrectionMD::exec() {
   API::IMDWorkspace_sptr outputWS1, outputWS2;
   API::IAlgorithm_sptr cloneMD =
       createChildAlgorithm("CloneMDWorkspace", 0, 0.25, true);
+  cloneMD->setRethrows(true);
   cloneMD->setProperty("InputWorkspace", inWS);
   cloneMD->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace1"));
   cloneMD->executeAsChildAlg();
@@ -138,7 +156,7 @@ void FlippingRatioCorrectionMD::exec() {
     this->setProperty("OutputWorkspace1", event1);
   } else {
     throw std::runtime_error(
-        "Could not clone the workspace for first correction");
+        "Could not clone the workspace for first correction (OutputWorkspace1)");
   }
   if (event2) {
     m_factor = C2;
@@ -146,7 +164,7 @@ void FlippingRatioCorrectionMD::exec() {
     this->setProperty("OutputWorkspace2", event2);
   } else {
     throw std::runtime_error(
-        "Could not clone the workspace for first correction");
+        "Could not clone the workspace for second correction (OutputWorkspace2)");
   }
 }
 
@@ -156,35 +174,33 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(
   // Get all the MDBoxes contained
   DataObjects::MDBoxBase<MDE, nd> *parentBox = ws->getBox();
   std::vector<API::IMDNode *> boxes;
+  // getBoxes(boxes, maxDepth, leafOnly)
   parentBox->getBoxes(boxes, 1000, true);
 
-  bool fileBackedTarget(false);
+  const bool fileBackedTarget = ws->isFileBacked();
   Kernel::DiskBuffer *dbuff(nullptr);
-  if (ws->isFileBacked()) {
-    fileBackedTarget = true;
+  if (fileBackedTarget) {
     dbuff = ws->getBoxController()->getFileIO();
   }
-  for (auto &boxe : boxes) {
+  for (const auto &boxe : boxes) {
     DataObjects::MDBox<MDE, nd> *box =
         dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
     if (box) {
-      typename std::vector<MDE> &events = box->getEvents();
-      size_t ic(events.size());
-      auto it = events.begin();
-      auto it_end = events.end();
-      for (; it != it_end; it++) {
-        size_t ind = static_cast<size_t>(it->getRunIndex());
-        float scalar = static_cast<float>(m_factor[ind]);
-        float scalarSquared = static_cast<float>(m_factor[ind] * m_factor[ind]);
+      auto &events = box->getEvents();
+      const bool hasEvents = !events.empty();
+      for (auto &event:events) {
+        const size_t ind = static_cast<size_t>(event.getRunIndex());
+        const float scalar = static_cast<float>(m_factor[ind]);
+        const float scalarSquared = static_cast<float>(m_factor[ind] * m_factor[ind]);
         // Multiply weight by a scalar, propagating error
-        float oldSignal = it->getSignal();
-        float signal = oldSignal * scalar;
-        float errorSquared = scalarSquared * it->getErrorSquared();
-        it->setSignal(signal);
-        it->setErrorSquared(errorSquared);
+        const float oldSignal = event.getSignal();
+        const float signal = oldSignal * scalar;
+        const float errorSquared = scalarSquared * event.getErrorSquared();
+        event.setSignal(signal);
+        event.setErrorSquared(errorSquared);
       }
       box->releaseEvents();
-      if (fileBackedTarget && ic > 0) {
+      if (fileBackedTarget && hasEvents) {
         Kernel::ISaveable *const pSaver(box->getISaveable());
         dbuff->toWrite(pSaver);
       }

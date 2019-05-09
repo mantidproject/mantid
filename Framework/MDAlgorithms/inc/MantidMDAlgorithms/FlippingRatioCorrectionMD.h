@@ -28,6 +28,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
   template <typename MDE, size_t nd>
   void executeTemplatedMDE(
       typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);

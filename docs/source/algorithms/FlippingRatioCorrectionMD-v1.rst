@@ -29,12 +29,12 @@ intensities for the spin flip (SF) and non spin flip (NSF) scattering are given 
 
 
 Given a multidimensional event workspace, this algorithm will output the workspace where events
-are multiplied by  :math:`F/(F-1)` (in OutputWorkspace1) and by :math:`1/(F-1)` (in OutputWorkspace2).
+are multiplied by  :math:`F/(F-1)` (in ``OutputWorkspace1``) and by :math:`1/(F-1)` (in ``OutputWorkspace2``).
 Note however that the flipping ratio might be angle dependent. For example, in the case of
 type II superconductors, the flux lattice will depolarize the neutrons differently, depending 
 on the orientation of the neutron beam with respect to the superconducting planes. In this case
 one must use a formula that would use a different flipping ratio for each neutron, that
-depends on a goniometer angle. Assuming that we have a log value "omega" for the sample rotation,
+depends on a goniometer angle. Assuming that we have a log value ``omega`` for the sample rotation,
 the flipping ratio might be described by something like [2]_:
 
 .. math::
@@ -42,7 +42,7 @@ the flipping ratio might be described by something like [2]_:
     F=6.5+2.8\cos(\pi(omega+3.7)/180)
 
 The MD event workspaces label each MDEvent with the experiment info number. The time averaged log
-value for "omega" is read from each experiment info, the flipping ratio is calculated from the
+value for ``omega`` is read from each experiment info, the flipping ratio is calculated from the
 user provided formula, and the corrected workspaces are computed.
 
 For the parsing of the formula, the algorithm uses `muparser <http://beltoforion.de/article.php?a=muparser>`_.
