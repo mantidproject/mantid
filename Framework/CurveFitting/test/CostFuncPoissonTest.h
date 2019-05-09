@@ -16,7 +16,7 @@ public:
   }
   static void destroySuite(CostFuncPoissonTest *suite) { delete suite; }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  void test_Something() { TS_ASSERT("You forgot to write a test!"); }
 };
 
 #endif /* MANTID_CURVEFITTING_COSTFUNCPOISSONTEST_H_ */
