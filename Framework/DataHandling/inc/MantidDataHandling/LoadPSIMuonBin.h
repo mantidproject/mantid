@@ -99,18 +99,11 @@ private:
   // Sample log helper functions
   Mantid::API::Algorithm_sptr
   createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
-  template <class T> std::string vectorToString(const std::vector<T> &vector);
   void addToSampleLog(const std::string &logName, const std::string &logText,
                       DataObjects::Workspace2D_sptr &ws);
   void addToSampleLog(const std::string &logName, const double &logNumber,
                       DataObjects::Workspace2D_sptr &ws);
   void addToSampleLog(const std::string &logName, const int &logNumber,
-                      DataObjects::Workspace2D_sptr &ws);
-  void addToSampleLog(const std::string &logName,
-                      const std::vector<double> &logSeries,
-                      DataObjects::Workspace2D_sptr &ws);
-  void addToSampleLog(const std::string &logName,
-                      const std::vector<int> &logSeries,
                       DataObjects::Workspace2D_sptr &ws);
 
   // Temperature file processing
