@@ -804,6 +804,54 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
                     " caused this error: " + ec.message());
     }
   }
+}
+
+  return "";
+}
+
+void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
+  std::string fileName = getPropertyValue("TemperatureFilename");
+  const bool searchForTempFile = getProperty("SearchForTempFile");
+  if (fileName == "" && searchForTempFile) {
+    fileName = detectTempFile();
+  }
+
+  if (fileName == "") {
+    throw std::invalid_argument(
+        "No temperature file could be found/was provided");
+  }
+
+  std::ifstream in(fileName, std::ios::in);
+  std::string contents;
+  in.seekg(0, std::ios::end);
+  contents.resize(in.tellg());
+  in.seekg(0, std::ios::beg);
+  in.read(&contents[0], contents.size());
+  in.close();
+
+  readInTemperatureFileHeader(contents);
+
+  std::string line = "";
+  for (const auto &charecter : contents) {
+    if (charecter == '\n') {
+      if (line[0] == '!') {
+        line = "";
+      } else {
+        processLine(line, ws);
+        line = "";
+      }
+    } else {
+      line += charecter;
+    }
+
+    boost::system::error_code ec;
+    iter.increment(ec);
+    if (ec) {
+      g_log.warning("When searching for temp file, accessing this file: " +
+                    iter->path().string() +
+                    " caused this error: " + ec.message());
+    }
+  }
 
   return "";
 }
