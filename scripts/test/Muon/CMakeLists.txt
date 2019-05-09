@@ -59,7 +59,7 @@ set ( TEST_PY_FILES
    help_widget_presenter_test.py
 )
 
-
+# LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
 set ( TEST_PY_FILES_QT5
    FFTModel_test.py
    FFTPresenter_test.py
