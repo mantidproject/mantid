@@ -81,7 +81,7 @@ def run_CalMuonDetectorPhases(parameter_dict, alg):
     alg.setProperty("DataFitted", "__NotUsed")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("DetectorTable").value
+    return alg.getProperty("DetectorTable").value, alg.getProperty('DataFitted').value
 
 
 def run_PhaseQuad(parameters_dict, alg):
@@ -89,6 +89,42 @@ def run_PhaseQuad(parameters_dict, alg):
     alg.setAlwaysStoreInADS(False)
     alg.setRethrows(True)
     alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_PaddingAndApodization(parameters_dict):
+    alg = mantid.AlgorithmManager.create("PaddingAndApodization")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_FFT(parameters_dict):
+    alg = mantid.AlgorithmManager.create("FFT")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def run_MuonMaxent(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperty("OutputPhaseTable", "__NotUsedPhase")
+    alg.setProperty("OutputDeadTimeTable", "__NotUsedDead")
+    alg.setProperty("ReconstructedSpectra", "__NotUsedRecon")
+    alg.setProperty("PhaseConvergenceTable", "__NotUsedConverge")
     alg.setProperties(parameters_dict)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value

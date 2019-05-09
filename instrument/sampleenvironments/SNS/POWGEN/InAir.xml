@@ -1,0 +1,125 @@
+<!-- Definition of containers without sample environment -->
+<!-- the names in this file match what are used in ITEMS with the spaces removed -->
+<environmentspec>
+  <materials>
+    <material id="vanadium" formula="V" numberdensity="0.0721"/>
+    <material id="quartz" formula="Si O2" massdensity="2.196"/>
+  </materials>
+  <components>
+    <containers>
+
+      <!-- TODO need dimensions for NIST06 can -->
+      <!-- TODO need dimensions for NIST08 can -->
+      <!-- TODO need dimensions for NIST10 can -->
+      <!-- TODO need dimensions for QuartzTube02 -->
+      <!-- TODO need dimensions for QuartzTube05 -->
+      <!-- TODO need dimensions for thin walled 3mm QuartzTube -->
+
+      <!-- 3mm quartz capillary -->
+      <container id="QuartzTube03" material="quartz">
+	<geometry>
+	  <hollow-cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.035" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <inner-radius val="0.0014" />
+	    <outer-radius val="0.0015" />
+	    <height val="0.07" />
+	  </hollow-cylinder>
+	</geometry>
+	<samplegeometry>
+	  <cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.035" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <radius val="0.0014" />
+	    <height val="0.07" />
+	  </cylinder>
+	</samplegeometry>
+      </container>
+
+      <!-- 3mm PAC can -->
+      <container id="PAC03" material="vanadium">
+	<geometry>
+	  <hollow-cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.0284" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <inner-radius val="0.00135" />
+	    <outer-radius val="0.0015875" />
+	    <height val="0.0568" />
+	  </hollow-cylinder>
+	</geometry>
+	<samplegeometry>
+	  <cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.0284" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <radius val="0.00135" />
+	    <height val="0.0568" />
+	  </cylinder>
+	</samplegeometry>
+      </container>
+
+      <!-- 6mm PAC can -->
+      <container id="PAC06" material="vanadium">
+	<geometry>
+	  <hollow-cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.0284" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <inner-radius val="0.00295" />
+	    <outer-radius val="0.00315" />
+	    <height val="0.0568" />
+	  </hollow-cylinder>
+	</geometry>
+	<samplegeometry>
+	  <cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.0284" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <radius val="0.00295" />
+	    <height val="0.0568" />
+	  </cylinder>
+	</samplegeometry>
+      </container>
+
+      <!-- 8mm PAC can -->
+      <container id="PAC08" material="vanadium">
+	<geometry>
+	  <hollow-cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.02835" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <inner-radius val="0.00385" />
+	    <outer-radius val="0.00395" />
+	    <height val="0.0567" />
+	  </hollow-cylinder>
+	</geometry>
+	<samplegeometry>
+	  <cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.02835" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <radius val="0.00385" />
+	    <height val="0.0567" />
+	  </cylinder>
+	</samplegeometry>
+      </container>
+
+      <!-- 10mm PAC can -->
+      <container id="PAC10" material="vanadium">
+	<geometry>
+	  <hollow-cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.0284" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <inner-radius val="0.0046" />
+	    <outer-radius val="0.0047625" />
+	    <height val="0.0568" />
+	  </hollow-cylinder>
+	</geometry>
+	<samplegeometry>
+	  <cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.0284" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <radius val="0.0046" />
+	    <height val="0.0568" />
+	  </cylinder>
+	</samplegeometry>
+      </container>
+
+    </containers>
+  </components>
+</environmentspec>

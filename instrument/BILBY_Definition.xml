@@ -5,7 +5,7 @@
   xmlns="http://www.mantidproject.org/IDF/1.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-  name="Bilby"
+  name="BILBY"
   valid-from = "1901-01-01 00:00:00"
   valid-to = "2100-01-01 00:00:00"
   last-modified="2016-04-15 00:00:00">

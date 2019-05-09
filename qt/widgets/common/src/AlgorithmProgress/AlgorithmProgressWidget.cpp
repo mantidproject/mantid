@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 
 #include <QProgressBar>
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -18,9 +19,7 @@ AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
     : QWidget(parent),
       m_progressBar{new QProgressBar(this)}, m_layout{new QHBoxLayout(this)},
       m_detailsButton{new QPushButton("Details")},
-      m_presenter{std::make_unique<AlgorithmProgressPresenter>(parent, this)}
-
-{
+      m_presenter{std::make_unique<AlgorithmProgressPresenter>(parent, this)} {
   m_progressBar->setAlignment(Qt::AlignHCenter);
   m_layout->addWidget(m_progressBar);
   m_layout->addWidget(m_detailsButton);
@@ -54,8 +53,9 @@ void AlgorithmProgressWidget::showDetailsDialog() {
   }
 }
 
-QProgressBar *AlgorithmProgressWidget::progressBar() const {
-  return m_progressBar;
+void AlgorithmProgressWidget::updateProgress(double progress,
+                                             const QString &message) {
+  m_presenter->setProgressBar(m_progressBar, progress, message);
 }
 
 void AlgorithmProgressWidget::blockUpdates(bool block) {

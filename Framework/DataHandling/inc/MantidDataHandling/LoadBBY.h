@@ -31,46 +31,19 @@ to recognise a file as the one containing Bilby data.
 class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
 
   struct InstrumentInfo {
-    //
-    int32_t bm_counts;
-    int32_t att_pos;
-    bool is_tof;       // tof or wavelength data
-    double wavelength; // -> /nvs067/lambda
-    //
+    // core values or non standard conversion
     std::string sample_name;
     std::string sample_description;
-    double sample_aperture;
-    double sample_x;
-    double sample_y;
-    double sample_z;
-    //
-    double source_aperture;
+    std::string start_time;
+    int32_t bm_counts;
+    int32_t att_pos;
     int32_t master1_chopper_id;
     int32_t master2_chopper_id;
-    //
+    bool is_tof;       // tof or wavelength data
+    double wavelength; // -> /nvs067/lambda
     double period_master;
     double period_slave;
     double phase_slave;
-    //
-    double Lt0_value;
-    double Ltof_curtainl_value;
-    double Ltof_curtainr_value;
-    double Ltof_curtainu_value;
-    double Ltof_curtaind_value;
-    //
-    double L1_chopper_value;
-    double L1_source_value;
-    double L2_det_value;
-    //
-    double L2_curtainl_value;
-    double L2_curtainr_value;
-    double L2_curtainu_value;
-    double L2_curtaind_value;
-    //
-    double D_curtainl_value;
-    double D_curtainr_value;
-    double D_curtainu_value;
-    double D_curtaind_value;
   };
 
 public:
@@ -100,7 +73,12 @@ private:
 
   // instrument creation
   void createInstrument(ANSTO::Tar::File &tarFile,
-                        InstrumentInfo &instrumentInfo);
+                        InstrumentInfo &instrumentInfo,
+                        std::map<std::string, double> &logParams,
+                        std::map<std::string, std::string> &allParams);
+  void loadInstrumentParameters(NeXus::NXEntry &entry,
+                                std::map<std::string, double> &logParams,
+                                std::map<std::string, std::string> &allParams);
 
   // load nx dataset
   template <class T>

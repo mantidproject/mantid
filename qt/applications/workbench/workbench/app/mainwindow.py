@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
         self.populate_interfaces_menu()
 
     def launch_custom_python_gui(self, filename):
-        self.executioner.execute(open(filename).read(), filename)
+        self.interface_executor.execute(open(filename).read(), filename)
 
     def launch_custom_cpp_gui(self, interface_name):
         interface = self.interface_manager.createSubWindow(interface_name)
