@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import numpy as np
-import matplotlib
-
-matplotlib.use('AGG')
-import matplotlib.pyplot as plt
 import unittest
+
+import matplotlib
+matplotlib.use('AGG')  # noqa
+import matplotlib.pyplot as plt
+import numpy as np
 
 import mantid.api
 import mantid.plots.plotfunctions as funcs

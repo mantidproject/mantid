@@ -139,7 +139,8 @@ public:
     TS_ASSERT_EQUALS("Counts", PlotAxis(true, *ws).title());
   }
 
-  void test_Passing_Workspace_And_Plotting_As_Distribution_Adds_XUnit() {
+  void
+  test_Passing_Non_Distribution_Workspace_And_Plotting_As_Distribution_Adds_XUnit() {
     using MantidQt::API::PlotAxis;
     using MantidQt::API::toQStringInternal;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
@@ -160,12 +161,12 @@ public:
     TS_ASSERT_EQUALS("Counts", PlotAxis(false, *ws).title());
   }
 
-  void test_Passing_Distribution_Workspace_Does_Not_Append_X_Unit() {
+  void test_Passing_Distribution_Workspace_Appends_X_Unit() {
     using MantidQt::API::PlotAxis;
     using MantidQt::API::toQStringInternal;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     ws->setDistribution(true);
-    ws->setYUnit("Counts per meV");
+    ws->setYUnit("Counts");
     ws->getAxis(0)->setUnit("Energy");
     QString titleWithPlotAsDist = PlotAxis(true, *ws).title();
     QString titleWithNoPlotAsDist = PlotAxis(false, *ws).title();

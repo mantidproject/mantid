@@ -186,7 +186,7 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_get_axes_labels(self):
         axs = funcs.get_axes_labels(self.ws2d_histo)
-        self.assertEqual(axs, ('', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
+        self.assertEqual(axs, ('($\\AA$)$^{-1}$', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
 
     def test_y_units_correct_on_distribution_workspace(self):
         ws = self.ws2d_distribution

@@ -860,8 +860,7 @@ public:
 
     // Create some discontinuities and check that the default value is there
     // Have to create a whole new instrument to keep things consistent, since
-    // the detector ID
-    // is stored in at least 3 places
+    // the detector ID is stored in at least 3 places
     auto inst = boost::make_shared<Instrument>("TestInstrument");
     // We get a 1:1 map by default so the detector ID should match the spectrum
     // number
@@ -1960,7 +1959,85 @@ public:
     TS_ASSERT_THROWS(workspace.yIndexOfX(3.5), std::invalid_argument);
   }
 
+  void
+  test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
+    auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(true, "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false),
+                     "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false),
+                     "Counts ($\\mu s$)$^{-1}$");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
+                     "Counts ($\\mu s$)$^{-1}$");
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
+    auto testWS =
+        generateTestWorkspaceWithDistributionAndLabelSet(true, "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "Custom Label");
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Not_Set() {
+    auto testWS = generateTestWorkspaceWithDistributionAndLabelSet(false, "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Counts");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "Counts per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Counts");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
+                     "Counts ($\\mu s$)$^{-1}$");
+  }
+
+  void
+  test_YUnitLabel_Correct_For_Non_Distribution_Workspace_Custom_m_YUnitLabel_Set() {
+    auto testWS =
+        generateTestWorkspaceWithDistributionAndLabelSet(false, "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true),
+                     "Custom Label per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "Custom Label");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true),
+                     "Custom Label ($\\mu s$)$^{-1}$");
+  }
+
+  void test_YUnitLabel_Correct_For_Empty_Y_Labels() {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1, 2, 1);
+    testWS->setDistribution(false);
+    testWS->getAxis(0)->setUnit("TOF");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), " per microsecond");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "($\\mu s$)$^{-1}$");
+  }
+
+  void test_YUnitLabel_Correct_For_Empty_X_And_Y_Labels() {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1, 2, 1);
+    testWS->setDistribution(false);
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
+    TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "");
+  }
+
 private:
+  boost::shared_ptr<WorkspaceTester>
+  generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
+                                                   const std::string &yLabel) {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1, 2, 1);
+    testWS->setDistribution(distribution);
+    testWS->setYUnit("Counts");
+    if (!yLabel.empty())
+      testWS->setYUnitLabel(yLabel);
+    testWS->getAxis(0)->setUnit("TOF");
+    return testWS;
+  }
+
   WorkspaceTester getWorkspaceWithPopulatedX(
       std::size_t const &nVectors, std::size_t const &xLength,
       std::size_t const &yLength, std::vector<double> const &xValues) {

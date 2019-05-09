@@ -58,7 +58,7 @@ constexpr const double EPSILON{1.0e-9};
  * label becomes "Counts per angstrom". Or if useLatex is true "Counts per
  * $\AA$"
  * @param yLabel :: The y-axis label
- * @param workspace :: Pointer to workspace
+ * @param workspace :: The workspace
  * @param useLatex :: Boolean, if true use latex else use ascii
  */
 std::string appendUnitDenominatorUsingPer(std::string yLabel,
@@ -89,7 +89,9 @@ std::string replacePerWithLatex(std::string yLabel) {
     yLabel = splitVec[0];
     splitVec.erase(splitVec.begin());
     std::string unitString = boost::algorithm::join(splitVec, " ");
-    yLabel += " (" + unitString + ")$^{-1}$";
+    if (!yLabel.empty())
+      yLabel += " ";
+    yLabel += "(" + unitString + ")$^{-1}$";
   }
   return yLabel;
 }
@@ -975,21 +977,33 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) {
   m_YUnit = newUnit;
 }
 
-/// Returns a caption for the units of the data in the workspace
+/**
+ * Returns a caption for the units of the data in the workspace.
+ * @param useLatex :: Return label using Latex syntax
+ * @param plotAsDistribution :: If true, the Y-axis has been divided by bin
+ * width
+ */
 std::string
 MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
                             bool plotAsDistribution /* = false */) const {
   std::string retVal;
   if (!m_YUnitLabel.empty()) {
     retVal = m_YUnitLabel;
+    // If a custom label has been set and we are dividing by bin width when
+    // plotting (i.e. plotAsDistribution = true and the workspace is not a
+    // distribution), we must append the x-unit as a divisor. We assume the
+    // custom label contains the correct units for the data.
+    if (plotAsDistribution && !this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
   } else {
     retVal = m_YUnit;
+    // If no custom label is set and the workspace is a distribution we need to
+    // append the divisor's unit to the label. If the workspace is not a
+    // distribution, but we are plotting it as a distribution, we must append
+    // the divisor's unit.
+    if (plotAsDistribution || this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
   }
-  // If the workspace is marked as a distribution its units are already
-  // correct, if the workspace is not a distribution but is being plotted as
-  // one we must adjust the unit
-  if (plotAsDistribution && !this->isDistribution())
-    retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
   if (useLatex)
     retVal = replacePerWithLatex(retVal);
   return retVal;
