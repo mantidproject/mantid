@@ -396,7 +396,7 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtAwesome,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
@@ -482,7 +482,6 @@ if(ENABLE_CPACK)
           "python3-skimage,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
-          "python3-qtawesome,"
           "ipython3-qtconsole") # transitional package for bionic
 
       if(ENABLE_MANTIDPLOT)
@@ -505,7 +504,6 @@ if(ENABLE_CPACK)
           "python-skimage,"
           "python-pycifrw (>= 4.2.1),"
           "python-yaml,"
-          "python-qtawesome,"
           "ipython-qtconsole")
 
       if(ENABLE_MANTIDPLOT)

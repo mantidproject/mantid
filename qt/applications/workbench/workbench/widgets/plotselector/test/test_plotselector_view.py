@@ -279,7 +279,7 @@ class PlotSelectorWidgetTest(GuiTest):
         self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, True)
 
-        self.mock_get_icon.assert_called_once_with('fa.eye')
+        self.mock_get_icon.assert_called_once_with('mdi.eye')
 
     def test_set_visibility_icon_to_hidden(self):
         plot_numbers = [0, 1, 2]
@@ -287,7 +287,7 @@ class PlotSelectorWidgetTest(GuiTest):
         self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, False)
 
-        self.mock_get_icon.assert_called_once_with('fa.eye', color='lightgrey')
+        self.mock_get_icon.assert_called_once_with('mdi.eye', 'lightgrey')
 
     # ------------------------ Plot Renaming ------------------------
 
