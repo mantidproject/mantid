@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, PYQT4
+from qtpy import QtWidgets
 from qtpy.QtCore import Signal
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
@@ -79,7 +79,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.file_path_edit)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
-        # self.horizontal_layout.setMargin(0)
 
         self.setLayout(self.horizontal_layout)
 
@@ -93,7 +92,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.file_path_edit.returnPressed.connect(slot)
 
     def show_file_browser_and_return_selection(
-           self, file_filter, search_directories, multiple_files=False):
+            self, file_filter, search_directories, multiple_files=False):
         return show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files)
 
     def disable_loading(self):
