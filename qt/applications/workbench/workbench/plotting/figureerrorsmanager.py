@@ -79,6 +79,7 @@ class FigureErrorsManager(object):
         error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
                                   partial(self._update_plot_after,
                                           self.toggle_all_error_bars, make_visible=False))
+        error_bars_menu.addSeparator()
         menu.addMenu(error_bars_menu)
 
         data_lines = self.get_data_lines(ax)
