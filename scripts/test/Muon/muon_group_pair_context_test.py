@@ -10,6 +10,7 @@ import unittest
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from mantid.simpleapi import CreateWorkspace
 
 if sys.version_info.major < 2:
     from unittest import mock
@@ -19,6 +20,19 @@ else:
 class MuonGroupPairContextTest(unittest.TestCase):
     def setUp(self):
         self.context = MuonGroupPairContext()
+
+    def create_group_populated_by_two_workspace(self):
+        group = MuonGroup(group_name="group1")
+        counts_workspace_22222 = CreateWorkspace([0], [0])
+        asymmetry_workspace_22222 = CreateWorkspace([0], [0])
+        group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, False)
+        group.show_raw([22222], 'counts_name_22222', 'asymmetry_name_22222')
+        counts_workspace_33333 = CreateWorkspace([0], [0])
+        asymmetry_workspace_33333 = CreateWorkspace([0], [0])
+        group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, False)
+        group.show_raw([33333], 'counts_name_33333', 'asymmetry_name_33333')
+
+        return group
 
     def test_can_be_created(self):
         self.assertTrue(self.context)
@@ -129,6 +143,13 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEquals(self.context.pair_names, ['pair_1', 'pair_3'])
 
+    def test_get_group_workspace_names_returns_correct_workspace_names(self):
+        group = self.create_group_populated_by_two_workspace()
+        self.context.add_group(group)
+
+        workspace_list = self.context.get_group_workspace_names([[33333]], ['group1'], False)
+
+        self.assertEqual(workspace_list, ['asymmetry_name_33333'])
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

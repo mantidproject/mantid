@@ -63,9 +63,6 @@ class TestListSelectorPresenter(unittest.TestCase):
 
         self.view.addItems.assert_called_with([['property_two', False, False], ['property_one', True, True]])
 
-    def test_handle_row_moved(self):
-        self.presenter.handle_row_moved()
-
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

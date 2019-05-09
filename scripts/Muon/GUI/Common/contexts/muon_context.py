@@ -214,3 +214,24 @@ class MuonContext(object):
             return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
         elif self.gui_context['DeadTimeSource'] == 'None':
             return None
+
+    def get_names_of_workspaces_to_fit(self, runs='', groups='', pairs='', phasequad=False, rebin=False):
+        if runs == 'All':
+            runs = self.data_context.current_runs
+
+        if groups == 'All':
+            groups = self.group_pair_context.group_names
+
+        if pairs == 'All':
+            pairs = self.group_pair_context.pair_names
+
+        group_names = self.group_pair_context.get_group_workspace_names(runs, groups, rebin)
+        pair_names = self.group_pair_context.get_pair_workspace_names(runs, pairs, rebin)
+
+        phasequad_names = []
+        if phasequad:
+            for run in runs:
+                run_string = run_list_to_string(run)
+                phasequad_names += self.phase_context.get_phase_quad(self.data_context.instrument, run_string)
+
+        return group_names + pair_names + phasequad_names
