@@ -23,10 +23,6 @@ public:
   MuonFunctionBrowser(QWidget *parent = nullptr, bool multi = false);
   /// Destructor
   virtual ~MuonFunctionBrowser() override;
-
-protected:
-  /// Ask user for function and return it
-  // QString getUserFunctionFromDialog() override;
 };
 
 } // namespace MantidWidgets

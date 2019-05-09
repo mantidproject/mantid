@@ -23,18 +23,5 @@ MuonFunctionBrowser::MuonFunctionBrowser(QWidget *parent, bool multi)
  */
 MuonFunctionBrowser::~MuonFunctionBrowser() {}
 
-///**
-// * Ask user to select a function and return it
-// * @returns :: function string
-// */
-// QString MuonFunctionBrowser::getUserFunctionFromDialog() {
-//  SelectFunctionDialog dlg(this, {"Muon", "General", "Background"});
-//  if (dlg.exec() == QDialog::Accepted) {
-//    return dlg.getFunction();
-//  } else {
-//    return QString();
-//  }
-//}
-
 } // namespace MantidWidgets
 } // namespace MantidQt
