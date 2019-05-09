@@ -73,7 +73,7 @@ SeqDomain *SeqDomain::create(API::IDomainCreator::DomainType type) {
 
 /**
  * Calculate the value of a least squares cost function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param costFunction :: The cost func to calculate the value for
  */
 void SeqDomain::additiveCostFunctionVal(
     const CostFunctions::CostFuncFitting &costFunction) {
@@ -112,7 +112,7 @@ void SeqDomain::rwpVal(const CostFunctions::CostFuncRwp &rwp) {
 /**
  * Calculate the value, first and second derivatives of a least squares cost
  * function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param costFunction :: The cost func to calculate the value for
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */

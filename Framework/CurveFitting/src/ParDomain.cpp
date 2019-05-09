@@ -32,7 +32,7 @@ void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
 
 /**
  * Calculate the value of a least squares cost function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param costFunction :: The cost func to calculate the value for
  */
 void ParDomain::additiveCostFunctionVal(
     const CostFunctions::CostFuncFitting &costFunction) {
@@ -52,7 +52,7 @@ void ParDomain::additiveCostFunctionVal(
 /**
  * Calculate the value, first and second derivatives of a least squares cost
  * function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param costFunction :: The cost func to calculate the value for
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
