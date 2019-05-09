@@ -19,6 +19,10 @@ class SliceViewer(object):
 
         if self.model.get_ws_type() == WS_TYPE.MDH:
             self.new_plot = self.new_plot_MDH
+            self.update_plot_data = self.update_plot_data_MDH
+        elif self.model.get_ws_type() == WS_TYPE.MDE:
+            self.new_plot = self.new_plot_MDE
+            self.update_plot_data = self.update_plot_data_MDE
         else:
             self.new_plot = self.new_plot_matrix
 
@@ -29,8 +33,17 @@ class SliceViewer(object):
     def new_plot_MDH(self):
         self.view.plot_MDH(self.model.get_ws(), slicepoint=self.view.dimensions.get_slicepoint())
 
+    def new_plot_MDE(self):
+        self.view.plot_MDH(self.model.get_ws(slicepoint=self.view.dimensions.get_slicepoint(),
+                                             bin_params=self.view.dimensions.get_bin_params()))
+
     def new_plot_matrix(self):
         self.view.plot_matrix(self.model.get_ws())
 
-    def update_plot_data(self):
+    def update_plot_data_MDH(self):
         self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint(), self.view.dimensions.transpose))
+
+    def update_plot_data_MDE(self):
+        self.view.update_plot_data(self.model.get_data(slicepoint=self.view.dimensions.get_slicepoint(),
+                                                       bin_params=self.view.dimensions.get_bin_params(),
+                                                       transpose=self.view.dimensions.transpose))

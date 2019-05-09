@@ -26,6 +26,8 @@ class SliceViewerTest(unittest.TestCase):
         self.view.dimensions = mock.Mock()
 
         self.model = mock.Mock(spec=SliceViewerModel)
+        self.model.get_ws = mock.Mock()
+        self.model.get_data = mock.Mock()
 
     def test_sliceviewer_MDH(self):
 
@@ -53,6 +55,37 @@ class SliceViewerTest(unittest.TestCase):
         presenter.update_plot_data()
         self.assertEqual(self.model.get_data.call_count, 1)
         self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.update_plot_data.call_count, 1)
+
+    def test_sliceviewer_MDE(self):
+
+        self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
+
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+
+        # setup calls
+        self.assertEqual(self.model.get_dimensions_info.call_count, 0)
+        self.assertEqual(self.model.get_ws.call_count, 1)
+        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.dimensions.get_bin_params.call_count, 1)
+        self.assertEqual(self.view.plot_MDH.call_count, 1)
+
+        # new_plot
+        self.model.reset_mock()
+        self.view.reset_mock()
+        presenter.new_plot()
+        self.assertEqual(self.model.get_ws.call_count, 1)
+        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.dimensions.get_bin_params.call_count, 1)
+        self.assertEqual(self.view.plot_MDH.call_count, 1)
+
+        # update_plot_data
+        self.model.reset_mock()
+        self.view.reset_mock()
+        presenter.update_plot_data()
+        self.assertEqual(self.model.get_data.call_count, 1)
+        self.assertEqual(self.view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.dimensions.get_bin_params.call_count, 1)
         self.assertEqual(self.view.update_plot_data.call_count, 1)
 
     def test_sliceviewer_matrix(self):
