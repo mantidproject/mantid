@@ -61,8 +61,8 @@ void FlippingRatioCorrectionMD::init() {
   declareProperty(
       Kernel::make_unique<Mantid::Kernel::PropertyWithValue<std::string>>(
           "FlippingRatio", "",
-                  boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
-                  Direction::Input),
+          boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string>>(),
+          Direction::Input),
       "Formula to define the flipping ratio. It can depend on the variables in "
       "the list "
       "of sample logs defined below");
@@ -86,8 +86,10 @@ void FlippingRatioCorrectionMD::init() {
  */
 std::map<std::string, std::string> FlippingRatioCorrectionMD::validateInputs() {
   std::map<std::string, std::string> errors;
-  if(getPropertyValue("OutputWorkspace1") == getPropertyValue("OutputWorkspace2")) {
-    const std::string message("The two output workspace names must be different");
+  if (getPropertyValue("OutputWorkspace1") ==
+      getPropertyValue("OutputWorkspace2")) {
+    const std::string message(
+        "The two output workspace names must be different");
     errors.emplace("OutputWorkspace1", message);
     errors.emplace("OutputWorkspace2", message);
   }
@@ -122,8 +124,8 @@ void FlippingRatioCorrectionMD::exec() {
       flippingRatio.push_back(muParser.Eval());
     } catch (mu::Parser::exception_type &e) {
       g_log.error() << "Parsing error in experiment info " << i << "\n"
-                    << e.GetMsg() << std::endl << "Formula: "
-                    << inputFormula << std::endl;
+                    << e.GetMsg() << std::endl
+                    << "Formula: " << inputFormula << std::endl;
       throw std::runtime_error("Parsing error");
     }
   }
@@ -155,16 +157,16 @@ void FlippingRatioCorrectionMD::exec() {
     CALL_MDEVENT_FUNCTION(this->executeTemplatedMDE, event1);
     this->setProperty("OutputWorkspace1", event1);
   } else {
-    throw std::runtime_error(
-        "Could not clone the workspace for first correction (OutputWorkspace1)");
+    throw std::runtime_error("Could not clone the workspace for first "
+                             "correction (OutputWorkspace1)");
   }
   if (event2) {
     m_factor = C2;
     CALL_MDEVENT_FUNCTION(this->executeTemplatedMDE, event2);
     this->setProperty("OutputWorkspace2", event2);
   } else {
-    throw std::runtime_error(
-        "Could not clone the workspace for second correction (OutputWorkspace2)");
+    throw std::runtime_error("Could not clone the workspace for second "
+                             "correction (OutputWorkspace2)");
   }
 }
 
@@ -188,10 +190,11 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(
     if (box) {
       auto &events = box->getEvents();
       const bool hasEvents = !events.empty();
-      for (auto &event:events) {
+      for (auto &event : events) {
         const size_t ind = static_cast<size_t>(event.getRunIndex());
         const float scalar = static_cast<float>(m_factor[ind]);
-        const float scalarSquared = static_cast<float>(m_factor[ind] * m_factor[ind]);
+        const float scalarSquared =
+            static_cast<float>(m_factor[ind] * m_factor[ind]);
         // Multiply weight by a scalar, propagating error
         const float oldSignal = event.getSignal();
         const float signal = oldSignal * scalar;
