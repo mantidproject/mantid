@@ -403,7 +403,7 @@ PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
   if (auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right)) {
     m_value = prop->m_value;
     return "";
-  }else{
+  } else {
     return setValue(right.value());
   }  
 }
