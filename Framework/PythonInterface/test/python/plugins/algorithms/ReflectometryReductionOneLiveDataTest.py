@@ -10,7 +10,8 @@ import unittest
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneLiveData)
+from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneAuto,
+                              ReflectometryReductionOneLiveData)
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
@@ -78,6 +79,29 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           ReflectometryReductionOneLiveData,
                           InputWorkspace=self.__class__._input_ws,
                           OutputWorkspace='')
+
+    def test_invalid_property(self):
+        self.assertRaises(RuntimeError,
+                          ReflectometryReductionOneLiveData,
+                          InputWorkspace=self.__class__._input_ws,
+                          OutputWorkspace='output',
+                          Instrument='INTER',
+                          GetLiveValueAlgorithm='GetFakeLiveInstrumentValue',
+                          BadProperty='badvalue')
+
+    def test_all_child_properties_are_present(self):
+        # Get the properties for the child algorithm, apart from a list of known
+        # exclusions
+        child_alg = create_algorithm('ReflectometryReductionOneAuto')
+        excluded = ['ThetaIn', 'ThetaLogName', 'Diagnostics',
+                    'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
+        child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
+        # Check the child properties exist in the parent algorithm
+        actual_alg = create_algorithm('ReflectometryReductionOneLiveData')
+        actual_props = set([prop.name for prop in actual_alg.getProperties()])
+        if not child_props.issubset(actual_props):
+            assert False, "The following child properties are not implemented in the parent algorithm:\n" \
+            + str(child_props.difference(actual_props))
 
     def test_instrument_was_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
