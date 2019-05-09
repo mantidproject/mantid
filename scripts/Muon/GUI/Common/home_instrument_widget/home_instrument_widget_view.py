@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, QtCore, QtGui, PYQT4
+from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments, show_file_browser_and_return_selection
 from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
