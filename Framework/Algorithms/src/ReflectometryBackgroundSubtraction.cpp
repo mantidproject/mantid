@@ -51,7 +51,7 @@ const std::string ReflectometryBackgroundSubtraction::summary() const {
  * background
  */
 void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
-    MatrixWorkspace_sptr inputWS, std::vector<specnum_t> spectraList) {
+    MatrixWorkspace_sptr inputWS, const std::vector<specnum_t> &spectraList) {
 
   auto alg = this->createChildAlgorithm("GroupDetectors");
   alg->setProperty("InputWorkspace", inputWS);
@@ -77,7 +77,7 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
  * @return a vector containing a list of ranges of the given indexList.
  */
 std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
-    std::vector<double> indexList) {
+    const std::vector<double> &indexList) {
 
   std::vector<double> indexRanges;
   indexRanges.push_back(indexList[0]);
@@ -105,7 +105,7 @@ std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
  * histograms containing the background
  */
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-    MatrixWorkspace_sptr inputWS, std::vector<double> indexRanges) {
+    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexRanges) {
 
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose an event workspace
@@ -157,7 +157,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * @param indexRanges :: the ranges of the background region
  */
 void ReflectometryBackgroundSubtraction::subtractPixelBackground(
-    MatrixWorkspace_sptr inputWS, std::vector<double> indexRanges) {
+    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexRanges) {
 
   const std::vector<int> backgroundRange{static_cast<int>(indexRanges.front()),
                                          static_cast<int>(indexRanges.back())};
