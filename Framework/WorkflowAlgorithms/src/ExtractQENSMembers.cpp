@@ -294,7 +294,7 @@ void ExtractQENSMembers::setNumericAxis(
     qAxis.setValue(i, values[i]);
 
   for (auto &workspace : workspaces) {
-    workspace->replaceAxis(axisIndex, new NumericAxis(qAxis));
+    workspace->replaceAxis(axisIndex, std::make_unique<NumericAxis>(qAxis));
     workspace->setYUnitLabel("MomentumTransfer");
   }
 }
