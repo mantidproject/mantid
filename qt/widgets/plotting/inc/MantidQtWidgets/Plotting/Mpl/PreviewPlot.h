@@ -89,7 +89,7 @@ private:
                                      const size_t wsIndex, const QString &label,
                                      const QColor &colour);
   void removeLines(const Mantid::API::MatrixWorkspace &ws);
-  void replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
+  void replaceLineData(const Mantid::API::MatrixWorkspace &oldWS,
                     const Mantid::API::MatrixWorkspace &newWS);
   void regenerateLegend();
   void removeLegend();

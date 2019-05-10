@@ -17,19 +17,33 @@
 
 #include <algorithm>
 
+using Mantid::API::AnalysisDataService;
+using Mantid::API::MatrixWorkspace;
+using MantidQt::Widgets::MplCpp::FigureCanvasQt;
+using MantidQt::Widgets::MplCpp::Line2D;
+
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
 constexpr auto DRAGGABLE_LEGEND{true};
 constexpr auto LINEAR_SCALE{"Linear"};
 constexpr auto LOG_SCALE{"Log"};
 constexpr auto SQUARE_SCALE{"Square"};
+
+/**
+ * Construct the line data from a workspace
+ * @param ws A reference to the workspace to plot
+ * @param wsIndex A wsIndex denoting the spectrum to plot
+ * @return A new Line2D::Data object
+ */
+Line2D::Data tolineData(const Mantid::API::MatrixWorkspace &ws,
+                        const size_t wsIndex) {
+  const auto &histogram = ws.histogram(wsIndex);
+  return {histogram.points().rawData(), histogram.y().rawData()};
+}
+
 } // namespace
 
 namespace MantidQt {
-using Mantid::API::AnalysisDataService;
-using Mantid::API::MatrixWorkspace;
-using Widgets::MplCpp::FigureCanvasQt;
-using Widgets::MplCpp::Line2D;
 
 namespace MantidWidgets {
 
@@ -249,7 +263,7 @@ void PreviewPlot::onWorkspaceReplaced(
           boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      replaceLines(*oldWS, *newWS);
+      replaceLineData(*oldWS, *newWS);
       m_canvas->draw();
     }
   }
@@ -284,10 +298,8 @@ Line2D PreviewPlot::createLine(Widgets::MplCpp::Axes &axes,
                                const Mantid::API::MatrixWorkspace &ws,
                                const size_t wsIndex, const QString &label,
                                const QColor &lineColor) {
-  const auto &histogram = ws.histogram(wsIndex);
-  const auto xpts = histogram.points();
-  const auto signal = histogram.y();
-  return axes.plot(xpts.data().rawData(), signal.rawData(),
+  auto data = tolineData(ws, wsIndex);
+  return axes.plot(std::move(data.xaxis), std::move(data.yaxis),
                    lineColor.name(QColor::HexRgb), label);
 }
 
@@ -314,17 +326,15 @@ void PreviewPlot::removeLines(const Mantid::API::MatrixWorkspace &ws) {
  * @param oldWS A reference to the existing workspace
  * @param newWS A reference to the replacement workspace
  */
-void PreviewPlot::replaceLines(const Mantid::API::MatrixWorkspace &oldWS,
-                               const Mantid::API::MatrixWorkspace &newWS) {
+void PreviewPlot::replaceLineData(const Mantid::API::MatrixWorkspace &oldWS,
+                                  const Mantid::API::MatrixWorkspace &newWS) {
   auto axes = m_canvas->gca();
   for (auto &info : m_lines) {
     if (info.workspace == &oldWS) {
-      info.line =
-          createLine(axes, newWS, info.wsIndex, info.label, info.colour);
+      info.line.setData(tolineData(newWS, info.wsIndex));
       info.workspace = &newWS;
     }
   }
-  regenerateLegend();
   axes.relim();
   m_canvas->draw();
 }
