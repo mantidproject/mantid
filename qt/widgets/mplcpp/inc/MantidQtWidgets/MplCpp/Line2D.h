@@ -32,7 +32,7 @@ public:
 public:
   Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner,
          std::vector<double> &&ydataOwner);
-  Line2D(Python::Object obj, Line2D::Data &&dataOwner);
+  Line2D(Common::Python::Object obj, Line2D::Data &&dataOwner);
   ~Line2D() noexcept;
   Line2D(const Line2D &) = delete;
   Line2D &operator=(const Line2D &) = delete;

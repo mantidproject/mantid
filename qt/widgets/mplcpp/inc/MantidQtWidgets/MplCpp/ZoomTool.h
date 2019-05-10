@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_ZOOMER_H
-#define MPLCPP_ZOOMER_H
+#ifndef MPLCPP_ZOOMTOOL_H
+#define MPLCPP_ZOOMTOOL_H
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
@@ -18,7 +18,7 @@ namespace MplCpp {
 class FigureCanvasQt;
 
 /**
- * @brief The Zoomer class adds zooming capabilities to
+ * @brief The ZoomTool class adds zooming capabilities to
  * an existing FigureCanvasQt object. The implementation relies on
  * the matplotlib NavigationToolbar2 class corresponding to the backend.
  *
@@ -26,9 +26,9 @@ class FigureCanvasQt;
  * it will not keep it alive. It is assumed that the canvas lifetime
  * is handled separately.
  */
-class MANTID_MPLCPP_DLL Zoomer : public Common::Python::InstanceHolder {
+class MANTID_MPLCPP_DLL ZoomTool : public Common::Python::InstanceHolder {
 public:
-  explicit Zoomer(FigureCanvasQt *canvas);
+  explicit ZoomTool(FigureCanvasQt *canvas);
 
   bool isZoomEnabled() const;
   void enableZoom(bool requestOn);
@@ -42,4 +42,4 @@ private:
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_ZOOMER_H
+#endif // MPLCPP_ZOOMTOOL_H

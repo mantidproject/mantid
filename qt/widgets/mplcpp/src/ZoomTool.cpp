@@ -4,11 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/MplCpp/Zoomer.h"
+#include "MantidQtWidgets/MplCpp/ZoomTool.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
-using namespace MantidQt::Widgets::Common;
+namespace Python = MantidQt::Widgets::Common::Python;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace MantidQt {
 namespace Widgets {
@@ -33,25 +35,27 @@ Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
 } // namespace
 
 /**
- * Create a Zoomer object to attach zooming capability to
+ * Create an object to attach zooming capability to
  * the given canvas.
  * @param canvas A reference to an existing FigureCanvasQt object
  */
-Zoomer::Zoomer(FigureCanvasQt *canvas)
+ZoomTool::ZoomTool(FigureCanvasQt *canvas)
     : Python::InstanceHolder(mplNavigationToolbar(canvas)), m_canvas(canvas) {}
 
 /**
  *
  * @return True if zooming has been enabled, false otherwise
  */
-bool Zoomer::isZoomEnabled() const {
+bool ZoomTool::isZoomEnabled() const {
+  GlobalInterpreterLock lock;
   return (pyobj().attr(TOOLBAR_MODE_ATTR) == TOOLBAR_MODE_ZOOM);
 }
 
 /**
  * Enable/disable zooming mode
  */
-void Zoomer::enableZoom(bool requestOn) {
+void ZoomTool::enableZoom(bool requestOn) {
+  GlobalInterpreterLock lock;
   // The base functionality works as a toggle
   const bool isOn = isZoomEnabled();
   if ((requestOn && !isOn) || (!requestOn && isOn)) {
@@ -62,7 +66,8 @@ void Zoomer::enableZoom(bool requestOn) {
 /**
  * Resets the view to encompass all of the data
  */
-void Zoomer::zoomOut() {
+void ZoomTool::zoomOut() {
+  GlobalInterpreterLock lock;
   m_canvas->gca().autoscale(true);
   m_canvas->drawIdle();
 }

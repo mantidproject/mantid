@@ -14,7 +14,7 @@ set(LIB_SRCS
     src/MantidColorMap.cpp
     src/Plot.cpp
     src/ScalarMappable.cpp
-    src/Zoomer.cpp)
+    src/ZoomTool.cpp)
 
 set(MOC_HEADERS
     inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
@@ -32,7 +32,7 @@ set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/MantidColorMap.h
     inc/MantidQtWidgets/MplCpp/Plot.h
     inc/MantidQtWidgets/MplCpp/ScalarMappable.h
-    inc/MantidQtWidgets/MplCpp/Zoomer.h)
+    inc/MantidQtWidgets/MplCpp/ZoomTool.h)
 
 set(UI_FILES
     inc/MantidQtWidgets/MplCpp/Colorbar.ui)

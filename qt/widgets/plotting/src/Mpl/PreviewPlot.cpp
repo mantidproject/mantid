@@ -25,6 +25,8 @@ using MantidQt::Widgets::MplCpp::Line2D;
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
 constexpr auto DRAGGABLE_LEGEND{true};
+constexpr auto PLOT_TOOL_NONE{"None"};
+constexpr auto PLOT_TOOL_ZOOM{"Zoom"};
 constexpr auto LINEAR_SCALE{"Linear"};
 constexpr auto LOG_SCALE{"Log"};
 constexpr auto SQUARE_SCALE{"Square"};
@@ -49,6 +51,7 @@ namespace MantidWidgets {
 
 PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, parent)}, m_lines{},
+      m_zoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
   createLayout();
@@ -160,6 +163,14 @@ void PreviewPlot::clear() {
 void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
 
 /**
+ * Reset the whole view to show all of the data
+ */
+void PreviewPlot::resetView() {
+  m_zoomTool.zoomOut();
+  m_canvas->gca().autoscaleView();
+}
+
+/**
  * Toggle for programatic legend visibility toggle
  * @param visible If True the legend is visible on the canvas
  */
@@ -178,13 +189,71 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   bool stopEvent{false};
   switch (evt->type()) {
   case QEvent::ContextMenu:
-    showContextMenu(static_cast<QContextMenuEvent *>(evt));
+    // handled by mouse press events below as we need to
+    // stop the canvas getting mouse events in some circumstances
+    // to disable zooming
     stopEvent = true;
+    break;
+  case QEvent::MouseButtonPress:
+    stopEvent = handleMousePressEvent(static_cast<QMouseEvent *>(evt));
+    break;
+  case QEvent::MouseButtonRelease:
+    stopEvent = handleMouseReleaseEvent(static_cast<QMouseEvent *>(evt));
     break;
   default:
     break;
   }
   return stopEvent;
+}
+
+/**
+ * Handler called when the event filter recieves a mouse press event
+ * @param evt A pointer to the event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
+bool PreviewPlot::handleMousePressEvent(QMouseEvent *evt) {
+  bool stopEvent(false);
+  // right-click events are reserved for the context menu
+  // show when the mouse click is released
+  if (evt->buttons() & Qt::RightButton) {
+    stopEvent = true;
+  }
+  return stopEvent;
+}
+
+/**
+ * Handler called when the event filter recieves a mouse release event
+ * @param evt A pointer to the event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
+bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
+  bool stopEvent(false);
+  if (evt->button() == Qt::RightButton) {
+    stopEvent = true;
+    showContextMenu(evt);
+  }
+  return stopEvent;
+}
+
+/**
+ * Display the context menu for the canvas
+ */
+void PreviewPlot::showContextMenu(QMouseEvent *evt) {
+  QMenu contextMenu{this};
+  auto plotTools = contextMenu.addMenu("Plot Tools");
+  plotTools->addActions(m_contextPlotTools->actions());
+  contextMenu.addAction(m_contextResetView);
+
+  contextMenu.addSeparator();
+  auto xscale = contextMenu.addMenu("X Scale");
+  xscale->addActions(m_contextXScale->actions());
+  auto yScale = contextMenu.addMenu("Y Scale");
+  yScale->addActions(m_contextYScale->actions());
+
+  contextMenu.addSeparator();
+  contextMenu.addAction(m_contextLegend);
+
+  contextMenu.exec(evt->globalPos());
 }
 
 /**
@@ -202,26 +271,35 @@ void PreviewPlot::createLayout() {
  * Create the menu actions items
  */
 void PreviewPlot::createActions() {
+  // Create an exclusive group of checkable actions with
+  auto createExclusiveActionGroup =
+      [this](const std::initializer_list<const char *> &names) {
+        auto group = new QActionGroup(this);
+        group->setExclusive(true);
+        for (const auto &name : names) {
+          auto action = group->addAction(name);
+          action->setCheckable(true);
+        }
+        group->actions()[0]->setChecked(true);
+        return group;
+      };
+  // plot tools
+  m_contextPlotTools =
+      createExclusiveActionGroup({PLOT_TOOL_NONE, PLOT_TOOL_ZOOM});
+  connect(m_contextPlotTools, &QActionGroup::triggered, this,
+          &PreviewPlot::switchPlotTool);
+  m_contextResetView = new QAction("Reset Plot", this);
+  connect(m_contextResetView, &QAction::triggered, this,
+          &PreviewPlot::resetView);
+
   // scales
-  m_contextXScale = new QActionGroup(this);
-  m_contextXScale->setExclusive(true);
+  m_contextXScale =
+      createExclusiveActionGroup({LINEAR_SCALE, LOG_SCALE, SQUARE_SCALE});
   connect(m_contextXScale, &QActionGroup::triggered, this,
           &PreviewPlot::setXScaleType);
-  m_contextYScale = new QActionGroup(this);
-  m_contextYScale->setExclusive(true);
+  m_contextYScale = createExclusiveActionGroup({LINEAR_SCALE, LOG_SCALE});
   connect(m_contextYScale, &QActionGroup::triggered, this,
           &PreviewPlot::setYScaleType);
-  auto addCheckableAction = [](QActionGroup *group, const char *name) {
-    auto action = group->addAction(name);
-    action->setCheckable(true);
-  };
-  for (const auto &scaleType : {LINEAR_SCALE, LOG_SCALE}) {
-    addCheckableAction(m_contextXScale, scaleType);
-    addCheckableAction(m_contextYScale, scaleType);
-  }
-  // Square scaling only apples to the X axis
-  addCheckableAction(m_contextXScale, SQUARE_SCALE);
-  // Set defaults as the first in the list
   m_contextXScale->actions()[0]->setChecked(true);
   m_contextYScale->actions()[0]->setChecked(true);
 
@@ -282,25 +360,10 @@ void PreviewPlot::onWorkspaceReplaced(
 PreviewPlot::Line2DInfo PreviewPlot::createLineInfo(
     Widgets::MplCpp::Axes &axes, const Mantid::API::MatrixWorkspace &ws,
     const size_t wsIndex, const QString &lineName, const QColor &lineColour) {
-  return Line2DInfo{createLine(axes, ws, wsIndex, lineName, lineColour), &ws,
-                    wsIndex, lineName, lineColour};
-}
-
-/**
- * Add a line to the canvas using the data from the workspace
- * @param axes A reference to the axes to contain the lines
- * @param ws A reference to the workspace
- * @param wsIndex The wsIndex
- * @param label A label for the line
- * @param colour The color required for the line
- */
-Line2D PreviewPlot::createLine(Widgets::MplCpp::Axes &axes,
-                               const Mantid::API::MatrixWorkspace &ws,
-                               const size_t wsIndex, const QString &label,
-                               const QColor &lineColor) {
   auto data = tolineData(ws, wsIndex);
-  return axes.plot(std::move(data.xaxis), std::move(data.yaxis),
-                   lineColor.name(QColor::HexRgb), label);
+  return Line2DInfo{axes.plot(std::move(data.xaxis), std::move(data.yaxis),
+                              lineColour.name(QColor::HexRgb), lineName),
+                    &ws, wsIndex, lineName, lineColour};
 }
 
 /**
@@ -359,20 +422,20 @@ void PreviewPlot::removeLegend() {
 }
 
 /**
- * Display the context menu for the canvas
+ * Called when a different plot tool is selected. Enables the
+ * appropriate mode on the canvas
+ * @param selected A QAction pointer denoting the desired tool
  */
-void PreviewPlot::showContextMenu(QContextMenuEvent *evt) {
-  QMenu contextMenu{this};
-
-  auto xscale = contextMenu.addMenu("X Scale");
-  xscale->addActions(m_contextXScale->actions());
-  auto yScale = contextMenu.addMenu("Y Scale");
-  yScale->addActions(m_contextYScale->actions());
-
-  contextMenu.addSeparator();
-  contextMenu.addAction(m_contextLegend);
-
-  contextMenu.exec(evt->globalPos());
+void PreviewPlot::switchPlotTool(QAction *selected) {
+  QString toolName = selected->text();
+  if (toolName == PLOT_TOOL_NONE) {
+    m_zoomTool.enableZoom(false);
+  } else if (toolName == PLOT_TOOL_ZOOM) {
+    m_zoomTool.enableZoom(true);
+  } else {
+    // if a tool is added to the menu but no handler is added
+    g_log.warning("Unknown plot tool selected.");
+  }
 }
 
 /**

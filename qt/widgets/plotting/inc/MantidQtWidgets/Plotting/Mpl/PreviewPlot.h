@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
+#include "MantidQtWidgets/MplCpp/ZoomTool.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
@@ -20,7 +21,6 @@
 
 class QAction;
 class QActionGroup;
-class QContextMenuEvent;
 
 namespace MantidQt {
 namespace Widgets {
@@ -55,12 +55,17 @@ public:
 public slots:
   void clear();
   void resizeX();
+  void resetView();
   void showLegend(const bool visible);
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
 
 private:
+  bool handleMousePressEvent(QMouseEvent *evt);
+  bool handleMouseReleaseEvent(QMouseEvent *evt);
+  void showContextMenu(QMouseEvent *evt);
+
   struct Line2DInfo {
     Widgets::MplCpp::Line2D line;
     // Non-owning pointer to the source workspace
@@ -84,24 +89,24 @@ private:
                             const Mantid::API::MatrixWorkspace &ws,
                             const size_t wsIndex, const QString &curveName,
                             const QColor &lineColour);
-  Widgets::MplCpp::Line2D createLine(Widgets::MplCpp::Axes &axes,
-                                     const Mantid::API::MatrixWorkspace &ws,
-                                     const size_t wsIndex, const QString &label,
-                                     const QColor &colour);
   void removeLines(const Mantid::API::MatrixWorkspace &ws);
   void replaceLineData(const Mantid::API::MatrixWorkspace &oldWS,
-                    const Mantid::API::MatrixWorkspace &newWS);
+                       const Mantid::API::MatrixWorkspace &newWS);
   void regenerateLegend();
   void removeLegend();
 
-  void showContextMenu(QContextMenuEvent *evt);
+  void switchPlotTool(QAction *selected);
   void setXScaleType(QAction *selected);
   void setYScaleType(QAction *selected);
   void setScaleType(AxisID id, QString actionName);
   void toggleLegend(const bool checked);
 
+  // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   std::list<Line2DInfo> m_lines;
+
+  // Canvas tools
+  Widgets::MplCpp::ZoomTool m_zoomTool;
 
   // Observers for ADS Notifications
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
@@ -110,8 +115,10 @@ private:
       m_wsReplacedObserver;
 
   // Context menu actions
-  QAction *m_contextLegend;
+  QActionGroup *m_contextPlotTools;
+  QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
+  QAction *m_contextLegend;
 };
 
 } // namespace MantidWidgets

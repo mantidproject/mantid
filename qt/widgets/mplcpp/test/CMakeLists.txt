@@ -9,9 +9,9 @@ set(TEST_FILES
     Line2DTest.h
     MantidColormapTest.h
     ScalarMappableTest.h
-    ZoomerTest.h
     QBackendExtractTest.h
-    PlotTest.h)
+    PlotTest.h
+    ZoomToolTest.h)
 
 if(NOT APPLE)
   list(APPEND TEST_FILES
