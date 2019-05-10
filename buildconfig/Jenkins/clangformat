@@ -23,7 +23,7 @@ if [ "$(git config user.email)" == "" ]; then
 fi
 
 # sources to format
-sources=`find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' \)`
+sources=`find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \)`
 sha=`git rev-parse --short HEAD`
 
 # format
