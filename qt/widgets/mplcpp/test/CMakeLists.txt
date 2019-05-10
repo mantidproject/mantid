@@ -8,10 +8,10 @@ set(TEST_FILES
     FigureTest.h
     Line2DTest.h
     MantidColormapTest.h
-    ScalarMappableTest.h
-    QBackendExtractTest.h
+    PanZoomToolTest.h
     PlotTest.h
-    ZoomToolTest.h)
+    QBackendExtractTest.h
+    ScalarMappableTest.h)
 
 if(NOT APPLE)
   list(APPEND TEST_FILES

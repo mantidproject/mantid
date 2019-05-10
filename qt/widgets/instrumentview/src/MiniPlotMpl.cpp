@@ -95,7 +95,7 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
   m_canvas->installEventFilterToMplCanvas(this);
   // Mouse events cause zooming by default. See mouseReleaseEvent
   // for exceptions
-  m_zoomer.enableZoom(true);
+  m_zoomTool.enableZoom(true);
   connect(m_homeBtn, SIGNAL(clicked()), this, SLOT(zoomOutOnPlot()));
 }
 

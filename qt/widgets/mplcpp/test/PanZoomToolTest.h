@@ -4,45 +4,71 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_ZOOMTOOLTEST_H
-#define MPLCPP_ZOOMTOOLTEST_H
+#ifndef MPLCPP_PANPanpanZoomToolTest_H
+#define MPLCPP_PANPanpanZoomToolTest_H
 
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
-#include "MantidQtWidgets/MplCpp/ZoomTool.h"
+#include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 
 #include <cxxtest/TestSuite.h>
 
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
-using MantidQt::Widgets::MplCpp::ZoomTool;
-using namespace MantidQt::Widgets::Common;
+using MantidQt::Widgets::MplCpp::PanZoomTool;
 namespace Python = MantidQt::Widgets::MplCpp::Python;
 
-class ZoomToolTest : public CxxTest::TestSuite {
+class PanZoomToolTest : public CxxTest::TestSuite {
 public:
-  static ZoomToolTest *createSuite() { return new ZoomToolTest; }
-  static void destroySuite(ZoomToolTest *suite) { delete suite; }
+  static PanZoomToolTest *createSuite() { return new PanZoomToolTest; }
+  static void destroySuite(PanZoomToolTest *suite) { delete suite; }
 
 public:
   // ----------------------------- success tests -------------------------------
   void testConstructionWithFigureCanvasSucceeds() {
     FigureCanvasQt canvas{111};
-    TS_ASSERT_THROWS_NOTHING(ZoomTool zoomTool(&canvas));
+    TS_ASSERT_THROWS_NOTHING(PanZoomTool panZoomTool(&canvas));
   }
 
-  void testDefaultHasZoomDisabled() {
+  void testDefaultHasPanAndZoomDisabled() {
     FigureCanvasQt canvas{111};
-    ZoomTool zoomTool(&canvas);
+    PanZoomTool panZoomTool(&canvas);
 
-    TS_ASSERT_EQUALS(false, zoomTool.isZoomEnabled());
+    TS_ASSERT_EQUALS(false, panZoomTool.isZoomEnabled());
+    TS_ASSERT_EQUALS(false, panZoomTool.isPanEnabled());
+  }
+
+  void testEnableZoomDisablesPan() {
+    FigureCanvasQt canvas{111};
+    PanZoomTool panZoomTool(&canvas);
+
+    panZoomTool.enablePan(true);
+    TS_ASSERT_EQUALS(true, panZoomTool.isPanEnabled());
+    TS_ASSERT_EQUALS(false, panZoomTool.isZoomEnabled());
+
+    panZoomTool.enableZoom(true);
+    TS_ASSERT_EQUALS(false, panZoomTool.isPanEnabled());
+    TS_ASSERT_EQUALS(true, panZoomTool.isZoomEnabled());
+  }
+
+  void testEnablePanDisablesZoom() {
+    FigureCanvasQt canvas{111};
+    PanZoomTool panZoomTool(&canvas);
+
+    panZoomTool.enableZoom(true);
+    TS_ASSERT_EQUALS(true, panZoomTool.isZoomEnabled());
+    TS_ASSERT_EQUALS(false, panZoomTool.isPanEnabled());
+
+    panZoomTool.enablePan(true);
+    TS_ASSERT_EQUALS(false, panZoomTool.isZoomEnabled());
+    TS_ASSERT_EQUALS(true, panZoomTool.isPanEnabled());
   }
 
   void testZoomOutDoesNotThrow() {
     FigureCanvasQt canvas{111};
     canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5});
-    ZoomTool zoomTool(&canvas);
-    zoomIn(&zoomTool);
+    PanZoomTool panZoomTool(&canvas);
+    zoomIn(&panZoomTool);
 
-    TS_ASSERT_THROWS_NOTHING(zoomTool.zoomOut());
+    TS_ASSERT_THROWS_NOTHING(panZoomTool.zoomOut());
     auto xlim(Python::Object(canvas.gca().pyobj().attr("get_xlim")()));
     // Do the axis limits get back to somewhere "close" to what is expected
     TS_ASSERT_DELTA(1.0, PyFloat_AsDouble(Python::Object(xlim[0]).ptr()), 0.25);
@@ -50,10 +76,11 @@ public:
   }
 
 private:
-  void zoomIn(ZoomTool *zoomTool) {
-    zoomTool->pyobj().attr("press_zoom")(createDummyMplMouseEvent(100, 100));
+  void zoomIn(PanZoomTool *panZoomTool) {
+    panZoomTool->pyobj().attr("press_zoom")(createDummyMplMouseEvent(100, 100));
     // events myst be >=5 pixels apart to count
-    zoomTool->pyobj().attr("release_zoom")(createDummyMplMouseEvent(110, 110));
+    panZoomTool->pyobj().attr("release_zoom")(
+        createDummyMplMouseEvent(110, 110));
   }
 
   Python::Object createDummyMplMouseEvent(double xpos, double ypos) {
@@ -79,4 +106,4 @@ private:
   }
 };
 
-#endif // MPLCPP_ZOOMTOOLTEST_H
+#endif // MPLCPP_PanpanZoomToolTest_H

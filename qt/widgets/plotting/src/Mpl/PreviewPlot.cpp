@@ -49,9 +49,20 @@ namespace MantidQt {
 
 namespace MantidWidgets {
 
+/**
+ * Construct a plot object
+ * @param parent The parent widget
+ * @param watchADS If true then ADS observers are added
+ */
 PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, parent)}, m_lines{},
+<<<<<<< HEAD
       m_zoomTool(m_canvas),
+||||||| parent of d0c18a6... Merge ZoomTool and PanTool
+      m_panTool(m_canvas), m_zoomTool(m_canvas),
+=======
+      m_panZoomTool(m_canvas),
+>>>>>>> d0c18a6... Merge ZoomTool and PanTool
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
   createLayout();
@@ -165,10 +176,7 @@ void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
 /**
  * Reset the whole view to show all of the data
  */
-void PreviewPlot::resetView() {
-  m_zoomTool.zoomOut();
-  m_canvas->gca().autoscaleView();
-}
+void PreviewPlot::resetView() { m_panZoomTool.zoomOut(); }
 
 /**
  * Toggle for programatic legend visibility toggle
@@ -429,9 +437,9 @@ void PreviewPlot::removeLegend() {
 void PreviewPlot::switchPlotTool(QAction *selected) {
   QString toolName = selected->text();
   if (toolName == PLOT_TOOL_NONE) {
-    m_zoomTool.enableZoom(false);
+    m_panZoomTool.enableZoom(false);
   } else if (toolName == PLOT_TOOL_ZOOM) {
-    m_zoomTool.enableZoom(true);
+    m_panZoomTool.enableZoom(true);
   } else {
     // if a tool is added to the menu but no handler is added
     g_log.warning("Unknown plot tool selected.");
