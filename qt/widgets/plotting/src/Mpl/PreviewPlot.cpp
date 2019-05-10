@@ -19,7 +19,10 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
-constexpr bool DRAGGABLE_LEGEND{true};
+constexpr auto DRAGGABLE_LEGEND{true};
+constexpr auto LINEAR_SCALE{"Linear"};
+constexpr auto LOG_SCALE{"Log"};
+constexpr auto SQUARE_SCALE{"Square"};
 } // namespace
 
 namespace MantidQt {
@@ -185,6 +188,30 @@ void PreviewPlot::createLayout() {
  * Create the menu actions items
  */
 void PreviewPlot::createActions() {
+  // scales
+  m_contextXScale = new QActionGroup(this);
+  m_contextXScale->setExclusive(true);
+  connect(m_contextXScale, &QActionGroup::triggered, this,
+          &PreviewPlot::setXScaleType);
+  m_contextYScale = new QActionGroup(this);
+  m_contextYScale->setExclusive(true);
+  connect(m_contextYScale, &QActionGroup::triggered, this,
+          &PreviewPlot::setYScaleType);
+  auto addCheckableAction = [](QActionGroup *group, const char *name) {
+    auto action = group->addAction(name);
+    action->setCheckable(true);
+  };
+  for (const auto &scaleType : {LINEAR_SCALE, LOG_SCALE}) {
+    addCheckableAction(m_contextXScale, scaleType);
+    addCheckableAction(m_contextYScale, scaleType);
+  }
+  // Square scaling only apples to the X axis
+  addCheckableAction(m_contextXScale, SQUARE_SCALE);
+  // Set defaults as the first in the list
+  m_contextXScale->actions()[0]->setChecked(true);
+  m_contextYScale->actions()[0]->setChecked(true);
+
+  // legend
   m_contextLegend = new QAction("Legend", this);
   m_contextLegend->setCheckable(true);
   m_contextLegend->setChecked(true);
@@ -326,8 +353,48 @@ void PreviewPlot::removeLegend() {
  */
 void PreviewPlot::showContextMenu(QContextMenuEvent *evt) {
   QMenu contextMenu{this};
+
+  auto xscale = contextMenu.addMenu("X Scale");
+  xscale->addActions(m_contextXScale->actions());
+  auto yScale = contextMenu.addMenu("Y Scale");
+  yScale->addActions(m_contextYScale->actions());
+
+  contextMenu.addSeparator();
   contextMenu.addAction(m_contextLegend);
+
   contextMenu.exec(evt->globalPos());
+}
+
+/**
+ * Set the X scale based on the given QAction
+ * @param selected The action that triggered the slot
+ */
+void PreviewPlot::setXScaleType(QAction *selected) {
+  setScaleType(AxisID::XBottom, selected->text());
+}
+
+/**
+ * Set the X scale based on the given QAction
+ * @param selected The action that triggered the slot
+ */
+void PreviewPlot::setYScaleType(QAction *selected) {
+  setScaleType(AxisID::YLeft, selected->text());
+}
+
+void PreviewPlot::setScaleType(AxisID id, QString actionName) {
+  auto scaleType = actionName.toLower().toLatin1();
+  auto axes = m_canvas->gca();
+  switch (id) {
+  case AxisID::XBottom:
+    axes.setXScale(scaleType.constData());
+    break;
+  case AxisID::YLeft:
+    axes.setYScale(scaleType.constData());
+    break;
+  default:
+    break;
+  }
+  m_canvas->draw();
 }
 
 /**

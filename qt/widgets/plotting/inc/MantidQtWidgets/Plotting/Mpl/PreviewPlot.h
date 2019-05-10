@@ -19,6 +19,7 @@
 #include <list>
 
 class QAction;
+class QActionGroup;
 class QContextMenuEvent;
 
 namespace MantidQt {
@@ -94,6 +95,9 @@ private:
   void removeLegend();
 
   void showContextMenu(QContextMenuEvent *evt);
+  void setXScaleType(QAction *selected);
+  void setYScaleType(QAction *selected);
+  void setScaleType(AxisID id, QString actionName);
   void toggleLegend(const bool checked);
 
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
@@ -107,6 +111,7 @@ private:
 
   // Context menu actions
   QAction *m_contextLegend;
+  QActionGroup *m_contextXScale, *m_contextYScale;
 };
 
 } // namespace MantidWidgets
