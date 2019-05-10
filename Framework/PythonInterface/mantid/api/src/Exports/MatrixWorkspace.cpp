@@ -330,7 +330,7 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
-      .def("replaceAxis", &MatrixWorkspace::replaceAxis,
+      .def("replaceAxis", &MatrixWorkspace::pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
 
