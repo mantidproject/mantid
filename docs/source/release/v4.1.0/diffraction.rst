@@ -34,6 +34,8 @@ Bug Fixes
 
 - Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
 
+- Prevented issue with reading CSV files on python 3
+
 Single Crystal Diffraction
 --------------------------
 
