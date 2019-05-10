@@ -8,7 +8,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_
 
 #include "DllConfig.h"
-
+#include <string>
 #include <cstddef>
 
 namespace MantidQt {
@@ -18,11 +18,11 @@ namespace CustomInterfaces {
 /// into the ED GUI
 class MANTIDQT_ENGGDIFFRACTION_DLL RunLabel {
 public:
-  RunLabel(const int runNumber, const size_t bank);
+  RunLabel(const std::string runNumber, const size_t bank);
 
   RunLabel() = default;
 
-  int runNumber;
+  std::string runNumber;
   std::size_t bank;
 };
 

@@ -15,7 +15,7 @@ std::string addRunNumberToGSASIIProjectFile(
     const MantidQt::CustomInterfaces::RunLabel &runLabel) {
   const auto dotPosition = filename.find_last_of(".");
   return filename.substr(0, dotPosition) + "_" +
-         std::to_string(runLabel.runNumber) + "_" +
+         runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) +
          filename.substr(dotPosition, filename.length());
 }
@@ -144,7 +144,7 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
     m_view->userError("Invalid run identifier",
                       "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
-                          std::to_string(runLabel.runNumber) +
+                          runLabel.runNumber +
                           ", bank ID = " + std::to_string(runLabel.bank) +
                           ". Please contact the development team");
     return;
@@ -240,7 +240,7 @@ void EnggDiffGSASFittingPresenter::processDoRefinement() {
     m_view->userError(
         "Invalid run selected for refinement",
         "Tried to run refinement on invalid focused run, run number " +
-            std::to_string(runLabel->runNumber) + " and bank ID " +
+            runLabel->runNumber + " and bank ID " +
             std::to_string(runLabel->bank) +
             ". Please contact the development team with this message");
     return;

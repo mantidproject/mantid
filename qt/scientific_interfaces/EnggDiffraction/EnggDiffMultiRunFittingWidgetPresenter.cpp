@@ -23,13 +23,13 @@ bool isDigit(const std::string &text) {
 
 std::string
 generateFittedPeaksName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
+  return runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) + "_fitted_peaks_external_plot";
 }
 
 std::string
 generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
+  return runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) + "_external_plot";
 }
 
@@ -82,7 +82,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
     const Mantid::API::MatrixWorkspace_sptr ws) {
-  const auto runNumber = ws->getRunNumber();
+  const auto runNumber = std::to_string(ws->getRunNumber());
   const auto bankID = guessBankID(ws);
 
   m_model->addFocusedRun(RunLabel(runNumber, bankID), ws);

@@ -1373,8 +1373,11 @@ std::string
 EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
   const std::string instStr = m_view->currentInstrument();
   const std::string runNumber = Poco::Path(runNo).getBaseName();
-  const std::string runName =
-      runNumber.substr(runNumber.find(instStr) + instStr.size());
+  const auto instrumentPresent = runNumber.find(instStr);
+  std::string runName =
+      (instrumentPresent != std::string::npos)
+          ? runNumber.substr(instrumentPresent + instStr.size())
+          : runNumber;
   return instStr + "_" + runName + "_focused_cropped.nxs";
 }
 
@@ -1791,8 +1794,8 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   const bool saveOutputFiles = m_view->saveFocusedOutputFiles();
   if (saveOutputFiles) {
     try {
-      const int runNo =
-          stoi(runLabel.substr(runLabel.rfind(instStr) + instStr.size()));
+      const auto runNo =
+          runLabel.substr(runLabel.rfind(instStr) + instStr.size());
       RunLabel label(runNo, bank);
       saveFocusedXYE(label, outWSName);
       saveGSS(label, outWSName);
@@ -2314,7 +2317,7 @@ EnggDiffractionPresenter::outFileNameFactory(const std::string &inputWorkspace,
                                              const std::string &format) {
   std::string fullFilename;
 
-  const auto runNo = std::to_string(runLabel.runNumber);
+  const auto runNo = runLabel.runNumber;
   const auto bank = std::to_string(runLabel.bank);
 
   // calibration output files
@@ -2564,10 +2567,10 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
   return dir;
 }
 
-std::string
-EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
+std::string EnggDiffractionPresenter::userHDFRunFilename(
+    const std::string runNumber) const {
   auto userOutputDir = outFilesUserDir("Runs");
-  userOutputDir.append(std::to_string(runNumber) + ".hdf5");
+  userOutputDir.append(runNumber + ".hdf5");
   return userOutputDir.toString();
 }
 
@@ -2578,8 +2581,8 @@ std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
   const auto minLabel = std::min_element(begin, end);
   const auto maxLabel = std::max_element(begin, end);
   auto userOutputDir = outFilesUserDir("Runs");
-  userOutputDir.append(std::to_string(minLabel->runNumber) + "_" +
-                       std::to_string(maxLabel->runNumber) + ".hdf5");
+  userOutputDir.append((minLabel->runNumber) + "_" +
+                       (maxLabel->runNumber) + ".hdf5");
   return userOutputDir.toString();
 }
 

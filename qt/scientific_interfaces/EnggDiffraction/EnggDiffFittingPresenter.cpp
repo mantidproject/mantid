@@ -37,11 +37,11 @@ RunLabel runLabelFromListWidgetLabel(const std::string &listLabel) {
   const auto runNumber = listLabel.substr(0, underscorePosition);
   const auto bank = listLabel.substr(underscorePosition + 1);
 
-  return RunLabel(std::atoi(runNumber.c_str()), std::atoi(bank.c_str()));
+  return RunLabel(runNumber, std::atoi(bank.c_str()));
 }
 
 std::string listWidgetLabelFromRunLabel(const RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
+  return runLabel.runNumber + "_" +
          std::to_string(runLabel.bank);
 }
 
@@ -203,7 +203,7 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
 }
 
 std::string
-EnggDiffFittingPresenter::userHDFRunFilename(const int runNumber) const {
+EnggDiffFittingPresenter::userHDFRunFilename(const std::string runNumber) const {
   return m_mainParam->userHDFRunFilename(runNumber);
 }
 

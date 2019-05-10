@@ -42,7 +42,7 @@ inline void
 EnggDiffFittingModelAddWSExposed::addWorkspace(const RunLabel &runLabel,
                                                API::MatrixWorkspace_sptr ws) {
   addFocusedWorkspace(runLabel, ws,
-                      std::to_string(runLabel.runNumber) + "_" +
+                      runLabel.runNumber + "_" +
                           std::to_string(runLabel.bank));
 }
 
@@ -162,7 +162,7 @@ public:
     API::MatrixWorkspace_sptr ws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10);
 
-    const RunLabel runLabel(100, 1);
+    const RunLabel runLabel("100", 1);
     TS_ASSERT_THROWS_NOTHING(model.addWorkspace(runLabel, ws));
     const auto retrievedWS = model.getFocusedWorkspace(runLabel);
 
@@ -173,18 +173,18 @@ public:
   void test_getRunNumbersAndBankIDs() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
-    addSampleWorkspaceToModel(RunLabel(123, 1), model);
-    addSampleWorkspaceToModel(RunLabel(456, 2), model);
-    addSampleWorkspaceToModel(RunLabel(789, 1), model);
-    addSampleWorkspaceToModel(RunLabel(123, 2), model);
+    addSampleWorkspaceToModel(RunLabel("123", 1), model);
+    addSampleWorkspaceToModel(RunLabel("456", 2), model);
+    addSampleWorkspaceToModel(RunLabel("789", 1), model);
+    addSampleWorkspaceToModel(RunLabel("123", 2), model);
 
     const auto runLabels = model.getRunLabels();
 
     TS_ASSERT_EQUALS(runLabels.size(), 4);
-    TS_ASSERT_EQUALS(runLabels[0], RunLabel(123, 1));
-    TS_ASSERT_EQUALS(runLabels[1], RunLabel(123, 2));
-    TS_ASSERT_EQUALS(runLabels[2], RunLabel(456, 2));
-    TS_ASSERT_EQUALS(runLabels[3], RunLabel(789, 1));
+    TS_ASSERT_EQUALS(runLabels[0], RunLabel("123", 1));
+    TS_ASSERT_EQUALS(runLabels[1], RunLabel("123", 2));
+    TS_ASSERT_EQUALS(runLabels[2], RunLabel("456", 2));
+    TS_ASSERT_EQUALS(runLabels[3], RunLabel("789", 1));
   }
 
   void test_loadWorkspaces() {
@@ -194,7 +194,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_LABEL));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws->getRunNumber(), FOCUSED_WS_RUN_LABEL.runNumber);
+    TS_ASSERT_EQUALS(std::to_string(ws->getRunNumber()), FOCUSED_WS_RUN_LABEL.runNumber);
   }
 
   void test_setDifcTzero() {
@@ -231,9 +231,9 @@ public:
   void test_getNumFocusedWorkspaces() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
-    addSampleWorkspaceToModel(RunLabel(123, 1), model);
-    addSampleWorkspaceToModel(RunLabel(456, 2), model);
-    addSampleWorkspaceToModel(RunLabel(789, 1), model);
+    addSampleWorkspaceToModel(RunLabel("123", 1), model);
+    addSampleWorkspaceToModel(RunLabel("456", 2), model);
+    addSampleWorkspaceToModel(RunLabel("789", 1), model);
 
     TS_ASSERT_EQUALS(model.getNumFocusedWorkspaces(), 3);
   }
@@ -284,11 +284,11 @@ public:
   void test_removeRun() {
     auto model = EnggDiffFittingModelAddWSExposed();
 
-    const RunLabel label1(123, 1);
+    const RunLabel label1("123", 1);
     addSampleWorkspaceToModel(label1, model);
-    const RunLabel label2(456, 2);
+    const RunLabel label2("456", 2);
     addSampleWorkspaceToModel(label2, model);
-    const RunLabel label3(789, 1);
+    const RunLabel label3("789", 1);
     addSampleWorkspaceToModel(label3, model);
 
     model.removeRun(label1);
@@ -309,6 +309,6 @@ const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME =
     "ENGINX_277208_focused_bank_2.nxs";
 
 const RunLabel EnggDiffFittingModelTest::FOCUSED_WS_RUN_LABEL =
-    RunLabel(277208, 2);
+    RunLabel("277208", 2);
 
 #endif

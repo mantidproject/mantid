@@ -50,7 +50,7 @@ bool EnggDiffMultiRunFittingWidgetModel::hasFittedPeaksForRun(
 void EnggDiffMultiRunFittingWidgetModel::removeRun(const RunLabel &runLabel) {
   if (!m_focusedRunMap.contains(runLabel)) {
     throw std::runtime_error("Tried to remove non-existent run (run number " +
-                             std::to_string(runLabel.runNumber) +
+                             runLabel.runNumber +
                              " and bank ID " + std::to_string(runLabel.bank) +
                              ")");
   }

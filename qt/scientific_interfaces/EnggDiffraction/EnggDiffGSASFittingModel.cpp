@@ -93,12 +93,12 @@ void EnggDiffGSASFittingModel::addSigma(const RunLabel &runLabel,
 namespace {
 
 std::string generateFittedPeaksWSName(const RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
+  return runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) + "_gsasii_fitted_peaks";
 }
 
 std::string generateLatticeParamsName(const RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
+  return runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) + "_lattice_params";
 }
 } // namespace
@@ -279,7 +279,7 @@ void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
   const auto numRuns = refinementResultSets.size();
   std::vector<std::string> latticeParamWSNames;
   latticeParamWSNames.reserve(numRuns);
-  std::vector<long> runNumbers;
+  std::vector<std::string> runNumbers;
   runNumbers.reserve(numRuns);
   std::vector<long> bankIDs;
   bankIDs.reserve(numRuns);
