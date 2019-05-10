@@ -606,7 +606,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     g_log.warning("Temperature file was not be loaded:" +
                   std::string(e.what()));
   }
-}
+} // namespace DataHandling
 
 namespace {
 std::string findTitlesFromLine(const std::string &line) {
