@@ -136,7 +136,7 @@ void SortHKL::exec() {
           "Workspace2D", uniqueReflections.getReflections().size(), 20, 20);
   int counter = 0;
   size_t maxPeaks = 0;
-  auto taxis = new TextAxis(uniqueReflections.getReflections().size());
+  auto tAxis = std::make_unique<TextAxis>(uniqueReflections.getReflections().size());
   UniqWksp->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   for (const auto &unique : uniqueReflections.getReflections()) {
     /* Since all possible unique reflections are explored
@@ -144,7 +144,7 @@ void SortHKL::exec() {
      * In that case, nothing can be done.*/
 
     if (unique.second.count() > 2) {
-      taxis->setLabel(counter, "   " + unique.second.getHKL().toString());
+      tAxis->setLabel(counter, "   " + unique.second.getHKL().toString());
       auto &UniqX = UniqWksp->mutableX(counter);
       auto &UniqY = UniqWksp->mutableY(counter);
       auto &UniqE = UniqWksp->mutableE(counter);
@@ -225,7 +225,7 @@ void SortHKL::exec() {
       // Copy the spectrum number/detector IDs
       outSpec.copyInfoFrom(inSpec);
     }
-    UniqWksp2->replaceAxis(1, taxis);
+    UniqWksp2->replaceAxis(1, std::move(tAxis));
     setProperty("EquivalentsWorkspace", UniqWksp2);
   } else {
     setProperty("EquivalentsWorkspace", UniqWksp);
