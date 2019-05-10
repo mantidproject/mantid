@@ -399,12 +399,13 @@ void PropertyWithValue<TYPE>::replaceValidator(IValidator_sptr newValidator) {
 template <typename TYPE>
 std::string
 PropertyWithValue<TYPE>::setValueFromProperty(const Property &right) {
-  auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right);
-  if (!prop) {
-    return "Could not set value: properties have different type.";
-  }
-  m_value = prop->m_value;
-  return "";
+  
+  if (auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right)) {
+    m_value = prop->m_value;
+    return "";
+  } else {
+    return setValue(right.value());
+  }  
 }
 
 /**
