@@ -32,3 +32,4 @@ Bug Fixes
 - Exporting table as a batch file is fixed for Mantid Workbench.
 - The warning message raised when you have supplied a transmission run without a direct run has been suppressed when data is still being input. The warning will still be raised if you load or process the data.
 - The algorithm :ref:`Load <algm-Load>` can now load NXcanSAS files.
+- A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
