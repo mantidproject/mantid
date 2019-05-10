@@ -24,8 +24,15 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL Line2D : public Artist {
 public:
-  Line2D(Common::Python::Object obj, std::vector<double> xdataOwner,
-         std::vector<double> ydataOwner);
+  // Ties together Line2D data
+  struct Data {
+    std::vector<double> xaxis, yaxis;
+  };
+
+public:
+  Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner,
+         std::vector<double> &&ydataOwner);
+  Line2D(Python::Object obj, Line2D::Data &&dataOwner);
   ~Line2D() noexcept;
   Line2D(const Line2D &) = delete;
   Line2D &operator=(const Line2D &) = delete;
@@ -34,9 +41,13 @@ public:
 
   QColor getColor() const;
 
+  const Data &rawData() const { return m_dataOwner; }
+  void setData(std::vector<double> &&xdataOwner,
+               std::vector<double> &&ydataOwner);
+  void setData(Line2D::Data &&lineDataOwner);
+
 private:
-  // Containers that own the data making up the line
-  std::vector<double> m_xOwner, m_yOwner;
+  Data m_dataOwner;
 };
 
 } // namespace MplCpp
