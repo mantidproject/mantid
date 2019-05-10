@@ -15,8 +15,12 @@ else
 fi
 
 # git needs to have a minimal coniguration for git commit to work
-git config user.name mantid-builder
-git config user.email "mantid-buildserver@mantidproject.org"
+if [ "$(git config user.name)" == "" ]; then
+  git config user.name mantid-builder
+fi
+if [ "$(git config user.email)" == "" ]; then
+  git config user.email "mantid-buildserver@mantidproject.org"
+fi
 
 # sources to format
 sources=`find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' \)`
