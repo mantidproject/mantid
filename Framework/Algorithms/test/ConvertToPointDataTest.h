@@ -57,16 +57,16 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(numSpectra, numBins);
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
     // add a new vertical axis
-    Mantid::API::Axis *const verticalAxis =
-        new Mantid::API::NumericAxis(numSpectra + 1);
-    testWS->replaceAxis(1, verticalAxis);
+    auto verticalAxis =
+        std::make_unique<Mantid::API::NumericAxis>(numSpectra + 1);
+    
     for (int i = 0; i < numSpectra + 1; i++) {
       verticalAxis->setValue(i, 2 * i);
     }
     verticalAxis->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
     verticalAxis->title() = "|Q|";
-
+    testWS->replaceAxis(1, std::move(verticalAxis));
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
 
     TS_ASSERT(outputWS);

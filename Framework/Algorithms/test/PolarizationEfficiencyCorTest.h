@@ -472,8 +472,8 @@ private:
       auto inWS = createWorkspaces(1)[0];
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
       ws->getAxis(0)->setUnit("Wavelength");
-      auto axis1 = new TextAxis(4);
-      ws->replaceAxis(1, axis1);
+      auto axis1 = std::make_unique<TextAxis>(4);
+      ws->replaceAxis(1, std::move(axis1));
       auto const &current_labels = labels.at(kind);
       for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
         axis1->setLabel(i, current_labels[i]);
