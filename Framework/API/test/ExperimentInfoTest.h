@@ -689,7 +689,7 @@ public:
     // this occurs in ConvertToMD, copy methadata
     ei.mutableRun().addProperty("W_MATRIX", wTrVector, true);
 
-    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(.get()));
+    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file.get()));
 
     th.reopenFile();
 

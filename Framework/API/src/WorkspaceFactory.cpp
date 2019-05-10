@@ -134,20 +134,20 @@ void WorkspaceFactoryImpl::initializeFromParent(
       continue;
     }
     const bool isBinEdge =
-        dynamic_cast<const BinEdgeAxis *const>(parent.m_axes[i]) != nullptr;
+        dynamic_cast<const BinEdgeAxis *const>(parent.m_axes[i].get()) != nullptr;
     const size_t newAxisLength =
         child.m_axes[i]->length() + (isBinEdge ? 1 : 0);
     const size_t oldAxisLength = parent.m_axes[i]->length();
 
     // Need to delete the existing axis created in init above
-    delete child.m_axes[i];
+
     child.m_axes[i] = nullptr;
     if (newAxisLength == oldAxisLength) {
       // Now set to a copy of the parent workspace's axis
-      child.m_axes[i] = parent.m_axes[i]->clone(&child);
+      child.m_axes[i] = std::unique_ptr<Axis>(parent.m_axes[i]->clone(&child));
     } else {
       // Call the 'different length' clone variant
-      child.m_axes[i] = parent.m_axes[i]->clone(newAxisLength, &child);
+      child.m_axes[i] = std::unique_ptr<Axis>(parent.m_axes[i]->clone(newAxisLength, &child));
     }
   }
 }

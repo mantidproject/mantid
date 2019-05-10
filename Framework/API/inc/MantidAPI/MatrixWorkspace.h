@@ -412,7 +412,8 @@ public:
 
   int axes() const;
   virtual Axis *getAxis(const std::size_t &axisIndex) const;
-  void replaceAxis(const std::size_t &axisIndex, Axis *const newAxis);
+  void replaceAxis(const std::size_t &axisIndex, std::unique_ptr<Axis> newAxis);
+  void pythonReplaceAxis(const std::size_t &axisIndex, Axis *newAxis);
 
   /// Will return the number of Axis currently stored in the workspace it is not
   /// always safe to assume it is just 2
@@ -571,7 +572,7 @@ protected:
   void updateCachedDetectorGrouping(const size_t index) const override;
 
   /// A vector of pointers to the axes for this workspace
-  std::vector<Axis *> m_axes;
+  std::vector<std::unique_ptr<Axis>> m_axes;
 
 private:
   std::size_t binIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
