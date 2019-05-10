@@ -61,7 +61,12 @@ class TestListSelectorPresenter(unittest.TestCase):
     def test_select_all_presenter_checkbox_changed_updates_current_filter_list_to_match_itself(self):
         self.presenter.handle_select_all_checkbox_changed(True)
 
-        self.view.addItems.assert_called_with([['property_two', False, False], ['property_one', True, True]])
+        self.view.addItems.assert_called_with([['property_two', True, False], ['property_one', True, True]])
+
+    def test_that_adding_to_the_filter_list_applies_additional_filter_on_items(self):
+        self.presenter.update_filter_list(['property_two'])
+
+        self.view.addItems.assert_called_with([['property_one', True, True]])
 
 
 if __name__ == '__main__':

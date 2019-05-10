@@ -14,7 +14,7 @@ from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
 
@@ -215,22 +215,27 @@ class MuonContext(object):
         elif self.gui_context['DeadTimeSource'] == 'None':
             return None
 
-    def get_names_of_workspaces_to_fit(self, runs='', groups='', pairs='', phasequad=False, rebin=False):
+    def get_names_of_workspaces_to_fit(self, runs='', group_and_pair='', phasequad=False, rebin=False):
+        if group_and_pair == 'All':
+            group = self.group_pair_context.group_names
+            pair = self.group_pair_context.pair_names
+        else:
+            group_pair_list = group_and_pair.replace(' ', '').split(',')
+            group = [item for item in group_pair_list if item in self.group_pair_context.group_names]
+            pair = [item for item in group_pair_list if item in self.group_pair_context.pair_names]
+
         if runs == 'All':
-            runs = self.data_context.current_runs
+            run_list = self.data_context.current_runs
+        else:
+            run_list = [run_string_to_list(item) for item in runs.replace(' ', '').split(',')]
+            run_list = [item for item in run_list if item in self.data_context.current_runs]
 
-        if groups == 'All':
-            groups = self.group_pair_context.group_names
-
-        if pairs == 'All':
-            pairs = self.group_pair_context.pair_names
-
-        group_names = self.group_pair_context.get_group_workspace_names(runs, groups, rebin)
-        pair_names = self.group_pair_context.get_pair_workspace_names(runs, pairs, rebin)
+        group_names = self.group_pair_context.get_group_workspace_names(run_list, group, rebin)
+        pair_names = self.group_pair_context.get_pair_workspace_names(run_list, pair, rebin)
 
         phasequad_names = []
         if phasequad:
-            for run in runs:
+            for run in run_list:
                 run_string = run_list_to_string(run)
                 phasequad_names += self.phase_context.get_phase_quad(self.data_context.instrument, run_string)
 
