@@ -10,13 +10,14 @@ import unittest
 from mantid.api import AnalysisDataService
 from mantid.api import FileFinder
 from mantid.dataobjects import Workspace2D
-
+from mantid.simpleapi import CreateWorkspace
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 if sys.version_info.major < 2:
     pass
@@ -54,7 +55,8 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_groups()
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
-        self.context.phase_context.add_phase_quad('EMU19489; PhaseQuad; PhaseTable EMU19489')
+        workspace = CreateWorkspace([0], [0], StoreInADS=False)
+        self.context.phase_context.add_phase_quad(MuonWorkspaceWrapper(workspace, 'EMU19489; PhaseQuad; PhaseTable EMU19489'))
 
     def test_reset_groups_and_pairs_to_default(self):
         self.assertEquals(self.group_pair_context.group_names, ['fwd', 'bwd'])
@@ -178,7 +180,16 @@ class MuonContextTest(unittest.TestCase):
     def test_get_workspaces_names_copes_with_non_existent_runs(self):
         self.populate_ADS()
 
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489, 22222', 'fwd, bwd, long, random, wrong', True)
+        workspace_list = self.context.get_names_of_workspaces_to_fit('19489, 22222', 'fwd, bwd, long', True)
+
+        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; #1', 'EMU19489; Group; bwd; Asymmetry; #1',
+                                          'EMU19489; Pair Asym; long; #1', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
+
+    def test_that_run_ranged_correctly_parsed(self):
+        self.populate_ADS()
+
+        workspace_list = self.context.get_names_of_workspaces_to_fit('19489-95', 'fwd, bwd, long',
+                                                                     True)
 
         self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; #1', 'EMU19489; Group; bwd; Asymmetry; #1',
                                           'EMU19489; Pair Asym; long; #1', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
