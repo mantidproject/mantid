@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MDFLocalParameterEditor.h"
-#include "MDFEditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/LocalParameterEditor.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
 #include <QAction>
 #include <QDoubleValidator>
@@ -18,8 +18,8 @@
 #include <QPushButton>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace MDF {
+namespace MantidWidgets {
+
 /// Constructor
 /// @param parent :: Parent widget.
 /// @param index :: Index of the spectrum which parameter is edited.
@@ -273,6 +273,5 @@ void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
   m_setToLogAction->setEnabled(enabled);
   m_setAllToLogAction->setEnabled(enabled);
 }
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

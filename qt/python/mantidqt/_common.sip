@@ -684,3 +684,45 @@ signals:
   void cutRowsRequested();
 
 };
+
+// ---------------------------------
+// Function Browser
+// ---------------------------------
+class FunctionBrowser : public QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FunctionBrowser.h"
+%End
+public:
+    FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
+    FunctionTreeView *view() const;
+    void setFunction(const QString &funStr);
+    QString getFunctionString();
+    QString getFitFunctionString() const;
+    void setParameter(const QString &funStr, double value);
+    double getParameter(const QString &funStr);
+    int getNumberOfDatasets() const;
+    void setNumberOfDatasets(int n);
+    void setCurrentDataset(int i);
+    int getCurrentDataset() const;
+signals:
+    void functionStructureChanged();
+};
+
+// ---------------------------------
+// FunctionTreeView
+// ---------------------------------
+class FunctionTreeView : public QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
+%End
+public:
+    FunctionTreeView(QWidget *parent, bool multi);
+    int getNumberOfQtProperties() const;
+    int getNumberOfTieProperties() const;
+    int getNumberOfConstraintProperties() const;
+    QRect getVisualRectFunctionProperty(const QString &index) const;
+    QRect getVisualRectParameterProperty(const QString &index) const;
+    QTreeWidget *treeWidget() const;
+    QWidget *getParamWidget(const QString &paramName) const;
+    double getParameter(const QString &paramName) const;
+};
