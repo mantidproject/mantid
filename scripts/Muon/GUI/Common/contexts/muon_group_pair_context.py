@@ -32,7 +32,6 @@ def get_grouping_psi(workspace):
     return grouping_list, []
 
 
-
 def get_default_grouping(workspace, instrument, main_field_direction):
     parameter_name = "Default grouping file"
     if instrument == "MUSR" or instrument == 'CHRONUS':
