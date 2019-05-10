@@ -7,8 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import mantid.simpleapi as mantid
-from mantid import config
-import os.path
 
 
 wsfile ="WISH00040503.raw"

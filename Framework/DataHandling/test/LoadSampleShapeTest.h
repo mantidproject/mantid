@@ -136,7 +136,7 @@ public:
     MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 1, 0, 0, 45);
 
-    auto sampleMesh= loadCube();
+    auto sampleMesh = loadCube();
     alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {
@@ -153,7 +153,7 @@ public:
     alg.initialize();
     MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 1, 0, 90);
-    auto sampleMesh= loadCube();
+    auto sampleMesh = loadCube();
     alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
@@ -187,7 +187,7 @@ public:
     inputWS->mutableRun().mutableGoniometer().pushAxis("Z", 0, 0, 1, 35);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Y", 0, 1, 0, 20);
     inputWS->mutableRun().mutableGoniometer().pushAxis("X", 1, 0, 0, 70);
-    auto sampleMesh= loadCube();
+    auto sampleMesh = loadCube();
     alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {
