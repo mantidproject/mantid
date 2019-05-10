@@ -26,6 +26,7 @@ namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
 constexpr auto DRAGGABLE_LEGEND{true};
 constexpr auto PLOT_TOOL_NONE{"None"};
+constexpr auto PLOT_TOOL_PAN{"Pan"};
 constexpr auto PLOT_TOOL_ZOOM{"Zoom"};
 constexpr auto LINEAR_SCALE{"Linear"};
 constexpr auto LOG_SCALE{"Log"};
@@ -56,13 +57,7 @@ namespace MantidWidgets {
  */
 PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, parent)}, m_lines{},
-<<<<<<< HEAD
-      m_zoomTool(m_canvas),
-||||||| parent of d0c18a6... Merge ZoomTool and PanTool
-      m_panTool(m_canvas), m_zoomTool(m_canvas),
-=======
       m_panZoomTool(m_canvas),
->>>>>>> d0c18a6... Merge ZoomTool and PanTool
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
   createLayout();
@@ -199,7 +194,7 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   case QEvent::ContextMenu:
     // handled by mouse press events below as we need to
     // stop the canvas getting mouse events in some circumstances
-    // to disable zooming
+    // to disable zooming/panning
     stopEvent = true;
     break;
   case QEvent::MouseButtonPress:
@@ -292,8 +287,8 @@ void PreviewPlot::createActions() {
         return group;
       };
   // plot tools
-  m_contextPlotTools =
-      createExclusiveActionGroup({PLOT_TOOL_NONE, PLOT_TOOL_ZOOM});
+  m_contextPlotTools = createExclusiveActionGroup(
+      {PLOT_TOOL_NONE, PLOT_TOOL_PAN, PLOT_TOOL_ZOOM});
   connect(m_contextPlotTools, &QActionGroup::triggered, this,
           &PreviewPlot::switchPlotTool);
   m_contextResetView = new QAction("Reset Plot", this);
@@ -438,6 +433,9 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
   QString toolName = selected->text();
   if (toolName == PLOT_TOOL_NONE) {
     m_panZoomTool.enableZoom(false);
+    m_panZoomTool.enablePan(false);
+  } else if (toolName == PLOT_TOOL_PAN) {
+    m_panZoomTool.enablePan(false);
   } else if (toolName == PLOT_TOOL_ZOOM) {
     m_panZoomTool.enableZoom(true);
   } else {

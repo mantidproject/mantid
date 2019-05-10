@@ -80,7 +80,7 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
     : QWidget(parent), m_canvas(new FigureCanvasQt(111)),
       m_homeBtn(createHomeButton()), m_lines(), m_peakLabels(),
       m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
-      m_activeCurveLabel(), m_storedCurveLabels(), m_zoomer(m_canvas),
+      m_activeCurveLabel(), m_storedCurveLabels(), m_zoomTool(m_canvas),
       m_mousePressPt() {
   auto plotLayout = new QGridLayout(this);
   plotLayout->setContentsMargins(0, 0, 0, 0);
@@ -340,7 +340,7 @@ bool MiniPlotMpl::handleMouseReleaseEvent(QMouseEvent *evt) {
 /**
  * Wire to the home button click
  */
-void MiniPlotMpl::zoomOutOnPlot() { m_zoomer.zoomOut(); }
+void MiniPlotMpl::zoomOutOnPlot() { m_zoomTool.zoomOut(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

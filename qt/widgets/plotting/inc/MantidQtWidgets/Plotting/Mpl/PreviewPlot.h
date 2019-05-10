@@ -10,14 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
-<<<<<<< HEAD
-#include "MantidQtWidgets/MplCpp/ZoomTool.h"
-||||||| parent of d0c18a6... Merge ZoomTool and PanTool
-#include "MantidQtWidgets/MplCpp/PanTool.h"
-#include "MantidQtWidgets/MplCpp/ZoomTool.h"
-=======
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
->>>>>>> d0c18a6... Merge ZoomTool and PanTool
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
