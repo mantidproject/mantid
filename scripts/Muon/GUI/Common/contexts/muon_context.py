@@ -228,6 +228,8 @@ class MuonContext(object):
             run_list = self.data_context.current_runs
         else:
             run_list = [run_string_to_list(item) for item in runs.replace(' ', '').split(',')]
+            flat_list = [[item] for sublist in run_list for item in sublist if len(sublist) > 1]
+            run_list += flat_list
             run_list = [item for item in run_list if item in self.data_context.current_runs]
 
         group_names = self.group_pair_context.get_group_workspace_names(run_list, group, rebin)
