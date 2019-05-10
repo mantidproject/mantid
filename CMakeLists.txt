@@ -155,8 +155,6 @@ set(FULL_PACKAGE_BUILD 1)
 set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
-set(CXXTEST_SINGLE_LOGFILE
-    CACHE BOOL "Switch to have the tests for each package run together")
 set(CXXTEST_ADD_PERFORMANCE OFF
     CACHE BOOL
           "Switch to add Performance tests to the list of tests run by ctest?")
@@ -316,7 +314,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(ENABLE_MANTIDPLOT)
     set(_icon_filename ${IMAGES_DIR}/mantidplot)
     if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}_${CPACK_PACKAGE_SUFFIX})
+      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
     endif()
     install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
                           MantidPlot${_app_name_suffix}
@@ -327,7 +325,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(ENABLE_WORKBENCH)
     set(_icon_filename ${IMAGES_DIR}/mantid_workbench)
     if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}_${CPACK_PACKAGE_SUFFIX})
+      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
     endif()
     install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
                           MantidWorkbench${_app_name_suffix}

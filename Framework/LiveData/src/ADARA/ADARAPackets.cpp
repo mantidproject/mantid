@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/ADARA/ADARAPackets.h"
 
-#include <boost/lexical_cast.hpp>
 #include <cstring>
 
 using namespace ADARA;

@@ -80,7 +80,7 @@ bool BatchAlgorithmRunner::executeBatch() {
  */
 void BatchAlgorithmRunner::executeBatchAsync() {
   m_notificationCenter.addObserver(m_notificationObserver);
-  Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
+  m_executeAsync(Poco::Void());
 }
 
 /**

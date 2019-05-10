@@ -66,10 +66,10 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
   col->setPlotType(1); // X-values inplots
 
   // Add columns for parameters and their errors
-  const auto &fun = *mdFunction.getFunction(0);
-  for (size_t iPar = 0; iPar < fun.nParams(); ++iPar) {
-    table->addColumn("double", fun.parameterName(iPar));
-    table->addColumn("double", fun.parameterName(iPar) + "_Err");
+  const auto &firstFun = *mdFunction.getFunction(0);
+  for (size_t iPar = 0; iPar < firstFun.nParams(); ++iPar) {
+    table->addColumn("double", firstFun.parameterName(iPar));
+    table->addColumn("double", firstFun.parameterName(iPar) + "_Err");
   }
 
   // Fill in the columns
@@ -340,7 +340,7 @@ void MultiDatasetFit::fitSimultaneous() {
       fit->setPropertyValue("InputWorkspace_" + suffix,
                             getWorkspaceName(ispec).toStdString());
       fit->setProperty("WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec));
-      auto range = getFittingRange(ispec);
+      range = getFittingRange(ispec);
       fit->setProperty("StartX_" + suffix, range.first);
       fit->setProperty("EndX_" + suffix, range.second);
     }
@@ -818,7 +818,6 @@ void MultiDatasetFit::invalidateOutput() {
 /// and the log name must be selected in m_fitOptionsBrowser.
 void MultiDatasetFit::showParameterPlot() {
   auto table = m_fitOptionsBrowser->getProperty("OutputWorkspace");
-  auto logValue = m_fitOptionsBrowser->getProperty("LogValue");
   auto parName = m_fitOptionsBrowser->getParameterToPlot();
   if (table.isEmpty() || parName.isEmpty())
     return;

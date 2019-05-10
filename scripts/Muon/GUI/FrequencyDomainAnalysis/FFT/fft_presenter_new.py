@@ -10,13 +10,14 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT
-import re
-from mantid.api import AnalysisDataService, WorkspaceGroup
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
+    get_base_data_directory
+import re
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class FFTPresenter(object):
-
     """
     This class links the FFT model to the GUI
     """
@@ -113,17 +114,19 @@ class FFTPresenter(object):
         self.view.warning_popup(error)
 
     def get_pre_inputs(self):
-        pre_inputs = {}
-
+        pre_inputs = self._get_generic_apodiazation_and_padding_inputs()
         pre_inputs['InputWorkspace'] = self.view.workspace
-        pre_inputs["ApodizationFunction"] = self.view.apodization_function
-        pre_inputs["DecayConstant"] = self.view.decay_constant
-        pre_inputs["NegativePadding"] = self.view.negative_padding
-        pre_inputs["Padding"] = self.view.padding_value
 
         return pre_inputs
 
     def get_imaginary_inputs(self):
+        pre_inputs = self._get_generic_apodiazation_and_padding_inputs()
+
+        pre_inputs['InputWorkspace'] = self.view.imaginary_workspace
+
+        return pre_inputs
+
+    def _get_generic_apodiazation_and_padding_inputs(self):
         pre_inputs = {}
 
         pre_inputs['InputWorkspace'] = self.view.imaginary_workspace
@@ -163,6 +166,7 @@ class FFTPresenter(object):
         if self.view.imaginary_data:
             if 'PhaseQuad' in self.view.workspace:
                 imaginary_workspace_input = real_workspace_input
+                imaginary_workspace_padding_parameters['InputWorkspace'] = real_workspace_padding_parameters['InputWorkspace']
                 imaginary_workspace_index = 1
             else:
                 imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
@@ -173,22 +177,15 @@ class FFTPresenter(object):
 
         frequency_domain_workspace = run_FFT(fft_parameters)
 
-        base_name, group = self.calculate_base_name_and_group(real_workspace_padding_parameters['InputWorkspace'])
+        self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
+                                      imaginary_workspace_padding_parameters['InputWorkspace'],
+                                      frequency_domain_workspace)
 
-        self.add_fft_workspace_to_ADS(base_name, group, frequency_domain_workspace)
+    def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
+        run = re.search('[0-9]+', input_workspace).group()
+        fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
+        group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument)
+        directory = get_base_data_directory(self.load, run) + group
 
-    def add_fft_workspace_to_ADS(self, base_name, group, fft_workspace):
-        AnalysisDataService.addOrReplace(base_name, fft_workspace)
-        AnalysisDataService.addToGroup(group, base_name)
-
-    def calculate_base_name_and_group(self, fft_workspace_name):
-        run = re.search('[0-9]+', fft_workspace_name).group()
-        base_name = fft_workspace_name + ';FFT'
-        group = self.load.data_context._base_run_name(run) + ' FFT'
-
-        if not AnalysisDataService.doesExist(group):
-            new_group = WorkspaceGroup()
-            AnalysisDataService.addOrReplace(group, new_group)
-            AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), group)
-
-        return base_name, group
+        muon_workspace_wrapper = MuonWorkspaceWrapper(fft_workspace, directory + fft_workspace_name)
+        muon_workspace_wrapper.show()

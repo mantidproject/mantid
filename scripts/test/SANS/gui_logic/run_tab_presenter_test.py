@@ -938,13 +938,12 @@ class RunTabPresenterTest(unittest.TestCase):
         view = mock.MagicMock()
         presenter.set_view(view)
 
-        test_row = ["SANS2D00022025", "another_file", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "a_user_file.txt"]
+        test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
+                    "", "", "", "another_file", "a_user_file.txt"]
 
-        expected_list = ["sample_sans", "SANS2D00022025", "output_as", "another_file",
-                         "sample_trans", "SANS2D00022052", "sample_direct_beam", "SANS2D00022022",
-                         "can_sans", "", "can_trans", "", "can_direct_beam", "",
-                         "user_file", "a_user_file.txt"]
+        expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
+                         "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
+                         "output_as", "another_file", "user_file", "a_user_file.txt"]
 
         actual_list = presenter._create_batch_entry_from_row(test_row)
 
@@ -962,8 +961,8 @@ class RunTabPresenterTest(unittest.TestCase):
         try:
             presenter.on_export_table_clicked()
         except Exception as e:
-            self.assertTrue(False, "Exceptions should have been caught in the method. "
-                                   "Exception thrown is {}".format(str(e)))
+            self.fail("Exceptions should have been caught in the method. "
+                      "Exception thrown is {}".format(str(e)))
         else:
             self.assertEqual(presenter._view.enable_buttons.call_count, 1,
                              "Expected enable buttons to be called once, "
@@ -1015,6 +1014,16 @@ class RunTabPresenterTest(unittest.TestCase):
         args, _ = presenter._view.can_sas_checkbox.setEnabled.call_args_list[-1]
         self.assertTrue(args[0], "Can SAS checkbox should have been enabled, since we switched to 1D reduction mode.")
 
+    def test_that_updating_default_save_directory_also_updates_add_runs_save_directory(self):
+        """This test checks that add runs presenter's save directory update method is called
+        when the defaultsave directory is updated."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+
+        presenter._handle_output_directory_changed("a_new_directory")
+        presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():
@@ -1049,6 +1058,7 @@ class RunTabPresenterTest(unittest.TestCase):
     @staticmethod
     def get_file_information_mock():
         return SANSFileInformationMock(instrument=SANSInstrument.SANS2D)
+
 
 if __name__ == '__main__':
     unittest.main()

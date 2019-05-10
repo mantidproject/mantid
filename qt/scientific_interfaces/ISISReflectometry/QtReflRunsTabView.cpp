@@ -465,8 +465,8 @@ std::set<int> QtReflRunsTabView::getAllSearchRows() const {
   std::set<int> rows;
   if (!ui.tableSearchResults || !ui.tableSearchResults->model())
     return rows;
-  auto const rowCount = ui.tableSearchResults->model()->rowCount();
-  for (auto row = 0; row < rowCount; ++row)
+  auto const numberOfRows = ui.tableSearchResults->model()->rowCount();
+  for (auto row = 0; row < numberOfRows; ++row)
     rows.insert(row);
   return rows;
 }

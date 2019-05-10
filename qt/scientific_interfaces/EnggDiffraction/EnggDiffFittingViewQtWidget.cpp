@@ -248,8 +248,7 @@ void EnggDiffFittingViewQtWidget::plotFittedPeaksStateChanged() {
 }
 
 void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(
-    QListWidgetItem *clickedItem) {
-  const auto label = clickedItem->text();
+    QListWidgetItem *) {
   m_presenter->notify(IEnggDiffFittingPresenter::selectRun);
 }
 

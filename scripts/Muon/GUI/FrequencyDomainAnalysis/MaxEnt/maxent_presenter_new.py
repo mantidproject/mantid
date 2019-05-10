@@ -6,27 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-
-import math
-from Muon.GUI.Common import thread_model
-import mantid.simpleapi as mantid
-from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
-import re
-from Muon.GUI.Common.observer_pattern import Observer
-from mantid.api import AnalysisDataService
-from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 import functools
-from mantid.api import WorkspaceGroup
+import math
+import re
+
+import mantid.simpleapi as mantid
+
+from Muon.GUI.Common import thread_model
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, \
+    get_base_data_directory
+from Muon.GUI.Common.observer_pattern import GenericObserver
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
+
 raw_data = "_raw_data"
-
-
-class GenericObserver(Observer):
-    def __init__(self, callback):
-        Observer.__init__(self)
-        self.callback = callback
-
-    def update(self, observable, arg):
-        self.callback()
 
 optional_output_suffixes = {'OutputPhaseTable': '_phase_table', 'OutputDeadTimeTable': '_dead_times',
                             'ReconstructedSpectra': '_reconstructed_spectra', 'PhaseConvergenceTable': '_phase_convergence'}
@@ -112,13 +106,7 @@ class MaxEntPresenter(object):
 
         maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
 
-        base_name, group = self.calculate_base_name_and_group(maxent_parameters['InputWorkspace'])
-
-        self.add_maxent_workspace_to_ADS(base_name, group, maxent_workspace)
-
-        maxent_output_options = self.get_maxent_output_options()
-
-        self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, group)
+        self.add_maxent_workspace_to_ADS(maxent_parameters['InputWorkspace'], maxent_workspace, alg)
 
     def get_parameters_for_maxent_calculation(self):
         inputs = {}
@@ -126,7 +114,7 @@ class MaxEntPresenter(object):
         inputs['InputWorkspace'] = self.view.input_workspace
         run = [float(re.search('[0-9]+', inputs['InputWorkspace']).group())]
 
-        if self.view.phase_table:
+        if self.view.phase_table != 'Construct':
             inputs['InputPhaseTable'] = self.view.phase_table
 
         if self.load.dead_time_table(run):
@@ -156,12 +144,22 @@ class MaxEntPresenter(object):
 
     def update_phase_table_options(self):
         phase_table_list = self.load.phase_context.get_phase_table_list(self.load.data_context.instrument)
+        phase_table_list.insert(0, 'Construct')
 
         self.view.update_phase_table_combo(phase_table_list)
 
-    def add_maxent_workspace_to_ADS(self, base_name, group, maxent_workspace):
-        AnalysisDataService.addOrReplace(base_name, maxent_workspace)
-        AnalysisDataService.addToGroup(group, base_name)
+    def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
+        run = re.search('[0-9]+', input_workspace).group()
+        base_name = get_maxent_workspace_name(input_workspace)
+        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument)
+        directory = get_base_data_directory(self.load, run) + group
+
+        muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
+        muon_workspace_wrapper.show()
+
+        maxent_output_options = self.get_maxent_output_options()
+
+        self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, directory)
 
     def get_maxent_output_options(self):
         output_options = {}
@@ -173,21 +171,8 @@ class MaxEntPresenter(object):
 
         return output_options
 
-    def add_optional_outputs_to_ADS(self, alg, output_options, base_name, group):
+    def add_optional_outputs_to_ADS(self, alg, output_options, base_name, directory):
         for key in output_options:
             if output_options[key]:
                 output = alg.getProperty(key).value
-                AnalysisDataService.addOrReplace(base_name + optional_output_suffixes[key], output)
-                AnalysisDataService.addToGroup(group, base_name + optional_output_suffixes[key])
-
-    def calculate_base_name_and_group(self, input_workspace):
-        run = re.search('[0-9]+', input_workspace).group()
-        base_name = self.load.data_context._base_run_name(run) + '_MaxEnt'
-        group = self.load.data_context._base_run_name(run) + ' MaxEnt Outputs'
-
-        if not AnalysisDataService.doesExist(group):
-            new_group = WorkspaceGroup()
-            AnalysisDataService.addOrReplace(group, new_group)
-            AnalysisDataService.addToGroup(self.load.data_context._base_run_name(run), group)
-
-        return base_name, group
+                MuonWorkspaceWrapper(output, directory + base_name + optional_output_suffixes[key]).show()

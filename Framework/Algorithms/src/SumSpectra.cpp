@@ -63,13 +63,13 @@ bool validateSingleMatrixWorkspace(
     }
   }
   // check ListOfWorkspaceIndices in range
-  for (const auto index : indices) {
-    if ((index >= numSpectra) || (index < 0)) {
-      validationOutput["ListOfWorkspaceIndices"] =
-          "One or more indices out of range of available spectra.";
-      success = false;
-      break;
-    }
+  if (std::any_of(indices.cbegin(), indices.cend(),
+                  [numSpectra](const auto index) {
+                    return (index >= numSpectra) || (index < 0);
+                  })) {
+    validationOutput["ListOfWorkspaceIndices"] =
+        "One or more indices out of range of available spectra.";
+    success = false;
   }
   return success;
 }

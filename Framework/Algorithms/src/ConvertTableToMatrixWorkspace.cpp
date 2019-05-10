@@ -51,18 +51,18 @@ void ConvertTableToMatrixWorkspace::exec() {
   std::string columnY = getProperty("ColumnY");
   std::string columnE = getProperty("ColumnE");
 
-  size_t nrows = inputWorkspace->rowCount();
+  const size_t nrows = inputWorkspace->rowCount();
   if (nrows == 0) {
     throw std::runtime_error("The input table is empty");
   }
 
-  auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
-  auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
+  const auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
+  const auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
 
   MatrixWorkspace_sptr outputWorkspace = create<Workspace2D>(1, Points(nrows));
 
-  outputWorkspace->mutableX(0).assign(X.begin(), X.end());
-  outputWorkspace->mutableY(0).assign(Y.begin(), Y.end());
+  outputWorkspace->mutableX(0).assign(X.cbegin(), X.cend());
+  outputWorkspace->mutableY(0).assign(Y.cbegin(), Y.cend());
 
   if (!columnE.empty()) {
     outputWorkspace->mutableE(0) =

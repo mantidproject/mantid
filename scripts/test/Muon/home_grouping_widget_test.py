@@ -12,13 +12,13 @@ from mantid.api import FileFinder
 from mantid.py3compat import mock
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
 from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.observer_pattern import Observer
-from Muon.GUI.Common.contexts.context_setup import setup_context_for_tests
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
 class HomeTabGroupingPresenterTest(unittest.TestCase):

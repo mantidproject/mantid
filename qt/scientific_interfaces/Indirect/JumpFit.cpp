@@ -18,7 +18,6 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <string>
 

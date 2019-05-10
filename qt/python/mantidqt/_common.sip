@@ -226,6 +226,36 @@ public:
 };
 
 
+class UserSubWindow : QMainWindow {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+using namespace MantidQt::API;
+%End
+private:
+  UserSubWindow(QWidget *parent = nullptr);
+};
+
+class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/UserSubWindowFactory.h"
+%End
+public:
+    static SIP_PYOBJECT Instance() const;
+    %MethodCode
+        auto &cppInstance = MantidQt::API::UserSubWindowFactory::Instance();
+        return sipConvertFromType(&cppInstance, sipType_UserSubWindowFactoryImpl, nullptr);
+    %End
+    UserSubWindow *createUnwrapped(const std::string &name) const;
+    QSet<QString> categories(const QString &interfaceName) const;
+    QStringList keys() const;
+
+private:
+  UserSubWindowFactoryImpl();
+  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &);
+  ~UserSubWindowFactoryImpl();
+};
+
+
 class InterfaceManager {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -240,6 +270,20 @@ public:
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
       const QStringList &disabled = QStringList());
+
+  UserSubWindow *createSubWindow(
+      const QString &interface_name,
+      QWidget *parent = nullptr);
+  QStringList getUserSubWindowKeys() const;
+
+  void showHelpPage(const QString &url=QString());
+  void showWikiPage(const QString &page=QString());
+  void showAlgorithmHelp(const QString &name, const int version=-1);
+  void showConceptHelp(const QString &name);
+  void showFitFunctionHelp(const QString &name=QString());
+  void showCustomInterfaceHelp(const QString &name);
+  void showWebPage(const QString &url);
+  void closeHelpWindow();
 };
 
 // ---------------------------------
@@ -290,6 +334,7 @@ signals:
   void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceNames);
+  void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
 };

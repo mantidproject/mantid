@@ -14,6 +14,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/regex.hpp>
+#include <numeric>
 
 namespace Mantid {
 using namespace Types::Core;
@@ -55,6 +56,9 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
   auto times = timeSeriesProperty->timesAsVector();
   // Shift the time
   for (auto it = times.begin(); it != times.end(); ++it) {
+    // There is a known issue which can cause cloneWithTimeShift to be called
+    // with a large (~9e+9 s) shift. Actual shifting is capped to be ~4.6e+19
+    // seconds in DateAndTime::operator+=
     (*it) += timeShift;
   }
   timeSeriesProperty->clear();
@@ -2021,10 +2025,11 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   out.maximum = raw_stats.maximum;
   if (this->size() > 0) {
     const auto &intervals = this->getSplittingIntervals();
-    double duration_sec = 0.0;
-    for (const auto &interval : intervals) {
-      duration_sec += interval.duration();
-    }
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) {
+                          return sum + interval.duration();
+                        });
     out.duration = duration_sec;
     const auto time_weighted = this->timeAverageValueAndStdDev();
     out.time_mean = time_weighted.first;

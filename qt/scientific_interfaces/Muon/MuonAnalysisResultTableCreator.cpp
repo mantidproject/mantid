@@ -234,11 +234,14 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
   if (const auto &wsGroup =
           AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
               "MuonSimulFit_" + label)) {
-    for (const auto &name : wsGroup->getNames()) {
-      if (name.find("_Parameters") != std::string::npos) {
-        return boost::dynamic_pointer_cast<ITableWorkspace>(
-            wsGroup->getItem(name));
-      }
+    const auto wsNames = wsGroup->getNames();
+    const auto found =
+        std::find_if(wsNames.cbegin(), wsNames.cend(), [](const auto &name) {
+          return name.find("_Parameters") != std::string::npos;
+        });
+    if (found != wsNames.cend()) {
+      return boost::dynamic_pointer_cast<ITableWorkspace>(
+          wsGroup->getItem(*found));
     }
     throw std::runtime_error("Could not retrieve parameters table for label " +
                              label);
@@ -255,8 +258,9 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
  */
 void MuonAnalysisResultTableCreator::checkSameFitModel() const {
   std::vector<ITableWorkspace_sptr> paramTables;
+  paramTables.reserve(static_cast<size_t>(m_items.size()));
   for (const auto &item : m_items) {
-    paramTables.push_back(getFitParametersTable(item));
+    paramTables.emplace_back(getFitParametersTable(item));
   }
   if (!haveSameParameters(paramTables)) {
     throw std::runtime_error(

@@ -25,7 +25,7 @@ attr_mapping = \
      ParamMapEntry(ext_name="grouping_file_name",          int_name="grouping_file_name"),
      ParamMapEntry(ext_name="input_mode",                  int_name="input_mode", enum_class=INPUT_BATCHING),
      ParamMapEntry(ext_name="merge_banks",                 int_name="merge_banks"),
-     ParamMapEntry(ext_name="mode",                        int_name="mode", enum_class=POLARIS_CHOPPER_MODES),
+     ParamMapEntry(ext_name="mode",                        int_name="mode", enum_class=POLARIS_CHOPPER_MODES, optional=True),
      ParamMapEntry(ext_name="multiple_scattering",         int_name="multiple_scattering", optional=True),
      ParamMapEntry(ext_name="raw_data_cropping_values",    int_name="raw_data_crop_values"),
      ParamMapEntry(ext_name="run_number",                  int_name="run_number"),

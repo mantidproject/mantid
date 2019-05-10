@@ -429,7 +429,9 @@ void export_MatrixWorkspace() {
       .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
            "Forget about monitor workspace, attached to the current workspace")
       .def("isCommonBins", &MatrixWorkspace::isCommonBins,
-           "Returns true if the workspace has common X bins.");
+           "Returns true if the workspace has common X bins.")
+      .def("isCommonLogBins", &MatrixWorkspace::isCommonLogBins,
+           "Returns true if the workspace has common X bins with log spacing.");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

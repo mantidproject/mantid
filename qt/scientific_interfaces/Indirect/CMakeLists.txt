@@ -160,7 +160,6 @@ set(MOC_FILES
     Elwin.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
-    IIndirectFitOutputOptionsModel.h
     IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
     ILLEnergyTransfer.h

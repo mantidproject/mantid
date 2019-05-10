@@ -7,9 +7,10 @@
 import unittest
 
 from mantid.py3compat import mock
-from Muon.GUI.Common import mock_widget
+
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 from Muon.GUI.Common.load_widget.load_view import LoadView
+from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 
 

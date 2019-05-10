@@ -100,10 +100,7 @@ variables = {
 
 def get_mode_specific_dict(mode):
     if mode is None:
-        raise RuntimeError("The parameter with name: 'mode' is required but "
-                           "was not set or passed.\n"
-                           "Acceptable values for this parameter are: PDF, Rietveld.")
-
+        return {"focused_cropping_values": 'auto'}
     mode = mode.lower()
     if mode == "pdf":
         return {"focused_cropping_values": pdf_focused_cropping_values}
@@ -112,7 +109,7 @@ def get_mode_specific_dict(mode):
     raise ValueError("Invalid chopper mode: \"{}\"".format(mode))
 
 
-def get_all_adv_variables(mode="PDF"):
+def get_all_adv_variables(mode=None):
     advanced_config_dict = {}
     advanced_config_dict.update(variables)
     advanced_config_dict.update(get_mode_specific_dict(mode))

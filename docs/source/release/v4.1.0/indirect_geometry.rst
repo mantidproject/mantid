@@ -11,6 +11,23 @@ Indirect Geometry Changes
 
 :ref:`Release 4.1.0 <v4.1.0>`
 
+Instrument Definitions
+----------------------
+
+The IDF of IN16B has been rewritten to properly model the neutronic positions of the pixels as reflections wrt spherical analysers.
+This is needed for the new inverted time-of-flight mode (BATS), but also improves the model for the standard doppler mode.
+Particularly, this will allow to calculate correct absorption corrections before grouping the pixels tube by tube.
+With the new IDF the flight-paths inside the sample will properly take into account the off-plane angle, which was not the case with the previous IDF.
+This change has a retroactive effect, but for reductions where the detectors were grouped, it should not produce different results.
+
+.. figure:: ../../images/IN16B-R.png
+   :align: left
+   :scale: 49%
+
+.. figure:: ../../images/IN16B-N.png
+   :align: right
+   :scale: 50%
+
 Algorithms
 ----------
 
@@ -35,11 +52,15 @@ Improvements
 - Improved the I(Q, t) tab by adding more validation checks for the input data.
 - Improved the Fit and Difference plots in MSD Fit, Iqt Fit, Conv Fit and F(Q)Fit. It is now possible to adjust their
   relative sizes by dragging a 'handle' between the plots.
+- Improved the I(Q, t) tab by allowing an asymmetric energy range by unticking 'Symmetric Energy Range'.
+- Improved the I(Q, t) tab by adding the ability to change the plotted spectrum using the 'Spectrum' spin box.
 
 Bug Fixes
 #########
 - Fixed an error caused by loading a Sample into ConvFit which does not have a resolution parameter for the analyser.
 - Fixed a crash caused by changing the Preview Spectrum on Elwin after clicking Run.
+- Fixed a bug where the loaded workspace in Data Analysis doesn't update after being changed on a different
+  interface.
 
 
 Data Corrections Interface
@@ -47,7 +68,7 @@ Data Corrections Interface
 
 Improvements
 ############
-- Improved the setting of sample and container neutron information by allowing the entry of cross sections as an 
+- Improved the setting of sample and container neutron information by allowing the entry of cross sections as an
   alternative to a chemical formula. The cross sections can be entered in the Calculate Paalman Pings tab and
   Calculate Monte Carlo Absorption tab. This uses the :ref:`SetSampleMaterial <algm-SetSampleMaterial>` algorithm.
 
@@ -59,6 +80,10 @@ Bug Fixes
 
 Data Reduction Interface
 ------------------------
+
+Improvements
+############
+- Added an option called *Group Output* to group the output files from a reduction on ISISEnergyTransfer.
 
 Bug Fixes
 #########

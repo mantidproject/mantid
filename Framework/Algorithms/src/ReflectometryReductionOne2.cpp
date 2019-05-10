@@ -24,7 +24,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

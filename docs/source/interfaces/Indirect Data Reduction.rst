@@ -129,6 +129,9 @@ Run
 Plot Output
   Allows the result to be plotted as either a spectrum plot or contour plot.
 
+Group Output
+  This will place the output reduced files from a reduction into a group workspace.
+
 Fold Multiple Frames
   This option is only relevant for TOSCA. If checked, then multiple-framed data
   will be folded back into a single spectra, if unchecked the frames will be
