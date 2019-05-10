@@ -170,15 +170,12 @@ void LoadPSIMuonBin::exec() {
 
   auto firstGoodDataSpecIndex = static_cast<int>(
       *std::max_element(m_header.firstGood, m_header.firstGood + 16));
-  if (firstGoodDataSpecIndex > largestBinValue)
-    setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
-  else
-    setProperty("FirstGoodData", firstGoodDataSpecIndex);
+  setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
 
   // Since the arrray is all 0s before adding them this can't get min
   // element so just get first element
-  auto lastGoodDataSpecNum = static_cast<int>(m_header.lastGood[0]);
-  setProperty("LastGoodData", outputWorkspace->x(0)[lastGoodDataSpecNum]);
+  auto lastGoodDataSpecIndex = static_cast<int>(m_header.lastGood[0]);
+  setProperty("LastGoodData", outputWorkspace->x(0)[lastGoodDataSpecIndex]);
 
   double timeZero = 0.0;
   if (m_header.realT0[0] != 0) {
@@ -398,7 +395,7 @@ void LoadPSIMuonBin::readInHistograms(
 void LoadPSIMuonBin::generateUnknownAxis() {
   // Create a x axis, assumption that m_histograms will all be the same size,
   // and that x will be 1 more in size than y
-  for (auto xIndex = 0u; xIndex < m_histograms[0].size() + 1; ++xIndex) {
+  for (auto xIndex = 0u; xIndex <= m_histograms[0].size(); ++xIndex) {
     m_xAxis.push_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
   }
 
@@ -604,17 +601,23 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   }
 }
 
-void LoadPSIMuonBin::processTitleHeaderLine(const std::string &line) {
+namespace {
+std::string findTitlesFromLine(const std::string &line) {
   bool titlesFound = false;
   std::string foundTitles = "";
   for (const auto &charecter : line) {
     if (charecter == ':') {
       titlesFound = true;
-      continue;
     } else if (titlesFound) {
       foundTitles += charecter;
     }
   }
+  return foundTitles;
+}
+} // namespace
+
+void LoadPSIMuonBin::processTitleHeaderLine(const std::string &line) {
+  auto foundTitles = findTitlesFromLine(line);
   boost::trim(foundTitles);
   if (foundTitles.find("\\") == std::string::npos) {
     boost::split(m_tempHeader.titles, foundTitles, boost::is_any_of(" "));
@@ -623,10 +626,13 @@ void LoadPSIMuonBin::processTitleHeaderLine(const std::string &line) {
     boost::split(m_tempHeader.titles, foundTitles, boost::is_any_of("\\"));
     m_tempHeader.delimeterOfTitlesIsBackSlash = true;
   }
-} // namespace DataHandling
+}
 
 void LoadPSIMuonBin::processDateHeaderLine(const std::string &line) {
   // Assume the date is added in the same place as always
+  // line example = "! 2018-01-01 10:10:10"
+  // date = 2018-01-01
+  // _time = 10:10:10
   auto date = line.substr(2, 11);
   auto _time = line.substr(14, 8);
   m_tempHeader.startDateTime = getFormattedDateTime(date, _time);
@@ -636,11 +642,11 @@ void LoadPSIMuonBin::processHeaderLine(const std::string &line) {
   if (line.find("Title") != std::string::npos) {
     // Find sample log titles from the header
     processTitleHeaderLine(line);
-
   } else if (std::find(std::begin(psiMonths), std::end(psiMonths),
                        line.substr(5, 3)) != std::end(psiMonths)) {
     // If the line contains a Month in the PSI format then assume it conains a
-    // date on the line
+    // date on the line. 5 is the index of the line that is where the month is
+    // found and 3 is the length of the month.
     processDateHeaderLine(line);
   }
 }
@@ -676,6 +682,8 @@ void LoadPSIMuonBin::processLine(const std::string &line,
   std::vector<std::string> secondValues;
   boost::split(secondValues, segments[3], boost::is_any_of(" "));
 
+  // example recordTime = 10:10:10
+  // 10 hours, 10 minutes, and 10 seconds. Hence the substr choices here.
   double secondsInRecordTime =
       (std::stoi(recordTime.substr(0, 2)) * 60 * 60) + // Hours
       (std::stoi(recordTime.substr(3, 2)) * 60) +      // Minutes
