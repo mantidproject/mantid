@@ -84,6 +84,14 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     return x, y, dy, dx, indices, kwargs
 
 
+def on_off_to_bool(on_or_off):
+    if on_or_off.lower() == 'on':
+        return True
+    if on_or_off.lower() == 'off':
+        return False
+    raise ValueError("Argument 'on_or_off' must be either 'On' or 'Off")
+
+
 # ========================================================
 # Plot functions
 # ========================================================
@@ -105,22 +113,9 @@ def _plot_impl(axes, workspace, args, kwargs):
         kwargs['linestyle'] = 'steps-post'
     else:
         x, y, _, _, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-        try:
-            plot_as_distribution = (on_off_to_bool(config['graph1d.autodistribution']) and
-                                    not workspace.isDistribution())
-        except AttributeError:
-            plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
-
+        plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
         _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
     return x, y, args, kwargs
-
-
-def on_off_to_bool(on_or_off):
-    if on_or_off.lower() == 'on':
-        return True
-    if on_or_off.lower() == 'off':
-        return False
-    raise ValueError("Argument 'on_or_off' must be either 'On' or 'Off")
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -211,12 +206,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
-    try:
-        plot_as_distribution = (on_off_to_bool(config['graph1d.autodistribution']) and
-                                not workspace.isDistribution())
-    except AttributeError:
-        plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
-
+    plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
     _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
