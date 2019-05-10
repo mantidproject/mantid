@@ -16,6 +16,7 @@ except ImportError:
 import numpy as np
 import six
 import os
+import re
 
 from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, \
     WorkspaceGroup
@@ -212,9 +213,13 @@ class Abins(PythonAlgorithm):
                 raise ValueError("Not all user defined atoms are unique.")
 
             # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
+            # A regular expression match is used to make the underscore separator optional and check the index format
             prefix = AbinsModules.AbinsConstants.ATOM_PREFIX
             atom_symbols = [item for item in self._atoms if item[:len(prefix)] != prefix]
-            atom_numbers = [item[len(prefix):] for item in self._atoms if item[:len(prefix)] == prefix]
+
+            numbered_atom_test = re.compile('^' + prefix + '_?(\d+)$')
+            atom_numbers = [numbered_atom_test.findall(item) for item in self._atoms]  # Matches will be lists of str
+            atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
 
             for atom_symbol in atom_symbols:
                 if atom_symbol not in all_atms_smbls:
@@ -277,7 +282,8 @@ class Abins(PythonAlgorithm):
         :param atoms_symbols: atom types (i.e. element symbols) for which S should be created.
         :type iterable of str:
 
-        :param atom_numbers: indices of individual atoms for which S should be created
+        :param atom_numbers:
+            indices of individual atoms for which S should be created. (One-based numbering; 1 <= I <= NUM_ATOMS)
         :type iterable of int:
 
         :param s_data: dynamical factor data
@@ -328,7 +334,7 @@ class Abins(PythonAlgorithm):
         """
         Helper function for calculating S for the given atomic index
 
-        :param atom_number: Index of atom in s_data e.g. 1 to select 'atom_1'
+        :param atom_number: One-based index of atom in s_data e.g. 1 to select first element 'atom_1'
         :type atom_number: int
 
         :param s_data_extracted: Collection of precalculated S for all atoms and quantum orders, obtained from extract()
@@ -347,22 +353,23 @@ class Abins(PythonAlgorithm):
         """
         atom_workspaces = []
         s_atom_data.fill(0.0)
-        atom_label = "atom_%s" % atom_number
-        symbol = self._extracted_ab_initio_data["atom_%s" % atom_number]["symbol"]
+        internal_atom_label = "atom_%s" % (atom_number - 1)
+        output_atom_label = "%s_%d" % (AbinsModules.AbinsConstants.ATOM_PREFIX, atom_number)
+        symbol = self._extracted_ab_initio_data[internal_atom_label]["symbol"]
         z_number = Atom(symbol=symbol).z_number
 
         for i, order in enumerate(range(AbinsModules.AbinsConstants.FUNDAMENTALS,
                                         self._num_quantum_order_events + AbinsModules.AbinsConstants.S_LAST_INDEX)):
 
-            s_atom_data[i] = s_data_extracted[atom_label]["s"]["order_%s" % order]
+            s_atom_data[i] = s_data_extracted[internal_atom_label]["s"]["order_%s" % order]
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
         atom_workspaces = []
-        atom_workspaces.append(self._create_workspace(atom_name=atom_label,
+        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label,
                                                       s_points=np.copy(total_s_atom_data),
                                                       optional_name="_total", protons_number=z_number))
-        atom_workspaces.append(self._create_workspace(atom_name=atom_label,
+        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label,
                                                       s_points=np.copy(s_atom_data),
                                                       protons_number=z_number))
         return atom_workspaces

@@ -11,7 +11,7 @@ from mantid import logger
 from mantid.simpleapi import mtd, Abins, Scale, CompareWorkspaces, Load, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
-
+from numpy.testing import assert_array_almost_equal
 
 class AbinsBasicTest(unittest.TestCase):
 
@@ -86,8 +86,19 @@ class AbinsBasicTest(unittest.TestCase):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
            In that case Abins should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
-        # In _squaricn there is no C atoms
+        # In _squaricn there are no N atoms
         self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon", Atoms="N",
+                          OutputWorkspace=self._workspace_name)
+
+    def test_atom_index_limits(self):
+        """Individual atoms may be indexed (counting from 1); if the index falls outside number of atoms, Abins should
+           terminate with a useful error message.
+        """
+        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon",
+                          Atoms=AbinsConstants.ATOM_PREFIX + "0",
+                          OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, Abins, VibrationalOrPhononFile=self._squaricn + ".phonon",
+                          Atoms=AbinsConstants.ATOM_PREFIX + "61",
                           OutputWorkspace=self._workspace_name)
 
     def test_scale(self):
@@ -200,6 +211,37 @@ class AbinsBasicTest(unittest.TestCase):
                                                    Tolerance=self._tolerance)
             self.assertEqual(result, True)
 
+    def test_numbered(self):
+        # Can request workspaces by atom number; these should add up to the usual elemental totals
+
+        wrk_ref = Abins(AbInitioProgram=self._ab_initio_program,
+                        VibrationalOrPhononFile=self._squaricn + ".phonon",
+                        Atoms=self._atoms,
+                        QuantumOrderEventsNumber=self._quantum_order_events_number,
+                        ScaleByCrossSection=self._cross_section_factor,
+                        OutputWorkspace=self._squaricn + "_ref")
+
+        numbered_workspace_name = "numbered"
+        h_indices = ("1", "2", "3", "4")
+        wks_numbered_atoms = Abins(VibrationalOrPhononFile=self._squaricn + ".phonon",
+                                   Atoms=", ".join([AbinsConstants.ATOM_PREFIX + s for s in h_indices]),
+                                   SumContributions=self._sum_contributions,
+                                   QuantumOrderEventsNumber=self._quantum_order_events_number,
+                                   ScaleByCrossSection=self._cross_section_factor,
+                                   OutputWorkspace=numbered_workspace_name)
+
+        wrk_ref_names = list(wrk_ref.getNames())
+        wrk_h_total = wrk_ref[wrk_ref_names.index(self._squaricn + "_ref_H_total")]
+
+        wks_numbered_atom_names = list(wks_numbered_atoms.getNames())
+        wrk_atom_totals = [wks_numbered_atoms[wks_numbered_atom_names.index(name)]
+                           for name in
+                           ['_'.join((numbered_workspace_name, AbinsConstants.ATOM_PREFIX, s, 'total')) for s in h_indices]]
+
+        assert_array_almost_equal(wrk_h_total.extractX(), wrk_atom_totals[0].extractX())
+
+        assert_array_almost_equal(wrk_h_total.extractY(),
+                                  sum((wrk.extractY() for wrk in wrk_atom_totals)))
 
 if __name__ == "__main__":
     unittest.main()
