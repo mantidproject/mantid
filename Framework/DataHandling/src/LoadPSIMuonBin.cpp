@@ -232,6 +232,7 @@ void LoadPSIMuonBin::readSingleVariables(
   streamReader >> m_header.histogramBinWidth;
 
   if (m_header.histogramBinWidth == 0) {
+    // If no histogram bin width found calculate it
     m_header.histogramBinWidth =
         static_cast<float>((625.E-6) / 8. *
                            pow(static_cast<float>(2.),
@@ -498,13 +499,14 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   constexpr auto sizeOfTemps =
       sizeof(m_header.temperatures) / sizeof(*m_header.temperatures);
   for (auto tempNum = 1u; tempNum < sizeOfTemps + 1; ++tempNum) {
-    if (m_header.temperatures[tempNum - 1] != 0) {
-      addToSampleLog("Spectra " + std::to_string(tempNum) + " Temperature",
-                     m_header.temperatures[tempNum - 1], outputWorkspace);
-      addToSampleLog(
-          "Spectra " + std::to_string(tempNum) + " Temperature Deviation",
-          m_header.temperatureDeviation[tempNum - 1], outputWorkspace);
-    }
+    if (m_header.temperatures[tempNum - 1] == 0)
+      // Break out of for loop
+      break;
+    addToSampleLog("Spectra " + std::to_string(tempNum) + " Temperature",
+                   m_header.temperatures[tempNum - 1], outputWorkspace);
+    addToSampleLog("Spectra " + std::to_string(tempNum) +
+                       " Temperature Deviation",
+                   m_header.temperatureDeviation[tempNum - 1], outputWorkspace);
   }
 
   outputWorkspace->setComment(m_header.comment);
@@ -528,29 +530,31 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   }
 
   // get scalar labels and set spectra accordingly
-  for (auto i = 0u; i < sizeof(m_header.scalars) / sizeof(*m_header.scalars);
-       ++i) {
-    if (m_header.labels_scalars[i] != "NONE") {
-      addToSampleLog("Label Spectra " + std::to_string(i),
-                     m_header.labels_scalars[i], outputWorkspace);
-      addToSampleLog("Scalar Spectra " + std::to_string(i), m_header.scalars[i],
-                     outputWorkspace);
-    } else {
+  constexpr auto sizeOfScalars =
+      sizeof(m_header.scalars) / sizeof(*m_header.scalars);
+  for (auto i = 0u; i < sizeOfScalars; ++i) {
+    if (m_header.labels_scalars[i] == "NONE")
+      // Break out of for loop
       break;
-    }
+    addToSampleLog("Label Spectra " + std::to_string(i),
+                   m_header.labels_scalars[i], outputWorkspace);
+    addToSampleLog("Scalar Spectra " + std::to_string(i), m_header.scalars[i],
+                   outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);
 
   // first good and last good
-  for (size_t i = 0;
-       i < sizeof(m_header.firstGood) / sizeof(*m_header.firstGood); ++i) {
-    if (m_header.firstGood[i] != 0) {
-      addToSampleLog("First good spectra " + std::to_string(i),
-                     m_header.firstGood[i], outputWorkspace);
-      addToSampleLog("Last good spectra " + std::to_string(i),
-                     m_header.lastGood[i], outputWorkspace);
-    }
+  constexpr auto sizeOfFirstGood =
+      sizeof(m_header.firstGood) / sizeof(*m_header.firstGood);
+  for (size_t i = 0; i < sizeOfFirstGood; ++i) {
+    if (m_header.firstGood[i] == 0)
+      // Break out of for loop
+      break;
+    addToSampleLog("First good spectra " + std::to_string(i),
+                   m_header.firstGood[i], outputWorkspace);
+    addToSampleLog("Last good spectra " + std::to_string(i),
+                   m_header.lastGood[i], outputWorkspace);
   }
 
   addToSampleLog("TDC Resolution", m_header.tdcResolution, outputWorkspace);
@@ -564,11 +568,14 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   addToSampleLog("Mon Period", m_header.periodOfMon, outputWorkspace);
 
   if (m_header.monLow[0] == 0 && m_header.monHigh[0] == 0) {
-    addToSampleLog("Mon Low", "0", outputWorkspace);
-    addToSampleLog("Mon High", "0", outputWorkspace);
+    addToSampleLog("Mon Low", 0.0, outputWorkspace);
+    addToSampleLog("Mon High", 0.0, outputWorkspace);
   } else {
-    for (auto i = 0u; i < 4; ++i) {
+    constexpr auto sizeOfMonLow =
+        sizeof(m_header.monLow) / sizeof(*m_header.monLow);
+    for (auto i = 0u; i < sizeOfMonLow; ++i) {
       if (m_header.monLow[i] == 0 || m_header.monHigh[i] == 0)
+        // Break out of for loop
         break;
       addToSampleLog("Mon Low " + std::to_string(i), m_header.monLow[i],
                      outputWorkspace);
@@ -599,7 +606,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     g_log.warning("Temperature file could not be loaded:" +
                   std::string(e.what()));
   }
-}
+} // namespace DataHandling
 
 namespace {
 std::string findTitlesFromLine(const std::string &line) {
@@ -660,7 +667,7 @@ void LoadPSIMuonBin::readInTemperatureFileHeader(const std::string &contents) {
       if (line[0] == '!' && lineNo > uselessLines) {
         processHeaderLine(line);
       } else if (line[0] != '!') {
-        break;
+        return;
       }
       ++lineNo;
       line = "";
