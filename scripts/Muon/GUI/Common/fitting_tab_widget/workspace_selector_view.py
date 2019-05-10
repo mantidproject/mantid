@@ -21,6 +21,10 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.current_runs = current_runs
         self.current_workspaces = current_workspaces
         self.instrument = instrument
+        self.context = context
+
+        self.groups_and_pairs = 'All'
+        self.runs = 'All'
 
         self.select_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)
@@ -32,16 +36,10 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.list_selector_presenter.update_view_from_model()
 
         self.group_pair_line_edit.editingFinished.connect(self.handle_group_pair_selection_changed)
+        self.run_line_edit.editingFinished.connect(self.handle_run_edit_changed)
 
     def get_workspace_list(self):
-        filter_types = ['Asymmetry', 'Pair', 'PhaseQuad']
-        filtered_list = AnalysisDataService.getObjectNames()
-
-        current_run_strings = [run_utils.run_list_to_string(run) for run in self.current_runs]
-
-        filtered_list = [item for item in filtered_list if any([self.instrument + run + ';' in item for run in current_run_strings])]
-
-        filtered_list = [item for item in filtered_list if any([filter in item for filter in filter_types])]
+        filtered_list = self.context.get_names_of_workspaces_to_fit(runs=self.runs, group_and_pair=self.groups_and_pairs, phasequad=False, rebin=False)
 
         filtered_list = [item for item in filtered_list if item not in self.current_workspaces]
 
@@ -52,6 +50,39 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
             model_dict.update({item: [index, item in self.current_workspaces, True]})
 
         return model_dict
+
+    def get_exclusion_list(self):
+        filtered_list = self.context.get_names_of_workspaces_to_fit(runs=self.runs,
+                                                                    group_and_pair=self.groups_and_pairs,
+                                                                    phasequad=False, rebin=False)
+        excluded_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=False,
+                                                                    rebin=False)
+
+        excluded_list = [item for item in excluded_list if item not in filtered_list]
+
+        return excluded_list
+
+    def handle_group_pair_selection_changed(self):
+        new_value = str(self.group_pair_line_edit.text())
+        if not new_value:
+            new_value = 'All'
+
+        self.groups_and_pairs = new_value
+
+        self.update_list()
+
+    def handle_run_edit_changed(self):
+        new_value = str(self.run_line_edit.text())
+        if not new_value:
+            new_value = 'All'
+
+        self.runs = new_value
+
+        self.update_list()
+
+    def update_list(self):
+        workspace_list = self.get_exclusion_list()
+        self.list_selector_presenter.update_filter_list(workspace_list)
 
     def get_selected_list(self):
         return self.list_selector_presenter.get_selected_items()

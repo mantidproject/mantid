@@ -10,6 +10,7 @@ class ListSelectorPresenter(object):
         self.model = model
         self.filter_string = ''
         self.filter_type = 'Include'
+        self.filter_list = []
 
         self.view.set_filter_line_edit_changed_action(self.handle_filter_changed)
         self.view.set_item_selection_changed_action(self.handle_selection_changed)
@@ -32,7 +33,7 @@ class ListSelectorPresenter(object):
 
     def handle_select_all_checkbox_changed(self, state):
         for item in self.get_filtered_list():
-            item[1] = state
+            self.model[item[0]][1] = state
 
         self.update_view_from_model()
 
@@ -74,4 +75,10 @@ class ListSelectorPresenter(object):
                              self.filter_string not in item]
             filtered_list.sort(key=lambda val: self.model[val[0]][0])
 
+        filtered_list = [item for item in filtered_list if item[0] not in self.filter_list]
+
         return filtered_list
+
+    def update_filter_list(self, filter_list):
+        self.filter_list = filter_list
+        self.update_view_from_model()
