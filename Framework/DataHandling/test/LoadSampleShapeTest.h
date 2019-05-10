@@ -136,9 +136,8 @@ public:
     MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 1, 0, 0, 45);
 
-    boost::shared_ptr<MeshObject> sampleMesh = nullptr;
-    sampleMesh = loadCube();
-    alg.rotate(sampleMesh, inputWS);
+    auto sampleMesh= loadCube();
+    alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {
         -5, 7.07106,    -14.142136, 5,  14.142136,  -7.07106,
@@ -154,9 +153,8 @@ public:
     alg.initialize();
     MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 1, 0, 90);
-    boost::shared_ptr<MeshObject> sampleMesh = nullptr;
-    sampleMesh = loadCube();
-    alg.rotate(sampleMesh, inputWS);
+    auto sampleMesh= loadCube();
+    alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
                                          -5,  -15, 5,  5,   15, -5, -5,  15,
@@ -171,9 +169,8 @@ public:
     alg.initialize();
     MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 0, 1, 180);
-    boost::shared_ptr<MeshObject> sampleMesh = nullptr;
-    sampleMesh = loadCube();
-    alg.rotate(sampleMesh, inputWS);
+    auto sampleMesh = loadCube();
+    alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
                                          -15, 5,  -5,  -15, -5, 5,   15, -5,
@@ -190,9 +187,8 @@ public:
     inputWS->mutableRun().mutableGoniometer().pushAxis("Z", 0, 0, 1, 35);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Y", 0, 1, 0, 20);
     inputWS->mutableRun().mutableGoniometer().pushAxis("X", 1, 0, 0, 70);
-    boost::shared_ptr<MeshObject> sampleMesh = nullptr;
-    sampleMesh = loadCube();
-    alg.rotate(sampleMesh, inputWS);
+    auto sampleMesh= loadCube();
+    alg.rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {
         -13.70635, 5.52235,   -7.52591,  -5.33788,  15.55731,  -2.11589,

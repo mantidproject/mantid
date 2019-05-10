@@ -82,7 +82,7 @@ void LoadSampleShape::exec() {
     shape = loadStl(filename, scaleType);
   }
   // rotate shape
-  shape = rotate(shape, inputWS);
+  rotate(*shape, inputWS);
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();
@@ -98,14 +98,11 @@ void LoadSampleShape::exec() {
  * @param inputWS The workspace to get the rotation from
  * @returns a shared pointer to the newly rotated Shape
  */
-boost::shared_ptr<MeshObject>
-LoadSampleShape::rotate(boost::shared_ptr<MeshObject> sampleMesh,
-                        MatrixWorkspace_const_sptr inputWS) {
+void LoadSampleShape::rotate(MeshObject &sampleMesh,
+                             MatrixWorkspace_const_sptr inputWS) {
   const std::vector<double> rotationMatrix =
       inputWS->run().getGoniometer().getR();
-  sampleMesh->rotate(rotationMatrix);
-
-  return sampleMesh;
+  sampleMesh.rotate(rotationMatrix);
 }
 
 /**

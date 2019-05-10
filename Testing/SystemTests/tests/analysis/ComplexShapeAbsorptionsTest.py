@@ -11,10 +11,7 @@ from mantid import config
 import os.path
 
 
-DIRS = config['datasearch.directories'].split(';')
-data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))), "Data", "UnitTest")
-wsfile = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))), "Data", "SystemTest", "WISH", "input",
-                      "18_1", "WISH00040503.raw")
+wsfile ="WISH00040503.raw"
 
 
 class SampleShapeBase(systemtesting.MantidSystemTest):
@@ -25,8 +22,7 @@ class SampleShapeBase(systemtesting.MantidSystemTest):
 
     def runTest(self):
         self.setup()
-        mantid.LoadSampleShape(InputWorkspace="ws", OutputWorkspace="ws",
-                               Filename=os.path.join(data_dir, "cylinder.stl"))
+        mantid.LoadSampleShape(InputWorkspace="ws", OutputWorkspace="ws", Filename="cylinder.stl")
         mantid.SetSampleMaterial(InputWorkspace="ws", ChemicalFormula="V", SampleNumberDensity=0.1)
         mantid.MonteCarloAbsorption(InputWorkspace="ws", OutputWorkspace="ws", NumberOfWavelengthPoints=50)
 

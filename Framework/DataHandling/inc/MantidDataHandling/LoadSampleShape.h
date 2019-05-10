@@ -8,7 +8,6 @@
 #define DATAHANDLING_LOAD_SHAPE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/LoadShape.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -46,9 +45,8 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
-  boost::shared_ptr<Geometry::MeshObject>
-  rotate(boost::shared_ptr<Geometry::MeshObject> sampleMesh,
-         API::MatrixWorkspace_const_sptr inputWS);
+  void rotate(Geometry::MeshObject &sampleMesh,
+              API::MatrixWorkspace_const_sptr inputWS);
 
 private:
   // Implement abstract Algorithm methods
