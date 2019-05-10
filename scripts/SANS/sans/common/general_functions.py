@@ -834,7 +834,8 @@ def sanitise_instrument_name(instrument_name):
     instrument_name_upper = instrument_name.upper()
     for instrument in SANSInstrument_string_list:
         if re.search(instrument, instrument_name_upper):
-            return instrument_name
+            return instrument
+    return instrument_name
 
 
 def get_facility(instrument):
