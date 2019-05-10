@@ -211,7 +211,13 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
-    _setLabels1D(axes, workspace, indices)
+    try:
+        plot_as_distribution = (on_off_to_bool(config['graph1d.autodistribution']) and
+                                not workspace.isDistribution())
+    except AttributeError:
+        plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
+
+    _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 

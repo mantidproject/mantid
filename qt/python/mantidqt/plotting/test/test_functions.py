@@ -22,6 +22,7 @@ import numpy as np
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.kernel import config
 from mantid.plots import MantidAxes
 from mantid.py3compat import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
@@ -209,6 +210,14 @@ class FunctionsTest(TestCase):
         self.assertEqual(len(mantid_ax.lines), 2)
         self.assertIsInstance(mantid_ax, MantidAxes)
 
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars(self):
+        config['graph1d.autodistribution'] = 'Off'
+        self._compare_errorbar_labels_and_title()
+
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_plot_as_dist(self):
+        config['graph1d.autodistribution'] = 'On'
+        self._compare_errorbar_labels_and_title()
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
@@ -250,6 +259,21 @@ class FunctionsTest(TestCase):
                 self.assertTrue(label_part in line.get_label(),
                                 msg="Label fragment '{}' not found in line label".format(label_part))
         return fig
+
+    def _compare_errorbar_labels_and_title(self):
+        ws = self._test_ws
+        ws.setYUnitLabel("MyLabel")
+        ws.getAxis(0).setUnit("TOF")
+        for distribution_ws in [True, False]:
+            ws.setDistribution(distribution_ws)
+            ax = plot([ws], wksp_indices=[1]).get_axes()[0]
+            err_ax = plot([ws], wksp_indices=[1], errors=True).get_axes()[0]
+            # Compare y-labels
+            self.assertEqual(ax.get_ylabel(), err_ax.get_ylabel())
+            # Compare x-labels
+            self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
+            # Compare title
+            self.assertEqual(ax.get_title(), err_ax.get_title())
 
 
 if __name__ == '__main__':
