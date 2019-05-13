@@ -278,16 +278,16 @@ class SANSFunctionsTest(unittest.TestCase):
 
     def test_that_sanitises_instrument_names(self):
         name1 = sanitise_instrument_name("LOQ_trans")
-        self.assertTrue(LOQ == name1)
+        self.assertEqual(name1, LOQ)
 
         name2 = sanitise_instrument_name("sans2d")
-        self.assertTrue(SANS2D == name2)
+        self.assertEqual(name2, SANS2D)
 
         name3 = sanitise_instrument_name("__LArMOR_")
-        self.assertTrue(LARMOR == name3)
+        self.assertEqual(name3, LARMOR)
 
         name4 = sanitise_instrument_name("OThER")
-        self.assertTrue("OThER" == name4)
+        self.assertEqual(name4, "OThER")
 
     def test_that_can_find_can_reduction_if_it_exists(self):
         # Arrange
