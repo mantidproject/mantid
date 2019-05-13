@@ -3,8 +3,8 @@
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
+# SPDX - License - Identifier: GPL - 3.0 +
 #
 #
 from __future__ import (absolute_import, unicode_literals)
@@ -16,7 +16,7 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.dialogs.plottypedialog import PlotTypeDialog
-from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, LOGGER, plot_from_names
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
