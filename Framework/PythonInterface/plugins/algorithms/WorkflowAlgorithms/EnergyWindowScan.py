@@ -45,7 +45,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
     _background_range = None
     _elastic_range = None
     _inelastic_range = None
-    _total_range = None
     _rebin_string = None
     _detailed_balance = None
     _grouping_method = None
@@ -91,14 +90,10 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
-
         self.declareProperty(FloatArrayProperty(name='ElasticRange'),
                              doc='Energy range for the elastic component')
         self.declareProperty(FloatArrayProperty(name='InelasticRange'),
                              doc='Energy range for the inelastic component.')
-        self.declareProperty(FloatArrayProperty(name='TotalRange'),
-                             doc='Energy range for the total energy component.')
-
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
                              doc='Apply the detailed balance correction')
 
@@ -140,7 +135,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         process_prog = Progress(self, start=0.1, end=0.9, nreports=4)
         process_prog.report("Energy Transfer")
-        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
+        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransferWrapper", 0.05, 0.95)
         scan_alg.setProperty('InputFiles', self._data_files)
         scan_alg.setProperty('SumFiles', self._sum_files)
         scan_alg.setProperty('LoadLogFiles', self._load_logs)
@@ -194,24 +189,17 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         elwin_alg.setProperty("OutputELT", self._scan_ws + '_inel_elt')
         elwin_alg.execute()
 
-        elwin_prog.report('Total window')
-        elwin_alg.setProperty("InputWorkspaces", self._output_ws)
-        elwin_alg.setProperty("IntegrationRangeStart", self._total_range[0])
-        elwin_alg.setProperty("IntegrationRangeEnd", self._total_range[1])
-        elwin_alg.setProperty("SampleEnvironmentLogName", self._sample_log_name)
-        elwin_alg.setProperty("SampleEnvironmentLogValue", self._sample_log_value)
-        elwin_alg.setProperty("OutputInQ", self._scan_ws + '_total_eq1')
-        elwin_alg.setProperty("OutputInQSquared", self._scan_ws + '_total_eq2')
-        elwin_alg.setProperty("OutputELF", self._scan_ws + '_total_elf')
-        elwin_alg.setProperty("OutputELT", self._scan_ws + '_total_elt')
-        elwin_alg.execute()
-
         # storing in ADS so eisf workspace is created
         divide_alg.setAlwaysStoreInADS(True)
         divide_alg.setProperty("LHSWorkspace", self._scan_ws + '_el_eq1')
-        divide_alg.setProperty("RHSWorkspace", self._scan_ws + '_total_eq1')
+        divide_alg.setProperty("RHSWorkspace", self._scan_ws + '_inel_eq1')
         divide_alg.setProperty("OutputWorkspace", self._scan_ws + '_eisf')
         divide_alg.execute()
+
+        delete_alg.setProperty("Workspace", self._scan_ws + '_el_elf')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._scan_ws + '_inel_elf')
+        delete_alg.execute()
 
         x_values = mtd[self._scan_ws + '_el_eq1'].readX(0)
         num_hist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms()
@@ -273,12 +261,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
                 issues['InelasticRange'] = 'Range must contain exactly two items'
             elif inelastic_range[0] > inelastic_range[1]:
                 issues['InelasticRange'] = 'Range must be in format: lower,upper'
-        total_range = self.getProperty('TotalRange').value
-        if inelastic_range is not None:
-            if len(total_range) != 2:
-                issues['TotalRange'] = 'Range must contain exactly two items'
-            elif total_range[0] > total_range[1]:
-                issues['TotalRange'] = 'Range must be in format: lower,upper'
 
         # Validate grouping method
         grouping_method = self.getPropertyValue('GroupingMethod')
@@ -313,7 +295,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self._fold_multiple_frames = False
         self._elastic_range = self.getProperty('ElasticRange').value
         self._inelastic_range = self.getProperty('InelasticRange').value
-        self._total_range = self.getProperty('TotalRange').value
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
         self._grouping_ws = ''
