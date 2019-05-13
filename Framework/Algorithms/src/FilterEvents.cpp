@@ -108,9 +108,13 @@ void FilterEvents::init() {
                   "workspaces.  Group name will be "
                   "OutputWorkspaceBaseName.");
 
+  declareProperty("InformativeOutputNames", false,
+                  "If selected, the names of the output workspaces will "
+                  "include information about each slice. ");
+
   declareProperty("OutputWorkspaceIndexedFrom1", false,
                   "If selected, the minimum output workspace is indexed from 1 "
-                  "and continuous. ");
+                  "and continuous.");
 
   // TOF correction
   vector<string> corrtypes{"None", "Customized", "Direct", "Elastic",
@@ -269,7 +273,7 @@ void FilterEvents::exec() {
   if (m_useArbTableSplitters)
     createOutputWorkspacesTableSplitterCase();
   else if (m_useSplittersWorkspace)
-    createOutputWorkspaces();
+    createOutputWorkspacesSplitters();
   else
     createOutputWorkspacesMatrixCase();
 
@@ -316,9 +320,8 @@ void FilterEvents::exec() {
 
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
   Goniometer inputGonio = m_eventWS->run().getGoniometer();
-  for (miter = m_outputWorkspacesMap.begin();
+  for (auto miter = m_outputWorkspacesMap.begin();
        miter != m_outputWorkspacesMap.end(); ++miter) {
     try {
       DataObjects::EventWorkspace_sptr ws_i = miter->second;
@@ -431,7 +434,7 @@ void FilterEvents::processAlgorithmProperties() {
   }
 
   m_informationWS = this->getProperty("InformationWorkspace");
-  // Informatin workspace is specified?
+  // Information workspace is specified?
   if (!m_informationWS)
     m_hasInfoWS = false;
   else
@@ -489,11 +492,13 @@ void FilterEvents::processAlgorithmProperties() {
   else
     m_useDBSpectrum = true;
 
-  // Get run start time from property 'run_start'
-  if (m_eventWS->run().hasProperty("run_start")) {
-    Types::Core::DateAndTime run_start_time(
-        m_eventWS->run().getProperty("run_start")->value());
+  bool start_time_set = false;
+  // Get run start time
+  try {
+    Types::Core::DateAndTime run_start_time(m_eventWS->run().startTime());
     m_runStartTime = run_start_time;
+    start_time_set = true;
+  } catch (std::runtime_error &) {
   }
 
   // Splitters are given relative time
@@ -507,7 +512,7 @@ void FilterEvents::processAlgorithmProperties() {
       m_filterStartTime = temp_shift_time;
     } else {
       // Retrieve filter starting time from property run_start as default
-      if (m_eventWS->run().hasProperty("run_start")) {
+      if (start_time_set) {
         m_filterStartTime = m_runStartTime;
       } else {
         throw std::runtime_error(
@@ -1000,6 +1005,11 @@ int64_t timeInSecondsToNanoseconds(const int64_t offset_ns,
                                    const double time_sec) {
   return offset_ns + static_cast<int64_t>(time_sec * 1.E9);
 }
+
+int64_t timeInNanosecondsToSeconds(const int64_t offset_ns,
+                                   const double time_sec) {
+  return offset_ns + static_cast<int64_t>(time_sec / 1.E9);
+}
 } // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
@@ -1007,7 +1017,7 @@ int64_t timeInSecondsToNanoseconds(const int64_t offset_ns,
  * The method will transfer the start/stop time to "m_vecSplitterTime"
  * and map the splitting target (in string) to "m_vecSplitterGroup".
  * The mapping will be recorded in "m_targetIndexMap" and
- *"m_wsGroupIndexTargetMap".
+ * "m_wsGroupIndexTargetMap".
  * Also, "m_maxTargetIndex" is set up to record the highest target group/index,
  * i.e., max value of m_vecSplitterGroup
  */
@@ -1102,7 +1112,7 @@ void FilterEvents::processTableSplittersWorkspace() {
  * given by
  *  SplittersWorkspace
  */
-void FilterEvents::createOutputWorkspaces() {
+void FilterEvents::createOutputWorkspacesSplitters() {
 
   // Convert information workspace to map
   std::map<int, std::string> infomap;
@@ -1132,12 +1142,29 @@ void FilterEvents::createOutputWorkspaces() {
   double numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
   double wsgindex = 0.;
 
+  bool splitByTime = true;
+  if (numnewws != m_splittersWorkspace->getNumberSplitters() + 1) {
+    splitByTime = false;
+  }
+  bool informativeNames = getProperty("InformativeOutputNames");
+
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
+
     if (wsgroup >= 0) {
-      wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
+      if (informativeNames && splitByTime) {
+        auto splitter = m_splitters[wsgroup];
+        auto startTime = splitter.start() - m_runStartTime;
+        auto stopTime = splitter.stop() - m_runStartTime;
+        wsname << "start_" << startTime.total_seconds() << "_end_"
+               << stopTime.total_seconds();
+      } else if (informativeNames && m_hasInfoWS) {
+        wsname << infomap[wsgroup];
+      } else {
+        wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
+      }
     } else {
       wsname << m_outputWSNameBase << "_unfiltered";
       if (from1)
@@ -1161,7 +1188,7 @@ void FilterEvents::createOutputWorkspaces() {
         if (infoiter != infomap.end()) {
           info = infoiter->second;
         } else {
-          info = "This workspace has no informatin provided. ";
+          info = "This workspace has no information provided. ";
         }
       }
       optws->setComment(info);
@@ -1240,6 +1267,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
   // SplittersWorkspace, MatrixWorkspace and TableWorkspace cases
   size_t numoutputws = m_targetWorkspaceIndexSet.size();
   size_t wsgindex = 0;
+  bool informativeNames = getProperty("InformativeOutputNames");
 
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < 0)
@@ -1249,8 +1277,14 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // workspace name
     std::stringstream wsname;
     if (wsgroup > 0) {
-      int target_name = m_wsGroupdYMap[wsgroup];
-      wsname << m_outputWSNameBase << "_" << target_name;
+      if (informativeNames) {
+        auto startTime = m_vecSplitterTime[wsgroup];
+        auto stopTime = m_vecSplitterTime[wsgroup + 1];
+        wsname << "start_" << startTime << "_end_" << stopTime;
+      } else {
+        int target_name = m_wsGroupdYMap[wsgroup];
+        wsname << m_outputWSNameBase << "_" << target_name;
+      }
     } else {
       wsname << m_outputWSNameBase << "_unfiltered";
     }
@@ -1336,12 +1370,27 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
       throw std::runtime_error("It is not possible to have split-target group "
                                "index < 0 in TableWorkspace case.");
 
-    // workspace name
     std::stringstream wsname;
+    bool informativeNames = getProperty("InformativeOutputNames");
+
+    // workspace name
     if (wsgroup > 0) {
-      // get target name via map
-      std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
-      wsname << m_outputWSNameBase << "_" << target_name;
+      if (informativeNames) {
+        int startIndex;
+        for (auto itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
+          if (m_vecSplitterGroup[itr] == wsgroup)
+            startIndex = itr;
+        }
+        auto startTime =
+            m_vecSplitterTime[startIndex] - m_runStartTime.totalNanoseconds();
+        auto stopTime = m_vecSplitterTime[startIndex + 1] -
+                        m_runStartTime.totalNanoseconds();
+        wsname << "start_" << timeInNanosecondsToSeconds(0, startTime)
+               << "_end_" << timeInNanosecondsToSeconds(0, stopTime);
+      } else {
+        std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
+        wsname << m_outputWSNameBase << "_" << target_name;
+      }
     } else {
       wsname << m_outputWSNameBase << "_unfiltered";
     }

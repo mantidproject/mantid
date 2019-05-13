@@ -21,6 +21,11 @@ Bug fixes
 Algorithms
 ----------
 
+Improvements
+############
+
+- The output workspaces of :ref:`algm-ReflectometrySliceEventWorkspace` now have names which describe the slice.
+
 Bug fixes
 #########
 
