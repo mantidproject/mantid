@@ -21,7 +21,6 @@ import sys
 import mantid.api
 import mantid.kernel
 import mantid.plots.modest_image
-import mantid.plots.modest_image
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \

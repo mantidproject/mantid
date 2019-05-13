@@ -107,24 +107,39 @@ class FigureErrorsManagerTest(GuiTest):
         # now it should be hidden
         self.assertFalse(self.ax.containers[1][2][0].get_visible())
 
-    def test_toggle_all_error_bars(self):
+    def test_toggle_all_error_bars_make_visible_False_single_line(self):
+        """
+        Test checking that clicking `Hide all` does not try to
+        toggle errors on a single line that does not have errors plotted.
+        Instead it just skips it
+        :return:
+        """
         # add one errorbar with visible and one with hidden errors
-        self.ax.errorbar(self.ws2d_histo, specNum=1)
-        self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
-        # first is visible
+        self.ax.plot(self.ws2d_histo, specNum=1)
+        self.assertEqual(0, len(self.ax.containers))
+
+        self.errors_manager.toggle_all_error_bars(make_visible=False)
+
+        # nothing should be done as the state being forced is False,
+        # which should not add new errors for lines
+        self.assertEqual(0, len(self.ax.containers))
+
+    def test_toggle_all_error_bars_make_visible_True_single_line(self):
+        """
+        Test checking that clicking `Show all` adds errors to the line.
+        :return:
+        """
+        # add one errorbar with visible and one with hidden errors
+        self.ax.plot(self.ws2d_histo, specNum=1)
+        self.assertEqual(0, len(self.ax.containers))
+
+        self.errors_manager.toggle_all_error_bars(make_visible=True)
+
+        # a container for the error should have been added
+        self.assertEqual(1, len(self.ax.containers))
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
-        # second is hidden
-        self.assertFalse(self.ax.containers[1][2][0].get_visible())
 
-        # toggle will flip the states
-        self.errors_manager.toggle_all_error_bars()
-
-        # first is now HIDDEN
-        self.assertFalse(self.ax.containers[0][2][0].get_visible())
-        # second is now VISIBLE
-        self.assertTrue(self.ax.containers[1][2][0].get_visible())
-
-    def test_toggle_all_error_bars_force_state(self):
+    def test_toggle_all_error_bars(self):
         # add one errorbar with visible and one with hidden errors
         self.ax.errorbar(self.ws2d_histo, specNum=1)
         self.ax.errorbar(self.ws2d_histo, specNum=2, errors_visible=False)
@@ -197,9 +212,9 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
     def tearDown(self):
         plt.close('all')
-        self.fig = None
-        self.ax = None
-        self.errors_manager = None
+        del self.fig
+        del self.ax
+        del self.errors_manager
 
     def test_context_menu_not_added_for_scripted_plot_without_errors(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
@@ -287,11 +302,11 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
 
-        self.errors_manager.toggle_all_error_bars()
+        self.errors_manager.toggle_all_error_bars(make_visible=False)
 
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
 
-        self.errors_manager.toggle_all_error_bars()
+        self.errors_manager.toggle_all_error_bars(make_visible=True)
 
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
 
@@ -303,25 +318,22 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
         # line with X Errors
         self.assertTrue(self.ax.containers[1][2][0].get_visible())
 
-        self.errors_manager.toggle_all_error_bars()
+        self.errors_manager.toggle_all_error_bars(make_visible=False)
 
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
         # line with X Errors is not affected by the toggle
         self.assertTrue(self.ax.containers[1][2][0].get_visible())
-        self.tearDown()
 
     def test_scripted_plot_with_only_x_errors(self):
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], xerr=[10, 10000], label='MyLabel 2')
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
 
-        self.errors_manager.toggle_all_error_bars()
+        self.errors_manager.toggle_all_error_bars(make_visible=False)
         # state does not change, because the toggle does not affect X errors
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
-        self.tearDown()
 
     def test_scripted_plot_show_unsupported_axis_raises_not_implemented(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
 
         self.assertRaisesRegexp(ValueError, FigureErrorsManager.AXES_NOT_MANTIDAXES_ERR_MESSAGE,
                                 self.errors_manager.show_error_bar_for, 0)
-        self.tearDown()

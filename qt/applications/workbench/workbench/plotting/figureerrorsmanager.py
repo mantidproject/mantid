@@ -152,6 +152,11 @@ class FigureErrorsManager(object):
         errorbar_container[0].set_color(line.get_color())
         errorbar_container[2][0].set_color(line.get_color())
 
+        # change the color of error cap lines, if present
+        if len(errorbar_container[1]) > 0:
+            for cap in errorbar_container[1]:
+                cap.set_color(line.get_color())
+
         # swap in .creation_args, remove the old args reference
         cargs = self.canvas.figure.axes[0].creation_args
         cargs[creation_args_index], cargs[-1] = cargs[-1], cargs[creation_args_index]
@@ -220,7 +225,7 @@ class FigureErrorsManager(object):
         errorbar_container = self._ensure_errorbar_present(data_lines_index)
         self._toggle_error_bar_for(data_lines_index, errorbar_container, make_visible=True)
 
-    def toggle_all_error_bars(self, make_visible=None):
+    def toggle_all_error_bars(self, make_visible):
         """
         Iterates through all lines in the plot and toggles the error visibility.
 
@@ -244,7 +249,9 @@ class FigureErrorsManager(object):
                                            make_visible=make_visible)
 
         # errors can't be added dynamically while working with axes that aren't supported
-        if not self._supported_ax(ax):
+        # also if there is no errobar container present, and the state if being forced to
+        # make_visible == False, then avoid doing any more work
+        if not self._supported_ax(ax) or not make_visible:
             return
 
         # Iterate over all lines to add new error bars.
