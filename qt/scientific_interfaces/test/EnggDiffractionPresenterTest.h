@@ -129,7 +129,7 @@ public:
   // Several of these are indirectly tested through some of the GUI-mock-based
   // tests below but should be tested as isolated methods here at the beginning.
 
-  void xtest_start() {
+  void test_start() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -147,7 +147,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_loadExistingCalibWithWrongName() {
+  void test_loadExistingCalibWithWrongName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -171,7 +171,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_loadExistingCalibWithAcceptableName() {
+  void test_loadExistingCalibWithAcceptableName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // by setting this here, when initialising the presenter, the function will
@@ -205,7 +205,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_calcCalibWithoutRunNumbers() {
+  void test_calcCalibWithoutRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -236,7 +236,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_calcCalibFailsWhenNoCalibDirectory() {
+  void test_calcCalibFailsWhenNoCalibDirectory() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
 
@@ -262,7 +262,7 @@ public:
   }
 
   // this can start the calibration thread, so watch out
-  void xtest_calcCalibWithSettingsMissing() {
+  void test_calcCalibWithSettingsMissing() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test can start a Qt thread that needs signals/slots
@@ -408,7 +408,7 @@ public:
 
   // This would test the cropped calibration with no cerial number
   // which should produce a warning
-  void xtestcalcCroppedCalibWithoutRunNumbers() {
+  void testcalcCroppedCalibWithoutRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -436,7 +436,7 @@ public:
   // this can start the cropped calibration thread, so watch out
   // the test provide gui with missing calib settings
   // which should return a single error
-  void xtestcalcCroppedCalibWithSettingsMissing() {
+  void testcalcCroppedCalibWithSettingsMissing() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test can start a Qt thread that needs signals/slots
@@ -471,7 +471,7 @@ public:
 
   // This should not start the process, tests with an empty spec number which
   // should generate a user warning that spec number is missing
-  void xtestcalcCroppedCalibWithEmptySpec() {
+  void testcalcCroppedCalibWithEmptySpec() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -519,7 +519,7 @@ public:
   // the thread unless you use the mock without thread
   // this will utlise the bank name north and not still carry out the cropped
   // calibration process normal
-  void xtestcalcCroppedCalibWithBankName() {
+  void testcalcCroppedCalibWithBankName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -585,7 +585,7 @@ public:
   // starting the thread unless you use the mock without thread
   // this test case includes all valid settings, run numbers, spectrum no
   // selected & valid spectrum no provided
-  void xtestcalcCroppedCalibWithRunNumbers() {
+  void testcalcCroppedCalibWithRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
@@ -694,7 +694,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusWithoutRunNumber() {
+  void testfocusWithoutRunNumber() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -731,7 +731,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusWithRunNumberButWrongBanks() {
+  void testfocusWithRunNumberButWrongBanks() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -766,7 +766,7 @@ public:
   }
 
   // the focusing process starts but the input run number cannot be found
-  void xtestfocusWithNumbersButError() {
+  void testfocusWithNumbersButError() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test starts the focusing process which would start a Qt
@@ -894,7 +894,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusCropped_withoutRunNo() {
+  void testfocusCropped_withoutRunNo() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -934,7 +934,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusCropped_withoutBanks() {
+  void testfocusCropped_withoutBanks() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -974,7 +974,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusCropped_withoutSpectrumNos() {
+  void testfocusCropped_withoutSpectrumNos() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1014,7 +1014,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusTexture_withoutRunNo() {
+  void testfocusTexture_withoutRunNo() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1050,7 +1050,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusTexture_withoutFilename() {
+  void testfocusTexture_withoutFilename() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1086,7 +1086,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestfocusTexture_withInexistentTextureFile() {
+  void testfocusTexture_withInexistentTextureFile() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1122,7 +1122,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestresetFocus() {
+  void testresetFocus() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1139,7 +1139,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestresetFocus_thenFocus() {
+  void testresetFocus_thenFocus() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1175,7 +1175,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestpreproc_event_time_bin_missing_runno() {
+  void testpreproc_event_time_bin_missing_runno() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1196,7 +1196,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestpreproc_event_time_wrong_bin() {
+  void testpreproc_event_time_wrong_bin() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1221,7 +1221,7 @@ public:
   }
 
   // this test does run Load and then Rebin //
-  void xtestpreproc_event_time_ok() {
+  void testpreproc_event_time_ok() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
     // inputs from user
@@ -1253,7 +1253,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtestpreproc_event_multiperiod_missing_runno() {
+  void testpreproc_event_multiperiod_missing_runno() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1274,7 +1274,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_preproc_event_multiperiod_wrong_bin() {
+  void test_preproc_event_multiperiod_wrong_bin() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1302,7 +1302,7 @@ public:
   }
 
   // this test does run Load but then RebinByPulseTimes should fail
-  void xtest_preproc_event_multiperiod_file_wrong_type() {
+  void test_preproc_event_multiperiod_file_wrong_type() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     EnggDiffPresenterNoThread pres(&mockView);
 
@@ -1331,7 +1331,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_logMsg() {
+  void test_logMsg() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1353,7 +1353,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_RBNumberChange_ok() {
+  void test_RBNumberChange_ok() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1375,7 +1375,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_RBNumberChange_empty() {
+  void test_RBNumberChange_empty() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -1397,7 +1397,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_instChange() {
+  void test_instChange() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // by setting this here, when initialising the presenter, the function will
@@ -1427,7 +1427,7 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void xtest_shutDown() {
+  void test_shutDown() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
