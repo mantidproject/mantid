@@ -661,7 +661,7 @@ void EnggDiffFittingPresenter::warnFileNotFound(const std::exception &ex) {
   m_view->showStatus("Error while loading focused run");
   m_view->userWarning("Invalid file selected",
                       "Mantid could not load the selected file, "
-                      "or was unable to get nessecary information."
+                      "or was unable to get necessary information."
                       "See the logger for more information");
   g_log.error("Failed to load file. Error message: ");
   g_log.error(ex.what());

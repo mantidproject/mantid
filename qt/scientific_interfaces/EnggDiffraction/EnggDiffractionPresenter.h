@@ -98,6 +98,11 @@ protected:
   void processShutDown();
   void processStopFocus();
 
+  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
+                                                const std::vector<bool> &banks);
+
+  std::string outputFocusCroppedFilename(const std::string &runNo);
+
 protected slots:
   void calibrationFinished();
   void focusingFinished();
@@ -174,11 +179,6 @@ private:
                                 const std::string &dgfile);
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
-
-  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
-                                                const std::vector<bool> &banks);
-
-  std::string outputFocusCroppedFilename(const std::string &runNo);
 
   std::vector<std::string> sumOfFilesLoadVec();
 

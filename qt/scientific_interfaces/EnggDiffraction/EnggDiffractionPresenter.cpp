@@ -1378,7 +1378,10 @@ EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
       (instrumentPresent != std::string::npos)
           ? runNumber.substr(instrumentPresent + instStr.size())
           : runNumber;
-  return instStr + "_" + runName + "_focused_cropped.nxs";
+  return instStr + "_" +
+         runName.erase(
+             0, std::min(runName.find_first_not_of('0'), runName.size() - 1)) +
+         "_focused_cropped.nxs";
 }
 
 std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
