@@ -302,7 +302,7 @@ public:
 
   // this test actually starts the calibration process - which implies starting
   // the thread unless you use the mock without thread
-  void xtestcalcCalibWithRunNumbersButError() {
+  void testcalcCalibWithRunNumbersButError() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
     // this test would start a Qt thread that needs signals/slots
