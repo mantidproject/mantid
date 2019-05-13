@@ -76,10 +76,11 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto const scaleFactor = stringValueOrEmpty(maybeScaleFactor);
   auto const processingInstructions = defaults.getStringOrEmpty(
       "ProcessingInstructions", "ProcessingInstructions");
-  auto perThetaDefaults = std::vector<std::array<std::string, 8>>();
-  perThetaDefaults.emplace_back(std::array<std::string, 8>{
-      theta, firstTransmissionRun, secondTransmissionRun, qMin, qMax, qStep,
-      scaleFactor, processingInstructions});
+  auto perThetaDefaultsRow = std::array<std::string, 8>{
+      {theta, firstTransmissionRun, secondTransmissionRun, qMin, qMax, qStep,
+       scaleFactor, processingInstructions}};
+  auto perThetaDefaults =
+      std::vector<std::array<std::string, 8>>{perThetaDefaultsRow};
   auto validate = PerThetaDefaultsTableValidator();
   auto const tolerance = 0.0; // irrelevant because theta is empty
   auto perThetaValidationResult = validate(perThetaDefaults, tolerance);
