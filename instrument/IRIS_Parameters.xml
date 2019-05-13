@@ -114,6 +114,15 @@
 <parameter name="Workflow.TemperatureSensorNames" type="string">
     <value val="Bottom_can,Middle_can,Top_can" />
 </parameter>
+<parameter name="Workflow.SamplePosition1">
+    <value val="165" />
+</parameter>
+<parameter name="Workflow.SamplePosition2">
+    <value val="85.5" />
+</parameter>
+<parameter name="Workflow.SamplePosition3">
+    <value val="6" />
+</parameter>
 
 </component-link>
 
