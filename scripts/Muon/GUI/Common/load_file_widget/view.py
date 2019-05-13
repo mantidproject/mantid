@@ -78,7 +78,8 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.file_path_edit)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
-        self.horizontal_layout.setMargin(0)
+        if not isinstance(self.horizontal_layout, QtWidgets.QHBoxLayout):
+            self.horizontal_layout.setMargin(0)
 
         self.setLayout(self.horizontal_layout)
 

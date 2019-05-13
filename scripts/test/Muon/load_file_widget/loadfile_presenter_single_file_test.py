@@ -92,7 +92,9 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.view.get_file_edit_text = mock.Mock(return_value=text)
 
     def mock_model_to_load_workspaces(self, workspaces, runs, filenames):
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs, filenames))
+        is_psi_data = [False] * len(filenames)
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs, filenames,
+                                                                                         is_psi_data))
 
     def load_workspaces_into_model_and_view_from_browse(self, workspaces, runs, files):
         self.mock_model_to_load_workspaces(workspaces, runs, files)

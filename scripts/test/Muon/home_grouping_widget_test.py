@@ -45,6 +45,7 @@ def perform_musr_file_finder(self):
     self.data_context._loaded_data.add_data(run=[run], workspace=ws, filename=filename, instrument='MUSR')
     self.data_context.current_runs = [[22725]]
 
+    self.context.data_context._instrument = "MUSR"
     self.context.update_current_data()
     test_pair = MuonPair('test_pair', 'top', 'bottom', alpha=0.75)
     self.group_context.add_pair(pair=test_pair)
@@ -68,6 +69,7 @@ class HomeTabGroupingPresenterTest(unittest.TestCase):
         self.obj = None
 
     def test_group_pair_selector_contains_groups_and_pairs(self):
+        self.context.data_context.current_data["workspace"] = mock.MagicMock()
         perform_musr_file_finder(self)
         self.assertEqual(self.view.grouppair_selector.itemText(0), 'top')
         self.assertEqual(self.view.grouppair_selector.itemText(1), 'bkwd')

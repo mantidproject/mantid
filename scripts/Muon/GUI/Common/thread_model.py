@@ -47,10 +47,13 @@ class ThreadModelWorker(QtCore.QObject):
         except KeyboardInterrupt:
             self.signals.cancel.emit()
         except Exception as error:
-            try:
-                self.signals.error.emit(error.args[0])
-            except IndexError:
-                self.signals.error.emit("")
+            # Doesn't emit on failed testing helps with decent test failure messages
+            import mock
+            if not isinstance(error.message, mock.MagicMock):
+                try:
+                    self.signals.error.emit(error.args[0])
+                except IndexError:
+                    self.signals.error.emit("")
         finally:
             self.signals.finished.emit()
             current_thread = QtCore.QThread.currentThread()
