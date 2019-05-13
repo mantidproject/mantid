@@ -20,8 +20,10 @@ Improvements
 - Increased font size in run table.
 - For ZOOM, SHIFT user file command now moves monitor 5.
 - canSAS output mode will be disabled if 2D reduction mode is selected to avoid accidental errors with data dimension.
+- **Load Batch File** opens to the directory of your last selected batch file. **Load User File** opens to the directory of your last selected user file.
 - Batch files created by exporting the runs table have the same order of keys as in the table.
 - Batch files no longer require an output name to load. When processing, an auto-generated name is used instead.
+- When the main save directory is changed, the add runs save directory is also updated. Add runs save directory can be still changed independently of the main save directory.
 
 Bug Fixes
 #########

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEvent.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/make_shared.hpp>
 #include <limits>
 
@@ -37,8 +37,8 @@ TMDE(MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,
 TMDE(MDBoxBase)::MDBoxBase(
     Mantid::API::BoxController *const boxController, const uint32_t depth,
     const size_t boxID,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector)
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_BoxController(boxController), m_inverseVolume(UNDEF_COORDT),
       m_depth(depth), m_parent(nullptr), m_fileID(boxID) {
@@ -140,7 +140,8 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
  * @param[out] numVertices :: returns the number of vertices in the array.
  * @return the bare array. This should be deleted by the caller!
  * */
-TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
+    size_t &numVertices) const {
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
   numVertices = 1 << nd;
@@ -189,9 +190,9 @@ TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices
  *caller!
  * @throw if outDimensions == 0
  * */
-TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(size_t &numVertices,
-                                           const size_t outDimensions,
-                                           const bool *maskDim) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxBase)::getVertexesArray(
+    size_t &numVertices, const size_t outDimensions,
+    const bool *maskDim) const {
   if (outDimensions == 0)
     throw std::invalid_argument(
         "MDBoxBase::getVertexesArray(): Must have > 0 output dimensions.");
@@ -283,5 +284,5 @@ TMDE(size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> &events) {
   return 0;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

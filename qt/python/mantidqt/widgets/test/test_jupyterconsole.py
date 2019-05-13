@@ -28,16 +28,33 @@ class InProcessJupyterConsoleTest(GuiTest):
         self.assertTrue(hasattr(widget, "kernel_manager"))
         self.assertTrue(hasattr(widget, "kernel_client"))
         self.assertTrue(len(widget.banner) > 0)
-        del widget
-
-    def test_construction_with_banner_replaces_default(self):
-        widget = InProcessJupyterConsole()
+        self._pre_delete_console_cleanup(widget)
         del widget
 
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
         self.assertEquals(1, widget.kernel_manager.kernel.shell.user_ns['x'])
+        self._pre_delete_console_cleanup(widget)
         del widget
+
+    def _pre_delete_console_cleanup(self, console):
+        """Certain versions of qtconsole seem to raise an attribute error on
+        exit of the process when an event is delivered to an event filter
+        during object deletion:
+
+        OK
+        Traceback (most recent call last):
+          File "/usr/local/lib/python2.7/site-packages/qtconsole/completion_html.py", line 149, in eventFilter
+            if obj == self._text_edit:
+        AttributeError: 'CompletionHtml' object has no attribute '_text_edit'
+        Child aborted
+
+        We workaround this by manually deleting the completion widget
+        """
+        try:
+            console._completion_widget = None
+        except AttributeError:
+            pass
 
 
 if __name__ == '__main__':

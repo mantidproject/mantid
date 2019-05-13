@@ -135,9 +135,9 @@ std::vector<std::string>
 EnggDiffGSASFittingViewQtWidget::getFocusedFileNames() const {
   const auto filenamesQStringList = m_ui.lineEdit_runFile->text().split(",");
   std::vector<std::string> filenames;
-
+  filenames.reserve(filenamesQStringList.size());
   for (const auto &filenameQString : filenamesQStringList) {
-    filenames.push_back(filenameQString.toStdString());
+    filenames.emplace_back(filenameQString.toStdString());
   }
   return filenames;
 }
@@ -198,7 +198,7 @@ EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const {
   const auto fileNameQStrings = m_ui.lineEdit_phaseFiles->text().split(",");
   fileNameStrings.reserve(fileNameQStrings.size());
   for (const auto &fileNameQString : fileNameQStrings) {
-    fileNameStrings.push_back(fileNameQString.toStdString());
+    fileNameStrings.emplace_back(fileNameQString.toStdString());
   }
   return fileNameStrings;
 }

@@ -208,11 +208,7 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
  */
 void IndirectDiffractionReduction::plotResults() {
   setPlotIsPlotting(true);
-
-  QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
-  QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
-  QString plotType = m_uiForm.cbPlotType->currentText();
+  const QString plotType = m_uiForm.cbPlotType->currentText();
 
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 

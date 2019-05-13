@@ -159,7 +159,7 @@ private slots:
   void saveClicked();
   void plotSeparateWindow();
   void showToolTipHelp();
-  void listWidget_fitting_run_num_clicked(QListWidgetItem *listWidget);
+  void listWidget_fitting_run_num_clicked(QListWidgetItem *);
   void plotFittedPeaksStateChanged();
   void removeRunClicked();
 

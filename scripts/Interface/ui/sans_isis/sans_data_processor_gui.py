@@ -28,7 +28,7 @@ from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
-                                       load_file, load_default_file, load_property, set_setting,
+                                       load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
@@ -198,6 +198,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
         self.__user_file_key = "user_file"
+        self.__batch_file_key = "batch_file"
         self.__mask_file_input_path_key = "mask_files"
         self.__output_mode_key = "output_mode"
         self.__save_can_key = "save_can"
@@ -214,12 +215,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.instrument = SANSInstrument.NoInstrument
 
-        self.paste_button.setIcon(icons.get_icon("fa.paste"))
-        self.copy_button.setIcon(icons.get_icon("fa.copy"))
-        self.cut_button.setIcon(icons.get_icon("fa.cut"))
-        self.erase_button.setIcon(icons.get_icon("fa.eraser"))
-        self.delete_row_button.setIcon(icons.get_icon("fa.trash"))
-        self.insert_row_button.setIcon(icons.get_icon("fa.table"))
+        self.paste_button.setIcon(icons.get_icon("mdi.content-paste"))
+        self.copy_button.setIcon(icons.get_icon("mdi.content-copy"))
+        self.cut_button.setIcon(icons.get_icon("mdi.content-cut"))
+        self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
+        self.delete_row_button.setIcon(icons.get_icon("mdi.trash-can"))
+        self.insert_row_button.setIcon(icons.get_icon("mdi.table"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
@@ -280,19 +281,19 @@ class SANSDataProcessorGui(QMainWindow,
         self.tab_choice_list.currentRowChanged.connect(self.set_current_page)
         self.set_current_page(0)
 
-        runs_icon = icons.get_icon("fa.play-circle-o")
+        runs_icon = icons.get_icon("mdi.play-circle-outline")
         _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
 
-        settings_icon = icons.get_icon("fa.cog")
+        settings_icon = icons.get_icon("mdi.settings")
         _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
 
-        centre_icon = icons.get_icon("fa.dot-circle-o")
+        centre_icon = icons.get_icon("mdi.adjust")
         _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
 
-        add_runs_page_icon = icons.get_icon("fa.plus-circle")
+        add_runs_page_icon = icons.get_icon("mdi.plus-circle-outline")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon = icons.get_icon("fa.question-circle")
+        diagnostic_icon = icons.get_icon("mdi.help-circle-outline")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled
@@ -570,21 +571,19 @@ class SANSDataProcessorGui(QMainWindow,
                   self.get_user_file_path)
 
         # Set full user file path for default loading
-        set_setting(self.__generic_settings, self.__user_file_key, self.get_user_file_path())
+        self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
 
         # Notify presenters
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        set_setting(self.__generic_settings, self.__user_file_key, "")
+        self.gui_properties_handler.set_setting("user_file", "")
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):
         """
         Load a default user file, called on view set-up
         """
-        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
-
         if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
@@ -616,7 +615,7 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__path_key,
+        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 

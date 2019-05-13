@@ -73,8 +73,8 @@ std::map<std::string, std::string> MaskBinsIf::validateInputs() {
   mu::Parser parser = makeParser(y, e, x, dx, s, getPropertyValue("Criterion"));
   try {
     parser.Eval();
-  } catch (mu::Parser::exception_type &e) {
-    issues["Criterion"] = "Invalid expression given: " + e.GetMsg();
+  } catch (mu::Parser::exception_type &exception) {
+    issues["Criterion"] = "Invalid expression given: " + exception.GetMsg();
   }
   return issues;
 }
@@ -89,10 +89,10 @@ void MaskBinsIf::exec() {
   if (inputWorkspace != outputWorkspace) {
     outputWorkspace = inputWorkspace->clone();
   }
-  const auto spectrumAxis = outputWorkspace->getAxis(1);
-  const auto numeric = dynamic_cast<NumericAxis *>(spectrumAxis);
-  const auto spectrum = dynamic_cast<SpectraAxis *>(spectrumAxis);
-  const bool spectrumOrNumeric = numeric || spectrum;
+  const auto verticalAxis = outputWorkspace->getAxis(1);
+  const auto numericAxis = dynamic_cast<NumericAxis *>(verticalAxis);
+  const auto spectrumAxis = dynamic_cast<SpectraAxis *>(verticalAxis);
+  const bool spectrumOrNumeric = numericAxis || spectrumAxis;
   if (!spectrumOrNumeric) {
     throw std::runtime_error(
         "Vertical axis must be NumericAxis or SpectraAxis");
@@ -104,7 +104,7 @@ void MaskBinsIf::exec() {
   for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERUPT_REGION
     double y, e, x, dx;
-    double s = spectrumOrNumeric ? spectrumAxis->getValue(index) : 0.;
+    double s = spectrumOrNumeric ? verticalAxis->getValue(index) : 0.;
     mu::Parser parser = makeParser(y, e, x, dx, s, criterion);
     const auto &spectrum = outputWorkspace->histogram(index);
     const bool hasDx = outputWorkspace->hasDx(index);

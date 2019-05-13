@@ -18,49 +18,50 @@ add_subdirectory(EnggDiffraction)
 add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
-set ( TEST_FILES
-  test/ALCBaselineModellingModelTest.h
-  test/ALCBaselineModellingPresenterTest.h
-  test/ALCDataLoadingPresenterTest.h
-  test/ALCLatestFileFinderTest.h
-  test/ALCPeakFittingModelTest.h
-  test/ALCPeakFittingPresenterTest.h
-  test/EnggDiffGSASFittingModelTest.h
-  test/EnggDiffGSASFittingPresenterTest.h
-  test/EnggDiffMultiRunFittingWidgetModelTest.h
-  test/EnggDiffMultiRunFittingWidgetPresenterTest.h
-  test/EnggDiffFittingModelTest.h
-  test/EnggDiffFittingPresenterTest.h
-  test/EnggDiffractionPresenterTest.h
-  test/EnggVanadiumCorrectionsModelTest.h
-  test/IO_MuonGroupingTest.h
-  test/MDFLogValueFinderTest.h
-  test/MuonAnalysisDataLoaderTest.h
-  test/MuonAnalysisFitDataPresenterTest.h
-  test/MuonAnalysisFitFunctionPresenterTest.h
-  test/MuonAnalysisHelperTest.h
-  test/MuonAnalysisResultTableCreatorTest.h
-  test/RunMapTest.h
-  test/ISISReflectometry/Batch/BatchJobRunnerTest.h
-  test/ISISReflectometry/Batch/BatchPresenterTest.h
-  test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
-  test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
-  test/ISISReflectometry/Reduction/GroupTest.h
-  test/ISISReflectometry/Reduction/ValidateRowTest.h
-  test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
-  test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
-  test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
-  test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
-  test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
-  test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
-  test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
-  test/ISISReflectometry/Event/EventPresenterTest.h
-  test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
-  test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
-  test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
-  test/ISISReflectometry/Runs/RunsPresenterTest.h
-  test/ISISReflectometry/Save/SavePresenterTest.h
-  test/ISISReflectometry/Plotting/PlotterTest.h
+set(TEST_FILES
+    test/ALCBaselineModellingModelTest.h
+    test/ALCBaselineModellingPresenterTest.h
+    test/ALCDataLoadingPresenterTest.h
+    test/ALCLatestFileFinderTest.h
+    test/ALCPeakFittingModelTest.h
+    test/ALCPeakFittingPresenterTest.h
+    test/EnggDiffGSASFittingModelTest.h
+    test/EnggDiffGSASFittingPresenterTest.h
+    test/EnggDiffMultiRunFittingWidgetModelTest.h
+    test/EnggDiffMultiRunFittingWidgetPresenterTest.h
+    test/EnggDiffFittingModelTest.h
+    test/EnggDiffFittingPresenterTest.h
+    test/EnggDiffractionPresenterTest.h
+    test/EnggVanadiumCorrectionsModelTest.h
+    test/IO_MuonGroupingTest.h
+    test/MeasurementItemTest.h
+    test/MuonAnalysisDataLoaderTest.h
+    test/MuonAnalysisFitDataPresenterTest.h
+    test/MuonAnalysisFitFunctionPresenterTest.h
+    test/MuonAnalysisHelperTest.h
+    test/MuonAnalysisResultTableCreatorTest.h
+
+    test/RunMapTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerTest.h
+    test/ISISReflectometry/Batch/BatchPresenterTest.h
+    test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
+    test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
+    test/ISISReflectometry/Reduction/GroupTest.h
+    test/ISISReflectometry/Reduction/ValidateRowTest.h
+    test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
+    test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
+    test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
+    test/ISISReflectometry/Event/EventPresenterTest.h
+    test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
+    test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
+    test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
+    test/ISISReflectometry/Runs/RunsPresenterTest.h
+    test/ISISReflectometry/Save/SavePresenterTest.h
+    test/ISISReflectometry/Plotting/PlotterTest.h
 )
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest

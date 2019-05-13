@@ -237,9 +237,6 @@ void Rebin::exec() {
       inputWS = ChildAlg->getProperty("OutputWorkspace");
     }
 
-    // This will be the output workspace (exact type may vary)
-    API::MatrixWorkspace_sptr outputWS;
-
     // make output Workspace the same type is the input, but with new length of
     // signal array
     outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber,

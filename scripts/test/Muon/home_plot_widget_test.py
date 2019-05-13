@@ -9,10 +9,10 @@ from PyQt4 import QtGui
 
 from mantid.py3compat import mock
 
-from Muon.GUI.Common import mock_widget
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class HomeTabPlotPresenterTest(unittest.TestCase):

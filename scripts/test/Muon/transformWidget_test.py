@@ -7,13 +7,16 @@
 import unittest
 
 from mantid.py3compat import mock
-from Muon.GUI.Common import mock_widget
+
+from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
-from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
-from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
-from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget import MaxEntWidget
+from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
+from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
+from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
 
 
 class TransformTest(unittest.TestCase):
@@ -24,7 +27,7 @@ class TransformTest(unittest.TestCase):
         self.maxent=mock.create_autospec( maxent_presenter.MaxEntPresenter,spec_set=True)
 
         # create widget
-        self.widget=transform_widget.TransformWidget(self.load)
+        self.widget=transform_widget.TransformWidget(self.load, FFTWidget, MaxEntWidget)
         # create the view
         self.view=mock.create_autospec(transform_view.TransformView,spec_set=False)
         self.view.getView=mock.Mock()

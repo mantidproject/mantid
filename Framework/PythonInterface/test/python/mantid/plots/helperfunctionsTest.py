@@ -169,7 +169,12 @@ class HelperFunctionsTest(unittest.TestCase):
     def test_get_axes_label_2d_MDWS(self):
         axs = funcs.get_axes_labels(self.ws_MD_2d)
         # should get the first two dimension labels only
-        self.assertEqual(axs, ('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)'))
+        self.assertEqual(axs, ('Intensity', 'Dim1 ($\\AA^{-1}$)', 'Dim2 (EnergyTransfer)', ''))
+
+    def test_get_axes_label_2d_MDWS_indices(self):
+        axs = funcs.get_axes_labels(self.ws_MD_2d, indices=(0,slice(None),0))
+        # should get the first two dimension labels only
+        self.assertEqual(axs, ('Intensity', 'Dim2 (EnergyTransfer)', 'Dim1=-2.4; Dim3=0.0;'))
 
     def test_get_data_uneven_flag(self):
         flag, kwargs = funcs.get_data_uneven_flag(self.ws2d_histo_rag, axisaligned=True, other_kwarg=1)
@@ -221,6 +226,15 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
         np.testing.assert_allclose(data, np.arange(25).reshape(5, 5) * 0.1, atol=1e-10)
 
+    def test_get_md_data2d_bin_centers_transpose(self):
+        """
+        Same as the test above but should be the transpose
+        """
+        x, y, data = funcs.get_md_data2d_bin_centers(self.ws_MD_2d, mantid.api.MDNormalization.NumEventsNormalization, transpose=True)
+        np.testing.assert_allclose(x, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
+        np.testing.assert_allclose(y, np.array([-2.4, -1.2, 0, 1.2, 2.4]), atol=1e-10)
+        np.testing.assert_allclose(data, np.arange(25).reshape(5, 5).T * 0.1, atol=1e-10)
+
     def test_get_md_data1d(self):
         coords, data, err = funcs.get_md_data1d(self.ws_MD_1d, mantid.api.MDNormalization.NumEventsNormalization)
         np.testing.assert_allclose(coords, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
@@ -246,6 +260,29 @@ class HelperFunctionsTest(unittest.TestCase):
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=True)
         np.testing.assert_allclose(x, np.array([[10, 20, 30], [10, 20, 30], [10, 20, 30]]))
         np.testing.assert_allclose(y, np.array([[4, 4, 4], [6, 6, 6], [8, 8, 8]]))
+
+    def test_get_matrix_2d_data_rect_transpose(self):
+        # same as the test above bur should be the transpose
+        # contour from aligned point data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_point, True, histogram2D=False, transpose=True)
+        np.testing.assert_allclose(y, np.array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]).T)
+        np.testing.assert_allclose(x, np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]).T)
+        # mesh from aligned point data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_point, True, histogram2D=True, transpose=True)
+        np.testing.assert_allclose(y, np.array(
+            [[0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5],
+             [0.5, 1.5, 2.5, 3.5, 4.5]]).T)
+        np.testing.assert_allclose(x, np.array(
+            [[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5], [2.5, 2.5, 2.5, 2.5, 2.5],
+             [3.5, 3.5, 3.5, 3.5, 3.5]]).T)
+        # contour from aligned histo data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=False, transpose=True)
+        np.testing.assert_allclose(y, np.array([[15, 25], [15, 25]]).T)
+        np.testing.assert_allclose(x, np.array([[5, 5], [7, 7]]).T)
+        # mesh from aligned histo data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=True, transpose=True)
+        np.testing.assert_allclose(y, np.array([[10, 20, 30], [10, 20, 30], [10, 20, 30]]).T)
+        np.testing.assert_allclose(x, np.array([[4, 4, 4], [6, 6, 6], [8, 8, 8]]).T)
 
     def test_get_matrix_2d_data_rag(self):
         # contour from ragged point data
@@ -549,6 +586,45 @@ class HelperFunctionsTest(unittest.TestCase):
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):
         self.assertRaises(AssertionError, funcs.get_md_data2d_bin_bounds, mdws, False)
+
+    @add_md_workspace_with_data(dimensions=3)
+    def test_get_md_data2d_bin_bounds_indices(self, mdws):
+        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (0,slice(None),slice(None)))
+        np.testing.assert_allclose(range(-10,12,2), x)
+        np.testing.assert_allclose(range(-20,24,4), y)
+
+    @add_md_workspace_with_data(dimensions=3)
+    def test_get_md_data2d_bin_bounds_indices2(self, mdws):
+        x, y, z = funcs.get_md_data2d_bin_bounds(mdws, False, (slice(None),0,slice(None)))
+        np.testing.assert_allclose(np.arange(-3,3.6,0.6), x, atol=1e-14)
+        np.testing.assert_allclose(range(-20,24,4), y)
+
+    def test_pointToIndex(self):
+        d=self.ws_MD_2d.getDimension(0)
+        self.assertEqual(funcs.pointToIndex(d,-10), 0)
+        self.assertEqual(funcs.pointToIndex(d,-3), 0)
+        self.assertEqual(funcs.pointToIndex(d,0), 2)
+        self.assertEqual(funcs.pointToIndex(d,3), 4)
+        self.assertEqual(funcs.pointToIndex(d,10), 4)
+
+    def test_get_indices(self):
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d)
+        self.assertIsNone(indices)
+        self.assertNotIn('label', kwargs)
+
+        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, indices=(0,slice(None)))
+        self.assertRaises(AssertionError, funcs.get_indices, self.ws_MD_2d, slicepoint=(0,None))
+        self.assertRaises(ValueError, funcs.get_indices, self.ws_MD_2d, indices=(1,2), slicepoint=(3,4))
+
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d,indices=(1,slice(None),slice(None)))
+        np.testing.assert_equal(indices, (1,slice(None),slice(None)))
+        self.assertIn('label', kwargs)
+        self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
+
+        indices, kwargs = funcs.get_indices(self.ws_MD_2d,slicepoint=(-1,None,None))
+        np.testing.assert_equal(indices, (1,slice(None),slice(None)))
+        self.assertIn('label', kwargs)
+        self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
 
 
 if __name__ == '__main__':

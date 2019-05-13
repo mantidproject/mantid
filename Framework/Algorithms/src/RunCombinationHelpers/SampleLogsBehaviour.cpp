@@ -296,10 +296,10 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
                               "ensure each comma separated value is within "
                               "double precision range.");
     }
-    for (auto value : tolerancesVector) {
-      if (value < 0)
-        throw std::out_of_range("Error when creating tolerances vector. Please "
-                                "ensure all tolerance values are positive.");
+    if (std::any_of(tolerancesVector.cbegin(), tolerancesVector.cend(),
+                    [](const auto value) { return value < 0.; })) {
+      throw std::out_of_range("Error when creating tolerances vector. Please "
+                              "ensure all tolerance values are positive.");
     }
   } else if (tolerances.empty()) {
     std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);

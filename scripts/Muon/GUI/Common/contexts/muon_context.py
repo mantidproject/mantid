@@ -13,16 +13,22 @@ from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calcu
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
+from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
+from Muon.GUI.Common.contexts.muon_data_context import get_default_grouping
 
 
 class MuonContext(object):
     def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
-                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data'):
+                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext()):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
+        self._phase_context = muon_phase_context
         self.base_directory = base_directory
+
+        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True})
 
     @property
     def data_context(self):
@@ -35,6 +41,10 @@ class MuonContext(object):
     @property
     def group_pair_context(self):
         return self._group_pair_context
+
+    @property
+    def phase_context(self):
+        return self._phase_context
 
     def calculate_group(self, group_name, run, rebin=False):
         group_workspace = calculate_group_data(self, group_name, run, rebin)
@@ -131,9 +141,76 @@ class MuonContext(object):
                (self.gui_context['RebinType'] == 'Variable' and
                 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
-    @property
-    def first_good_data(self):
+    def get_workspace_names_for_FFT_analysis(self, use_raw=True):
+        pair_names = list(self.group_pair_context.pair_names)
+        group_names = list(self.group_pair_context.group_names)
+        run_numbers = self.data_context.current_runs
+        workspace_options = []
+
+        for run in run_numbers:
+            workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
+
+            for name in pair_names:
+                workspace_options.append(
+                    wsName.get_pair_data_workspace_name(self,
+                                                        str(name),
+                                                        run_list_to_string(run), not use_raw))
+            for group_name in group_names:
+                workspace_options.append(
+                    wsName.get_group_asymmetry_name(self, str(group_name), run_list_to_string(run),
+                                                    not use_raw))
+        return workspace_options
+
+    def get_detectors_excluded_from_default_grouping_tables(self):
+        groups, _ = get_default_grouping(
+            self.data_context.current_workspace, self.data_context.instrument,
+            self.data_context.main_field_direction)
+        detectors_in_group = []
+        for group in groups:
+            detectors_in_group += group.detectors
+        detectors_in_group = set(detectors_in_group)
+
+        return [det for det in range(1, self.data_context.num_detectors) if det not in detectors_in_group]
+
+    # Get the groups/pairs for active WS
+    def getGroupedWorkspaceNames(self):
+        run_numbers = self.data_context.current_runs
+        runs = [
+            wsName.get_raw_data_workspace_name(self, run_list_to_string(run_number), period=str(period + 1))
+            for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
+        return runs
+
+    def first_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
         if self.gui_context['FirstGoodDataFromFile']:
-            return self.data_context.get_loaded_data_for_run(self.current_runs[-1])["FirstGoodData"]
+            return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            return self.gui_context['FirstGoodData']
+            if 'FirstGoodData' in self.gui_context:
+                return self.gui_context['FirstGoodData']
+            else:
+                self.gui_context['FirstGoodData'] = self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+                return self.gui_context['FirstGoodData']
+
+    def last_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
+        if self.gui_context['LastGoodDataFromFile']:
+            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
+        else:
+            if 'LastGoodData' in self.gui_context:
+                return self.gui_context['LastGoodData']
+            else:
+                self.gui_context['LastGoodData'] = round(max(self.data_context.get_loaded_data_for_run(run)
+                                                             ["OutputWorkspace"][0].workspace.dataX(0)), 2)
+                return self.gui_context['LastGoodData']
+
+    def dead_time_table(self, run):
+        if self.gui_context['DeadTimeSource'] == 'FromADS':
+            return self.gui_context['DeadTimeTable']
+        elif self.gui_context['DeadTimeSource'] == 'FromFile':
+            return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+        elif self.gui_context['DeadTimeSource'] == 'None':
+            return None
