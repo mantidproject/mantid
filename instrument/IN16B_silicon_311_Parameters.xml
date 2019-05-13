@@ -19,6 +19,10 @@
       <value val="7.63" />
     </parameter>
 
+    <parameter name="Vfixed">
+      <value val="1208.1876" />
+    </parameter>
+
     <parameter name="resolution">
       <value val="0.002" />
     </parameter>

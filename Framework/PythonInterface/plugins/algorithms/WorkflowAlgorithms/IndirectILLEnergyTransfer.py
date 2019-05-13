@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import os
+import os, math
 import numpy as np
 from mantid import config, mtd, logger
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     WorkspaceGroupProperty, FileAction, Progress
 from mantid.simpleapi import *  # noqa
@@ -52,6 +52,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _use_map_file = None
     _spectrum_axis = None
     _efixed = None
+    _normalise_to = None
+    _monitor_cutoff = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -106,6 +108,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
+        self.declareProperty(name='NormaliseTo', defaultValue='Monitor',
+                             validator=StringListValidator(['Monitor', 'None']),
+                             doc='Choose to normalise to monitor.')
+
+        self.declareProperty(name='MonitorCutoff', defaultValue=0.5,
+                             validator=FloatBoundedValidator(lower=0., upper=1.),
+                             doc='Choose the cutoff fraction wrt the maximum of the monitor counts.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -130,6 +140,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._dead_channels = self.getProperty('CropDeadMonitorChannels').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
+        self._normalise_to = self.getPropertyValue('NormaliseTo')
+        self._monitor_cutoff = self.getProperty('MonitorCutoff').value
 
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == 128):
             self._use_map_file = True
@@ -263,6 +275,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             else:
                 self._reduction_type = 'IFWS'
 
+        if run.hasProperty('acquisition_mode'):
+            if run.getLogData('acquisition_mode').value == 1:
+                self._reduction_type = 'BATS'
+
     def PyExec(self):
 
         self.setUp()
@@ -290,24 +306,92 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._setup_run_properties()
 
-        if self._mirror_sense == 14:      # two wings, extract left and right
+        if self._reduction_type == 'BATS':
+            self._reduce_bats(self._ws)
+        else:
+            if self._mirror_sense == 14:      # two wings, extract left and right
 
-            size = mtd[self._ws].blocksize()
-            left = self._ws + '_left'
-            right = self._ws + '_right'
-            _extract_workspace(self._ws, left, 0, int(size/2))
-            _extract_workspace(self._ws, right, int(size/2), size)
-            DeleteWorkspace(self._ws)
-            self._reduce_one_wing(left)
-            self._reduce_one_wing(right)
-            GroupWorkspaces(InputWorkspaces=[left,right],OutputWorkspace=self._red_ws)
+                size = mtd[self._ws].blocksize()
+                left = self._ws + '_left'
+                right = self._ws + '_right'
+                _extract_workspace(self._ws, left, 0, int(size/2))
+                _extract_workspace(self._ws, right, int(size/2), size)
+                DeleteWorkspace(self._ws)
+                self._reduce_one_wing(left)
+                self._reduce_one_wing(right)
+                GroupWorkspaces(InputWorkspaces=[left,right],OutputWorkspace=self._red_ws)
 
-        elif self._mirror_sense == 16:    # one wing
+            elif self._mirror_sense == 16:    # one wing
 
-            self._reduce_one_wing(self._ws)
-            GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
+                self._reduce_one_wing(self._ws)
+                GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
 
         self.setProperty('OutputWorkspace',self._red_ws)
+
+    def _reduce_bats(self, ws):
+        """
+        Reduces inverted TOF mode (BATS)
+        @param ws :: input workspace
+        """
+        equator_ws = '__'+self._ws+'_eq'
+        epp_ws = '__'+self._ws+'_epp'
+        mon_ws = '__'+self._ws+'_mon'
+        rebin_ws = self._ws + '_reb'
+        equator_grouping_filename = self._instrument.getStringParameter('EquatorialGroupingFile')[0]
+        grouping_file = os.path.join(config['groupingFiles.directory'], equator_grouping_filename)
+        GroupDetectors(InputWorkspace=self._ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
+        to_crop = mtd[self._ws].blocksize() / 4
+        CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
+        FindEPP(InputWorkspace=equator_ws, OutputWorkspace=epp_ws)
+        elastic_channel = mtd[epp_ws].cell(0,1)
+        detectro_info = mtd[self._ws].detectorInfo()
+        l1 = detectro_info.l1()
+        l2_equator = (detectro_info.l2(65) + detectro_info.l2(66)) / 2.
+        v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
+        elastic_tof = (l1 + l2_equator) * 1E+6 / v_fixed
+        run = mtd[self._ws].getRun()
+        channel_width = run.getLogData('PSD.time_of_flight_0').value
+        formula = '{0} + (x - {1})*{2}'.format(elastic_tof, elastic_channel, channel_width)
+        ConvertAxisByFormula(InputWorkspace=self._ws, Axis='X', AxisUnits='TOF', Formula=formula, OutputWorkspace=self._ws)
+        ExtractMonitors(InputWorkspace=self._ws, DetectorWorkspace=self._ws, MonitorWorkspace=mon_ws)
+        if self._normalise_to == 'Monitor':
+            if not run.hasProperty('monitor.time_of_flight_2') or not run.hasProperty('PSD.time_of_flight_2'):
+                raise RuntimeError('Unable to normalise to monitor: missing chopper phase delay information.')
+            phase_offset = run.getLogData('monitor.time_of_flight_2').value - run.getLogData('PSD.time_of_flight_2').value
+            ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=phase_offset, Operation='Add')
+            frame_width = 1E+6 * 2 * 4./v_fixed
+            mon_data = mtd[mon_ws].readY(0)
+            mon_elastic = np.argmax(mon_data)
+            mon_elastic_tof = mtd[mon_ws].readX(0)[mon_elastic]
+            n_frames_diff = math.floor((mon_elastic_tof - elastic_tof)/frame_width) + 1
+            ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=-n_frames_diff * frame_width, Operation='Add')
+            ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Energy', EMode='Elastic')
+            ConvertUnits(InputWorkspace=self._ws, OutputWorkspace=self._ws, Target='Energy', EMode='Indirect')
+            monitor = mtd[mon_ws].readY(0)
+            x_axis = mtd[mon_ws].readX(0)
+            cutoff = np.max(monitor) * self._monitor_cutoff
+            range = x_axis[:-1][monitor > cutoff]
+            self.log().information('Cutoff from {0} to {1} in Energy [mev]'.format(range[0], range[-1]))
+            CropWorkspace(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, XMin=range[0], XMax=range[-1])
+            CropWorkspace(InputWorkspace=self._ws, OutputWorkspace=self._ws, XMin=range[0], XMax=range[-1])
+            RebinToWorkspace(WorkspaceToRebin=self._ws, WorkspaceToMatch=mon_ws, OutputWorkspace=self._ws)
+            Divide(LHSWorkspace=self._ws, RHSWorkspace=mon_ws, OutputWorkspace=self._ws)
+            ReplaceSpecialValues(InputWorkspace=self._ws, OutputWorkspace=self._ws,
+                                 NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+        ConvertUnits(InputWorkspace=self._ws, OutputWorkspace=self._ws, Target='DeltaE', EMode='Indirect')
+        ExtractSingleSpectrum(InputWorkspace=self._ws, OutputWorkspace=rebin_ws, WorkspaceIndex=0)
+        RebinToWorkspace(WorkspaceToRebin=self._ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=self._ws)
+        GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
+        DeleteWorkspaces([epp_ws, equator_ws, rebin_ws, mon_ws])
+
+    def _group_pixels(self, by=4):
+        pattern = ''
+        for i in range(16):
+            for j in range(int(128/by)):
+                start = i * 128 + j * by + 1
+                end = start + by
+                pattern += str(start)+'-'+str(end)+','
+        return pattern[:-1]
 
     def _reduce_one_wing(self, ws):
         """
@@ -326,7 +410,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         xmin, xmax = self._monitor_zero_range(mon)
 
-        self._normalise_to_monitor(ws, mon)
+        if self._normalise_to == 'Monitor':
+            self._normalise_to_monitor(ws, mon)
 
         if self._reduction_type == 'QENS':
             if self._dead_channels:
@@ -380,7 +465,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
     def _normalise_to_monitor(self, ws, mon):
         """
-        Normalises the ws to the monitor dependent on the reduction type
+        Normalises the ws to the monitor dependent on the reduction type (doppler mode)
         @param ws :: input workspace name
         @param mon :: ws's monitor
         """
