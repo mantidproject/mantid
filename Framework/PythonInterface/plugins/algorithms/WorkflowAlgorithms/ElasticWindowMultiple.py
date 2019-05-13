@@ -13,12 +13,6 @@ from mantid.api import *
 import numpy as np
 
 
-def workspaces_have_same_size(workspaces):
-    first_size = len(workspaces[0].readY(0))
-    differently_sized_workspaces = [workspace for workspace in workspaces[1:] if len(workspace.readY(0)) != first_size]
-    return len(differently_sized_workspaces) == 0
-
-
 def _normalize_by_index(workspace, index):
     """
     Normalize each spectra of the specified workspace by the
@@ -192,9 +186,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_workspace = q_workspaces[0]
             q2_workspace = q2_workspaces[0]
         else:
-            if not workspaces_have_same_size(q_workspaces) or not workspaces_have_same_size(q2_workspaces):
-                raise RuntimeError('The ElasticWindow algorithm produced differently sized workspaces. Please check '
-                                   'the input files are compatible.')
             q_workspace = _append_all(q_workspaces)
             q2_workspace = _append_all(q2_workspaces)
 
@@ -265,8 +256,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         run = workspace.getRun()
 
-        if self._sample_log_name.lower() == 'position':
-            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.getInstrument())
+        if 'SAMP_POSN' in run:
+            self._sample_log_name = _extract_sensor_name(run, workspace.getInstrument())
 
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
@@ -307,35 +298,29 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
     return None, None
 
 
-def _extract_sensor_name(sample_log_name, run, instrument):
-    default_names = ['Bot_Can_Top', 'Middle_Can_Top', 'Top_Can_Top']
+def _extract_sensor_name(run, instrument):
     sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")[0].split(',')
-    position = _extract_position_from_run(sample_log_name, run)
+    position = _extract_position_from_run(instrument, run)
 
     if position is not None:
 
         if position < len(sensor_names) and sensor_names[position] in run:
             return sensor_names[position]
-        elif position < len(default_names):
-            logger.warning("Position {0} not found within the instrument parameters, "
-                           "using default '{1}'.".format(position, default_names[position]))
-            return default_names[position]
         else:
             logger.warning('Invalid position ({}) found in workspace.'.format(position))
     else:
-        logger.information('Position not found in sample logs, when using log name {}.'.format(sample_log_name))
+        logger.information('Position not found in sample logs')
     return ''
 
 
-def _extract_position_from_run(sample_log_name, run):
+def _extract_position_from_run(instrument, run):
+    sample_position = instrument.getStringParameter("Workflow.SamplePositions")[0].split(',')
+    logger.warning(str(sample_position))
 
-    if sample_log_name in run:
-        position = run[sample_log_name].value[-1]
-
-        if isinstance(position, str):
-            return {'B':0, 'M':1, 'T':2}.get(position[0], None)
-        else:
-            return int(position)
+    if 'SAMP_POSN' in run:
+        position = run['SAMP_POSN'].value[-1]
+        index = sample_position.index(position)
+        return index
     return None
 
 
