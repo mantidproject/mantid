@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 /// into the ED GUI
 class MANTIDQT_ENGGDIFFRACTION_DLL RunLabel {
 public:
-  RunLabel(const std::string runNumber, const size_t bank);
+  RunLabel(const std::string &runNumber, const size_t bank);
 
   RunLabel() = default;
 

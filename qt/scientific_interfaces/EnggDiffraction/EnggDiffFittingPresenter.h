@@ -56,7 +56,7 @@ public:
   Poco::Path outFilesUserDir(const std::string &addToDir) const override;
   //@}
 
-  std::string userHDFRunFilename(const std::string runNumber) const override;
+  std::string userHDFRunFilename(const std::string &runNumber) const override;
   std::string userHDFMultiRunFilename(
       const std::vector<RunLabel> &runLabels) const override;
 

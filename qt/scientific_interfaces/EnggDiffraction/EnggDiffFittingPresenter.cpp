@@ -202,7 +202,7 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
 }
 
 std::string EnggDiffFittingPresenter::userHDFRunFilename(
-    const std::string runNumber) const {
+    const std::string &runNumber) const {
   return m_mainParam->userHDFRunFilename(runNumber);
 }
 

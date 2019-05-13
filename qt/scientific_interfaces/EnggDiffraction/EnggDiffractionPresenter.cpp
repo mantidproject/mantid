@@ -2571,7 +2571,7 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
 }
 
 std::string EnggDiffractionPresenter::userHDFRunFilename(
-    const std::string runNumber) const {
+    const std::string &runNumber) const {
   auto userOutputDir = outFilesUserDir("Runs");
   userOutputDir.append(runNumber + ".hdf5");
   return userOutputDir.toString();
