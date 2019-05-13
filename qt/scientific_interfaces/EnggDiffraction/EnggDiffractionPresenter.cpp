@@ -231,6 +231,8 @@ void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
  * process.
  *
  * @param fname name of the calibration/GSAS iparm file
+ * @param vanNo output param to hold the vanadium run
+ * @param ceriaNo output param to hold the ceria run
  */
 void EnggDiffractionPresenter::grabCalibParms(const std::string &fname,
                                               std::string &vanNo,
@@ -1663,7 +1665,9 @@ void EnggDiffractionPresenter::focusingFinished() {
  * @param cs user settings for calibration (this does not calibrate but
  * uses calibration input files such as vanadium runs
  *
- * @param runLabel run number and bank ID of the run to focus
+ * @param runLabel run number of the run to focus
+ *
+ * @param bank the Bank ID to focus
  *
  * @param specNos string specifying a list of spectra (for "cropped"
  * focusing or "texture" focusing), only considered if not empty
