@@ -718,7 +718,7 @@ private:
         .WillOnce(Return(std::string("DivergentBeam")));
   }
 
-  std::unique_ptr<IExperimentOptionDefaults>
+  std::unique_ptr<MockExperimentOptionDefaults>
   expectDefaults(Experiment const &model) {
     // Create a defaults object, set expectations on it, and return it so
     // that it can be passed to the presenter

@@ -390,7 +390,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
   }
 
-  std::unique_ptr<IInstrumentOptionDefaults>
+  std::unique_ptr<MockInstrumentOptionDefaults>
   expectDefaults(Instrument const &model) {
     // Create a defaults object, set expectations on it, and return it so
     // that it can be passed to the presenter
