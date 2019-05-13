@@ -68,10 +68,7 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 # Helper code
 
 set(SRC_FILES
-    src/Converters/CloneToNumpy.cpp
-    src/Converters/DateAndTime.cpp
     src/Converters/NDArrayToVector.cpp
-    src/Converters/NumpyFunctions.cpp
     src/Converters/PyObjectToMatrix.cpp
     src/Converters/PyObjectToV3D.cpp
     src/Converters/PyObjectToVMD.cpp
@@ -83,12 +80,9 @@ set(SRC_FILES
 
 set(INC_FILES
     ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
-    ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
     ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
-    ${HEADER_DIR}/kernel/Converters/DateAndTime.h
     ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
     ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
-    ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
     ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
     ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
     ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h

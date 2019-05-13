@@ -5,7 +5,10 @@
 # It should not link to any other Mantid libraries.
 
 set(SRC_FILES
+    src/Converters/CloneToNDArray.cpp
+    src/Converters/DateAndTime.cpp
     src/Converters/NDArrayTypeIndex.cpp
+    src/Converters/NumpyFunctions.cpp
     src/Converters/WrapWithNDArray.cpp
     src/ErrorHandling.cpp
     src/GlobalInterpreterLock.cpp
@@ -14,8 +17,11 @@ set(SRC_FILES
     src/WrapperHelpers.cpp)
 
 set(INC_FILES
+    inc/MantidPythonInterface/core/Converters/CloneToNDArray.h
+    inc/MantidPythonInterface/core/Converters/DateAndTime.h
     inc/MantidPythonInterface/core/Converters/NDArrayTypeIndex.h
     inc/MantidPythonInterface/core/Converters/ToPyList.h
+    inc/MantidPythonInterface/core/Converters/NumpyFunctions.h
     inc/MantidPythonInterface/core/Converters/VectorToNDArray.h
     inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
     inc/MantidPythonInterface/core/CallMethod.h
