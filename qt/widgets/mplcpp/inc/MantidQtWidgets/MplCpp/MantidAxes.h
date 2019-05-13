@@ -22,7 +22,7 @@ public:
   MantidAxes(Python::Object pyObj);
 
   Line2D plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-              const size_t wkspIndex, const QString format,
+              const size_t wkspIndex, const QString lineColour,
               const QString label);
 };
 

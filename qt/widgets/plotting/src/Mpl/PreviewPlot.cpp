@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
 
 #include <QAction>
 #include <QContextMenuEvent>
@@ -19,11 +20,14 @@
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
+using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Line2D;
+using MantidQt::Widgets::MplCpp::MantidAxes;
 
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
+constexpr auto MANTID_PROJECTION{"mantid"};
 constexpr auto DRAGGABLE_LEGEND{true};
 constexpr auto PLOT_TOOL_NONE{"None"};
 constexpr auto PLOT_TOOL_PAN{"Pan"};
@@ -56,8 +60,8 @@ namespace MantidWidgets {
  * @param watchADS If true then ADS observers are added
  */
 PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
-    : QWidget(parent), m_canvas{new FigureCanvasQt(111, parent)}, m_lines{},
-      m_panZoomTool(m_canvas),
+    : QWidget(parent), m_canvas{new FigureCanvasQt(111, "mantid", parent)},
+      m_lines{}, m_panZoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
   createLayout();
@@ -100,9 +104,10 @@ void PreviewPlot::addSpectrum(const QString &lineName,
     return;
   }
   removeSpectrum(lineName);
-  auto axes = m_canvas->gca();
-  m_lines.emplace_back(
-      createLineInfo(axes, *ws, wsIndex, lineName, lineColour));
+  auto axes = m_canvas->gca<MantidAxes>();
+  axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName);
+  //  m_lines.emplace_back(
+  //      createLineInfo(axes, *ws, wsIndex, lineName, lineColour));
   regenerateLegend();
   axes.relim();
   m_canvas->draw();
@@ -317,7 +322,7 @@ void PreviewPlot::createActions() {
  * @return True if the legend is visible, false otherwise
  */
 bool PreviewPlot::legendIsVisible() const {
-  return m_contextLegend->isChecked() && !m_lines.empty();
+  return m_contextLegend->isChecked();
 }
 
 /**

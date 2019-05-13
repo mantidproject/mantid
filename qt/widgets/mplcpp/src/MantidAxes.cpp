@@ -19,10 +19,10 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
 
 /**
  * Add a line on the current axes based on the workspace
- * @param workspace
- * @param wkspIndex
- * @param format
- * @param label
+ * @param workspace A pointer to a workspace containing the data
+ * @param wkspIndex The workspace index to plot
+ * @param lineColour Set the line colour to this string name
+ * @param label A label for the curve
  * @return A new Line2D artist object
  */
 Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
