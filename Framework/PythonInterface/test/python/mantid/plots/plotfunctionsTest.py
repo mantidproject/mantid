@@ -124,13 +124,18 @@ class PlotFunctionsTest(unittest.TestCase):
     def _do_update_colorplot_datalimits(self, color_func):
         fig, ax = plt.subplots()
         mesh = color_func(ax, self.ws2d_histo)
-        ax.set_xlim(-0.05, 0.05)
+        ax.set_xlim(0.01, 0.05)
         ax.set_ylim(-0.05, 0.05)
         funcs.update_colorplot_datalimits(ax, mesh)
         self.assertAlmostEqual(10.0, ax.get_xlim()[0])
-        self.assertAlmostEqual(30.0, ax.get_xlim()[1])
-        #self.assertAlmostEqual(4.0, ax.get_ylim()[0])
-        #self.assertAlmostEqual(8.0, ax.get_ylim()[1])
+        from distutils.version import LooseVersion
+        #different results with 1.5.3 and 2.1.1
+        if color_func.__name__ != 'imshow' and LooseVersion(matplotlib.__version__) < LooseVersion("2"):
+            self.assertAlmostEqual(100.0, ax.get_xlim()[1])
+        else:
+            self.assertAlmostEqual(30.0, ax.get_xlim()[1])
+        self.assertAlmostEqual(4.0, ax.get_ylim()[0])
+        self.assertAlmostEqual(8.0, ax.get_ylim()[1])
 
     def test_update_colorplot_datalimits_for_pcolormesh(self):
         self._do_update_colorplot_datalimits(funcs.pcolormesh)
