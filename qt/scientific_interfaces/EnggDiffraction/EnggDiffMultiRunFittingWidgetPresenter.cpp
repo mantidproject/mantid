@@ -23,14 +23,14 @@ bool isDigit(const std::string &text) {
 
 std::string
 generateFittedPeaksName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return runLabel.runNumber + "_" +
-         std::to_string(runLabel.bank) + "_fitted_peaks_external_plot";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_fitted_peaks_external_plot";
 }
 
 std::string
 generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return runLabel.runNumber + "_" +
-         std::to_string(runLabel.bank) + "_external_plot";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_external_plot";
 }
 
 size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {

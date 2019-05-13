@@ -8,8 +8,8 @@
 #define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_
 
 #include "DllConfig.h"
-#include <string>
 #include <cstddef>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

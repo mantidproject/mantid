@@ -2581,8 +2581,8 @@ std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
   const auto minLabel = std::min_element(begin, end);
   const auto maxLabel = std::max_element(begin, end);
   auto userOutputDir = outFilesUserDir("Runs");
-  userOutputDir.append((minLabel->runNumber) + "_" +
-                       (maxLabel->runNumber) + ".hdf5");
+  userOutputDir.append((minLabel->runNumber) + "_" + (maxLabel->runNumber) +
+                       ".hdf5");
   return userOutputDir.toString();
 }
 

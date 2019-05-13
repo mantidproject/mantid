@@ -41,8 +41,7 @@ RunLabel runLabelFromListWidgetLabel(const std::string &listLabel) {
 }
 
 std::string listWidgetLabelFromRunLabel(const RunLabel &runLabel) {
-  return runLabel.runNumber + "_" +
-         std::to_string(runLabel.bank);
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank);
 }
 
 // Remove commas at the start and end of the string,
@@ -202,8 +201,8 @@ EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) const {
   return m_mainParam->outFilesUserDir(addToDir);
 }
 
-std::string
-EnggDiffFittingPresenter::userHDFRunFilename(const std::string runNumber) const {
+std::string EnggDiffFittingPresenter::userHDFRunFilename(
+    const std::string runNumber) const {
   return m_mainParam->userHDFRunFilename(runNumber);
 }
 

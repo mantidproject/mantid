@@ -42,8 +42,7 @@ inline void
 EnggDiffFittingModelAddWSExposed::addWorkspace(const RunLabel &runLabel,
                                                API::MatrixWorkspace_sptr ws) {
   addFocusedWorkspace(runLabel, ws,
-                      runLabel.runNumber + "_" +
-                          std::to_string(runLabel.bank));
+                      runLabel.runNumber + "_" + std::to_string(runLabel.bank));
 }
 
 inline void EnggDiffFittingModelAddWSExposed::addFitParams(
@@ -194,7 +193,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         ws = model.getFocusedWorkspace(FOCUSED_WS_RUN_LABEL));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(std::to_string(ws->getRunNumber()), FOCUSED_WS_RUN_LABEL.runNumber);
+    TS_ASSERT_EQUALS(std::to_string(ws->getRunNumber()),
+                     FOCUSED_WS_RUN_LABEL.runNumber);
   }
 
   void test_setDifcTzero() {

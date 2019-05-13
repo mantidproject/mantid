@@ -93,13 +93,13 @@ void EnggDiffGSASFittingModel::addSigma(const RunLabel &runLabel,
 namespace {
 
 std::string generateFittedPeaksWSName(const RunLabel &runLabel) {
-  return runLabel.runNumber + "_" +
-         std::to_string(runLabel.bank) + "_gsasii_fitted_peaks";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_gsasii_fitted_peaks";
 }
 
 std::string generateLatticeParamsName(const RunLabel &runLabel) {
-  return runLabel.runNumber + "_" +
-         std::to_string(runLabel.bank) + "_lattice_params";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_lattice_params";
 }
 } // namespace
 

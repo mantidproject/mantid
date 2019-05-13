@@ -20,7 +20,8 @@ class MockEnggDiffractionParam : public IEnggDiffractionParam {
 public:
   MOCK_CONST_METHOD1(outFilesUserDir, Poco::Path(const std::string &addToDir));
 
-  MOCK_CONST_METHOD1(userHDFRunFilename, std::string(const std::string runNumber));
+  MOCK_CONST_METHOD1(userHDFRunFilename,
+                     std::string(const std::string runNumber));
 
   MOCK_CONST_METHOD1(userHDFMultiRunFilename,
                      std::string(const std::vector<RunLabel> &runLabels));

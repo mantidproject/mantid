@@ -14,8 +14,7 @@ std::string addRunNumberToGSASIIProjectFile(
     const std::string &filename,
     const MantidQt::CustomInterfaces::RunLabel &runLabel) {
   const auto dotPosition = filename.find_last_of(".");
-  return filename.substr(0, dotPosition) + "_" +
-         runLabel.runNumber + "_" +
+  return filename.substr(0, dotPosition) + "_" + runLabel.runNumber + "_" +
          std::to_string(runLabel.bank) +
          filename.substr(dotPosition, filename.length());
 }
