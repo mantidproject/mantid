@@ -57,6 +57,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111));
   }
 
+  void testSubPlotAcceptsProjection() {
+    Python::Object module{
+        Python::NewRef(PyImport_ImportModule("mantid.plots"))};
+    Figure fig{false};
+    TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111, "mantid"));
+  }
+
   void testColorbar() {
     Figure fig{false};
     auto cax = fig.addAxes(0.1, 0.1, 0.9, 0.9);

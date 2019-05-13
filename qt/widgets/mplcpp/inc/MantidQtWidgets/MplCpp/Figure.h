@@ -29,9 +29,9 @@ public:
    * @brief Access (and create if necessar) the active Axes
    * @return An instance of Axes attached to the figure
    */
-  inline Axes gca() const {
+  template <typename AxesType = Axes> inline AxesType gca() const {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
-    return Axes{pyobj().attr("gca")()};
+    return AxesType{pyobj().attr("gca")()};
   }
   /**
    * @param index The index of the axes to return
@@ -44,11 +44,10 @@ public:
 
   void setFaceColor(const char *color);
   Axes addAxes(double left, double bottom, double width, double height);
-  Axes addSubPlot(int subplotspec);
-  Common::Python::Object
-  colorbar(const ScalarMappable &mappable, const Axes &cax,
-           const Common::Python::Object &ticks = Common::Python::Object(),
-           const Common::Python::Object &format = Common::Python::Object());
+  Axes addSubPlot(const int subplotspec, QString projection = "");
+  Python::Object colorbar(const ScalarMappable &mappable, const Axes &cax,
+                          const Common::Python::Object &ticks = Python::Object(),
+                          const Common::Python::Object &format = Python::Object());
 };
 
 } // namespace MplCpp

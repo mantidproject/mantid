@@ -69,12 +69,20 @@ Axes Figure::addAxes(double left, double bottom, double width, double height) {
 
 /**
  * Add a subplot Axes to the figure
- * @param subplotspec
- * @return
+ * @param subplotspec A short-form subplot specification
+ * @param projection An optional string denoting the projection type
+ * @return A wrapper around the Axes object
  */
-Axes Figure::addSubPlot(int subplotspec) {
+Axes Figure::addSubPlot(const int subplotspec, QString projection) {
   GlobalInterpreterLock lock;
-  return Axes{pyobj().attr("add_subplot")(subplotspec)};
+  if (projection.isEmpty())
+    return Axes{pyobj().attr("add_subplot")(subplotspec)};
+  else {
+    auto args = Python::NewRef(Py_BuildValue("(i)", subplotspec));
+    Python::Dict kwargs;
+    kwargs["projection"] = projection.toLatin1().constData();
+    return Axes{pyobj().attr("add_subplot")(*args, **kwargs)};
+  }
 }
 
 /**

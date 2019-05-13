@@ -22,6 +22,12 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
+ * Contruct a wrapper around an existing matplotlib Line2D instance.
+ * @param obj An existing Line2D instance
+ */
+Line2D::Line2D(Python::Object obj) : Artist(std::move(obj)), m_dataOwner{} {}
+
+/**
  * @brief Contruct a wrapper around an existing matplotlib Line2D instance.
  * Usally Axes.plot is used to create one of these so that an the Line2D
  * object already contains the data. This object assumes the Line2D

@@ -18,9 +18,9 @@ namespace MplCpp {
 
 /**
  * @brief Line2D holds an instance of a matplotlib Line2D type.
- * This type is designed to hold an existing Line2D instance that contains
- * data in numpy arrays that do not own their data but have a view on to an
- * existing vector of data. This object keeps the data alive.
+ * This type is designed to hold an existing Line2D instance and optionally
+ * hold the raw data for the numpy arrays stored with the Line2D instance.
+ * This object keeps the data alive if it has it.
  */
 class MANTID_MPLCPP_DLL Line2D : public Artist {
 public:
@@ -30,7 +30,8 @@ public:
   };
 
 public:
-  Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner,
+  explicit Line2D(Common::Python::Object obj);
+  Line2D(Python::Object obj, std::vector<double> &&xdataOwner,
          std::vector<double> &&ydataOwner);
   Line2D(Common::Python::Object obj, Line2D::Data &&dataOwner);
   ~Line2D() noexcept;

@@ -9,9 +9,11 @@ set(
   src/Colormap.cpp
   src/ColorConverter.cpp
   src/Cycler.cpp
+  src/ErrorbarContainer.cpp
   src/Figure.cpp
   src/FigureCanvasQt.cpp
   src/Line2D.cpp
+  src/MantidAxes.cpp
   src/MantidColorMap.cpp
   src/PanZoomTool.cpp
   src/Plot.cpp
@@ -32,8 +34,10 @@ set(
   inc/MantidQtWidgets/MplCpp/Colormap.h
   inc/MantidQtWidgets/MplCpp/ColorConverter.h
   inc/MantidQtWidgets/MplCpp/Cycler.h
+  inc/MantidQtWidgets/MplCpp/ErrorbarContainer.h
   inc/MantidQtWidgets/MplCpp/Figure.h
   inc/MantidQtWidgets/MplCpp/Line2D.h
+  inc/MantidQtWidgets/MplCpp/MantidAxes.h
   inc/MantidQtWidgets/MplCpp/MantidColorMap.h
   inc/MantidQtWidgets/MplCpp/PanZoomTool.h
   inc/MantidQtWidgets/MplCpp/Plot.h
