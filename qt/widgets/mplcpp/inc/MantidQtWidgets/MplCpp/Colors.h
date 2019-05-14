@@ -7,8 +7,8 @@
 #ifndef MPLCPP_COLORS_H
 #define MPLCPP_COLORS_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 /**
  * @file Contains definitions of wrappers for types in
@@ -16,6 +16,8 @@
  * normalize data according to different scale types.
  * See https://matplotlib.org/2.2.3/api/colors_api.html
  */
+
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

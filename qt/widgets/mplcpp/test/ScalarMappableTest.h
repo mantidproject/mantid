@@ -19,7 +19,6 @@ using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::PowerNorm;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
 using MantidQt::Widgets::MplCpp::getCMap;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 class ScalarMappableTest : public CxxTest::TestSuite {
 public:
@@ -55,7 +54,8 @@ public:
     ScalarMappable mappable(Normalize(-1, 1), "jet");
     mappable.setNorm(PowerNorm(2, 0, 1));
 
-    auto norm = Python::Object(mappable.pyobj().attr("norm"));
+    auto norm = MantidQt::Widgets::Common::Python::Object(
+        mappable.pyobj().attr("norm"));
     TS_ASSERT(PyObject_HasAttrString(norm.ptr(), "gamma"));
   }
 

@@ -7,10 +7,12 @@
 #ifndef MPLCPP_COLORCONVERTER_H
 #define MPLCPP_COLORCONVERTER_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 #include <QColor>
+
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

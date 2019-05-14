@@ -15,7 +15,6 @@
 using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 class FigureTest : public CxxTest::TestSuite {
 public:
@@ -67,7 +66,8 @@ public:
 
   // -------------------------- Failure tests ---------------------------
   void testFigureConstructedWithNonFigureThrows() {
-    TS_ASSERT_THROWS(Figure fig(Python::NewRef(Py_BuildValue("(i)", 1))),
+    TS_ASSERT_THROWS(Figure fig(MantidQt::Widgets::Common::Python::NewRef(
+                         Py_BuildValue("(i)", 1))),
                      std::invalid_argument);
   }
 };

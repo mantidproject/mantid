@@ -10,9 +10,11 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #pragma push_macro("slots")
 #undef slots
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
 #pragma pop_macro("slots")
 #include <QString>
+
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

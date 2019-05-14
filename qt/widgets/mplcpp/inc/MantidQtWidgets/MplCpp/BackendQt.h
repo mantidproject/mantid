@@ -7,8 +7,8 @@
 #ifndef MPLCPP_BACKENDQT_H
 #define MPLCPP_BACKENDQT_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 #include <QtGlobal>
 
 /*
@@ -30,6 +30,8 @@ constexpr static const char *MPL_QT_BACKEND =
 #else
 #error "Unknown Qt version. Cannot determine matplotlib backend."
 #endif
+
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
