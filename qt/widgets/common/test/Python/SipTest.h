@@ -4,36 +4,51 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_SIPTEST_H
-#define MPLCPP_SIPTEST_H
+#ifndef MANTIDQTWIDGETS_SIPTEST_H
+#define MANTIDQTWIDGETS_SIPTEST_H
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
-#include "MantidQtWidgets/MplCpp/BackendQt.h"
 
 #include <QWidget>
-
-using MantidQt::Widgets::MplCpp::backendModule;
 
 class SipTest : public CxxTest::TestSuite {
 public:
   static SipTest *createSuite() { return new SipTest; }
   static void destroySuite(SipTest *suite) { delete suite; }
 
-public:
+  void setUp() override {
+    Py_Initialize();
+    PyEval_InitThreads();
+    // Insert the directory of the properties file as a sitedir
+    // to ensure the built copy of mantid gets picked up
+    const MantidQt::Widgets::Common::Python::Object siteModule{
+        MantidQt::Widgets::Common::Python::NewRef(
+            PyImport_ImportModule("site"))};
+    siteModule.attr("addsitedir")(
+        Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
+    TS_ASSERT(Py_IsInitialized());
+  }
+
+  void tearDown() override {
+    // Some test methods may leave the Python error handler with an error
+    // set that confuse other tests when the executable is run as a whole
+    // Clear the errors after each suite method is run
+    PyErr_Clear();
+    Py_Finalize();
+  }
+
   // ----------------- success tests ---------------------
   void testExtractWithSipWrappedTypeSucceeds() {
-    MantidQt::Widgets::Common::Python::Object mplBackend{backendModule()};
-    MantidQt::Widgets::Common::Python::Object fig{
+    MantidQt::Widgets::Common::Python::Object qwidget{
         MantidQt::Widgets::Common::Python::NewRef(
-            PyImport_ImportModule("matplotlib.figure"))
-            .attr("Figure")()};
-    MantidQt::Widgets::Common::Python::Object pyCanvas{
-        mplBackend.attr("FigureCanvasQT")(fig)};
+            PyImport_ImportModule("qtpy.QtWidgets"))
+            .attr("QWidget")()};
     QWidget *w{nullptr};
     TS_ASSERT_THROWS_NOTHING(
-        w = MantidQt::Widgets::Common::Python::extract<QWidget>(pyCanvas));
+        w = MantidQt::Widgets::Common::Python::extract<QWidget>(qwidget));
     TS_ASSERT(w);
   }
 
@@ -49,4 +64,4 @@ public:
   }
 };
 
-#endif // MPLCPP_SIPTEST_H
+#endif // MANTIDQTWIDGETS_SIPTEST_H

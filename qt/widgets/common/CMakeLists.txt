@@ -263,9 +263,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
+    inc/MantidQtWidgets/Common/Python/Sip.h
     inc/MantidQtWidgets/Common/Python/Object.h
-    inc/MantidQtWidgets/Common/Python/QHashToDict.h
-    inc/MantidQtWidgets/Common/Python/Sip.h)
+    inc/MantidQtWidgets/Common/Python/QHashToDict.h)
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/DataSelector.ui
@@ -832,6 +832,8 @@ mtd_add_qt_library(TARGET_NAME
                    LINUX_INSTALL_RPATH
                    "\$ORIGIN/../${LIB_DIR}")
 
+find_package(BoostPython REQUIRED)
+
 mtd_add_qt_library(TARGET_NAME
                    MantidQtWidgetsCommon
                    QT_VERSION
@@ -851,9 +853,12 @@ mtd_add_qt_library(TARGET_NAME
                    ${_webengine_def}
                    INCLUDE_DIRS
                    inc
+                   ../../../Framework/PythonInterface/core/inc
                    ${PYTHON_INCLUDE_PATH}
                    LINK_LIBS
                    ${TARGET_LIBRARIES}
+                   ${Boost_LIBRARIES}
+                   ${PYTHON_LIBRARIES}
                    QT5_LINK_LIBS
                    Qt5::Concurrent
                    Qt5::Help
@@ -948,6 +953,10 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h)
 
+if(NOT APPLE)
+  list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
+endif()
+
 mtd_add_qt_tests(TARGET_NAME
                  MantidQtWidgetsCommonTest
                  QT_VERSION
@@ -966,6 +975,9 @@ mtd_add_qt_tests(TARGET_NAME
                  ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                  LINK_LIBS
                  ${TARGET_LIBRARIES}
+                 ${PYTHON_LIBRARIES}
+                 ${Boost_LIBRARIES}
+                 PythonInterfaceCore
                  DataObjects
                  ${GMOCK_LIBRARIES}
                  ${GTEST_LIBRARIES}

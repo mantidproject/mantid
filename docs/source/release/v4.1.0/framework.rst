@@ -47,4 +47,6 @@ Data Objects
 Python
 ------
 
+- The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
+
 :ref:`Release 4.1.0 <v4.1.0>`

@@ -9,13 +9,14 @@ set(TEST_FILES
     Line2DTest.h
     MantidColormapTest.h
     ScalarMappableTest.h
-    ZoomerTest.h)
+    ZoomerTest.h
+    QBackendExtractTest.h
+    PlotTest.h)
 
 if(NOT APPLE)
   list(APPEND TEST_FILES
               ColorsTest.h
-              FigureCanvasQtTest.h
-              SipTest.h)
+              FigureCanvasQtTest.h)
 endif()
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
@@ -28,6 +29,8 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                  SRC
                    ${TEST_FILES}
                  LINK_LIBS
+                   Kernel
+                   API
                    PythonInterfaceCore
                    ${Boost_LIBRARIES}
                    ${PYTHON_LIBRARIES}
