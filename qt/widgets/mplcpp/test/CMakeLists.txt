@@ -7,6 +7,7 @@ set(TEST_FILES
     CyclerTest.h
     FigureTest.h
     Line2DTest.h
+    MantidAxesTest.h
     MantidColormapTest.h
     PanZoomToolTest.h
     PlotTest.h
@@ -21,7 +22,6 @@ endif()
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
-
 mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                  QT_VERSION 5
                  INCLUDE_DIRS
@@ -29,9 +29,12 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                  SRC
                    ${TEST_FILES}
                  LINK_LIBS
-                   Kernel
                    API
+                   DataObjects
+                   HistogramData
+                   Kernel
                    PythonInterfaceCore
+                   Types
                    ${Boost_LIBRARIES}
                    ${PYTHON_LIBRARIES}
                    ${POCO_LIBRARIES}

@@ -21,9 +21,18 @@ class MANTID_MPLCPP_DLL MantidAxes : public Axes {
 public:
   MantidAxes(Python::Object pyObj);
 
+  /// @name Plot creation functions
+  ///@{
   Line2D plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
               const size_t wkspIndex, const QString lineColour,
               const QString label);
+  ///@}
+
+  /// @name Artist removal/replacement
+  ///@{
+  void replaceWorkspaceArtists(
+      const Mantid::API::MatrixWorkspace_sptr &newWorkspace);
+  ///@}
 };
 
 } // namespace MplCpp

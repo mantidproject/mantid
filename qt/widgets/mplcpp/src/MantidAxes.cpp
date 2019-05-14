@@ -6,10 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::PythonInterface::GlobalInterpreterLock;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
+using MatrixWorkpaceToPython = Python::ToPythonValue<MatrixWorkspace_sptr>;
 
 /**
  * Construct an Axes wrapper around an existing Axes instance
@@ -28,9 +31,6 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
 Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
                         const size_t wkspIndex, const QString lineColour,
                         const QString label) {
-  using Mantid::API::MatrixWorkspace_sptr;
-  using MatrixWorkpaceToPython = Python::ToPythonValue<MatrixWorkspace_sptr>;
-
   GlobalInterpreterLock lock;
   auto wksp{Python::NewRef(MatrixWorkpaceToPython()(workspace))};
   auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
@@ -39,6 +39,17 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
   return Line2D{pyobj().attr("plot")(*args, **kwargs)[0]};
+}
+
+/**
+ * Replace the artists on this axes instance that are based off this workspace
+ * @param newWorkspace A reference to the new workspace containing the data
+ */
+void MantidAxes::replaceWorkspaceArtists(
+    const Mantid::API::MatrixWorkspace_sptr &newWorkspace) {
+  GlobalInterpreterLock lock;
+  pyobj().attr("replace_workspace_artists")(
+      Python::NewRef(MatrixWorkpaceToPython()(newWorkspace)));
 }
 
 } // namespace MplCpp

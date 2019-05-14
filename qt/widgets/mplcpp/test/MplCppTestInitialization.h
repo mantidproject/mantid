@@ -25,16 +25,17 @@
 class PythonInterpreter : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
+    using Mantid::Kernel::ConfigService;
+    namespace Python = MantidQt::Widgets::MplCpp::Python;
+
     Py_Initialize();
     PyEval_InitThreads();
     Mantid::PythonInterface::importNumpy();
     // Insert the directory of the properties file as a sitedir
     // to ensure the built copy of mantid gets picked up
-    const MantidQt::Widgets::Common::Python::Object siteModule{
-        MantidQt::Widgets::Common::Python::NewRef(
-            PyImport_ImportModule("site"))};
-    siteModule.attr("addsitedir")(
-        Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
+    const Python::Object siteModule{
+        Python::NewRef(PyImport_ImportModule("site"))};
+    siteModule.attr("addsitedir")(ConfigService::Instance().getPropertiesDir());
     return Py_IsInitialized();
   }
 
