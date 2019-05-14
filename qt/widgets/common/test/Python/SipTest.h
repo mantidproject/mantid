@@ -9,6 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
 #include <QWidget>
@@ -21,6 +22,13 @@ public:
   void setUp() override {
     Py_Initialize();
     PyEval_InitThreads();
+    // Insert the directory of the properties file as a sitedir
+    // to ensure the built copy of mantid gets picked up
+    const MantidQt::Widgets::Common::Python::Object siteModule{
+        MantidQt::Widgets::Common::Python::NewRef(
+            PyImport_ImportModule("site"))};
+    siteModule.attr("addsitedir")(
+        Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
     TS_ASSERT(Py_IsInitialized());
   }
 

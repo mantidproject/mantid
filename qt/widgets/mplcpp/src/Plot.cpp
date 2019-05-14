@@ -69,7 +69,7 @@ constructKwargs(boost::optional<std::vector<int>> spectrum_nums,
   bool useSpecNums;
   if (spectrum_nums && !wksp_indices) {
     useSpecNums = true;
-  } else if (wksp_indices) {
+  } else if (wksp_indices && !spectrum_nums) {
     useSpecNums = false;
   } else {
     throw std::invalid_argument(
