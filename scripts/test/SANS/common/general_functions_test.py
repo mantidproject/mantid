@@ -13,7 +13,8 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
-                                           get_facility, parse_diagnostic_settings, get_transmission_output_name, get_output_name)
+                                           get_facility, parse_diagnostic_settings, get_transmission_output_name,
+                                           get_output_name, check_for_bytes)
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility, DataType)
@@ -539,6 +540,24 @@ class SANSFunctionsTest(unittest.TestCase):
 
         self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
         self.assertEqual(group_output_name, '12345rear_1DPhi12.0_56.0')
+
+    def test_that_check_for_bytes_can_convert_bytes_to_str(self):
+        value_as_str = "value"
+        actual_value_as_str = check_for_bytes(value_as_str)
+        self.assertEqual(type(actual_value_as_str), str)
+        self.assertEqual(actual_value_as_str, value_as_str)
+
+        # These tests will pass on Python2 regardless of the function working
+        # as b"value" == "value"
+        value_as_bytes = b"value"
+        actual_value_as_bytes = check_for_bytes(value_as_bytes)
+        self.assertEqual(type(actual_value_as_bytes), str)
+        self.assertEqual(actual_value_as_bytes, value_as_str)
+
+        # Test that raises on other types
+        self.assertRaises(TypeError, check_for_bytes, True)
+        self.assertRaises(TypeError, check_for_bytes, 5)
+
 
 if __name__ == '__main__':
     unittest.main()
