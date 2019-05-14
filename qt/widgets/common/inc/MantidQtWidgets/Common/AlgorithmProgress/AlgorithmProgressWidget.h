@@ -12,6 +12,7 @@
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressWidget.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QHBoxLayout>
@@ -21,6 +22,7 @@
 #include <memory>
 
 class QProgressBar;
+class QString;
 
 /** The AlgorithmProgressWidget shows the main progress bar always visible on
  * the Workbench.
@@ -33,22 +35,24 @@ class QProgressBar;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressWidget
+    : public QWidget,
+      public IAlgorithmProgressWidget {
   Q_OBJECT
 public:
   AlgorithmProgressWidget(QWidget *parent = nullptr);
 
-  QProgressBar *progressBar() const;
-
   /// Setup the view for whenever an algorithm has started.
-  void algorithmStarted();
+  void algorithmStarted() override;
   /// Setup the view for whenever an algorithm has ended.
-  void algorithmEnded();
+  void algorithmEnded() override;
   /// Enable or disable the processing of updates to the algorithm progress
   void blockUpdates(bool block = true);
+  /// Update the progress bar
+  void updateProgress(double progress, const QString &message) override;
 
 public slots:
-  void showDetailsDialog();
+  void showDetailsDialog() override;
 
 private:
   // Widgets are managed by Qt. This class owns them, and Qt will delete them on

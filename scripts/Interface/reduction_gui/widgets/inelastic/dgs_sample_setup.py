@@ -11,6 +11,7 @@ from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
+from qtpy import PYQT4  # noqa
 import reduction_gui.widgets.util as util
 import os
 try:
@@ -21,12 +22,14 @@ except ImportError:
     from mantidplot import load_ui
 
 IS_IN_MANTIDPLOT = False
-try:
-    import mantidqtpython
-    from mantid.kernel import config
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
+
+if PYQT4:
+    try:
+        import mantidqtpython
+        from mantid.kernel import config
+        IS_IN_MANTIDPLOT = True
+    except:
+        pass
 
 
 class SampleSetupWidget(BaseWidget):

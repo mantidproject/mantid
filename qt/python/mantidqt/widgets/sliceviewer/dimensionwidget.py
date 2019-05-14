@@ -8,7 +8,7 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox
+from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox
 from qtpy.QtCore import Qt, Signal
 from mantid.py3compat.enum import Enum
 
@@ -44,11 +44,16 @@ class DimensionWidget(QWidget):
 
         self.dims = []
         for n, dim in enumerate(dims_info):
-            self.dims.append(Dimension(dim, number=n, parent=self))
+            if dim['type'] == 'MDE':
+                self.dims.append(DimensionMDE(dim, number=n, parent=self))
+            else:
+                self.dims.append(Dimension(dim, number=n, parent=self))
 
         for widget in self.dims:
             widget.stateChanged.connect(self.change_dims)
             widget.valueChanged.connect(self.valueChanged)
+            if hasattr(widget, 'binningChanged'):
+                widget.binningChanged.connect(self.dimensionsChanged)
             self.layout.addWidget(widget)
 
         self.set_initial_states()
@@ -103,6 +108,9 @@ class DimensionWidget(QWidget):
 
     def get_slicepoint(self):
         return [None if d.get_state() in (State.X, State.Y) else d.get_value() for d in self.dims]
+
+    def get_bin_params(self):
+        return [d.get_bins() if d.get_state() in (State.X, State.Y) else d.get_thickness() for d in self.dims]
 
 
 class Dimension(QWidget):
@@ -242,3 +250,70 @@ class Dimension(QWidget):
 
     def get_value(self):
         return self.value
+
+
+class DimensionMDE(Dimension):
+    binningChanged = Signal()
+    """
+    MDEventWorkspace has additional properties for either number_of_bins or thickness
+
+    from mantidqt.widgets.sliceviewer.dimensionwidget import DimensionMDE
+    from qtpy.QtWidgets import QApplication
+    app = QApplication([])
+    window = DimensionMDE({'minimum':-1.1, 'number_of_bins':11, 'width':0.2, 'name':'Dim0', 'units':'A'})
+    window.show()
+    app.exec_()
+    """
+    def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
+
+        # hack in a number_of_bins for MDEventWorkspace
+        dim_info['number_of_bins'] = 1000
+        dim_info['width'] = (dim_info['maximum']-dim_info['minimum'])/1000
+
+        self.spinBins = QSpinBox()
+        self.spinBins.setRange(2,9999)
+        self.spinBins.setValue(100)
+        self.spinBins.hide()
+        self.spinBins.setMinimumWidth(110)
+        self.spinThick = QDoubleSpinBox()
+        self.spinThick.setRange(0.001,999)
+        self.spinThick.setValue(0.1)
+        self.spinThick.setSingleStep(0.1)
+        self.spinThick.setDecimals(3)
+        self.spinThick.setMinimumWidth(110)
+        self.rebinLabel = QLabel("thick")
+        self.rebinLabel.setMinimumWidth(44)
+
+        super(DimensionMDE, self).__init__(dim_info, number, state, parent)
+
+        self.spinBins.valueChanged.connect(self.binningChanged)
+        self.spinThick.valueChanged.connect(self.valueChanged)
+
+        self.layout.addWidget(self.spinBins)
+        self.layout.addWidget(self.spinThick)
+        self.layout.addWidget(self.rebinLabel)
+
+    def get_bins(self):
+        return int(self.spinBins.value())
+
+    def get_thickness(self):
+        return float(self.spinThick.value())
+
+    def set_state(self, state):
+        super(DimensionMDE, self).set_state(state)
+        if self.state == State.X:
+            self.spinBins.show()
+            self.spinThick.hide()
+            self.rebinLabel.setText('bins')
+        elif self.state == State.Y:
+            self.spinBins.show()
+            self.spinThick.hide()
+            self.rebinLabel.setText('bins')
+        elif self.state == State.NONE:
+            self.spinBins.hide()
+            self.spinThick.show()
+            self.rebinLabel.setText('thick')
+        else:
+            self.spinBins.hide()
+            self.spinThick.hide()
+            self.rebinLabel.hide()

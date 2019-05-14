@@ -2,13 +2,10 @@ set(SRC_FILES
     MDFAddWorkspaceDialog.cpp
     MDFDataController.cpp
     MDFDatasetPlotData.cpp
-    MDFEditLocalParameterDialog.cpp
     MDFFunctionPlotData.cpp
-    MDFLocalParameterEditor.cpp
-    MDFLocalParameterItemDelegate.cpp
-    MDFLogValueFinder.cpp
     MDFPlotController.cpp
-    MultiDatasetFit.cpp)
+    MultiDatasetFit.cpp
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -18,27 +15,22 @@ set(INC_FILES
     MDFAddWorkspaceDialog.h
     MDFDataController.h
     MDFDatasetPlotData.h
-    MDFEditLocalParameterDialog.h
     MDFFunctionPlotData.h
-    MDFLocalParameterEditor.h
-    MDFLocalParameterItemDelegate.h
-    MDFLogValueFinder.h
     MDFPlotController.h
-    MultiDatasetFit.h)
+    MultiDatasetFit.h
+)
 
 set(MOC_FILES
     MultiDatasetFit.h
     MDFAddWorkspaceDialog.h
     MDFDataController.h
     MDFPlotController.h
-    MDFLocalParameterEditor.h
-    MDFLocalParameterItemDelegate.h
-    MDFEditLocalParameterDialog.h)
+)
 
 set(UI_FILES
     MultiDatasetFit.ui
     MDFAddWorkspaceDialog.ui
-    EditLocalParameterDialog.ui)
+)
 
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMultiDatasetFit
                    QT_VERSION 4

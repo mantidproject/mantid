@@ -26,8 +26,6 @@ from qtpy.QtGui import QKeySequence # noqa
 from qtpy.QtWidgets import QAction, QMenu # noqa
 from qtpy.uic import loadUi, loadUiType # noqa
 
-from ...icons import get_icon # noqa
-
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
 
@@ -140,6 +138,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
                                              are NOT shown on context menus. Set this to True to show them.
     :return: A new QAction object
     """
+    from ...icons import get_icon  # noqa
     action = QAction(text, parent)
     if on_triggered is not None:
         action.triggered.connect(on_triggered)

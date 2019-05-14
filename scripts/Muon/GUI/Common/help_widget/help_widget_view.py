@@ -1,25 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
-from qtpy import PYQT4
-# determine whether the interface is opened from within Mantid or not
-# (outside of Mantid we cannot use the "Manage user directories" functionality)
-STANDALONE_EXEC = True
-try:
-    from mantidqt.widgets import manageuserdirectories
-except:
-    STANDALONE_EXEC = False
 
-if PYQT4:
-    IN_MANTIDPLOT = False
-    try:
-        from pymantidplot import proxies
-        IN_MANTIDPLOT = True
-    except ImportError:
-        # We are not in MantidPlot e.g. testing
-        pass
-else:
-    from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.widgets.manageuserdirectories import ManageUserDirectories
+from mantidqt.interfacemanager import InterfaceManager
 
 
 class HelpWidgetView(QtWidgets.QWidget):
@@ -32,9 +16,6 @@ class HelpWidgetView(QtWidgets.QWidget):
         super(HelpWidgetView, self).__init__(parent)
 
         self.setup_interface_layout()
-
-        if not PYQT4:
-            self.interface_manager = InterfaceManager()
 
     def setup_interface_layout(self):
         self.setObjectName("HelpWidget")
@@ -72,14 +53,7 @@ class HelpWidgetView(QtWidgets.QWidget):
         self.help_button.clicked.connect(slot)
 
     def show_directory_manager(self):
-        if STANDALONE_EXEC:
-            manageuserdirectories.ManageUserDirectories.openUserDirsDialog(self)
-        else:
-            self.warning_popup(
-                "Cannot open user directories dailog outside MantidPlot.")
+        ManageUserDirectories.openUserDirsDialog(self)
 
     def _on_help_button_clicked(self):
-        if PYQT4:
-            proxies.showCustomInterfaceHelp('Frequency Domain Analysis')
-        else:
-            self.interface_manager.showCustomInterfaceHelp('Frequency Domain Analysis')
+        InterfaceManager().showCustomInterfaceHelp('Frequency Domain Analysis')

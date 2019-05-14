@@ -15,7 +15,9 @@ from copy import deepcopy
 import json
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, ZOOM, EMPTY_NAME,
+from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
+                                             SANSInstrument_string_as_key_NoInstrument)
+from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
@@ -830,20 +832,14 @@ def sanitise_instrument_name(instrument_name):
     :return: a sanitises instrument name string
     """
     instrument_name_upper = instrument_name.upper()
-    if re.search(LOQ, instrument_name_upper):
-        instrument_name = LOQ
-    elif re.search(SANS2D, instrument_name_upper):
-        instrument_name = SANS2D
-    elif re.search(LARMOR, instrument_name_upper):
-        instrument_name = LARMOR
-    elif re.search(ZOOM, instrument_name_upper):
-        instrument_name = ZOOM
+    for instrument in SANSInstrument_string_list:
+        if re.search(instrument, instrument_name_upper):
+            return instrument
     return instrument_name
 
 
 def get_facility(instrument):
-    if (instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ or
-        instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.ZOOM):  # noqa
+    if instrument in SANSInstrument_enum_list:
         return SANSFacility.ISIS
     else:
         return SANSFacility.NoFacility
@@ -858,17 +854,10 @@ def instrument_name_correction(instrument_name):
 
 def get_instrument(instrument_name):
     instrument_name = instrument_name.upper()
-    if instrument_name == SANS2D:
-        instrument = SANSInstrument.SANS2D
-    elif instrument_name == LARMOR:
-        instrument = SANSInstrument.LARMOR
-    elif instrument_name == LOQ:
-        instrument = SANSInstrument.LOQ
-    elif instrument_name == ZOOM:
-        instrument = SANSInstrument.ZOOM
-    else:
-        instrument = SANSInstrument.NoInstrument
-    return instrument
+    try:
+        return SANSInstrument_string_as_key_NoInstrument[instrument_name]
+    except KeyError:
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------

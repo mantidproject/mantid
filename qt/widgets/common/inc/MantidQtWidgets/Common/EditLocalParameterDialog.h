@@ -4,37 +4,33 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFEDITLOCALPARAMETERDIALOG_H_
-#define MDFEDITLOCALPARAMETERDIALOG_H_
+#ifndef MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_
+#define MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_
 
-#include "DllConfig.h"
-#include "MDFLogValueFinder.h"
-#include "MantidQtWidgets/Common/IFunctionBrowser.h"
+#include "DllOption.h"
+#include "MantidQtWidgets/Common/LogValueFinder.h"
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
+#include <memory>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
-class MultiDatasetFit;
-
-namespace MDF {
+class FunctionMultiDomainPresenter;
 
 /**
  * A dialog for displaying and editing values of local parameters.
  * Parameters can be set individually or all to the same value.
  * They also can be fixed and unfixed.
  */
-class MANTIDQT_MULTIDATASETFIT_DLL EditLocalParameterDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public QDialog {
   Q_OBJECT
 public:
-  EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
   EditLocalParameterDialog(QWidget *parent,
-                           MantidWidgets::IFunctionBrowser *funcBrowser,
-                           const QString &parName, const QStringList &wsNames,
-                           const std::vector<size_t> &wsIndices);
-  void doSetup(const QString &parName, const QStringList &wsNames,
-               const std::vector<size_t> &wsIndices);
+                           FunctionMultiDomainPresenter *funcBrowser,
+                           const QString &parName, const QStringList &wsNames);
+  void doSetup(const QString &parName, const QStringList &wsNames);
+  QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;
@@ -77,11 +73,10 @@ private:
   /// Cache for the ties
   QStringList m_ties;
   /// Log value finder
-  std::unique_ptr<MDFLogValueFinder> m_logFinder;
+  std::unique_ptr<LogValueFinder> m_logFinder;
 };
 
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /*MDFEDITLOCALPARAMETERDIALOG_H_*/
+#endif /*MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_*/

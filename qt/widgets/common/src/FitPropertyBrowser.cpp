@@ -2068,9 +2068,8 @@ void FitPropertyBrowser::addTie() {
     return;
 
   bool ok = false;
-  QString tieStr =
-      QInputDialog::getText(this, "MantidPlot - Fit", "Enter tie expression",
-                            QLineEdit::Normal, "", &ok);
+  QString tieStr = QInputDialog::getText(
+      this, "Mantid - Fit", "Enter tie expression", QLineEdit::Normal, "", &ok);
   if (ok) {
     tieStr = tieStr.trimmed();
     if (!tieStr.contains('=')) {
@@ -2124,7 +2123,7 @@ void FitPropertyBrowser::addTieToFunction() {
 
   bool ok;
   QString tieName = QInputDialog::getItem(
-      this, "MantidPlot - Fit", "Select function", fnNames, 0, false, &ok);
+      this, "Mantid - Fit", "Select function", fnNames, 0, false, &ok);
 
   if (!ok)
     return;
@@ -3257,7 +3256,7 @@ void FitPropertyBrowser::minimizerChanged() {
       m_stringManager->setValue(prop,
                                 QString::fromStdString((*property).value()));
     } else {
-      QMessageBox::warning(this, "MantidPlot - Error",
+      QMessageBox::warning(this, "Mantid - Error",
                            "Type of minimizer's property " + propName +
                                " is not yet supported by the browser.");
       continue;

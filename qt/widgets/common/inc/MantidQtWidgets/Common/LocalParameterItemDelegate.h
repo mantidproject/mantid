@@ -4,14 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFLOCALPARAMETERITEMDELEGATE_H_
-#define MDFLOCALPARAMETERITEMDELEGATE_H_
+#ifndef MANTIDWIDGETS_LOCALPARAMETERITEMDELEGATE_H_
+#define MANTIDWIDGETS_LOCALPARAMETERITEMDELEGATE_H_
 
 #include <QStyledItemDelegate>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace MDF {
+namespace MantidWidgets {
 
 // Forward declarations.
 class EditLocalParameterDialog;
@@ -60,8 +59,7 @@ private:
   mutable LocalParameterEditor *m_currentEditor;
 };
 
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /*MDFLOCALPARAMETERITEMDELEGATE_H_*/
+#endif /*MANTIDWIDGETS_LOCALPARAMETERITEMDELEGATE_H_*/

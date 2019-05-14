@@ -4,23 +4,23 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
-#define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
+#ifndef MANTIDQT_MANTIDWIDGETS_MDFLOGVALUEFINDER_H_
+#define MANTIDQT_MANTIDWIDGETS_MDFLOGVALUEFINDER_H_
 
-#include "DllConfig.h"
+#include "DllOption.h"
 #include "MantidKernel/Statistics.h"
 #include <QStringList>
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 
 /** MDFLogValueFinder : Holds a collection of workspace names, and finds log
   values from them
 */
-class MANTIDQT_MULTIDATASETFIT_DLL MDFLogValueFinder {
+class EXPORT_OPT_MANTIDQT_COMMON LogValueFinder {
 public:
   /// Constructor
-  explicit MDFLogValueFinder(const QStringList &wsNames);
+  explicit LogValueFinder(const QStringList &wsNames);
   /// Get log names from workspaces
   std::vector<std::string> getLogNames() const;
   /// Get log value from workspace position in list
@@ -37,7 +37,7 @@ private:
   const QStringList m_wsNames;
 };
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /* MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_ */
+#endif /* MANTIDQT_MANTIDWIDGETS_MDFLOGVALUEFINDER_H_ */

@@ -1244,8 +1244,8 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       }
     } // single fit
     else {
-      FitPropertyBrowser::clear();
-      FitPropertyBrowser::addFunction(func->asString());
+      m_functionBrowser->clear();
+      m_functionBrowser->setFunction(func);
     }
 
     updateTFPlot();

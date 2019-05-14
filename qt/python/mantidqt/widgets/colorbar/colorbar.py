@@ -15,6 +15,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colors import Normalize, SymLogNorm, PowerNorm
+import numpy as np
 
 
 NORM_OPTS = ["Linear", "SymmetricLog10", "Power"]
@@ -150,9 +151,13 @@ class ColorbarWidget(QWidget):
         if self.autoscale.isChecked():
             data = self.colorbar.mappable.get_array()
             try:
-                self.cmin_value = data[~data.mask].min()
-                self.cmax_value = data[~data.mask].max()
-            except ValueError:
+                try:
+                    self.cmin_value = data[~data.mask].min()
+                    self.cmax_value = data[~data.mask].max()
+                except AttributeError:
+                    self.cmin_value = np.nanmin(data)
+                    self.cmax_value = np.nanmax(data)
+            except (ValueError, RuntimeWarning):
                 # all values mask
                 pass
             self.update_clim_text()
