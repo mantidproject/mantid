@@ -36,18 +36,6 @@ constexpr auto LINEAR_SCALE{"Linear"};
 constexpr auto LOG_SCALE{"Log"};
 constexpr auto SQUARE_SCALE{"Square"};
 
-/**
- * Construct the line data from a workspace
- * @param ws A reference to the workspace to plot
- * @param wsIndex A wsIndex denoting the spectrum to plot
- * @return A new Line2D::Data object
- */
-Line2D::Data tolineData(const Mantid::API::MatrixWorkspace &ws,
-                        const size_t wsIndex) {
-  const auto &histogram = ws.histogram(wsIndex);
-  return {histogram.points().rawData(), histogram.y().rawData()};
-}
-
 } // namespace
 
 namespace MantidQt {
@@ -60,8 +48,9 @@ namespace MantidWidgets {
  * @param watchADS If true then ADS observers are added
  */
 PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
-    : QWidget(parent), m_canvas{new FigureCanvasQt(111, "mantid", parent)},
-      m_lines{}, m_panZoomTool(m_canvas),
+    : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION,
+                                                   parent)},
+      m_panZoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
   createLayout();
@@ -106,8 +95,6 @@ void PreviewPlot::addSpectrum(const QString &lineName,
   removeSpectrum(lineName);
   auto axes = m_canvas->gca<MantidAxes>();
   axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName);
-  //  m_lines.emplace_back(
-  //      createLineInfo(axes, *ws, wsIndex, lineName, lineColour));
   regenerateLegend();
   axes.relim();
   m_canvas->draw();
@@ -134,13 +121,7 @@ void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
  * not known then this does nothing
  */
 void PreviewPlot::removeSpectrum(const QString &lineName) {
-  auto lineIter = std::find_if(
-      m_lines.cbegin(), m_lines.cend(),
-      [&lineName](const auto &line) { return line.label == lineName; });
-  if (lineIter != m_lines.cend()) {
-    m_lines.erase(lineIter);
-    regenerateLegend();
-  }
+
 }
 
 /**
@@ -164,8 +145,8 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
  * Clear all lines from the plot
  */
 void PreviewPlot::clear() {
-  m_lines.clear();
-  regenerateLegend();
+  m_canvas->gca();
+ regenerateLegend();
 }
 
 /**
@@ -333,7 +314,7 @@ void PreviewPlot::onWorkspaceRemoved(
     Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
   // Ignore non matrix workspaces
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
-    removeLines(*ws);
+    m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
     m_canvas->draw();
   }
 }
@@ -349,65 +330,10 @@ void PreviewPlot::onWorkspaceReplaced(
           boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      replaceLineData(*oldWS, *newWS);
+      m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS);
       m_canvas->draw();
     }
   }
-}
-
-/**
- * Add a line to the canvas using the data from the workspace and return a
- * struct describing the line
- * @param axes A reference to the axes to contain the lines
- * @param ws A reference to the workspace
- * @param wsIndex The wsIndex
- * @param lineLabel A label for the line
- * @param lineColour The color required for the line
- * @return A Line2DInfo describing the line
- */
-PreviewPlot::Line2DInfo PreviewPlot::createLineInfo(
-    Widgets::MplCpp::Axes &axes, const Mantid::API::MatrixWorkspace &ws,
-    const size_t wsIndex, const QString &lineName, const QColor &lineColour) {
-  auto data = tolineData(ws, wsIndex);
-  return Line2DInfo{axes.plot(std::move(data.xaxis), std::move(data.yaxis),
-                              lineColour.name(QColor::HexRgb), lineName),
-                    &ws, wsIndex, lineName, lineColour};
-}
-
-/**
- * Remove all lines based on a given workspace
- * @param ws A reference to a workspace
- */
-void PreviewPlot::removeLines(const Mantid::API::MatrixWorkspace &ws) {
-  decltype(m_lines.cbegin()) lineIter{m_lines.cbegin()};
-  while (lineIter != m_lines.cend()) {
-    lineIter =
-        std::find_if(m_lines.cbegin(), m_lines.cend(),
-                     [&ws](const auto &info) { return info.workspace == &ws; });
-    if (lineIter != m_lines.cend()) {
-      m_lines.erase(lineIter);
-    }
-  };
-  regenerateLegend();
-}
-
-/**
- * Replace any lines based on the old workspace with data from the new
- * workspace
- * @param oldWS A reference to the existing workspace
- * @param newWS A reference to the replacement workspace
- */
-void PreviewPlot::replaceLineData(const Mantid::API::MatrixWorkspace &oldWS,
-                                  const Mantid::API::MatrixWorkspace &newWS) {
-  auto axes = m_canvas->gca();
-  for (auto &info : m_lines) {
-    if (info.workspace == &oldWS) {
-      info.line.setData(tolineData(newWS, info.wsIndex));
-      info.workspace = &newWS;
-    }
-  }
-  axes.relim();
-  m_canvas->draw();
 }
 
 /**

@@ -30,6 +30,8 @@ public:
 
   /// @name Artist removal/replacement
   ///@{
+  void
+  removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void replaceWorkspaceArtists(
       const Mantid::API::MatrixWorkspace_sptr &newWorkspace);
   ///@}

@@ -42,6 +42,18 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
 }
 
 /**
+ * Remove any artists plotted from the given workspace
+ * @param workspace A reference to a workspace whose name is used to
+ * lookup any artists for removal
+ */
+void MantidAxes::removeWorkspaceArtists(
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  GlobalInterpreterLock lock;
+  pyobj().attr("remove_workspace_artists")(
+      Python::NewRef(MatrixWorkpaceToPython()(workspace)));
+}
+
+/**
  * Replace the artists on this axes instance that are based off this workspace
  * @param newWorkspace A reference to the new workspace containing the data
  */

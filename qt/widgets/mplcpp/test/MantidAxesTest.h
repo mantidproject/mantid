@@ -41,25 +41,30 @@ public:
     TS_ASSERT_EQUALS("red", line.pyobj().attr("get_color")());
   }
 
+  void testRemoveArtist() {
+    MantidAxes axes{pyAxes()};
+    const std::string wsName{"myname"};
+    const auto ws = createWorkspaceInADS(wsName, {1, 2, 4});
+    axes.plot(ws, 0, "red", "mylabel");
+    axes.removeWorkspaceArtists(ws);
+
+    TS_ASSERT_EQUALS(0, Python::Len(axes.pyobj().attr("lines")));
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void testReplaceArtist() {
     MantidAxes axes{pyAxes()};
-    const auto wsOld = boost::shared_ptr<Workspace2D>(
-        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
-    // replacement is based on names and the only way to set a name is to
-    // add the object to the ADS
-    auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace("name", wsOld);
+    const std::string wsName{"myname"};
+    const auto wsOld = createWorkspaceInADS(wsName, {1, 2, 4});
     axes.plot(wsOld, 0, "red", "mylabel");
-    const auto wsNew = boost::shared_ptr<Workspace2D>(
-        create<Workspace2D>(2, Histogram(BinEdges{2, 3, 5})).release());
-    ads.addOrReplace("name", wsNew);
+    const auto wsNew = createWorkspaceInADS(wsName, {2, 3, 5});
     axes.replaceWorkspaceArtists(wsNew);
 
     auto newLine = axes.pyobj().attr("lines")[0];
     TS_ASSERT_EQUALS(2.5, newLine.attr("get_xdata")()[0]);
     TS_ASSERT_EQUALS("red", newLine.attr("get_color")());
 
-    ads.remove("name");
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   // ----------------- failure tests ----------------------
@@ -84,6 +89,17 @@ private:
     const Python::Object plotsModule{
         Python::NewRef(PyImport_ImportModule("mantid.plots"))};
     return plotsModule.attr("MantidAxes")(figure, rect);
+  }
+
+  Workspace2D_sptr
+  createWorkspaceInADS(const std::string &name,
+                       const std::initializer_list<double> &binEdges) {
+    const auto ws = boost::shared_ptr<Workspace2D>(
+        create<Workspace2D>(2, Histogram(BinEdges{binEdges})).release());
+    // replacement is based on names and the only way to set a name is to
+    // add the object to the ADS
+    AnalysisDataService::Instance().addOrReplace(name, ws);
+    return ws;
   }
 };
 

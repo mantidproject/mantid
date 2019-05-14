@@ -66,32 +66,14 @@ private:
   bool handleMouseReleaseEvent(QMouseEvent *evt);
   void showContextMenu(QMouseEvent *evt);
 
-  struct Line2DInfo {
-    Widgets::MplCpp::Line2D line;
-    // Non-owning pointer to the source workspace
-    // It is only safe to compare this with another workspace pointer
-    const Mantid::API::MatrixWorkspace *workspace;
-    const size_t wsIndex;
-    const QString label;
-    const QColor colour;
-  };
-
   void createLayout();
   void createActions();
-
   bool legendIsVisible() const;
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
   void
   onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
 
-  Line2DInfo createLineInfo(Widgets::MplCpp::Axes &axes,
-                            const Mantid::API::MatrixWorkspace &ws,
-                            const size_t wsIndex, const QString &curveName,
-                            const QColor &lineColour);
-  void removeLines(const Mantid::API::MatrixWorkspace &ws);
-  void replaceLineData(const Mantid::API::MatrixWorkspace &oldWS,
-                       const Mantid::API::MatrixWorkspace &newWS);
   void regenerateLegend();
   void removeLegend();
 
@@ -103,7 +85,6 @@ private:
 
   // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
-  std::list<Line2DInfo> m_lines;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;
