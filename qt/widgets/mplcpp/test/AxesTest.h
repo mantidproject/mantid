@@ -26,12 +26,27 @@ public:
 
   void testClear() {
     Axes axes(pyAxes());
-    std::vector<double> xsrc{1, 2, 3}, ysrc{1, 2, 3};
-    auto line = axes.plot(xsrc, ysrc);
+    auto line = axes.plot({1, 2, 3}, {1, 2, 3});
     TS_ASSERT_EQUALS(1, line.pyobj().attr("get_xdata")()[0]);
     TS_ASSERT_EQUALS(1, Python::Len(axes.pyobj().attr("lines")));
     axes.clear();
     TS_ASSERT_EQUALS(0, Python::Len(axes.pyobj().attr("lines")));
+  }
+
+  void testForEachArtist() {
+    Axes axes(pyAxes());
+    auto line1 = axes.plot({1, 2, 3}, {1, 2, 3});
+    auto line2 = axes.plot({2, 3, 4}, {2, 3, 4});
+
+    constexpr auto newColour{"green"};
+    TS_ASSERT_DIFFERS(newColour, line1.pyobj().attr("get_color")());
+    TS_ASSERT_DIFFERS(newColour, line2.pyobj().attr("get_color")());
+
+    axes.forEachArtist("lines", [&newColour](Artist &&artist) {
+      artist.pyobj().attr("set_color")(newColour);
+    });
+    TS_ASSERT_EQUALS(newColour, line1.pyobj().attr("get_color")());
+    TS_ASSERT_EQUALS(newColour, line2.pyobj().attr("get_color")());
   }
 
   void testSetXLabel() {
@@ -125,6 +140,11 @@ public:
   }
 
   // ----------------- failure tests ---------------------
+  void testForEachArtistThrowsForInvalidAttribute() {
+    Axes axes(pyAxes());
+    TS_ASSERT_THROWS_ANYTHING(axes.forEachArtist("badattr", [](Artist &&) {}));
+  }
+
   void testPlotThrowsWithEmptyData() {
     Axes axes(pyAxes());
     TS_ASSERT_THROWS(axes.plot({}, {}), const std::invalid_argument &);

@@ -20,6 +20,7 @@
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
+using MantidQt::Widgets::MplCpp::Artist;
 using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Line2D;
@@ -121,7 +122,12 @@ void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
  * not known then this does nothing
  */
 void PreviewPlot::removeSpectrum(const QString &lineName) {
-
+  auto axes = m_canvas->gca();
+  const auto lineNameAsCStr{lineName.toLatin1().constData()};
+  axes.forEachArtist("lines", [&lineNameAsCStr](Artist &&line) {
+    if (line.pyobj().attr("get_label")() == lineNameAsCStr)
+      line.remove();
+  });
 }
 
 /**
@@ -144,10 +150,7 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
 /**
  * Clear all lines from the plot
  */
-void PreviewPlot::clear() {
-  m_canvas->gca().clear();
-  regenerateLegend();
-}
+void PreviewPlot::clear() { m_canvas->gca().clear(); }
 
 /**
  * Resize the X axis to encompass all of the data

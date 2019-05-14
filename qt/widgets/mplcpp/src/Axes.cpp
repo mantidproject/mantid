@@ -62,11 +62,22 @@ Axes::Axes(Python::Object obj) : InstanceHolder(std::move(obj), "plot") {}
 void Axes::clear() { callMethodNoCheck<void>(pyobj(), "clear"); }
 
 /**
- * @brief Axes::forEachArtist
- * @param container
- * @param op
+ * Apply an operation to each artist in the given container
+ * @param containerAttr The name of the container attribute
+ * @param op An operation to apply to each artist in the contain
  */
-void Axes::forEachArtist(const char *container, const ArtistOperation &op) {}
+void Axes::forEachArtist(const char *containerAttr, const ArtistOperation &op) {
+  GlobalInterpreterLock lock;
+  try {
+    auto container = pyobj().attr(containerAttr);
+    auto containerLength = Python::Len(container);
+    for (decltype(containerLength) i = 0; i < containerLength; ++i) {
+      op(Artist{container[i]});
+    }
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
 
 /**
  * @brief Set the X-axis label
