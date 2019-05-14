@@ -24,7 +24,8 @@ from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.common.enums import (BatchReductionEntry, FitType, RangeStepType, RowState, SampleShape,
+                               SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
                                        add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
@@ -541,6 +542,9 @@ class RunTabPresenter(object):
         """
         error_msg = ""
         try:
+            # Trip up early if output modes are invalid
+            self._validate_output_modes()
+
             for row in rows:
                 self._table_model.reset_row_state(row)
             self.update_view_from_table_model()
@@ -586,6 +590,19 @@ class RunTabPresenter(object):
                 self.sans_logger.information("2D reductions are incompatible with canSAS output. "
                                              "canSAS output has been unchecked.")
             self._view.can_sas_checkbox.setEnabled(False)
+
+    def _validate_output_modes(self):
+        """
+        Check which output modes has been checked (memory, file, both), and which
+        file types. If no file types have been selected and output mode is not memory,
+        we want to raise an error here. (If we don't, an error will be raised on attempting
+        to save after performing the reductions)
+        """
+        if (self._view.output_mode_file_radio_button.isChecked() or
+                self._view.output_mode_both_radio_button.isChecked()):
+            if self._view.save_types == [SaveType.NoType]:
+                raise RuntimeError("You have selected an output mode which saves to file, "
+                                   "but no file types have been selected.")
 
     def on_process_all_clicked(self):
         """
