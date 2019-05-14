@@ -31,8 +31,8 @@ set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/Line2D.h
     inc/MantidQtWidgets/MplCpp/MantidColorMap.h
     inc/MantidQtWidgets/MplCpp/ScalarMappable.h
-    inc/MantidQtWidgets/MplCpp/Zoomer.h)
-    inc/MantidQtWidgets/MplCpp/Plot.h
+    inc/MantidQtWidgets/MplCpp/Zoomer.h
+    inc/MantidQtWidgets/MplCpp/Plot.h)
 
 set(UI_FILES
     inc/MantidQtWidgets/MplCpp/Colorbar.ui)
