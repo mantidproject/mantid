@@ -145,8 +145,8 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
  * Clear all lines from the plot
  */
 void PreviewPlot::clear() {
-  m_canvas->gca();
- regenerateLegend();
+  m_canvas->gca().clear();
+  regenerateLegend();
 }
 
 /**

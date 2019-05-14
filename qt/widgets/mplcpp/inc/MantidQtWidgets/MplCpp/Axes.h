@@ -19,11 +19,15 @@ namespace Widgets {
 namespace MplCpp {
 
 class MANTID_MPLCPP_DLL Axes : public Common::Python::InstanceHolder {
+using ArtistOperation = void (*)(Artist &);
+
 public:
   explicit Axes(Common::Python::Object obj);
 
-  /// @name Formatting
+  /// @name General axes manipulation
   /// @{
+  void clear();
+  void forEachArtist(const char *container, const ArtistOperation &op);
   void setXLabel(const char *label);
   void setYLabel(const char *label);
   void setTitle(const char *label);

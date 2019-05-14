@@ -24,6 +24,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(Axes axes(pyAxes()));
   }
 
+  void testClear() {
+    Axes axes(pyAxes());
+    std::vector<double> xsrc{1, 2, 3}, ysrc{1, 2, 3};
+    auto line = axes.plot(xsrc, ysrc);
+    TS_ASSERT_EQUALS(1, line.pyobj().attr("get_xdata")()[0]);
+    TS_ASSERT_EQUALS(1, Python::Len(axes.pyobj().attr("lines")));
+    axes.clear();
+    TS_ASSERT_EQUALS(0, Python::Len(axes.pyobj().attr("lines")));
+  }
+
   void testSetXLabel() {
     Axes axes(pyAxes());
     axes.setXLabel("X");

@@ -57,6 +57,18 @@ std::tuple<double, double> limitsToTuple(const Python::Object &axes,
 Axes::Axes(Python::Object obj) : InstanceHolder(std::move(obj), "plot") {}
 
 /**
+ * Clear all artists from the axes
+ */
+void Axes::clear() { callMethodNoCheck<void>(pyobj(), "clear"); }
+
+/**
+ * @brief Axes::forEachArtist
+ * @param container
+ * @param op
+ */
+void Axes::forEachArtist(const char *container, const ArtistOperation &op) {}
+
+/**
  * @brief Set the X-axis label
  * @param label String for the axis label
  */
