@@ -18,6 +18,7 @@
 #include "GUI/MainWindow/IMainWindowPresenter.h"
 #include "GUI/MainWindow/IMainWindowView.h"
 #include "GUI/Runs/IAutoreduction.h"
+#include "GUI/Runs/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/SearchModel.h"
@@ -185,6 +186,10 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(search, Mantid::API::ITableWorkspace_sptr(const std::string &));
+};
+
+class MockRunNotifier : public IRunNotifier {
+public:
 };
 
 class MockSearchModel : public SearchModel {

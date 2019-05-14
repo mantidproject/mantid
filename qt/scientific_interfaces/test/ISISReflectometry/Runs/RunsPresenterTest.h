@@ -46,10 +46,10 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest(Plotter plotter)
-      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
-                                              "POLREF", "OFFSPEC"},
-        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
-        m_autoreduction(new MockAutoreduction), m_searcher(new MockSearcher),
+      : m_thetaTolerance(0.01),
+        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
+        m_runsTableView(), m_progressView(), m_messageHandler(),
+        m_autoreduction(), m_searcher(), m_runNotifier(),
         m_runsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -150,9 +150,9 @@ public:
     auto settingsChanged = true;
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+    EXPECT_CALL(m_autoreduction, searchStringChanged(_))
         .WillOnce(Return(settingsChanged));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+    EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_))
         .WillOnce(Return(true));
     expectCheckForNewRuns();
     expectWidgetsEnabledForAutoreducing();
@@ -164,9 +164,9 @@ public:
     auto settingsChanged = false;
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getSearchString()).Times(2);
-    EXPECT_CALL(*m_autoreduction, searchStringChanged(_))
+    EXPECT_CALL(m_autoreduction, searchStringChanged(_))
         .WillOnce(Return(settingsChanged));
-    EXPECT_CALL(*m_autoreduction, setupNewAutoreduction(_))
+    EXPECT_CALL(m_autoreduction, setupNewAutoreduction(_))
         .WillOnce(Return(true));
     expectCheckForNewRuns();
     expectWidgetsEnabledForAutoreducing();
@@ -181,7 +181,7 @@ public:
   void testPauseAutoreduction() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, stopTimer()).Times(1);
-    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+    EXPECT_CALL(m_autoreduction, stop()).Times(1);
     expectWidgetsEnabledForPaused();
     presenter.autoreductionPaused();
     verifyAndClear();
@@ -274,17 +274,17 @@ private:
     friend class RunsPresenterTest;
 
   public:
-    RunsPresenterFriend(
-        IRunsView *mainView, ProgressableView *progressView,
-        const RunsTablePresenterFactory &makeRunsTablePresenter,
-        double thetaTolerance, std::vector<std::string> const &instruments,
-        int defaultInstrumentIndex, IMessageHandler *messageHandler,
-        boost::shared_ptr<IAutoreduction> autoreduction =
-            boost::shared_ptr<IAutoreduction>(),
-        boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>())
+    RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
+                        const RunsTablePresenterFactory &makeRunsTablePresenter,
+                        double thetaTolerance,
+                        std::vector<std::string> const &instruments,
+                        int defaultInstrumentIndex,
+                        IMessageHandler *messageHandler,
+                        IAutoreduction &autoreduction, ISearcher &searcher,
+                        IRunNotifier &runNotifier)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
                         thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler, autoreduction, searcher) {}
+                        messageHandler, autoreduction, searcher, runNotifier) {}
   };
 
   RunsPresenterFriend makePresenter() {
@@ -300,7 +300,7 @@ private:
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, m_runsTablePresenterFactory, m_thetaTolerance,
         m_instruments, defaultInstrumentIndex, &m_messageHandler,
-        m_autoreduction, m_searcher);
+        m_autoreduction, m_searcher, m_runNotifier);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
@@ -313,6 +313,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_messageHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_autoreduction));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searcher));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
@@ -333,7 +334,7 @@ private:
 
   void expectStopAutoreduction() {
     EXPECT_CALL(m_view, stopTimer()).Times(1);
-    EXPECT_CALL(*m_autoreduction, stop()).Times(1);
+    EXPECT_CALL(m_autoreduction, stop()).Times(1);
   }
 
   void expectSearchFailed() {
@@ -442,8 +443,9 @@ private:
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
-  boost::shared_ptr<MockAutoreduction> m_autoreduction;
-  boost::shared_ptr<MockSearcher> m_searcher;
+  MockAutoreduction m_autoreduction;
+  MockSearcher m_searcher;
+  MockRunNotifier m_runNotifier;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   MockRunsTablePresenterFactory m_runsTablePresenterFactory;
 };

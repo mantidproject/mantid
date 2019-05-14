@@ -33,6 +33,7 @@ class IAutoreduction;
 class IMessageHandler;
 class ISearcher;
 class SearchModel;
+class IRunNotifier;
 
 using MantidWidgets::ProgressableView;
 
@@ -52,14 +53,13 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
       public RunsViewSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
-  RunsPresenter(
-      IRunsView *mainView, ProgressableView *progressView,
-      const RunsTablePresenterFactory &makeRunsTablePresenter,
-      double thetaTolerance, std::vector<std::string> const &instruments,
-      int defaultInstrumentIndex, IMessageHandler *messageHandler,
-      boost::shared_ptr<IAutoreduction> autoreduction =
-          boost::shared_ptr<IAutoreduction>(),
-      boost::shared_ptr<ISearcher> searcher = boost::shared_ptr<ISearcher>());
+  RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
+                const RunsTablePresenterFactory &makeRunsTablePresenter,
+                double thetaTolerance,
+                std::vector<std::string> const &instruments,
+                int defaultInstrumentIndex, IMessageHandler *messageHandler,
+                IAutoreduction &autoreduction, ISearcher &searcher,
+                IRunNotifier &runNotifier);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -100,7 +100,7 @@ public:
 protected:
   IRunsTablePresenter *tablePresenter() const;
   /// Information about the autoreduction process
-  boost::shared_ptr<IAutoreduction> m_autoreduction;
+  IAutoreduction &m_autoreduction;
   /// The search model
   boost::shared_ptr<SearchModel> m_searchModel;
   /// The current transfer method
@@ -118,7 +118,9 @@ private:
   /// The message reporting implementation
   IMessageHandler *m_messageHandler;
   /// The search implementation
-  boost::shared_ptr<ISearcher> m_searcher;
+  ISearcher &m_searcher;
+  /// The run notifier implementation
+  IRunNotifier &m_runNotifier;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list

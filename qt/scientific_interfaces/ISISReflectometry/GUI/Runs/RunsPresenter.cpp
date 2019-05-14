@@ -10,6 +10,7 @@
 #include "Common/IMessageHandler.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
+#include "IRunNotifier.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -55,18 +56,19 @@ namespace CustomInterfaces {
  * @param messageHandler :: A handler to pass messages to the user
  * @param autoreduction :: [input] The autoreduction implementation
  * @param searcher :: [input] The search implementation
+ * @param runNotifier :: [input] The run notifier implementation
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler,
-    boost::shared_ptr<IAutoreduction> autoreduction,
-    boost::shared_ptr<ISearcher> searcher)
+    IAutoreduction &autoreduction, ISearcher &searcher,
+    IRunNotifier &runNotifier)
     : m_autoreduction(autoreduction), m_view(mainView),
       m_progressView(progressableView), m_mainPresenter(nullptr),
       m_messageHandler(messageHandler), m_searcher(searcher),
-      m_instruments(instruments),
+      m_runNotifier(runNotifier), m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
@@ -74,13 +76,6 @@ RunsPresenter::RunsPresenter(
   m_view->subscribe(this);
   m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
-
-  if (!m_autoreduction)
-    m_autoreduction.reset(new Autoreduction());
-
-  // If we don't have a searcher yet, use CatalogSearcher
-  if (!m_searcher)
-    m_searcher.reset(new CatalogSearcher());
 
   updateViewWhenMonitorStopped();
 }
@@ -200,7 +195,7 @@ void RunsPresenter::autoreductionResumed() {
     //}
   }
 
-  if (m_autoreduction->setupNewAutoreduction(m_view->getSearchString()))
+  if (m_autoreduction.setupNewAutoreduction(m_view->getSearchString()))
     checkForNewRuns();
 
   updateWidgetEnabledState();
@@ -209,7 +204,7 @@ void RunsPresenter::autoreductionResumed() {
 
 void RunsPresenter::autoreductionPaused() {
   m_view->stopTimer();
-  m_autoreduction->stop();
+  m_autoreduction.stop();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
 }
@@ -301,7 +296,7 @@ void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
  */
 bool RunsPresenter::requireNewAutoreduction() const {
   bool searchNumChanged =
-      m_autoreduction->searchStringChanged(m_view->getSearchString());
+      m_autoreduction.searchStringChanged(m_view->getSearchString());
 
   return searchNumChanged || m_instrumentChanged;
 }
@@ -322,7 +317,7 @@ void RunsPresenter::checkForNewRuns() {
  */
 void RunsPresenter::autoreduceNewRuns() {
 
-  m_autoreduction->setSearchResultsExist();
+  m_autoreduction.setSearchResultsExist();
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0) {
@@ -334,7 +329,7 @@ void RunsPresenter::autoreduceNewRuns() {
 
 void RunsPresenter::stopAutoreduction() {
   m_view->stopTimer();
-  m_autoreduction->stop();
+  m_autoreduction.stop();
 }
 
 bool RunsPresenter::isProcessing() const {
@@ -364,7 +359,7 @@ bool RunsPresenter::shouldUpdateExistingSearchResults() const {
   // Existing search results should be updated rather than replaced if
   // autoreduction is running and has valid results
   return m_searchModel && isAutoreducing() &&
-         m_autoreduction->searchResultsExist();
+         m_autoreduction.searchResultsExist();
 }
 
 /** Check that the given rows are valid for a transfer and warn the user if not

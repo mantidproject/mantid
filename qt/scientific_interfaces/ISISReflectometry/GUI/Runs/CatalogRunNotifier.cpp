@@ -7,5 +7,9 @@
 #include "CatalogRunNotifier.h"
 
 namespace MantidQt {
-namespace CustomInterfaces {} // namespace CustomInterfaces
+namespace CustomInterfaces {
+
+CatalogRunNotifier::CatalogRunNotifier(IMainWindowView *view) : m_view(view) {}
+
+} // namespace CustomInterfaces
 } // namespace MantidQt

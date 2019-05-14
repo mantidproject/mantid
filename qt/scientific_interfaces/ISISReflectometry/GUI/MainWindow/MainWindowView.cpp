@@ -8,6 +8,7 @@
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
 #include "GUI/Plotting/Plotter.h"
+#include "GUI/Runs/CatalogRunNotifier.h"
 #include "MantidKernel/make_unique.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -74,13 +75,11 @@ void MainWindowView::initLayout() {
       instruments, thetaTolerance, std::move(plotter));
 
   auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
-  auto autoreduction = boost::shared_ptr<IAutoreduction>();
-  auto searcher = boost::shared_ptr<ISearcher>();
   auto messageHandler = this;
-
   auto makeRunsPresenter = RunsPresenterFactory(
       std::move(makeRunsTablePresenter), thetaTolerance, instruments,
-      defaultInstrumentIndex, messageHandler, autoreduction, searcher);
+      defaultInstrumentIndex, messageHandler, Autoreduction(),
+      CatalogSearcher(), CatalogRunNotifier(this));
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
