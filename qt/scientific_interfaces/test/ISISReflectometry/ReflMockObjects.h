@@ -54,6 +54,8 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+  MOCK_METHOD1(startTimer, void(const int));
+  MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   MOCK_METHOD0(newBatch, IBatchView *());
   MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));
@@ -108,6 +110,7 @@ public:
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD0(autoreductionCompleted, void());
   MOCK_METHOD1(instrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
@@ -190,6 +193,9 @@ public:
 
 class MockRunNotifier : public IRunNotifier {
 public:
+  MOCK_METHOD1(subscribe, void(RunNotifierSubscriber *));
+  MOCK_METHOD0(startPolling, void());
+  MOCK_METHOD0(stopPolling, void());
 };
 
 class MockSearchModel : public SearchModel {

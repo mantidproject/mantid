@@ -15,8 +15,6 @@
 
 #include "ui_RunsWidget.h"
 
-#include <QBasicTimer>
-
 namespace MantidQt {
 
 namespace MantidWidgets {
@@ -85,10 +83,6 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const override;
 
-  // Timer methods
-  void startTimer(const int millisecs) override;
-  void stopTimer() override;
-
   // Start an ICAT search
   void startIcatSearch() override;
   void noActiveICatSessions() override;
@@ -101,8 +95,6 @@ public:
 private:
   /// initialise the interface
   void initLayout();
-  // Implement our own timer event to trigger autoreduction
-  void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
@@ -117,8 +109,6 @@ private:
   Ui::RunsWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
-  // Timer for triggering periodic autoreduction
-  QBasicTimer m_timer;
 
   RunsTableView *m_tableView;
 

@@ -41,7 +41,6 @@ public:
   virtual void notifySearch() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
-  virtual void notifyTimerEvent() = 0;
   virtual void notifyICATSearchComplete() = 0;
   virtual void notifyTransfer() = 0;
   virtual void notifyInstrumentChanged() = 0;
@@ -92,11 +91,7 @@ public:
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const = 0;
 
-  // Timer methods
-  virtual void startTimer(const int millisecs) = 0;
-  virtual void stopTimer() = 0;
   virtual void loginFailed(std::string const &fullError) = 0;
-
   virtual void noActiveICatSessions() = 0;
   virtual void missingRunsToTransfer() = 0;
 

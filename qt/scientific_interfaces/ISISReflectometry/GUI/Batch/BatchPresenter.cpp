@@ -233,7 +233,9 @@ void BatchPresenter::autoreductionPaused() {
   m_runsPresenter->autoreductionPaused();
 }
 
-void BatchPresenter::autoreductionCompleted() {}
+void BatchPresenter::autoreductionCompleted() {
+  m_runsPresenter->autoreductionCompleted();
+}
 
 void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
   updateInstrument(instrumentName);

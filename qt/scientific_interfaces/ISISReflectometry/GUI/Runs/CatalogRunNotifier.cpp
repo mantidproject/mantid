@@ -9,7 +9,23 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-CatalogRunNotifier::CatalogRunNotifier(IMainWindowView *view) : m_view(view) {}
+CatalogRunNotifier::CatalogRunNotifier(IMainWindowView *view) : m_view(view) {
+  m_view->subscribe(this);
+}
 
+void CatalogRunNotifier::subscribe(RunNotifierSubscriber *notifyee) {
+  m_notifyee = notifyee;
+}
+
+void CatalogRunNotifier::startPolling() {
+  m_view->startTimer(POLLING_INTERVAL_MILLISECONDS);
+}
+
+void CatalogRunNotifier::stopPolling() { m_view->stopTimer(); }
+
+void CatalogRunNotifier::notifyTimerEvent() {
+  if (m_notifyee)
+    m_notifyee->notifyCheckForNewRuns();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

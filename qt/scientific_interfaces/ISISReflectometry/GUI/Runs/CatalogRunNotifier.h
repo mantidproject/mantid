@@ -17,13 +17,25 @@ namespace CustomInterfaces {
 CatalogRunNotifier implements IRunNotifier to provide functionality to
 poll for new runs.
 */
-class CatalogRunNotifier : public IRunNotifier {
+class CatalogRunNotifier : public IRunNotifier, public MainWindowSubscriber {
 public:
+  static auto constexpr POLLING_INTERVAL_MILLISECONDS = 5000;
+
   CatalogRunNotifier(IMainWindowView *view);
   ~CatalogRunNotifier() override{};
 
+  void subscribe(RunNotifierSubscriber *notifyee) override;
+
+  // IRunNotifier overrides
+  void startPolling() override;
+  void stopPolling() override;
+
+  // MainWindowSubscriber overrides
+  void notifyTimerEvent() override;
+
 private:
   IMainWindowView *m_view;
+  RunNotifierSubscriber *m_notifyee;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

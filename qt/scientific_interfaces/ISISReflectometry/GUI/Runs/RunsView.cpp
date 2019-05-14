@@ -279,27 +279,6 @@ This slot notifies the presenter that the "transfer" button has been pressed
 void RunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
 
 /**
-   This slot is called each time the timer times out
-*/
-void RunsView::timerEvent(QTimerEvent *event) {
-  if (event->timerId() == m_timer.timerId()) {
-    m_notifyee->notifyTimerEvent();
-  } else {
-    QWidget::timerEvent(event);
-  }
-}
-
-/** start the timer
- */
-void RunsView::startTimer(const int millisecs) {
-  m_timer.start(millisecs, this);
-}
-
-/** stop
- */
-void RunsView::stopTimer() { m_timer.stop(); }
-
-/**
 This slot shows the slit calculator
 */
 void RunsView::onShowSlitCalculatorRequested() {

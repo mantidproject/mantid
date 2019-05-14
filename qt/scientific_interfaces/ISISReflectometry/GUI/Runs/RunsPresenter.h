@@ -12,6 +12,7 @@
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
+#include "IRunNotifier.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
@@ -33,7 +34,6 @@ class IAutoreduction;
 class IMessageHandler;
 class ISearcher;
 class SearchModel;
-class IRunNotifier;
 
 using MantidWidgets::ProgressableView;
 
@@ -51,6 +51,7 @@ handles any interface functionality and model manipulation.
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter
     : public IRunsPresenter,
       public RunsViewSubscriber,
+      public RunNotifierSubscriber,
       public Mantid::API::AlgorithmObserver {
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
@@ -82,6 +83,7 @@ public:
   void reductionResumed() override;
   void autoreductionResumed() override;
   void autoreductionPaused() override;
+  void autoreductionCompleted() override;
   void instrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
@@ -89,13 +91,15 @@ public:
   void notifySearch() override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
-  void notifyTimerEvent() override;
   void notifyICATSearchComplete() override;
   void notifyTransfer() override;
   void notifyInstrumentChanged() override;
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
+
+  // RunNotifierSubscriber overrides
+  void notifyCheckForNewRuns() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;

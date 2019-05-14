@@ -32,7 +32,7 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 DECLARE_SUBWINDOW(MainWindowView)
 
 MainWindowView::MainWindowView(QWidget *parent)
-    : UserSubWindow(parent), m_notifyee(NULL) {}
+    : UserSubWindow(parent), m_notifyees() {}
 
 IBatchView *MainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
@@ -104,14 +104,18 @@ void MainWindowView::onTabCloseRequested(int tabIndex) {
 }
 
 void MainWindowView::onNewBatchRequested(bool) {
-  m_notifyee->notifyNewBatchRequested();
+  for (auto notifyee : m_notifyees)
+    notifyee->notifyNewBatchRequested();
 }
 
 void MainWindowView::subscribe(MainWindowSubscriber *notifyee) {
-  m_notifyee = notifyee;
+  m_notifyees.push_back(notifyee);
 }
 
-void MainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
+void MainWindowView::helpPressed() {
+  for (auto notifyee : m_notifyees)
+    notifyee->notifyHelpPressed();
+}
 
 /**
 Runs python code
@@ -150,5 +154,27 @@ void MainWindowView::giveUserInfo(const std::string &prompt,
                            QString::fromStdString(prompt), QMessageBox::Ok,
                            QMessageBox::Ok);
 }
+
+/**
+   This slot is called each time the timer times out
+*/
+void MainWindowView::timerEvent(QTimerEvent *event) {
+  if (event->timerId() == m_timer.timerId()) {
+    for (auto notifyee : m_notifyees)
+      notifyee->notifyTimerEvent();
+  } else {
+    QWidget::timerEvent(event);
+  }
+}
+
+/** start the timer
+ */
+void MainWindowView::startTimer(const int millisecs) {
+  m_timer.start(millisecs, this);
+}
+
+/** stop
+ */
+void MainWindowView::stopTimer() { m_timer.stop(); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

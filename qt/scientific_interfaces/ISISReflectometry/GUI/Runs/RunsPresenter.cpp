@@ -76,6 +76,7 @@ RunsPresenter::RunsPresenter(
   m_view->subscribe(this);
   m_tablePresenter = makeRunsTablePresenter(m_view->table());
   m_tablePresenter->acceptMainPresenter(this);
+  m_runNotifier.subscribe(this);
 
   updateViewWhenMonitorStopped();
 }
@@ -123,7 +124,7 @@ void RunsPresenter::notifySearch() {
     stopAutoreduction();
 }
 
-void RunsPresenter::notifyTimerEvent() { checkForNewRuns(); }
+void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
 void RunsPresenter::notifyICATSearchComplete() { icatSearchComplete(); }
 
@@ -203,10 +204,16 @@ void RunsPresenter::autoreductionResumed() {
 }
 
 void RunsPresenter::autoreductionPaused() {
-  m_view->stopTimer();
+  m_runNotifier.stopPolling();
   m_autoreduction.stop();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
+}
+
+void RunsPresenter::autoreductionCompleted() {
+  // Return to polling state
+  m_runNotifier.startPolling();
+  updateWidgetEnabledState();
 }
 
 void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
@@ -306,7 +313,7 @@ bool RunsPresenter::requireNewAutoreduction() const {
  */
 void RunsPresenter::checkForNewRuns() {
   // Stop notifications during processing
-  m_view->stopTimer();
+  m_runNotifier.stopPolling();
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
@@ -328,7 +335,7 @@ void RunsPresenter::autoreduceNewRuns() {
 }
 
 void RunsPresenter::stopAutoreduction() {
-  m_view->stopTimer();
+  m_runNotifier.stopPolling();
   m_autoreduction.stop();
 }
 

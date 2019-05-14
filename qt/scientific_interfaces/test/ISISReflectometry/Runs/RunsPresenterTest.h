@@ -180,17 +180,17 @@ public:
 
   void testPauseAutoreduction() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_autoreduction, stop()).Times(1);
     expectWidgetsEnabledForPaused();
     presenter.autoreductionPaused();
     verifyAndClear();
   }
 
-  void testAutoreductionPollsForNewRunsOnTimerEvent() {
+  void testNotifyCheckForNewRuns() {
     auto presenter = makePresenter();
     expectCheckForNewRuns();
-    presenter.notifyTimerEvent();
+    presenter.notifyCheckForNewRuns();
     verifyAndClear();
   }
 
@@ -333,7 +333,7 @@ private:
   }
 
   void expectStopAutoreduction() {
-    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_autoreduction, stop()).Times(1);
   }
 
@@ -343,7 +343,7 @@ private:
   }
 
   void expectCheckForNewRuns() {
-    EXPECT_CALL(m_view, stopTimer()).Times(1);
+    EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_view, startIcatSearch()).Times(1);
   }
 

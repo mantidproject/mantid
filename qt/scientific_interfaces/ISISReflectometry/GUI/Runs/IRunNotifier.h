@@ -11,6 +11,12 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class RunNotifierSubscriber {
+public:
+  virtual void notifyCheckForNewRuns() = 0;
+};
+
 /** @class IRunNotifier
 
 IRunNotifier is an interface for polling for runs from IRunsPresenter
@@ -19,6 +25,9 @@ implementations.
 class IRunNotifier {
 public:
   virtual ~IRunNotifier(){};
+  virtual void subscribe(RunNotifierSubscriber *notifyee) = 0;
+  virtual void startPolling() = 0;
+  virtual void stopPolling() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
