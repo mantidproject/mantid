@@ -42,6 +42,8 @@ public:
     return Axes{pyobj().attr("axes")[index]};
   }
 
+  QColor faceColor() const;
+  void setFaceColor(QColor color);
   void setFaceColor(const char *color);
   Axes addAxes(double left, double bottom, double width, double height);
   Axes addSubPlot(const int subplotspec, QString projection = "");

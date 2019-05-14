@@ -43,13 +43,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(fig.addAxes(0.1, 0.1, 0.9, 0.9));
   }
 
-  void testSetFaceColor() {
+  void testSetFaceColorFromString() {
     Figure fig{false};
     fig.setFaceColor("r");
-    auto rgb = fig.pyobj().attr("get_facecolor")();
-    TS_ASSERT_EQUALS(1.0, rgb[0]);
-    TS_ASSERT_EQUALS(0.0, rgb[1]);
-    TS_ASSERT_EQUALS(0.0, rgb[2]);
+    auto color = fig.faceColor();
+    TS_ASSERT_EQUALS(255, color.red());
+    TS_ASSERT_EQUALS(0, color.green());
+    TS_ASSERT_EQUALS(0, color.blue());
+  }
+
+  void testSetFaceColorFromQColor() {
+    Figure fig{false};
+    fig.setFaceColor(QColor("red"));
+    auto color = fig.faceColor();
+    TS_ASSERT_EQUALS(255, color.red());
+    TS_ASSERT_EQUALS(0, color.green());
+    TS_ASSERT_EQUALS(0, color.blue());
   }
 
   void testSubPlot() {

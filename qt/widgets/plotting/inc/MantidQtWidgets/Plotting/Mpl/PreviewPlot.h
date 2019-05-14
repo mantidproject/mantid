@@ -37,6 +37,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
   Q_OBJECT
 
+  Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
+  Q_PROPERTY(bool showLegend READ legendIsVisible WRITE showLegend)
+  Q_PROPERTY(
+      QStringList curveErrorBars READ linesWithErrors WRITE setLinesWithErrors)
+
 public:
   PreviewPlot(QWidget *parent = nullptr, bool observeADS = true);
   ~PreviewPlot();
@@ -57,7 +62,14 @@ public slots:
   void clear();
   void resizeX();
   void resetView();
+  void setCanvasColour(QColor colour);
+  void setLinesWithErrors(QStringList labels);
   void showLegend(const bool visible);
+
+public:
+  QColor canvasColour() const;
+  bool legendIsVisible() const;
+  QStringList linesWithErrors() const;
 
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
@@ -69,7 +81,6 @@ private:
 
   void createLayout();
   void createActions();
-  bool legendIsVisible() const;
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
   void
@@ -86,6 +97,8 @@ private:
 
   // Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
+  // Map a line label to the boolean indicating whether error bars are shown
+  QHash<QString, bool> m_lines;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidQtWidgets/MplCpp/ColorConverter.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
@@ -42,6 +43,25 @@ Figure::Figure(Python::Object obj)
  */
 Figure::Figure(bool tightLayout)
     : Python::InstanceHolder(newFigure(tightLayout)) {}
+
+/**
+ * @return The facecolor of the current figure
+ */
+QColor Figure::faceColor() const {
+  return ColorConverter::toRGB(
+      callMethodNoCheck<Python::Object>(pyobj(), "get_facecolor"));
+}
+
+/**
+ * Reset the background color of the figure.
+ * @param color A character string indicating the color.
+ * See https://matplotlib.org/api/colors_api.html
+ */
+void Figure::setFaceColor(QColor color) {
+  callMethodNoCheck<void, const char *>(
+      pyobj(), "set_facecolor",
+      color.name(QColor::HexRgb).toLatin1().constData());
+}
 
 /**
  * Reset the background color of the figure.

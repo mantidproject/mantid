@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 
@@ -21,6 +22,7 @@
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
 using MantidQt::Widgets::MplCpp::Artist;
+using MantidQt::Widgets::MplCpp::ColorConverter;
 using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Line2D;
@@ -170,12 +172,35 @@ void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
 void PreviewPlot::resetView() { m_panZoomTool.zoomOut(); }
 
 /**
+ * Set the face colour for the canvas
+ * @param colour A new colour for the figure facecolor
+ */
+void PreviewPlot::setCanvasColour(QColor colour) {
+  m_canvas->gcf().setFaceColor(colour);
+}
+
+/**
+ * @brief PreviewPlot::setLinesWithErrors
+ * @param labels A list of line labels where error bars should be shown
+ */
+void PreviewPlot::setLinesWithErrors(QStringList labels) {
+  for (const QString &label : labels) {
+    m_lines[label] = true;
+  }
+}
+
+/**
  * Toggle for programatic legend visibility toggle
  * @param visible If True the legend is visible on the canvas
  */
 void PreviewPlot::showLegend(const bool visible) {
   m_contextLegend->setChecked(visible);
 }
+
+/**
+ * @return The current colour of the canvas
+ */
+QColor PreviewPlot::canvasColour() const { return m_canvas->gcf().faceColor(); }
 
 /**
  * Capture events destined for the canvas
@@ -314,6 +339,20 @@ void PreviewPlot::createActions() {
  */
 bool PreviewPlot::legendIsVisible() const {
   return m_contextLegend->isChecked();
+}
+
+/**
+ * @return A list of labels whose line have errors attached
+ */
+QStringList PreviewPlot::linesWithErrors() const {
+  QStringList visibleErrorLabels;
+  auto iterator = m_lines.constBegin();
+  while (iterator != m_lines.constEnd()) {
+    if (iterator.value())
+      visibleErrorLabels.append(iterator.key());
+    ++iterator;
+  }
+  return visibleErrorLabels;
 }
 
 /**
