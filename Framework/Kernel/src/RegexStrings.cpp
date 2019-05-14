@@ -57,19 +57,6 @@ int StrComp(const char *Text, const boost::regex &Re, T &Aout,
 
 /**
   Find the match in regular expression and return 1 if good match
-  @param Sx :: string to match
-  @param Re :: regular expression to use
-  @return 0 on failure and 1 on success
-*/
-int StrLook(const char *Sx, const boost::regex &Re) {
-  boost::cmatch ans;
-  if (boost::regex_search(Sx, ans, Re, boost::match_default))
-    return 1;
-  return 0;
-}
-
-/**
-  Find the match in regular expression and return 1 if good match
   @param Text :: string to match
   @param Re :: regular expression to use
   @return 0 on failure and 1 on success
@@ -201,29 +188,6 @@ int StrFullCut(std::string &Text, const boost::regex &Re,
   // Found object
   Text.erase(M0, ML);
   return 1;
-}
-
-/**
-  Find the match, return the string - the bit
-  @param Sdx :: string to split, is returned with the string after
-  the find (if successful).
-  @param Extract :: Full piece extracted
-  @param Re :: regular expression to use.
-  @retval 0 :: failed to match the string or there were no parts to match.
-  @retval 1 :: succes
-*/
-int StrRemove(std::string &Sdx, std::string &Extract, const boost::regex &Re) {
-  boost::sregex_token_iterator empty;
-
-  boost::cmatch ans;
-  if (boost::regex_search(Sdx.c_str(), ans, Re, boost::match_default)) {
-    if (!ans[0].matched) // no match
-      return 0;
-    Extract = std::string(ans[0].first, ans[0].second);
-    Sdx = std::string(Sdx.c_str(), ans[0].first) + std::string(ans[0].second);
-    return 1;
-  }
-  return 0;
 }
 
 /**

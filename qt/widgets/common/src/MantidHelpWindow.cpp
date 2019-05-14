@@ -55,7 +55,7 @@ const QString BASE_URL("qthelp://org.mantidproject/doc/");
 const QString DEFAULT_URL(BASE_URL + "index.html");
 
 /// Base url for all of the wiki links
-const QString WIKI_BASE_URL("http://mantidproject.org/");
+const QString WIKI_BASE_URL("https://www.mantidproject.org/");
 /// Url to display if nothing else is suggested.
 const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 
@@ -96,17 +96,20 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, Qt::WindowFlags flags)
                      SLOT(warning(QString)));
     g_log.debug() << "Making local cache copy for saving information at "
                   << m_cacheFile << "\n";
+
     if (helpEngine->copyCollectionFile(QString(m_cacheFile.c_str()))) {
       helpEngine->setCollectionFile(QString(m_cacheFile.c_str()));
     } else {
       g_log.warning("Failed to copy collection file");
+      g_log.debug(helpEngine->error().toStdString());
     }
     g_log.debug() << "helpengine.setupData() returned "
                   << helpEngine->setupData() << "\n";
 
     // create a new help window
     g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
-    g_helpWindow->setWindowTitle(QString("MantidPlot - help"));
+    g_helpWindow->setWindowTitle(QString("Mantid - Help"));
+    g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
 
     // show the home page on startup
     auto registeredDocs = helpEngine->registeredDocumentations();
@@ -352,7 +355,10 @@ void MantidHelpWindow::showCustomInterface(const std::string &name,
  * close soon. This closes the help window & releases the QProcess
  */
 void MantidHelpWindow::shutdown() {
-  // close the window
+  // close the window and delete the object
+  // Deleting the object ensures the help engine's destructor is called and
+  // avoids a segfault when workbench is closed
+  g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
   g_helpWindow->close();
 }
 
@@ -376,6 +382,9 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
   if (searchDir.exists(COLLECTION_FILE)) {
     m_collectionFile = path.toStdString();
     return;
+  } else {
+    g_log.debug() << "QHelp Collection file " << path.toStdString()
+                  << " not found\n";
   }
 
   // try where the builds will put it for a single configuration build
@@ -436,8 +445,8 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
  */
 void MantidHelpWindow::determineFileLocs() {
   // determine collection file location
-  string binDir =
-      Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable();
+  string binDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
+
   this->findCollectionFile(binDir);
   if (m_collectionFile.empty()) {
     // clear out the other filenames

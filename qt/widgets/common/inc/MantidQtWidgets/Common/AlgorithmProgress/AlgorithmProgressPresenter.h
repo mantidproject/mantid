@@ -9,6 +9,8 @@
 
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressWidget.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QWidget>
 
@@ -29,19 +31,19 @@
  */
 namespace MantidQt {
 namespace MantidWidgets {
-class AlgorithmProgressWidget;
+class IAlgorithmProgressWidget;
 
-class AlgorithmProgressPresenter : public AlgorithmProgressPresenterBase {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressPresenter
+    : public AlgorithmProgressPresenterBase {
   Q_OBJECT
 
 public:
-  AlgorithmProgressPresenter(QWidget *parent,
-                             AlgorithmProgressWidget * /*view*/);
+  AlgorithmProgressPresenter(QWidget *parent, IAlgorithmProgressWidget *);
 
-  void algorithmStartedSlot(Mantid::API::AlgorithmID /*unused*/) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/,
-                             double /*unused*/, QString /*unused*/) override;
-  void algorithmEndedSlot(Mantid::API::AlgorithmID /*unused*/) override;
+  void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID, double progress,
+                             QString message) override;
+  void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
 
   AlgorithmProgressModel &model() { return m_model; }
 
@@ -52,7 +54,7 @@ private:
   Mantid::API::AlgorithmID m_algorithm;
   /// The view that contains the progress widget.
   /// The creator of the view also owns the view (Python), not this presenter.
-  AlgorithmProgressWidget *m_view;
+  IAlgorithmProgressWidget *m_view;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

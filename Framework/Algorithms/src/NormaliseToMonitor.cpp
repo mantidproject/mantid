@@ -159,11 +159,9 @@ bool MonIDPropChanger::monitorIdReader(
 
 bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
                                        const size_t timeIndex) {
-
-  for (const auto &spec : specDef)
-    if (spec.second != timeIndex)
-      return false;
-  return true;
+  return std::none_of(
+      specDef.cbegin(), specDef.cend(),
+      [timeIndex](const auto &spec) { return spec.second != timeIndex; });
 }
 
 // Register with the algorithm factory

@@ -31,6 +31,8 @@ public:
   void enableParameterSelection();
   void disableParameterSelection();
 
+  void updateSelectedSpectra() override{};
+
 public slots:
   void emitWorkspaceChanged(const QString &name);
   void emitParameterTypeChanged(const QString &index);

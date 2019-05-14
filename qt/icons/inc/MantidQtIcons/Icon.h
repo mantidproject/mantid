@@ -16,8 +16,6 @@
 #include <QIconEngine>
 #include <QString>
 #include <QVariant>
-#include <boost/optional.hpp>
-#include <vector>
 
 namespace MantidQt {
 namespace Icons {
@@ -38,7 +36,7 @@ public:
   IconicFont();
   QIcon getIcon(const QStringList &iconNames,
                 const QList<QHash<QString, QVariant>> &options);
-  QString findCharecterFromCharMap(const QString &, const QString &) const;
+  QString findCharacterFromCharMap(const QString &, const QString &) const;
   QFont getFont(const QString &prefix, const int drawSize);
 
 private:
@@ -47,7 +45,7 @@ private:
   QIcon iconByPainter(CharIconPainter *painter,
                       QList<QHash<QString, QVariant>> &options);
   void addValuesToOptions(QList<QHash<QString, QVariant>> &options,
-                          const QStringList iconNames,
+                          const QStringList &iconNames,
                           unsigned int vectorIndex);
 
   QHash<QString, QString> m_fontnames;

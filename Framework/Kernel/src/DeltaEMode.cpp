@@ -70,12 +70,15 @@ std::string DeltaEMode::asString(const Type mode) {
  */
 DeltaEMode::Type DeltaEMode::fromString(const std::string &modeStr) {
   const ModeIndex &lookup = typeStringLookup();
-  for (const auto &iter : lookup.index) {
-    if (boost::iequals(modeStr, iter.second)) // case-insensitive
-    {
-      return iter.first;
-    }
+
+  auto emode = std::find_if(
+      lookup.index.cbegin(), lookup.index.cend(),
+      [&modeStr](auto it) { return boost::iequals(it.second, modeStr); });
+
+  if (emode != lookup.index.cend()) {
+    return emode->first;
   }
+
   // Unknown mode
   throw std::invalid_argument(
       "DeltaEMode::fromString - Unknown energy transfer mode: " + modeStr);

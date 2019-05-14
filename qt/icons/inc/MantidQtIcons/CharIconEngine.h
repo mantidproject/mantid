@@ -17,7 +17,6 @@
 #include <QRect>
 #include <QString>
 #include <QVariant>
-#include <vector>
 
 namespace MantidQt {
 namespace Icons {
@@ -25,6 +24,15 @@ namespace Icons {
 class IconicFont;
 class CharIconPainter;
 
+/**
+ * This Class is used to paint the icon onto the pixmap inside of a QIcon
+ * object. It makes a custom call to a painter named CharIconPainter, this
+ * occurs both via the paint and pixmap functions on the objects made with this
+ * class.
+ *
+ * The ownership of this object should be taken by a QIcon that recieves this as
+ * it's constructor.
+ */
 class EXPORT_OPT_MANTIDQT_ICONS CharIconEngine : public QIconEngine {
 public:
   CharIconEngine(IconicFont *iconic, CharIconPainter *painter,

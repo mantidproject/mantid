@@ -56,9 +56,11 @@ double standardDeviation(const std::vector<double> &inputValues) {
   const auto inputSize = boost::numeric_cast<double>(inputValues.size());
   const auto mean =
       std::accumulate(inputValues.begin(), inputValues.end(), 0.0) / inputSize;
-  double sumOfXMinusMeanSquared = 0;
-  for (auto &&x : inputValues)
-    sumOfXMinusMeanSquared += (x - mean) * (x - mean);
+  const double sumOfXMinusMeanSquared =
+      std::accumulate(inputValues.cbegin(), inputValues.cend(), 0.,
+                      [mean](const auto sum, const auto x) {
+                        return sum + std::pow(x - mean, 2);
+                      });
   return sqrt(sumOfXMinusMeanSquared / (inputSize - 1));
 }
 

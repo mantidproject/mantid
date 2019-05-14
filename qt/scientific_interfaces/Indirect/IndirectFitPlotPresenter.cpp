@@ -205,10 +205,10 @@ void IndirectFitPlotPresenter::disablePlotGuessInSeparateWindow() {
 }
 
 void IndirectFitPlotPresenter::appendLastDataToSelection() {
-  const auto numberOfWorkspaces = m_model->numberOfWorkspaces();
-  if (m_view->dataSelectionSize() == numberOfWorkspaces)
+  const auto workspaceCount = m_model->numberOfWorkspaces();
+  if (m_view->dataSelectionSize() == workspaceCount)
     m_view->setNameInDataSelection(m_model->getLastFitDataName(),
-                                   numberOfWorkspaces - 1);
+                                   workspaceCount - 1);
   else
     m_view->appendToDataSelection(m_model->getLastFitDataName());
 }
@@ -258,9 +258,9 @@ void IndirectFitPlotPresenter::setFitSingleSpectrumEnabled(bool enable) {
 }
 
 void IndirectFitPlotPresenter::updatePlots() {
-  const auto result = m_model->getResultWorkspace();
-  if (result)
-    plotResult(result);
+  const auto resultWs = m_model->getResultWorkspace();
+  if (resultWs)
+    plotResult(resultWs);
   else
     plotInput();
   updateRangeSelectors();
@@ -268,11 +268,11 @@ void IndirectFitPlotPresenter::updatePlots() {
 }
 
 void IndirectFitPlotPresenter::plotInput() {
-  const auto workspace = m_model->getWorkspace();
-  if (workspace) {
+  const auto ws = m_model->getWorkspace();
+  if (ws) {
     clearFit();
     clearDifference();
-    plotInput(workspace, m_model->getActiveSpectrum());
+    plotInput(ws, m_model->getActiveSpectrum());
     updatePlotRange(m_model->getWorkspaceRange());
   } else
     m_view->clear();
@@ -404,9 +404,9 @@ void IndirectFitPlotPresenter::updateBackgroundSelector() {
 
 std::string
 IndirectFitPlotPresenter::getPlotString(std::size_t spectrum) const {
-  const auto result = m_model->getResultWorkspace();
-  if (result)
-    return createPlotString(result->getName(), "[0,1,2]");
+  const auto resultWs = m_model->getResultWorkspace();
+  if (resultWs)
+    return createPlotString(resultWs->getName(), "[0,1,2]");
   return createPlotString(m_model->getWorkspace()->getName(), spectrum);
 }
 

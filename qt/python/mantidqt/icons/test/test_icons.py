@@ -10,8 +10,8 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 
-from mantidqt.utils.qt.testing import GuiTest
 from mantidqt.icons import get_icon
+from mantidqt.utils.qt.testing import GuiTest
 
 
 class IconsTest(GuiTest):

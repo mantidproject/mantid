@@ -9,11 +9,12 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from mantid.py3compat import mock
-from Muon.GUI.Common import mock_widget
+
+from Muon.GUI.Common.test_helpers import mock_widget
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTable as silxPT, PeriodicTableItem
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTable as silxPT, PeriodicTableItem
 
 
 class PeriodicTablePresenterTest(unittest.TestCase):

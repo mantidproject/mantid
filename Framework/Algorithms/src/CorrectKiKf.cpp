@@ -236,11 +236,8 @@ void CorrectKiKf::execEvent() {
             << "Workspace Index " << i << ": cannot find detector"
             << "\n";
       }
-    }
-
-    if (emodeStr == "Indirect")
       efixed = Efi;
-    else
+    } else
       efixed = efixedProp;
 
     // Do the correction

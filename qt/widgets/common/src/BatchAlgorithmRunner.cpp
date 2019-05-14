@@ -136,7 +136,7 @@ bool BatchAlgorithmRunner::executeBatch() {
  */
 void BatchAlgorithmRunner::executeBatchAsync() {
   addAllObservers();
-  Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
+  m_executeAsync(Poco::Void());
 }
 
 /**

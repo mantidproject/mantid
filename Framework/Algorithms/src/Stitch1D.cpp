@@ -107,10 +107,9 @@ void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
     // Copy over the data
     auto &sourceY = source->mutableY(i);
     auto &sourceE = source->mutableE(i);
-
-    for (int i = a1; i < a2; ++i) {
-      sourceY[i] = 0;
-      sourceE[i] = 0;
+    for (int binIndex = a1; binIndex < a2; ++binIndex) {
+      sourceY[binIndex] = 0;
+      sourceE[binIndex] = 0;
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -588,11 +587,11 @@ void Stitch1D::exec() {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
     if (scaleRHS) {
-      auto scaleRHS = lhsOverlapIntegrated / rhsOverlapIntegrated;
-      scaleWorkspace(rhs, scaleRHS, rhsWS);
+      auto scalingFactors = lhsOverlapIntegrated / rhsOverlapIntegrated;
+      scaleWorkspace(rhs, scalingFactors, rhsWS);
     } else {
-      auto scaleLHS = rhsOverlapIntegrated / lhsOverlapIntegrated;
-      scaleWorkspace(lhs, scaleLHS, lhsWS);
+      auto scalingFactors = rhsOverlapIntegrated / lhsOverlapIntegrated;
+      scaleWorkspace(lhs, scalingFactors, lhsWS);
     }
   }
   // Provide log information about the scale factors used in the calculations.
