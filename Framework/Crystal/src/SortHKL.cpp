@@ -119,7 +119,7 @@ void SortHKL::exec() {
   std::vector<Peak> peaks = getNonZeroPeaks(inputPeaks);
 
   if (peaks.empty()) {
-    g_log.error() << "Number of peaks should not be 0 for SortHKL.\n";
+    g_log.warning() << "Number of peaks should not be 0 for SortHKL.\n";
     return;
   }
 
@@ -205,11 +205,6 @@ void SortHKL::exec() {
           UniqE[i] = intensityStatistics.median - intensities[i];
         g_log.debug() << zScores[i] << "  ";
       }
-      for (size_t i = zScores.size(); i < 20; ++i) {
-        UniqX[i] = wavelengths[zScores.size() - 1];
-        UniqY[i] = intensities[zScores.size() - 1];
-        UniqE[i] = 0.0;
-      }
       g_log.debug() << "\n";
     }
   }
@@ -266,6 +261,7 @@ SortHKL::getNonZeroPeaks(const std::vector<Peak> &inputPeaks) const {
                       std::back_inserter(peaks), [](const Peak &peak) {
                         return peak.getIntensity() <= 0.0 ||
                                peak.getSigmaIntensity() <= 0.0 ||
+                               peak.getIntMNP() != V3D(0, 0, 0) ||
                                peak.getHKL() == V3D(0, 0, 0);
                       });
 
