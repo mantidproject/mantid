@@ -547,10 +547,13 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_output_mode_clicked(self):
         if self.output_mode_memory_radio_button.isChecked():
             output_mode = "PublishToADS"
+            self.disable_file_type_buttons()
         elif self.output_mode_file_radio_button.isChecked():
             output_mode = "SaveToFile"
+            self.enable_file_type_buttons()
         elif self.output_mode_both_radio_button.isChecked():
             output_mode = "Both"
+            self.enable_file_type_buttons()
         else:
             output_mode = None
         set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
@@ -598,10 +601,13 @@ class SANSDataProcessorGui(QMainWindow,
     def _check_output_mode(self, value):
         if value is OutputMode.PublishToADS:
             self.output_mode_memory_radio_button.setChecked(True)
+            self.disable_file_type_buttons()
         elif value is OutputMode.SaveToFile:
             self.output_mode_file_radio_button.setChecked(True)
+            self.enable_file_type_buttons()
         elif value is OutputMode.Both:
             self.output_mode_both_radio_button.setChecked(True)
+            self.enable_file_type_buttons()
 
     def set_out_default_save_can(self):
         try:
@@ -620,7 +626,6 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
     def disable_buttons(self):
-
         self.process_selected_button.setEnabled(False)
         self.process_all_button.setEnabled(False)
         self.batch_button.setEnabled(False)
@@ -637,6 +642,16 @@ class SANSDataProcessorGui(QMainWindow,
         self.manage_directories_button.setEnabled(True)
         self.load_button.setEnabled(True)
         self.export_table_button.setEnabled(True)
+
+    def disable_file_type_buttons(self):
+        self.can_sas_checkbox.setEnabled(False)
+        self.nx_can_sas_checkbox.setEnabled(False)
+        self.rkh_checkbox.setEnabled(False)
+
+    def enable_file_type_buttons(self):
+        self.can_sas_checkbox.setEnabled(True)
+        self.nx_can_sas_checkbox.setEnabled(True)
+        self.rkh_checkbox.setEnabled(True)
 
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
@@ -963,6 +978,9 @@ class SANSDataProcessorGui(QMainWindow,
             checked_save_types.append(SaveType.NXcanSAS)
         if self.rkh_checkbox.isChecked():
             checked_save_types.append(SaveType.RKH)
+        # If empty, provide the NoType type
+        if not checked_save_types:
+            checked_save_types = [SaveType.NoType]
         return checked_save_types
 
     @save_types.setter
