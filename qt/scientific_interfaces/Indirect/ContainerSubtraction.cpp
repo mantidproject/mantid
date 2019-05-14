@@ -49,6 +49,7 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
 }
 
 ContainerSubtraction::~ContainerSubtraction() {
+  m_uiForm.ppPreview->watchADS(false);
   if (m_transformedContainerWS)
     AnalysisDataService::Instance().remove(m_transformedContainerWS->getName());
 }

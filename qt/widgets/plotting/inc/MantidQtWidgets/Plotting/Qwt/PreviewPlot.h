@@ -56,6 +56,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public API::MantidWidget {
 public:
   PreviewPlot(QWidget *parent = nullptr, bool init = true);
   ~PreviewPlot() override;
+  void watchADS(bool on);
 
   QColor canvasColour();
   void setCanvasColour(const QColor &colour);

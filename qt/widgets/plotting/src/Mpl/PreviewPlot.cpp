@@ -48,7 +48,7 @@ namespace MantidWidgets {
  * @param parent The parent widget
  * @param watchADS If true then ADS observers are added
  */
-PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
+PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION,
                                                    parent)},
       m_panZoomTool(m_canvas),
@@ -58,21 +58,28 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool watchADS)
   createActions();
 
   m_canvas->installEventFilterToMplCanvas(this);
-  if (watchADS) {
-    auto &ads = AnalysisDataService::Instance();
-    ads.notificationCenter.addObserver(m_wsRemovedObserver);
-    ads.notificationCenter.addObserver(m_wsReplacedObserver);
-  }
+  watchADS(observeADS);
 }
 
 /**
  * Destructor.
- * Remove ADS observers
+ * Removes ADS observers
  */
-PreviewPlot::~PreviewPlot() {
+PreviewPlot::~PreviewPlot() { watchADS(false); }
+
+/**
+ * Enable/disable the ADS observers
+ * @param on If true ADS observers are enabled else they are disabled
+ */
+void PreviewPlot::watchADS(bool on) {
   auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
-  notificationCenter.removeObserver(m_wsReplacedObserver);
-  notificationCenter.removeObserver(m_wsRemovedObserver);
+  if (on) {
+    notificationCenter.addObserver(m_wsRemovedObserver);
+    notificationCenter.addObserver(m_wsReplacedObserver);
+  } else {
+    notificationCenter.removeObserver(m_wsReplacedObserver);
+    notificationCenter.removeObserver(m_wsRemovedObserver);
+  }
 }
 
 /**

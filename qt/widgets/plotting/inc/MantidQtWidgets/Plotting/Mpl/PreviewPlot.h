@@ -38,9 +38,10 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
   Q_OBJECT
 
 public:
-  PreviewPlot(QWidget *parent = nullptr, bool watchADS = true);
+  PreviewPlot(QWidget *parent = nullptr, bool observeADS = true);
   ~PreviewPlot();
 
+  void watchADS(bool on);
   void addSpectrum(const QString &lineLabel,
                    const Mantid::API::MatrixWorkspace_sptr &ws,
                    const size_t wsIndex = 0,

@@ -40,12 +40,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
       m_showErrorsMenu(nullptr), m_errorBarOptionCache() {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
-
-  if (init) {
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-    ads.notificationCenter.addObserver(m_removeObserver);
-    ads.notificationCenter.addObserver(m_replaceObserver);
-  }
+  watchADS(init);
 
   // Setup plot manipulation tools
   m_zoomTool =
@@ -141,12 +136,20 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
  *
  * Removes observers on the ADS.
  */
-PreviewPlot::~PreviewPlot() {
-  if (m_init) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_removeObserver);
-    AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_replaceObserver);
+PreviewPlot::~PreviewPlot() { watchADS(!m_init); }
+
+/**
+ * Enable/disable the ADS observers
+ * @param on If true ADS observers are enabled else they are disabled
+ */
+void PreviewPlot::watchADS(bool on) {
+  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  if (on) {
+    notificationCenter.addObserver(m_removeObserver);
+    notificationCenter.addObserver(m_replaceObserver);
+  } else {
+    notificationCenter.removeObserver(m_replaceObserver);
+    notificationCenter.removeObserver(m_removeObserver);
   }
 }
 
