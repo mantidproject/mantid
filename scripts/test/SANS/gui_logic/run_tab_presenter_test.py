@@ -1024,6 +1024,48 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._handle_output_directory_changed("a_new_directory")
         presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
 
+    def test_that_validate_output_modes_raises_if_no_file_types_selected_for_file_mode(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.save_types = [SaveType.NoType]
+
+        view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
+        view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=True)
+        view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=False)
+        presenter.set_view(view)
+
+        self.assertRaises(RuntimeError, presenter._validate_output_modes)
+
+    def test_that_validate_output_modes_raises_if_no_file_types_selected_for_both_mode(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.save_types = [SaveType.NoType]
+
+        view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
+        view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=False)
+        view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=True)
+        presenter.set_view(view)
+
+        self.assertRaises(RuntimeError, presenter._validate_output_modes)
+
+    def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        view.save_types = [SaveType.NoType]
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
+        view.output_mode_file_radio_button.isChecked = mock.Mock(return_value=False)
+        view.output_mode_both_radio_button.isChecked = mock.Mock(return_value=False)
+        presenter.set_view(view)
+
+        try:
+            presenter._validate_output_modes()
+        except RuntimeError:
+            self.fail("Did not expect _validate_output_modes to fail when no file types are selected "
+                      "for memory output mode.")
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():
