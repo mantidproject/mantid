@@ -27,7 +27,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
 
-    def test_execution_AveragePixelFit(self):
+    def test_execution_Polynomial(self):
         """
             Check that the algorithm executes using background method Polynomial
         """
@@ -89,6 +89,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
                 'InputWorkspaceIndexSet' : '0-7',
                 'BackgroundCalculationMethod' : 'AveragePixelFit',
                 'PeakRange' : '3,4',
+				'SumPeak' : False,
                 'OutputWorkspace': 'output'}
         output = self._assert_run_algorithm_succeeds(args)
         for i in range(0, output.getNumberHistograms()):
@@ -125,7 +126,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
         """ Run the algorithm with the given args and check it succeeds """
         alg = create_algorithm('ReflectometryBackgroundSubtraction', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.doesExist('output'), True)
+        self.assertTrue(mtd.doesExist('output'))
         return mtd['output']
 
     def _assert_run_algorithm_throws(self, args = {}):
@@ -136,7 +137,7 @@ class ReflectometryBackgroundSubtraction(unittest.TestCase):
             alg.execute()
         except:
             throws = True
-        self.assertEquals(throws, True)
+        self.assertRaises(throws, True)
 
 if __name__ == '__main__':
     unittest.main()
