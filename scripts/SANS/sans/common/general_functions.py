@@ -1010,3 +1010,24 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
         if 36873 <= spectrum_number <= 73736:
             detector = DetectorType.HAB
     return detector
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Utility functions - functions to perform non-SANS specific operations
+# ----------------------------------------------------------------------------------------------------------------------
+def check_for_bytes(value, encoding="utf-8"):
+    """
+    A function to decode a bytes class into a string. In Python3, behaviour of str and bytes classes diverged.
+    There are cases when data intended to be a string can be passed around as bytes, due to legacy Python2 code.
+    While we will try to correctly encode/decode data as we begin to handle it, there may be missed cases.
+    This function should be used to confirm that we have a string when we expect a string.
+    :param value: the variable to convert to a string. This may be *str* or *bytes*. Raises TypeError if other type.
+    :param encoding: optional str. Denotes the encoding of the data.
+    :return: value, now of type *str*
+    """
+    if isinstance(value, str):
+        return value
+    elif isinstance(value, bytes):
+        return value.decode(encoding)
+    else:
+        raise TypeError("{} is type {}, not str or bytes.".format(value, type(value)))

@@ -18,6 +18,7 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
                                DetectorType, DataType, FitType, SANSInstrument)
+from sans.common.general_functions import check_for_bytes
 
 
 class StateGuiModel(object):
@@ -888,7 +889,7 @@ class StateGuiModel(object):
 
     @q_1d_rebin_string.setter
     def q_1d_rebin_string(self, value):
-        self._set_q_1d_limits(rebin_string=value)
+        self._set_q_1d_limits(rebin_string=check_for_bytes(value))
 
     @property
     def q_xy_max(self):
