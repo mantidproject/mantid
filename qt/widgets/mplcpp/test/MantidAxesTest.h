@@ -41,6 +41,15 @@ public:
     TS_ASSERT_EQUALS("red", line.pyobj().attr("get_color")());
   }
 
+  void testErrorbarWithWorkspaceReturnsLineForValidWsIndex() {
+    using Mantid::DataObjects::create;
+    const auto ws = boost::shared_ptr<Workspace2D>(
+        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
+    MantidAxes axes{pyAxes()};
+    auto errbar = axes.errorbar(ws, 0, "red", "mylabel");
+    TS_ASSERT_EQUALS(true, errbar.pyobj().attr("has_yerr"));
+  }
+
   void testRemoveArtist() {
     MantidAxes axes{pyAxes()};
     const std::string wsName{"myname"};

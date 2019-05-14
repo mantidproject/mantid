@@ -19,6 +19,8 @@ public:
   ErrorbarContainer(Python::Object pyInstance);
 };
 
-}}}
+} // namespace MplCpp
+} // namespace Widgets
+} // namespace MantidQt
 
 #endif // MPLCPP_ERRORBARCONTAINER_H

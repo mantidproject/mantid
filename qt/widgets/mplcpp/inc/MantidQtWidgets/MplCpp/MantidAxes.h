@@ -9,6 +9,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/MplCpp/Axes.h"
+#include "MantidQtWidgets/MplCpp/ErrorbarContainer.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -26,14 +27,15 @@ public:
   Line2D plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
               const size_t wkspIndex, const QString lineColour,
               const QString label);
+  ErrorbarContainer errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                             const size_t wkspIndex, const QString lineColour,
+                             const QString label);
   ///@}
 
   /// @name Artist removal/replacement
   ///@{
-  void
-  removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &workspace);
-  void replaceWorkspaceArtists(
-      const Mantid::API::MatrixWorkspace_sptr &newWorkspace);
+  void removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &ws);
+  void replaceWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &newWS);
   ///@}
 };
 

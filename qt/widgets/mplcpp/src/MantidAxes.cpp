@@ -32,7 +32,7 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
                         const size_t wkspIndex, const QString lineColour,
                         const QString label) {
   GlobalInterpreterLock lock;
-  auto wksp{Python::NewRef(MatrixWorkpaceToPython()(workspace))};
+  auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
   Python::Dict kwargs;
   kwargs["wkspIndex"] = wkspIndex;
@@ -42,26 +42,48 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
 }
 
 /**
+ * Add an errorbar plot on the current axes based on the workspace
+ * @param workspace A pointer to a workspace containing the data
+ * @param wkspIndex The workspace index to plot
+ * @param lineColour Set the line colour to this string name
+ * @param label A label for the curve
+ * @return A new ErrorbarContainer object
+ */
+ErrorbarContainer
+MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                     const size_t wkspIndex, const QString lineColour,
+                     const QString label) {
+  GlobalInterpreterLock lock;
+  auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
+  auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
+  Python::Dict kwargs;
+  kwargs["wkspIndex"] = wkspIndex;
+  kwargs["color"] = lineColour.toLatin1().constData();
+  kwargs["label"] = label.toLatin1().constData();
+  return ErrorbarContainer{pyobj().attr("errorbar")(*args, **kwargs)};
+}
+
+/**
  * Remove any artists plotted from the given workspace
- * @param workspace A reference to a workspace whose name is used to
+ * @param ws A reference to a workspace whose name is used to
  * lookup any artists for removal
  */
 void MantidAxes::removeWorkspaceArtists(
-    const Mantid::API::MatrixWorkspace_sptr &workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
   GlobalInterpreterLock lock;
   pyobj().attr("remove_workspace_artists")(
-      Python::NewRef(MatrixWorkpaceToPython()(workspace)));
+      Python::NewRef(MatrixWorkpaceToPython()(ws)));
 }
 
 /**
  * Replace the artists on this axes instance that are based off this workspace
- * @param newWorkspace A reference to the new workspace containing the data
+ * @param newWS A reference to the new workspace containing the data
  */
 void MantidAxes::replaceWorkspaceArtists(
-    const Mantid::API::MatrixWorkspace_sptr &newWorkspace) {
+    const Mantid::API::MatrixWorkspace_sptr &newWS) {
   GlobalInterpreterLock lock;
   pyobj().attr("replace_workspace_artists")(
-      Python::NewRef(MatrixWorkpaceToPython()(newWorkspace)));
+      Python::NewRef(MatrixWorkpaceToPython()(newWS)));
 }
 
 } // namespace MplCpp
