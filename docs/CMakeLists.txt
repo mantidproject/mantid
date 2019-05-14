@@ -148,12 +148,8 @@ set_target_properties(${TARGET_PREFIX}-test
 # Installation settings
 
 # Allow control over whether the documentation is packaged
-set(
-  PACKAGE_DOCS False
-  CACHE
-    BOOL
-    "If true the html documentation is installed in the share/doc directory of the package"
-  )
+option(PACKAGE_DOCS
+       "If true the html documentation is installed in the share/doc directory of the package")
 
 if(PACKAGE_DOCS)
   set(HTML_DOCS_DEST share/doc)
