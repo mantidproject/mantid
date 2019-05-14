@@ -389,7 +389,7 @@ class MainWindow(QMainWindow):
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname in blacklist:
+            if scriptname in GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             interfaces.setdefault(key, []).append(scriptname)

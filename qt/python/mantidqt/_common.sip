@@ -238,15 +238,6 @@ protected:
   virtual void initLayout() = 0;
 };
 
-class UserSubWindow : QMainWindow {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-using namespace MantidQt::API;
-%End
-private:
-  UserSubWindow(QWidget *parent = nullptr);
-};
-
 class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindowFactory.h"
@@ -298,25 +289,6 @@ public:
   void closeHelpWindow();
 };
 
-class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/UserSubWindowFactoryImpl.h"
-%End
-public:
-    static SIP_PYOBJECT Instance() const;
-    %MethodCode
-        auto &cppInstance = MantidQt::API::UserSubWindowFactory::Instance();
-        return sipConvertFromType(&cppInstance, sipType_UserSubWindowFactoryImpl, nullptr);
-    %End
-    UserSubWindow *createUnwrapped(const std::string &name) const;
-    QSet<QString> categories(const QString &interfaceName) const;
-    QStringList keys() const;
-
-private:
-  UserSubWindowFactoryImpl();
-  UserSubWindowFactoryImpl(const UserSubWindowFactoryImpl &);
-  ~UserSubWindowFactoryImpl();
-};
 // ---------------------------------
 // WorkspaceWidget and dependencies
 // ---------------------------------
