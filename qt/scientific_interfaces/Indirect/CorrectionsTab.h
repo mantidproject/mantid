@@ -84,7 +84,8 @@ protected:
   std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws,
                                   const std::string &unitID,
                                   const std::string &suffix = "UNIT",
-                                  std::string eMode = ""); /// Displays and logs the error for a workspace with an invalid type
+                                  std::string eMode = "");
+  /// Displays and logs the error for a workspace with an invalid type
   void displayInvalidWorkspaceTypeError(const std::string &workspaceName,
                                         Mantid::Kernel::Logger &log);
 
