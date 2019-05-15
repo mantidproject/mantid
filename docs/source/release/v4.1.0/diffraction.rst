@@ -16,7 +16,15 @@ Improvements
 ############
 
 - The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction
+
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction.
+
+- Added two new options to the HRPD scripts `do_solid_angle_corrections` and `subtract_empty_instrument` allowing setting whether or not these actions should take place.
+
+Bug Fixes
+#########
+
+- HRPD Absorption corrections now correctly takes into account the thickness of the slab.
 
 Engineering Diffraction
 -----------------------
