@@ -60,9 +60,16 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def set_slot_for_display_workspace_changed(self, slot):
         self.parameter_display_combo.currentIndexChanged.connect(slot)
 
+    def set_slot_for_use_raw_changed(self, slot):
+        self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
+
     @property
     def display_workspace(self):
         return str(self.parameter_display_combo.currentText())
+
+    @property
+    def fit_to_raw(self):
+        return self.fit_to_raw_data_checkbox.isChecked()
 
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(6)
@@ -78,19 +85,19 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 0, [])
 
         table_utils.setRowName(self.fit_options_table, 1, "TF Asymmetry Mode")
-        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxToTable(
+        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, False, 1)
 
         table_utils.setRowName(self.fit_options_table, 2, "Plot Difference")
-        self.plot_differences_checkbox = table_utils.addCheckBoxToTable(
+        self.plot_differences_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 2)
 
         table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
-        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxToTable(
-            self.fit_options_table, False, 3)
+        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
+            self.fit_options_table, True, 3)
 
         table_utils.setRowName(self.fit_options_table, 4, "Show Parameter Errors")
-        self.show_parameter_errors_checkbox = table_utils.addCheckBoxToTable(
+        self.show_parameter_errors_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 4)
 
         table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
