@@ -93,7 +93,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
                              doc='Comma separated range of spectra number to use.')
 
         self.declareProperty(FloatArrayProperty(name='ElasticRange'),
-                             doc='Energy range for the elastic component')
+                             doc='Energy range for the elastic component.')
         self.declareProperty(FloatArrayProperty(name='InelasticRange'),
                              doc='Energy range for the inelastic component.')
         self.declareProperty(FloatArrayProperty(name='TotalRange'),
