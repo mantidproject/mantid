@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using MantidQt::Widgets::MplCpp::ColorConverter;
+using namespace MantidQt::Widgets::Common;
 
 class ColorConverterTest : public CxxTest::TestSuite {
 public:
@@ -22,8 +23,7 @@ public:
   // ----------------- success tests ---------------------
   void testKnownColorIsTranslated() {
     // matplotlib cyan=(0,0.75,0.75). See matplotlib.colors
-    auto color = ColorConverter::toRGB(
-        MantidQt::Widgets::Common::Python::NewRef(Py_BuildValue("s", "c")));
+    auto color = ColorConverter::toRGB(Python::NewRef(Py_BuildValue("s", "c")));
     TS_ASSERT_EQUALS(0, color.red());
     TS_ASSERT_EQUALS(191, color.blue());
     TS_ASSERT_EQUALS(191, color.green());

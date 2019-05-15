@@ -26,7 +26,7 @@ namespace MplCpp {
  * type to provide the capability to map an arbitrary data
  * value or array of values to an RGBA value(s) within a given colormap
  */
-class MANTID_MPLCPP_DLL ScalarMappable : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL ScalarMappable : public Common::Python::InstanceHolder {
 public:
   ScalarMappable(const NormalizeBase &norm, const Colormap &cmap);
   ScalarMappable(const NormalizeBase &norm, const QString &cmap);

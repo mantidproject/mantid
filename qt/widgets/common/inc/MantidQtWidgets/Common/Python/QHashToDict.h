@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MPLCPP_QHASHTODICT_H
-#define MPLCPP_QHASHTODICT_H
+#ifndef MANTIDQTWIDGETS_QHASHTODICT_H
+#define MANTIDQTWIDGETS_QHASHTODICT_H
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"

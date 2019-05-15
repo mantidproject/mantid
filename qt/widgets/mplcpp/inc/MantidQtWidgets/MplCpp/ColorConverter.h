@@ -12,8 +12,6 @@
 
 #include <QColor>
 
-using namespace MantidQt::Widgets::Common;
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -22,9 +20,9 @@ namespace MplCpp {
  * A static C++ wrapper around the matplotlib.colors.colorConverter instance.
  * It is used to translate colors of various formats to a QColor instance.
  */
-class MANTID_MPLCPP_DLL ColorConverter : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL ColorConverter : public Common::Python::InstanceHolder {
 public:
-  static QColor toRGB(const Python::Object &colorSpec);
+  static QColor toRGB(const Common::Python::Object &colorSpec);
 };
 
 } // namespace MplCpp

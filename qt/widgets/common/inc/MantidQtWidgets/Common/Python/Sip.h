@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_SIPUTILS_H
-#define MPLCPP_SIPUTILS_H
+#ifndef MANTIDQTWIDGETS_SIPUTILS_H
+#define MANTIDQTWIDGETS_SIPUTILS_H
 
-#include "../DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include <sip.h>
 #include <stdexcept>

@@ -15,11 +15,12 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-using Mantid::PythonInterface::Converters::VectorToNDArray;
-using Mantid::PythonInterface::Converters::WrapReadOnly;
+using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
-using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::Converters::VectorToNDArray;
+using Mantid::PythonInterface::Converters::WrapReadOnly;
+using namespace MantidQt::Widgets::Common;
 
 namespace {
 /**

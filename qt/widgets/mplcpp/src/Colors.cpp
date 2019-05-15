@@ -10,12 +10,14 @@
 #include <boost/optional.hpp>
 #include <tuple>
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
-using Mantid::PythonInterface::PythonException;
 using boost::none;
 using boost::optional;
+using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::PythonException;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
+
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

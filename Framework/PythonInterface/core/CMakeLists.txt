@@ -15,6 +15,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidPythonInterface/core/Converters/NDArrayTypeIndex.h
+    inc/MantidPythonInterface/core/Converters/ToPyList.h
     inc/MantidPythonInterface/core/Converters/VectorToNDArray.h
     inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
     inc/MantidPythonInterface/core/CallMethod.h

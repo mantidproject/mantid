@@ -26,7 +26,7 @@ class FigureCanvasQt;
  * it will not keep it alive. It is assumed that the canvas lifetime
  * is handled separately.
  */
-class MANTID_MPLCPP_DLL Zoomer : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Zoomer : public Common::Python::InstanceHolder {
 public:
   explicit Zoomer(FigureCanvasQt *canvas);
 

@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_PYTHON_OBJECT_H
-#define MPLCPP_PYTHON_OBJECT_H
+#ifndef MANTIDQTWIDGETS_PYTHON_OBJECT_H
+#define MANTIDQTWIDGETS_PYTHON_OBJECT_H
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -103,4 +103,4 @@ private:
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_PYTHON_OBJECT_H
+#endif // MANTIDQTWIDGETS_PYTHON_OBJECT_H

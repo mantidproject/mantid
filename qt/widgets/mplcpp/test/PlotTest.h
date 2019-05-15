@@ -12,19 +12,22 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
+using namespace Mantid::PythonInterface;
 
 namespace {
 void setMatplotlibBackend() {
-  PyObject *functionsString = Py_BuildValue("s", "matplotlib");
-  PyObject *funcsModule = PyImport_Import(functionsString);
-  PyObject *plotFunc = PyObject_GetAttrString(funcsModule, "use");
-  PyObject *args = Py_BuildValue("(s)", "Agg");
-  PyObject *kwargs = Py_BuildValue("{}");
-  PyObject_Call(plotFunc, args, kwargs);
+  // auto funcsModule =
+  //     Python::NewRef(PyImport_Import(Py_BuildValue("s", "matplotlib")));
+  // auto args = Python::NewRef(Py_BuildValue("(s)", "Agg"));
+  // auto kwargs = Python::NewRef(Py_BuildValue("{}"));
+  // funcsModule.attr("use")(args, kwargs);
+  auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
+  mpl.attr("use")("Agg");
 }
 } // namespace
 
@@ -42,12 +45,6 @@ public:
     alg->execute();
 
     setMatplotlibBackend();
-  }
-
-  void tearDown() override {
-    // Confirm an error hasn't happend
-    auto error = PyErr_Occurred();
-    TS_ASSERT_EQUALS(error, nullptr)
   }
 
   void testPlottingWorksWithWorkspaceIndex() {
@@ -86,8 +83,9 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(1));
-    TS_ASSERT_THROWS_ANYTHING(plot(workspaces, index, boost::none, boost::none,
-                                   hash, boost::none, boost::none))
+    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, hash,
+                          boost::none, boost::none),
+                     const PythonException &)
   }
 
   void testPlottingWithAxProperties() {
@@ -104,8 +102,9 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(QString(1)));
-    TS_ASSERT_THROWS_ANYTHING(plot(workspaces, index, boost::none, boost::none,
-                                   boost::none, hash, boost::none))
+    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none,
+                          boost::none, hash, boost::none),
+                     const PythonException &)
   }
 
   void testPlottingWithWindowTitle() {
