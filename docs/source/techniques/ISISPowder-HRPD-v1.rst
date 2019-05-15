@@ -120,6 +120,7 @@ The following parameters may optionally be passed:
 - :ref:`suffix_hrpd_isis-powder-diffraction-ref`
 - :ref:`subtract_empty_instrument_hrpd_isis-powder-diffraction-ref`
 - :ref:`do_solid_angle_corrections_hrpd_isis-powder-diffraction-ref`
+
 If :ref:`do_absorb_corrections_hrpd_isis-powder-diffraction-ref` is set to
 **True** the following parameter is required in addition to the above:
 
