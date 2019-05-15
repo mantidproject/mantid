@@ -586,11 +586,12 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                             raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                                " be set with a partial can.".format(reduction_mode))
         if workspace_group_lab_can_count.size() > 0:
-            # Both LAB count and norm are non-empty
             self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)
+        if workspace_group_lab_can_norm.size() > 0:
             self.setProperty("OutputWorkspaceLABCanNorm", workspace_group_lab_can_norm)
         if workspace_group_hab_can_count.size() > 0:
             self.setProperty("OutputWorkspaceHABCanCount", workspace_group_hab_can_count)
+        if workspace_group_hab_can_norm.size() > 0:
             self.setProperty("OutputWorkspaceHABCanNorm", workspace_group_hab_can_norm)
 
     def set_can_and_sam_on_output(self, output_bundles):
@@ -642,11 +643,13 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                             raise RuntimeError("SANSSingleReductionEventSlice: The reduction mode {0} should not"
                                                " be set with a sample.".format(reduction_mode))
 
-        if workspace_group_hab_sample.size() > 0:
+        if workspace_group_hab_can.size() > 0:
             self.setProperty("OutputWorkspaceHABCan", workspace_group_hab_can)
+        if workspace_group_hab_sample.size() > 0:
             self.setProperty("OutputWorkspaceHABSample", workspace_group_hab_sample)
-        if workspace_group_lab_sample.size() > 0:
+        if workspace_group_lab_can.size() > 0:
             self.setProperty("OutputWorkspaceLABCan", workspace_group_lab_can)
+        if workspace_group_lab_sample.size() > 0:
             self.setProperty("OutputWorkspaceLABSample", workspace_group_lab_sample)
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):

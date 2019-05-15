@@ -145,7 +145,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
 
         if not event_slice and plot_results:
-            # Event slice reductions do
+            # Plot results is intended to show the result of each workspace/slice as it is reduced
+            # as we reduce in bulk, it is not possible to plot live results while in event_slice mode
             if PYQT4:
                 plot_workspace(reduction_package, output_graph)
             elif output_graph:
