@@ -17,7 +17,6 @@ class HelpWidgetView(QtWidgets.QWidget):
 
         self.setup_interface_layout()
 
-
     def setup_interface_layout(self):
         self.setObjectName("HelpWidget")
         self.resize(500, 100)
