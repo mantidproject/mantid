@@ -145,14 +145,19 @@ void BatchAlgorithmRunner::executeBatchAsync() {
 void BatchAlgorithmRunner::cancelBatch() {
   std::lock_guard<std::mutex> lock(m_mutex);
   m_cancelRequested = true;
+  // If the queue is empty, notify straight away that the batch has been
+  // cancelled
+  if (queueLength() < 1)
+    m_notificationCenter.postNotification(new BatchCancelledNotification());
 }
 
 /**
  * Reset state ready for executing a new batch
  */
 void BatchAlgorithmRunner::resetState() {
-  removeAllObservers();
   std::lock_guard<std::mutex> lock(m_mutex);
+  removeAllObservers();
+  clearQueue();
   m_cancelRequested = false;
 }
 
@@ -190,9 +195,6 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
                           << "\" finished\n";
     }
   }
-
-  // Clear queue
-  m_algorithms.clear();
 
   // Notify observers
   if (cancelRequested())
