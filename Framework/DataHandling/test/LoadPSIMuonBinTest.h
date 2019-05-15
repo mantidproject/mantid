@@ -35,6 +35,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
@@ -44,6 +45,7 @@ public:
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
@@ -57,6 +59,7 @@ public:
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
@@ -106,6 +109,7 @@ public:
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SearchForTempFile", false));
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
         "Filename", getTestFilePath("pid_offset_vulcan_new.dat.bin")));
