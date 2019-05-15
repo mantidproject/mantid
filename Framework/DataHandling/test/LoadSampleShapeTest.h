@@ -134,7 +134,7 @@ public:
     MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 1, 0, 0, 45);
-    auto sampleMesh = loadCube();
+    auto sampleMesh = createCube();
 
     rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
@@ -151,7 +151,7 @@ public:
     MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 1, 0, 90);
-    auto sampleMesh = loadCube();
+    auto sampleMesh = createCube();
 
     rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
@@ -167,7 +167,7 @@ public:
     MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 0, 1, 180);
-    auto sampleMesh = loadCube();
+    auto sampleMesh = createCube();
 
     rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
@@ -185,7 +185,7 @@ public:
     inputWS->mutableRun().mutableGoniometer().pushAxis("Z", 0, 0, 1, 35);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Y", 0, 1, 0, 20);
     inputWS->mutableRun().mutableGoniometer().pushAxis("X", 1, 0, 0, 70);
-    auto sampleMesh = loadCube();
+    auto sampleMesh = createCube();
 
     rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
@@ -244,11 +244,17 @@ private:
     return mObj;
   }
 
-  std::unique_ptr<MeshObject> loadCube() {
-    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    constexpr ScaleUnits unit = ScaleUnits::metres;
-    auto loader = LoadBinaryStl(path, unit);
-    auto cube = loader.readStl();
+  std::unique_ptr<MeshObject> createCube() {
+    const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5,
+                                      2, 5, 4, 6, 1, 3, 6, 5, 1, 4, 5, 6,
+                                      7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
+    const std::vector<Mantid::Kernel::V3D> vertices{
+        Mantid::Kernel::V3D(-5, -5, -15), Mantid::Kernel::V3D(5, 5, -15),
+        Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
+        Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
+        Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
+    auto cube = std::make_unique<MeshObject>(faces, vertices,
+                                             Mantid::Kernel::Material());
     return cube;
   }
 };
@@ -268,11 +274,11 @@ public:
   }
 
 private:
-  LoadSampleShape *alg;
+  std::unique_ptr<LoadSampleShape> alg;
   const int numberOfIterations = 5;
 
-  LoadSampleShape *setupAlg(Workspace2D_sptr inputWS) {
-    LoadSampleShape *loadAlg = new LoadSampleShape();
+  std::unique_ptr<LoadSampleShape> setupAlg(Workspace2D_sptr inputWS) {
+    auto loadAlg = std::make_unique<LoadSampleShape>();
     loadAlg->initialize();
     loadAlg->setChild(true);
     loadAlg->setProperty("InputWorkspace", inputWS);
