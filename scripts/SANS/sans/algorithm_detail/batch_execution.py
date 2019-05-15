@@ -77,11 +77,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # If using compatibility mode we convert to histogram immediately after taking event slices,
         # so would not be able to perform operations on event workspaces pre-slicing.
         alg = "SANSSingleReductionEventSlice"
-        set_properties_func = set_properties_for_event_slice_reduction_algorithm
         event_slice = True
     else:
         alg = "SANSSingleReduction"
-        set_properties_func = set_properties_for_reduction_algorithm
         event_slice = False
         if split_for_event_slices:
             # Split into separate event slice workspaces here.
@@ -101,8 +99,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # Set the properties on the algorithm
         # -----------------------------------
-        set_properties_func(reduction_alg, reduction_package,
-                            workspace_to_name, workspace_to_monitor)
+        set_properties_for_reduction_algorithm(reduction_alg, reduction_package,
+                                               workspace_to_name, workspace_to_monitor, event_slice=event_slice)
 
         # -----------------------------------
         #  Run the reduction
@@ -156,6 +154,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice=event_slice)
 
+    #import pydevd
+    #pydevd.settrace('localhost', port=8000, stdoutToServer=True, stderrToServer=True)
     # --------------------------------
     # Perform output of all workspaces
     # --------------------------------
@@ -903,7 +903,8 @@ def set_properties_for_event_slice_reduction_algorithm(reduction_alg, reduction_
                                  , "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
 
 
-def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, workspace_to_name, workspace_to_monitor):
+def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, workspace_to_name, workspace_to_monitor,
+                                           event_slice=False):
     """
     Sets up everything necessary on the reduction algorithm.
 
@@ -911,12 +912,16 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     :param reduction_package: a reduction package object
     :param workspace_to_name: the workspace to name map
     :param workspace_to_monitor: a workspace to monitor map
+    :param event_slice: optional bool. If true then using SANSSingleReductionEventSlice algorithm.
+                        In this base, names and base names should not include time slice information.
     """
     def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
                          _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None, transmission=False):
         if not transmission:
+            # Use event_slice from set_properties_for_reduction_algorithm scope
             _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
-                                                        multi_reduction_type=multi_reduction_type)
+                                                        multi_reduction_type=multi_reduction_type,
+                                                        event_slice=event_slice)
         else:
             _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode
                                                                      , multi_reduction_type=multi_reduction_type)
@@ -998,14 +1003,17 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
-    is_group = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or is_part_of_wavelength_range_reduction
-    multi_reduction_type = {"period": is_part_of_multi_period_reduction, "event_slice": is_part_of_event_slice_reduction,
+    is_group = (is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or
+                is_part_of_wavelength_range_reduction or event_slice)
+    multi_reduction_type = {"period": is_part_of_multi_period_reduction,
+                            "event_slice": is_part_of_event_slice_reduction,
                             "wavelength_range": is_part_of_wavelength_range_reduction}
 
     reduction_mode = reduction_package.reduction_mode
     if reduction_mode is ISISReductionMode.Merged:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.Merged,
-                         "OutputWorkspaceMerged", "reduced_merged_name", "reduced_merged_base_name", multi_reduction_type)
+                         "OutputWorkspaceMerged", "reduced_merged_name", "reduced_merged_base_name",
+                         multi_reduction_type)
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
                          "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
