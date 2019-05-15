@@ -10,8 +10,9 @@ from copy import deepcopy
 import time
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
-from sans.common.general_functions import (add_to_sample_log, create_managed_non_child_algorithm, create_unmanaged_algorithm,
-                                           get_output_name, get_base_name_from_multi_period_name, get_transmission_output_name)
+from sans.common.general_functions import (add_to_sample_log, create_managed_non_child_algorithm,
+                                           create_unmanaged_algorithm, get_output_name,
+                                           get_base_name_from_multi_period_name, get_transmission_output_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode, DataType)
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
@@ -70,15 +71,22 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Split into individual bundles which can be reduced individually. We split here if we have multiple periods.
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
-    if (reduction_packages_require_splitting_for_event_slices(reduction_packages) and not
+    split_for_event_slices = reduction_packages_require_splitting_for_event_slices(reduction_packages)
+    if (split_for_event_slices and not
             state.compatibility.use_compatibility_mode):
         # If using compatibility mode we convert to histogram immediately after taking event slices,
         # so would not be able to perform operations on event workspaces pre-slicing.
         alg = "SANSSingleReductionEventSlice"
+        set_properties_func = set_properties_for_event_slice_reduction_algorithm
         event_slice = True
     else:
         alg = "SANSSingleReduction"
+        set_properties_func = set_properties_for_reduction_algorithm
         event_slice = False
+        if split_for_event_slices:
+            # Split into separate event slice workspaces here.
+            # For event_slice mode, this is done in SANSSingleReductionEventSlice
+            reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
@@ -93,8 +101,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # Set the properties on the algorithm
         # -----------------------------------
-        set_properties_for_reduction_algorithm(reduction_alg, reduction_package,
-                                               workspace_to_name, workspace_to_monitor)
+        set_properties_func(reduction_alg, reduction_package,
+                            workspace_to_name, workspace_to_monitor)
 
         # -----------------------------------
         #  Run the reduction
@@ -145,7 +153,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
-        group_workspaces_if_required(reduction_package, output_mode, save_can)
+        group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice=event_slice)
 
     # --------------------------------
     # Perform output of all workspaces
@@ -160,10 +168,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     #    * This means that we need to save out the reduced data
     #    * The data is already on the ADS, so do nothing
     if output_mode is OutputMode.SaveToFile:
-        save_to_file(reduction_packages, save_can)
+        save_to_file(reduction_packages, save_can, event_slice=event_slice)
         delete_reduced_workspaces(reduction_packages)
     elif output_mode is OutputMode.Both:
-        save_to_file(reduction_packages, save_can)
+        save_to_file(reduction_packages, save_can, event_slice=event_slice)
 
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
@@ -1120,7 +1128,8 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can, event
     :param reduction_package: a list of reduction packages
     :param output_mode: one of OutputMode. SaveToFile, PublishToADS, Both.
     :param save_can: a bool. If true save out can and sample workspaces.
-    :param event_slice: an optional bool. If true group_workspaces is being called on event sliced data.
+    :param event_slice: an optional bool. If true group_workspaces is being called on event sliced data, so the
+                        reduction_package contains grouped workspaces.
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction or event_slice
@@ -1192,12 +1201,7 @@ def add_to_group(workspace, name_of_group_workspace):
         group_workspace = AnalysisDataService.retrieve(name_of_group_workspace)
         if type(group_workspace) is WorkspaceGroup:
             if type(workspace) is WorkspaceGroup:
-                group_name = "GroupWorkspaces"
-                group_options = {"InputWorkspaces": [name_of_group_workspace, name_of_workspace],
-                                 "OutputWorkspace": name_of_group_workspace}
-                group_alg = create_unmanaged_algorithm(group_name, **group_options)
-                group_alg.setAlwaysStoreInADS(True)
-                group_alg.execute()
+                add_group_to_group(name_of_workspace, name_of_group_workspace)
             elif not group_workspace.contains(name_of_workspace):
                 group_workspace.add(name_of_workspace)
         else:
@@ -1216,6 +1220,26 @@ def add_to_group(workspace, name_of_group_workspace):
 
         group_alg.setAlwaysStoreInADS(True)
         group_alg.execute()
+
+
+def add_group_to_group(name_of_group_workspace, name_of_target_group_workspace):
+    """
+    Adds a group workspace to an existing group workspace.
+    This is used when using SANSSingleEventSlice algorithm, which returns group workspaces
+    containing the workspaces from each time slice.
+    :param name_of_group_workspace: str. The name of the group workspace
+    :param name_of_target_group_workspace: str. The name of the group workspace we want as output
+    :return:
+    """
+    if name_of_group_workspace == name_of_target_group_workspace:
+        # Do nothing as we already have the group workspace we want
+        return
+    group_name = "GroupWorkspaces"
+    group_options = {"InputWorkspaces": [name_of_target_group_workspace, name_of_group_workspace],
+                     "OutputWorkspace": name_of_target_group_workspace}
+    group_alg = create_unmanaged_algorithm(group_name, **group_options)
+    group_alg.setAlwaysStoreInADS(True)
+    group_alg.execute()
 
 
 def save_to_file(reduction_packages, save_can, event_slice=False):
