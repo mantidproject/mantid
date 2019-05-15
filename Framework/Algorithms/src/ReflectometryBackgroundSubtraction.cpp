@@ -76,24 +76,24 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
  * the histograms
  * @return a vector containing a list of ranges of the given indexList.
  */
-std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
-    const std::vector<double> &indexList) {
+std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
+    const std::vector<specnum_t> &spectraList) {
 
-  std::vector<double> indexRanges;
-  indexRanges.push_back(indexList[0]);
-  auto prevSpec = indexRanges[0];
-  for (size_t index = 0; index < indexList.size() - 1; ++index) {
-    auto spec = indexList[index + 1];
+  std::vector<double> spectrumRanges;
+  spectrumRanges.push_back(spectraList[0]);
+  auto prevSpec = spectrumRanges[0];
+  for (size_t index = 0; index < spectraList.size() - 1; ++index) {
+    auto spec = spectraList[index + 1];
     auto range = spec - prevSpec;
     // check if start of new range
     if (range > 1) {
-      indexRanges.push_back(prevSpec);
-      indexRanges.push_back(spec);
+      spectrumRanges.push_back(prevSpec);
+      spectrumRanges.push_back(spec);
     }
     prevSpec = spec;
   }
-  indexRanges.push_back(indexList.back());
-  return indexRanges;
+  spectrumRanges.push_back(spectraList.back());
+  return spectrumRanges;
 }
 
 /** Calculates the background by fitting a polynomial to each TOF. This is done
@@ -101,11 +101,12 @@ std::vector<double> ReflectometryBackgroundSubtraction::findIndexRanges(
  * then subtracted from the input workspace.
  *
  * @param inputWS :: the input workspace
- * @param indexRanges :: a vector containing the index of the ranges of
- * histograms containing the background
+ * @param spectrumRanges :: a vector containing the ranges of spectra containing
+ * the background
  */
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexRanges) {
+    MatrixWorkspace_sptr inputWS,
+    const std::vector<double> &spectrumRanges) {
 
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose an event workspace
@@ -133,7 +134,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   poly->initialize();
   poly->setProperty("InputWorkspace", transposedWS);
   poly->setProperty("Degree", getPropertyValue("DegreeOfPolynomial"));
-  poly->setProperty("XRanges", indexRanges);
+  poly->setProperty("XRanges", spectrumRanges);
   poly->setProperty("CostFunction", getPropertyValue("CostFunction"));
   poly->execute();
   MatrixWorkspace_sptr bgd = poly->getProperty("OutputWorkspace");
@@ -156,11 +157,11 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * @param inputWS :: the input workspace
  * @param indexRanges :: the ranges of the background region
  */
-void ReflectometryBackgroundSubtraction::subtractPixelBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexRanges) {
+void ReflectometryBackgroundSubtraction::calculatePixelBackground(
+    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexList) {
 
-  const std::vector<int> backgroundRange{static_cast<int>(indexRanges.front()),
-                                         static_cast<int>(indexRanges.back())};
+  const std::vector<int> backgroundRange{static_cast<int>(indexList.front()),
+                                         static_cast<int>(indexList.back())};
 
   auto outputWSName = getPropertyValue("OutputWorkspace");
 
@@ -275,13 +276,12 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
-    auto indexRanges = findIndexRanges(indexList);
-    calculatePolynomialBackground(inputWS, indexRanges);
+    auto spectrumRanges = findSpectrumRanges(spectraList);
+    calculatePolynomialBackground(inputWS, spectrumRanges);
   }
 
   if (backgroundType == "AveragePixelFit") {
-    auto indexRanges = findIndexRanges(indexList);
-    subtractPixelBackground(inputWS, indexRanges);
+    calculatePixelBackground(inputWS, indexList);
   }
 }
 
