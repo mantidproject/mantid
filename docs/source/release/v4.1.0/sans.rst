@@ -24,6 +24,7 @@ Improvements
 - Batch files created by exporting the runs table have the same order of keys as in the table.
 - Batch files no longer require an output name to load. When processing, an auto-generated name is used instead.
 - When the main save directory is changed, the add runs save directory is also updated. Add runs save directory can be still changed independently of the main save directory.
+- File type buttons are disabled when memory mode is selected to make it clearer that SANS will not save to file.
 
 Bug Fixes
 #########
@@ -32,3 +33,4 @@ Bug Fixes
 - Exporting table as a batch file is fixed for Mantid Workbench.
 - The warning message raised when you have supplied a transmission run without a direct run has been suppressed when data is still being input. The warning will still be raised if you load or process the data.
 - The algorithm :ref:`Load <algm-Load>` can now load NXcanSAS files.
+- You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
