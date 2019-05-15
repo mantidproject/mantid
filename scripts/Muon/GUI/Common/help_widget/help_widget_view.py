@@ -16,9 +16,6 @@ class HelpWidgetView(QtWidgets.QWidget):
 
         self.setup_interface_layout()
 
-        if not PYQT4:
-            self.interface_manager = InterfaceManager()
-
     def setup_interface_layout(self):
         self.setObjectName("HelpWidget")
         self.resize(500, 100)

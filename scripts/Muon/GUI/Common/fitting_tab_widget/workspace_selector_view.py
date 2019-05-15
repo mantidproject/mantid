@@ -23,7 +23,6 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.instrument = instrument
         self.context = context
         self.rebin = not fit_to_raw
-        self.phasequad = True
 
         self.groups_and_pairs = 'All'
         self.runs = 'All'
@@ -35,13 +34,16 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.list_selector_layout.addWidget(self.list_selector_widget, 0, 1, 4, 1)
         self.list_selector_layout.setContentsMargins(0, 0, 0, 0)
         self.list_selector_presenter = ListSelectorPresenter(self.list_selector_widget, self.get_workspace_list())
+        self.update_list()
         self.list_selector_presenter.update_view_from_model()
 
         self.group_pair_line_edit.editingFinished.connect(self.handle_group_pair_selection_changed)
         self.run_line_edit.editingFinished.connect(self.handle_run_edit_changed)
+        self.phase_quad_checkbox.stateChanged.connect(self.handle_phase_quad_changed)
 
     def get_workspace_list(self):
-        filtered_list = self.context.get_names_of_workspaces_to_fit(runs=self.runs, group_and_pair=self.groups_and_pairs, phasequad=self.phasequad, rebin=self.rebin)
+        filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+                                                                    rebin=self.rebin)
 
         filtered_list = [item for item in filtered_list if item not in self.current_workspaces]
 
@@ -57,7 +59,7 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs=self.runs,
                                                                     group_and_pair=self.groups_and_pairs,
                                                                     phasequad=self.phasequad, rebin=self.rebin)
-        excluded_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=self.phasequad,
+        excluded_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
                                                                     rebin=self.rebin)
 
         excluded_list = [item for item in excluded_list if item not in filtered_list]
@@ -82,12 +84,19 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         self.update_list()
 
+    def handle_phase_quad_changed(self):
+        self.update_list()
+
     def update_list(self):
         workspace_list = self.get_exclusion_list()
         self.list_selector_presenter.update_filter_list(workspace_list)
 
     def get_selected_list(self):
         return self.list_selector_presenter.get_selected_items()
+
+    @property
+    def phasequad(self):
+        return self.phase_quad_checkbox.isChecked()
 
     @staticmethod
     def get_selected_data(current_runs, instrument, current_workspaces, fit_to_raw, context, parent):
