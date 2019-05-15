@@ -170,7 +170,7 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         # 4. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
-        workspace = self._mask(state_serialized, workspace, component_as_string)
+        workspace = self._mask(state_serialized, workspace, component_as_string, compatibility.use_compatibility_mode)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Convert to Wavelength
@@ -199,12 +199,6 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
             calculated_transmission_workspace, unfitted_transmission_workspace = \
             self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
-
-        # ------------------------------------------------------------
-        # 8. Convert event workspaces to histogram workspaces
-        # ------------------------------------------------------------
-        progress.report("Converting to histogram mode ...")
-        workspace = self._convert_to_histogram(workspace)
 
         progress.report("Completed SANSReductionCoreInitial ...")
 
@@ -250,11 +244,12 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         move_alg.execute()
         return move_alg.getProperty("Workspace").value
 
-    def _mask(self, state_serialized, workspace, component):
+    def _mask(self, state_serialized, workspace, component, include_bin_masking):
         mask_name = "SANSMaskWorkspace"
         mask_options = {"SANSState": state_serialized,
                         "Workspace": workspace,
-                        "Component": component}
+                        "Component": component,
+                        "includeBinMasking": include_bin_masking}
         mask_alg = create_child_algorithm(self, mask_name, **mask_options)
         mask_alg.execute()
         return mask_alg.getProperty("Workspace").value
@@ -363,7 +358,7 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         return clone_alg.getProperty("OutputWorkspace").value
 
     def _get_progress(self):
-        return Progress(self, start=0.0, end=1.0, nreports=10)
+        return Progress(self, start=0.0, end=1.0, nreports=7)
 
 
 # Register algorithm with Mantid
