@@ -176,7 +176,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
     # -----------------------------------------------------------------------
-    if not event_slice and not use_optimizations:
+    if not use_optimizations:
         delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can)
 
     out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]
@@ -1213,13 +1213,22 @@ def add_to_group(workspace, name_of_group_workspace):
             group_alg.setAlwaysStoreInADS(True)
             group_alg.execute()
     else:
-        group_name = "GroupWorkspaces"
-        group_options = {"InputWorkspaces": [name_of_workspace],
-                         "OutputWorkspace": name_of_group_workspace}
-        group_alg = create_unmanaged_algorithm(group_name, **group_options)
+        if type(workspace) is WorkspaceGroup:
+            if workspace.size() > 0:
+                rename_name = "RenameWorkspace"
+                rename_options = {"InputWorkspace": name_of_workspace,
+                                  "OutputWorkspace": name_of_group_workspace}
+                rename_alg = create_unmanaged_algorithm(rename_name, **rename_options)
+                rename_alg.setAlwaysStoreInADS(True)
+                rename_alg.execute()
+        else:
+            group_name = "GroupWorkspaces"
+            group_options = {"InputWorkspaces": [name_of_workspace],
+                             "OutputWorkspace": name_of_group_workspace}
+            group_alg = create_unmanaged_algorithm(group_name, **group_options)
 
-        group_alg.setAlwaysStoreInADS(True)
-        group_alg.execute()
+            group_alg.setAlwaysStoreInADS(True)
+            group_alg.execute()
 
 
 def add_group_to_group(name_of_group_workspace, name_of_target_group_workspace):
