@@ -135,7 +135,7 @@ void NormaliseByCurrent::exec() {
   }
   outputWS->mutableRun().addLogData(
       new Kernel::PropertyWithValue<double>("NormalizationFactor", charge));
-  outputWS->setYUnit("Counts per microAmp.hour");
+  outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 
 } // namespace Algorithms

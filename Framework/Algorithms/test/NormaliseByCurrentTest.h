@@ -71,7 +71,7 @@ MatrixWorkspace_const_sptr doTest(MatrixWorkspace_sptr inWS,
       }
     }
 
-    TS_ASSERT_EQUALS(output->YUnit(), "Counts per microAmp.hour");
+    TS_ASSERT_EQUALS(output->YUnit(), "Counts");
     TS_ASSERT_EQUALS(output->YUnitLabel(), "Counts per microAmp.hour");
     Kernel::Property *normLog(nullptr);
     TS_ASSERT_THROWS_NOTHING(

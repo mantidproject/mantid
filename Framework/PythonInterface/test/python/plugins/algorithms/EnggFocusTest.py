@@ -129,7 +129,7 @@ class EnggFocusTest(unittest.TestCase):
         self.assertEqual(wks.blocksize(), 98)
         self.assertEqual(wks.getNEvents(), 98)
         self.assertEqual(wks.getNumDims(), 2)
-        self.assertEqual(wks.YUnit(), 'Counts per microAmp.hour')
+        self.assertEqual(wks.YUnit(), 'Counts')
         dimX = wks.getXDimension()
         self.assertAlmostEqual( dimX.getMaximum(), 36938.078125)
         self.assertEqual(dimX.name, 'Time-of-flight')
