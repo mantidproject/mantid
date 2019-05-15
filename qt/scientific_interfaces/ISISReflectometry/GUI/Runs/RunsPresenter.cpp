@@ -183,6 +183,7 @@ void RunsPresenter::reductionPaused() {
  */
 void RunsPresenter::autoreductionResumed() {
   if (requireNewAutoreduction()) {
+    // TODO clear table
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
