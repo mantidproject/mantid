@@ -72,7 +72,7 @@ void BatchView::setAlgorithmQueue(
   m_batchAlgoRunner.setQueue(algorithms);
 }
 
-void BatchView::executeAlgorithmQueue() {
+void BatchView::connectBatchAlgoRunnerSlots() {
   connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(onBatchComplete(bool)));
   connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
@@ -91,12 +91,37 @@ void BatchView::executeAlgorithmQueue() {
           this,
           SLOT(onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
                                 std::string)));
+}
+
+void BatchView::disconnectBatchAlgoRunnerSlots() {
+  disconnect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(onBatchComplete(bool)));
+  disconnect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
+             SLOT(onBatchCancelled()));
+  disconnect(&m_batchAlgoRunner,
+             SIGNAL(algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)),
+          this,
+          SLOT(onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr)));
+  disconnect(&m_batchAlgoRunner,
+             SIGNAL(algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)),
+          this,
+          SLOT(onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr)));
+  disconnect(&m_batchAlgoRunner,
+             SIGNAL(algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr,
+                                   std::string)),
+             this, SLOT(onAlgorithmError(
+                       MantidQt::API::IConfiguredAlgorithm_sptr, std::string)));
+}
+
+void BatchView::executeAlgorithmQueue() {
+  connectBatchAlgoRunnerSlots();
   m_batchAlgoRunner.executeBatchAsync();
 }
 
 void BatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
 void BatchView::onBatchComplete(bool error) {
+  disconnectBatchAlgoRunnerSlots();
   m_notifyee->notifyBatchComplete(error);
 }
 

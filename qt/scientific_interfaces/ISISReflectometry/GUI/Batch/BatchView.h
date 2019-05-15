@@ -51,6 +51,8 @@ private slots:
 private:
   void initLayout();
   Mantid::API::IAlgorithm_sptr createReductionAlg();
+  void connectBatchAlgoRunnerSlots();
+  void disconnectBatchAlgoRunnerSlots();
 
   std::unique_ptr<RunsView> createRunsTab();
   std::unique_ptr<EventView> createEventTab();
