@@ -70,122 +70,20 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Split into individual bundles which can be reduced individually. We split here if we have multiple periods.
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
-    if reduction_packages_require_splitting_for_event_slices(reduction_packages):
-        # TODO change function order so we don't have to pass in lots of the same parameters to the two functions
-        return single_reduction_for_event_slices(reduction_packages, workspace_to_name, workspace_to_monitor,
-                                                 use_optimizations, output_mode, save_can)
+    if (reduction_packages_require_splitting_for_event_slices(reduction_packages) and not
+            state.compatibility.use_compatibility_mode):
+        # If using compatibility mode we convert to histogram immediately after taking event slices,
+        # so would not be able to perform operations on event workspaces pre-slicing.
+        alg = "SANSSingleReductionEventSlice"
+        event_slice = True
     else:
-        return single_reduction_for_non_event_slices(reduction_packages, workspaces, monitors, workspace_to_name,
-                                                     workspace_to_monitor, use_optimizations, output_mode, plot_results,
-                                                     output_graph, save_can)
+        alg = "SANSSingleReduction"
+        event_slice = False
 
-
-def single_reduction_for_event_slices(reduction_packages, workspace_to_name, workspace_to_monitor,
-                                      use_optimizations, output_mode, save_can):
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
-    single_reduction_name = "SANSSingleReductionEventSlice"
-    single_reduction_options = {"UseOptimizations": use_optimizations,
-                                "SaveCan": save_can}
-    reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
-    reduction_alg.setChild(False)
-    # Perform the data reduction
-    for reduction_package in reduction_packages:
-        # -----------------------------------
-        # Set the properties on the algorithm
-        # -----------------------------------
-        set_properties_for_event_slice_reduction_algorithm(reduction_alg, reduction_package,
-                                                           workspace_to_name, workspace_to_monitor)
-
-        # -----------------------------------
-        #  Run the reduction
-        # -----------------------------------
-        reduction_alg.execute()
-
-        # -----------------------------------------
-        # Get the output group workspaces and split
-        # -----------------------------------------
-        reduction_package.reduced_lab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLAB")
-        reduction_package.reduced_hab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHAB")
-        reduction_package.reduced_merged = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceMerged")
-
-        reduction_package.reduced_lab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABCan")
-        reduction_package.reduced_lab_can_count = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceLABCanCount")
-        reduction_package.reduced_lab_can_norm = get_workspace_from_algorithm(reduction_alg,
-                                                                              "OutputWorkspaceLABCanNorm")
-        reduction_package.reduced_hab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABCan")
-        reduction_package.reduced_hab_can_count = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceHABCanCount")
-        reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
-                                                                              "OutputWorkspaceHABCanNorm")
-        reduction_package.calculated_transmission = get_workspace_from_algorithm(reduction_alg,
-                                                                                 "OutputWorkspaceCalculatedTransmission")
-        reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
-                                                                               "OutputWorkspaceUnfittedTransmission")
-        reduction_package.calculated_transmission_can = get_workspace_from_algorithm(reduction_alg,
-                                                                                     "OutputWorkspaceCalculatedTransmissionCan")
-        reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
-                                                                                   "OutputWorkspaceUnfittedTransmissionCan")
-
-        reduction_package.reduced_lab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABSample")
-        reduction_package.reduced_hab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABSample")
-
-        reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
-        reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
-
-        # -----------------------------------
-        # The workspaces are already on the ADS, but should potentially be grouped
-        # -----------------------------------
-        group_workspaces_if_required(reduction_package, output_mode, save_can)
-
-    # --------------------------------
-    # Perform output of all workspaces
-    # --------------------------------
-    # We have three options here
-    # 1. PublishToADS:
-    #    * This means we can leave it as it is
-    # 2. SaveToFile:
-    #    * This means we need to save out the reduced data
-    #    * Then we need to delete the reduced data from the ADS
-    # 3. Both:
-    #    * This means that we need to save out the reduced data
-    #    * The data is already on the ADS, so do nothing
-    if output_mode is OutputMode.SaveToFile:
-        save_to_file(reduction_packages, save_can, event_slice=True)
-        delete_reduced_workspaces(reduction_packages)
-    elif output_mode is OutputMode.Both:
-        save_to_file(reduction_packages, save_can, event_slice=True)
-
-    out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]
-    out_shift_factors = [reduction_package.out_shift_factor for reduction_package in reduction_packages]
-    return out_scale_factors, out_shift_factors
-
-
-def single_reduction_for_non_event_slices(reduction_packages, workspaces, monitors, workspace_to_name,
-                                          workspace_to_monitor, use_optimizations, output_mode,
-                                          plot_results, output_graph, save_can=False):
-    """
-        Runs a single reduction for non-event sliced data.
-
-        This function creates reduction packages which essentially contain information for a single valid reduction,
-        run it and store the results according to the user specified setting (output_mode).
-        :param reduction_packages: a list of ReductionPackage objects, which contain information for a single reduction.
-        :param workspaces: loaded workspaces which need to be deleted if not use_optimizations
-        :param monitors: loaded monitor workspaces which need to be deleted if not use_optimizations
-        :param workspace_to_name: a dict of SANSDataType vs output workspace names
-        :param workspace_to_monitor: a dict of SANSDataType vs output monitor workspace names
-        :param use_optimizations: if true then the optimizations of child algorithms are enabled.
-        :param output_mode: the output mode
-        :param plot_results: a bool. If true then plot the reduced workspaces as they are created
-        :param output_graph: a graph onto which new plots should be added.
-        :param save_can: bool. whether or not to save out can workspaces
-        """
-    # ------------------------------------------------------------------------------------------------------------------
-    # Run reductions (one at a time)
-    # ------------------------------------------------------------------------------------------------------------------
-    single_reduction_name = "SANSSingleReduction"
+    single_reduction_name = alg
     single_reduction_options = {"UseOptimizations": use_optimizations,
                                 "SaveCan": save_can}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
@@ -238,7 +136,8 @@ def single_reduction_for_non_event_slices(reduction_packages, workspaces, monito
         reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
         reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
 
-        if plot_results:
+        if not event_slice and plot_results:
+            # Event slice reductions do
             if PYQT4:
                 plot_workspace(reduction_package, output_graph)
             elif output_graph:
@@ -269,7 +168,7 @@ def single_reduction_for_non_event_slices(reduction_packages, workspaces, monito
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
     # -----------------------------------------------------------------------
-    if not use_optimizations:
+    if not event_slice and not use_optimizations:
         delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can)
 
     out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]

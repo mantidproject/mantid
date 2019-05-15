@@ -14,9 +14,11 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         IEventWorkspace, Progress)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from sans.algorithm_detail.mask_workspace import mask_bins
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, DataType)
-from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
+from sans.common.general_functions import (append_to_sans_file_tag, create_child_algorithm,
+                                           create_managed_non_child_algorithm)
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
 
@@ -119,6 +121,7 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         #    to have knowledge of masked regions: masking
         #    EventWorkspaces simply removes their events
         # ------------------------------------------------------------
+        component_as_string = self.getProperty("Component").value
         progress.report("Masking bin ...")
         workspace = self._mask_bins(state, workspace, component_as_string)
 
@@ -148,6 +151,36 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
             self.setProperty("SumOfCounts", sum_of_counts)
         if sum_of_norms:
             self.setProperty("SumOfNormFactors", sum_of_norms)
+
+    def _slice(self, state_serialized, workspace, monitor_workspace, data_type_as_string):
+        slice_name = "SANSSliceEvent"
+        slice_options = {"SANSState": state_serialized,
+                         "InputWorkspace": workspace,
+                         "InputWorkspaceMonitor": monitor_workspace,
+                         "OutputWorkspace": EMPTY_NAME,
+                         "OutputWorkspaceMonitor": "dummy2",
+                         "DataType": data_type_as_string}
+        slice_alg = create_child_algorithm(self, slice_name, **slice_options)
+        slice_alg.execute()
+
+        workspace = slice_alg.getProperty("OutputWorkspace").value
+        monitor_workspace = slice_alg.getProperty("OutputWorkspaceMonitor").value
+        slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
+        return workspace, monitor_workspace, slice_event_factor
+
+    def _convert_to_histogram(self, workspace):
+        if isinstance(workspace, IEventWorkspace):
+            convert_name = "RebinToWorkspace"
+            convert_options = {"WorkspaceToRebin": workspace,
+                               "WorkspaceToMatch": workspace,
+                               "OutputWorkspace": "OutputWorkspace",
+                               "PreserveEvents": False}
+            convert_alg = create_child_algorithm(self, convert_name, **convert_options)
+            convert_alg.execute()
+            workspace = convert_alg.getProperty("OutputWorkspace").value
+            append_to_sans_file_tag(workspace, "_histogram")
+
+        return workspace
 
     def _mask_bins(self, state, workspace, component):
         instrument = workspace.getInstrument().getName()
@@ -234,42 +267,6 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         delete_alg.execute()
 
         return new_mask_start, new_mask_stop
-
-    def _slice(self, state_serialized, workspace, monitor_workspace, data_type_as_string):
-        slice_name = "SANSSliceEvent"
-        slice_options = {"SANSState": state_serialized,
-                         "InputWorkspace": workspace,
-                         "InputWorkspaceMonitor": monitor_workspace,
-                         "OutputWorkspace": EMPTY_NAME,
-                         "OutputWorkspaceMonitor": "dummy2",
-                         "DataType": data_type_as_string}
-        slice_alg = create_child_algorithm(self, slice_name, **slice_options)
-        slice_alg.execute()
-
-        workspace = slice_alg.getProperty("OutputWorkspace").value
-        monitor_workspace = slice_alg.getProperty("OutputWorkspaceMonitor").value
-        slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
-        return workspace, monitor_workspace, slice_event_factor
-
-    def _move(self, state_serialized, workspace, component, is_transmission=False):
-        # First we set the workspace to zero, since it might have been moved around by the user in the ADS
-        # Second we use the initial move to bring the workspace into the correct position
-        move_name = "SANSMove"
-        move_options = {"SANSState": state_serialized,
-                        "Workspace": workspace,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
-        move_alg.execute()
-        workspace = move_alg.getProperty("Workspace").value
-
-        # Do the initial move
-        move_alg.setProperty("MoveType", "InitialMove")
-        move_alg.setProperty("Component", component)
-        move_alg.setProperty("Workspace", workspace)
-        move_alg.setProperty("IsTransmissionWorkspace", is_transmission)
-        move_alg.execute()
-        return move_alg.getProperty("Workspace").value
 
     def _convert_to_q(self, state_serialized, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
                       wavelength_and_pixel_adjustment_workspace):

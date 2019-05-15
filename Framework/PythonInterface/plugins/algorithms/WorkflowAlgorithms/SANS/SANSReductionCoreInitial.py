@@ -307,20 +307,6 @@ class SANSReductionCoreInitial(DistributedDataProcessorAlgorithm):
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
             calculated_transmission_workspace, unfitted_transmission_workspace
 
-    def _convert_to_histogram(self, workspace):
-        if isinstance(workspace, IEventWorkspace):
-            convert_name = "RebinToWorkspace"
-            convert_options = {"WorkspaceToRebin": workspace,
-                               "WorkspaceToMatch": workspace,
-                               "OutputWorkspace": "OutputWorkspace",
-                               "PreserveEvents": False}
-            convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-            convert_alg.execute()
-            workspace = convert_alg.getProperty("OutputWorkspace").value
-            append_to_sans_file_tag(workspace, "_histogram")
-
-        return workspace
-
     def validateInputs(self):
         errors = dict()
         # Check that the input can be converted into the right state object
