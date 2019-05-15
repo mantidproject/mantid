@@ -124,7 +124,7 @@ if __name__ == "__main__":
     # write the elements and isotopes
     atomNames = []
     for element in periodictable.elements:
-        atomNames.extend(writeElement(handle, element))
+        atomNames.append(writeElement(handle, element))
     handle.write("/// @endcond\n")
     handle.write("\n")
 
@@ -133,11 +133,12 @@ if __name__ == "__main__":
     handle.write("// getAtom() expects them to be sorted first by Z number then by A number.\n")
     handle.write("static Atom ATOMS[] = {\n")
     numAtoms = len(atomNames)
-    for i in range(0, numAtoms, 10):
-        handle.write(", ".join(atomNames[i:i+10]))
-        if i+10 < numAtoms:
-            handle.write(",")
-        handle.write("\n")
+    for i in range(0, numAtoms, 1):
+        if len(atomNames[i]):
+            handle.write(", ".join(atomNames[i]))
+            if i < numAtoms:
+                handle.write(",")
+            handle.write("\n")
     handle.write("};\n")
     handle.write("\n")
     handle.write("/** The total number of atoms in the array. */\n")
