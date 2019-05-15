@@ -45,16 +45,16 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
-  void rotate(Geometry::MeshObject &sampleMesh,
-              API::MatrixWorkspace_const_sptr inputWS);
 
 private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  boost::shared_ptr<Geometry::MeshObject> loadStl(std::string filename,
-                                                  ScaleUnits scaleType);
 };
+void DLLExport rotate(Geometry::MeshObject &sampleMesh,
+                      API::MatrixWorkspace_const_sptr inputWS);
+boost::shared_ptr<Geometry::MeshObject> DLLExport loadStl(std::string filename,
+                                                          ScaleUnits scaleType);
 
 } // namespace DataHandling
 } // namespace Mantid

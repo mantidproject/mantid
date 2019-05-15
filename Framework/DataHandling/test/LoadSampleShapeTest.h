@@ -131,13 +131,12 @@ public:
   }
 
   void testXRotation() {
-    LoadSampleShape alg;
-    alg.initialize();
-    MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 1, 0, 0, 45);
-
     auto sampleMesh = loadCube();
-    alg.rotate(*sampleMesh, inputWS);
+
+    rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {
         -5, 7.07106,    -14.142136, 5,  14.142136,  -7.07106,
@@ -149,12 +148,12 @@ public:
     }
   }
   void testYRotation() {
-    LoadSampleShape alg;
-    alg.initialize();
-    MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 1, 0, 90);
     auto sampleMesh = loadCube();
-    alg.rotate(*sampleMesh, inputWS);
+
+    rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
                                          -5,  -15, 5,  5,   15, -5, -5,  15,
@@ -165,12 +164,12 @@ public:
   }
 
   void testZRotation() {
-    LoadSampleShape alg;
-    alg.initialize();
-    MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 0, 1, 180);
     auto sampleMesh = loadCube();
-    alg.rotate(*sampleMesh, inputWS);
+
+    rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
                                          -15, 5,  -5,  -15, -5, 5,   15, -5,
@@ -181,14 +180,14 @@ public:
   }
 
   void testMultiRotation() {
-    LoadSampleShape alg;
-    alg.initialize();
-    MatrixWorkspace_sptr inputWS = prepareWorkspaces(alg, true);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Z", 0, 0, 1, 35);
     inputWS->mutableRun().mutableGoniometer().pushAxis("Y", 0, 1, 0, 20);
     inputWS->mutableRun().mutableGoniometer().pushAxis("X", 1, 0, 0, 70);
     auto sampleMesh = loadCube();
-    alg.rotate(*sampleMesh, inputWS);
+
+    rotate(*sampleMesh, inputWS);
     std::vector<double> rotatedVertices = sampleMesh->getVertices();
     std::vector<double> vectorToMatch = {
         -13.70635, 5.52235,   -7.52591,  -5.33788,  15.55731,  -2.11589,

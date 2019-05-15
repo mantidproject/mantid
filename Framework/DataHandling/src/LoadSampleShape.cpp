@@ -98,8 +98,7 @@ void LoadSampleShape::exec() {
  * @param inputWS The workspace to get the rotation from
  * @returns a shared pointer to the newly rotated Shape
  */
-void LoadSampleShape::rotate(MeshObject &sampleMesh,
-                             MatrixWorkspace_const_sptr inputWS) {
+void rotate(MeshObject &sampleMesh, MatrixWorkspace_const_sptr inputWS) {
   const std::vector<double> rotationMatrix =
       inputWS->run().getGoniometer().getR();
   sampleMesh.rotate(rotationMatrix);
@@ -111,8 +110,8 @@ void LoadSampleShape::rotate(MeshObject &sampleMesh,
  * @param scaleType The units of the scale to use mm, cm or m
  * @returns a shared pointer to the loaded meshobject
  */
-boost::shared_ptr<MeshObject> LoadSampleShape::loadStl(std::string filename,
-                                                       ScaleUnits scaleType) {
+boost::shared_ptr<MeshObject> loadStl(std::string filename,
+                                      ScaleUnits scaleType) {
   boost::shared_ptr<MeshObject> shape = nullptr;
   auto asciiStlReader = LoadAsciiStl(filename, scaleType);
   auto binaryStlReader = LoadBinaryStl(filename, scaleType);
