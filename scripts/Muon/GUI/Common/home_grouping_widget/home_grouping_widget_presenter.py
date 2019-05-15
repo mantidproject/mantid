@@ -56,6 +56,7 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 
     def handle_grouppair_selector_changed(self):
         name = str(self._view.get_selected_group_or_pair_name())
+        self._model.update_selected_group_pair_in_context(name)
         if self._model.is_group(name):
             self._view.alpha_hidden(True)
         elif self._model.is_pair(name):
