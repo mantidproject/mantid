@@ -29,8 +29,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-set(ENABLE_MANTIDPLOT ON CACHE BOOL "Enable Qt4-based gui & components")
-set(ENABLE_WORKBENCH ON CACHE BOOL "Enable Qt5-based gui & components")
+option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" ON)
+option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
@@ -64,7 +64,7 @@ include(Eigen)
 # Set ParaView information since later items depend on it
 
 # VATES flag. Requires ParaView
-set(MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+option(MAKE_VATES "Switch for compiling the Vates project")
 if(ENABLE_MANTIDPLOT AND MAKE_VATES)
   find_package(ParaView)
   if(ParaView_FOUND)
@@ -155,9 +155,8 @@ set(FULL_PACKAGE_BUILD 1)
 set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 
 # Framework Build options
-set(CXXTEST_ADD_PERFORMANCE OFF
-    CACHE BOOL
-          "Switch to add Performance tests to the list of tests run by ctest?")
+option(CXXTEST_ADD_PERFORMANCE
+       "Switch to add Performance tests to the list of tests run by ctest?")
 
 add_subdirectory(Framework)
 
@@ -202,12 +201,8 @@ endif(ENABLE_MANTIDPLOT AND MAKE_VATES)
 
 if(UNIX)
   # Experimental feature. Unix only at this point.
-  set(
-    UNITY_BUILD OFF
-    CACHE
-      BOOL
-      "Switch for utilising unity builds. Faster builds for selected components."
-    )
+  option(UNITY_BUILD
+         "Switch for utilising unity builds. Faster builds for selected components.")
 endif(UNIX)
 
 if(MSVC)
@@ -339,7 +334,7 @@ endif()
 add_subdirectory(Framework/PostInstall)
 
 # Conda
-set(ENABLE_CONDA CACHE BOOL "Switch to enable conda package generation")
+option(ENABLE_CONDA "Switch to enable conda package generation")
 if(ENABLE_CONDA)
   include(conda)
 endif(ENABLE_CONDA)
@@ -347,7 +342,7 @@ endif(ENABLE_CONDA)
 # CPack settings
 
 # Keep this in a defaulted-to-off option
-set(ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
+option(ENABLE_CPACK "Switch to enable CPack package generation")
 if(ENABLE_CPACK)
   include(CPackCommon)
 
@@ -396,7 +391,7 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtAwesome,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
@@ -482,7 +477,6 @@ if(ENABLE_CPACK)
           "python3-skimage,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
-          "python3-qtawesome,"
           "ipython3-qtconsole") # transitional package for bionic
 
       if(ENABLE_MANTIDPLOT)
@@ -505,7 +499,6 @@ if(ENABLE_CPACK)
           "python-skimage,"
           "python-pycifrw (>= 4.2.1),"
           "python-yaml,"
-          "python-qtawesome,"
           "ipython-qtconsole")
 
       if(ENABLE_MANTIDPLOT)

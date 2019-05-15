@@ -45,6 +45,7 @@ set(SRC_FILES
     src/FakeMDEventData.cpp
     src/FindPeaksMD.cpp
     src/FitMD.cpp
+    src/FlippingRatioCorrectionMD.cpp
     src/GetSpiceDataRawCountsFromMD.cpp
     src/GreaterThanMD.cpp
     src/IDynamicRebinning.cpp
@@ -176,6 +177,7 @@ set(
   inc/MantidMDAlgorithms/FakeMDEventData.h
   inc/MantidMDAlgorithms/FindPeaksMD.h
   inc/MantidMDAlgorithms/FitMD.h
+  inc/MantidMDAlgorithms/FlippingRatioCorrectionMD.h
   inc/MantidMDAlgorithms/GSLFunctions.h
   inc/MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h
   inc/MantidMDAlgorithms/GreaterThanMD.h
@@ -309,6 +311,7 @@ set(TEST_FILES
     FindPeaksMDTest.h
     FitMDTest.h
     FitResolutionConvolvedModelTest.h
+    FlippingRatioCorrectionMDTest.h
     ForegroundModelTest.h
     GetSpiceDataRawCountsFromMDTest.h
     GreaterThanMDTest.h

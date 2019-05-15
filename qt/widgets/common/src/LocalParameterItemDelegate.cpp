@@ -4,16 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MDFLocalParameterItemDelegate.h"
-#include "MDFEditLocalParameterDialog.h"
-#include "MDFLocalParameterEditor.h"
-#include "MultiDatasetFit.h"
+#include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
+#include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
+#include "MantidQtWidgets/Common/LocalParameterEditor.h"
 
 #include <QPainter>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace MDF {
+namespace MantidWidgets {
 
 /// Constructor.
 LocalParameterItemDelegate::LocalParameterItemDelegate(
@@ -133,6 +131,5 @@ void LocalParameterItemDelegate::prepareForPastedData() {
   }
 }
 
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

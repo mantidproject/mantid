@@ -46,9 +46,11 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
             'NormalizeByIntegratedMonitors', 'FirstTransmissionRun',
             'SecondTransmissionRun', 'Params', 'StartOverlap', 'EndOverlap',
+            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-            'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha', 'Debug', 'OutputWorkspace']
+            'ScaleFactor', 'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha',
+            'FloodCorrection', 'FloodWorkspace', 'Debug', 'OutputWorkspace']
         self.copyProperties('ReflectometryReductionOneAuto', self._child_properties)
 
     def PyExec(self):

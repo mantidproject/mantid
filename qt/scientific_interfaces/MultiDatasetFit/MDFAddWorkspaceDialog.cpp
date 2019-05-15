@@ -137,13 +137,13 @@ void AddWorkspaceDialog::accept() {
       m_wsIndices = prop;
     } else {
       QMessageBox::warning(
-          this, "MantidPlot - Error",
+          this, "Mantid - Error",
           QString("Some of the indices are outside the allowed range [0,%1]")
               .arg(m_maxIndex));
     }
   }
   if (m_wsIndices.empty()) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          QString("No indices have been selected."));
     return;
   }

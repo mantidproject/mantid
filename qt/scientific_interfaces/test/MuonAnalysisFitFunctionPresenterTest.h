@@ -42,16 +42,21 @@ public:
   MOCK_METHOD0(clearErrors, void());
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD1(setNumberOfDatasets, void(int));
+  MOCK_METHOD1(setDatasetNames, void(const QStringList &));
   MOCK_METHOD1(updateMultiDatasetParameters,
                void(const Mantid::API::IFunction &));
   MOCK_CONST_METHOD2(isLocalParameterFixed, bool(const QString &, int));
   MOCK_CONST_METHOD2(getLocalParameterValue, double(const QString &, int));
   MOCK_CONST_METHOD2(getLocalParameterTie, QString(const QString &, int));
   MOCK_CONST_METHOD0(getNumberOfDatasets, int());
+  MOCK_CONST_METHOD0(getCurrentDataset, int());
   MOCK_METHOD3(setLocalParameterValue, void(const QString &, int, double));
   MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
   MOCK_METHOD1(setCurrentDataset, void(int));
+  MOCK_METHOD3(editLocalParameter,
+               void(const QString &parName, const QStringList &wsNames,
+                    const std::vector<size_t> &wsIndices));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 private:

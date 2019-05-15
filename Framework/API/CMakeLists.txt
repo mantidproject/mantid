@@ -245,6 +245,7 @@ set(INC_FILES
     inc/MantidAPI/IFileLoader.h
     inc/MantidAPI/IFuncMinimizer.h
     inc/MantidAPI/IFunction.h
+    inc/MantidAPI/IFunction_fwd.h
     inc/MantidAPI/IFunction1D.h
     inc/MantidAPI/IFunction1DSpectrum.h
     inc/MantidAPI/IFunctionGeneral.h

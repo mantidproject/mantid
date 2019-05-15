@@ -22,15 +22,13 @@ class EXPORT_OPT_MANTIDQT_COMMON IFunctionBrowser {
 public:
   virtual ~IFunctionBrowser() {}
   virtual QString getFunctionString() = 0;
-  virtual void functionStructureChanged() = 0;
-  virtual void parameterChanged(const QString &funcIndex,
-                                const QString &paramName) = 0;
   virtual void updateParameters(const Mantid::API::IFunction &fun) = 0;
   virtual void clear() = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual void setFunction(const QString &funStr) = 0;
   virtual void setNumberOfDatasets(int n) = 0;
+  virtual void setDatasetNames(const QStringList &) = 0;
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
@@ -46,6 +44,7 @@ public:
   virtual void setLocalParameterTie(const QString &parName, int i,
                                     QString tie) = 0;
   virtual void setCurrentDataset(int i) = 0;
+  virtual int getCurrentDataset() const = 0;
 };
 
 } // namespace MantidWidgets

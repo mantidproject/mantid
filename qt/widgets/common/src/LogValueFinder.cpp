@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MDFLogValueFinder.h"
+#include "MantidQtWidgets/Common/LogValueFinder.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -14,12 +14,12 @@ using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
 
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 /**
  * Constructor
  * @param wsNames :: [input] Workspace names
  */
-MDFLogValueFinder::MDFLogValueFinder(const QStringList &wsNames)
+LogValueFinder::LogValueFinder(const QStringList &wsNames)
     : m_wsNames(wsNames) {}
 
 /**
@@ -29,7 +29,7 @@ MDFLogValueFinder::MDFLogValueFinder(const QStringList &wsNames)
  *   - Names of all logs are returned, not just those convertible to double
  * @returns :: List of log names
  */
-std::vector<std::string> MDFLogValueFinder::getLogNames() const {
+std::vector<std::string> LogValueFinder::getLogNames() const {
   std::vector<std::string> logNames;
   if (m_wsNames.empty()) { // no workspaces = no logs
     return logNames;
@@ -57,9 +57,10 @@ std::vector<std::string> MDFLogValueFinder::getLogNames() const {
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if index is not in range
  */
-double MDFLogValueFinder::getLogValue(
-    const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
-    int index) const {
+double
+LogValueFinder::getLogValue(const QString &logName,
+                            const Mantid::Kernel::Math::StatisticType &function,
+                            int index) const {
   if (index > m_wsNames.size() - 1 || index < 0) {
     std::ostringstream message;
     message << "Index " << index
@@ -79,9 +80,10 @@ double MDFLogValueFinder::getLogValue(
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if workspace not found
  */
-double MDFLogValueFinder::getLogValue(
-    const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
-    const QString &wsName) const {
+double
+LogValueFinder::getLogValue(const QString &logName,
+                            const Mantid::Kernel::Math::StatisticType &function,
+                            const QString &wsName) const {
   auto &ads = AnalysisDataService::Instance();
   const auto &workspace = wsName.toStdString();
   if (ads.doesExist(workspace)) {
@@ -92,5 +94,5 @@ double MDFLogValueFinder::getLogValue(
   }
 }
 
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
