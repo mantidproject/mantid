@@ -38,14 +38,6 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
     def tearDown(self):
         AnalysisDataService.clear()
 
-    def test_that_create_function_string_returns_the_correct_string_for_a_1L_function(self):
-        from IndirectTwoPeakFit import _create_function_string
-
-        func = _create_function_string('1L')
-        expected_func = 'name=Lorentzian,Amplitude={0},PeakCentre=0.0,FWHM={1}'.format(str(0.5), str(0.4))
-        expected_func += ',constraint=(Amplitude>0.0,FWHM>0.0)'
-        self.assertEqual(func, expected_func)
-
     def test_that_IndirectTwoPeakFit_produces_output_workspaces_with_the_correct_names(self):
         self.assertTrue(exists_in_ads('osiris92762_graphite002_two_peak_fit_1L_Workspaces'))
         self.assertTrue(exists_in_ads('osiris92762_graphite002_two_peak_fit_2L_Workspaces'))
