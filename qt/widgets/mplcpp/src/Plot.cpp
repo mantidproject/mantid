@@ -37,7 +37,7 @@ constructKwargs(boost::optional<std::vector<int>> spectrumNums,
   // Make sure to decide whether spectrum numbers or workspace indices
   Python::Dict kwargs;
 
-if (spectrumNums && !wkspIndices) {
+  if (spectrumNums && !wkspIndices) {
     kwargs["spectrum_nums"] = Converters::ToPyList<int>()(spectrumNums.get());
   } else if (wkspIndices && !spectrumNums) {
     kwargs["wksp_indices"] = Converters::ToPyList<int>()(wkspIndices.get());
@@ -49,13 +49,13 @@ if (spectrumNums && !wkspIndices) {
 
   kwargs["errors"] = errors;
   kwargs["overplot"] = overplot;
-  if(fig)
+  if (fig)
     kwargs["fig"] = fig.get();
-  if(plotKwargs)
+  if (plotKwargs)
     kwargs["plot_kwargs"] = Python::qHashToDict(plotKwargs.get());
-  if(axProperties)
+  if (axProperties)
     kwargs["ax_properties"] = Python::qHashToDict(axProperties.get());
-  if(windowTitle)
+  if (windowTitle)
     kwargs["window_title"] = windowTitle.get();
 
   return kwargs;

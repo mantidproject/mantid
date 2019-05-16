@@ -22,7 +22,7 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
- * Makes a call to the Mantid variation of plt.plot in Python utilising the
+ * Makes a call to the Mantid variation of plt.plot in Python utilizing the
  * Python C API, and the MantidQt::Widgets::Common::Python functionality.
  *
  * Each of the inputs to this function are optional and thus can be replaced
@@ -45,7 +45,7 @@ namespace MplCpp {
  * page https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
  *
  * @param axProperties A QHash<QString, QVariant> that consists of the
- * individual arguements you can give to the Matplotlib Axes object, for
+ * individual arguments you can give to the Matplotlib Axes object, for
  * examples look at the **kwargs section on this page
  * https://matplotlib.org/api/axes_api.html
  *
@@ -65,8 +65,8 @@ plot(const std::vector<std::string> &workspaces,
      boost::optional<Common::Python::Object> fig = boost::none,
      boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
      boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-     boost::optional<std::string> windowTitle = boost::none, bool errors = false,
-     bool overplot = false);
+     boost::optional<std::string> windowTitle = boost::none,
+     bool errors = false, bool overplot = false);
 
 } // namespace MplCpp
 } // namespace Widgets

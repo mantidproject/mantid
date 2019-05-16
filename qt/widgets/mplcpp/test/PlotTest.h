@@ -66,8 +66,8 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("linewidth"), QVariant(10));
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  hash))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, index, boost::none, boost::none, hash))
   }
 
   void testPlottingWithIncorrectPlotKwargsThrows() {
@@ -84,8 +84,8 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("xscale"), QVariant("log"));
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  boost::none, hash))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, index, boost::none, boost::none, boost::none, hash))
   }
 
   void testPlottingWithIncorrectAxPropertiesThrows() {
@@ -93,9 +93,9 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(QString(1)));
-    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none,
-                          boost::none, hash),
-                     const PythonException &)
+    TS_ASSERT_THROWS(
+        plot(workspaces, index, boost::none, boost::none, boost::none, hash),
+        const PythonException &)
   }
 
   void testPlottingWithWindowTitle() {
