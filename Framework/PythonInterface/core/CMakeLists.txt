@@ -31,7 +31,8 @@ set(INC_FILES
     inc/MantidPythonInterface/core/NDArray.h
     inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
     inc/MantidPythonInterface/core/VersionCompat.h
-    inc/MantidPythonInterface/core/WrapperHelpers.h)
+    inc/MantidPythonInterface/core/WrapperHelpers.h
+    inc/MantidPythonInterface/core/WrapPython.h)
 
 # Add the target for this directory
 set(_target_name PythonInterfaceCore)
