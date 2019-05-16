@@ -266,7 +266,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         run = workspace.getRun()
 
         if 'SAMP_POSN' in run:
-            self._sample_log_name = _extract_sensor_name(run, workspace.getInstrument())
+            self._sample_log_name = _extract_sensor_name(run, workspace.getInstrument(), self._sample_log_name)
 
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
@@ -307,7 +307,7 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
     return None, None
 
 
-def _extract_sensor_name(run, instrument):
+def _extract_sensor_name(run, instrument, default_value):
     if instrument.hasParameter("Workflow.TemperatureSensorNames"):
         sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")[0].split(',')
         position = _extract_position_from_run(instrument, run)
@@ -320,16 +320,15 @@ def _extract_sensor_name(run, instrument):
                 logger.warning('Invalid position ({}) found in workspace.'.format(position))
         else:
             logger.information('Position not found in sample logs.')
-    return ''
+    return default_value
 
 
 def _extract_position_from_run(instrument, run):
     if instrument.hasParameter("Workflow.SamplePositions"):
         sample_position = instrument.getStringParameter("Workflow.SamplePositions")[0].split(',')
         if 'SAMP_POSN' in run:
-            position = run['SAMP_POSN'].value[-1]
-            index = sample_position.index(position)
-            return index
+            position = str(run['SAMP_POSN'].value[-1])
+            return sample_position.index(position)
     return None
 
 

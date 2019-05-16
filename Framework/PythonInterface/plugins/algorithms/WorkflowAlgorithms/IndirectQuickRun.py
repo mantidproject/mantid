@@ -392,9 +392,9 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         instrument_prefix = get_instrument_prefix(workspace_name, run_number)
 
         log_filename = get_log_filename(instrument_prefix, run_number)
-        return self._get_temperature(workspace_name, mtd[workspace_name].getRun(), log_filename)
+        return self._get_temperature_from_log(workspace_name, mtd[workspace_name].getRun(), log_filename)
 
-    def _get_temperature(self, workspace_name, run, log_filename):
+    def _get_temperature_from_log(self, workspace_name, run, log_filename):
         if self._sample_log_name in run:
             # Look for temperature in logs of workspace
             return get_log_from_run(run, self._sample_log_name, self._sample_log_value)
