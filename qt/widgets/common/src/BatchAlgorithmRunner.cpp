@@ -144,11 +144,13 @@ void BatchAlgorithmRunner::executeBatchAsync() {
  */
 void BatchAlgorithmRunner::cancelBatch() {
   std::lock_guard<std::mutex> lock(m_mutex);
-  m_cancelRequested = true;
   // If the queue is empty, notify straight away that the batch has been
-  // cancelled
+  // cancelled. Otherwise, set a flag so that it will be cancelled after the
+  // current algorithm finishes processing
   if (queueLength() < 1)
     m_notificationCenter.postNotification(new BatchCancelledNotification());
+  else
+    m_cancelRequested = true;
 }
 
 /**
