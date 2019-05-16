@@ -84,7 +84,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         warning(message, parent=self)
 
     def setup_fit_options_table(self):
-        self.fit_options_table.setRowCount(8)
+        self.fit_options_table.setRowCount(5)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 300)
         self.fit_options_table.setColumnWidth(1, 300)
@@ -102,21 +102,21 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
 
-        table_utils.setRowName(self.fit_options_table, 3, "TF Asymmetry Mode")
-        self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, 3)
+        # table_utils.setRowName(self.fit_options_table, 3, "TF Asymmetry Mode")
+        # self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
+        #     self.fit_options_table, False, 3)
+        #
+        # table_utils.setRowName(self.fit_options_table, 4, "Plot Difference")
+        # self.plot_differences_checkbox = table_utils.addCheckBoxWidgetToTable(
+        #     self.fit_options_table, True, 4)
 
-        table_utils.setRowName(self.fit_options_table, 4, "Plot Difference")
-        self.plot_differences_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 4)
-
-        table_utils.setRowName(self.fit_options_table, 5, "Fit To Raw Data")
+        table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 5)
+            self.fit_options_table, True, 3)
 
-        table_utils.setRowName(self.fit_options_table, 6, "Show Parameter Errors")
-        self.show_parameter_errors_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 6)
+        # table_utils.setRowName(self.fit_options_table, 6, "Show Parameter Errors")
+        # self.show_parameter_errors_checkbox = table_utils.addCheckBoxWidgetToTable(
+        #     self.fit_options_table, True, 6)
 
-        table_utils.setRowName(self.fit_options_table, 7, "Evaluate Function As")
-        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 7, ['CentrePoint', 'Histogram'])
+        table_utils.setRowName(self.fit_options_table, 4, "Evaluate Function As")
+        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
