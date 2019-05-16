@@ -322,6 +322,7 @@ set(TEST_FILES
     BinFinderTest.h
     BinaryFileTest.h
     BinaryStreamReaderTest.h
+    BinaryStreamWriterTest.h
     BoseEinsteinDistributionTest.h
     BoundedValidatorTest.h
     CPUTimerTest.h
