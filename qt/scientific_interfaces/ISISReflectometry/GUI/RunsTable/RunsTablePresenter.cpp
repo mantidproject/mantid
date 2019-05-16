@@ -184,7 +184,8 @@ void RunsTablePresenter::updateWidgetEnabledState() {
   m_view->setProcessButtonEnabled(!processing && !autoreducing);
   m_view->setActionEnabled(IRunsTableView::Action::Process,
                            !processing && !autoreducing);
-  m_view->setActionEnabled(IRunsTableView::Action::Pause, processing);
+  m_view->setActionEnabled(IRunsTableView::Action::Pause,
+                           processing && !autoreducing);
   m_view->setActionEnabled(IRunsTableView::Action::InsertRow,
                            !processing && !autoreducing);
   m_view->setActionEnabled(IRunsTableView::Action::InsertGroup,
