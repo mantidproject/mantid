@@ -49,5 +49,6 @@ Python
 ------
 
 - The ``mantid.plots`` module now registers a ``power`` and ``square`` scale type to be used with ``set_xscale`` and ``set_xscale`` functions.
+- The method `total_nanoseconds` in `DateAndTime` has been deprecated. `totalNanoseconds` should be used instead.
 
 :ref:`Release 4.1.0 <v4.1.0>`

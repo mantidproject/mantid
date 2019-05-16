@@ -29,6 +29,13 @@ std::string ISO8601StringPlusSpace(DateAndTime &self) {
   return self.toISO8601String() + " ";
 }
 
+int64_t total_nanoseconds(DateAndTime &self) {
+  PyErr_Warn(
+      PyExc_DeprecationWarning,
+      ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  return self.totalNanoseconds();
+}
+
 void export_DateAndTime() {
   class_<DateAndTime>("DateAndTime", no_init)
       // Constructors
@@ -49,7 +56,7 @@ void export_DateAndTime() {
            make_constructor(Converters::to_dateandtime, default_call_policies(),
                             (arg("other"))),
            "Construct from numpy.datetime64")
-      .def("total_nanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
+      .def("total_nanoseconds", &total_nanoseconds, arg("self"),
            "Since 1990-01-01T00:00")
       .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
            "Since 1990-01-01T00:00")
