@@ -66,7 +66,6 @@ Bug Fixes
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
 
-
 Imaging
 -------
 
