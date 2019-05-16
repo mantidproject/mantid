@@ -39,7 +39,7 @@ endif()
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
 # -Wno-unused-result: Do not warn about unused return values in some C functions
-add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
+add_compile_options ( -Wall -Werror -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
                       -Wno-write-strings -Wno-unused-result )
 # C++-specific flags
