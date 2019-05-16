@@ -30,14 +30,14 @@ using MantidQt::Widgets::MplCpp::MantidAxes;
 
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
-constexpr auto MANTID_PROJECTION{"mantid"};
-constexpr auto DRAGGABLE_LEGEND{true};
-constexpr auto PLOT_TOOL_NONE{"None"};
-constexpr auto PLOT_TOOL_PAN{"Pan"};
-constexpr auto PLOT_TOOL_ZOOM{"Zoom"};
-constexpr auto LINEAR_SCALE{"Linear"};
-constexpr auto LOG_SCALE{"Log"};
-constexpr auto SQUARE_SCALE{"Square"};
+constexpr auto MANTID_PROJECTION = "mantid";
+constexpr auto DRAGGABLE_LEGEND = true;
+constexpr auto PLOT_TOOL_NONE = "None";
+constexpr auto PLOT_TOOL_PAN = "Pan";
+constexpr auto PLOT_TOOL_ZOOM = "Zoom";
+constexpr auto LINEAR_SCALE = "Linear";
+constexpr auto LOG_SCALE = "Log";
+constexpr auto SQUARE_SCALE = "Square";
 
 } // namespace
 
@@ -132,7 +132,7 @@ void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
  */
 void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
-  const auto lineNameAsCStr{lineName.toLatin1().constData()};
+  const auto lineNameAsCStr = lineName.toLatin1().constData();
   axes.forEachArtist("lines", [&lineNameAsCStr](Artist &&line) {
     if (line.pyobj().attr("get_label")() == lineNameAsCStr)
       line.remove();
@@ -398,7 +398,7 @@ void PreviewPlot::regenerateLegend() {
  * If the legend is visible remove it from the canvas
  */
 void PreviewPlot::removeLegend() {
-  auto legend{m_canvas->gca().legendInstance()};
+  auto legend = m_canvas->gca().legendInstance();
   if (!legend.pyobj().is_none()) {
     m_canvas->gca().legendInstance().remove();
   }

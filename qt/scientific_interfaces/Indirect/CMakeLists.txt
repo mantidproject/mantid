@@ -298,6 +298,10 @@ mtd_add_qt_library(
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
+    PythonInterfaceCore
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting

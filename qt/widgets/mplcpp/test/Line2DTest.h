@@ -22,7 +22,7 @@ public:
   // ---------------------- success tests --------------------
   void testConstructionWithVectorData() {
     std::vector<double> xdata{{2, 3, 4}}, ydata{{4, 5, 6}};
-    const auto expectedX{xdata}, expectedY{ydata};
+    const std::vector<double> expectedX{xdata}, expectedY{ydata};
     Line2D line(rawMplLine2D(), std::move(xdata), std::move(ydata));
     TS_ASSERT_EQUALS(expectedX, line.rawData().xaxis)
     TS_ASSERT_EQUALS(expectedY, line.rawData().yaxis)
@@ -49,7 +49,7 @@ public:
   void testSetDataUpdatesDataWithVectors() {
     Line2D line(rawMplLine2D(), {1, 2}, {1, 2});
     std::vector<double> newx{{2, 3, 4}}, newy{{4, 5, 6}};
-    const auto expectedX{newx}, expectedY{newy};
+    const std::vector<double> expectedX{newx}, expectedY{newy};
     line.setData(std::move(newx), std::move(newy));
     assertDataMatches(line, expectedX, expectedY);
   }

@@ -38,7 +38,7 @@ public:
     auto line1 = axes.plot({1, 2, 3}, {1, 2, 3});
     auto line2 = axes.plot({2, 3, 4}, {2, 3, 4});
 
-    constexpr auto newColour{"green"};
+    constexpr auto newColour = "green";
     TS_ASSERT_DIFFERS(newColour, line1.pyobj().attr("get_color")());
     TS_ASSERT_DIFFERS(newColour, line2.pyobj().attr("get_color")());
 

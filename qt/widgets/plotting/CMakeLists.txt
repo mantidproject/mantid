@@ -157,6 +157,8 @@ set(MPL_INC_FILES
 set(MPL_UI_FILES
     inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
 
+find_package(BoostPython)
+
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
   QT_VERSION 5
   SRC ${MPL_SRC_FILES}
@@ -170,6 +172,9 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
+    PythonInterfaceCore
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
