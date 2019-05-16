@@ -68,8 +68,7 @@ private:
 
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
-      return std::hash<std::int32_t>()(
-          static_cast<const int32_t>(spectrumNumber));
+      return std::hash<std::int32_t>()(static_cast<int32_t>(spectrumNumber));
     }
   };
 
