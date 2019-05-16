@@ -10,6 +10,7 @@ from qtpy import QtWidgets, QtCore
 from Muon.GUI.Common.utilities import table_utils
 from Muon.GUI.Common.message_box import warning
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
 
@@ -19,6 +20,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
+
+        self.function_browser = FunctionBrowser(self, True)
+        self.function_browser_layout.addWidget(self.function_browser)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
@@ -80,7 +84,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         warning(message, parent=self)
 
     def setup_fit_options_table(self):
-        self.fit_options_table.setRowCount(6)
+        self.fit_options_table.setRowCount(8)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 300)
         self.fit_options_table.setColumnWidth(1, 300)
