@@ -108,11 +108,14 @@ class _WorkspaceArtists(object):
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
             axes.legend().draggable()
 
-    def replace_data(self, workspace):
+    def replace_data(self, workspace, plot_kwargs):
         """Replace or replot artists based on a new workspace
         :param workspace: The new workspace containing the data
+        :param plot_kwargs: Key word args to pass to plotting function
         """
-        self._set_artists(self._data_replace_cb(self._artists, workspace))
+        new_artists = self._data_replace_cb(self._artists, workspace,
+                                            plot_kwargs)
+        self._set_artists(new_artists)
 
     def _set_artists(self, artists):
         """Ensure the stored artists is an iterable"""
@@ -246,10 +249,11 @@ class MantidAxes(Axes):
                 def data_replace_cb(_, __):
                     logger.warning("Updating data on this plot type is not yet supported")
             artist_info = self.tracked_workspaces.setdefault(name, [])
-            self.check_axes_distribution_consistency(is_distribution)
+
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
                                                  is_distribution,
                                                  spec_num))
+            self.check_axes_distribution_consistency()
         return artists
 
     @staticmethod
@@ -260,7 +264,7 @@ class MantidAxes(Axes):
             return False
         raise ValueError("Argument must be 'On' or 'Off'!")
 
-    def check_axes_distribution_consistency(self, is_distribution):
+    def check_axes_distribution_consistency(self):
         """
         Checks if new workspace to be plotted is consistent with current
         workspaces on axes in regard to being plotted as distributions.
@@ -271,7 +275,7 @@ class MantidAxes(Axes):
             for artist in artists:
                 tracked_ws_distributions.append(artist.is_distribution)
         if len(tracked_ws_distributions) > 0:
-            if any(tracked_ws_distributions) != is_distribution:
+            if not all(tracked_ws_distributions) and any(tracked_ws_distributions):
                 logger.warning("You are overlaying distribution and "
                                "non-distribution data!")
 
@@ -411,7 +415,7 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace):
+            def _data_update(artists, workspace, kwargs):
                 # It's only possible to plot 1 line at a time from a workspace
                 x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
                                                        kwargs)
@@ -479,7 +483,7 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace):
+            def _data_update(artists, workspace, kwargs):
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -488,6 +492,9 @@ class MantidAxes(Axes):
                 container_orig.remove()
                 # The container does not remove itself from the containers list
                 # but protect this just in case matplotlib starts doing this
+
+                # tracked_idx = self.tracked_workspaces[workspace.name()].index(container_orig)
+                # self.tracked_workspaces[workspace.name()].pop(tracked_idx)
                 try:
                     self.containers.remove(container_orig)
                 except ValueError:
@@ -496,6 +503,9 @@ class MantidAxes(Axes):
                 container_new = plotfunctions.errorbar(self, workspace, **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
+                # self.track_workspace_artist(workspace, container_new,
+                #                             spec_num=kwargs['specNum'],
+                #                             is_distribution=kwargs['plot_as_distribution'])
                 # update line properties to match original
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
                 for artist_orig, artist_new in zip(orig_flat, new_flat):
@@ -509,9 +519,10 @@ class MantidAxes(Axes):
             spec_num = self._get_spec_number(workspace, kwargs)
             plot_as_dist, _ = get_plot_as_distribution(workspace, pop=False,
                                                        **kwargs)
+            is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
-                workspace, plotfunctions.plot(self, *args, **kwargs),
-                plot_as_dist, _data_update, spec_num)
+                workspace, plotfunctions.errorbar(self, *args, **kwargs),
+                is_distribution, _data_update, spec_num)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 

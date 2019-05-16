@@ -13,6 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 from collections import OrderedDict
+from copy import copy
 from functools import partial
 
 # third party imports
@@ -24,8 +25,9 @@ from qtpy.QtWidgets import QActionGroup, QMenu
 
 # local imports
 from mantid.api import AnalysisDataService as ads
+from mantid.plots import MantidAxes
 from mantid.plots.helperfunctions import get_axes_labels
-from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -128,7 +130,8 @@ class FigureInteraction(object):
             self.fit_browser.add_to_menu(menu)
             menu.addSeparator()
         self._add_axes_scale_menu(menu)
-        self._add_normalization_option_menu(menu)
+        if isinstance(event.inaxes, MantidAxes):
+            self._add_normalization_option_menu(menu, event.inaxes)
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu):
@@ -144,24 +147,25 @@ class FigureInteraction(object):
             axes_actions.addAction(action)
         menu.addMenu(axes_menu)
 
-    def _add_normalization_option_menu(self, menu):
+    def _add_normalization_option_menu(self, menu, ax):
         # Check if toggling normalization makes sense
-        axes = self.canvas.figure.get_axes()
-        can_toggle_normalization = self._can_toggle_normalization(axes)
+        can_toggle_normalization = self._can_toggle_normalization(ax)
         if not can_toggle_normalization:
             return None
 
         # Create menu
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
-        none_action = norm_menu.addAction('None', self._normalize_none)
-        norm_action = norm_menu.addAction('Bin Width', self._normalize_bin_width)
+        none_action = norm_menu.addAction('None',
+                                          lambda: self._set_normalization_none(ax))
+        norm_action = norm_menu.addAction('Bin Width',
+                                          lambda: self._set_normalization_bin_width(ax))
         for action in [none_action, norm_action]:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
 
         # Update menu state
-        is_normalized = self._is_normalized(axes)
+        is_normalized = self._is_normalized(ax)
         if is_normalized:
             norm_action.setChecked(True)
         else:
@@ -169,47 +173,56 @@ class FigureInteraction(object):
 
         menu.addMenu(norm_menu)
 
-    def _is_normalized(self, axes):
-        return axes[0].tracked_workspaces.values()[0][0].is_distribution
+    def _is_normalized(self, ax):
+        return ax.tracked_workspaces.values()[0][0].is_distribution
 
-    def _normalize_bin_width(self):
-        self._toggle_normalization(is_normalized=False)
+    def _set_normalization_bin_width(self, ax):
+        if self._is_normalized(ax):
+            return
+        self._toggle_normalization(ax)
 
-    def _normalize_none(self):
-        self._toggle_normalization(is_normalized=True)
+    def _set_normalization_none(self, ax):
+        if not self._is_normalized(ax):
+            return
+        self._toggle_normalization(ax)
 
-    def _toggle_normalization(self, is_normalized):
-        axes = self.canvas.figure.get_axes()
-        for ax in axes:
-            ax.set_prop_cycle(None)  # reset the color cycler
-            for ws_name, artists in ax.tracked_workspaces.items():
-                workspace = ads.retrieve(ws_name)
-                if not workspace.isDistribution():
-                    for artist in artists:
-                        spec_num = artist.spec_num
-                        ax.remove_workspace_artist(ws_name, artist)
-                        ax.plot(workspace, specNum=spec_num,
-                                plot_as_distribution=(not is_normalized))
-            ax.set_ylabel(get_axes_labels(workspace)[0])
-            ax.relim()
-            ax.autoscale()
-
+    def _toggle_normalization(self, ax):
+        is_normalized = self._is_normalized(ax)
+        for arg_set in ax.creation_args:
+            workspace = ads.retrieve(arg_set['workspaces'])
+            arg_set['plot_as_distribution'] = not is_normalized
+            arg_set_copy = copy(arg_set)
+            [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
+            if 'specNum' not in arg_set:
+                if 'wkspIndex' in arg_set:
+                    arg_set['specNum'] = workspace.getSpectrum(
+                        arg_set.pop('wkspIndex')).getSpectrumNo()
+                else:
+                    raise RuntimeError(
+                        "No spectrum number associated with plot of workspace "
+                        "'{}'".format(workspace.name()))
+            for ws_artist in ax.tracked_workspaces[workspace.name()]:
+                if ws_artist.spec_num == arg_set.get('specNum'):
+                    ws_artist.replace_data(workspace, arg_set_copy)
+                    ws_artist.is_distribution = not is_normalized
+        ax.relim()
+        ax.autoscale()
         self.canvas.draw()
 
-    def _can_toggle_normalization(self, axes):
+    def _can_toggle_normalization(self, ax):
         """
         Return True if no plotted workspaces are distributions and all curves
         on the figure are either distributions or non-distributions. Return
         False otherwise.
+        :param ax: A MantidAxes object
         :return: bool
         """
         plotted_as_distribution = []
-        for ax in axes:
-            for workspace_name, artists in ax.tracked_workspaces.items():
-                if not ads.retrieve(workspace_name).isDistribution():
-                    plotted_as_distribution += [a.is_distribution for a in artists]
-                else:
-                    return False
+        for workspace_name, artists in ax.tracked_workspaces.items():
+            if not ads.retrieve(workspace_name).isDistribution():
+                plotted_as_distribution += [a.is_distribution for a in artists]
+            else:
+                return False
         if all(plotted_as_distribution) or not any(plotted_as_distribution):
             return True
         return False
