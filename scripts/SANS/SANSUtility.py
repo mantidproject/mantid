@@ -986,7 +986,7 @@ class AddOperation(object):
         self.adder = factory.create_add_algorithm(is_overlay)
         self.time_shifter = TimeShifter(time_shifts)
 
-    def add(self, LHS_workspace, RHS_workspace, output_workspace, run_to_add):
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, run_to_add, estimate_logs=False):
         """
         Add two workspaces together and place the result into the outputWorkspace.
         The user needs to specify which run is being added in order to determine
@@ -996,12 +996,15 @@ class AddOperation(object):
         :param RHS_workspace :: second workspace which can be shifted in time
         :param output_workspace :: the output workspace name
         :param run_to_add :: the number of the nth added workspace
+        :param estimate_logs :: bool. whether or not to estimate good values for bad proton charge logs.
+                                Only applicable for Overlay. Default is False.
         """
         current_time_shift = self.time_shifter.get_Nth_time_shift(run_to_add)
         self.adder.add(LHS_workspace=LHS_workspace,
                        RHS_workspace=RHS_workspace,
                        output_workspace=output_workspace,
-                       time_shift=current_time_shift)
+                       time_shift=current_time_shift,
+                       estimate_logs=estimate_logs)
 
 
 class CombineWorkspacesFactory(object):
@@ -1030,12 +1033,13 @@ class PlusWorkspaces(object):
     def __init__(self):
         super(PlusWorkspaces, self).__init__()
 
-    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift=0.0):
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift=0.0, estimate_logs=False):
         """
         :param LHS_workspace :: the first workspace
         :param RHS_workspace :: the second workspace
         :param output_workspace :: the output workspace
         :param time_shift :: unused parameter
+        :param estimate_logs :: unused parameter
         """
         lhs_ws = self._get_workspace(LHS_workspace)
         rhs_ws = self._get_workspace(RHS_workspace)
@@ -1065,19 +1069,22 @@ class OverlayWorkspaces(object):
     def __init__(self):
         super(OverlayWorkspaces, self).__init__()
 
-    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift=0.0):
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift=0.0, estimate_logs=False):
         """
         :param LHS_workspace :: the first workspace
         :param RHS_workspace :: the second workspace
         :param output_workspace :: the output workspace
         :param time_shift :: an additional time shift for the overlay procedure
+        :param estimate_logs :: optional bool. If true, and bad proton logs are present,
+                                estimate "good" values to replace them
         """
         rhs_ws = self._get_workspace(RHS_workspace)
         lhs_ws = self._get_workspace(LHS_workspace)
 
         # Remove bad proton charges from logs
-        self._clean_logs(lhs_ws)
-        self._clean_logs(rhs_ws)
+        self._clean_logs(lhs_ws, estimate_logs)
+        self._clean_logs(rhs_ws, estimate_logs)
+
         # Find the time difference between LHS and RHS workspaces and add optional time shift
         time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
         total_time_shift = time_difference + time_shift
@@ -1105,23 +1112,56 @@ class OverlayWorkspaces(object):
         if mtd.doesExist(temp_ws_name):
             mtd.remove(temp_ws_name)
 
-    def _clean_logs(self, ws):
+    def _clean_logs(self, ws, estimate_logs):
         """
-        Remove bad proton charge times from the logs.
-        This is a fix to a specific bug which was fixed in 2019.
+        Remove bad proton charge times from the logs, if present.
         :param ws: The workspace to clean
+        :param estimate_logs: bool. If true, estimate "good" values for bad proton logs
         """
         run = ws.getRun()
         if run.hasProperty("proton_charge"):
             pc = run.getProperty("proton_charge")
-            first = pc.firstTime()
-            if first.totalNanoseconds() < 0:
-                # 0 is in the 1990s. Proton charge bug causes times in the 1700s
+            first_log_time = pc.firstTime().toISO8601String()
+            if int(first_log_time.split("-")[0]) < 1990:
+                # Bug caused bad proton charges in 1700s. 1990 is start of epoch.
                 start = pc.nthTime(1)
                 end = pc.lastTime()
                 # Remove the 0th element in the proton charge logs
                 # we have assumed here that a run can have 1 bad proton charge at a maximum
                 pc.filterByTime(start, end)
+                sanslog.notice("An invalid pulsetime of {} has been detected and removed.".format(first_log_time))
+                if estimate_logs:
+                    # Estimate what the data should have been
+                    self._estimate_good_log(pc)
+
+    def _estimate_good_log(self, pc):
+        """
+        The bad proton charge is corrupted data from the end of a run,
+        rather than additional data. Therefore, we can estimate what
+        the data should have been.
+        Naively, we add a log with a time = last time + average time diff
+        and a value equal to the average of the values
+        :param pc: FloatTimeSeriesProperty. The proton charge logs.
+        """
+        average_time_diff = self._get_average_time_difference(pc)
+        estimated_time = pc.lastTime().totalNanoseconds() + average_time_diff
+        estimated_charge = np.mean(pc.value)
+        pc.addValue(estimated_time, estimated_charge)
+        sanslog.notice("A corrected pulstime of {} has been estimated.".format(estimated_time))
+
+    def _get_average_time_difference(self, pc):
+        """
+        Get the average difference between consecutive values,
+        in nanoseconds
+        :param pc: The proton charge logs
+        :return: the average different between times in ns
+        """
+        diffs = []
+        for i in range(pc.size() - 1):
+            first = pc.nthTime(i)
+            second = pc.nthTime(i+1)
+            diffs.append(second.totalNanoseconds()-first.totalNanoseconds())
+        return np.mean(diffs)
 
     def _extract_time_difference_in_seconds(self, ws1, ws2):
         # The times which need to be compared are the first entry in the proton charge log

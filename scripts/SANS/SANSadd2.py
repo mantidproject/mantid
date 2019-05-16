@@ -39,7 +39,8 @@ def add_runs(runs,  # noqa: C901
              time_shifts=None,
              outFile=None,
              outFile_monitors=None,
-             save_directory=None):
+             save_directory=None,
+             estimate_logs=False):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
 
@@ -103,13 +104,13 @@ def add_runs(runs,  # noqa: C901
                     return ""
 
                 adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY, RHS_workspace=ADD_FILES_NEW_TEMPORARY,
-                          output_workspace=ADD_FILES_SUM_TEMPORARY, run_to_add=counter_run)
+                          output_workspace=ADD_FILES_SUM_TEMPORARY, run_to_add=counter_run, estimate_logs=estimate_logs)
 
                 if isFirstDataSetEvent:
                     adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
                               RHS_workspace=ADD_FILES_NEW_TEMPORARY_MONITORS,
                               output_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
-                              run_to_add=counter_run)
+                              run_to_add=counter_run, estimate_logs=estimate_logs)
                 DeleteWorkspace(ADD_FILES_NEW_TEMPORARY)
                 if isFirstDataSetEvent:
                     DeleteWorkspace(ADD_FILES_NEW_TEMPORARY_MONITORS)
