@@ -78,10 +78,10 @@ class FigureInteraction(object):
         """Respond to a MouseEvent where a button was pressed"""
         # local variables to avoid constant self lookup
         canvas = self.canvas
-        if (event.button == canvas.buttond[Qt.RightButton] and
+        if (event.button == canvas.buttond.get(Qt.RightButton) and
                 not self.toolbar_manager.is_tool_active()):
             self._show_context_menu(event)
-        elif event.dblclick and event.button == canvas.buttond[Qt.LeftButton]:
+        elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             self._show_axis_editor(event)
 
     def _show_axis_editor(self, event):

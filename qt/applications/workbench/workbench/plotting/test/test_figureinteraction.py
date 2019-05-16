@@ -50,8 +50,10 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Empty
 
-        interactor.on_mouse_button_press(mouse_event)
-        mocked_qmenu.assert_not_called()
+        with patch.object(interactor.toolbar_manager, 'is_tool_active',
+                          lambda: False):
+            interactor.on_mouse_button_press(mouse_event)
+            self.assertEqual(0, mocked_qmenu.call_count)
 
     @patch('workbench.plotting.figureinteraction.QMenu',
            autospec=True)
@@ -64,8 +66,10 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Image
 
-        interactor.on_mouse_button_press(mouse_event)
-        mocked_qmenu.assert_not_called()
+        with patch.object(interactor.toolbar_manager, 'is_tool_active',
+                          lambda: False):
+            interactor.on_mouse_button_press(mouse_event)
+            self.assertEqual(0, mocked_qmenu.call_count)
 
     @patch('workbench.plotting.figureinteraction.QMenu',
            autospec=True)
@@ -79,23 +83,30 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Line
 
-        # Expect a call to QMenu() for the outer menu followed by a call with the first
-        # as its parent to generate the Axes menu.
+        # Expect a call to QMenu() for the outer menu followed by two more calls
+        # for the Axes and Normalization menus
         qmenu_call1 = MagicMock()
         qmenu_call2 = MagicMock()
-        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2]
+        qmenu_call3 = MagicMock()
+        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3]
 
         with patch('workbench.plotting.figureinteraction.QActionGroup',
                    autospec=True):
-            interactor.on_mouse_button_press(mouse_event)
-            self.assertEqual(0, qmenu_call1.addSeparator.call_count)
-            self.assertEqual(0, qmenu_call1.addAction.call_count)
-            expected_qmenu_calls = [call(), call("Axes", qmenu_call1)]
-            self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
-            self.assertEqual(4, qmenu_call2.addAction.call_count)
+            with patch.object(interactor.toolbar_manager, 'is_tool_active',
+                              lambda: False):
+                interactor.on_mouse_button_press(mouse_event)
+                self.assertEqual(0, qmenu_call1.addSeparator.call_count)
+                self.assertEqual(0, qmenu_call1.addAction.call_count)
+                expected_qmenu_calls = [call(),
+                                        call("Axes", qmenu_call1),
+                                        call("Normalization", qmenu_call1)]
+                self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
+                # 4 actions in Axes submenu
+                self.assertEqual(4, qmenu_call2.addAction.call_count)
+                # 2 actions in Normalization submenu
+                self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     # Failure tests
-
     def test_construction_with_non_qt_canvas_raises_exception(self):
         class NotQtCanvas(object):
             pass
