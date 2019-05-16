@@ -14,7 +14,7 @@ class TableWidgetDragRows(QTableWidget):
     rowMoved = Signal(int, list)
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(TableWidgetDragRows, self).__init__(*args, **kwargs)
 
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
