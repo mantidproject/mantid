@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
+
 from mantidqt.widgets.manageuserdirectories import ManageUserDirectories
 from mantidqt.interfacemanager import InterfaceManager
 

@@ -15,6 +15,7 @@ MuSR Changes
 New
 ###
 
+* Frequency Domain Analysis GUI added to workbench.
 * Added phase tab for calculating :ref:`phase tables <algm-CalMuonDetectorPhases>` and :ref:`PhaseQuad <algm-PhaseQuad>` workspaces to Frequency Domain Analysis GUI.
 
 Improvements
@@ -27,3 +28,4 @@ Bug Fixes
 
 * Muon Analysis no longer crashes when `TF Asymmetry` mode is activated.
 * Frequency Domain Analysis GUI added to workbench.
+
