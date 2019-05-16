@@ -10,10 +10,10 @@
 #include <boost/optional.hpp>
 #include <tuple>
 
-using boost::none;
-using boost::optional;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
+using boost::none;
+using boost::optional;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
 

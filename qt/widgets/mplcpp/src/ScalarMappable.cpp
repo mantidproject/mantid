@@ -12,11 +12,11 @@
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
-using Mantid::PythonInterface::callMethodNoCheck;
-using Mantid::PythonInterface::GlobalInterpreterLock;
-using Mantid::PythonInterface::NDArray;
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
+using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::NDArray;
+using Mantid::PythonInterface::callMethodNoCheck;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {

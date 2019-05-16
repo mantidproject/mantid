@@ -8,8 +8,8 @@
 #include "MantidPythonInterface/core/CallMethod.h"
 #include <cassert>
 
-using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::callMethodNoCheck;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {

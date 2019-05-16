@@ -62,10 +62,10 @@ MANTID_MPLCPP_DLL Common::Python::Object
 plot(const std::vector<std::string> &workspaces,
      boost::optional<std::vector<int>> spectrumNums,
      boost::optional<std::vector<int>> wkspIndices,
-     boost::optional<Common::Python::Object> fig,
-     boost::optional<QHash<QString, QVariant>> plotKwargs,
-     boost::optional<QHash<QString, QVariant>> axProperties,
-     boost::optional<std::string> windowTitle, bool errors = false,
+     boost::optional<Common::Python::Object> fig = boost::none,
+     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+     boost::optional<std::string> windowTitle = boost::none, bool errors = false,
      bool overplot = false);
 
 } // namespace MplCpp

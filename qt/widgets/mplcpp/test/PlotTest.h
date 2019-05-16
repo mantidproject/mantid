@@ -21,11 +21,6 @@ using namespace Mantid::PythonInterface;
 
 namespace {
 void setMatplotlibBackend() {
-  // auto funcsModule =
-  //     Python::NewRef(PyImport_Import(Py_BuildValue("s", "matplotlib")));
-  // auto args = Python::NewRef(Py_BuildValue("(s)", "Agg"));
-  // auto kwargs = Python::NewRef(Py_BuildValue("{}"));
-  // funcsModule.attr("use")(args, kwargs);
   auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
   mpl.attr("use")("Agg");
 }
@@ -50,22 +45,19 @@ public:
   void testPlottingWorksWithWorkspaceIndex() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, boost::none))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index))
   }
 
   void testPlottingWorksWithSpecNum() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  boost::none, boost::none, boost::none))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none))
   }
 
   void testPlottingThrowsWithSpecNumAndWorkspaceIndex() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
-    TS_ASSERT_THROWS(plot(workspaces, index, index, boost::none, boost::none,
-                          boost::none, boost::none),
+    TS_ASSERT_THROWS(plot(workspaces, index, index),
                      const std::invalid_argument &)
   }
 
@@ -75,7 +67,7 @@ public:
     QHash<QString, QVariant> hash;
     hash.insert(QString("linewidth"), QVariant(10));
     TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  hash, boost::none, boost::none))
+                                  hash))
   }
 
   void testPlottingWithIncorrectPlotKwargsThrows() {
@@ -83,8 +75,7 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(1));
-    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, hash,
-                          boost::none, boost::none),
+    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, hash),
                      const PythonException &)
   }
 
@@ -94,16 +85,16 @@ public:
     QHash<QString, QVariant> hash;
     hash.insert(QString("xscale"), QVariant("log"));
     TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  boost::none, hash, boost::none))
+                                  boost::none, hash))
   }
 
-  void testPlottingWithAxPropertiesThrows() {
+  void testPlottingWithIncorrectAxPropertiesThrows() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(QString(1)));
     TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none,
-                          boost::none, hash, boost::none),
+                          boost::none, hash),
                      const PythonException &)
   }
 
