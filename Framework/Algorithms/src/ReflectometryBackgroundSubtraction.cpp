@@ -70,11 +70,10 @@ void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
   setProperty("OutputWorkspace", outputWS);
 }
 
-/** Returns the indexNumbers of the ranges of spectra in the given list.
+/** Returns the ranges of spectra in the given list.
  *
- * @param indexList :: a vector containing an list of all the index numbers of
- * the histograms
- * @return a vector containing a list of ranges of the given indexList.
+ * @param spectraList :: a vector containing a list of spectra
+ * @return a vector containing a list of ranges of the given spectraList.
  */
 std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
     const std::vector<specnum_t> &spectraList) {
@@ -154,7 +153,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * The background is then subtracted from the input workspace.
  *
  * @param inputWS :: the input workspace
- * @param indexRanges :: the ranges of the background region
+ * @param indexList :: the ranges of the background region
  */
 void ReflectometryBackgroundSubtraction::calculatePixelBackground(
     MatrixWorkspace_sptr inputWS, const std::vector<double> &indexList) {
