@@ -74,7 +74,6 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.increment_run_button)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
-        self.horizontal_layout.setMargin(0)
 
     def getLayout(self):
         return self.horizontalLayout
