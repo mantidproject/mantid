@@ -116,4 +116,3 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         table_utils.setRowName(self.fit_options_table, 7, "Evaluate Function As")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 7, ['CentrePoint', 'Histogram'])
-

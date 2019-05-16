@@ -4,11 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtCore, QtWidgets
+from qtpy import QtWidgets
 
 from mantidqt.utils.qt import load_ui
-from mantid.api import AnalysisDataService
-import Muon.GUI.Common.utilities.run_string_utils as run_utils
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
 ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")

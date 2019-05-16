@@ -9,6 +9,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem
 from qtpy.QtCore import Signal
 
+
 class TableWidgetDragRows(QTableWidget):
     rowMoved = Signal(int, list)
 
@@ -54,7 +55,6 @@ class TableWidgetDragRows(QTableWidget):
             self.rowMoved.emit(drop_row, rows)
 
         super().dropEvent(event)
-
 
     def drop_on(self, event):
         index = self.indexAt(event.pos())

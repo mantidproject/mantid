@@ -12,18 +12,18 @@ import qtpy as QtCore
 
 Name = "Muon_Analysis_2"
 
-
-try:
-    global muon
-    if not muon.isHidden():
-        muon.setWindowState(muon.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
-        muon.activateWindow()
+if 'muon_analysis' in globals():
+    muon_analysis = globals()['muon_analysis']
+    if not muon_analysis.isHidden():
+        muon_analysis.setWindowState(
+            muon_analysis.windowState(
+            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        muon_analysis.activateWindow()
     else:
-        muon = MuonAnalysisGui()
-        muon.resize(700, 700)
-        muon.show()
-except:
-    muon = MuonAnalysisGui()
-    muon.resize(700, 700)
-    muon.show()
-
+        muon_analysis = MuonAnalysisGui()
+        muon_analysis.resize(700, 700)
+        muon_analysis.show()
+else:
+    muon_analysis = MuonAnalysisGui()
+    muon_analysis.resize(700, 700)
+    muon_analysis.show()
