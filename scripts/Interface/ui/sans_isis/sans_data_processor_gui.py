@@ -221,16 +221,17 @@ class SANSDataProcessorGui(QMainWindow,
         self.erase_button.setIcon(icons.get_icon("mdi.eraser"))
         self.delete_row_button.setIcon(icons.get_icon("mdi.trash-can"))
         self.insert_row_button.setIcon(icons.get_icon("mdi.table"))
+        self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
         self.paste_button.clicked.connect(self._paste_rows_requested)
         self.copy_button.clicked.connect(self._copy_rows_requested)
         self.erase_button.clicked.connect(self._erase_rows)
         self.cut_button.clicked.connect(self._cut_rows)
-
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
-        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
+        self.export_table_button.clicked.connect(self._export_table_clicked)
 
+        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
         self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
         self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
 
@@ -316,8 +317,6 @@ class SANSDataProcessorGui(QMainWindow,
         self.process_all_button.clicked.connect(self._process_all_clicked)
 
         self.load_button.clicked.connect(self._load_clicked)
-
-        self.export_table_button.clicked.connect(self._export_table_clicked)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
