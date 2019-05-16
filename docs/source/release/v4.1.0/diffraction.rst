@@ -61,6 +61,11 @@ Improvements
 
 - :ref:`DeltaPDF3D <algm-DeltaPDF3D>` has a new method for peak removal, KAREN (K-space Algorithmic REconstructioN)
 
+Bug Fixes
+#########
+
+- :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
+
 
 Imaging
 -------
