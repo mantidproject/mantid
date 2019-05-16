@@ -86,5 +86,16 @@ Row Row::withExtraRunNumbers(
   return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
              scaleFactor(), reductionOptions(), wsNames);
 }
+
+bool operator!=(Row const &lhs, Row const &rhs) { return !(lhs == rhs); }
+
+bool operator==(Row const &lhs, Row const &rhs) {
+  return lhs.runNumbers() == rhs.runNumbers() && lhs.theta() == rhs.theta() &&
+         lhs.qRange() == rhs.qRange() &&
+         lhs.scaleFactor() == rhs.scaleFactor() &&
+         lhs.transmissionWorkspaceNames() == rhs.transmissionWorkspaceNames() &&
+         lhs.reducedWorkspaceNames() == rhs.reducedWorkspaceNames() &&
+         lhs.reductionOptions() == rhs.reductionOptions();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

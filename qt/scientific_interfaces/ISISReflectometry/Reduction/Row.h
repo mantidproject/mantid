@@ -60,6 +60,8 @@ private:
   ReductionOptionsMap m_reductionOptions;
 };
 
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Row const &lhs, Row const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Row const &lhs, Row const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL Row mergedRow(Row const &rowA, Row const &rowB);
 } // namespace CustomInterfaces
 } // namespace MantidQt

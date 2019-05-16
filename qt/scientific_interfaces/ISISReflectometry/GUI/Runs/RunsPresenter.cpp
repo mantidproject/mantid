@@ -441,8 +441,11 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
       auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
                                             resultMetadata.theta);
       if (row.is_initialized()) {
+        auto rowChanged = [](Row const &rowA, Row const &rowB) -> bool {
+          return rowA.runNumbers() != rowB.runNumbers();
+        };
         mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          resultMetadata.groupName);
+                          resultMetadata.groupName, rowChanged);
       } else {
         m_searchModel->setError(rowIndex,
                                 "Theta was not specified in the description.");

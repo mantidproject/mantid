@@ -70,7 +70,8 @@ bool setGroupName(ReductionJobs &jobs, int groupIndex,
 std::string groupName(ReductionJobs const &jobs, int groupIndex);
 
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
-                       double thetaTolerance, std::string const &groupName);
+                       double thetaTolerance, std::string const &groupName,
+                       bool (*rowChanged)(Row const &rowA, Row const &rowB));
 
 template <typename ModificationListener>
 void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,

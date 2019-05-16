@@ -137,6 +137,9 @@ void Group::removeRow(int rowIndex) {
 }
 
 void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
+  if (row == m_rows[rowIndex])
+    return;
+
   Item::resetState();
   m_rows[rowIndex] = row;
 }
