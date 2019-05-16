@@ -74,6 +74,10 @@ void Row::renameOutputWorkspace(std::string const &oldName,
 
 Row Row::withExtraRunNumbers(
     std::vector<std::string> const &extraRunNumbers) const {
+  // If both lists of run numbers are the same then there's nothing to merge
+  if (extraRunNumbers == m_runNumbers)
+    return *this;
+
   auto newRunNumbers = std::vector<std::string>();
   newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
   boost::range::set_union(m_runNumbers, extraRunNumbers,
