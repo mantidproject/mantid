@@ -36,7 +36,10 @@ class FittingTabPresenter(object):
         pass
 
     def handle_use_rebin_changed(self):
-        self.update_selected_workspace_guess()
+        if not self.manual_selection_made:
+            self.update_selected_workspace_guess()
+        else:
+            self.selected_data = self.context.get_list_of_binned_or_unbinned_workspaces_from_equivalents(self.selected_data)
 
     @property
     def selected_data(self):

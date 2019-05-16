@@ -180,3 +180,11 @@ class MuonGroupPairContext(object):
             workspace_list += sub_list
 
         return workspace_list
+
+    def get_equivalent_group_pair(self, workspace_name):
+        for item in self._groups + self._pairs:
+            equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
+            if equivalent_name:
+                return equivalent_name
+
+        return None

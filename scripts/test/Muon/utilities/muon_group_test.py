@@ -42,11 +42,33 @@ class MuonGroupTest(unittest.TestCase):
         counts_workspace_22222 = CreateWorkspace([0], [0])
         asymmetry_workspace_22222 = CreateWorkspace([0], [0])
         group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, True)
-        group.show_rebin([22222], 'counts_name_22222', 'asymmetry_name_22222')
+        group.show_rebin([22222], 'counts_name_22222_rebin', 'asymmetry_name_22222_rebin')
         counts_workspace_33333 = CreateWorkspace([0], [0])
         asymmetry_workspace_33333 = CreateWorkspace([0], [0])
         group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, True)
-        group.show_rebin([33333], 'counts_name_33333', 'asymmetry_name_33333')
+        group.show_rebin([33333], 'counts_name_33333_rebin', 'asymmetry_name_33333_rebin')
+
+        return group
+
+    def create_group_populated_by_two_binned_and_two_unbinned_workspaces(self):
+        group = MuonGroup(group_name="group1")
+        counts_workspace_22222 = CreateWorkspace([0], [0])
+        asymmetry_workspace_22222 = CreateWorkspace([0], [0])
+        group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, False)
+        group.show_raw([22222], 'counts_name_22222', 'asymmetry_name_22222')
+        counts_workspace_33333 = CreateWorkspace([0], [0])
+        asymmetry_workspace_33333 = CreateWorkspace([0], [0])
+        group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, False)
+        group.show_raw([33333], 'counts_name_33333', 'asymmetry_name_33333')
+
+        counts_workspace_22222 = CreateWorkspace([0], [0])
+        asymmetry_workspace_22222 = CreateWorkspace([0], [0])
+        group.update_workspaces([22222], counts_workspace_22222, asymmetry_workspace_22222, True)
+        group.show_rebin([22222], 'counts_name_22222_rebin', 'asymmetry_name_22222_rebin')
+        counts_workspace_33333 = CreateWorkspace([0], [0])
+        asymmetry_workspace_33333 = CreateWorkspace([0], [0])
+        group.update_workspaces([33333], counts_workspace_33333, asymmetry_workspace_33333, True)
+        group.show_rebin([33333], 'counts_name_33333_rebin', 'asymmetry_name_33333_rebin')
 
         return group
 
@@ -148,7 +170,7 @@ class MuonGroupTest(unittest.TestCase):
 
         workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
 
-        self.assertEqual(workspace_list, ['asymmetry_name_22222'])
+        self.assertEqual(workspace_list, ['asymmetry_name_22222_rebin'])
 
     def test_get_asymmetry_workspace_names_returns_nothing_if_workspace_is_hidden_for_rebinned(self):
         group = self.create_group_populated_by_two_rebinned_workspaces()
@@ -157,6 +179,48 @@ class MuonGroupTest(unittest.TestCase):
         workspace_list = group.get_asymmetry_workspace_names_rebinned([[22222]])
 
         self.assertEqual(workspace_list, [])
+
+    def test_unbinned_asymmetry_name_returns_binned_name(self):
+        group = self.create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333')
+
+        self.assertEqual(rebinned_workspace_name, 'asymmetry_name_33333_rebin')
+
+    def test_unbinned_counts_workspace_returns_binned_name(self):
+        group = self.create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('counts_name_33333')
+
+        self.assertEqual(rebinned_workspace_name, 'counts_name_33333_rebin')
+
+    def test_binned_counts_workspace_returns_unbinned_name(self):
+        group = self.create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('counts_name_33333_rebin')
+
+        self.assertEqual(rebinned_workspace_name, 'counts_name_33333')
+
+    def test_binned_asymmetry_name_returns_unbinned_name(self):
+        group = self.create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333_rebin')
+
+        self.assertEqual(rebinned_workspace_name, 'asymmetry_name_33333')
+
+    def test_nothing_returned_if_workspace_does_not_exist(self):
+        group = self.create_group_populated_by_two_binned_and_two_unbinned_workspaces()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_43333_rebin')
+
+        self.assertEqual(rebinned_workspace_name, None)
+
+    def test_nothing_returned_equivalent_workspace_does_not_exist(self):
+        group = self.create_group_populated_by_two_workspace()
+
+        rebinned_workspace_name = group.get_rebined_or_unbinned_version_of_workspace_if_it_exists('asymmetry_name_33333')
+
+        self.assertEqual(rebinned_workspace_name, None)
 
 
 if __name__ == '__main__':
