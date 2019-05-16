@@ -131,14 +131,18 @@ if __name__ == "__main__":
     # write an array of all atoms and elements
     handle.write("// All of the atoms in a single array so it can be searched.\n")
     handle.write("// getAtom() expects them to be sorted first by Z number then by A number.\n")
-    handle.write("static Atom ATOMS[] = {\n")
+    handle.write("static std::vector<std::vector<std::reference_wrapper<const Atom>> ATOMS = {\n")
     numAtoms = len(atomNames)
     for i in range(0, numAtoms, 1):
         if len(atomNames[i]):
+            handle.write("{")
             handle.write(", ".join(atomNames[i]))
-            if i < numAtoms:
-                handle.write(",")
-            handle.write("\n")
+            handle.write(",}")
+        else:
+            handle.write("{}")
+        if i + 1 < numAtoms:
+            handle.write(",")
+        handle.write("\n")
     handle.write("};\n")
     handle.write("\n")
     handle.write("/** The total number of atoms in the array. */\n")

@@ -36,6 +36,13 @@ public:
     // Cm249.neutron.coh_scatt_length_real); // TODO
   }
 
+  void test_Z_Number() {
+    for(uint16_t z = 1; z <=96; ++z) {
+      Atom a = getAtom(z);
+      TS_ASSERT_EQUALS(a.z_number, z);
+    }
+  }
+
   void testError() {
     TS_ASSERT_THROWS(getAtom(1, 15), std::runtime_error);
     TS_ASSERT_THROWS(getAtom("garbage"), std::runtime_error);
