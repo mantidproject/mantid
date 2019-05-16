@@ -102,8 +102,8 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input properties
-        self.declareProperty(StringArrayProperty(name='RunNumbers'),
-                             doc='A list of input runs.')
+        self.declareProperty(StringArrayProperty(name='InputFiles'),
+                             doc='A comma separated list of run numbers.')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
@@ -205,7 +205,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         """
         self._instrument_name = self.getPropertyValue('Instrument')
 
-        runs = self.getProperty('RunNumbers').value
+        runs = self.getProperty('InputFiles').value
         self._data_files = []
         self._format_runs(runs)
         first_file = self._data_files[0]
@@ -332,8 +332,6 @@ class IndirectQuickRun(DataProcessorAlgorithm):
                 IndirectTwoPeakFit(SampleWorkspace=workspace_name,
                                    EnergyMin=x_min,
                                    EnergyMax=x_max,
-                                   Minimizer='Levenberg-Marquardt',
-                                   MaxIterations=500,
                                    OutputName=result)
 
             result_workspaces.append(result + '_Result')

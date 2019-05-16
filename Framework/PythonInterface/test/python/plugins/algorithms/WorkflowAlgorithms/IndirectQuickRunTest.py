@@ -32,6 +32,9 @@ class IndirectQuickRunTest(unittest.TestCase):
         self._inelastic_range = '0.4,0.5'
         self._total_range = '-0.5, 0.5'
 
+    def tearDown(self):
+        AnalysisDataService.clear()
+
     def test_that_IndirectQuickRun_produces_output_workspaces_with_the_correct_names(self):
         self._execute_IndirectQuickRun()
 
@@ -91,15 +94,14 @@ class IndirectQuickRunTest(unittest.TestCase):
         self._assert_equal_to_reference_file('osiris92762-osiris92763_scan_red_Diffusion')
 
     def _execute_IndirectQuickRun(self, msd_fit=False, width_fit=False):
-        IndirectQuickRun(RunNumbers=self._run_numbers, Instrument=self._instrument, Analyser=self._analyser,
+        IndirectQuickRun(InputFiles=self._run_numbers, Instrument=self._instrument, Analyser=self._analyser,
                          Reflection=self._reflection, SpectraRange=self._spectra_range,
                          ElasticRange=self._elastic_range, InelasticRange=self._inelastic_range,
                          TotalRange=self._total_range, MSDFit=msd_fit, WidthFit=width_fit)
 
     def _assert_equal_to_reference_file(self, output_name):
-        output_workspace = get_ads_workspace(output_name)
         expected_workspace = LoadNexus(Filename='IndirectQuickRun_' + output_name +'.nxs')
-        self.assertTrue(CompareWorkspaces(output_workspace, expected_workspace)[0])
+        self.assertTrue(CompareWorkspaces(get_ads_workspace(output_name), expected_workspace)[0])
 
 
 if __name__ == '__main__':
