@@ -36,6 +36,13 @@ class HomePlotWidgetView(QtWidgets.QWidget):
         self.plot_label.setObjectName("plotLabel")
         self.plot_label.setText("Plot type : ")
 
+        self.plot_label = QtWidgets.QLabel(self)
+        self.plot_label.setObjectName("plotLabel")
+        self.plot_label.setText("Plot type : ")
+
+        self.overlay = QtWidgets.QCheckBox("overlay",self)
+        self.keep = QtWidgets.QCheckBox("keep",self)
+
         self.plot_selector = QtWidgets.QComboBox(self)
         self.plot_selector.setObjectName("plotSelector")
         self.plot_selector.addItems(["Asymmetry", "Counts"])
@@ -54,6 +61,10 @@ class HomePlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.plot_label)
         self.horizontal_layout.addWidget(self.plot_selector)
+        self.horizontal_layout.addStretch(0)
+        self.horizontal_layout.addWidget(self.overlay)
+        self.horizontal_layout.addStretch(0)
+        self.horizontal_layout.addWidget(self.keep)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
@@ -84,6 +95,12 @@ class HomePlotWidgetView(QtWidgets.QWidget):
     # for docking
     def getLayout(self):
         return self.widget_layout
+
+    def if_overlay(self):
+        return self.overlay.isChecked()
+
+    def if_keep(self):
+        return self.keep.isChecked()
 
     def on_plot_button_clicked(self, slot):
         self.plot_button.clicked.connect(slot)
