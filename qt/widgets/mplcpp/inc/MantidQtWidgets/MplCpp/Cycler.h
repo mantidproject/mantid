@@ -13,8 +13,6 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #pragma pop_macro("slots")
 
-using namespace MantidQt::Widgets::Common;
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -25,12 +23,12 @@ namespace MplCpp {
  * to create an interable that endlessly loops around a sequence of values.
  * The call operator is used to produce the next value in the cycle
  */
-class MANTID_MPLCPP_DLL Cycler : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Cycler : public Common::Python::InstanceHolder {
 public:
-  Cycler(Python::Object obj);
+  Cycler(Common::Python::Object obj);
 
   /// Return the next value in the sequence
-  Python::Dict operator()() const;
+  Common::Python::Dict operator()() const;
 };
 
 /// Create a cycler from a string of values

@@ -17,6 +17,7 @@
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

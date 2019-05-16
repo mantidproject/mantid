@@ -14,8 +14,6 @@
 #pragma pop_macro("slots")
 #include <QString>
 
-using namespace MantidQt::Widgets::Common;
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -24,13 +22,13 @@ namespace MplCpp {
  * @brief Defines a C++ wrapper for the matplotlib.cm.Colormap
  * class
  */
-class MANTID_MPLCPP_DLL Colormap : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Colormap : public Common::Python::InstanceHolder {
 public:
-  Colormap(Python::Object obj);
+  Colormap(Common::Python::Object obj);
 };
 
 /// Return the matplotlib.cm module
-MANTID_MPLCPP_DLL Python::Object cmModule();
+MANTID_MPLCPP_DLL Common::Python::Object cmModule();
 
 /// Check if the named colormap if it exists
 MANTID_MPLCPP_DLL bool cmapExists(const QString &name);

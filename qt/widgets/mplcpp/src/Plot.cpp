@@ -6,147 +6,81 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/MplCpp/Plot.h"
+#include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 
 using namespace Mantid::PythonInterface;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
 namespace {
-/**
- * Construct a Python list object from the passed vector
- *
- * @tparam T intended to be a std::vector of a type that is a type convertable
- * to the pythonType passed
- * @param vector
- * @param pythonType Any of the types here:
- * https://docs.python.org/2/c-api/arg.html
- * @return Python::Object Python List
- */
-template <class T>
-PyObject *constructPythonListFromVectorOfTypeT(const T &vector,
-                                               std::string pythonType) {
-  const auto vectorSize = vector.size();
-  PyObject *pythonList = PyList_New(vectorSize);
-  for (auto i = 0u; i < vectorSize; ++i) {
-    PyObject *pythonVectorItem;
-    pythonVectorItem = Py_BuildValue(pythonType.c_str(), vector[i]);
-    PyList_SetItem(pythonList, i, pythonVectorItem);
-  }
-  return pythonList;
-}
-PyObject *
-constructPythonListFromVectorOfStrings(const std::vector<std::string> &vector) {
-  const auto vectorSize = vector.size();
-  PyObject *pythonList = PyList_New(vectorSize);
-  for (auto i = 0u; i < vectorSize; ++i) {
-    PyObject *pythonVectorItem;
-    pythonVectorItem = Py_BuildValue("s", vector[i].c_str());
-
-    PyList_SetItem(pythonList, i, pythonVectorItem);
-  }
-  return pythonList;
-}
-
 Python::Object constructArgs(const std::vector<std::string> &workspaces) {
-  return Python::NewRef(
-      Py_BuildValue("(O)", constructPythonListFromVectorOfStrings(workspaces)));
+  Python::Object workspaceList =
+      Converters::ToPyList<std::string>()(workspaces);
+  return Python::NewRef(Py_BuildValue("(O)", workspaceList.ptr()));
 }
 
 Python::Object
-constructKwargs(boost::optional<std::vector<int>> spectrum_nums,
-                boost::optional<std::vector<int>> wksp_indices,
+constructKwargs(boost::optional<std::vector<int>> spectrumNums,
+                boost::optional<std::vector<int>> wkspIndices,
                 boost::optional<Python::Object> fig,
-                boost::optional<QHash<QString, QVariant>> plot_kwargs,
-                boost::optional<QHash<QString, QVariant>> ax_properties,
-                boost::optional<std::string> window_title, bool errors,
+                boost::optional<QHash<QString, QVariant>> plotKwargs,
+                boost::optional<QHash<QString, QVariant>> axProperties,
+                boost::optional<std::string> windowTitle, bool errors,
                 bool overplot) {
   // Make sure to decide whether spectrum numbers or workspace indices
-  bool useSpecNums;
-  if (spectrum_nums && !wksp_indices) {
-    useSpecNums = true;
-  } else if (wksp_indices && !spectrum_nums) {
-    useSpecNums = false;
+  Python::Dict kwargs;
+
+  if (spectrumNums && !wkspIndices) {
+    kwargs["spectrum_nums"] = Converters::ToPyList<int>()(spectrumNums.get());
+  } else if (wkspIndices && !spectrumNums) {
+    kwargs["wksp_indices"] = Converters::ToPyList<int>()(wkspIndices.get());
   } else {
     throw std::invalid_argument(
         "Passed spectrum numbers and workspace indices, please only pass one, "
         "with the other being boost::none.");
   }
 
-  // Declare all variables at this scope before potential assignment
-  Python::Object pythonSpectrumNums;
-  Python::Object pythonWkspIndices;
-  Python::Object pythonFig;
-  Python::Object pythonPlotKwargs;
-  Python::Object pythonAxProperties;
-  Python::Object pythonWindowTitle;
+  kwargs["errors"] = errors;
+  kwargs["overplot"] = overplot;
+  if (fig)
+    kwargs["fig"] = fig.get();
+  if (plotKwargs)
+    kwargs["plot_kwargs"] = Python::qHashToDict(plotKwargs.get());
+  if (axProperties)
+    kwargs["ax_properties"] = Python::qHashToDict(axProperties.get());
+  if (windowTitle)
+    kwargs["window_title"] = windowTitle.get();
 
-  // These values are defaulted so not purely optional
-  Python::Object pythonErrors = Python::NewRef(Py_BuildValue("b", errors));
-  Python::Object pythonOverplot = Python::NewRef(Py_BuildValue("b", overplot));
-
-  // Check the optional variables that are purely optional
-  if (plot_kwargs) {
-    pythonPlotKwargs = Python::qHashToDict(plot_kwargs.get());
-  }
-  if (ax_properties) {
-    pythonAxProperties = Python::qHashToDict(ax_properties.get());
-  }
-  if (window_title) {
-    pythonWindowTitle =
-        Python::NewRef(Py_BuildValue("s", window_title.get().c_str()));
-  }
-  if (fig) {
-    pythonFig = fig.get();
-  }
-
-  if (useSpecNums) {
-    // Using specNums
-    pythonSpectrumNums =
-        Python::NewRef(constructPythonListFromVectorOfTypeT<std::vector<int>>(
-            spectrum_nums.get(), "i"));
-
-    return Python::NewRef(Py_BuildValue(
-        "{sOsOsOsOsOsOsO}", "spectrum_nums", pythonSpectrumNums.ptr(), "errors",
-        pythonErrors.ptr(), "overplot", pythonOverplot.ptr(), "fig",
-        pythonFig.ptr(), "plot_kwargs", pythonPlotKwargs.ptr(), "ax_properties",
-        pythonAxProperties.ptr(), "window_title", pythonWindowTitle.ptr()));
-  } else {
-    // Using wkspIndices
-    pythonWkspIndices =
-        Python::NewRef(constructPythonListFromVectorOfTypeT<std::vector<int>>(
-            wksp_indices.get(), "i"));
-
-    return Python::NewRef(Py_BuildValue(
-        "{sOsOsOsOsOsOsO}", "wksp_indices", pythonWkspIndices.ptr(), "errors",
-        pythonErrors.ptr(), "overplot", pythonOverplot.ptr(), "fig",
-        pythonFig.ptr(), "plot_kwargs", pythonPlotKwargs.ptr(), "ax_properties",
-        pythonAxProperties.ptr(), "window_title", pythonWindowTitle.ptr()));
-  }
+  return kwargs;
 }
 } // namespace
 
 Python::Object plot(const std::vector<std::string> &workspaces,
-                    boost::optional<std::vector<int>> spectrum_nums,
-                    boost::optional<std::vector<int>> wksp_indices,
+                    boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices,
                     boost::optional<Python::Object> fig,
-                    boost::optional<QHash<QString, QVariant>> plot_kwargs,
-                    boost::optional<QHash<QString, QVariant>> ax_properties,
-                    boost::optional<std::string> window_title, bool errors,
+                    boost::optional<QHash<QString, QVariant>> plotKwargs,
+                    boost::optional<QHash<QString, QVariant>> axProperties,
+                    boost::optional<std::string> windowTitle, bool errors,
                     bool overplot) {
   GlobalInterpreterLock lock;
-  PyObject *functionsString = Py_BuildValue("s", "mantidqt.plotting.functions");
-  PyObject *funcsModule = PyImport_Import(functionsString);
-  PyObject *plotFunc = PyObject_GetAttrString(funcsModule, "plot");
+  auto funcsModule =
+      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"));
   auto args = constructArgs(workspaces);
-  auto kwargs = constructKwargs(spectrum_nums, wksp_indices, fig, plot_kwargs,
-                                ax_properties, window_title, errors, overplot);
-  PyObject *returnedFig = PyObject_Call(plotFunc, args.ptr(), kwargs.ptr());
-  return Python::NewRef(returnedFig);
+  auto kwargs = constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs,
+                                axProperties, windowTitle, errors, overplot);
+  try {
+    return funcsModule.attr("plot")(*args, **kwargs);
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
 }
 } // namespace MplCpp
 } // namespace Widgets

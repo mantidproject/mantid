@@ -13,6 +13,7 @@
 
 using MantidQt::Widgets::MplCpp::Cycler;
 using MantidQt::Widgets::MplCpp::cycler;
+using namespace MantidQt::Widgets::Common;
 
 class CyclerTest : public CxxTest::TestSuite {
 public:
@@ -26,8 +27,7 @@ public:
     auto colors = cycler(label.c_str(), "rgb");
 
     auto toDict = [&label](const char *value) {
-      return MantidQt::Widgets::Common::Python::NewRef(
-          Py_BuildValue("{ss}", label.c_str(), value));
+      return Python::NewRef(Py_BuildValue("{ss}", label.c_str(), value));
     };
     TS_ASSERT_EQUALS(toDict("r"), colors());
     TS_ASSERT_EQUALS(toDict("g"), colors());
@@ -37,7 +37,7 @@ public:
   // ----------------- failure tests ---------------------
 
   void testConstructWithNonCyclerThrowsInvalidArgument() {
-    MantidQt::Widgets::Common::Python::Object none;
+    Python::Object none;
     TS_ASSERT_THROWS(Cycler cycler(none), std::invalid_argument);
   }
 };

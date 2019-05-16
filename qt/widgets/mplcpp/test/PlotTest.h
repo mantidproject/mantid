@@ -12,19 +12,17 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
+using namespace Mantid::PythonInterface;
 
 namespace {
 void setMatplotlibBackend() {
-  PyObject *functionsString = Py_BuildValue("s", "matplotlib");
-  PyObject *funcsModule = PyImport_Import(functionsString);
-  PyObject *plotFunc = PyObject_GetAttrString(funcsModule, "use");
-  PyObject *args = Py_BuildValue("(s)", "Agg");
-  PyObject *kwargs = Py_BuildValue("{}");
-  PyObject_Call(plotFunc, args, kwargs);
+  auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
+  mpl.attr("use")("Agg");
 }
 } // namespace
 
@@ -44,31 +42,22 @@ public:
     setMatplotlibBackend();
   }
 
-  void tearDown() override {
-    // Confirm an error hasn't happend
-    auto error = PyErr_Occurred();
-    TS_ASSERT_EQUALS(error, nullptr)
-  }
-
   void testPlottingWorksWithWorkspaceIndex() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
-                                  boost::none, boost::none, boost::none))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index))
   }
 
   void testPlottingWorksWithSpecNum() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  boost::none, boost::none, boost::none))
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none))
   }
 
   void testPlottingThrowsWithSpecNumAndWorkspaceIndex() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
-    TS_ASSERT_THROWS(plot(workspaces, index, index, boost::none, boost::none,
-                          boost::none, boost::none),
+    TS_ASSERT_THROWS(plot(workspaces, index, index),
                      const std::invalid_argument &)
   }
 
@@ -77,8 +66,8 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("linewidth"), QVariant(10));
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  hash, boost::none, boost::none))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, index, boost::none, boost::none, hash))
   }
 
   void testPlottingWithIncorrectPlotKwargsThrows() {
@@ -86,8 +75,8 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(1));
-    TS_ASSERT_THROWS_ANYTHING(plot(workspaces, index, boost::none, boost::none,
-                                   hash, boost::none, boost::none))
+    TS_ASSERT_THROWS(plot(workspaces, index, boost::none, boost::none, hash),
+                     const PythonException &)
   }
 
   void testPlottingWithAxProperties() {
@@ -95,17 +84,18 @@ public:
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("xscale"), QVariant("log"));
-    TS_ASSERT_THROWS_NOTHING(plot(workspaces, index, boost::none, boost::none,
-                                  boost::none, hash, boost::none))
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, index, boost::none, boost::none, boost::none, hash))
   }
 
-  void testPlottingWithAxPropertiesThrows() {
+  void testPlottingWithIncorrectAxPropertiesThrows() {
     std::vector<std::string> workspaces = {"ws"};
     std::vector<int> index = {1};
     QHash<QString, QVariant> hash;
     hash.insert(QString("asdasdasdasdasd"), QVariant(QString(1)));
-    TS_ASSERT_THROWS_ANYTHING(plot(workspaces, index, boost::none, boost::none,
-                                   boost::none, hash, boost::none))
+    TS_ASSERT_THROWS(
+        plot(workspaces, index, boost::none, boost::none, boost::none, hash),
+        const PythonException &)
   }
 
   void testPlottingWithWindowTitle() {

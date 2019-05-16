@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

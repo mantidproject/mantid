@@ -14,6 +14,7 @@
 
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Zoomer;
+using namespace MantidQt::Widgets::Common;
 
 class ZoomerTest : public CxxTest::TestSuite {
 public:
@@ -41,8 +42,7 @@ public:
     zoomIn(&zoomer);
 
     TS_ASSERT_THROWS_NOTHING(zoomer.zoomOut());
-    auto xlim(MantidQt::Widgets::Common::Python::Object(
-        canvas.gca().pyobj().attr("get_xlim")()));
+    auto xlim(Python::Object(canvas.gca().pyobj().attr("get_xlim")()));
     // Do the axis limits get back to somewhere "close" to what is expected
     TS_ASSERT_DELTA(1.0, PyFloat_AsDouble(Python::Object(xlim[0]).ptr()), 0.25);
     TS_ASSERT_DELTA(5.0, PyFloat_AsDouble(Python::Object(xlim[1]).ptr()), 0.25);
@@ -57,10 +57,9 @@ private:
 
   Python::Object createDummyMplMouseEvent(double xpos, double ypos) {
     try {
-      auto mainModule = MantidQt::Widgets::Common::Python::NewRef(
-          PyImport_ImportModule("__main__"));
-      auto builtinsDict = MantidQt::Widgets::Common::Python::BorrowedRef(
-          PyModule_GetDict(mainModule.ptr()));
+      auto mainModule = Python::NewRef(PyImport_ImportModule("__main__"));
+      auto builtinsDict =
+          Python::BorrowedRef(PyModule_GetDict(mainModule.ptr()));
       auto createMouseEventFnSrc =
           QString("def createDummyMouseEvent(xpos, ypos):\n"
                   "  class MouseEvent(object):\n"
@@ -70,9 +69,8 @@ private:
                   "  return MouseEvent()\n");
       Python::Dict context;
       context.update(builtinsDict);
-      MantidQt::Widgets::Common::Python::NewRef(
-          PyRun_String(createMouseEventFnSrc.toLatin1().constData(),
-                       Py_file_input, context.ptr(), context.ptr()));
+      Python::NewRef(PyRun_String(createMouseEventFnSrc.toLatin1().constData(),
+                                  Py_file_input, context.ptr(), context.ptr()));
       return context["createDummyMouseEvent"](xpos, ypos);
     } catch (Python::ErrorAlreadySet &) {
       throw Mantid::PythonInterface::PythonException();
