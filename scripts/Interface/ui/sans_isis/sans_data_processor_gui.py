@@ -1084,11 +1084,14 @@ class SANSDataProcessorGui(QMainWindow,
     @compatibility_mode.setter
     def compatibility_mode(self, value):
         self.event_binning_group_box.setChecked(value)
-        if not value:
-            # If you uncheck it, post to logger, in
-            # case user didn't realise user file had
-            # turned it off
-            self.gui_logger.notice("Compatibility mode has been turned off.")
+
+    @property
+    def event_slice_mode(self):
+        return self.event_slice_mode_checkbox.isChecked()
+
+    @event_slice_mode.setter
+    def event_slice_mode(self, value):
+        self.event_slice_mode_checkbox.setChecked(value)
 
     @property
     def instrument(self):

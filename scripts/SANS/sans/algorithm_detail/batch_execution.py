@@ -38,6 +38,35 @@ else:
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
+def select_reduction_alg(split_for_event_slices, use_compatibility_mode, use_event_slice_mode, reduction_packages):
+    """
+    Select whether the data should be reduced via SANSSingleReduction, or SANSSingleReductionEventSlice.
+    To use SANSSingleReductionEventSlice, the reduction must be carried out with event slices, compatibility mode
+    must not have been switched on (via the sans_data_processor_gui), and event slice mode must have been switched on
+    (via the sans_data_processor_gui)
+    :param split_for_event_slices: bool. If true, event slicing will be carried out in the reduction
+    :param use_compatibility_mode: bool. If true, compatibility mode has been turned on
+    :param use_event_slice_mode: bool. If true, event slice mode has been turned on
+    :param reduction_packages: a list of reduction package objects
+    :return:
+    """
+    if (split_for_event_slices and not
+            use_compatibility_mode and
+            use_event_slice_mode):
+        # If using compatibility mode we convert to histogram immediately after taking event slices,
+        # so would not be able to perform operations on event workspaces pre-slicing.
+        alg = "SANSSingleReductionEventSlice"
+        event_slice = True
+    else:
+        alg = "SANSSingleReduction"
+        event_slice = False
+        if split_for_event_slices:
+            # Split into separate event slice workspaces here.
+            # For event_slice mode, this is done in SANSSingleReductionEventSlice
+            reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
+    return alg, event_slice, reduction_packages
+
+
 def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
     """
     Runs a single reduction.
@@ -72,19 +101,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
     split_for_event_slices = reduction_packages_require_splitting_for_event_slices(reduction_packages)
-    if (split_for_event_slices and not
-            state.compatibility.use_compatibility_mode):
-        # If using compatibility mode we convert to histogram immediately after taking event slices,
-        # so would not be able to perform operations on event workspaces pre-slicing.
-        alg = "SANSSingleReductionEventSlice"
-        event_slice = True
-    else:
-        alg = "SANSSingleReduction"
-        event_slice = False
-        if split_for_event_slices:
-            # Split into separate event slice workspaces here.
-            # For event_slice mode, this is done in SANSSingleReductionEventSlice
-            reduction_packages = split_reduction_packages_for_event_slice_packages(reduction_packages)
+
+    alg, event_slice, reduction_packages = select_reduction_alg(split_for_event_slices,
+                                                                state.compatibility.use_compatibility_mode,
+                                                                state.compatibility.use_event_slice_mode,
+                                                                reduction_packages)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
@@ -154,8 +175,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice=event_slice)
 
-    #import pydevd
-    #pydevd.settrace('localhost', port=8000, stdoutToServer=True, stderrToServer=True)
     # --------------------------------
     # Perform output of all workspaces
     # --------------------------------

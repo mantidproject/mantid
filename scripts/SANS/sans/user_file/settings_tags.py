@@ -143,6 +143,7 @@ class BackId(object):
 @serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
                    "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
                    "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
-                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "wavelength_range")
+                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "wavelength_range",
+                   "use_event_slice_mode")
 class OtherId(object):
     pass

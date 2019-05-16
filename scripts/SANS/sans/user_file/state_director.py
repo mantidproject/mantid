@@ -1281,6 +1281,12 @@ class StateDirectorISIS(object):
             use_compatibility_mode = use_compatibility_mode[-1]
             self._compatibility_builder.set_use_compatibility_mode(use_compatibility_mode)
 
+        if OtherId.use_event_slice_mode in user_file_items:
+            use_event_slice_mode = user_file_items[OtherId.use_event_slice_mode]
+            check_if_contains_only_one_element(use_event_slice_mode, OtherId.use_event_slice_mode)
+            use_event_slice_mode = use_event_slice_mode[-1]
+            self._compatibility_builder.set_use_event_slice_mode(use_event_slice_mode)
+
     def _set_up_save(self, user_file_items):
         if OtherId.save_types in user_file_items:
             save_types = user_file_items[OtherId.save_types]

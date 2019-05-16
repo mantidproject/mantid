@@ -178,6 +178,15 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         self.assertEqual("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37",  output_workspace)
 
+    def test_that_can_switch_off_including_slice_limits_in_standard_output_workspace_name(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        # Act
+        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB,
+                                                                 include_slice_limits=False)
+        # Assert
+        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0" == output_workspace)
+
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
         state = SANSFunctionsTest._get_state()
@@ -539,6 +548,7 @@ class SANSFunctionsTest(unittest.TestCase):
 
         self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
         self.assertEqual(group_output_name, '12345rear_1DPhi12.0_56.0')
+
 
 if __name__ == '__main__':
     unittest.main()

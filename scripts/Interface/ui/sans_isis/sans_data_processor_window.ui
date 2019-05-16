@@ -854,17 +854,37 @@ QGroupBox::title {
                     <layout class="QGridLayout" name="gridLayout_2">
                      <item row="0" column="0">
                       <layout class="QGridLayout" name="slice_event_grid_layout">
-                       <item row="0" column="0">
+                       <item row="1" column="0">
                         <widget class="QLabel" name="slice_event_label">
                          <property name="text">
                           <string>Slices</string>
                          </property>
                         </widget>
                        </item>
-                       <item row="0" column="1">
+                       <item row="1" column="2">
                         <widget class="QLineEdit" name="slice_event_line_edit">
                          <property name="enabled">
                           <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="event_slice_mode_label">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the reduction workflow is changed to perform most operations on event workspaces before event slicing.  This speeds up reduction by not repeating operations for each event slice.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Leaving this unchecked will perform reductions as before.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Checking this, but also checking &lt;span style=&quot; font-weight:600;&quot;&gt;Use compatibility mode&lt;/span&gt;, will perform reductions as before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Optimize event slices</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <widget class="QCheckBox" name="event_slice_mode_checkbox">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the reduction workflow is changed to perform most operations on event workspaces before event slicing.  This speeds up reduction by not repeating operations for each event slice.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Leaving this unchecked will perform reductions as before.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Checking this, but also checking &lt;span style=&quot; font-weight:600;&quot;&gt;Use compatibility mode&lt;/span&gt;, will perform reductions as before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string/>
                          </property>
                         </widget>
                        </item>
@@ -2381,7 +2401,6 @@ QGroupBox::title {
   <tabstop>q_resolution_delta_r_line_edit</tabstop>
   <tabstop>q_resolution_moderator_file_line_edit</tabstop>
   <tabstop>q_resolution_moderator_file_push_button</tabstop>
-  <tabstop>settings_tab_widget</tabstop>
   <tabstop>user_file_line_edit</tabstop>
   <tabstop>tab_choice_list</tabstop>
   <tabstop>batch_line_edit</tabstop>
