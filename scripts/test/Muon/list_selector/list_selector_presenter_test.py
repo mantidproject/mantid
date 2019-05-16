@@ -7,14 +7,13 @@
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 import unittest
-from Muon.GUI.Common.mock_widget import mockQapp
+from mantidqt.utils.qt.testing import GuiTest
 from mantid.py3compat import mock
 
 
-class TestListSelectorPresenter(unittest.TestCase):
+class TestListSelectorPresenter(GuiTest):
     def setUp(self):
-        # self.qapp = mockQapp()
-        self.view = mock.MagicMock()#ListSelectorView()
+        self.view = mock.MagicMock()
         self.model = {'property_one': [2, True, True], 'property_two': [1, False, False]}
         self.presenter = ListSelectorPresenter(self.view, self.model)
 

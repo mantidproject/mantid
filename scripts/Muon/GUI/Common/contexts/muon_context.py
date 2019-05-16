@@ -28,7 +28,7 @@ class MuonContext(object):
         self._phase_context = muon_phase_context
         self.base_directory = base_directory
 
-        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True})
+        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 
     @property
     def data_context(self):

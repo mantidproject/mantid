@@ -1,9 +1,9 @@
 import unittest
 from mantid.py3compat import mock
-from Muon.GUI.Common import mock_widget
+from mantidqt.utils.qt.testing import GuiTest
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter import FittingTabPresenter
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_view import FittingTabView
-from Muon.GUI.Common.contexts.context_setup import setup_context
+from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
 def retrieve_combobox_info(combo_box):
@@ -14,9 +14,8 @@ def retrieve_combobox_info(combo_box):
     return output_list
 
 
-class FittingTabPresenterTest(unittest.TestCase):
+class FittingTabPresenterTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self.view = FittingTabView()
         self.context = setup_context()
         self.context.data_context.current_runs = [[62260]]
@@ -32,7 +31,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.handle_select_fit_data_clicked()
 
-        dialog_mock.assert_called_once_with([[62260]], 'MUSR', self.view)
+        dialog_mock.assert_called_once_with([[62260]], 'MUSR', [], True, self.context, self.view)
 
         self.assertEqual(retrieve_combobox_info(self.view.parameter_display_combo),
                          ['MUSR62260; Group; bkwd; Asymmetry; #1', 'MUSR62260; Group; bottom; Asymmetry; #1',
