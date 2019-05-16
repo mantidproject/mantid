@@ -103,7 +103,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
     def PyInit(self):
         # Input properties
         self.declareProperty(StringArrayProperty(name='RunNumbers'),
-                             doc='List of input runs')
+                             doc='A list of input runs.')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='',
