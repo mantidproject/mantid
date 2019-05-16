@@ -1074,6 +1074,10 @@ class OverlayWorkspaces(object):
         """
         rhs_ws = self._get_workspace(RHS_workspace)
         lhs_ws = self._get_workspace(LHS_workspace)
+
+        # Remove bad proton charges from logs
+        self._clean_logs(lhs_ws)
+        self._clean_logs(rhs_ws)
         # Find the time difference between LHS and RHS workspaces and add optional time shift
         time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
         total_time_shift = time_difference + time_shift
@@ -1100,6 +1104,24 @@ class OverlayWorkspaces(object):
         # Remove the shifted workspace
         if mtd.doesExist(temp_ws_name):
             mtd.remove(temp_ws_name)
+
+    def _clean_logs(self, ws):
+        """
+        Remove bad proton charge times from the logs.
+        This is a fix to a specific bug which was fixed in 2019.
+        :param ws: The workspace to clean
+        """
+        run = ws.getRun()
+        if run.hasProperty("proton_charge"):
+            pc = run.getProperty("proton_charge")
+            first = pc.firstTime()
+            if first.totalNanoseconds() < 0:
+                # 0 is in the 1990s. Proton charge bug causes times in the 1700s
+                start = pc.nthTime(1)
+                end = pc.lastTime()
+                # Remove the 0th element in the proton charge logs
+                # we have assumed here that a run can have 1 bad proton charge at a maximum
+                pc.filterByTime(start, end)
 
     def _extract_time_difference_in_seconds(self, ws1, ws2):
         # The times which need to be compared are the first entry in the proton charge log
