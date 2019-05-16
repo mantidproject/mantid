@@ -105,8 +105,7 @@ std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
  * the background
  */
 void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
-    MatrixWorkspace_sptr inputWS,
-    const std::vector<double> &spectrumRanges) {
+    MatrixWorkspace_sptr inputWS, const std::vector<double> &spectrumRanges) {
 
   // if the input workspace is an event workspace it must be converted to a
   // Matrix workspace as cannot transpose an event workspace
