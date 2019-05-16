@@ -126,7 +126,12 @@ void RunsPresenter::notifySearch() {
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
-void RunsPresenter::notifyICATSearchComplete() { icatSearchComplete(); }
+void RunsPresenter::notifyICATSearchComplete() {
+  populateSearchResults();
+
+  if (isAutoreducing())
+    autoreduceNewRuns();
+}
 
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
@@ -276,9 +281,10 @@ bool RunsPresenter::search() {
 }
 
 /** Populates the search results table
- * @param searchAlg : [input] The search algorithm
  */
-void RunsPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+void RunsPresenter::populateSearchResults() {
+  auto algRunner = m_view->getAlgorithmRunner();
+  IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
   if (!searchAlg->isExecuted())
     return;
 
@@ -330,6 +336,7 @@ void RunsPresenter::autoreduceNewRuns() {
 
   if (rowsToTransfer.size() > 0) {
     transfer(rowsToTransfer, TransferMatch::Strict);
+    m_mainPresenter->notifyReductionResumed();
   } else {
     m_mainPresenter->notifyAutoreductionCompleted();
   }
@@ -346,17 +353,6 @@ bool RunsPresenter::isProcessing() const {
 
 bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
-}
-
-void RunsPresenter::icatSearchComplete() {
-  // Populate the search results
-  auto algRunner = m_view->getAlgorithmRunner();
-  IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
-  populateSearch(searchAlg);
-
-  if (isAutoreducing()) {
-    autoreduceNewRuns();
-  }
 }
 
 IRunsTablePresenter *RunsPresenter::tablePresenter() const {

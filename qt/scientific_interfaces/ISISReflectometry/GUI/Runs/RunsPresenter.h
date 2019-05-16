@@ -137,8 +137,7 @@ private:
 
   /// searching
   bool search();
-  void icatSearchComplete();
-  void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
+  void populateSearchResults();
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();

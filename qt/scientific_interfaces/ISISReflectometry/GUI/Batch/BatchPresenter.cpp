@@ -196,14 +196,10 @@ void BatchPresenter::reductionPaused() {
 void BatchPresenter::resumeAutoreduction() {
   // Update the model first to ensure the autoprocessing flag is set
   m_jobRunner->autoreductionResumed();
-  // Then update the child presenters. This ensures the table is updated
-  // with new runs before we get the algorithms for processing.
+  // Then update the child presenters. This sets off a search to find
+  // new runs, if there are any. When the search completes, we'll receive
+  // a separate callback to reductionResumed.
   autoreductionResumed();
-  // Get the algorithms to run
-  auto algorithms = m_jobRunner->getAlgorithms();
-  // Start processing
-  if (algorithms.size() > 0)
-    startBatch(std::move(algorithms));
 }
 
 void BatchPresenter::autoreductionResumed() {
