@@ -72,20 +72,25 @@ class HRPD(AbstractInst):
         :param run_details: the run details of to use
         """
         if not self._inst_settings.do_solid_angle:
-            return None
+            return
         solid_angle = mantid.SolidAngle(InputWorkspace=vanadium)
+
         scale = mantid.CreateSingleValuedWorkspace(DataValue='100')
         correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=scale)
+
         eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=correction)
         eff = mantid.ConvertUnits(InputWorkspace=eff, Target='Wavelength')
         eff = mantid.Integration(InputWorkspace=eff, RangeLower='1.3999999999999999', RangeUpper='3')
+
         correction = mantid.Multiply(LHSWorkspace=correction, RHSWorkspace=eff)
         scale = mantid.CreateSingleValuedWorkspace(DataValue='100000')
         correction = mantid.Divide(LHSWorkspace=correction, RHSWorkspace=scale)
-        name = common.generate_splined_name(run_details.run_number,[])
+
+        name = "sac" + common.generate_splined_name(run_details.run_number, [])
         path = run_details.van_paths
-        name = "sac"+name
-        mantid.SaveNexus(InputWorkspace=correction,Filename=os.path.join(path, name))
+
+        mantid.SaveNexus(InputWorkspace=correction, Filename=os.path.join(path, name))
+        
         common.remove_intermediate_workspace(solid_angle)
         common.remove_intermediate_workspace(scale)
         common.remove_intermediate_workspace(eff)
@@ -94,9 +99,8 @@ class HRPD(AbstractInst):
     def get_solid_angle_corrections(self, vanadium, run_details):
         if not self._inst_settings.do_solid_angle:
             return None
-        name = common.generate_splined_name(vanadium, [])
+        name = "sac" + common.generate_splined_name(vanadium, [])
         path = run_details.van_paths
-        name = "sac" + name
         try:
             solid_angle = mantid.Load(Filename=os.path.join(path,name))
             return solid_angle
