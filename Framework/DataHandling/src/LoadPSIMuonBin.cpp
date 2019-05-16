@@ -20,8 +20,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <Poco/Path.h>
+#include <Poco/RecursiveDirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <map>
@@ -600,13 +600,13 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   try {
     readInTemperatureFile(outputWorkspace);
   } catch (std::invalid_argument &e) {
-    g_log.warning("Temperature file could not be loaded: " +
+    g_log.warning("Temperature file was not be loaded: " +
                   std::string(e.what()));
   } catch (std::runtime_error &e) {
-    g_log.warning("Temperature file could not be loaded:" +
+    g_log.warning("Temperature file was not be loaded:" +
                   std::string(e.what()));
   }
-} // namespace DataHandling
+}
 
 namespace {
 std::string findTitlesFromLine(const std::string &line) {
@@ -682,6 +682,11 @@ void LoadPSIMuonBin::processLine(const std::string &line,
   std::vector<std::string> segments;
   boost::split(segments, line, boost::is_any_of("\\"));
 
+  // 5 is the size that we expect vectors to be at this stage
+  if (segments.size() != 5) {
+    throw std::runtime_error(
+        "Line does not have 5 segments delimited by \\: '" + line + "'");
+  }
   const auto recordTime = segments[0];
   const auto numValues = std::stoi(segments[1]);
   std::vector<std::string> firstValues;
@@ -726,28 +731,21 @@ std::string LoadPSIMuonBin::detectTempFile() {
   const std::string binFileName = getPropertyValue("Filename");
   const Poco::Path fileDir(Poco::Path(binFileName).parent());
 
-  boost::filesystem::recursive_directory_iterator iter(fileDir.toString());
-  boost::filesystem::recursive_directory_iterator end;
-
-  // Recursively iterate through the directory and sub directories looking for a
-  // temp file. The file has the run number in it's name and .mon as it's
-  while (iter != end) {
-    const std::string filepath = iter->path().string();
-    if (filepath.find(std::to_string(m_header.numberOfRuns)) !=
-            std::string::npos &&
-        filepath.find(".mon") != std::string::npos) {
-      return filepath;
-    }
-
-    boost::system::error_code ec;
-    iter.increment(ec);
-    if (ec) {
-      g_log.warning("When searching for temp file, accessing this file: " +
-                    iter->path().string() +
-                    " caused this error: " + ec.message());
+  Poco::SiblingsFirstRecursiveDirectoryIterator end;
+  // 3 represents the maximum recursion depth for this search
+  const uint16_t maxRecursionDepth = 3;
+  for (Poco::SiblingsFirstRecursiveDirectoryIterator it(fileDir,
+                                                        maxRecursionDepth);
+       it != end; ++it) {
+    // If it is not a directory, exists, has the extension '.mon', and it
+    // contains the current run number.
+    const Poco::Path path = it->path();
+    if (!it->isDirectory() && it->exists() && path.getExtension() == "mon" &&
+        path.getFileName().find(std::to_string(m_header.numberOfRuns)) !=
+            std::string::npos) {
+      return path.toString();
     }
   }
-
   return "";
 }
 
@@ -762,6 +760,8 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
     throw std::invalid_argument(
         "No temperature file could be found/was provided");
   }
+
+  g_log.notice("Temperature file in use by LoadPSIMuonBin: '" + fileName + "'");
 
   std::ifstream in(fileName, std::ios::in);
   std::string contents;
