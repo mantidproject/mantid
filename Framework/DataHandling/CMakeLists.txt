@@ -183,6 +183,7 @@ set(SRC_FILES
     src/SaveReflThreeColumnAscii.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
+    src/SaveStl.cpp
     src/SaveTBL.cpp
     src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
@@ -378,6 +379,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveReflThreeColumnAscii.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
+    inc/MantidDataHandling/SaveStl.h
     inc/MantidDataHandling/SaveTBL.h
     inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
