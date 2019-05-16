@@ -21,7 +21,7 @@ def get_log_filename(instrument_name, run_number):
                           len(run_number))
 
     run_name = instrument_name + zero_padding + run_number
-    return run_name.upper() + '.log', run_name
+    return run_name.upper() + '.log'
 
 
 def get_log_from_run(run, log_name, method):
@@ -48,8 +48,7 @@ def get_instrument_prefix(workspace_name, run_number):
     if instrument != '':
         for facility in config.getFacilities():
             try:
-                instrument = facility.instrument(instrument).filePrefix(int(run_number))
-                instrument = instrument.lower()
+                instrument = facility.instrument(instrument).filePrefix(int(run_number)).lower()
                 break
             except RuntimeError:
                 continue
@@ -276,20 +275,13 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
     def _group_energy_window_scan_output(self):
         """
-        Group the output workspaces from the ElasticWindowScan algorithm. Groups the _eq1, _eq2, _elf and _elt
-        workspaces separately.
+        Group the output workspaces from the ElasticWindowScan algorithm.
         """
-        elf_workspaces = [self._scan_ws + '_el_elf', self._scan_ws + '_inel_elf', self._scan_ws + '_total_elf']
-        group_workspaces(elf_workspaces, self._scan_ws + '_elf')
+        suffixes = ['_el_elf', '_inel_elf', '_total_elf', '_el_elt', '_inel_elt', '_total_elt', '_el_eq1', '_inel_eq1',
+                    '_total_eq1', '_el_eq2', '_inel_eq2', '_total_eq2']
+        energy_window_scan_workspaces = [self._scan_ws + suffix for suffix in suffixes]
 
-        elt_workspaces = [self._scan_ws + '_el_elt', self._scan_ws + '_inel_elt', self._scan_ws + '_total_elt']
-        group_workspaces(elt_workspaces, self._scan_ws + '_elt')
-
-        eq1_workspaces = [self._scan_ws + '_el_eq1', self._scan_ws + '_inel_eq1', self._scan_ws + '_total_eq1']
-        group_workspaces(eq1_workspaces, self._scan_ws + '_eq1')
-
-        eq2_workspaces = [self._scan_ws + '_el_eq2', self._scan_ws + '_inel_eq2', self._scan_ws + '_total_eq2']
-        group_workspaces(eq2_workspaces, self._scan_ws + '_eq2')
+        group_workspaces(energy_window_scan_workspaces, self._scan_ws + '_q')
 
     def _width_fit(self):
         input_workspace_names = mtd[self._output_ws].getNames()
@@ -298,9 +290,6 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         # Perform the two peak fits on the input workspaces
         result_workspaces, chi_workspaces, temperatures, run_numbers = self._perform_two_peak_fits(input_workspace_names,
                                                                                                    x[0], x[len(x) - 1])
-
-        # Group the result workspaces
-        group_workspaces(result_workspaces, self._output_ws + '_Result')
 
         # Find the units of the x axis
         number_of_temperatures = len(temperatures)
@@ -315,7 +304,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         self._create_diffusion_workspace(mtd[width_name], temperatures, run_numbers, diffusion_name, x_axis_is_temperature)
 
         # Group the width fit workspaces
-        group_workspaces(chi_workspaces + [width_name] + [diffusion_name], self._output_ws + '_Width_Fit')
+        group_workspaces(result_workspaces + chi_workspaces + [width_name] + [diffusion_name], self._output_ws + '_Width_Fit')
 
     def _perform_two_peak_fits(self, workspace_names, x_min, x_max):
         result_workspaces = []
@@ -402,10 +391,10 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         run_number = str(mtd[workspace_name].getRunNumber())
         instrument_prefix = get_instrument_prefix(workspace_name, run_number)
 
-        log_filename, run_name = get_log_filename(instrument_prefix, run_number)
+        log_filename = get_log_filename(instrument_prefix, run_number)
+        return self._get_temperature(workspace_name, mtd[workspace_name].getRun(), log_filename)
 
-        run = mtd[workspace_name].getRun()
-
+    def _get_temperature(self, workspace_name, run, log_filename):
         if self._sample_log_name in run:
             # Look for temperature in logs of workspace
             return get_log_from_run(run, self._sample_log_name, self._sample_log_value)
