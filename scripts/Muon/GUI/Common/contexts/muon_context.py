@@ -242,3 +242,16 @@ class MuonContext(object):
                 phasequad_names += self.phase_context.get_phase_quad(self.data_context.instrument, run_string)
 
         return group_names + pair_names + phasequad_names
+
+    def get_list_of_binned_or_unbinned_workspaces_from_equivalents(self, input_list):
+        equivalent_list = []
+
+        for item in input_list:
+            if 'PhaseQuad' in item:
+                equivalent_list.append(item)
+
+            equivalent_group_pair = self.group_pair_context.get_equivalent_group_pair(item)
+            if equivalent_group_pair:
+                equivalent_list.append(equivalent_group_pair)
+
+        return equivalent_list
