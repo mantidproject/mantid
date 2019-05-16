@@ -32,8 +32,8 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
                         const size_t wkspIndex, const QString lineColour,
                         const QString label) {
   GlobalInterpreterLock lock;
-  auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
-  auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
+  const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
+  const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
   Python::Dict kwargs;
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
@@ -54,8 +54,8 @@ MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
                      const size_t wkspIndex, const QString lineColour,
                      const QString label) {
   GlobalInterpreterLock lock;
-  auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
-  auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
+  const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
+  const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
   Python::Dict kwargs;
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();

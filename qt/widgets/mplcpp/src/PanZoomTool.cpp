@@ -34,7 +34,7 @@ constexpr auto TOOLBAR_PAN_METHOD = "pan";
 /// Return the matplotlib NavigationToolbar type appropriate
 /// for our backend. It is returned hidden
 Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
-  auto backend = backendModule();
+  const auto backend = backendModule();
   bool showCoordinates(false);
   auto obj = Python::Object(backend.attr(TOOLBAR_CLS)(
       canvas->pyobj(), canvas->pyobj(), showCoordinates));
@@ -64,7 +64,7 @@ bool PanZoomTool::isZoomEnabled() const {
  * Enable/disable zoom mode
  * @param on If true enable zoom mode else disable it
  */
-void PanZoomTool::enableZoom(bool requestOn) {
+void PanZoomTool::enableZoom(const bool requestOn) {
   // The base functionality works as a toggle
   const bool isOn = isZoomEnabled();
   if ((requestOn && !isOn) || (!requestOn && isOn)) {
@@ -94,7 +94,7 @@ bool PanZoomTool::isPanEnabled() const {
  * Enable/disable pan mode
  * @param on If true enable pan mode else disable it
  */
-void PanZoomTool::enablePan(bool on) {
+void PanZoomTool::enablePan(const bool on) {
   // The base functionality works as a toggle
   const bool isOn = isPanEnabled();
   if ((on && !isOn) || (!on && isOn)) {

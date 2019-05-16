@@ -40,7 +40,7 @@ public:
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
               const char *format = "b-");
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
-              QString format, QString label);
+              const QString format, const QString label);
   Artist text(double x, double y, QString text,
               const char *horizontalAlignment);
   /// @}

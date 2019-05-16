@@ -43,10 +43,10 @@ public:
   }
 
   QColor faceColor() const;
-  void setFaceColor(QColor color);
+  void setFaceColor(const QColor color);
   void setFaceColor(const char *color);
   Axes addAxes(double left, double bottom, double width, double height);
-  Axes addSubPlot(const int subplotspec, QString projection = "");
+  Axes addSubPlot(const int subplotspec, const QString projection = "");
   Python::Object colorbar(const ScalarMappable &mappable, const Axes &cax,
                           const Common::Python::Object &ticks = Python::Object(),
                           const Common::Python::Object &format = Python::Object());

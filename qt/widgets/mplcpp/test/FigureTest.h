@@ -46,7 +46,7 @@ public:
   void testSetFaceColorFromString() {
     Figure fig{false};
     fig.setFaceColor("r");
-    auto color = fig.faceColor();
+    const auto color = fig.faceColor();
     TS_ASSERT_EQUALS(255, color.red());
     TS_ASSERT_EQUALS(0, color.green());
     TS_ASSERT_EQUALS(0, color.blue());
@@ -55,7 +55,7 @@ public:
   void testSetFaceColorFromQColor() {
     Figure fig{false};
     fig.setFaceColor(QColor("red"));
-    auto color = fig.faceColor();
+    const auto color = fig.faceColor();
     TS_ASSERT_EQUALS(255, color.red());
     TS_ASSERT_EQUALS(0, color.green());
     TS_ASSERT_EQUALS(0, color.blue());
@@ -75,7 +75,7 @@ public:
 
   void testColorbar() {
     Figure fig{false};
-    auto cax = fig.addAxes(0.1, 0.1, 0.9, 0.9);
+    const auto cax = fig.addAxes(0.1, 0.1, 0.9, 0.9);
     ScalarMappable mappable(Normalize(-1, 1), "jet");
 
     TS_ASSERT_THROWS_NOTHING(fig.colorbar(mappable, cax));

@@ -134,7 +134,7 @@ Artist Axes::legendInstance() const {
  * the canvas as the vector data will be destroyed.
  */
 Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
-                  QString format, QString label) {
+                  const QString format, const QString label) {
   GlobalInterpreterLock lock;
   auto line2d =
       plot(std::move(xdata), std::move(ydata), format.toLatin1().constData());

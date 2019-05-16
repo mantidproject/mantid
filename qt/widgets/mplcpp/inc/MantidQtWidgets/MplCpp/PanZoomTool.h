@@ -29,14 +29,14 @@ public:
   /// @name Zoom tools
   /// @{
   bool isZoomEnabled() const;
-  void enableZoom(bool on);
+  void enableZoom(const bool on);
   void zoomOut();
   ///@}
 
   /// @name Zoom tools
   /// @{
   bool isPanEnabled() const;
-  void enablePan(bool on);
+  void enablePan(const bool on);
   ///@}
 
 private:
