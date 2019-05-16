@@ -71,6 +71,14 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def fit_to_raw(self):
         return self.fit_to_raw_data_checkbox.isChecked()
 
+    @fit_to_raw.setter
+    def fit_to_raw(self, value):
+        state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
+        self.fit_to_raw_data_checkbox.setCheckState(state)
+
+    def warning_popup(self, message):
+        warning(message, parent=self)
+
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(6)
         self.fit_options_table.setColumnCount(2)
@@ -81,25 +89,31 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_options_table.setHorizontalHeaderLabels(
             ("Property;Value").split(";"))
 
-        table_utils.setRowName(self.fit_options_table, 0, "Minimizer")
-        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 0, [])
+        table_utils.setRowName(self.fit_options_table, 0, "Time Start")
+        self.minimizer_combo = table_utils.addDoubleToTable(self.fit_options_table, 0.0, 0, 1)
 
-        table_utils.setRowName(self.fit_options_table, 1, "TF Asymmetry Mode")
+        table_utils.setRowName(self.fit_options_table, 1, "Time End")
+        self.minimizer_combo = table_utils.addDoubleToTable(self.fit_options_table, 15.0, 1, 1)
+
+        table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
+        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
+
+        table_utils.setRowName(self.fit_options_table, 3, "TF Asymmetry Mode")
         self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, False, 1)
+            self.fit_options_table, False, 3)
 
-        table_utils.setRowName(self.fit_options_table, 2, "Plot Difference")
+        table_utils.setRowName(self.fit_options_table, 4, "Plot Difference")
         self.plot_differences_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 2)
-
-        table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
-        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
-            self.fit_options_table, True, 3)
-
-        table_utils.setRowName(self.fit_options_table, 4, "Show Parameter Errors")
-        self.show_parameter_errors_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 4)
 
-        table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
-        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])
+        table_utils.setRowName(self.fit_options_table, 5, "Fit To Raw Data")
+        self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
+            self.fit_options_table, True, 5)
+
+        table_utils.setRowName(self.fit_options_table, 6, "Show Parameter Errors")
+        self.show_parameter_errors_checkbox = table_utils.addCheckBoxWidgetToTable(
+            self.fit_options_table, True, 6)
+
+        table_utils.setRowName(self.fit_options_table, 7, "Evaluate Function As")
+        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 7, ['CentrePoint', 'Histogram'])
 

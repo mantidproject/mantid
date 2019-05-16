@@ -36,6 +36,11 @@ class FittingTabPresenter(object):
         pass
 
     def handle_use_rebin_changed(self):
+        if not self.view.fit_to_raw and not self.context._do_rebin():
+            self.view.fit_to_raw = True
+            self.view.warning_popup('No rebin options specified')
+            return
+
         if not self.manual_selection_made:
             self.update_selected_workspace_guess()
         else:
