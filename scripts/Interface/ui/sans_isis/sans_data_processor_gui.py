@@ -549,21 +549,19 @@ class SANSDataProcessorGui(QMainWindow,
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
 
     def _on_output_mode_clicked(self):
+        """This method is called when an output mode is clicked on the gui"""
         if self.output_mode_memory_radio_button.isChecked():
             output_mode = "PublishToADS"
-            self.disable_file_type_buttons()
         elif self.output_mode_file_radio_button.isChecked():
             output_mode = "SaveToFile"
-            self.enable_file_type_buttons()
         elif self.output_mode_both_radio_button.isChecked():
             output_mode = "Both"
-            self.enable_file_type_buttons()
         else:
             output_mode = None
         set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
 
         # Notify the presenter
-        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed(is_1d))
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed())
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
@@ -606,15 +604,22 @@ class SANSDataProcessorGui(QMainWindow,
             self._check_output_mode(default_output_mode)
 
     def _check_output_mode(self, value):
+        """
+        Set the output mode radio button from a SANS enum.
+        This method is called when:
+        1. The gui is launched
+        2. Via the presenter, from state
+        :param value: An OutputMode (SANS enum) object
+        """
         if value is OutputMode.PublishToADS:
             self.output_mode_memory_radio_button.setChecked(True)
-            self.disable_file_type_buttons()
         elif value is OutputMode.SaveToFile:
             self.output_mode_file_radio_button.setChecked(True)
-            self.enable_file_type_buttons()
         elif value is OutputMode.Both:
             self.output_mode_both_radio_button.setChecked(True)
-            self.enable_file_type_buttons()
+
+        # Notify the presenter
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed())
 
     def set_out_default_save_can(self):
         try:

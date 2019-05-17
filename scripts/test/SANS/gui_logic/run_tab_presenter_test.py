@@ -1010,10 +1010,9 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter.set_view(view)
         presenter.on_reduction_dimensionality_changed(True)
+
         presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        self.assertEqual(presenter._view.can_sas_checkbox.setChecked.call_count, 0,
-                         "Did not expect can_sas_checkbox.setChecked to be called. "
-                         "It was called {} times".format(presenter._view.can_sas_checkbox.setChecked.call_count))
+        presenter._view.can_sas_checkbox.setChecked.assert_not_called()
 
     def test_that_canSAS_is_not_enabled_if_switch_to_1D_reduction_and_in_memory_mode(self):
         """This test checks that if you are in memory mode, the can sas file type is not
@@ -1029,13 +1028,8 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
         presenter.on_reduction_dimensionality_changed(True)
 
-        self.assertEqual(presenter._view.can_sas_checkbox.setChecked.call_count, 0,
-                         "Did not expect can_sas_checkbox.setChecked to be called. "
-                         "It was called {} times".format(presenter._view.can_sas_checkbox.setChecked.call_count))
-        self.assertEqual(presenter._view.can_sas_checkbox.setEnabled.call_count, 0,
-                         "Did not expect can_sas_checkbox.setEnabled to be called, since "
-                         "all file types should be disabled when in memory mode. It was called {} "
-                         "times.".format(presenter._view.can_sas_checkbox.setEnabled.call_count))
+        presenter._view.can_sas_checkbox.setChecked.assert_not_called()
+        presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
 
     def test_that_updating_default_save_directory_also_updates_add_runs_save_directory(self):
         """This test checks that add runs presenter's save directory update method is called
@@ -1088,6 +1082,57 @@ class RunTabPresenterTest(unittest.TestCase):
         except RuntimeError:
             self.fail("Did not expect _validate_output_modes to fail when no file types are selected "
                       "for memory output mode.")
+
+    def test_that_switching_to_memory_mode_disables_all_file_type_buttons(self):
+        """This tests that all file type buttons are disabled when memory mode is selected."""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
+        view.disable_file_type_buttons = mock.Mock()
+
+        presenter.set_view(view)
+
+        presenter.on_output_mode_changed()
+        presenter._view.disable_file_type_buttons.assert_called_once()
+
+    def test_that_all_file_type_buttons_are_enabled_if_switching_to_non_memory_mode_and_in_1D_reduction_mode(self):
+        """This tests that all file type buttons are enabled if switching to file or both mode, when reduction
+        dimensionality is 1D"""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
+        view.reduction_dimensionality_1D.isChecked = mock.Mock(return_value=True)
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.nx_can_sas_checkbox.setEnabled = mock.Mock()
+        view.rkh_checkbox.setEnabled = mock.Mock()
+
+        presenter.set_view(view)
+
+        presenter.on_output_mode_changed()
+        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
+
+    def test_that_rkh_and_nx_can_sas_are_enabled_if_switching_to_non_memory_mode_and_in_2D_reduction_mode(self):
+        """This tests that nx_can_sas and rkh file type buttons are enabled if switching to file or both mode, when
+         reduction dimensionality is 1D, but can sas is not enabled"""
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+
+        view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
+        view.reduction_dimensionality_1D.isChecked = mock.Mock(return_value=False)
+        view.can_sas_checkbox.setEnabled = mock.Mock()
+        view.nx_can_sas_checkbox.setEnabled = mock.Mock()
+        view.rkh_checkbox.setEnabled = mock.Mock()
+
+        presenter.set_view(view)
+
+        presenter.on_output_mode_changed()
+        presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
+        presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
 
     @staticmethod
     def _clear_property_manager_data_service():
