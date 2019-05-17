@@ -8,11 +8,12 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from matplotlib import ticker
 import matplotlib.axis
+from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
+from mantid.plots import MantidAxKwargs
 
 try:
     from matplotlib.colors import to_hex
@@ -213,12 +214,16 @@ class PlotsSaver(object):
         return line_dict
 
     def get_dict_for_errorbars(self, line):
-        if self.figure_creation_args[0]["function"] == "errorbar":
+        cargs = self.figure_creation_args[0]
+        if cargs["function"] == "errorbar" or (
+                MantidAxKwargs.POST_CREATION_ARGS in cargs
+                and cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_ADDED]):
             return {"exists": True,
                     "dashCapStyle": line.get_dash_capstyle(),
                     "dashJoinStyle": line.get_dash_joinstyle(),
                     "solidCapStyle": line.get_solid_capstyle(),
-                    "solidJoinStyle": line.get_solid_joinstyle()}
+                    "solidJoinStyle": line.get_solid_joinstyle(),
+                    "visible": cargs[MantidAxKwargs.POST_CREATION_ARGS][MantidAxKwargs.ERRORS_VISIBLE]}
         else:
             return {"exists": False}
 

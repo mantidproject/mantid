@@ -7,7 +7,9 @@ class MantidAxType(Enum):
 
 
 class MantidAxKwargs(object):
+    POST_CREATION_ARGS = "post_creation_args"
     ERRORS_VISIBLE = "errors_visible"
+    ERRORS_ADDED = "errors_added"
 
 
 def find_errorbar_container(line, containers):

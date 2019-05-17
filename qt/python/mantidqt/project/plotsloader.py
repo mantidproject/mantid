@@ -10,17 +10,18 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import copy
 
-from matplotlib import ticker, text, axis  # noqa
-import matplotlib.colors
 import matplotlib.axes
 import matplotlib.cm as cm
+import matplotlib.colors
+from matplotlib import axis, ticker  # noqa
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
-from mantid import plots  # noqa
-from mantidqt.plotting.functions import pcolormesh
-
 # Constants set in workbench.plotting.functions but would cause backwards reliability
+from mantid.plots.utility import MantidAxKwargs
+from mantidqt.plotting.functions import pcolormesh
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager
+
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
 
@@ -57,19 +58,28 @@ class PlotsLoader(object):
         creation_args_copy = copy.deepcopy(creation_args[0])
 
         # Populate workspace names
-        workspace_name = creation_args[0][0].pop('workspaces')
-        workspace = ADS.retrieve(workspace_name)
+        # workspace_name = creation_args[0][0].pop('workspaces')
+        # post_creation_args = creation_args[0][0].pop(MantidAxKwargs.POST_CREATION_ARGS)
+        # workspace = ADS.retrieve(workspace_name)
 
         # Make initial plot
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
+        pcargs = []
+        # If an overplot is necessary plot onto the same figure
+        for cargs in creation_args[0]:
+            workspace_name = cargs.pop('workspaces')
+            pcargs.append(cargs.pop(MantidAxKwargs.POST_CREATION_ARGS, {}))
+            workspace = ADS.retrieve(workspace_name)
+            self.plot_func(workspace, ax, ax.figure, cargs)
+
+        fem = FigureErrorsManager(ax.figure.canvas)
+        for index, pcargs in enumerate(pcargs):
+            if MantidAxKwargs.ERRORS_ADDED in pcargs and pcargs[MantidAxKwargs.ERRORS_ADDED]:
+                fem.show_error_bar_for(index)
+
         # Make sure that the axes gets it's creation_args as loading doesn't add them
         ax.creation_args = creation_args_copy
-
-        self.plot_func(workspace, ax, fig, creation_args[0][0])
-
-        # If an overplot is necessary plot onto the same figure
-        self.plot_extra_lines(creation_args=creation_args, ax=ax)
 
         # Update the fig
         fig._label = plot_dict["label"]
@@ -316,7 +326,7 @@ class PlotsLoader(object):
         image.set_label(dic["label"])
         image.set_cmap(cm.get_cmap(dic["cmap"]))
         image.set_interpolation(dic["interpolation"])
-        #Try and make the cmap line up but sometimes it wont
+        # Try and make the cmap line up but sometimes it wont
         try:
             image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
         except AttributeError as e:
