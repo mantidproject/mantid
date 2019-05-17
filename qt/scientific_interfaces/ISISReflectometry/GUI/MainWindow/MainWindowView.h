@@ -48,6 +48,8 @@ public:
                         const std::string &title) override;
   void giveUserInfo(const std::string &prompt,
                     const std::string &title) override;
+  bool askUserYesNo(const std::string &prompt,
+                    const std::string &title) override;
 
   // Timer methods
   void startTimer(const int millisecs) override;

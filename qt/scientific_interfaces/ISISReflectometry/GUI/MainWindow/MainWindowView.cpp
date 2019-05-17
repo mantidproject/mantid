@@ -155,6 +155,17 @@ void MainWindowView::giveUserInfo(const std::string &prompt,
                            QMessageBox::Ok);
 }
 
+bool MainWindowView::askUserYesNo(const std::string &prompt,
+                                  const std::string &title) {
+  auto reply = QMessageBox::question(this, QString::fromStdString(title),
+                                     QString::fromStdString(prompt),
+                                     QMessageBox::Yes | QMessageBox::No);
+  if (reply == QMessageBox::Yes)
+    return true;
+
+  return false;
+}
+
 /**
    This slot is called each time the timer times out
 */

@@ -46,9 +46,6 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /**** Views ****/
 class MockMainWindowView : public IMainWindowView {
 public:
-  MOCK_METHOD3(askUserString,
-               std::string(const std::string &, const std::string &,
-                           const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserCritical,
@@ -219,6 +216,7 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
+  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
 };
 
 /**** Saver ****/

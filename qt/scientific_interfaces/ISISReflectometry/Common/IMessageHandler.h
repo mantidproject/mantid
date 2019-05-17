@@ -21,6 +21,8 @@ public:
                                 const std::string &title) = 0;
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
+  virtual bool askUserYesNo(const std::string &prompt,
+                            const std::string &title) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

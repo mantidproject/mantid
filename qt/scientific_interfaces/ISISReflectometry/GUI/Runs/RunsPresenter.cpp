@@ -94,15 +94,6 @@ void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   // Must do this after setting main presenter or notifications don't get
   // through
   m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
-  // Register this presenter as the workspace receiver
-  // When doing so, the inner presenters will notify this
-  // presenter with the list of commands
-
-  //  tablePresenter()->accept(this);
-
-  // Note this must be done here since notifying the gdpp of its view
-  // will cause it to request settings only accessible via the main
-  // presenter.
 }
 
 RunsTable const &RunsPresenter::runsTable() const {
@@ -188,18 +179,16 @@ void RunsPresenter::reductionPaused() {
  */
 void RunsPresenter::autoreductionResumed() {
   if (requireNewAutoreduction()) {
-    // TODO clear table
     // If starting a brand new autoreduction, delete all rows / groups in
     // existing table first
     // We'll prompt the user to check it's ok to delete existing rows
-
-    // tablePresenter()->setPromptUser(false);
-    // try {
-    //  tablePresenter()->notify(DataProcessorPresenter::DeleteAllFlag);
-    //} catch (const DataProcessorPresenter::DeleteAllRowsCancelledException &)
-    //{
-    //  return;
-    //}
+    auto ok = true;
+    if (runsTable().reductionJobs().groups().size() > 0) {
+      ok = m_messageHandler->askUserYesNo(
+          "There are unsaved changes in the table. Continue?", "Warning");
+    }
+    if (ok)
+      tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
   if (m_autoreduction.setupNewAutoreduction(m_view->getSearchString()))

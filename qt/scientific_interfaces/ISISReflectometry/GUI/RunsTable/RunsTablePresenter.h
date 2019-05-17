@@ -29,7 +29,7 @@ public:
                      double thetaTolerance, ReductionJobs reductionJobs,
                      const IPlotter &plotter);
 
-  void notifyRemoveAllRowsAndGroupsRequested();
+  void notifyRemoveAllRowsAndGroupsRequested() override;
 
   // IRunsTablePresenter overrides
   void acceptMainPresenter(IRunsPresenter *mainPresenter) override;

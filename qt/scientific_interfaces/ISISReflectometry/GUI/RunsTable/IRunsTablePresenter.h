@@ -30,6 +30,7 @@ public:
   virtual RunsTable &mutableRunsTable() = 0;
 
   virtual void notifyRowStateChanged() = 0;
+  virtual void notifyRemoveAllRowsAndGroupsRequested() = 0;
 
   virtual void mergeAdditionalJobs(ReductionJobs const &jobs) = 0;
 
