@@ -65,7 +65,7 @@ class PlotsSaver(object):
 
     @staticmethod
     def get_dict_for_axes_colorbar(ax):
-        image = None
+        # image = None
         cb_dict = {}
 
         # If an image is present (from imshow)
