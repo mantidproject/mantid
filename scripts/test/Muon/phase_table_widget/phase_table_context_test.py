@@ -1,5 +1,7 @@
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext, default_dict
 import unittest
+from Muon.GUI.Common.test_helpers.general_test_helpers import create_workspace_wrapper_stub_object
+
 
 class PhaseTableContextTest(unittest.TestCase):
     def setUp(self):
@@ -9,21 +11,34 @@ class PhaseTableContextTest(unittest.TestCase):
         self.assertEquals(self.context.options_dict, default_dict)
         self.assertEquals(self.context.phase_tables, [])
 
-    def test_add_phase_table_adds_phase_table_name_to_dict_with_run_as_key(self):
-        name = 'MUSR22222_phase_table'
+    def test_add_phase_table_adds_phase_table_name_to_list(self):
+        name = create_workspace_wrapper_stub_object('MUSR22222_phase_table')
         self.context.add_phase_table(name)
 
         self.assertEquals(self.context.phase_tables, [name])
 
     def test_get_phase_table_list_retrieves_all_tables_wth_correct_instrument(self):
-        name = 'MUSR22222_phase_table'
+        name = create_workspace_wrapper_stub_object('MUSR22222_phase_table')
         self.context.add_phase_table(name)
-        name = 'EMU22222_phase_table'
+        name = create_workspace_wrapper_stub_object('EMU22222_phase_table')
         self.context.add_phase_table(name)
-        name = 'MUSR33333_phase_table'
+        name = create_workspace_wrapper_stub_object('MUSR33333_phase_table')
         self.context.add_phase_table(name)
 
         self.assertEquals(self.context.get_phase_table_list('MUSR'), ['MUSR22222_phase_table', 'MUSR33333_phase_table'])
+
+    def test_add_phase_quad_adds_phase_quad_name_to_list(self):
+        name = create_workspace_wrapper_stub_object('MUSR22222_phase_quad')
+
+        self.context.add_phase_quad(name)
+
+        self.assertEquals(self.context.phase_quad, [name])
+
+    def test_get_phase_quad_returns_phase_quad_name_if_run_and_instrument_match(self):
+        name = create_workspace_wrapper_stub_object('MUSR22222_phase_quad')
+        self.context.add_phase_quad(name)
+
+        self.assertEquals(self.context.get_phase_quad('MUSR', '22222'), ['MUSR22222_phase_quad'])
 
 
 if __name__ == '__main__':

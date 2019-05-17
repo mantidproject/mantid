@@ -261,6 +261,10 @@ class RunTabPresenter(object):
         :return:
         """
         self._view.set_out_file_directory(new_directory)
+        # Update add runs save location. We want distinct reduction save/add runs save locations,
+        # but the add runs directory change when the main directory is, to avoid users having to
+        # remember to update in two places.
+        self._view.add_runs_presenter.handle_new_save_directory(new_directory)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table + Actions
@@ -913,7 +917,8 @@ class RunTabPresenter(object):
                                            self._view.instrument,
                                            self._facility,
                                            row_index=row_index,
-                                           file_lookup=file_lookup)
+                                           file_lookup=file_lookup,
+                                           user_file=self._view.get_user_file_path())
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
@@ -1299,9 +1304,9 @@ class RunTabPresenter(object):
         :return: Nothing
         """
         for row in rows:
-                table_row = self._table_model.get_table_entry(row).to_batch_list()
-                batch_file_row = self._create_batch_entry_from_row(table_row)
-                filewriter.writerow(batch_file_row)
+            table_row = self._table_model.get_table_entry(row).to_batch_list()
+            batch_file_row = self._create_batch_entry_from_row(table_row)
+            filewriter.writerow(batch_file_row)
 
     @staticmethod
     def _create_batch_entry_from_row(row):

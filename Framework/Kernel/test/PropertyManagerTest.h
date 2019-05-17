@@ -440,6 +440,34 @@ public:
     TS_ASSERT_EQUALS(mgr.propertyCount(), 0);
   }
 
+  void testUpdatePropertyValues() {
+    PropertyManagerHelper mgr1;
+    mgr1.declareProperty("aProp", 10);
+    PropertyManagerHelper mgr2;
+    mgr2.declareProperty("aProp", 0);
+    mgr2.updatePropertyValues(mgr1);
+    const std::vector<Property *> &props1 = mgr1.getProperties();
+    const std::vector<Property *> &props2 = mgr2.getProperties();
+    TS_ASSERT_EQUALS(props1.size(), props2.size());
+    TS_ASSERT_DIFFERS(&props1[0], &props2[0]);
+    TS_ASSERT_EQUALS(props1[0]->name(), props2[0]->name());
+    TS_ASSERT_EQUALS(props1[0]->value(), props2[0]->value());
+  }
+
+  void testUpdatePropertyValuesWithStringConversion() {
+    PropertyManagerHelper mgr1;
+    mgr1.declareProperty("aProp", "10");
+    PropertyManagerHelper mgr2;
+    mgr2.declareProperty("aProp", 0);
+    mgr2.updatePropertyValues(mgr1);
+    const std::vector<Property *> &props1 = mgr1.getProperties();
+    const std::vector<Property *> &props2 = mgr2.getProperties();
+    TS_ASSERT_EQUALS(props1.size(), props2.size());
+    TS_ASSERT_DIFFERS(&props1[0], &props2[0]);
+    TS_ASSERT_EQUALS(props1[0]->name(), props2[0]->name());
+    TS_ASSERT_EQUALS(props1[0]->value(), props2[0]->value());
+  }
+
   void test_asStringWithNotEnabledProperty() {
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("Semaphor", true));

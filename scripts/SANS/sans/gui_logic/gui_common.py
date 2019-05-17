@@ -9,7 +9,8 @@ import os
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
-from mantid.kernel import Logger
+from sans.common.constant_containers import (SANSInstrument_enum_as_key, SANSInstrument_string_as_key_NoInstrument,
+                                             SANSInstrument_string_list)
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 
 
@@ -104,7 +105,7 @@ def get_reduction_mode_strings_for_gui(instrument=None):
 
 
 def get_instrument_strings_for_gui():
-        return ['SANS2D', 'LOQ', 'LARMOR', 'ZOOM']
+        return SANSInstrument_string_list
 
 
 def get_reduction_selection(instrument):
@@ -135,11 +136,9 @@ def get_string_for_gui_from_reduction_mode(reduction_mode, instrument):
 
 
 def get_string_for_gui_from_instrument(instrument):
-    instrument_selection = {SANSInstrument.SANS2D: 'SANS2D', SANSInstrument.LOQ: 'LOQ', SANSInstrument.LARMOR: 'LARMOR'
-                            , SANSInstrument.ZOOM: 'ZOOM'}
-    if instrument in instrument_selection:
-        return instrument_selection[instrument]
-    else:
+    try:
+        return SANSInstrument_enum_as_key[instrument]
+    except KeyError:
         return None
 
 
@@ -164,17 +163,9 @@ def get_detector_from_gui_selection(gui_selection):
 
 
 def get_instrument_from_gui_selection(gui_selection):
-    if gui_selection == 'LOQ':
-        return SANSInstrument.LOQ
-    elif gui_selection == 'LARMOR':
-        return SANSInstrument.LARMOR
-    elif gui_selection == 'SANS2D':
-        return SANSInstrument.SANS2D
-    elif gui_selection == 'ZOOM':
-        return SANSInstrument.ZOOM
-    elif gui_selection == 'NoInstrument':
-        return SANSInstrument.NoInstrument
-    else:
+    try:
+        return SANSInstrument_string_as_key_NoInstrument[gui_selection]
+    except KeyError:
         raise RuntimeError("Instrument selection is not valid.")
 
 
@@ -285,13 +276,6 @@ class SANSGuiPropertiesHandler(object):
                     pass
             load_func(*args)
 
-    def update_default(self, gui_property, value):
-        if gui_property in self.keys:
-            self._set_setting(self.__generic_settings, gui_property, value)
-        else:
-            Logger("SANSPropertyHandler").information("Trying to set property {} for which a default property "
-                                                      "does not exist".format(gui_property))
-
     @staticmethod
     def _load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
         settings = QSettings()
@@ -310,9 +294,8 @@ class SANSGuiPropertiesHandler(object):
 
         return default_property
 
-    @staticmethod
-    def _set_setting(q_settings_group_key, q_settings_key, value):
+    def set_setting(self, q_settings_key, value):
         settings = QSettings()
-        settings.beginGroup(q_settings_group_key)
+        settings.beginGroup(self.__generic_settings)
         settings.setValue(q_settings_key, value)
         settings.endGroup()

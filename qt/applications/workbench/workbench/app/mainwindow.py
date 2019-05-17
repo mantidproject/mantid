@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
         self.populate_interfaces_menu()
 
     def launch_custom_python_gui(self, filename):
-        self.executioner.execute(open(filename).read(), filename)
+        self.interface_executor.execute(open(filename).read(), filename)
 
     def launch_custom_cpp_gui(self, interface_name):
         interface = self.interface_manager.createSubWindow(interface_name)
@@ -379,7 +379,6 @@ class MainWindow(QMainWindow):
         # list of custom interfaces that are not qt4/qt5 compatible
         GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
                          'Frequency_Domain_Analysis_Old.py',
-                         'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']
 
         # detect the python interfaces

@@ -234,7 +234,7 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         # Set the output workspaces
         # --------------------------------------------------------------------------------------------------------------
         # Set sample logs
-        # Todo: Set sample log -> Userfile and unfitted transmission workspace. Should probably set on
+        # Todo: Set sample log -> unfitted transmission workspace. Should probably set on
         # higher level (SANSBatch)
         # Set the output workspaces
         self.set_output_workspaces(reduction_mode_vs_output_workspaces)

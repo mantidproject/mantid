@@ -186,6 +186,24 @@ class BatchCsvParserTest(unittest.TestCase):
 
         BatchCsvParserTest._remove_csv(batch_file_path)
 
+    def test_can_parse_file_with_empty_final_column(self):
+        """There was a bug where certain batch files with an empty final column (no user file provided)
+        would not be treated as a column and therefore the batch file would be read as having only 15
+        rows.
+        We now add an empty final row in the parser if there are 15 rows and the last row provided is
+        a batch file key"""
+        batch_file_row = ["sample_sans", "1", "sample_trans", "", "sample_direct_beam", "",
+                          "can_sans", "", "can_trans", "", "can_direct_beam", "", "output_as", "", "user_file"]
+
+        content = "# MANTID_BATCH_FILE add more text here\n" + ",".join(batch_file_row)
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser(batch_file_path)
+
+        try:
+            parser._parse_row(batch_file_row, 0)
+        except RuntimeError as e:
+            self.fail("An error should not have been raised. Error raised was: {}".format(str(e)))
+
 
 if __name__ == '__main__':
     unittest.main()

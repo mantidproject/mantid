@@ -28,6 +28,8 @@ class MuonContext(object):
         self._phase_context = muon_phase_context
         self.base_directory = base_directory
 
+        self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True})
+
     @property
     def data_context(self):
         return self._data_context
@@ -146,9 +148,8 @@ class MuonContext(object):
         workspace_options = []
 
         for run in run_numbers:
-            workspace_options += [
-                wsName.get_phase_quad_workspace_name(self, run_list_to_string(run), period=str(period + 1))
-                for period in range(self.data_context.num_periods(run))]
+            workspace_options += self.phase_context.get_phase_quad(self.data_context.instrument, run_list_to_string(run))
+
             for name in pair_names:
                 workspace_options.append(
                     wsName.get_pair_data_workspace_name(self,
@@ -179,9 +180,37 @@ class MuonContext(object):
             for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
         return runs
 
-    @property
-    def first_good_data(self):
+    def first_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
         if self.gui_context['FirstGoodDataFromFile']:
-            return self.data_context.get_loaded_data_for_run(self.data_context.current_runs[-1])["FirstGoodData"]
+            return self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
         else:
-            return self.gui_context['FirstGoodData']
+            if 'FirstGoodData' in self.gui_context:
+                return self.gui_context['FirstGoodData']
+            else:
+                self.gui_context['FirstGoodData'] = self.data_context.get_loaded_data_for_run(run)["FirstGoodData"]
+                return self.gui_context['FirstGoodData']
+
+    def last_good_data(self, run):
+        if not self.data_context.get_loaded_data_for_run(run):
+            return 0.0
+
+        if self.gui_context['LastGoodDataFromFile']:
+            return round(max(self.data_context.get_loaded_data_for_run(run)["OutputWorkspace"][0].workspace.dataX(0)), 2)
+        else:
+            if 'LastGoodData' in self.gui_context:
+                return self.gui_context['LastGoodData']
+            else:
+                self.gui_context['LastGoodData'] = round(max(self.data_context.get_loaded_data_for_run(run)
+                                                             ["OutputWorkspace"][0].workspace.dataX(0)), 2)
+                return self.gui_context['LastGoodData']
+
+    def dead_time_table(self, run):
+        if self.gui_context['DeadTimeSource'] == 'FromADS':
+            return self.gui_context['DeadTimeTable']
+        elif self.gui_context['DeadTimeSource'] == 'FromFile':
+            return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+        elif self.gui_context['DeadTimeSource'] == 'None':
+            return None
