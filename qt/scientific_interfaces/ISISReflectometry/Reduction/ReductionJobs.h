@@ -28,6 +28,7 @@ public:
   Group &appendGroup(Group group);
   Group &insertGroup(Group group, int beforeIndex);
   bool hasGroupWithName(std::string const &groupName) const;
+  bool containsSingleEmptyGroup() const;
   boost::optional<int> indexOfGroupWithName(std::string const &groupName);
   void removeGroup(int index);
   void removeAllGroups();
@@ -61,6 +62,7 @@ void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
 
 void appendEmptyGroup(ReductionJobs &jobs);
 void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup);
+bool hasGroupsWithContent(ReductionJobs const &jobs);
 void ensureAtLeastOneGroupExists(ReductionJobs &jobs);
 void removeGroup(ReductionJobs &jobs, int groupIndex);
 void removeAllRowsAndGroups(ReductionJobs &jobs);
@@ -76,6 +78,8 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
 template <typename ModificationListener>
 void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
                    double thetaTolerance, ModificationListener &listener) {
+  // If there's a "fake" empty group, then we want to remove it
+  auto removeFirstGroup = intoHere.containsSingleEmptyGroup();
   for (auto const &group : fromHere.groups()) {
     auto maybeGroupIndex = intoHere.indexOfGroupWithName(group.name());
     if (maybeGroupIndex.is_initialized()) {
@@ -88,6 +92,12 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
       listener.groupAppended(static_cast<int>(intoHere.groups().size()) - 1,
                              group);
     }
+  }
+  // Remove the fake group after we have added the content, otherwise the
+  // JobTreeView will add another fake group
+  if (removeFirstGroup) {
+    intoHere.removeGroup(0);
+    listener.groupRemoved(0);
   }
 }
 } // namespace CustomInterfaces

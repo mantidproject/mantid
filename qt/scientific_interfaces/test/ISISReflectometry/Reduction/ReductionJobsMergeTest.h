@@ -20,6 +20,7 @@ using namespace MantidQt::CustomInterfaces;
 class MockModificationListener {
 public:
   MOCK_METHOD2_T(groupAppended, void(int, Group const &));
+  MOCK_METHOD1_T(groupRemoved, void(int));
   MOCK_METHOD3_T(rowAppended, void(int, int, Row const &));
   MOCK_METHOD3_T(rowModified, void(int, int, Row const &));
 };

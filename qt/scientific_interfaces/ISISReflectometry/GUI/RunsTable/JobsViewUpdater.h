@@ -60,6 +60,11 @@ public:
             cellsFromRow(row.get()));
   }
 
+  void groupRemoved(int groupIndex) {
+    m_view.removeRowAt(
+        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
+  }
+
   void rowAppended(int groupIndex, int, Row const &row) {
     m_view.appendChildRowOf(
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),

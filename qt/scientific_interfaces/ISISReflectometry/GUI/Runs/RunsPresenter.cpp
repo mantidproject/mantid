@@ -183,7 +183,7 @@ bool RunsPresenter::resumeAutoreduction() {
     // existing table first.  We'll prompt the user to check it's ok to delete
     // existing rows
     auto ok = true;
-    if (runsTable().reductionJobs().groups().size() > 0) {
+    if (hasGroupsWithContent(runsTable().reductionJobs())) {
       ok = m_messageHandler->askUserYesNo(
           "There are unsaved changes in the table. Continue?", "Warning");
       if (!ok)
