@@ -3065,16 +3065,9 @@ bool compareAtoms(const Atom &left, uint16_t a_number) {
  * @return The atom corresponding to the given Z and A
  */
 const Atom &getAtom(const uint16_t z_number, const uint16_t a_number) {
-  /*Atom temp("junk", z_number, a_number,
-            std::numeric_limits<double>::quiet_NaN(),
-            std::numeric_limits<double>::quiet_NaN(),
-            std::numeric_limits<double>::quiet_NaN());
-
-  */
-  auto result = std::lower_bound(
+  const auto result = std::lower_bound(
       ATOMS[z_number].cbegin(), ATOMS[z_number].cend(), a_number, compareAtoms);
 
-  // auto result = ATOMS[z_number].cbegin();
   if (result == ATOMS[z_number].cend() || result->z_number != z_number ||
       result->a_number != a_number) {
     std::stringstream msg;
@@ -3091,17 +3084,17 @@ const Atom &getAtom(const uint16_t z_number, const uint16_t a_number) {
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given symbol and A
  */
-Atom getAtom(const std::string &symbol, const uint16_t a_number) {
+const Atom &getAtom(const std::string &symbol, const uint16_t a_number) {
   // special cases for aliases
-  if (symbol == "D")
+  /*if (symbol == "D")
     return H2;
   if (symbol == "T")
     return H3;
-
+  */
   // linear search
   for (const auto &atom_vec : ATOMS) {
-    for(const auto &atom : atom_vec) {
-      if (symbol == atom.symbol) {
+    if (!atom_vec.empty() && symbol == atom_vec[0].symbol) {
+      for (const auto &atom : atom_vec) {
         if (a_number == atom.a_number) {
           return atom;
         }

@@ -67,21 +67,32 @@ public:
     boost::random::mt19937 gen;
     boost::random::uniform_int_distribution<uint16_t> dist(1, 96);
     for (size_t i = 0; i < test_size; ++i) {
-      input.push_back(dist(gen));
+      z_input.push_back(dist(gen));
+    }
+    for (auto z : z_input) {
+      symbol_input.push_back(getAtom(z).symbol);
     }
   }
 
   static void escape(void *p) { asm volatile("" : : "g"(p) : "memory"); }
 
-  void test_performance() {
-    for (uint16_t z : input) {
+  void test_z_performance() {
+    for (uint16_t z : z_input) {
       const Atom &a = getAtom(z);
       escape(const_cast<Atom *>(&a));
     }
   }
 
+  void test_symbol_performance() {
+    for (const auto &symbol : symbol_input) {
+      const Atom &a = getAtom(symbol);
+      escape(const_cast<Atom *>(&a));
+    }
+  }
+
 private:
-  std::vector<uint16_t> input;
+  std::vector<uint16_t> z_input;
+  std::vector<std::string> symbol_input;
 };
 
 #endif // ATOMTEST_H_
