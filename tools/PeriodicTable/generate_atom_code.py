@@ -123,24 +123,22 @@ if __name__ == "__main__":
 
     # write the elements and isotopes
     atomNames = []
+    spanTable = []
     for element in periodictable.elements:
-        atomNames.append(writeElement(handle, element))
+        if element.symbol not in BANNED:
+            spanTable.append([len(atomNames),len(element._isotopes.keys())+1])
+        atomNames.extend(writeElement(handle, element))
     handle.write("/// @endcond\n")
     handle.write("\n")
-
+    print(spanTable)
     # write an array of all atoms and elements
     handle.write("// All of the atoms in a single array so it can be searched.\n")
     handle.write("// getAtom() expects them to be sorted first by Z number then by A number.\n")
-    handle.write("static std::vector<std::vector<std::reference_wrapper<const Atom>> ATOMS = {\n")
     numAtoms = len(atomNames)
-    for i in range(0, numAtoms, 1):
-        if len(atomNames[i]):
-            handle.write("{")
-            handle.write(", ".join(atomNames[i]))
-            handle.write(",}")
-        else:
-            handle.write("{}")
-        if i + 1 < numAtoms:
+    handle.write("static std::array<Atom, %d> ATOMS_ARRAY = {\n" % numAtoms)
+    for i in range(0, numAtoms, 10):
+        handle.write(", ".join(atomNames[i:i+10]))
+        if i+10 < numAtoms:
             handle.write(",")
         handle.write("\n")
     handle.write("};\n")
@@ -148,6 +146,14 @@ if __name__ == "__main__":
     handle.write("/** The total number of atoms in the array. */\n")
     handle.write("static const size_t NUM_ATOMS = %d;\n" % numAtoms)
     handle.write("\n")
+
+    handle.write("static std::array<tcb::span<Atom>,%d> ATOMS = {\n" % len(spanTable))
+    for i, elem in enumerate(spanTable):
+        handle.write("tcb::span<Atom>(&ATOMS_ARRAY[%d], %d)" % (elem[0], elem[1]))
+        if i + 1 < len(spanTable):
+            handle.write(",")
+        handle.write("\n")
+    handle.write("};\n")
     handle.write(DELIMITOR_STOP+"\n")
 
     # write out what was after the delimitor
