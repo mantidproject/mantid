@@ -98,7 +98,7 @@ class HRPD(AbstractInst):
 
     def get_solid_angle_corrections(self, vanadium, run_details):
         if not self._inst_settings.do_solid_angle:
-            return None
+            return
         name = "sac" + common.generate_splined_name(vanadium, [])
         path = run_details.van_paths
         try:
