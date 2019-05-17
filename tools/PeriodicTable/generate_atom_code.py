@@ -130,7 +130,6 @@ if __name__ == "__main__":
         atomNames.extend(writeElement(handle, element))
     handle.write("/// @endcond\n")
     handle.write("\n")
-    print(spanTable)
     # write an array of all atoms and elements
     handle.write("// All of the atoms in a single array so it can be searched.\n")
     handle.write("// getAtom() expects them to be sorted first by Z number then by A number.\n")
