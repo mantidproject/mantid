@@ -561,6 +561,7 @@ set(TEST_FILES
     SaveReflThreeColumnAsciiTest.h
     SaveSESANSTest.h
     SaveSPETest.h
+    SaveStlTest.h
     SaveTBLTest.h
     SaveToSNSHistogramNexusTest.h
     SetBeamTest.h

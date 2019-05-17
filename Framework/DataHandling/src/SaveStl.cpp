@@ -14,18 +14,19 @@
 #include <vector>
 namespace Mantid {
 namespace DataHandling {
-
+enum class ScaleUnits { metres, centimetres, millimetres };
 namespace {
 void writeHeader(Kernel::BinaryStreamWriter streamWriter) {
-  const std::string header =
+  const std::string headerStart =
       "Binary STL File created using Mantid Environment:";
-  streamWriter << header;
-  const auto time =
-      Types::Core::DateAndTime::getCurrentTime().toISO8601String() + ":";
-  streamWriter << time;
+  const auto timeString =
+      Types::Core::DateAndTime::getCurrentTime().toFormattedString(
+          "%Y-%b-%dT%H:%M:%S") +
+      ":";
   // TODO add scale type
-  const size_t emptySize = 80 - size_t(header.size() + time.size());
-  streamWriter << std::string(emptySize, ' ');
+  const size_t emptySize =
+      80 - size_t(headerStart.size() + timeString.size() + 4);
+  streamWriter << headerStart + timeString + std::string(emptySize, ' ');
 }
 
 void writeNumberTriangles(Kernel::BinaryStreamWriter streamWriter,
@@ -45,7 +46,11 @@ void writeNormal(Kernel::BinaryStreamWriter StreamWriter) {
 } // namespace
 
 void SaveStl::writeStl() {
+  if (m_triangle.size() % 3 != 0) {
+    throw std::runtime_error("Invalid mesh, could not save.");
+  }
   std::ofstream myFile(m_filename.c_str(), std::ios::out | std::ios::binary);
+
   const uint32_t numberOfTriangles = uint32_t(m_triangle.size() / 3);
   Kernel::BinaryStreamWriter streamWriter = Kernel::BinaryStreamWriter(myFile);
   writeHeader(streamWriter);

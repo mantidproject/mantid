@@ -16,8 +16,8 @@ namespace Geometry {
 class MeshObject;
 }
 namespace DataHandling {
-enum class ScaleUnits { metres, centimetres, millimetres };
-class SaveStl {
+enum class ScaleUnits;
+class DLLExport SaveStl {
 public:
   SaveStl(const std::string &filename, const std::vector<uint32_t> triangle,
           std::vector<Kernel::V3D> vertices, ScaleUnits scaleType)
