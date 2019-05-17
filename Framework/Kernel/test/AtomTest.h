@@ -12,6 +12,9 @@
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
+
 using namespace Mantid::PhysicalConstants;
 
 class AtomTest : public CxxTest::TestSuite {
@@ -47,6 +50,38 @@ public:
     TS_ASSERT_THROWS(getAtom(1, 15), std::runtime_error);
     TS_ASSERT_THROWS(getAtom("garbage"), std::runtime_error);
   }
+};
+
+class AtomTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AtomTestPerformance *createSuite() {
+    return new AtomTestPerformance();
+  }
+  static void destroySuite(AtomTestPerformance *suite) { delete suite; }
+
+  /// Set up all the test workspaces
+  AtomTestPerformance() {
+    const size_t test_size = 1000000;
+    boost::random::mt19937 gen;
+    boost::random::uniform_int_distribution<uint16_t> dist(1, 96);
+    for (size_t i = 0; i < test_size; ++i) {
+      input.push_back(dist(gen));
+    }
+  }
+
+  static void escape(void *p) { asm volatile("" : : "g"(p) : "memory"); }
+
+  void test_performance() {
+    for (uint16_t z : input) {
+      const Atom &a = getAtom(z);
+      escape(const_cast<Atom *>(&a));
+    }
+  }
+
+private:
+  std::vector<uint16_t> input;
 };
 
 #endif // ATOMTEST_H_

@@ -3055,12 +3055,8 @@ std::ostream &operator<<(std::ostream &out, const Atom &atom) {
 }
 
 /// Compare two atoms
-bool compareAtoms(const Atom &left, const Atom &right) {
-  if (left.z_number == right.z_number) {
-    return (left.a_number < right.a_number);
-  } else {
-    return (left.z_number < right.z_number);
-  }
+bool compareAtoms(const Atom &left, uint16_t a_number) {
+  return (left.a_number < a_number);
 }
 
 /**
@@ -3068,14 +3064,17 @@ bool compareAtoms(const Atom &left, const Atom &right) {
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
  */
-Atom getAtom(const uint16_t z_number, const uint16_t a_number) {
-  Atom temp("junk", z_number, a_number,
+const Atom &getAtom(const uint16_t z_number, const uint16_t a_number) {
+  /*Atom temp("junk", z_number, a_number,
             std::numeric_limits<double>::quiet_NaN(),
             std::numeric_limits<double>::quiet_NaN(),
             std::numeric_limits<double>::quiet_NaN());
 
-  auto result =
-      std::lower_bound(ATOMS[z_number].cbegin(), ATOMS[z_number].cend(), temp, compareAtoms);
+  */
+  auto result = std::lower_bound(
+      ATOMS[z_number].cbegin(), ATOMS[z_number].cend(), a_number, compareAtoms);
+
+  // auto result = ATOMS[z_number].cbegin();
   if (result == ATOMS[z_number].cend() || result->z_number != z_number ||
       result->a_number != a_number) {
     std::stringstream msg;
