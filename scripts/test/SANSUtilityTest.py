@@ -419,17 +419,18 @@ class AddOperationTest(unittest.TestCase):
         out_ws_name = 'out_ws'
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
         # Create event ws2
         start_time_2 = "2012-01-01T00:10:00"
-        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
         # Create adder
         adder = su.AddOperation(isOverlay, '')
         # Act
-        adder.add(ws1, ws2,out_ws_name, 0)
+        adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
+                                      isOverlay=isOverlay)
 
     def test_two_files_are_added_correctly_for_overlay_on_and_inverted_times(self):
         isOverlay = True
@@ -437,79 +438,126 @@ class AddOperationTest(unittest.TestCase):
         out_ws_name = 'out_ws'
         # Create event ws1
         start_time_1 = "2012-01-01T00:10:00"
-        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
         # Create event ws2
         start_time_2 = "2010-01-01T00:00:00"
-        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
         # Create adder
         adder = su.AddOperation(isOverlay, '')
         # Act
-        adder.add(ws1, ws2,out_ws_name, 0)
+        adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
+                                      isOverlay=isOverlay)
 
     def test_two_files_are_added_correctly_for_overlay_off(self):
         isOverlay = False
-        names =['ws1', 'ws2']
+        names = ['ws1', 'ws2']
         out_ws_name = 'out_ws'
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
         # Create event ws2
         start_time_2 = "2012-01-01T01:00:00"
-        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
         # Create adder
         adder = su.AddOperation(False, '')
         # Act
-        adder.add(ws1, ws2,out_ws_name, 0)
+        adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
+                                      isOverlay=isOverlay)
 
     def test_two_files_are_added_correctly_with_time_shift(self):
         isOverlay = True
-        names =['ws1', 'ws2']
+        names = ['ws1', 'ws2']
         out_ws_name = 'out_ws'
         time_shift = 100
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
         # Create event ws2
         start_time_2 = "2012-01-01T01:10:00"
-        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = time_shift )
+        ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=time_shift)
         # Create adder
         adder = su.AddOperation(True, str(time_shift))
         # Act
-        adder.add(ws1, ws2,out_ws_name, 0)
+        adder.add(ws1, ws2, out_ws_name, 0)
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = time_shift, isOverlay = isOverlay)
-
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=time_shift,
+                                      isOverlay=isOverlay)
 
     def test_multiple_files_are_overlayed_correctly(self):
         isOverlay = True
-        names =['ws1', 'ws2', 'ws3']
+        names = ['ws1', 'ws2', 'ws3']
         out_ws_name = 'out_ws'
         out_ws_name2 = 'out_ws2'
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
         # Create event ws2
         start_time_2 = "2012-01-01T00:00:00"
-        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
         # Create event ws3
         start_time_3 = "2013-01-01T00:00:00"
-        ws3 = provide_event_ws(names[2],start_time_3, extra_time_shift = 0.0)
+        ws3 = provide_event_ws(names[2], start_time_3, extra_time_shift=0.0)
         # Create adder
         adder = su.AddOperation(True, '')
         # Act
-        adder.add(ws1, ws2,out_ws_name, 0)
+        adder.add(ws1, ws2, out_ws_name, 0)
         adder.add(out_ws_name, ws3, out_ws_name2, 0)
         out_ws2 = mtd[out_ws_name2]
         out_ws = mtd[out_ws_name]
         # Assert
-        self.compare_added_workspaces(out_ws, ws2, out_ws2, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+        self.compare_added_workspaces(out_ws, ws2, out_ws2, start_time_1, start_time_2, extra_time_shift=0.0,
+                                      isOverlay=isOverlay)
+
+    def test_that_bad_proton_charges_are_estimated_correctly(self):
+        ws = self._create_workspace_with_bad_logs()
+
+        # Clean the logs and estimate values
+        adder = su.OverlayWorkspaces()
+        adder._clean_logs(ws, True)
+
+        # Get proton charge logs after operation
+        new_pc = ws.getRun().getProperty("proton_charge")
+
+        # Bad pulsetime should have been removed, cleaned, and re-added as the last log
+        self.assertEqual(new_pc.firstTime().toISO8601String(), "2019-01-01T00:00:00")
+        #  Estimated time is last time + av difference
+        self.assertEqual(new_pc.lastTime().toISO8601String(), "2019-01-01T02:00:00")
+        self.assertEqual(new_pc.value[-1], 11.)
+
+    def test_that_bad_proton_charges_can_be_removed_without_estimating_good_values(self):
+        # If we pass a False boolean to _clean_logs, we should remove the bad proton charges
+        # but not re-estimate good values
+        ws = self._create_workspace_with_bad_logs()
+
+        # Clean the logs, but do not estimate new values
+        adder = su.OverlayWorkspaces()
+        adder._clean_logs(ws, False)
+
+        # Get proton charge logs after operation
+        new_pc = ws.getRun().getProperty("proton_charge")
+
+        # Bad pulsetime should have been removed, cleaned, and re-added as the last log
+        self.assertEqual(new_pc.firstTime().toISO8601String(), "2019-01-01T00:00:00")
+        self.assertEqual(new_pc.lastTime().toISO8601String(), "2019-01-01T01:00:00")
+        self.assertEqual(new_pc.size(), 2)
+
+    def _create_workspace_with_bad_logs(self):
+        ws = CreateSampleWorkspace(WorkspaceType='Event', NumEvents=0, OutputWorkspace="ws")
+
+        # Add sample logs, including 1 bad proton charge
+        for time, val in zip(["1900-01-01T00:00:00", "2019-01-01T00:00:00", "2019-01-01T01:00:00"],
+                             [0, 10, 12]):
+            date = DateAndTime(time)
+            AddTimeSeriesLog(ws, Name="proton_charge", Time=date.__str__().strip(), Value=val)
+        return ws
+
 
 class TestCombineWorkspacesFactory(unittest.TestCase):
     def test_that_factory_returns_overlay_class(self):
