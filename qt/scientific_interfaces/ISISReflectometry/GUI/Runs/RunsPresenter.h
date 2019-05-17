@@ -81,6 +81,7 @@ public:
 
   void reductionPaused() override;
   void reductionResumed() override;
+  bool resumeAutoreduction() override;
   void autoreductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionCompleted() override;
@@ -109,14 +110,14 @@ protected:
   boost::shared_ptr<SearchModel> m_searchModel;
   /// The current transfer method
   std::string m_currentTransferMethod;
+  /// The data processor presenters stored in a vector
+  std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
 
 private:
   /// The main view we're managing
   IRunsView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
-  /// The data processor presenters stored in a vector
-  std::unique_ptr<IRunsTablePresenter> m_tablePresenter;
   /// The main presenter
   IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation

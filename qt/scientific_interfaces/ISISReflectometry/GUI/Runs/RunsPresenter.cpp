@@ -174,26 +174,30 @@ void RunsPresenter::reductionPaused() {
   tablePresenter()->reductionPaused();
 }
 
-/** Searches ICAT for runs with given instrument and investigation id, transfers
- * runs to table and processes them. Clears any existing table data first.
+/** Resume autoreduction. Clears any existing table data first and then
+ * starts a search to check if there are new runs.
  */
-void RunsPresenter::autoreductionResumed() {
+bool RunsPresenter::resumeAutoreduction() {
   if (requireNewAutoreduction()) {
     // If starting a brand new autoreduction, delete all rows / groups in
-    // existing table first
-    // We'll prompt the user to check it's ok to delete existing rows
+    // existing table first.  We'll prompt the user to check it's ok to delete
+    // existing rows
     auto ok = true;
     if (runsTable().reductionJobs().groups().size() > 0) {
       ok = m_messageHandler->askUserYesNo(
           "There are unsaved changes in the table. Continue?", "Warning");
+      if (!ok)
+        return false;
     }
-    if (ok)
-      tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
+    tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
-  if (m_autoreduction.setupNewAutoreduction(m_view->getSearchString()))
-    checkForNewRuns();
+  m_autoreduction.setupNewAutoreduction(m_view->getSearchString());
+  checkForNewRuns();
+  return true;
+}
 
+void RunsPresenter::autoreductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->autoreductionResumed();
 }

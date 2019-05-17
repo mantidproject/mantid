@@ -34,6 +34,7 @@ public:
 
   virtual void reductionPaused() = 0;
   virtual void reductionResumed() = 0;
+  virtual bool resumeAutoreduction() = 0;
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionCompleted() = 0;
   virtual void autoreductionResumed() = 0;

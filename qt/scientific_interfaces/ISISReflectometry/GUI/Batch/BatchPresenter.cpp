@@ -196,10 +196,13 @@ void BatchPresenter::reductionPaused() {
 void BatchPresenter::resumeAutoreduction() {
   // Update the model first to ensure the autoprocessing flag is set
   m_jobRunner->autoreductionResumed();
-  // Then update the child presenters. This sets off a search to find
+  // The runs presenter starts autoreduction. This sets off a search to find
   // new runs, if there are any. When the search completes, we'll receive
   // a separate callback to reductionResumed.
-  autoreductionResumed();
+  if (m_runsPresenter->resumeAutoreduction())
+    autoreductionResumed();
+  else
+    m_jobRunner->autoreductionPaused();
 }
 
 void BatchPresenter::autoreductionResumed() {

@@ -105,6 +105,7 @@ public:
   MOCK_METHOD0(notifyRowStateChanged, void());
   MOCK_METHOD0(reductionPaused, void());
   MOCK_METHOD0(reductionResumed, void());
+  MOCK_METHOD0(resumeAutoreduction, bool());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
   MOCK_METHOD0(autoreductionCompleted, void());
@@ -238,7 +239,7 @@ public:
   MOCK_CONST_METHOD0(searchResultsExist, bool());
   MOCK_METHOD0(setSearchResultsExist, void());
 
-  MOCK_METHOD1(setupNewAutoreduction, bool(const std::string &));
+  MOCK_METHOD1(setupNewAutoreduction, void(const std::string &));
   MOCK_METHOD0(pause, bool());
   MOCK_METHOD0(stop, void());
 };

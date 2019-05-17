@@ -36,19 +36,18 @@ bool Autoreduction::searchResultsExist() const { return m_searchResultsExist; }
  */
 void Autoreduction::setSearchResultsExist() { m_searchResultsExist = true; }
 
-/** Initialise a new autoreduction on the given group
+/** Initialise a new autoreduction
  *
  * @param searchString : the search string to use for finding runs
  * @return : true if started
  */
-bool Autoreduction::setupNewAutoreduction(const std::string &searchString) {
+void Autoreduction::setupNewAutoreduction(const std::string &searchString) {
   m_searchString = searchString;
   m_running = true;
   m_searchResultsExist = false;
-  return true;
 }
 
-/** Stop an autoreduction for a given group
+/** Stop an autoreduction
  * @return : true if stopped
  */
 bool Autoreduction::pause() {
@@ -60,7 +59,7 @@ bool Autoreduction::pause() {
   return true;
 }
 
-/** Stop autoreduction on any group for which it is running
+/** Stop autoreduction
  */
 void Autoreduction::stop() { m_running = false; }
 } // namespace CustomInterfaces
