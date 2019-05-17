@@ -133,13 +133,6 @@ public:
     verifyAndClear();
   }
 
-  void testBatchIsExecutedWhenAutoreductionResumed() {
-    auto presenter = makePresenter();
-    expectBatchIsExecuted();
-    presenter.notifyAutoreductionResumed();
-    verifyAndClear();
-  }
-
   void testChildPresentersUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     expectAutoreductionResumed();

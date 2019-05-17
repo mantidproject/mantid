@@ -178,12 +178,21 @@ public:
     // TODO
   }
 
-  void testPauseAutoreduction() {
+  void testAutoreductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_runNotifier, stopPolling()).Times(1);
     EXPECT_CALL(m_autoreduction, stop()).Times(1);
     expectWidgetsEnabledForPaused();
     presenter.autoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testAutoreductionCompleted() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_runNotifier, startPolling()).Times(1);
+    EXPECT_CALL(m_autoreduction, stop()).Times(0);
+    expectWidgetsEnabledForAutoreducing();
+    presenter.autoreductionCompleted();
     verifyAndClear();
   }
 
