@@ -137,6 +137,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_output_mode_changed(self):
+            pass
+
+        @abstractmethod
         def on_data_changed(self, row, column, new_value, old_value):
             pass
 
@@ -557,6 +561,9 @@ class SANSDataProcessorGui(QMainWindow,
         else:
             output_mode = None
         set_setting(self.__generic_settings, self.__output_mode_key, output_mode)
+
+        # Notify the presenter
+        self._call_settings_listeners(lambda listener: listener.on_output_mode_changed(is_1d))
 
     def _on_save_can_clicked(self, value):
         self.save_can_checkBox.setChecked(value)
