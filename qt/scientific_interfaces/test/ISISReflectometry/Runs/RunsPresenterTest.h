@@ -48,9 +48,9 @@ public:
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
-      : m_thetaTolerance(0.01),
-        m_instruments{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}, m_view(),
-        m_runsTableView(), m_progressView(), m_messageHandler(),
+      : m_thetaTolerance(0.01), m_instruments{"INTER", "SURF", "CRISP",
+                                              "POLREF", "OFFSPEC"},
+        m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_autoreduction(), m_searcher(), m_runNotifier(),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()) {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
