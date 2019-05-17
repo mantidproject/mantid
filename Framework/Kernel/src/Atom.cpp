@@ -3086,11 +3086,11 @@ const Atom &getAtom(const uint16_t z_number, const uint16_t a_number) {
  */
 const Atom &getAtom(const std::string &symbol, const uint16_t a_number) {
   // special cases for aliases
-  /*if (symbol == "D")
+  if (symbol == "D")
     return H2;
   if (symbol == "T")
     return H3;
-  */
+
   // linear search
   for (const auto &atom_vec : ATOMS) {
     if (!atom_vec.empty() && symbol == atom_vec[0].symbol) {
