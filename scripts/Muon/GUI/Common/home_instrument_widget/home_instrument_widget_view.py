@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
-from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
+from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments, show_file_browser_and_return_selection
 from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 from Muon.GUI.Common.message_box import warning
 
@@ -101,15 +101,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def show_file_browser_and_return_selection(
             self, file_filter, search_directories, multiple_files=False):
-        default_directory = search_directories[0]
-        if multiple_files:
-            chosen_files = QtWidgets.QFileDialog.getOpenFileNames(
-                self, "Select files", default_directory, file_filter)
-            return [str(chosen_file) for chosen_file in chosen_files]
-        else:
-            chosen_file = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Select file", default_directory, file_filter)
-            return [str(chosen_file)]
+        return show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files)
 
     def set_combo_boxes_to_default(self):
         self.rebin_selector.setCurrentIndex(0)
