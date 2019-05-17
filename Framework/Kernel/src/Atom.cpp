@@ -3334,6 +3334,13 @@ bool compareAtoms(const Atom &left, uint16_t a_number) {
  * @return The atom corresponding to the given Z and A
  */
 const Atom &getAtom(const uint16_t z_number, const uint16_t a_number) {
+
+  if (z_number > ATOMS.size() || z_number < 1 ) {
+    std::stringstream msg;
+    msg << "Invalid proton number z=" << z_number;
+    throw std::runtime_error(msg.str());
+  }
+
   const std::size_t index = z_number - 1;
   const auto result = std::lower_bound(
       ATOMS[index].cbegin(), ATOMS[index].cend(), a_number, compareAtoms);
@@ -3364,10 +3371,9 @@ const Atom &getAtom(const std::string &symbol, const uint16_t a_number) {
   // linear search
   for (const auto &atom_vec : ATOMS) {
     if (!atom_vec.empty() && symbol == atom_vec[0].symbol) {
-      for (const auto &atom : atom_vec) {
-        if (a_number == atom.a_number) {
-          return atom;
-        }
+      const auto result = std::lower_bound(atom_vec.cbegin(), atom_vec.cend(), a_number, compareAtoms);
+      if(result != atom_vec.cend()) {
+        return *result;
       }
     }
   }
