@@ -28,8 +28,7 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               ScaleX, Plus)
 from mantid.kernel import (FloatArrayProperty, Direction, EnabledWhenProperty,
                            PropertyCriterion, StringListValidator, logger)
-debug_flag = False  # set to True to prevent erasing temporary workspaces
-
+temp_prefix = '_tp_'  # marks a workspace as temporary
 
 class VDAS(Enum):
     """Specifices the version of the Data Acquisition System (DAS)"""
@@ -70,7 +69,7 @@ def unique_workspace_name(n=5, prefix='', suffix=''):
 
 def tws(marker=''):
     r"""
-    String starting with '_t_' and guaranteed not to collide with the name of
+    String starting with temp_prefix and guaranteed not to collide with the name of
     any existing Mantid workspace in the analysis data service
 
     Parameters
@@ -82,20 +81,33 @@ def tws(marker=''):
     -------
     str
     """
-    return unique_workspace_name(prefix='_t_', suffix='_'+marker)
+    return unique_workspace_name(prefix=temp_prefix, suffix='_'+marker)
 
 
 @contextmanager
-def pyexec_setup(new_options):
+def pyexec_setup(remove_temp, new_options):
     """
-    Backup keys of mantid.config and clean up temporary files and workspaces
+    Backup keys of mantid.config
+    and clean up temporary files and workspaces
     upon algorithm completion or exception raised.
-    Workspaces with names beginning with '_t_' are assumed temporary.
+    Workspaces with names beginning
+    with the temporary workspace marker
+    are assumed temporary.
 
     Parameters
     ----------
+    remove_temp: bool
+        Determine wether to remove the temporary workspaces
     new_options: dict
         Dictionary of mantid configuration options to be modified.
+
+    Yields
+    ------
+    namedtuple:
+        tuple containing two lists.
+        The first list to hold temporary workspaces of arbitrary names.
+        The second list to hold temporary file names.
+        Used to delete the workspaces and files upon algorithm completion.
     """
     # Hold in this tuple all temporary objects to be removed after completion
     temp_objects = namedtuple('temp_objects', 'files workspaces')
@@ -111,7 +123,7 @@ def pyexec_setup(new_options):
         # reinstate the mantid options
         for key, value in previous_config.items():
             mantid_config[key] = value
-        if debug_flag is True:
+        if remove_temp is False:
             return
         # delete temporary files
         for file_name in temps.files:
@@ -120,7 +132,7 @@ def pyexec_setup(new_options):
         # with "_t_"
         to_be_removed = set()
         for name in AnalysisDataService.getObjectNames():
-            if '_t_' == name[0:3]:
+            if temp_prefix in name:
                 to_be_removed.add(name)
         for workspace in temps.workspaces:
             if isinstance(workspace, str):
@@ -280,6 +292,14 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         vanadium_title = 'Vanadium runs'
         self.declareProperty('VanadiumRuns', '', 'Vanadium run numbers')
         self.setPropertyGroup('VanadiumRuns', vanadium_title)
+        #
+        # Aditional output properties
+        #
+        titleAddionalOutput = 'Additional Output'
+        self.declareProperty('RemoveTemp', True, direction=Direction.Input,
+                             doc='Remove temporary workspaces and files')
+        self.setPropertyGroup('RemoveTemp', titleAddionalOutput)
+
 
     def PyExec(self):
         # Facility and database configuration
@@ -296,7 +316,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         # implement with ContextDecorator after python2 is deprecated)
         #
-        with pyexec_setup(config_new_options) as self._temps:
+        remove_temp = self.getProperty('RemoveTemp').value
+        with pyexec_setup(remove_temp, config_new_options) as self._temps:
             #
             # Load the mask to a temporary workspace
             #

@@ -24,9 +24,7 @@ from mantid.kernel import (IntArrayProperty, StringListValidator,
                            Direction, PropertyCriterion)
 from mantid import config as mantid_config
 from os.path import join as pjoin
-
-# name prefix marking a workspace for deletion after algorithm completion
-temporary_workspace_marker = '_t_'
+temp_prefix = '_ti_'  # marks a workspace as temporary
 
 
 def unique_workspace_name(n=3, prefix='', suffix=''):
@@ -60,7 +58,7 @@ def unique_workspace_name(n=3, prefix='', suffix=''):
 
 def tws(marker=''):
     r"""
-    String starting with the temporary workspace marker
+    String starting with the temp_prefix
     and guaranteed not to collide
     with the name of any existing Mantid workspace
     in the analysis data service
@@ -74,8 +72,7 @@ def tws(marker=''):
     -------
     str
     """
-    return unique_workspace_name(prefix=temporary_workspace_marker,
-                                 suffix='_'+marker)
+    return unique_workspace_name(prefix=temp_prefix, suffix='_'+marker)
 
 
 @contextmanager
@@ -90,6 +87,8 @@ def pyexec_setup(remove_temp, new_options):
 
     Parameters
     ----------
+    remove_temp: bool
+        Determine wether to remove the temporary workspaces
     new_options: dict
         Dictionary of mantid configuration options to be modified.
 
@@ -121,8 +120,7 @@ def pyexec_setup(remove_temp, new_options):
             os.remove(file_name)
         to_be_removed = set()
         for name in AnalysisDataService.getObjectNames():
-            twml = len(temporary_workspace_marker)
-            if name[0: twml] == temporary_workspace_marker:
+            if temp_prefix in name:
                 to_be_removed.add(name)
         for workspace in temps.workspaces:
             if isinstance(workspace, str) and AnalysisDataService.doesExist(workspace):
@@ -189,7 +187,6 @@ class BASISReduction(PythonAlgorithm):
         self._normalizeToFirst = False
         self._as_json = None
         self._temps = None  # hold names of temporary workspaces and files
-        self.remove_temp = None  # set to true to keep temporary workspaces
 
         # properties related to the sample
         self._samWs = None  # name of the sample events file
@@ -366,8 +363,8 @@ the first two hours"""
         #
         # implement with ContextDecorator after python2 is deprecated)
         #
-        self.remove_temp = self.getProperty('RemoveTemp').value
-        with pyexec_setup(self.remove_temp, config_new_options) as self._temps:
+        remove_temp = self.getProperty('RemoveTemp').value
+        with pyexec_setup(remove_temp, config_new_options) as self._temps:
             self._PyExec()
 
     def _PyExec(self):
