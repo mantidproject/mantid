@@ -30,6 +30,7 @@ from mantid.kernel import (FloatArrayProperty, Direction, EnabledWhenProperty,
                            PropertyCriterion, StringListValidator, logger)
 temp_prefix = '_tp_'  # marks a workspace as temporary
 
+
 class VDAS(Enum):
     """Specifices the version of the Data Acquisition System (DAS)"""
     v1900_2018 = 0  # Up to Dec 31 2018
@@ -299,7 +300,6 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.declareProperty('RemoveTemp', True, direction=Direction.Input,
                              doc='Remove temporary workspaces and files')
         self.setPropertyGroup('RemoveTemp', titleAddionalOutput)
-
 
     def PyExec(self):
         # Facility and database configuration
