@@ -40,7 +40,7 @@ public:
   }
 
   void test_Z_Number() {
-    for(uint16_t z = 1; z <=96; ++z) {
+    for (uint16_t z = 1; z <= 96; ++z) {
       Atom a = getAtom(z);
       TS_ASSERT_EQUALS(a.z_number, z);
     }
