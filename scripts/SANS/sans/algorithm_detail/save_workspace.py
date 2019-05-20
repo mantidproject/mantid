@@ -18,7 +18,7 @@ ZERO_ERROR_DEFAULT = 1e6
 file_format_with_append = namedtuple('file_format_with_append', 'file_format, append_file_format_name')
 
 
-def save_to_file(workspace, file_format, file_name, transmission_workspaces):
+def save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers):
     """
     Save a workspace to a file.
 
@@ -27,15 +27,16 @@ def save_to_file(workspace, file_format, file_name, transmission_workspaces):
     :param file_name: the file name.
     :param transmission_workspaces: a dict of additional save algorithm inputs
             e.g. Transmission and TransmissionCan for SaveCanSAS1D-v2
+    :param additional_run_numbers: a dict of workspace type to run number. Used in SaveNXCanSAS only.
     :return:
     """
     save_options = {"InputWorkspace": workspace}
-    save_alg = get_save_strategy(file_format, file_name, save_options, transmission_workspaces)
+    save_alg = get_save_strategy(file_format, file_name, save_options, transmission_workspaces, additional_run_numbers)
     save_alg.setRethrows(True)
     save_alg.execute()
 
 
-def get_save_strategy(file_format_bundle, file_name, save_options, transmission_workspaces):
+def get_save_strategy(file_format_bundle, file_name, save_options, transmission_workspaces, additional_run_numbers):
     """
     Provide a save strategy based on the selected file format
 
@@ -43,6 +44,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options, transmission_
     :param file_name: the name of the file
     :param save_options: the save options such as file name and input workspace
     :param transmission_workspaces: a dict of additional inputs for SaveCanSAS algorithm
+    :param additional_run_numbers: a dict of workspace type to run number
     :return: a handle to a save algorithm
     """
     file_format = file_format_bundle.file_format
@@ -57,6 +59,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options, transmission_
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
         save_options.update(transmission_workspaces)
+        save_options.update(additional_run_numbers)
     elif file_format is SaveType.NistQxy:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")
         save_name = "SaveNISTDAT"
@@ -106,7 +109,7 @@ def remove_zero_errors_from_workspace(workspace):
     :return: A zero-error free workspace
     """
     # Make sure we are dealing with a MatrixWorkspace
-    if not isinstance(workspace, MatrixWorkspace) or isinstance(workspace,EventWorkspace):
+    if not isinstance(workspace, MatrixWorkspace) or isinstance(workspace, EventWorkspace):
         raise ValueError('Cannot remove zero errors from a workspace which is not a MatrixWorkspace.')
 
     # Uncomment the next line and tests fail for checking error values should not be zero, and
