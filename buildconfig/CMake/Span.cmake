@@ -12,5 +12,5 @@ cmake_policy(SET CMP0063 "OLD")
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-span )
 execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-span )
 
-set(SPAN_INCLUDE_DIR "${CMAKE_BINARY_DIR}/extern-span/download/include/" CACHE PATH "")
+set(SPAN_INCLUDE_DIR "${CMAKE_BINARY_DIR}/extern-span/span-prefix/src/span/include" CACHE PATH "")
 

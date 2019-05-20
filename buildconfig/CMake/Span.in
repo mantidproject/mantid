@@ -2,11 +2,8 @@ cmake_minimum_required ( VERSION 3.5 )
 include( ExternalProject )
 
 ExternalProject_Add(span
-  URL "https://raw.githubusercontent.com/tcbrindle/span/e9cf0809c9b8b9ecd06db782dc631f138fab4ee8/include/tcb/span.hpp"
-  URL_HASH "MD5=be82062a7ede8c8550904fadacd4c31f"
-  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern-span/download/include/tcb
-  DOWNLOAD_NO_EXTRACT TRUE
-  DOWNLOAD_NAME span.hpp
+  GIT_REPOSITORY "https://github.com/tcbrindle/span.git"
+  GIT_TAG "e9cf0809c9b8b9ecd06db782dc631f138fab4ee8"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
