@@ -2890,7 +2890,7 @@ static const Atom Cm252("Cm", 96, 252, 0.000000, 252.084870, 13.7881238611);
 
 // All of the atoms in a single array so it can be searched.
 // getAtom() expects them to be sorted first by Z number then by A number.
-static std::array<Atom, 2845> ATOMS_ARRAY = {
+static std::array<Atom, 2845> ATOMS_ARRAY = {{
     H,     H1,    H2,    H3,    H4,    H5,    H6,    He,    He3,   He4,   He5,
     He6,   He7,   He8,   He9,   He10,  Li,    Li4,   Li5,   Li6,   Li7,   Li8,
     Li9,   Li10,  Li11,  Li12,  Be,    Be5,   Be6,   Be7,   Be8,   Be9,   Be10,
@@ -3149,9 +3149,9 @@ static std::array<Atom, 2845> ATOMS_ARRAY = {
     Am231, Am232, Am233, Am234, Am235, Am236, Am237, Am238, Am239, Am240, Am241,
     Am242, Am243, Am244, Am245, Am246, Am247, Am248, Am249, Cm,    Cm233, Cm234,
     Cm235, Cm236, Cm237, Cm238, Cm239, Cm240, Cm241, Cm242, Cm243, Cm244, Cm245,
-    Cm246, Cm247, Cm248, Cm249, Cm250, Cm251, Cm252};
+    Cm246, Cm247, Cm248, Cm249, Cm250, Cm251, Cm252}};
 
-static std::array<tcb::span<Atom>, 96> ATOMS = {
+static std::array<tcb::span<Atom>, 96> ATOMS = {{
     tcb::span<Atom>(&ATOMS_ARRAY[0], 7),
     tcb::span<Atom>(&ATOMS_ARRAY[7], 9),
     tcb::span<Atom>(&ATOMS_ARRAY[16], 10),
@@ -3247,7 +3247,7 @@ static std::array<tcb::span<Atom>, 96> ATOMS = {
     tcb::span<Atom>(&ATOMS_ARRAY[2762], 21),
     tcb::span<Atom>(&ATOMS_ARRAY[2783], 21),
     tcb::span<Atom>(&ATOMS_ARRAY[2804], 20),
-    tcb::span<Atom>(&ATOMS_ARRAY[2824], 21)};
+    tcb::span<Atom>(&ATOMS_ARRAY[2824], 21)}};
 // ---------- END DO NOT EDIT AREA----------
 
 /// Check if two atoms are not valid.
