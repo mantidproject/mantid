@@ -98,6 +98,11 @@ protected:
   void processShutDown();
   void processStopFocus();
 
+  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
+                                                const std::vector<bool> &banks);
+
+  std::string outputFocusCroppedFilename(const std::string &runNo);
+
 protected slots:
   void calibrationFinished();
   void focusingFinished();
@@ -120,7 +125,8 @@ private:
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
 
-  void grabCalibParms(const std::string &fname);
+  void grabCalibParms(const std::string &fname, std::string &vanNo,
+                      std::string &ceriaNo);
 
   void updateCalibParmsTable();
 
@@ -174,11 +180,6 @@ private:
   void inputChecksBeforeFocus();
   void inputChecksBanks(const std::vector<bool> &banks);
 
-  std::vector<std::string> outputFocusFilenames(const std::string &runNo,
-                                                const std::vector<bool> &banks);
-
-  std::string outputFocusCroppedFilename(const std::string &runNo);
-
   std::vector<std::string> sumOfFilesLoadVec();
 
   std::vector<std::string>
@@ -189,8 +190,9 @@ private:
                                std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs, const RunLabel &runLabel,
-                  const std::string &specNos, const std::string &dgFile);
+  void doFocusing(const EnggDiffCalibSettings &cs, const std::string &runLabel,
+                  const size_t bank, const std::string &specNos,
+                  const std::string &dgFile);
 
   /// @name Methods related to pre-processing / re-binning
   //@{
@@ -236,7 +238,7 @@ private:
   // returns a directory as a path, creating it if not found, and checking
   // errors
   Poco::Path outFilesUserDir(const std::string &addToDir) const override;
-  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFRunFilename(const std::string &runNumber) const override;
   std::string userHDFMultiRunFilename(
       const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
@@ -301,8 +303,14 @@ private:
 
   QThread *m_workerThread;
 
+  /// true if the last thing ran was cancelled
+  bool m_cancelled;
+
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+
+  /// error that caused the calibration to fail
+  std::string m_calibError;
   /// path where the calibration has been produced (par/prm file)
   std::string m_calibFullPath;
 
@@ -312,6 +320,8 @@ private:
 
   /// true if the last focusing completed successfully
   bool m_focusFinishedOK;
+  /// error that caused the focus to fail
+  std::string m_focusError;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
 

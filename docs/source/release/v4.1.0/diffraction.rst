@@ -36,6 +36,8 @@ Bug Fixes
 
 - Prevented issue with reading CSV files on python 3
 
+- GUI now correctly loads the file browsed to instead of looking for a run number in every folder along the path to that file.
+
 Single Crystal Diffraction
 --------------------------
 
