@@ -8,16 +8,15 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import AnalysisDataServiceObserver
-from functools import wraps
-import mantid.simpleapi as mantid
+
 
 class SubplotADSObserver(AnalysisDataServiceObserver):
 
     def __init__(self, subplot):
         super(SubplotADSObserver, self).__init__()
-        self._subplot= subplot
+        self._subplot = subplot
 
-        #self.observeClear(True)
+        # self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
 
@@ -37,4 +36,4 @@ class SubplotADSObserver(AnalysisDataServiceObserver):
         :param workspace_name: The name of the workspace. Unused
         :param workspace: A reference to the new workspace
         """
-        self._subplot._replaced_ws( workspace)
+        self._subplot._replaced_ws(workspace)

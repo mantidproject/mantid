@@ -90,14 +90,14 @@ class subplotContext(object):
                 label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
             self._lines[label] = [line]
 
-    def replace_ws(self,ws):
+    def replace_ws(self, ws):
         redraw_canvas = False
         for key in self._ws.keys():
             if key.name() == ws.name():
-               redraw_canvas = True
-               self._ws[ws] = self._ws.pop(key)
-               for label in self._ws[ws]:
-                   self.redraw(label)
+                redraw_canvas = True
+                self._ws[ws] = self._ws.pop(key)
+                for label in self._ws[ws]:
+                    self.redraw(label)
         return redraw_canvas
 
     def change_errors(self, state):
@@ -182,7 +182,6 @@ class subplotContext(object):
         for key in to_delete:
             del self._ws[key]
 
-
     def removeVLine(self, name):
         if name not in self._vLines:
             return
@@ -217,5 +216,5 @@ class subplotContext(object):
     def get_lines_from_WS_name(self, name):
         for ws in self._ws:
             if name == ws.name():
-               return self._ws[ws]
+                return self._ws[ws]
         return []

@@ -40,7 +40,6 @@ class subplot(QtWidgets.QWidget):
         self.canvas.mpl_connect("draw_event", self.draw_event_callback)
 
         self._ADSObserver = SubplotADSObserver(self)
-       
 
         grid = QtWidgets.QGridLayout()
         # add toolbar
@@ -257,18 +256,18 @@ class subplot(QtWidgets.QWidget):
         self._update()
         self.rmSubplotSignal.emit(subplotName)
 
-    def _rm_ws_from_plots(self,workspace_name):
+    def _rm_ws_from_plots(self, workspace_name):
         keys = deepcopy(self._context.subplots.keys())
         for subplot in keys:
-             labels = self._context.get_lines_from_WS(subplot,workspace_name)
-             for label in labels:
-                  self._context.removePlotLine(subplot, label)
-                  self.canvas.draw()
-             if self._context.is_subplot_empty(subplot):
+            labels = self._context.get_lines_from_WS(subplot, workspace_name)
+            for label in labels:
+                self._context.removePlotLine(subplot, label)
+                self.canvas.draw()
+            if self._context.is_subplot_empty(subplot):
                 self._remove_subplot(subplot)
 
-    def _replaced_ws(self,workspace):
+    def _replaced_ws(self, workspace):
         for subplot in self._context.subplots.keys():
-              redraw = self._context.subplots[subplot].replace_ws(workspace)
-              if redraw:
-                  self.canvas.draw()
+            redraw = self._context.subplots[subplot].replace_ws(workspace)
+            if redraw:
+                self.canvas.draw()

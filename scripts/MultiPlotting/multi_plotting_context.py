@@ -10,12 +10,12 @@ from MultiPlotting.gridspec_engine import gridspecEngine
 from MultiPlotting.subplot.subplot_context import subplotContext
 
 
-
 import mantid.simpleapi as mantid
 
 
 xBounds = "xBounds"
 yBounds = "yBounds"
+
 
 class PlottingContext(object):
 
@@ -26,7 +26,6 @@ class PlottingContext(object):
         self.context[yBounds] = [0., 0.]
         self._gridspec_engine = gridspec_engine
         self._gridspec = None
-
 
     def addSubplot(self, name, subplot):
         self.subplots[name] = subplotContext(name, subplot)
