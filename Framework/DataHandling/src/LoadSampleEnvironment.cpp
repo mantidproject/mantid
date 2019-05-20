@@ -24,9 +24,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-#include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
-#include <cmath>
 #include <fstream>
 
 namespace Mantid {

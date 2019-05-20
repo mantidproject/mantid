@@ -20,7 +20,6 @@
 
 #include "MantidGeometry/Instrument.h"
 
-#include <Poco/File.h>
 
 namespace Mantid {
 namespace DataHandling {
