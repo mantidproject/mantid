@@ -45,6 +45,12 @@ class FittingTabPresenter(object):
 
         if fit_type == 'Single Fit':
             self.view.set_datasets_in_function_browser([self.view.display_workspace])
+        elif fit_type == 'Sequential Fit':
+            current_index = self.view.parameter_display_combo.currentIndex()
+            current_index = current_index if current_index != -1 else 0
+            self.view.set_datasets_in_function_browser([self.view.display_workspace])
+            self.view.start_time = self.start_x[current_index]
+            self.view.end_time = self.end_x[current_index]
         else:
             current_index = self.view.parameter_display_combo.currentIndex()
             current_index = current_index if current_index != -1 else 0
@@ -90,14 +96,19 @@ class FittingTabPresenter(object):
             single_fit_parameters = self.get_parameters_for_single_fit()
             self.model.do_single_fit(single_fit_parameters)
         elif fit_type == 'Simultaneous Fit':
-            simultaneous_fit_parameters = self.get_simultaneous_fit_parameters()
+            simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
             self.model.do_simultaneous_fit(simultaneous_fit_parameters)
+        elif fit_type == 'Sequential Fit':
+            sequential_fit_parameters = self.get_multi_domain_fit_parameters()
+            self.model.do_sequential_fit(sequential_fit_parameters)
 
-    def handle_start_x_updated(self, value):
+    def handle_start_x_updated(self):
+        value = self.view.start_time
         index = self.view.parameter_display_combo.currentIndex()
         self.update_start_x(index, value)
 
-    def handle_end_x_updated(self, value):
+    def handle_end_x_updated(self):
+        value = self.view.end_time
         index = self.view.parameter_display_combo.currentIndex()
         self.update_end_x(index, value)
 
@@ -113,7 +124,7 @@ class FittingTabPresenter(object):
 
         return params
 
-    def get_simultaneous_fit_parameters(self):
+    def get_multi_domain_fit_parameters(self):
         params = {}
 
         params['Function'] = self.view.fit_string
@@ -135,9 +146,10 @@ class FittingTabPresenter(object):
         self.view.update_displayed_data_combo_box(value)
 
         if self.view.fit_type != 'Single Fit':
-            self.view.set_datasets_in_function_browser(self._selected_data)
             self._start_x = [self.view.start_time] * len(value)
             self._end_x = [self.view.end_time] * len(value)
+        if self.view.fit_type == 'Simultaneous Fit':
+            self.view.set_datasets_in_function_browser(self._selected_data)
 
     @property
     def start_x(self):

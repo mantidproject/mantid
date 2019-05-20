@@ -79,3 +79,12 @@ class FittingTabModel(object):
             new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index], function)
             new_name += '; Simultaneous'
             RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
+
+    def do_sequential_fit(self, parameter_dict):
+        for input_workspace, startX, endX in zip(parameter_dict['InputWorkspace'], parameter_dict['StartX'], parameter_dict['EndX']):
+            sub_parameter_dict = parameter_dict.copy()
+            sub_parameter_dict['InputWorkspace'] = input_workspace
+            sub_parameter_dict['StartX'] = startX
+            sub_parameter_dict['EndX'] = endX
+
+            self.do_single_fit(sub_parameter_dict)
