@@ -200,7 +200,6 @@ set(MOC_FILES
     IndirectMoments.h
     IndirectSassena.h
     IndirectSettings.h
-    IndirectSettingsModel.h
     IndirectSettingsPresenter.h
     IndirectSettingsView.h
     IndirectSimulation.h
