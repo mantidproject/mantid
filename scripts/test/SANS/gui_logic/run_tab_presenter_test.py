@@ -1094,7 +1094,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         presenter.on_output_mode_changed()
-        presenter._view.disable_file_type_buttons.assert_called_once()
+        presenter._view.disable_file_type_buttons.assert_called_once_with()
 
     def test_that_all_file_type_buttons_are_enabled_if_switching_to_non_memory_mode_and_in_1D_reduction_mode(self):
         """This tests that all file type buttons are enabled if switching to file or both mode, when reduction
