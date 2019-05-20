@@ -138,5 +138,54 @@ class SubPlotContextTest(unittest.TestCase):
             self.assertIn(key, result)
         self.assertEquals(len(result), len(expect))
 
+
+
+    def test_replaceWS(self):
+        ws = mock.Mock()
+        ws2 = mock.Mock()
+        ws.name = mock.Mock(return_value="test")
+        ws2.name = mock.Mock(return_value="not used")
+        self.context.redraw = mock.Mock()
+
+        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+            patch.return_value = tuple([line()])
+            self.context.addLine(ws, 3)
+            self.context.addLine(ws2, 3)
+        # check inital set up
+        keys = self.context.ws.keys()
+        expect = [ws,ws2]
+        for key in expect:
+            self.assertIn(key, keys)
+        self.assertEquals(len(keys),len(expect))
+
+        # do the method
+        redraw = self.context.replace_ws(ws)
+        self.assertEquals(redraw,True)
+        new_keys = self.context.ws.keys()
+        for key in expect:
+            self.assertIn(key, new_keys)
+        self.assertEquals(len(new_keys),len(expect))
+        self.assertEquals(self.context.ws[ws],["test"])
+
+    def test_getLinesFromWSName(self):
+        ws = mock.Mock()
+        ws2 = mock.Mock()
+        ws.name = mock.Mock(return_value="test")
+        ws2.name = mock.Mock(return_value="not used")
+        self.context.redraw = mock.Mock()
+
+        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+            patch.return_value = tuple([line()])
+            self.context.addLine(ws, 1)
+            self.context.addLine(ws2, 2)
+
+        lines = self.context.get_lines_from_WS_name("test")
+        expect = ["test"]
+        for key in expect:
+            self.assertIn(key, "test")
+ 
+
+
+
 if __name__ == "__main__":
     unittest.main()

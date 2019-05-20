@@ -8,6 +8,7 @@ from matplotlib.gridspec import GridSpec
 import unittest
 
 from mantid.py3compat import mock
+from MultiPlotting.subplot.subplot_context import *
 from MultiPlotting.subplot.subplot import subplot
 from MultiPlotting.multi_plotting_context import PlottingContext
 from Muon.GUI.Common import mock_widget
@@ -156,6 +157,51 @@ class SubplotTest(unittest.TestCase):
          self.subplot.add_subplot("test",3)
          self.subplot._context.update_gridspec.assert_called_with(4)
          self.assertEquals(self.subplot._update.call_count,1)
+
+    #def test_rm_ws_from_plots(self):
+    def test_replaced_ws_false(self):
+        one = mock.Mock()
+        two = mock.Mock()
+        self.subplot._context.subplots["one"] = one
+        self.subplot._context.subplots["two"] = two
+        self.subplot.canvas.draw = mock.Mock()
+        ws = mock.Mock()
+        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = False)
+        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = False)
+
+        self.subplot._replaced_ws(ws)
+        self.assertEquals(self.subplot.canvas.draw.call_count,0)
+
+
+
+    def test_replaced_ws(self):
+        one = mock.Mock()
+        two = mock.Mock()
+        self.subplot._context.subplots["one"] = one
+        self.subplot._context.subplots["two"] = two
+        self.subplot.canvas.draw = mock.Mock()
+        ws = mock.Mock()
+        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = False)
+        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = True)
+
+        self.subplot._replaced_ws(ws)
+        self.assertEquals(self.subplot.canvas.draw.call_count,1)
+
+
+
+    def test_replaced_ws_true(self):
+        one = mock.Mock()
+        two = mock.Mock()
+        self.subplot._context.subplots["one"] = one
+        self.subplot._context.subplots["two"] = two
+        self.subplot.canvas.draw = mock.Mock()
+        ws = mock.Mock()
+        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = True)
+        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = True)
+
+        self.subplot._replaced_ws(ws)
+        self.assertEquals(self.subplot.canvas.draw.call_count,2)
+
 
 if __name__ == "__main__":
     unittest.main()

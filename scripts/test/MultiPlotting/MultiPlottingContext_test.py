@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantid.simpleapi import *
 from mantid.py3compat import mock
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot_context import subplotContext
-
+from line_helper import line
 
 class gen_ws(object):
     def __init__(self,mock):
@@ -70,5 +71,31 @@ class MultiPlottingContextTest(unittest.TestCase):
             patch.assert_called_with(gridspec,figure,2)
 
 
+    def test_subplotEmptyTrue(self):
+        names = ["one","two","three"]
+        for name in names:
+            self.context.addSubplot(name, mock.Mock())
+
+        for name in names:
+             self.assertEquals(self.context.is_subplot_empty(name),True)
+ 
+    def test_subplotEmptyFalse(self):
+        names = ["one","two","three"]
+
+        no_lines = 1
+
+        ws = mock.MagicMock()
+        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+            patch.return_value = tuple([line()])
+ 
+            for name in names:
+                self.context.addSubplot(name, mock.Mock())
+                for k in range(0,no_lines):
+                    self.context.addLine(name, ws,1)
+                no_lines +=1
+
+        for name in names:
+             self.assertEquals(self.context.is_subplot_empty(name),False)
+        
 if __name__ == "__main__":
     unittest.main()

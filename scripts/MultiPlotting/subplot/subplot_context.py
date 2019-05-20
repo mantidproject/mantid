@@ -168,7 +168,6 @@ class subplotContext(object):
             return
         lines = self._lines[name]
         for line in lines:
-            print(name)
             line.remove()
             del line
         del self._lines[name]
