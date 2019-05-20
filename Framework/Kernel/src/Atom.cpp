@@ -7,7 +7,7 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/span.hpp"
+#include "tcb/span.hpp"
 
 #include <algorithm>
 #include <array>
@@ -3150,9 +3150,6 @@ static std::array<Atom, 2845> ATOMS_ARRAY = {
     Am242, Am243, Am244, Am245, Am246, Am247, Am248, Am249, Cm,    Cm233, Cm234,
     Cm235, Cm236, Cm237, Cm238, Cm239, Cm240, Cm241, Cm242, Cm243, Cm244, Cm245,
     Cm246, Cm247, Cm248, Cm249, Cm250, Cm251, Cm252};
-
-/** The total number of atoms in the array. */
-static const size_t NUM_ATOMS = 2845;
 
 static std::array<tcb::span<Atom>, 96> ATOMS = {
     tcb::span<Atom>(&ATOMS_ARRAY[0], 7),

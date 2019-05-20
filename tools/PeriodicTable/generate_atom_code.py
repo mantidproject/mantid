@@ -142,9 +142,6 @@ if __name__ == "__main__":
         handle.write("\n")
     handle.write("};\n")
     handle.write("\n")
-    handle.write("/** The total number of atoms in the array. */\n")
-    handle.write("static const size_t NUM_ATOMS = %d;\n" % numAtoms)
-    handle.write("\n")
 
     handle.write("static std::array<tcb::span<Atom>,%d> ATOMS = {\n" % len(spanTable))
     for i, elem in enumerate(spanTable):
