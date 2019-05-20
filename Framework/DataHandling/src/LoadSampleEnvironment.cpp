@@ -295,6 +295,7 @@ void LoadSampleEnvironment::exec() {
 /**
  * translates the environment by a provided matrix
  * @param environmentMesh The environment to translate
+ * @param scaleType The scale to use
  * @returns a shared pointer to the newly translated environment
  */
 boost::shared_ptr<MeshObject>
