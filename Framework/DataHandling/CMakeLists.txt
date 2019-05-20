@@ -561,6 +561,7 @@ set(TEST_FILES
     SaveReflectometryAsciiTest.h
     SaveReflCustomAsciiTest.h
     SaveReflThreeColumnAsciiTest.h
+    SaveSampleEnvironmentAndShapeTest.h
     SaveSESANSTest.h
     SaveSPETest.h
     SaveStlTest.h

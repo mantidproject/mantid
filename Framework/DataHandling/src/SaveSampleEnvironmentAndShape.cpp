@@ -43,7 +43,7 @@ void SaveSampleEnvironmentAndShape::init() {
 }
 
 void SaveSampleEnvironmentAndShape::exec() {
-  auto filename = getPropertyValue("Filename");
+
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   try {
     // track the total number of triangles and vertices
@@ -53,61 +53,81 @@ void SaveSampleEnvironmentAndShape::exec() {
     // Get the shape of the sample
     auto &sampleShape =
         dynamic_cast<const MeshObject &>(inputWS->sample().getShape());
+    if (!sampleShape.hasValidShape()) {
+      throw std::invalid_argument("Sample Shape is not complete");
+    }
     numVertices += sampleShape.numberOfVertices();
     numTriangles += (sampleShape.numberOfTriangles() * 3);
 
-    // get the environment
-    auto environment = inputWS->sample().getEnvironment();
+    if (inputWS->sample().hasEnvironment()) {
 
-    // Setup vector to store the pieces of the environment
-    std::vector<const MeshObject *> environmentPieces;
-    auto numElements = environment.nelements();
-    environmentPieces.reserve(numElements);
+      // get the environment
+      auto environment = inputWS->sample().getEnvironment();
 
-    // get the shape the container of the environment and add it to the vector
-    environmentPieces.emplace_back(dynamic_cast<const MeshObject *>(
-        &environment.getContainer().getShape()));
-    numVertices += environmentPieces[0]->numberOfVertices();
-    numTriangles += (environmentPieces[0]->numberOfTriangles() * 3);
+      // Setup vector to store the pieces of the environment
+      std::vector<const MeshObject *> environmentPieces;
+      auto numElements = environment.nelements();
+      environmentPieces.reserve(numElements);
 
-    // get the shapes of the components and add them to the vector
-    for (size_t i = 1; i < numElements;
-         ++i) { // start at 1 because element 0 is container
-      const MeshObject *temp =
-          dynamic_cast<const MeshObject *>(&environment.getComponent(i));
-      numVertices += temp->numberOfVertices();
-      numTriangles += (temp->numberOfTriangles() * 3);
-      environmentPieces.emplace_back(temp);
+      // get the shape the container of the environment and add it to the vector
+      bool environmentValid = true;
+      environmentPieces.emplace_back(dynamic_cast<const MeshObject *>(
+          &environment.getContainer().getShape()));
+      environmentValid =
+          environmentValid && environmentPieces[0]->hasValidShape();
+      numVertices += environmentPieces[0]->numberOfVertices();
+      numTriangles += (environmentPieces[0]->numberOfTriangles() * 3);
+
+      // get the shapes of the components and add them to the vector
+      for (size_t i = 1; i < numElements;
+           ++i) { // start at 1 because element 0 is container
+        const MeshObject *temp =
+            dynamic_cast<const MeshObject *>(&environment.getComponent(i));
+        numVertices += temp->numberOfVertices();
+        numTriangles += (temp->numberOfTriangles() * 3);
+        environmentValid = environmentValid && temp->hasValidShape();
+        environmentPieces.emplace_back(temp);
+      }
+      if (!environmentValid) {
+        throw std::invalid_argument("Environment Shape is not complete");
+      }
+
+      // setup vectors to store all triangles and vertices
+      m_vertices.reserve(numVertices);
+      m_triangle.reserve(numTriangles);
+
+      // get the sample vertices and triangles and add them into the vector
+      addMeshToVector(sampleShape);
+
+      // keep track of the current number of vertices added
+      size_t offset = sampleShape.numberOfVertices();
+
+      // go through the environment, adding the triangles and vertices to the
+      // vector
+      for (size_t i = 0; i < environmentPieces.size(); ++i) {
+        offset = addMeshToVector(*environmentPieces[i], offset);
+      }
+    } else {
+      // setup vectors to store all triangles and vertices
+      m_vertices.reserve(numVertices);
+      m_triangle.reserve(numTriangles);
+
+      // get the sample vertices and triangles and add them into the vector
+      addMeshToVector(sampleShape);
     }
-
-    // setup vectors to store all triangles and vertices
-    m_vertices.reserve(numVertices);
-    m_triangle.reserve(numTriangles);
-
-    // get the sample vertices and triangles and add them into the vector
-    addMeshToVector(sampleShape);
-
-    // keep track of the current number of vertices added
-    size_t offset = sampleShape.numberOfVertices();
-
-    // go through the environment, adding the triangles and vertices to the
-    // vector
-    for (size_t i = 0; i < environmentPieces.size(); ++i) {
-      offset = addMeshToVector(*environmentPieces[i], offset);
-    }
-
     // get the scale to use
     auto scale = getPropertyValue("Scale");
     auto scaleType = getScaleType(scale);
 
     // Save out the shape
+    auto filename = getPropertyValue("Filename");
     SaveStl writer = SaveStl(filename, m_triangle, m_vertices, scaleType);
     writer.writeStl();
   } catch (std::bad_cast &) {
     // if bad_cast is thrown the sample or environment is not a mesh_object, and
     // therefore cannot be saved as an STL
     throw std::invalid_argument(
-        "Attempted to Save out non-mesh based Sample Shape");
+        "Attempted to Save out non mesh based Sample or Environment");
   }
 }
 void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
