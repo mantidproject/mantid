@@ -74,7 +74,19 @@ public:
     }
   }
 
+#ifdef _MSC_VER
+
+#pragma optimize("", off)
+
+  static void escape(void *p) { p = p; }
+
+#pragma optimize("", on)
+
+#else
+
   static void escape(void *p) { asm volatile("" : : "g"(p) : "memory"); }
+
+#endif
 
   void test_z_performance() {
     for (uint16_t z : z_input) {
