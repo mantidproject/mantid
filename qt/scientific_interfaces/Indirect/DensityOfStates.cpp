@@ -174,11 +174,8 @@ void DensityOfStates::handleFileChange() {
   bool isPhononFile = fileInfo.suffix() == "phonon";
 
   std::string filePropName("CASTEPFile");
-  if (isPhononFile)
-    filePropName = "PHONONFile";
-
-  // Need a .phonon file for ion contributions
   if (isPhononFile) {
+    filePropName = "PHONONFile";
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo =
         AlgorithmManager::Instance().create("SimulatedDensityOfStates");

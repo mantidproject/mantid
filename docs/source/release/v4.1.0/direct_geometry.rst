@@ -18,6 +18,11 @@ New Instruments
 Algorithms
 ----------
 
+New Algorithms
+##############
+
+- :ref:`algm-FlippingRatioCorrectionMD` algorithm was introduced to account for polarization effects on HYSPEC, but it's not instrument specific.
+
 Removed
 #######
 
@@ -36,6 +41,14 @@ Improvements
 
 Bugfixes
 ########
+
+Python
+------
+
+Improvements
+############
+
+- :func:`directtools.plotSofQW` now supports plotting of transposed and non-transposed workspaces.
 
 - In :ref:`PyChop <PyChop>`, the sample-size effect calculation was improved to account for the annular shape.
 

@@ -4,9 +4,6 @@
 # dlls
 ###########################################################################
 set (SYSTEM_PACKAGE_TARGET RUNTIME)
-# Also include MSVC runtime libraries when running install commands
-set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
-include (InstallRequiredSystemLibraries)
 
 ###########################################################################
 # Compiler options.
@@ -81,7 +78,7 @@ else ( USE_TCMALLOC )
   message ( STATUS "TCMalloc will not be included." )
 endif ()
 
-set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
+option ( CONSOLE "Switch for enabling/disabling the console" ON )
 
 ###########################################################################
 # Windows import library needs to go to bin as well

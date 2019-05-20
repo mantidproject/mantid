@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "BILBY" valid-from = "1901-01-01T00:00:00">
+
+  <component-link name = "BILBY">
+  
+	<!-- Bilby parameters -->
+	<parameter name="wavelength_extn_lo">
+	  <value val="0.95"/>
+	</parameter>
+	<parameter name="wavelength_extn_hi">
+	  <value val="1.05"/>
+	</parameter>
+
+	<!-- following parameters are saved to the run log,
+	     parameters are entered as log_[log_name] and the 
+	     and the value is: "hdf_tag,scale,def_value" -->
+    <parameter name="log_sample_aperture" type="string">
+      <value val="sample/sample_aperture, 1.0, 0.0"/>
+    </parameter>		 
+    <parameter name="log_sample_x" type="string">
+      <value val="sample/samx, 1.0, 0.0"/>
+    </parameter>    
+    <parameter name="log_sample_y" type="string">
+      <value val="sample/samy, 1.0, 0.0"/>
+    </parameter>    
+    <parameter name="log_sample_z" type="string">
+      <value val="sample/samz, 1.0, 0.0"/>
+    </parameter>    
+    <parameter name="log_source_aperture" type="string">
+      <value val="instrument/source_aperture, 1.0, 0.0"/>
+    </parameter>	
+	
+    <parameter name="log_Lt0_value" type="string">
+      <value val="instrument/Lt0, 0.001, 0.0"/>
+    </parameter>		 
+    <parameter name="log_Ltof_curtainl_value" type="string">
+      <value val="instrument/Ltof_curtainl, 0.001, 0.0"/>
+    </parameter>		 
+    <parameter name="log_Ltof_curtainr_value" type="string">
+      <value val="instrument/Ltof_curtainr, 0.001, 0.0"/>
+    </parameter>		 
+    <parameter name="log_Ltof_curtainu_value" type="string">
+      <value val="instrument/Ltof_curtainu, 0.001, 0.0"/>
+    </parameter>		 
+    <parameter name="log_Ltof_curtaind_value" type="string">
+      <value val="instrument/Ltof_curtaind, 0.001, 0.0"/>
+    </parameter>	
+
+    <parameter name="log_L2_det_value" type="string">
+      <value val="instrument/L2_det, 0.001, 33.15616015625"/>
+    </parameter>	
+    <parameter name="log_Ltof_det_value" type="string">
+      <value val="instrument/Ltof_det, 0.001, 0.0"/>
+    </parameter>	
+    <parameter name="log_L1" type="string">
+      <value val="instrument/L1, 0.001, 16.671"/>
+    </parameter>	
+	
+	<parameter name="log_L2_curtainl_value" type="string">
+      <value val="instrument/L2_curtainl, 0.001, 23.28446093750"/>
+    </parameter>
+	<parameter name="log_L2_curtainr_value" type="string">
+      <value val="instrument/L2_curtainr, 0.001, 23.28201953125"/>
+    </parameter>
+	<parameter name="log_L2_curtainu_value" type="string">
+      <value val="instrument/L2_curtainu, 0.001, 24.28616015625"/>
+    </parameter>
+	<parameter name="log_L2_curtaind_value" type="string">
+      <value val="instrument/L2_curtaind, 0.001, 24.28235937500"/>
+    </parameter>
+ 
+	<parameter name="log_D_curtainl_value" type="string">
+      <value val="instrument/detector/curtainl, 0.001, 0.3816"/>
+    </parameter>
+	<parameter name="log_D_curtainr_value" type="string">
+      <value val="instrument/detector/curtainr, 0.001, 0.4024"/>
+    </parameter>
+	<parameter name="log_D_curtainu_value" type="string">
+      <value val="instrument/detector/curtainu, 0.001, 0.3947"/>
+    </parameter>
+	<parameter name="log_D_curtaind_value" type="string">
+      <value val="instrument/detector/curtaind, 0.001, 0.3978"/>
+    </parameter>
+	
+	<!-- parameter to be added to log that is not in the hdf file -->
+	<parameter name="log_curtain_rotation" type="string">
+      <value val=",,10.0"/>
+    </parameter>
+	
+	
+	
+  </component-link>
+
+</parameter-file>

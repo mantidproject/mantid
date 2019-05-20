@@ -108,7 +108,7 @@ void AddWorkspaceDialog::findCommonMaxIndex(const QString &wsName) {
     if (grp) {
       int maxIndex = std::numeric_limits<int>::max();
       for (auto ws : grp->getAllItems()) {
-        auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
         if (mws) {
           maxIndex = std::min(maxIndex,
                               static_cast<int>(mws->getNumberHistograms()) - 1);
@@ -137,13 +137,13 @@ void AddWorkspaceDialog::accept() {
       m_wsIndices = prop;
     } else {
       QMessageBox::warning(
-          this, "MantidPlot - Error",
+          this, "Mantid - Error",
           QString("Some of the indices are outside the allowed range [0,%1]")
               .arg(m_maxIndex));
     }
   }
   if (m_wsIndices.empty()) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
+    QMessageBox::warning(this, "Mantid - Warning",
                          QString("No indices have been selected."));
     return;
   }

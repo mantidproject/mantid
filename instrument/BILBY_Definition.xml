@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
+<instrument
+  xmlns="http://www.mantidproject.org/IDF/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+  name="BILBY"
+  valid-from = "1901-01-01 00:00:00"
+  valid-to = "2100-01-01 00:00:00"
+  last-modified="2016-04-15 00:00:00">
+  <!--
+    Changes 19 January 2016:
+    - lines <component type="WestBilbyPanel"> and <component type="EastBilbyPanel"> swapped; were identified wrong
+    - pixel size changed: <height val="0.00281" />, was <height val="0.0025" />
+      height 0.64m/256 - not correct anymore; it is from  BBY0001429_mask.tar data, measured separation between tubes
+    - this section <type name="tube" outline="yes"> is changed corresponding to new pixel size
+
+    Changes 5 April 2016:
+    - separation between 8-packs in curtains implemented, keeping rotation axis as a middle of panels
+      Changes 5 April 2016:
+    - rotation around edge tube + shift including extra 4mm - because wire is 4mm away from the edge
+      Changes 7 April 2016:
+    - shift 0 to the first inner tube, hence extra shifts by sin and cos are not needed anymore;
+    - separation between Left & Right rear panels (measured in January, 2016) is hard coded in the initial x-shift;
+    - separations between 8-packs (measured in January, 2016) are hard-coded in the description of the panels;
+  -->
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z-"/>
+  </defaults>
+
+  <!-- source and sample-position components -->
+  <component name="Source" type="source">
+    <!-- in Mantid source is defined where T0 starts -->
+    <location x="0.0" y="0.0" />
+    <parameter name="z">
+      <logfile id="L1_chopper_value" eq="-1*value"/>
+      <!-- It is NOT L1 in terms of SANS; it is distance between origin T0 the sample -->
+    </parameter>
+  </component>
+  <type name="source" is="Source" />
+
+  <component name="Sample-Holder" type="some-sample-holder">
+    <location z="0.0" x="0.0" y="0.0"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+
+  <type name="pixel" is="detector">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" />
+      <radius val="0.004" />
+      <height val="0.00281" />
+      <!-- height 0.64m/256 - not from here anymore; it is from  BBY0001429_mask.tar data, measured separation between tubes -->
+    </cylinder>
+    <algebra val="cyl-approx" />
+    <!-- Detectors are tubes, so each pixel is a small cylinder -->
+  </type>
+
+  <component name="CurtainLeft" type="bank01" idlist="bank01">
+    <location/>
+  </component>
+  <type name="bank01">
+    <component type="CurtainLeftPanel">
+      <location y="0.0">
+        <!-- Rotate the panel 10 degrees -->
+        <rot val="10" axis-x="0" axis-y="1" axis-z="0">
+        </rot>
+      </location>
+      <parameter name="z">
+        <!-- Distance from sample to the first inner tube of Curtain Left (West) -->
+        <logfile id="L2_curtainl_value" eq="1*value"/>
+
+      </parameter>
+      <parameter name="x">
+        <!-- D_curtainl_value is the distance from the beam centerline to the outside of inner curtain; 4mm is the tube' radius -->
+        <logfile id="D_curtainl_value" eq="1*value + 0.004"/>
+        <!-- from beam center to the edge of the tube-->
+      </parameter>
+    </component>
+  </type>
+
+  <component name="CurtainTop" type="bank03" idlist="bank03">
+    <location/>
+  </component>
+  <type name="bank03">
+    <component type="CurtainTopPanel">
+      <location x="0.0">
+        <rot val="90" axis-x="0" axis-y="0" axis-z="1">
+          <!-- Rotate the panel 10 degrees -->
+          <rot val="10" axis-x="0" axis-y="1" axis-z="0" />
+        </rot>
+      </location>
+      <parameter name="z">
+        <!-- Distance from sample to the first inner tube of Curtain Top -->
+        <logfile id="L2_curtainu_value" eq="1*value"/>
+        <!-- Distance from sample to the first inner tube of Curtain Top -->
+      </parameter>
+      <parameter name="y">
+        <!-- D_curtainu_value is the distance from the beam centerline to the outside of inner curtain; 4mm is the tube' radius -->
+        <logfile id="D_curtainu_value" eq="value + 0.004"/>
+        <!-- from beam center to the edge of the tube-->
+      </parameter>
+    </component>
+  </type>
+
+  <component name="CurtainRight" type="bank02" idlist="bank02">
+    <location/>
+  </component>
+  <type name="bank02">
+    <component type="CurtainRightPanel">
+      <location y="0.0" >
+        <rot val="180" axis-x="0" axis-y="0" axis-z="1">
+          <!-- Rotate the panel 10 degrees -->
+          <rot val="10" axis-x="0" axis-y="1" axis-z="0" />
+        </rot>
+      </location>
+      <parameter name="z">
+        <!-- Distance from sample to the first inner tube of Curtain Right (East) -->
+        <logfile id="L2_curtainr_value" eq="1*value"/>
+      </parameter>
+      <parameter name="x">
+        <!-- D_curtainr_value is the distance from the beam centerline to the outside of inner curtain; 4mm is the tube' radius -->
+        <logfile id="D_curtainr_value" eq="-1 * value - 0.004"/>
+        <!-- from beam center -->
+      </parameter>
+    </component>
+  </type>
+
+  <component name="CurtainBottom" type="bank04" idlist="bank04">
+    <location/>
+  </component>
+  <type name="bank04">
+    <component type="CurtainBottomPanel">
+      <location x="0.0" >
+        <rot val="270" axis-x="0" axis-y="0" axis-z="1">
+          <!-- Rotate the panel 10 degrees -->
+          <rot val="10" axis-x="0" axis-y="1" axis-z="0" />
+        </rot>
+      </location>
+      <parameter name="z">
+        <!-- Distance from sample to the first inner tube of Curtain Bottom -->
+        <logfile id="L2_curtaind_value" eq="1*value"/>
+      </parameter>
+      <parameter name="y">
+        <!-- D_curtaind_value is the distance from the beam centerline to the outside of inner curtain; 4mm is the tube' radius -->
+        <logfile id="D_curtaind_value" eq="-1 * value - 0.004"/>
+        <!-- from beam center -->
+      </parameter>
+    </component>
+  </type>
+
+  <component name="BackDetectorLeft" type="bank05" idlist="bank05">
+    <location/>
+  </component>
+  <type name="bank05">
+    <component type="WestBilbyPanel">
+      <!-- Rear detector panels are separated by 1.3mm, 1.3/2 = 0.0065m; 0.004 is a radius of a tube, hence 0.00465 is a separation between beam centerline and the first wire -->
+      <location x = "0.00465" y = "0.0" >
+      </location>
+      <parameter name="z">
+        <!-- Distance from sample to the Left (West) rear detector panel-->
+        <logfile id="L2_det_value"/>
+      </parameter>
+    </component>
+  </type>
+
+  <component name="BackDetectorRight" type="bank06" idlist="bank06">
+    <location/>
+  </component>
+  <type name="bank06">
+    <component type="EastBilbyPanel">
+      <!-- Rear detector panels are separated by 1.3mm, 1.3/2 = 0.0065m; 0.004 is a radius of a tube, hence -0.00465 is a separation between beam centerline and the first wire -->
+      <location x = "-0.00465"  y = "0.0" >
+        <rot val="180" axis-x="0" axis-y="0" axis-z="1" />
+      </location>
+      <parameter name="z">
+        <!-- Distance from sample to the Right (East) rear detector panel-->
+        <logfile id="L2_det_value"/>
+      </parameter>
+    </component>
+  </type>
+
+  <!-- Relative position of five 8-packs within Left Curtain; the tube closest to the beam center is sitting at 0, i.e. at the center of rotation-->
+  <!-- Eight-packs not equally separated; measured  values are taken into account -->
+  <type name="CurtainLeftPanel">
+    <component type="eight_pack">
+      <location  x="0.0" name="eight_pack1" />
+      <location  x="0.0678"  name="eight_pack2" />
+      <location  x="0.1364" name="eight_pack3" />
+      <location  x="0.20375" name="eight_pack4" />
+      <location  x="0.27145" name="eight_pack5" />
+    </component>
+  </type>
+
+  <!-- Relative position of five 8-packs within Top Curtain; the tube closest to the beam center is sitting at 0, i.e. at the center of rotation-->
+  <!-- Eight-packs not equally separated; measured  values are taken into account -->
+  <type name="CurtainTopPanel">
+    <component type="eight_pack">
+      <location  x="0.0" name="eight_pack1" />
+      <location  x="0.0672" name="eight_pack2" />
+      <location  x="0.1344" name="eight_pack3" />
+      <location  x="0.20185" name="eight_pack4" />
+      <location  x="0.26945" name="eight_pack5" />
+    </component>
+  </type>
+
+  <!-- Relative position of five 8-packs within Right Curtain; the tube closest to the beam center is sitting at 0, i.e. at the center of rotation-->
+  <!-- Eight-packs not equally separated; measured  values are taken into account -->
+  <type name="CurtainRightPanel">
+    <component type="eight_pack">
+      <location  x="0" name="eight_pack1" />
+      <location  x="0.06755" name="eight_pack2" />
+      <location  x="0.1348" name="eight_pack3" />
+      <location  x="0.20195" name="eight_pack4" />
+      <location  x="0.26925" name="eight_pack5" />
+    </component>
+  </type>
+
+  <!-- Relative position of five 8-packs within Bottom Curtain; the tube closest to the beam center is sitting at 0, i.e. at the center of rotation-->
+  <!-- Eight-packs not equally separated; measured  values are taken into account -->
+  <type name="CurtainBottomPanel">
+    <component type="eight_pack">
+      <location  x="0" name="eight_pack1" />
+      <location  x="0.0675"  name="eight_pack2" />
+      <location  x="0.1351" name="eight_pack3" />
+      <location  x="0.2026"  name="eight_pack4" />
+      <location  x="0.2698"  name="eight_pack5" />
+    </component>
+  </type>
+
+  <!-- Relative position of five 8-packs within Right Rear detector panel; the tube closest to the beam center is sitting at 0, i.e. at the center of rotation-->
+  <!-- Eight-packs not equally separated; measured  values are taken into account -->
+  <type name="EastBilbyPanel">
+    <component type="eight_pack">
+      <location  x="0.0" name="eight_pack1" />
+      <location  x="0.0678" name="eight_pack2" />
+      <location  x="0.1354" name="eight_pack3" />
+      <location  x="0.2032" name="eight_pack4" />
+      <location  x="0.271" name="eight_pack5" />
+    </component>
+  </type>
+
+  <!-- Relative position of five 8-packs within Left Rear detector panel; the tube closest to the beam center is sitting at 0, i.e. at the center of rotation-->
+  <!-- Eight-packs not equally separated; measured  values are taken into account -->
+  <type name="WestBilbyPanel">
+    <component type="eight_pack">
+      <location  x="0" name="eight_pack1" />
+      <location  x="0.0678" name="eight_pack2" />
+      <location  x="0.1354" name="eight_pack3" />
+      <location  x="0.2027" name="eight_pack4" />
+      <location  x="0.2709" name="eight_pack5" />
+    </component>
+  </type>
+
+  <type name="eight_pack">
+    <component type="tube">
+      <!-- tubes in each eight_pack are 0.0004 m separated, all eight_packs are equal -->
+      <location  x="0.000000" name="tube1" />
+      <location  x="0.008400" name="tube2" />
+      <location  x="0.016800" name="tube3" />
+      <location  x="0.025200" name="tube4" />
+      <location  x="0.033600" name="tube5" />
+      <location  x="0.042000" name="tube6" />
+      <location  x="0.050400" name="tube7" />
+      <location  x="0.058800" name="tube8" />
+    </component>
+  </type>
+
+  <type name="tube" outline="yes">
+    <component type="pixel">
+      <location y="-0.35968" name="pixel1"/>
+      <location y="-0.35687" name="pixel2"/>
+      <location y="-0.35406" name="pixel3"/>
+      <location y="-0.35125" name="pixel4"/>
+      <location y="-0.34844" name="pixel5"/>
+      <location y="-0.34563" name="pixel6"/>
+      <location y="-0.34282" name="pixel7"/>
+      <location y="-0.34001" name="pixel8"/>
+      <location y="-0.33720" name="pixel9"/>
+      <location y="-0.33439" name="pixel10"/>
+      <location y="-0.33158" name="pixel11"/>
+      <location y="-0.32877" name="pixel12"/>
+      <location y="-0.32596" name="pixel13"/>
+      <location y="-0.32315" name="pixel14"/>
+      <location y="-0.32034" name="pixel15"/>
+      <location y="-0.31753" name="pixel16"/>
+      <location y="-0.31472" name="pixel17"/>
+      <location y="-0.31191" name="pixel18"/>
+      <location y="-0.30910" name="pixel19"/>
+      <location y="-0.30629" name="pixel20"/>
+      <location y="-0.30348" name="pixel21"/>
+      <location y="-0.30067" name="pixel22"/>
+      <location y="-0.29786" name="pixel23"/>
+      <location y="-0.29505" name="pixel24"/>
+      <location y="-0.29224" name="pixel25"/>
+      <location y="-0.28943" name="pixel26"/>
+      <location y="-0.28662" name="pixel27"/>
+      <location y="-0.28381" name="pixel28"/>
+      <location y="-0.28100" name="pixel29"/>
+      <location y="-0.27819" name="pixel30"/>
+      <location y="-0.27538" name="pixel31"/>
+      <location y="-0.27257" name="pixel32"/>
+      <location y="-0.26976" name="pixel33"/>
+      <location y="-0.26695" name="pixel34"/>
+      <location y="-0.26414" name="pixel35"/>
+      <location y="-0.26133" name="pixel36"/>
+      <location y="-0.25852" name="pixel37"/>
+      <location y="-0.25571" name="pixel38"/>
+      <location y="-0.25290" name="pixel39"/>
+      <location y="-0.25009" name="pixel40"/>
+      <location y="-0.24728" name="pixel41"/>
+      <location y="-0.24447" name="pixel42"/>
+      <location y="-0.24166" name="pixel43"/>
+      <location y="-0.23885" name="pixel44"/>
+      <location y="-0.23604" name="pixel45"/>
+      <location y="-0.23323" name="pixel46"/>
+      <location y="-0.23042" name="pixel47"/>
+      <location y="-0.22761" name="pixel48"/>
+      <location y="-0.22480" name="pixel49"/>
+      <location y="-0.22199" name="pixel50"/>
+      <location y="-0.21918" name="pixel51"/>
+      <location y="-0.21637" name="pixel52"/>
+      <location y="-0.21356" name="pixel53"/>
+      <location y="-0.21075" name="pixel54"/>
+      <location y="-0.20794" name="pixel55"/>
+      <location y="-0.20513" name="pixel56"/>
+      <location y="-0.20232" name="pixel57"/>
+      <location y="-0.19951" name="pixel58"/>
+      <location y="-0.19670" name="pixel59"/>
+      <location y="-0.19389" name="pixel60"/>
+      <location y="-0.19108" name="pixel61"/>
+      <location y="-0.18827" name="pixel62"/>
+      <location y="-0.18546" name="pixel63"/>
+      <location y="-0.18265" name="pixel64"/>
+      <location y="-0.17984" name="pixel65"/>
+      <location y="-0.17703" name="pixel66"/>
+      <location y="-0.17422" name="pixel67"/>
+      <location y="-0.17141" name="pixel68"/>
+      <location y="-0.16860" name="pixel69"/>
+      <location y="-0.16579" name="pixel70"/>
+      <location y="-0.16298" name="pixel71"/>
+      <location y="-0.16017" name="pixel72"/>
+      <location y="-0.15736" name="pixel73"/>
+      <location y="-0.15455" name="pixel74"/>
+      <location y="-0.15174" name="pixel75"/>
+      <location y="-0.14893" name="pixel76"/>
+      <location y="-0.14612" name="pixel77"/>
+      <location y="-0.14331" name="pixel78"/>
+      <location y="-0.14050" name="pixel79"/>
+      <location y="-0.13769" name="pixel80"/>
+      <location y="-0.13488" name="pixel81"/>
+      <location y="-0.13207" name="pixel82"/>
+      <location y="-0.12926" name="pixel83"/>
+      <location y="-0.12645" name="pixel84"/>
+      <location y="-0.12364" name="pixel85"/>
+      <location y="-0.12083" name="pixel86"/>
+      <location y="-0.11802" name="pixel87"/>
+      <location y="-0.11521" name="pixel88"/>
+      <location y="-0.11240" name="pixel89"/>
+      <location y="-0.10959" name="pixel90"/>
+      <location y="-0.10678" name="pixel91"/>
+      <location y="-0.10397" name="pixel92"/>
+      <location y="-0.10116" name="pixel93"/>
+      <location y="-0.09835" name="pixel94"/>
+      <location y="-0.09554" name="pixel95"/>
+      <location y="-0.09273" name="pixel96"/>
+      <location y="-0.08992" name="pixel97"/>
+      <location y="-0.08711" name="pixel98"/>
+      <location y="-0.08430" name="pixel99"/>
+      <location y="-0.08149" name="pixel100"/>
+      <location y="-0.07868" name="pixel101"/>
+      <location y="-0.07587" name="pixel102"/>
+      <location y="-0.07306" name="pixel103"/>
+      <location y="-0.07025" name="pixel104"/>
+      <location y="-0.06744" name="pixel105"/>
+      <location y="-0.06463" name="pixel106"/>
+      <location y="-0.06182" name="pixel107"/>
+      <location y="-0.05901" name="pixel108"/>
+      <location y="-0.05620" name="pixel109"/>
+      <location y="-0.05339" name="pixel110"/>
+      <location y="-0.05058" name="pixel111"/>
+      <location y="-0.04777" name="pixel112"/>
+      <location y="-0.04496" name="pixel113"/>
+      <location y="-0.04215" name="pixel114"/>
+      <location y="-0.03934" name="pixel115"/>
+      <location y="-0.03653" name="pixel116"/>
+      <location y="-0.03372" name="pixel117"/>
+      <location y="-0.03091" name="pixel118"/>
+      <location y="-0.02810" name="pixel119"/>
+      <location y="-0.02529" name="pixel120"/>
+      <location y="-0.02248" name="pixel121"/>
+      <location y="-0.01967" name="pixel122"/>
+      <location y="-0.01686" name="pixel123"/>
+      <location y="-0.01405" name="pixel124"/>
+      <location y="-0.01124" name="pixel125"/>
+      <location y="-0.00843" name="pixel126"/>
+      <location y="-0.00562" name="pixel127"/>
+      <location y="-0.00281" name="pixel128"/>
+      <location y="0.00000" name="pixel129"/>
+      <location y="0.00281" name="pixel130"/>
+      <location y="0.00562" name="pixel131"/>
+      <location y="0.00843" name="pixel132"/>
+      <location y="0.01124" name="pixel133"/>
+      <location y="0.01405" name="pixel134"/>
+      <location y="0.01686" name="pixel135"/>
+      <location y="0.01967" name="pixel136"/>
+      <location y="0.02248" name="pixel137"/>
+      <location y="0.02529" name="pixel138"/>
+      <location y="0.02810" name="pixel139"/>
+      <location y="0.03091" name="pixel140"/>
+      <location y="0.03372" name="pixel141"/>
+      <location y="0.03653" name="pixel142"/>
+      <location y="0.03934" name="pixel143"/>
+      <location y="0.04215" name="pixel144"/>
+      <location y="0.04496" name="pixel145"/>
+      <location y="0.04777" name="pixel146"/>
+      <location y="0.05058" name="pixel147"/>
+      <location y="0.05339" name="pixel148"/>
+      <location y="0.05620" name="pixel149"/>
+      <location y="0.05901" name="pixel150"/>
+      <location y="0.06182" name="pixel151"/>
+      <location y="0.06463" name="pixel152"/>
+      <location y="0.06744" name="pixel153"/>
+      <location y="0.07025" name="pixel154"/>
+      <location y="0.07306" name="pixel155"/>
+      <location y="0.07587" name="pixel156"/>
+      <location y="0.07868" name="pixel157"/>
+      <location y="0.08149" name="pixel158"/>
+      <location y="0.08430" name="pixel159"/>
+      <location y="0.08711" name="pixel160"/>
+      <location y="0.08992" name="pixel161"/>
+      <location y="0.09273" name="pixel162"/>
+      <location y="0.09554" name="pixel163"/>
+      <location y="0.09835" name="pixel164"/>
+      <location y="0.10116" name="pixel165"/>
+      <location y="0.10397" name="pixel166"/>
+      <location y="0.10678" name="pixel167"/>
+      <location y="0.10959" name="pixel168"/>
+      <location y="0.11240" name="pixel169"/>
+      <location y="0.11521" name="pixel170"/>
+      <location y="0.11802" name="pixel171"/>
+      <location y="0.12083" name="pixel172"/>
+      <location y="0.12364" name="pixel173"/>
+      <location y="0.12645" name="pixel174"/>
+      <location y="0.12926" name="pixel175"/>
+      <location y="0.13207" name="pixel176"/>
+      <location y="0.13488" name="pixel177"/>
+      <location y="0.13769" name="pixel178"/>
+      <location y="0.14050" name="pixel179"/>
+      <location y="0.14331" name="pixel180"/>
+      <location y="0.14612" name="pixel181"/>
+      <location y="0.14893" name="pixel182"/>
+      <location y="0.15174" name="pixel183"/>
+      <location y="0.15455" name="pixel184"/>
+      <location y="0.15736" name="pixel185"/>
+      <location y="0.16017" name="pixel186"/>
+      <location y="0.16298" name="pixel187"/>
+      <location y="0.16579" name="pixel188"/>
+      <location y="0.16860" name="pixel189"/>
+      <location y="0.17141" name="pixel190"/>
+      <location y="0.17422" name="pixel191"/>
+      <location y="0.17703" name="pixel192"/>
+      <location y="0.17984" name="pixel193"/>
+      <location y="0.18265" name="pixel194"/>
+      <location y="0.18546" name="pixel195"/>
+      <location y="0.18827" name="pixel196"/>
+      <location y="0.19108" name="pixel197"/>
+      <location y="0.19389" name="pixel198"/>
+      <location y="0.19670" name="pixel199"/>
+      <location y="0.19951" name="pixel200"/>
+      <location y="0.20232" name="pixel201"/>
+      <location y="0.20513" name="pixel202"/>
+      <location y="0.20794" name="pixel203"/>
+      <location y="0.21075" name="pixel204"/>
+      <location y="0.21356" name="pixel205"/>
+      <location y="0.21637" name="pixel206"/>
+      <location y="0.21918" name="pixel207"/>
+      <location y="0.22199" name="pixel208"/>
+      <location y="0.22480" name="pixel209"/>
+      <location y="0.22761" name="pixel210"/>
+      <location y="0.23042" name="pixel211"/>
+      <location y="0.23323" name="pixel212"/>
+      <location y="0.23604" name="pixel213"/>
+      <location y="0.23885" name="pixel214"/>
+      <location y="0.24166" name="pixel215"/>
+      <location y="0.24447" name="pixel216"/>
+      <location y="0.24728" name="pixel217"/>
+      <location y="0.25009" name="pixel218"/>
+      <location y="0.25290" name="pixel219"/>
+      <location y="0.25571" name="pixel220"/>
+      <location y="0.25852" name="pixel221"/>
+      <location y="0.26133" name="pixel222"/>
+      <location y="0.26414" name="pixel223"/>
+      <location y="0.26695" name="pixel224"/>
+      <location y="0.26976" name="pixel225"/>
+      <location y="0.27257" name="pixel226"/>
+      <location y="0.27538" name="pixel227"/>
+      <location y="0.27819" name="pixel228"/>
+      <location y="0.28100" name="pixel229"/>
+      <location y="0.28381" name="pixel230"/>
+      <location y="0.28662" name="pixel231"/>
+      <location y="0.28943" name="pixel232"/>
+      <location y="0.29224" name="pixel233"/>
+      <location y="0.29505" name="pixel234"/>
+      <location y="0.29786" name="pixel235"/>
+      <location y="0.30067" name="pixel236"/>
+      <location y="0.30348" name="pixel237"/>
+      <location y="0.30629" name="pixel238"/>
+      <location y="0.30910" name="pixel239"/>
+      <location y="0.31191" name="pixel240"/>
+      <location y="0.31472" name="pixel241"/>
+      <location y="0.31753" name="pixel242"/>
+      <location y="0.32034" name="pixel243"/>
+      <location y="0.32315" name="pixel244"/>
+      <location y="0.32596" name="pixel245"/>
+      <location y="0.32877" name="pixel246"/>
+      <location y="0.33158" name="pixel247"/>
+      <location y="0.33439" name="pixel248"/>
+      <location y="0.33720" name="pixel249"/>
+      <location y="0.34001" name="pixel250"/>
+      <location y="0.34282" name="pixel251"/>
+      <location y="0.34563" name="pixel252"/>
+      <location y="0.34844" name="pixel253"/>
+      <location y="0.35125" name="pixel254"/>
+      <location y="0.35406" name="pixel255"/>
+      <location y="0.35687" name="pixel256"/>
+    </component>
+  </type>
+
+  <!-- Each panel consists of 40 tubes, 256 pixel long each, hence each panel has 10240 pixels -->
+  <idlist idname="bank01">
+    <id start="0" end="10239" />
+  </idlist>
+
+  <idlist idname="bank02">
+    <id start="10240" end="20479" />
+  </idlist>
+
+  <idlist idname="bank03">
+    <id start="20480" end="30719" />
+  </idlist>
+
+  <idlist idname="bank04">
+    <id start="30720" end="40959" />
+  </idlist>
+
+  <idlist idname="bank05">
+    <id start="40960" end="51199" />
+  </idlist>
+
+  <idlist idname="bank06">
+    <id start="51200" end="61439" />
+  </idlist>
+
+
+</instrument>
+

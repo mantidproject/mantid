@@ -40,14 +40,14 @@ set(MANTIDLIBS ${Boost_LIBRARIES} ${POCO_LIBRARIES})
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(MPI_BUILD OFF CACHE BOOL "Enable MPI options")
+  option(MPI_BUILD "Enable MPI options")
   if(MPI_BUILD)
     include(MPISetup)
     set(MANTIDLIBS ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
   endif(MPI_BUILD)
 endif()
 
-set(MPI_EXPERIMENTAL OFF CACHE BOOL "Enable MPI options")
+option(MPI_EXPERIMENTAL "Enable MPI options")
 if(MPI_EXPERIMENTAL)
   include(BoostMPI)
 endif()

@@ -159,11 +159,9 @@ twoThetaWidth(const size_t wsIndex,
   } else {
     const auto t1 = spectrumInfo.twoTheta(wsIndex - 1);
     const auto t2 = spectrumInfo.twoTheta(wsIndex + 1);
-    Mantid::Algorithms::ReflectometrySumInQ::MinMax neighbours(t1, t2);
-    const auto d1 = std::abs(twoTheta - neighbours.min) / 2.;
-    const auto d2 = std::abs(neighbours.max - twoTheta) / 2.;
-    range.min = twoTheta - d1;
-    range.max = twoTheta + d2;
+    const Mantid::Algorithms::ReflectometrySumInQ::MinMax neighbours(t1, t2);
+    range.min = (twoTheta + neighbours.min) / 2.;
+    range.max = (twoTheta + neighbours.max) / 2.;
   }
   return range;
 }
@@ -344,7 +342,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
   // the same bin width as the input workspace
   const auto &edges = detectorWS.binEdges(refAngles.referenceWSIndex);
   const double binWidth =
-      (edges.back() - edges.front()) / static_cast<double>(edges.size());
+      (edges.back() - edges.front()) / static_cast<double>(edges.size() - 1);
   const auto wavelengthRange =
       findWavelengthMinMax(detectorWS, indices, refAngles);
   if (std::abs(wavelengthRange.max - wavelengthRange.min) < binWidth) {
@@ -493,22 +491,10 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
 
   // Calculate the projected wavelength range
   MinMax range;
-  try {
-    const double lambdaTop =
-        projectToReference(wavelengthRange.max, twoThetaRange.min, refAngles);
-    const double lambdaBot =
-        projectToReference(wavelengthRange.min, twoThetaRange.max, refAngles);
-    range.testAndSet(lambdaBot);
-    range.testAndSet(lambdaTop);
-  } catch (std::exception &ex) {
-    const auto twoTheta = (twoThetaRange.min + twoThetaRange.max) / 2.;
-    const auto lambda = (wavelengthRange.min + wavelengthRange.max) / 2.;
-    throw std::runtime_error(
-        "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
-        "," + std::to_string(twoTheta * Geometry::rad2deg) +
-        ") onto twoThetaR = " + std::to_string(refAngles.twoTheta) + ": " +
-        ex.what());
-  }
+  range.max =
+      projectToReference(wavelengthRange.max, twoThetaRange.min, refAngles);
+  range.min =
+      projectToReference(wavelengthRange.min, twoThetaRange.max, refAngles);
   return range;
 }
 
@@ -551,15 +537,14 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
   // Construct the output workspace in virtual lambda
   API::MatrixWorkspace_sptr IvsLam =
       constructIvsLamWS(detectorWS, indices, refAngles);
-  auto &outputE = IvsLam->dataE(0);
+  auto &outputE = IvsLam->mutableE(0);
   // Loop through each spectrum in the detector group
-  for (auto spIdx : indices) {
+  for (const auto spIdx : indices) {
     if (spectrumInfo.isMasked(spIdx) || spectrumInfo.isMonitor(spIdx)) {
       continue;
     }
     // Get the size of this detector in twoTheta
     const auto twoThetaRange = twoThetaWidth(spIdx, spectrumInfo);
-    // Check X length is Y length + 1
     const auto inputBinEdges = detectorWS.binEdges(spIdx);
     const auto inputCounts = detectorWS.counts(spIdx);
     const auto inputStdDevs = detectorWS.countStandardDeviations(spIdx);

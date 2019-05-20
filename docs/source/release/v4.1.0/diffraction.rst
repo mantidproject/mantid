@@ -12,6 +12,12 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+Improvements
+############
+
+- The Polaris scripts can now detect the chopper mode if none is provided using the frequency block logs.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has a new property, ``OffsetData``, which adds a constant to the data at the very end of the reduction
+
 Engineering Diffraction
 -----------------------
 
@@ -19,6 +25,7 @@ Improvements
 ############
 
 - Changed focus to save out .his files in the format <run-number><instrument> as opposed to <run-number>_<instrument> to allow for better compatibility with opengenie.
+- Added sample environment file for POWGEN that includes many of the standard sample containers
 
 Bug Fixes
 #########
@@ -26,6 +33,10 @@ Bug Fixes
 - Prevented crash caused by canceling algorithms called by GUI.
 
 - Prevented GUI breaking bug caused by entering files from the wrong instrument to calibration.
+
+- Prevented issue with reading CSV files on python 3
+
+- GUI now correctly loads the file browsed to instead of looking for a run number in every folder along the path to that file.
 
 Single Crystal Diffraction
 --------------------------

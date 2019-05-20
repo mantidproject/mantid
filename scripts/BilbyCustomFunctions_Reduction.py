@@ -121,12 +121,12 @@ def strip_NaNs(output_workspace, base_output_name):
 #######################################################################################
 
 def get_pixel_size():  # reads current IDF and get pixelsize from there
-    """ To get pixel size for Bilby detectors from the Bilby_Definition.xml file """
+    """ To get pixel size for Bilby detectors from the BILBY_Definition.xml file """
 
     from mantid.api import ExperimentInfo
     import xml.etree.cElementTree as ET
 
-    currentIDF = ExperimentInfo.getInstrumentFilename("Bilby")
+    currentIDF = ExperimentInfo.getInstrumentFilename("BILBY")
     # print currentIDF
     tree = ET.parse(currentIDF)
     for node in tree.iter():

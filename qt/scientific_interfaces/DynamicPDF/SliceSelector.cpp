@@ -30,10 +30,9 @@ namespace DynamicPDF {
  * @param workspaceName retrieve the workspace with the Analysis Data Service
  */
 WorkspaceRecord::WorkspaceRecord(const std::string &workspaceName)
-    : m_name{workspaceName}, m_energy{0.0}, m_label() {
-  m_ws = Mantid::API::AnalysisDataService::Instance()
-             .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-}
+    : m_ws(Mantid::API::AnalysisDataService::Instance()
+               .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName)),
+      m_name{workspaceName}, m_energy{0.0}, m_label() {}
 
 /**
  * @brief Destructor. Reset the pointer to the workspace

@@ -349,17 +349,11 @@ void Wavelength::init() {
   factorTo *= TOFisinMicroseconds / toAngstroms;
 
   // ------------ Factors to convert FROM TOF ---------------------
-  ltot = l1 + l2;
-  // Protect against divide by zero
-  if (ltot == 0.0)
-    ltot = DBL_MIN;
-
   // Now apply the factor to the input data vector
   do_sfpFrom = false;
   if (efixed != DBL_MIN) {
     if (emode == 1) // Direct
     {
-      ltot = l2;
       sfpFrom = (sqrt(PhysicalConstants::NeutronMass /
                       (2.0 * PhysicalConstants::meV)) *
                  TOFisinMicroseconds * l1) /
@@ -367,18 +361,17 @@ void Wavelength::init() {
       do_sfpFrom = true;
     } else if (emode == 2) // Indirect
     {
-      ltot = l1;
       sfpFrom = (sqrt(PhysicalConstants::NeutronMass /
                       (2.0 * PhysicalConstants::meV)) *
                  TOFisinMicroseconds * l2) /
                 sqrt(efixed);
       do_sfpFrom = true;
-    } else {
-      ltot = l1 + l2;
     }
-  } else {
-    ltot = l1 + l2;
   }
+
+  // Protect against divide by zero
+  if (ltot == 0.0)
+    ltot = DBL_MIN;
 
   // First the crux of the conversion
   factorFrom = PhysicalConstants::h / (PhysicalConstants::NeutronMass * (ltot));
@@ -1005,30 +998,24 @@ void Momentum::init() {
   factorTo *= TOFisinMicroseconds / toAngstroms;
 
   // ------------ Factors to convert FROM TOF ---------------------
-  ltot = l1 + l2;
-  // Protect against divide by zero
-  if (ltot == 0.0)
-    ltot = DBL_MIN;
 
   // Now apply the factor to the input data vector
   do_sfpFrom = false;
   if (efixed != DBL_MIN) {
     if (emode == 1) // Direct
     {
-      ltot = l2;
       sfpFrom = sfpTo;
       do_sfpFrom = true;
     } else if (emode == 2) // Indirect
     {
-      ltot = l1;
       sfpFrom = sfpTo;
       do_sfpFrom = true;
-    } else {
-      ltot = l1 + l2;
     }
-  } else {
-    ltot = l1 + l2;
   }
+
+  // Protect against divide by zero
+  if (ltot == 0.0)
+    ltot = DBL_MIN;
 
   // First the crux of the conversion
   factorFrom = PhysicalConstants::h / (PhysicalConstants::NeutronMass * (ltot));

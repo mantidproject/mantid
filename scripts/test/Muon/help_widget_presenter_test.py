@@ -7,9 +7,10 @@
 import unittest
 
 from mantid.py3compat import mock
-from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
+
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
-from Muon.GUI.Common import mock_widget
+from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
+from Muon.GUI.Common.test_helpers import mock_widget
 
 
 class HelpWidgetPresenterTest(unittest.TestCase):
@@ -23,11 +24,11 @@ class HelpWidgetPresenterTest(unittest.TestCase):
     def tearDown(self):
         self.view = None
 
-    @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.MantidQt')
-    def test_that_manage_directories_button_clicked_opens_directory_manager(self, mantidqt_mock):
+    @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.ManageUserDirectories')
+    def test_that_manage_directories_button_clicked_opens_directory_manager(self, mock_ManageUserDirectories):
         self.view.manage_user_dir_button.clicked.emit(True)
 
-        mantidqt_mock.API.ManageUserDirectories.openUserDirsDialog.assert_called_once_with(self.view)
+        mock_ManageUserDirectories.openUserDirsDialog.assert_called_once_with(self.view)
 
 
 if __name__ == '__main__':

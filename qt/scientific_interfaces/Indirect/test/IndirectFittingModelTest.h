@@ -234,6 +234,18 @@ public:
   }
 
   void
+  test_that_hasWorkspace_returns_true_when_the_model_contains_a_workspace() {
+    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
+    TS_ASSERT(model->hasWorkspace("WorkspaceName"));
+  }
+
+  void
+  test_that_hasWorkspace_returns_false_when_the_model_does_not_contain_a_workspace() {
+    auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
+    TS_ASSERT(!model->hasWorkspace("WrongName"));
+  }
+
+  void
   test_that_getWorkspace_returns_a_nullptr_when_getWorkspace_is_provided_an_out_of_range_index() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
     TS_ASSERT_EQUALS(model->getWorkspace(1), nullptr);

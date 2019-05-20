@@ -23,14 +23,14 @@ bool isDigit(const std::string &text) {
 
 std::string
 generateFittedPeaksName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
-         std::to_string(runLabel.bank) + "_fitted_peaks_external_plot";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_fitted_peaks_external_plot";
 }
 
 std::string
 generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
-         std::to_string(runLabel.bank) + "_external_plot";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_external_plot";
 }
 
 size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {
@@ -45,17 +45,19 @@ size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {
   const std::string name = ws->getName();
   std::vector<std::string> chunks;
   boost::split(chunks, name, boost::is_any_of("_"));
-  bool isNum = isDigit(chunks.back());
-  if (!chunks.empty() && isNum) {
-    try {
-      return boost::lexical_cast<size_t>(chunks.back());
-    } catch (boost::exception &) {
-      // If we get a bad cast or something goes wrong then
-      // the file is probably not what we were expecting
-      // so throw a runtime error
-      throw std::runtime_error(
-          "Failed to fit file: The data was not what is expected. "
-          "Does the file contain a focused workspace?");
+  if (!chunks.empty()) {
+    const bool isNum = isDigit(chunks.back());
+    if (isNum) {
+      try {
+        return boost::lexical_cast<size_t>(chunks.back());
+      } catch (boost::exception &) {
+        // If we get a bad cast or something goes wrong then
+        // the file is probably not what we were expecting
+        // so throw a runtime error
+        throw std::runtime_error(
+            "Failed to fit file: The data was not what is expected. "
+            "Does the file contain a focused workspace?");
+      }
     }
   }
 
@@ -80,7 +82,7 @@ void EnggDiffMultiRunFittingWidgetPresenter::addFittedPeaks(
 
 void EnggDiffMultiRunFittingWidgetPresenter::addFocusedRun(
     const Mantid::API::MatrixWorkspace_sptr ws) {
-  const auto runNumber = ws->getRunNumber();
+  const auto runNumber = std::to_string(ws->getRunNumber());
   const auto bankID = guessBankID(ws);
 
   m_model->addFocusedRun(RunLabel(runNumber, bankID), ws);

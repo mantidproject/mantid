@@ -19,21 +19,21 @@ import time
 import traceback
 
 from mantid.api import (FileFinder)
-from mantid.kernel import Logger, ConfigService
+from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from mantid.py3compat import csv_open_type
 
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
+from sans.common.enums import (BatchReductionEntry, FitType, RangeStepType, RowState, SampleShape,
+                               SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
-                                       add_dir_to_datasearch, remove_dir_from_datasearch)
+                                       add_dir_to_datasearch, remove_dir_from_datasearch, SANSGuiPropertiesHandler)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
@@ -79,6 +79,15 @@ def log_times(func):
     return run
 
 
+class SaveDirectoryObserver(ConfigPropertyObserver):
+    def __init__(self, callback):
+        super(SaveDirectoryObserver, self).__init__("defaultsave.directory")
+        self.callback = callback
+
+    def onPropertyValueChanged(self, new_value, old_value):
+        self.callback(new_value)
+
+
 class RunTabPresenter(object):
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
@@ -110,7 +119,10 @@ class RunTabPresenter(object):
             self._presenter.on_multiperiod_changed(show_periods)
 
         def on_reduction_dimensionality_changed(self, is_1d):
-            self._presenter.verify_output_modes(is_1d)
+            self._presenter.on_reduction_dimensionality_changed(is_1d)
+
+        def on_output_mode_changed(self):
+            self._presenter.on_output_mode_changed()
 
         def on_data_changed(self, row, column, new_value, old_value):
             self._presenter.on_data_changed(row, column, new_value, old_value)
@@ -253,6 +265,10 @@ class RunTabPresenter(object):
         :return:
         """
         self._view.set_out_file_directory(new_directory)
+        # Update add runs save location. We want distinct reduction save/add runs save locations,
+        # but the add runs directory change when the main directory is, to avoid users having to
+        # remember to update in two places.
+        self._view.add_runs_presenter.handle_new_save_directory(new_directory)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table + Actions
@@ -290,7 +306,6 @@ class RunTabPresenter(object):
 
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
 
-            self._view.set_out_default_user_file()
             self._view.set_out_default_output_mode()
             self._view.set_out_default_save_can()
 
@@ -301,6 +316,12 @@ class RunTabPresenter(object):
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
+
+            self._view.gui_properties_handler = SANSGuiPropertiesHandler(
+                                                    {"user_file": (self._view.set_out_default_user_file,
+                                                                   str)},
+                                                    line_edits={"user_file":
+                                                                self._view.user_file_line_edit})
 
     def on_user_file_load(self):
         """
@@ -524,6 +545,9 @@ class RunTabPresenter(object):
         """
         error_msg = ""
         try:
+            # Trip up early if output modes are invalid
+            self._validate_output_modes()
+
             for row in rows:
                 self._table_model.reset_row_state(row)
             self.update_view_from_table_model()
@@ -555,20 +579,49 @@ class RunTabPresenter(object):
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e) + error_msg)
 
-    def verify_output_modes(self, is_1d):
+    def on_reduction_dimensionality_changed(self, is_1d):
         """
         Unchecks and disabled canSAS output mode if switching to 2D reduction.
         Enabled canSAS if switching to 1D.
         :param is_1d: bool. If true then switching TO 1D reduction.
         """
-        if is_1d:
-            self._view.can_sas_checkbox.setEnabled(True)
+        if not self._view.output_mode_memory_radio_button.isChecked():
+            # If we're in memory mode, all file types should always be disabled
+            if is_1d:
+                self._view.can_sas_checkbox.setEnabled(True)
+            else:
+                if self._view.can_sas_checkbox.isChecked():
+                    self._view.can_sas_checkbox.setChecked(False)
+                    self.sans_logger.information("2D reductions are incompatible with canSAS output. "
+                                                 "canSAS output has been unchecked.")
+                self._view.can_sas_checkbox.setEnabled(False)
+
+    def _validate_output_modes(self):
+        """
+        Check which output modes has been checked (memory, file, both), and which
+        file types. If no file types have been selected and output mode is not memory,
+        we want to raise an error here. (If we don't, an error will be raised on attempting
+        to save after performing the reductions)
+        """
+        if (self._view.output_mode_file_radio_button.isChecked() or
+                self._view.output_mode_both_radio_button.isChecked()):
+            if self._view.save_types == [SaveType.NoType]:
+                raise RuntimeError("You have selected an output mode which saves to file, "
+                                   "but no file types have been selected.")
+
+    def on_output_mode_changed(self):
+        """
+        When output mode changes, dis/enable file type buttons
+        based on the output mode and reduction dimensionality
+        """
+        if self._view.output_mode_memory_radio_button.isChecked():
+            # If in memory mode, disable all buttons regardless of dimension
+            self._view.disable_file_type_buttons()
         else:
-            if self._view.can_sas_checkbox.isChecked():
-                self._view.can_sas_checkbox.setChecked(False)
-                self.sans_logger.information("2D reductions are incompatible with canSAS output. "
-                                             "canSAS output has been unchecked.")
-            self._view.can_sas_checkbox.setEnabled(False)
+            self._view.nx_can_sas_checkbox.setEnabled(True)
+            self._view.rkh_checkbox.setEnabled(True)
+            if self._view.reduction_dimensionality_1D.isChecked():
+                self._view.can_sas_checkbox.setEnabled(True)
 
     def on_process_all_clicked(self):
         """
@@ -900,7 +953,8 @@ class RunTabPresenter(object):
                                            self._view.instrument,
                                            self._facility,
                                            row_index=row_index,
-                                           file_lookup=file_lookup)
+                                           file_lookup=file_lookup,
+                                           user_file=self._view.get_user_file_path())
 
         if errors and not suppress_warnings:
             self.sans_logger.warning("Errors in getting states...")
@@ -1286,9 +1340,9 @@ class RunTabPresenter(object):
         :return: Nothing
         """
         for row in rows:
-                table_row = self._table_model.get_table_entry(row).to_batch_list()
-                batch_file_row = self._create_batch_entry_from_row(table_row)
-                filewriter.writerow(batch_file_row)
+            table_row = self._table_model.get_table_entry(row).to_batch_list()
+            batch_file_row = self._create_batch_entry_from_row(table_row)
+            filewriter.writerow(batch_file_row)
 
     @staticmethod
     def _create_batch_entry_from_row(row):

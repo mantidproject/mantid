@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 
 from mantid.kernel import ConfigServiceImpl
@@ -15,6 +14,7 @@ import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
@@ -22,8 +22,10 @@ from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
-from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
+from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
@@ -63,18 +65,18 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
-
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
+        self.phase_context = PhaseTableContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context)
+                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
-        freq_context = FrequencyContext(self.context)
-        self.transform = TransformWidget(load=freq_context, parent=self)
+        self.phase_tab = PhaseTabWidget(self.context, self)
+        self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget()
@@ -108,6 +110,10 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_on_load_disabler()
 
+        self.setup_phase_quad_changed_notifer()
+
+        self.setup_phase_table_changed_notifier()
+
         self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
@@ -118,6 +124,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
 
     def setup_load_observers(self):
@@ -129,6 +136,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.transform.LoadObserver)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.phase_tab.phase_table_presenter.run_change_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
@@ -145,6 +154,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.transform.GroupPairObserver)
 
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.group_change_observer)
+
     def setup_instrument_changed_notifier(self):
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.home_tab.home_tab_widget.instrumentObserver)
@@ -157,6 +169,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.transform.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.instrument_changed_observer)
 
     def setup_group_calculation_enable_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
@@ -191,6 +206,14 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.transform.disable_observer)
+
+    def setup_phase_quad_changed_notifer(self):
+        self.phase_tab.phase_table_presenter.phase_quad_calculation_complete_nofifier.add_subscriber(
+            self.transform.phase_quad_observer)
+
+    def setup_phase_table_changed_notifier(self):
+        self.phase_tab.phase_table_presenter.phase_table_calculation_complete_notifier.add_subscriber(
+            self.transform._maxent._presenter.phase_table_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

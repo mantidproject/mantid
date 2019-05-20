@@ -45,9 +45,17 @@ set PARAVIEW_DIR=%PARAVIEW_DIR%
 if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
   cd %WORKSPACE%\external\src\ThirdParty
   git reset --hard HEAD
-  git clean -fdx
+  git clean -d -x --force
   cd %WORKSPACE%
 )
+
+set BUILD_DIR_REL=build
+set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
+
+:: Clean the source tree to remove stale configured files but make sure to
+:: leave external/ and the BUILD_DIR directory intact.
+:: There is a later check to see if this is a clean build and remove BUILD_DIR.
+git clean -d -x --force --exclude=external --exclude=%BUILD_DIR_REL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
@@ -89,15 +97,13 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 :: For a clean build the entire thing is removed to guarantee it is clean. All
 :: other build types are assumed to be incremental and the following items
 :: are removed to ensure stale build objects don't interfere with each other:
-::   - those removed by git clean -fdx --exclude=build
 ::   - build/bin: if libraries are removed from cmake they are not deleted
 ::                   from bin and can cause random failures
 ::   - build/ExternalData/**: data files will change over time and removing
 ::                            the links helps keep it fresh
+::   - build/Testing/**: old ctest xml files will change over time and removing
+::                       the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set BUILD_DIR_REL=build
-set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
-
 if EXIST %BUILD_DIR%\CMakeCache.txt (
   call "%_grep_exe%" CMAKE_GENERATOR:INTERNAL %BUILD_DIR%\CMakeCache.txt > %BUILD_DIR%\cmake_generator.log
   call "%_grep_exe%" -q "%CM_GENERATOR%" %BUILD_DIR%\cmake_generator.log
@@ -117,13 +123,11 @@ if "!CLEANBUILD!" == "yes" (
 )
 
 if EXIST %BUILD_DIR% (
-  git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
-  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData %BUILD_DIR%\Testing
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-prefix
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
-    rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
   )
 ) else (
   md %BUILD_DIR%
@@ -210,7 +214,7 @@ mkdir %CONFIGDIR%\mantid
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
 
-call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+call ctest.exe -C %BUILD_CONFIG%  --no-compress-output -T Test -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

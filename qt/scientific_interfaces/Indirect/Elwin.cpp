@@ -250,10 +250,8 @@ void Elwin::run() {
     runNumber = runNumber.substr(runNumberStart, strLength);
     auto baseName = firstFileInfo.baseName();
     const auto prefix = baseName.left(baseName.indexOf("_"));
-    auto testPre = prefix.toStdString();
     const auto suffix =
         baseName.right(baseName.length() - baseName.indexOf("_"));
-    auto testsuf = suffix.toStdString();
     workspaceBaseName =
         prefix + QString::fromStdString("-" + runNumber) + suffix;
   }

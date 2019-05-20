@@ -103,7 +103,6 @@ void IndirectLoadILL::run() {
     QString pyFunc("");
     // IN13 has a different loading routine
     if (instrument == "IN13") {
-      ext = "asc";
       pyFunc = "IN13Start";
     } else if (ext == "asc") // using ascii files
     {

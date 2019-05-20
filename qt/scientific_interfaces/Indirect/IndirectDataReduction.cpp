@@ -182,9 +182,9 @@ void IndirectDataReduction::instrumentSetupChanged(
  * @returns Pointer to instrument workspace
  */
 Mantid::API::MatrixWorkspace_sptr
-IndirectDataReduction::loadInstrumentIfNotExist(std::string instrumentName,
-                                                std::string analyser,
-                                                std::string reflection) {
+IndirectDataReduction::loadInstrumentIfNotExist(
+    const std::string &instrumentName, const std::string &analyser,
+    const std::string &reflection) {
   std::string idfDirectory =
       Mantid::Kernel::ConfigService::Instance().getString(
           "instrumentDefinition.directory");
