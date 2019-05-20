@@ -221,16 +221,18 @@ class MuonContext(object):
             pair = self.group_pair_context.pair_names
         else:
             group_pair_list = group_and_pair.replace(' ', '').split(',')
-            group = [item for item in group_pair_list if item in self.group_pair_context.group_names]
-            pair = [item for item in group_pair_list if item in self.group_pair_context.pair_names]
+            group = [group for group in group_pair_list if group in self.group_pair_context.group_names]
+            pair = [pair for pair in group_pair_list if pair in self.group_pair_context.pair_names]
 
         if runs == 'All':
             run_list = self.data_context.current_runs
         else:
             run_list = [run_string_to_list(item) for item in runs.replace(' ', '').split(',')]
-            flat_list = [[item] for sublist in run_list for item in sublist if len(sublist) > 1]
+            flat_list = []
+            for sublist in run_list:
+                flat_list += [[run] for run in sublist if len(sublist) > 1]
             run_list += flat_list
-            run_list = [item for item in run_list if item in self.data_context.current_runs]
+            run_list = [run for run in run_list if run in self.data_context.current_runs]
 
         group_names = self.group_pair_context.get_group_workspace_names(run_list, group, rebin)
         pair_names = self.group_pair_context.get_pair_workspace_names(run_list, pair, rebin)

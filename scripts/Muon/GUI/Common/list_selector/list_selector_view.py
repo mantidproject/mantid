@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
-
+import functools
 from qtpy.QtCore import Qt
 from Muon.GUI.Common.list_selector.TableWidgetDragRows import TableWidgetDragRows
 from mantidqt.utils.qt import load_ui
@@ -30,7 +30,7 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.list_layout.addWidget(self.item_table_widget)
         self.list_layout.setContentsMargins(0, 0, 0, 0)
 
-        self._item_selection_changed_action = lambda a, b: 0
+        self._item_selection_changed_action = lambda name, selection_state: 0
         self.item_table_widget.cellChanged.connect(self.handle_cell_changed_signal)
 
     def addItems(self, item_list):
@@ -79,7 +79,11 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.filter_type_combo_box.currentIndexChanged.connect(action)
 
     def set_select_all_checkbox_action(self, action):
-        self.select_all_checkbox.stateChanged.connect(action)
+        self.select_all_button.clicked.connect(functools.partial(action, True))
+        self.unselect_all_button.clicked.connect(functools.partial(action, False))
+
+    def set_show_selected_checkbox_changed(self, action):
+        self.show_selected_checkbox.stateChanged.connect(action)
 
     def set_row_moved_checkbox_action(self, action):
         self.item_table_widget.rowMoved.connect(action)
@@ -89,3 +93,14 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
             name = self.item_table_widget.item(row, 0).text()
             state = self.item_table_widget.item(row, 1).checkState() == Qt.Checked
             self._item_selection_changed_action(name, state)
+
+    def update_number_of_selected_label(self, number_selected, number_selected_displayed):
+        self.number_of_selected_display_box.setText('Displaying {} of {} selected'.format(number_selected, number_selected_displayed))
+
+    def disable_filtering_options(self):
+        self.filter_line_edit.setEnabled(False)
+        self.filter_type_combo_box.setEnabled(False)
+
+    def enable_filtering_options(self):
+        self.filter_line_edit.setEnabled(True)
+        self.filter_type_combo_box.setEnabled(True)

@@ -54,7 +54,7 @@ class TableWidgetDragRows(QTableWidget):
             self.blockSignals(False)
             self.rowMoved.emit(drop_row, rows)
 
-        super().dropEvent(event)
+        super(TableWidgetDragRows, self).dropEvent(event)
 
     def drop_on(self, event):
         index = self.indexAt(event.pos())
