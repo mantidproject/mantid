@@ -298,15 +298,11 @@ std::string getDate() {
 /**
  * Add the process information to the NXcanSAS file. This information
  * about the run number, the Mantid version and the user file (if available)
- * @param group: the sasEntry
+ * @param process: the process group
  * @param workspace: the workspace which is being stored
  */
-void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
-  // Setup process
-  const std::string sasProcessNameForGroup = sasProcessGroupName;
-  auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
-      group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
-
+void addToProcess(H5::Group &process,
+                  Mantid::API::MatrixWorkspace_sptr workspace) {
   // Add name
   Mantid::DataHandling::H5Util::write(process, sasProcessName,
                                       sasProcessNameValue);
@@ -329,42 +325,59 @@ void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace) {
 }
 
 /**
- * Add the process information to the NXcanSAS file. This information
- * about the run number, the Mantid version and the user file (if available)
+ * Add the process and note information to the NXcanSAS file. Process includes
+ * the run number, the Mantid version, and the user file. Process/note contains
+ * information on all other run numbers used in the reduction
  * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
+ * @param sampleTransmission: the sample transmission workspace
+ * @param canTransmission: the can transmission workspace
+ * @param sampleTransmissionRun: string of the sample transmission run number
+ * @param sampleDirectRun: string of the sample direct run number
+ * @param canScatterRun: string of the can scatter run number
+ * @param canDirectRun: string of the can direct run number
  */
-void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
-                Mantid::API::MatrixWorkspace_sptr canWorkspace) {
+void addProcessWithNote(H5::Group &group,
+                        Mantid::API::MatrixWorkspace_sptr workspace,
+                        Mantid::API::MatrixWorkspace_sptr sampleTransmission,
+                        Mantid::API::MatrixWorkspace_sptr canTransmission,
+                        const std::string &sampleTransmissionRun,
+                        const std::string &sampleDirectRun,
+                        const std::string &canScatterRun,
+                        const std::string &canDirectRun) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
   auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(
       group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
 
-  // Add name
-  Mantid::DataHandling::H5Util::write(process, sasProcessName,
-                                      sasProcessNameValue);
+  // Populate process
+  addToProcess(process, workspace);
 
-  // Add creation date of the file
-  auto date = getDate();
-  Mantid::DataHandling::H5Util::write(process, sasProcessDate, date);
+  // Setup process/note
+  const std::string sasNoteNameForGroup = sasNoteGroupName;
+  auto note = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      process, sasNoteNameForGroup, nxNoteClassAttr, sasNoteClassAttr);
 
-  // Add Mantid version
-  const auto version = std::string(MantidVersion::version());
-  Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
-
-  const auto run = workspace->run();
-  if (run.hasProperty(sasProcessUserFileInLogs)) {
-    auto userFileProperty = run.getProperty(sasProcessUserFileInLogs);
-    auto userFileString = userFileProperty->value();
-    Mantid::DataHandling::H5Util::write(process, sasProcessTermUserFile,
-                                        userFileString);
+  // Populate note
+  if (sampleTransmission) {
+    // Add sample transmission and direct to process/note
+    Mantid::DataHandling::H5Util::write(note, sasProcessTermSampleTrans,
+                                        sampleTransmissionRun);
+    Mantid::DataHandling::H5Util::write(note, sasProcessTermSampleDirect,
+                                        sampleDirectRun);
   }
+  if (canTransmission) {
+    // Add can run number to process
+    const auto canRun = canTransmission->getRunNumber();
+    Mantid::DataHandling::H5Util::write(process, sasProcessTermCan,
+                                        std::to_string(canRun));
 
-  // Add can run number
-  const auto canRun = canWorkspace->getRunNumber();
-  Mantid::DataHandling::H5Util::write(process, sasProcessTermCan,
-                                      std::to_string(canRun));
+    // Add scatter and direct to process/note
+    Mantid::DataHandling::H5Util::write(note, sasProcessTermCanScatter,
+                                        canScatterRun);
+    Mantid::DataHandling::H5Util::write(note, sasProcessTermCanDirect,
+                                        canDirectRun);
+  }
 }
 
 WorkspaceDimensionality
@@ -795,6 +808,11 @@ void SaveNXcanSAS::init() {
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace of the Can. Optional. If given, will be "
       "saved at TransmissionSpectrum");
+
+  declareProperty("SampleTransmissionRunNumber", "", "The run number for the sample transmission workspace. Optional.");
+  declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
+  declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
+  declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
 }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
@@ -874,13 +892,18 @@ void SaveNXcanSAS::exec() {
   const auto detectors = splitDetectorNames(detectorNames);
   addInstrument(sasEntry, workspace, radiationSource, detectors);
 
+  // Get additional run numbers
+  const auto sampleTransmissionRun =
+      getPropertyValue("SampleTransmissionRunNumber");
+  const auto sampleDirectRun = getPropertyValue("SampleDirectRunNumber");
+  const auto canScatterRun = getPropertyValue("CanScatterRunNumber");
+  const auto canDirectRun = getPropertyValue("CanDirectRunNumber");
+
   // Add the process information
   progress.report("Adding process information.");
-  if (transmissionCan) {
-    addProcess(sasEntry, workspace, transmissionCan);
-  } else {
-    addProcess(sasEntry, workspace);
-  }
+  addProcessWithNote(sasEntry, workspace, transmissionSample, transmissionCan,
+                     sampleTransmissionRun, sampleDirectRun, canScatterRun,
+                     canDirectRun);
 
   // Add the transmissions for sample
   if (transmissionSample) {
