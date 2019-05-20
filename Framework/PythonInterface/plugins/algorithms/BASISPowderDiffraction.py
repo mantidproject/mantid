@@ -297,9 +297,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         # Aditional output properties
         #
         titleAddionalOutput = 'Additional Output'
-        self.declareProperty('RemoveTemp', True, direction=Direction.Input,
+        self.declareProperty('RemoveTemporaryWorkspaces', True, direction=Direction.Input,
                              doc='Remove temporary workspaces and files')
-        self.setPropertyGroup('RemoveTemp', titleAddionalOutput)
+        self.setPropertyGroup('RemoveTemporaryWorkspaces', titleAddionalOutput)
 
     def PyExec(self):
         # Facility and database configuration
@@ -316,7 +316,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         # implement with ContextDecorator after python2 is deprecated)
         #
-        remove_temp = self.getProperty('RemoveTemp').value
+        remove_temp = self.getProperty('RemoveTemporaryWorkspaces').value
         with pyexec_setup(remove_temp, config_new_options) as self._temps:
             #
             # Load the mask to a temporary workspace

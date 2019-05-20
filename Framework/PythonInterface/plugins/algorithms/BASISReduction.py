@@ -350,9 +350,9 @@ the first two hours"""
                              direction=Direction.Input,
                              doc='Output S(Q) and S(theta) powder diffraction')
         self.setPropertyGroup('OutputPowderSpectrum', titleAddionalOutput)
-        self.declareProperty('RemoveTemp', True, direction=Direction.Input,
+        self.declareProperty('RemoveTemporaryWorkspaces', True, direction=Direction.Input,
                              doc='Remove temporary workspaces and files')
-        self.setPropertyGroup('RemoveTemp', titleAddionalOutput)
+        self.setPropertyGroup('RemoveTemporaryWorkspaces', titleAddionalOutput)
 
     # pylint: disable=too-many-branches
     def PyExec(self):
@@ -363,7 +363,7 @@ the first two hours"""
         #
         # implement with ContextDecorator after python2 is deprecated)
         #
-        remove_temp = self.getProperty('RemoveTemp').value
+        remove_temp = self.getProperty('RemoveTemporaryWorkspaces').value
         with pyexec_setup(remove_temp, config_new_options) as self._temps:
             self._PyExec()
 
