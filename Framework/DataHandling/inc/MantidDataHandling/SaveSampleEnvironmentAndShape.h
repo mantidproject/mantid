@@ -22,10 +22,13 @@ namespace DataHandling {
 class DLLExport SaveSampleEnvironmentAndShape : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "SaveSampleEnvironmentAndShape"; }
+  const std::string name() const override {
+    return "SaveSampleEnvironmentAndShape";
+  }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "The algorithm saves the environment and sample shape from the instrument of a "
+    return "The algorithm saves the environment and sample shape from the "
+           "instrument of a "
            "workspace. ";
   }
 
@@ -43,7 +46,14 @@ public:
 private:
   // Implement abstract Algorithm methods
   void init() override;
-  void exec() override;  
+  void exec() override;
+
+  void addMeshToVector(const Mantid::Geometry::MeshObject &mesh);
+  size_t addMeshToVector(const Mantid::Geometry::MeshObject &mesh,
+                         size_t offset);
+
+  std::vector<Kernel::V3D> m_vertices;
+  std::vector<uint32_t> m_triangle;
 };
 
 } // end namespace DataHandling

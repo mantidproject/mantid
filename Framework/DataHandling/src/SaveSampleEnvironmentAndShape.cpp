@@ -9,6 +9,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/LoadShape.h"
 #include "MantidDataHandling/SaveStl.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -17,7 +18,6 @@
 #include <memory>
 namespace Mantid {
 namespace DataHandling {
-enum class ScaleUnits { metres, centimetres, millimetres };
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveSampleEnvironmentAndShape)
 using namespace Kernel;
@@ -53,13 +53,15 @@ void SaveSampleEnvironmentAndShape::exec() {
     // Get the shape of the sample
     auto &sampleShape =
         dynamic_cast<const MeshObject &>(inputWS->sample().getShape());
-    auto environment = inputWS->sample().getEnvironment();
-    auto numElements = environment.nelements();
     numVertices += sampleShape.numberOfVertices();
     numTriangles += (sampleShape.numberOfTriangles() * 3);
 
-    // Setup vector to store the pieves of the environment
+    // get the environment
+    auto environment = inputWS->sample().getEnvironment();
+
+    // Setup vector to store the pieces of the environment
     std::vector<const MeshObject *> environmentPieces;
+    auto numElements = environment.nelements();
     environmentPieces.reserve(numElements);
 
     // get the shape the container of the environment and add it to the vector
@@ -79,18 +81,11 @@ void SaveSampleEnvironmentAndShape::exec() {
     }
 
     // setup vectors to store all triangles and vertices
-    std::vector<V3D> vertices;
-    std::vector<uint32_t> triangle;
-    vertices.reserve(numVertices);
-    triangle.reserve(numTriangles);
+    m_vertices.reserve(numVertices);
+    m_triangle.reserve(numTriangles);
 
     // get the sample vertices and triangles and add them into the vector
-    auto shapeVertices = sampleShape.getV3Ds();
-    auto shapeTriangles = sampleShape.getTriangles();
-    vertices.insert(std::end(vertices), std::begin(shapeVertices),
-                    std::end(shapeVertices));
-    triangle.insert(std::end(triangle), std::begin(shapeTriangles),
-                    std::end(shapeTriangles));
+    addMeshToVector(sampleShape);
 
     // keep track of the current number of vertices added
     size_t offset = sampleShape.numberOfVertices();
@@ -98,26 +93,15 @@ void SaveSampleEnvironmentAndShape::exec() {
     // go through the environment, adding the triangles and vertices to the
     // vector
     for (size_t i = 0; i < environmentPieces.size(); ++i) {
-      std::vector<Kernel::V3D> tempVertices = environmentPieces[i]->getV3Ds();
-      std::vector<uint32_t> tempTriangles =
-          environmentPieces[i]->getTriangles();
-
-      // increase the triangles by the offset, so they refer to the new index of
-      // the vertices
-      std::transform(std::begin(tempTriangles), std::end(tempTriangles),
-                     std::begin(tempTriangles),
-                     [&offset](uint32_t &val) { return val + offset; });
-      vertices.insert(std::end(vertices), std::begin(tempVertices),
-                      std::end(tempVertices));
-      triangle.insert(std::end(triangle), std::begin(tempTriangles),
-                      std::end(tempTriangles));
-
-      // add the newly added vertices to the offset
-      offset += tempVertices.size();
+      offset = addMeshToVector(*environmentPieces[i], offset);
     }
 
+    // get the scale to use
+    auto scale = getPropertyValue("Scale");
+    auto scaleType = getScaleType(scale);
+
     // Save out the shape
-    SaveStl writer = SaveStl(filename, triangle, vertices, ScaleUnits::metres);
+    SaveStl writer = SaveStl(filename, m_triangle, m_vertices, scaleType);
     writer.writeStl();
   } catch (std::bad_cast &) {
     // if bad_cast is thrown the sample or environment is not a mesh_object, and
@@ -125,6 +109,33 @@ void SaveSampleEnvironmentAndShape::exec() {
     throw std::invalid_argument(
         "Attempted to Save out non-mesh based Sample Shape");
   }
+}
+void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
+  auto vertices = mesh.getV3Ds();
+  auto triangles = mesh.getTriangles();
+  m_vertices.insert(std::end(m_vertices), std::begin(vertices),
+                    std::end(vertices));
+  m_triangle.insert(std::end(m_triangle), std::begin(triangles),
+                    std::end(triangles));
+}
+
+size_t SaveSampleEnvironmentAndShape::addMeshToVector(
+    const Mantid::Geometry::MeshObject &mesh, size_t offset) {
+  auto vertices = mesh.getV3Ds();
+  auto triangles = mesh.getTriangles();
+
+  // increase the triangles by the offset, so they refer to the new index of
+  // the vertices
+  std::transform(std::begin(triangles), std::end(triangles),
+                 std::begin(triangles),
+                 [&offset](uint32_t &val) { return val + offset; });
+  m_vertices.insert(std::end(m_vertices), std::begin(vertices),
+                    std::end(vertices));
+  m_triangle.insert(std::end(m_triangle), std::begin(triangles),
+                    std::end(triangles));
+
+  // add the newly added vertices to the offset
+  return offset += vertices.size();
 }
 } // namespace DataHandling
 } // namespace Mantid
