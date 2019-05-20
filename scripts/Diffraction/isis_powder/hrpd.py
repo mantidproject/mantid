@@ -90,7 +90,7 @@ class HRPD(AbstractInst):
         path = run_details.van_paths
 
         mantid.SaveNexus(InputWorkspace=correction, Filename=os.path.join(path, name))
-        
+
         common.remove_intermediate_workspace(solid_angle)
         common.remove_intermediate_workspace(scale)
         common.remove_intermediate_workspace(eff)
