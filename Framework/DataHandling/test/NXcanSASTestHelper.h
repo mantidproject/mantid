@@ -37,6 +37,10 @@ struct NXcanSASTestParameters {
     ymax = 12.0;
     is2dData = false;
     isHistogram = false;
+    sampleTransmissionRun = "";
+    sampleDirectRun = "";
+    canScatterRun = "";
+    canDirectRun = "";
   }
 
   std::string filename;
@@ -59,6 +63,10 @@ struct NXcanSASTestParameters {
   bool is2dData;
   std::string idf;
   bool isHistogram;
+  std::string sampleTransmissionRun = "";
+  std::string sampleDirectRun = "";
+  std::string canScatterRun = "";
+  std::string canDirectRun = "";
 };
 
 struct NXcanSASTestTransmissionParameters {
