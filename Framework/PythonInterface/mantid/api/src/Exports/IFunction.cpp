@@ -245,6 +245,8 @@ void export_IFunction() {
            "Split this function (if needed) into a list of "
            "independent functions")
 
+      .def("getFunction", &IFunction::getFunction, (arg("self"), arg("index")), "Returns the pointer to i-th child function")
+
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
            "Get the number of domains.")
 

@@ -27,6 +27,8 @@ class FittingTabModel(object):
         self.add_workspace_to_ADS(output_workspace, workspace_name, directory)
         self.add_workspace_to_ADS(fitting_parameters_table, table_name, directory)
 
+        return function_string
+
     def do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
         return run_Fit(parameters_dict, alg)
@@ -37,26 +39,20 @@ class FittingTabModel(object):
 
     def create_fitted_workspace_name(self, input_workspace_name, function_name):
         directory = get_fit_workspace_base_directory()
-        name = input_workspace_name + '; Fitted; ' + self.convert_function_string_into_dict(function_name)['name']
+        name = input_workspace_name + '; Fitted; ' + self.get_function_name(function_name)
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function):
         directory = get_fit_workspace_base_directory()
-        name = input_workspace + '+ ...; Fitted; ' + self.convert_function_string_into_dict(function)['name']
+        name = input_workspace + '+ ...; Fitted; ' + self.get_function_name(function)
 
         return name, directory
 
     def create_parameter_table_name(self, input_workspace_name, function_name):
         directory = get_fit_workspace_base_directory()
-        name = input_workspace_name + '; Fitted Parameters; ' + self.convert_function_string_into_dict(function_name)[
-            'name']
+        name = input_workspace_name + '; Fitted Parameters; ' + self.get_function_name(function_name)
         return name, directory
-
-    def convert_function_string_into_dict(self, function_string):
-        value_list = function_string.replace(' ', '').replace(';', ',').split(',')
-        value_dict = {item.split('=')[0]: item.split('=')[1] for item in value_list}
-        return value_dict
 
     def do_simultaneous_fit(self, parameter_dict):
         output_workspace, fitting_parameters_table, function_string = self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
@@ -81,10 +77,18 @@ class FittingTabModel(object):
             RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
 
     def do_sequential_fit(self, parameter_dict):
+        function_string = parameter_dict['Function']
         for input_workspace, startX, endX in zip(parameter_dict['InputWorkspace'], parameter_dict['StartX'], parameter_dict['EndX']):
             sub_parameter_dict = parameter_dict.copy()
             sub_parameter_dict['InputWorkspace'] = input_workspace
             sub_parameter_dict['StartX'] = startX
             sub_parameter_dict['EndX'] = endX
+            sub_parameter_dict['Function'] = function_string
 
-            self.do_single_fit(sub_parameter_dict)
+            function_string = self.do_single_fit(sub_parameter_dict)
+
+    def get_function_name(self, function):
+        if function.getNumberDomains() > 1:
+            return function.getFunction(0).name()
+        else:
+            return function.name()

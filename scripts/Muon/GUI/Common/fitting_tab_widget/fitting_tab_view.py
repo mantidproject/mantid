@@ -20,6 +20,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
+        self.undo_fit_button.hide()
 
         self.function_browser = FunctionBrowser(self, True)
         self.function_browser_layout.addWidget(self.function_browser)
@@ -133,6 +134,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     def warning_popup(self, message):
         warning(message, parent=self)
+
+    def get_index_for_start_end_times(self):
+        if self.fit_type == 'Single Fit':
+            return 0
+
+        current_index = self.parameter_display_combo.currentIndex()
+        current_index = current_index if current_index != -1 else 0
+
+        return current_index
 
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(5)
