@@ -308,8 +308,8 @@ LoadSampleEnvironment::translate(boost::shared_ptr<MeshObject> environmentMesh,
       throw std::invalid_argument(
           "Invalid Translation vector, must have exactly 3 dimensions");
     }
-    V3D translate =
-        createScaledV3D(translationVector[0], translationVector[1], translationVector[2],scaleType);
+    V3D translate = createScaledV3D(translationVector[0], translationVector[1],
+                                    translationVector[2], scaleType);
     environmentMesh->translate(translate);
   }
   return environmentMesh;

@@ -7,9 +7,9 @@
 #ifndef DATAHANDLING_LOAD_ENVIRONMENT_H_
 #define DATAHANDLING_LOAD_ENVIRONMENT_H_
 
+#include "LoadShape.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Matrix.h"
-#include "LoadShape.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -47,7 +47,8 @@ public:
   }
 
   boost::shared_ptr<Geometry::MeshObject>
-  translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,ScaleUnits scaleType);
+  translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,
+            ScaleUnits scaleType);
   boost::shared_ptr<Geometry::MeshObject>
   rotate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
 
@@ -61,8 +62,8 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  Kernel::V3D createScaledV3D(double xVal, double yVal, double zVal,ScaleUnits scaleType);
-  
+  Kernel::V3D createScaledV3D(double xVal, double yVal, double zVal,
+                              ScaleUnits scaleType);
 };
 
 } // end namespace DataHandling
