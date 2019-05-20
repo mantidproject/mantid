@@ -55,6 +55,14 @@ public:
     doWriteSingleValueTest<int64_t>(200);
   }
 
+  void test_Write_uint16_t_Gives_Correct_Value() {
+    doWriteSingleValueTest<uint16_t>(111);
+  }
+
+  void test_Write_uint32_t_Gives_Correct_Value() {
+    doWriteSingleValueTest<uint32_t>(231);
+  }
+
   void test_Write_float_Gives_Correct_Value() {
     doWriteSingleValueTest<float>(787.0f);
   }
@@ -102,11 +110,8 @@ private:
     BinaryStreamWriter writer(m_bytes);
     BinaryStreamReader reader(m_bytes);
     T readVal;
-    auto place1 =m_bytes.tellg();
     writer << value;
-    auto place= m_bytes.tellg();
     reader >> readVal;
-    auto place2= m_bytes.tellg();
     TS_ASSERT_EQUALS(readVal, value);
   }
 
