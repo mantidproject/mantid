@@ -25,9 +25,9 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 # -----------------------------------------------------------------
 class UserFileStateDirectorISISTest(unittest.TestCase):
     def _assert_data(self, state):
-        # The only item which can be set by the director in the data state is the tube calibration file
         data = state.data
         self.assertTrue(data.calibration == "TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
+        self.assertTrue(data.user_file == "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger_FRONT.txt")
 
     def _assert_move(self, state):
         move = state.move
@@ -177,7 +177,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
     def test_state_can_be_created_from_valid_user_file_with_data_information(self):
         # Arrange
         file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information,
+                                        user_file="USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger_FRONT.txt")
         data_builder.set_sample_scatter("SANS2D00022024")
         data_builder.set_sample_scatter_period(3)
         data_state = data_builder.build()

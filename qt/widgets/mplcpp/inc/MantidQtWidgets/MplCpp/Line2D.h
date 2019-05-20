@@ -24,7 +24,7 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL Line2D : public Artist {
 public:
-  Line2D(Python::Object obj, std::vector<double> xdataOwner,
+  Line2D(Common::Python::Object obj, std::vector<double> xdataOwner,
          std::vector<double> ydataOwner);
   ~Line2D() noexcept;
   // not copyable

@@ -8,12 +8,15 @@
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadOff.h"
-#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+
+#include "MantidKernel/ArrayProperty.h"
 
 #include "MantidGeometry/Instrument.h"
 
@@ -75,19 +78,11 @@ void LoadSampleShape::exec() {
   if (filetype == "off") {
     auto offReader = LoadOff(filename, scaleType);
     shape = offReader.readOFFshape();
-  } else /* stl */ {
-
-    auto asciiStlReader = LoadAsciiStl(filename, scaleType);
-    auto binaryStlReader = LoadBinaryStl(filename, scaleType);
-    if (binaryStlReader.isBinarySTL(filename)) {
-      shape = binaryStlReader.readStl();
-    } else if (asciiStlReader.isAsciiSTL(filename)) {
-      shape = asciiStlReader.readStl();
-    } else {
-      throw Kernel::Exception::ParseError(
-          "Could not read file, did not match either STL Format", filename, 0);
-    }
+  } else {
+    shape = loadStl(filename, scaleType);
   }
+  // rotate shape
+  rotate(*shape, inputWS);
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();
@@ -97,5 +92,38 @@ void LoadSampleShape::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
+/**
+ * Rotates the Shape by a provided matrix
+ * @param sampleMesh The Shape to rotate
+ * @param inputWS The workspace to get the rotation from
+ * @returns a shared pointer to the newly rotated Shape
+ */
+void rotate(MeshObject &sampleMesh, MatrixWorkspace_const_sptr inputWS) {
+  const std::vector<double> rotationMatrix =
+      inputWS->run().getGoniometer().getR();
+  sampleMesh.rotate(rotationMatrix);
+}
+
+/**
+ * Handles the loading of STL files
+ * @param filename The file to load
+ * @param scaleType The units of the scale to use mm, cm or m
+ * @returns a shared pointer to the loaded meshobject
+ */
+boost::shared_ptr<MeshObject> loadStl(std::string filename,
+                                      ScaleUnits scaleType) {
+  boost::shared_ptr<MeshObject> shape = nullptr;
+  auto asciiStlReader = LoadAsciiStl(filename, scaleType);
+  auto binaryStlReader = LoadBinaryStl(filename, scaleType);
+  if (binaryStlReader.isBinarySTL(filename)) {
+    shape = binaryStlReader.readStl();
+  } else if (asciiStlReader.isAsciiSTL(filename)) {
+    shape = asciiStlReader.readStl();
+  } else {
+    throw Kernel::Exception::ParseError(
+        "Could not read file, did not match either STL Format", filename, 0);
+  }
+  return shape;
+}
 } // namespace DataHandling
 } // namespace Mantid

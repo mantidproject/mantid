@@ -9,9 +9,11 @@
 
 #include <cxxtest/GlobalFixture.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include <QApplication>
 
 /**
@@ -26,6 +28,13 @@ public:
     Py_Initialize();
     PyEval_InitThreads();
     Mantid::PythonInterface::importNumpy();
+    // Insert the directory of the properties file as a sitedir
+    // to ensure the built copy of mantid gets picked up
+    const MantidQt::Widgets::Common::Python::Object siteModule{
+        MantidQt::Widgets::Common::Python::NewRef(
+            PyImport_ImportModule("site"))};
+    siteModule.attr("addsitedir")(
+        Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
     return Py_IsInitialized();
   }
 

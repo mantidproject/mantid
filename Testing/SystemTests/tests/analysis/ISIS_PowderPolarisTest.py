@@ -64,8 +64,8 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         splined_ws, unsplined_ws = self.calibration_results
         for ws in splined_ws+unsplined_ws:
             self.assertEqual(ws.sample().getMaterial().name(), 'V')
-        return (unsplined_ws.getName(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
-                splined_ws.getName(), "ISIS_Powder-POLARIS00098533_splined.nxs")
+        return (unsplined_ws.name(), "ISIS_Powder-POLARIS00098533_unsplined.nxs",
+                splined_ws.name(), "ISIS_Powder-POLARIS00098533_splined.nxs")
 
     def cleanup(self):
         try:
@@ -93,7 +93,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         for ws in self.focus_results:
             self.assertEqual(ws.sample().getMaterial().name(), 'Si')
         self.tolerance = 1e-7
-        return self.focus_results.getName(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
 
     def cleanup(self):
         try:
@@ -124,7 +124,7 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
         # this needs to be put in due to rounding errors between OS' for the proton_charge_by_period log
         self.disableChecking.append('Sample')
         self.tolerance = 1e-7
-        return self.focus_results.getName(), "ISIS_Powder-POLARIS98533_Auto_chopper.nxs"
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_Auto_chopper.nxs"
 
     def cleanup(self):
         try:
