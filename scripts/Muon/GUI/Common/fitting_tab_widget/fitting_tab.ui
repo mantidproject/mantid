@@ -59,7 +59,7 @@
    <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="workspace_combo_box_label">
        <property name="text">
         <string>Select Workspace</string>
        </property>
@@ -169,7 +169,7 @@
      <item row="2" column="2">
       <widget class="QPushButton" name="select_workspaces_to_fit_button">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="text">
         <string>Select data to fit</string>

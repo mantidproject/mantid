@@ -58,6 +58,13 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         else:
             self.parameter_display_combo.setCurrentIndex(count - 1)
 
+    def set_datasets_in_function_browser(self, data_set_name_list):
+        number_of_data_sets = self.function_browser.getNumberOfDatasets()
+        index_list = range(number_of_data_sets)
+        self.function_browser.removeDatasets(index_list)
+
+        self.function_browser.addDatasets(data_set_name_list)
+
     def set_slot_for_select_workspaces_to_fit(self, slot):
         self.select_workspaces_to_fit_button.clicked.connect(slot)
 
@@ -67,9 +74,53 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def set_slot_for_use_raw_changed(self, slot):
         self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
+    def set_slot_for_fit_type_changed(self, slot):
+        self.fit_type_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_fit_button_clicked(self, slot):
+        self.fit_button.clicked.connect(slot)
+
+    def set_slot_for_start_x_updated(self, slot):
+        self.time_start.editingFinished.connect(slot)
+
+    def set_slot_for_end_x_updated(self, slot):
+        self.time_end.editingFinished.connect(slot)
+
     @property
     def display_workspace(self):
         return str(self.parameter_display_combo.currentText())
+
+    @property
+    def fit_string(self):
+        return str(self.function_browser.getFitFunctionString())
+
+    @property
+    def minimizer(self):
+        return str(self.minimizer_combo.currentText())
+
+    @property
+    def start_time(self):
+        return float(self.time_start.text())
+
+    @start_time.setter
+    def start_time(self, value):
+        self.time_start.setText(str(value))
+
+    @property
+    def end_time(self):
+        return float(self.time_end.text())
+
+    @end_time.setter
+    def end_time(self, value):
+        self.time_end.setText(str(value))
+
+    @property
+    def evaluation_type(self):
+        return str(self.evaluation_combo.currentText())
+
+    @property
+    def fit_type(self):
+        return str(self.fit_type_combo.currentText())
 
     @property
     def fit_to_raw(self):
@@ -94,13 +145,18 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             ("Property;Value").split(";"))
 
         table_utils.setRowName(self.fit_options_table, 0, "Time Start")
-        self.minimizer_combo = table_utils.addDoubleToTable(self.fit_options_table, 0.0, 0, 1)
+        self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, 0, 1)
 
         table_utils.setRowName(self.fit_options_table, 1, "Time End")
-        self.minimizer_combo = table_utils.addDoubleToTable(self.fit_options_table, 15.0, 1, 1)
+        self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, 1, 1)
 
         table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
+
+        self.minimizer_combo.addItems(
+            ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate gradient (Polak-Ribiere imp.)',
+             'Damped GaussNewton', 'FABADA', 'Levenberg-MarquardtMD', 'Simplex',
+             'SteepestDescent', 'Trust Region'])
 
         # table_utils.setRowName(self.fit_options_table, 3, "TF Asymmetry Mode")
         # self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
@@ -119,4 +175,4 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         #     self.fit_options_table, True, 6)
 
         table_utils.setRowName(self.fit_options_table, 4, "Evaluate Function As")
-        self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
+        self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
