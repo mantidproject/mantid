@@ -286,7 +286,6 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
   }
 
-
   void test_Setting_Geometry_No_Volume() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
@@ -488,7 +487,8 @@ private:
     workspace->setInstrument(inst);
   }
 
-  Mantid::Kernel::PropertyManager_sptr createMaterialProps(const double volume = 0.) {
+  Mantid::Kernel::PropertyManager_sptr
+  createMaterialProps(const double volume = 0.) {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
@@ -496,9 +496,10 @@ private:
     props->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("ChemicalFormula", "V"),
         "");
-    if (volume > 0.)     // <mass> = <standard mass density for vanadium> x <volume>
+    if (volume > 0.) // <mass> = <standard mass density for vanadium> x <volume>
       props->declareProperty(
-          Mantid::Kernel::make_unique<PropertyWithValue<double>>("SampleMass", 6.11 * volume),
+          Mantid::Kernel::make_unique<PropertyWithValue<double>>("SampleMass",
+                                                                 6.11 * volume),
           "");
     return props;
   }

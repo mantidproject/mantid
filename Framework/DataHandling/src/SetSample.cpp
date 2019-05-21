@@ -308,7 +308,8 @@ void SetSample::exec() {
       // only add the volume if it isn't already specfied
       if (!materialArgs->existsProperty(VOLUME_ARG)) {
         materialArgs->declareProperty(
-              Kernel::make_unique<PropertyWithValue<double>>(VOLUME_ARG, sampleVolume));
+            Kernel::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
+                                                           sampleVolume));
       }
     }
     runChildAlgorithm("SetSampleMaterial", workspace, *materialArgs);

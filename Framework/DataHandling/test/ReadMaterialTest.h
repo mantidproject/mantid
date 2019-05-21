@@ -336,7 +336,7 @@ public:
 
   void testCalculateDensity() {
     // test getting the number density from the table
-    const ReadMaterial::MaterialParameters tableParams = [this]()->auto {
+    const ReadMaterial::MaterialParameters tableParams = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       return setMaterial;
@@ -352,7 +352,7 @@ public:
     }
 
     // test getting the number density from the mass density
-    const ReadMaterial::MaterialParameters massParams = [this]()->auto {
+    const ReadMaterial::MaterialParameters massParams = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.sampleMassDensity = MASS_DENSITY;
@@ -368,7 +368,7 @@ public:
     }
 
     // test getting the number density from the mass and volume
-    const ReadMaterial::MaterialParameters sampleParams = [this]()->auto {
+    const ReadMaterial::MaterialParameters sampleParams = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.sampleMass = 5.; // grams
@@ -406,12 +406,12 @@ public:
 
 private:
   // these values are for elemental vanadium
-  const double EMPTY_DOUBLE_VAL{ 8.9884656743115785e+307 };
-  const double PRECISION{ 1e-8 };
-  const double NUMBER_DENSITY{ 0.0722305 };
-  const double MASS_DENSITY{ 6.11 }; // matches the number density
-  const std::string EMPTY{ "" };
-  const std::string FORMULA{ "V" };
+  const double EMPTY_DOUBLE_VAL{8.9884656743115785e+307};
+  const double PRECISION{1e-8};
+  const double NUMBER_DENSITY{0.0722305};
+  const double MASS_DENSITY{6.11}; // matches the number density
+  const std::string EMPTY{""};
+  const std::string FORMULA{"V"};
 
   void compareMaterial(const Material &material, const Material &check) {
     std::vector<Material::FormulaUnit> checkFormula = check.chemicalFormula();
