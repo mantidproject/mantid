@@ -627,6 +627,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
   peak->setHKL(hkl * m_qConventionFactor);
+  peak->setIntHKL(hkl * m_qConventionFactor);
 
   if (m_sfCalculator) {
     peak->setIntensity(m_sfCalculator->getFSquared(hkl));

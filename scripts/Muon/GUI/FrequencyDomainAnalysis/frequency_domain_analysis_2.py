@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 
 from mantid.kernel import ConfigServiceImpl

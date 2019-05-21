@@ -244,7 +244,7 @@ public:
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
         .WillOnce(Return(std::vector<RunLabel>({runLabel})));
@@ -284,7 +284,7 @@ public:
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
         .WillOnce(Return(std::vector<RunLabel>({runLabel})));
@@ -614,11 +614,11 @@ public:
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>("123_1")));
-    EXPECT_CALL(*mockModel_ptr, removeRun(RunLabel(123, 1)));
+    EXPECT_CALL(*mockModel_ptr, removeRun(RunLabel("123", 1)));
     EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
         .WillOnce(Return(
-            std::vector<RunLabel>({RunLabel(123, 2), RunLabel(456, 1)})));
+            std::vector<RunLabel>({RunLabel("123", 2), RunLabel("456", 1)})));
     EXPECT_CALL(mockView, updateFittingListWidget(
                               std::vector<std::string>({"123_2", "456_1"})));
 
@@ -638,7 +638,7 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(2)
         .WillRepeatedly(Return(boost::optional<std::string>("123_1")));
@@ -673,7 +673,7 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>("123_1")));
@@ -708,7 +708,7 @@ public:
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(2)
         .WillRepeatedly(Return(boost::optional<std::string>("123_1")));

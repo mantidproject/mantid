@@ -63,6 +63,9 @@ GNU_DIAG_OFF("conversion")
 // Overloads for yIndexOfX function which has 2 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
+// Overloads for YUnitLabel which has 1 optional argument
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
+                                       YUnitLabel, 0, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -284,8 +287,10 @@ void export_MatrixWorkspace() {
            arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
-      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
-           "Returns the caption for the Y axis")
+      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel,
+           MatrixWorkspace_YUnitLabelOverloads(
+               (arg("self"), arg("useLatex"), arg("plotAsDistribution")),
+               "Returns the caption for the Y axis"))
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),
            "Returns true if this spectrum contains any masked bins")

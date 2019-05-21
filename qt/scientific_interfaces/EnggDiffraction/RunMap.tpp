@@ -22,8 +22,8 @@ const T &RunMap<NumBanks, T>::get(const RunLabel &runLabel) const {
   validateBankID(runLabel.bank);
   if (!contains(runLabel)) {
     throw std::invalid_argument("Tried to access invalid run number " +
-                                std::to_string(runLabel.runNumber) +
-                                " for bank " + std::to_string(runLabel.bank));
+                                runLabel.runNumber + " for bank " +
+                                std::to_string(runLabel.bank));
   }
   return m_map[runLabel.bank].at(runLabel.runNumber);
 }
@@ -50,8 +50,8 @@ std::vector<RunLabel> RunMap<NumBanks, T>::getRunLabels() const {
 }
 
 template <size_t NumBanks, typename T>
-std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
-  std::set<int> runNumbers;
+std::set<std::string> RunMap<NumBanks, T>::getAllRunNumbers() const {
+  std::set<std::string> runNumbers;
 
   for (const auto &bank : m_map) {
     for (const auto &runLabel : bank) {
