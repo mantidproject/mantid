@@ -20,11 +20,6 @@
 
 using namespace MantidQt::API;
 
-namespace {
-// Load libraries once
-std::once_flag DLLS_LOADED;
-} // namespace
-
 //------------------------------------------------------
 // Public member functions
 //------------------------------------------------------

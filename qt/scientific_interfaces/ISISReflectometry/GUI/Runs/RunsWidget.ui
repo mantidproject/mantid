@@ -380,10 +380,6 @@
       </property>
     </action>
     <action name="actionTransfer">
-      <property name="icon">
-        <iconset resource="../../../../../MantidPlot/icons/icons.qrc">
-          <normaloff>:/append_drag_curves.png</normaloff>:/append_drag_curves.png</iconset>
-      </property>
       <property name="text">
         <string>Transfer</string>
       </property>
@@ -410,9 +406,6 @@
     <tabstop>comboSearchInstrument</tabstop>
     <tabstop>tableSearchResults</tabstop>
   </tabstops>
-  <resources>
-    <include location="../../../../../MantidPlot/icons/icons.qrc"/>
-  </resources>
   <connections>
     <connection>
       <sender>buttonSearch</sender>

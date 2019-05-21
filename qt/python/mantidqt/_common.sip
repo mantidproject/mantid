@@ -230,12 +230,8 @@ class UserSubWindow : QMainWindow {
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 using namespace MantidQt::API;
 %End
-public:
+private:
   UserSubWindow(QWidget *parent = nullptr);
-  void setInterfaceName(const QString &iface_name);
-  void initializeLayout();
-protected:
-  virtual void initLayout() = 0;
 };
 
 class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {

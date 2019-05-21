@@ -86,9 +86,6 @@ public:
   /// Has the Python initialization function been run
   bool isPyInitialized() const;
 
-  /// Set the interface name, made public so possible from Python
-  void setInterfaceName(const QString &iface_name);
-
 signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString &code, bool /*_t2*/);
@@ -116,6 +113,14 @@ protected:
   QLabel *newValidator(QWidget *parent);
 
 private:
+  // This is so that it can set the name
+  // I can't pass anything as an argument to the constructor as I am using
+  // the DynamicFactory
+  friend class InterfaceManager;
+
+  /// Set the interface name, made public so possible from Python
+  void setInterfaceName(const QString &iface_name);
+
   /// Has this already been initialized
   bool m_bIsInitialized;
   /// Has the python initialization been run
