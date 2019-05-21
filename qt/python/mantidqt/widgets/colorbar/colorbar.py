@@ -32,7 +32,7 @@ class ColorbarWidget(QWidget):
         self.setMaximumWidth(200)
 
         self.cmap = QComboBox()
-        self.cmap.addItems(cm.cmap_d.keys())
+        self.cmap.addItems(sorted(cm.cmap_d.keys()))
         self.cmap.currentTextChanged.connect(self.cmap_changed)
 
         self.cmin = QLineEdit()
