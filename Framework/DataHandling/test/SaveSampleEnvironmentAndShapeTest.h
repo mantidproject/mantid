@@ -4,7 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/SaveSampleEnvironmentAndShape.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -13,6 +15,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -48,6 +51,9 @@ public:
     ws->mutableSample().setShape(mesh1);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    auto loadMesh = retrieveSavedMesh();
+    assertVectorsMatch(*mesh1, *loadMesh);
+    Poco::File(m_OutputFile).remove();
   }
 
   void testWithEnvironment() {
@@ -64,6 +70,10 @@ public:
     ws->mutableSample().setEnvironment(std::move(environment));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    auto loadMesh = retrieveSavedMesh();
+    auto checkMesh = createCubes(2, 10);
+    assertVectorsMatch(*loadMesh, *checkMesh);
+    Poco::File(m_OutputFile).remove();
   }
 
   void testComplexEnvironment() {
@@ -78,11 +88,15 @@ public:
     auto can = boost::make_shared<Container>(mesh2);
     auto environment = std::make_unique<SampleEnvironment>("name", can);
     auto mesh3 = createCube();
-    mesh3->translate(Kernel::V3D{-10, -10, -10});
+    mesh3->translate(Kernel::V3D{20, 20, 20});
     environment->add(mesh3);
     ws->mutableSample().setEnvironment(std::move(environment));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
+    auto loadMesh = retrieveSavedMesh();
+    auto checkMesh = createCubes(3, 10);
+    assertVectorsMatch(*loadMesh, *checkMesh);
+    Poco::File(m_OutputFile).remove();
   }
 
   void testFailNoShape() {
@@ -162,8 +176,28 @@ public:
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setPropertyValue("Filename", "TempFile");
+    alg.setPropertyValue("Filename", m_OutputFile);
     return inputWS;
+  }
+
+  boost::shared_ptr<MeshObject> retrieveSavedMesh() {
+    LoadBinaryStl loader = LoadBinaryStl(m_OutputFile, ScaleUnits::metres);
+    TS_ASSERT(loader.isBinarySTL(m_OutputFile))
+    auto shape = loader.readStl();
+    return shape;
+  }
+
+  void assertVectorsMatch(const MeshObject &mesh1, const MeshObject &mesh2) {
+    auto vertices1 = mesh1.getV3Ds();
+    auto vertices2 = mesh2.getV3Ds();
+    auto triangles1 = mesh1.getTriangles();
+    auto triangles2 = mesh2.getTriangles();
+    for (size_t i = 0; i < vertices1.size(); ++i) {
+      TS_ASSERT_EQUALS(vertices1[i], vertices2[i]);
+    }
+    for (size_t i = 0; i < triangles1.size(); ++i) {
+      TS_ASSERT_EQUALS(triangles1[i], triangles2[i]);
+    }
   }
 
   // create a cube mesh object
@@ -180,4 +214,47 @@ public:
                                                Mantid::Kernel::Material());
     return cube;
   }
+  // create a mesh of cubes for comparison
+  boost::shared_ptr<MeshObject> createCubes(int num, int translation) {
+    uint32_t offset = 0;
+    int actualTranslation = 0;
+    std::vector<uint32_t> faces;
+    std::vector<Mantid::Kernel::V3D> vertices;
+    for (int i = 0; i < num; ++i) {
+      faces.insert(std::end(faces),
+                   {0 + offset, 1 + offset, 2 + offset, 0 + offset, 3 + offset,
+                    1 + offset, 0 + offset, 2 + offset, 4 + offset, 2 + offset,
+                    1 + offset, 5 + offset, 2 + offset, 5 + offset, 4 + offset,
+                    6 + offset, 1 + offset, 3 + offset, 6 + offset, 5 + offset,
+                    1 + offset, 4 + offset, 5 + offset, 6 + offset, 7 + offset,
+                    3 + offset, 0 + offset, 0 + offset, 4 + offset, 7 + offset,
+                    7 + offset, 6 + offset, 3 + offset, 4 + offset, 6 + offset,
+                    7 + offset});
+      vertices.insert(
+          std::end(vertices),
+          {Mantid::Kernel::V3D(-5 + actualTranslation, -5 + actualTranslation,
+                               -15 + actualTranslation),
+           Mantid::Kernel::V3D(5 + actualTranslation, 5 + actualTranslation,
+                               -15 + actualTranslation),
+           Mantid::Kernel::V3D(5 + actualTranslation, -5 + actualTranslation,
+                               -15 + actualTranslation),
+           Mantid::Kernel::V3D(-5 + actualTranslation, 5 + actualTranslation,
+                               -15 + actualTranslation),
+           Mantid::Kernel::V3D(5 + actualTranslation, -5 + actualTranslation,
+                               15 + actualTranslation),
+           Mantid::Kernel::V3D(5 + actualTranslation, 5 + actualTranslation,
+                               15 + actualTranslation),
+           Mantid::Kernel::V3D(-5 + actualTranslation, 5 + actualTranslation,
+                               15 + actualTranslation),
+           Mantid::Kernel::V3D(-5 + actualTranslation, -5 + actualTranslation,
+                               15 + actualTranslation)});
+      actualTranslation += translation;
+      offset += 8;
+    }
+    auto cube = boost::make_shared<MeshObject>(faces, vertices,
+                                               Mantid::Kernel::Material());
+    return cube;
+  }
+
+  const std::string m_OutputFile = "SaveSampleTest.stl";
 };

@@ -39,7 +39,7 @@ void SaveSampleEnvironmentAndShape::init() {
       "The path name of the file to save");
 
   // scale to use for stl
-  declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
+  declareProperty("Scale", "m", "The scale of the stl: m, cm, or mm");
 }
 
 void SaveSampleEnvironmentAndShape::exec() {
