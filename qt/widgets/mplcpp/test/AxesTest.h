@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
+using namespace MantidQt::Widgets::Common;
 
 class AxesTest : public CxxTest::TestSuite {
 public:

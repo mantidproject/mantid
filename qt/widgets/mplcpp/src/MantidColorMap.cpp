@@ -13,6 +13,8 @@
 #include <QStringList>
 #include <QWidget>
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

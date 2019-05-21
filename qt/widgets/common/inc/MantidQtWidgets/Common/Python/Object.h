@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_PYTHON_OBJECT_H
-#define MPLCPP_PYTHON_OBJECT_H
+#ifndef MANTIDQTWIDGETS_PYTHON_OBJECT_H
+#define MANTIDQTWIDGETS_PYTHON_OBJECT_H
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -14,7 +14,7 @@
 #include <boost/python/object.hpp>
 
 /**
- * @file The intetion of this module is to centralize the access
+ * The intetion of this module is to centralize the access
  * to boost::python so that it is not scattered throughout this library. In
  * theory updating to a different wrapper library would just require altering
  * this file.
@@ -22,7 +22,7 @@
 
 namespace MantidQt {
 namespace Widgets {
-namespace MplCpp {
+namespace Common {
 namespace Python {
 
 // Alias for boost python object wrapper
@@ -99,8 +99,8 @@ private:
 };
 
 } // namespace Python
-} // namespace MplCpp
+} // namespace Common
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_PYTHON_OBJECT_H
+#endif // MANTIDQTWIDGETS_PYTHON_OBJECT_H

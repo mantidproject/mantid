@@ -17,6 +17,8 @@ using boost::optional;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
