@@ -9,12 +9,12 @@
 #include "../ReflMockObjects.h"
 #include <cxxtest/TestSuite.h>
 
-class PlotterTest : public CxxTest::TestSuite {
+class PlotterTestQt4 : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PlotterTest *createSuite() { return new PlotterTest(); }
-  static void destroySuite(PlotterTest *suite) { delete suite; }
+  static PlotterTestQt4 *createSuite() { return new PlotterTestQt4(); }
+  static void destroySuite(PlotterTestQt4 *suite) { delete suite; }
 
   void testReflectometryPlot() {
     MockMainWindowView mainWindow;

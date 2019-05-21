@@ -8,28 +8,39 @@
 #include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include <cxxtest/TestSuite.h>
 
 namespace {
 void setMatplotlibBackend() {
+  // Setup python and mantid python
+  Py_Initialize();
+  const MantidQt::Widgets::Common::Python::Object siteModule{
+      MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("site"))};
+  siteModule.attr("addsitedir")(
+      Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
+
+  // Set matplotlib backend
   auto mpl = MantidQt::Widgets::Common::Python::NewRef(
       PyImport_ImportModule("matplotlib"));
   mpl.attr("use")("Agg");
 }
 } // namespace
 
-class PlotterTest : public CxxTest::TestSuite {
+class PlotterTestQt5 : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PlotterTest *createSuite() { return new PlotterTest(); }
-  static void destroySuite(PlotterTest *suite) { delete suite; }
+  static PlotterTestQt5 *createSuite() { return new PlotterTestQt5(); }
+  static void destroySuite(PlotterTestQt5 *suite) { delete suite; }
 
   void setUp() override {
     Mantid::API::FrameworkManager::Instance();
     setMatplotlibBackend();
   }
+
+  void tearDown() override { Py_Finalize(); }
 
   void testReflectometryPlot() {
     // Just test that it doesn't segfault when plotting as nothing is returned
