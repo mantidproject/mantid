@@ -8,6 +8,12 @@
 #define TIMECONTROLWIDGET_H_
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+
+// The Windows SDK defines an ERROR macro in um\wingdi.h that conflicts
+// with the definition of a enum value in pqOutputWidget.h
+#if defined(_WIN32) && defined(ERROR)
+#undef ERROR
+#endif
 #include "ui_TimeControlWidget.h"
 
 namespace Mantid {
