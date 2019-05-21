@@ -12,6 +12,10 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+New Algorithms
+##############
+- New algorithm :ref:`SaveSampleEnvironmentAndShape <algm-SaveSampleEnvironmentAndShape>` to save out a sample shape and environment as a single STL file, this can be used to save out pieces with a set rotation or scale, or to assemble multiple stl files into one for viewing purposes.
+
 Improvements
 ############
 
