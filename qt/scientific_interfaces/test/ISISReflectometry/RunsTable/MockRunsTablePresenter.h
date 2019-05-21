@@ -8,7 +8,6 @@
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
 #include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
-#include "DllConfig.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <gmock/gmock.h>
 

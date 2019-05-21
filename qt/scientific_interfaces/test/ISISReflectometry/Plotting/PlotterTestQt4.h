@@ -16,7 +16,6 @@ public:
   static PlotterTest *createSuite() { return new PlotterTest(); }
   static void destroySuite(PlotterTest *suite) { delete suite; }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   void testReflectometryPlot() {
     MockMainWindowView mainWindow;
     auto plotter = Plotter(&mainWindow);
@@ -38,5 +37,4 @@ public:
 
     plotter.runPython(testCode);
   }
-#endif
 };

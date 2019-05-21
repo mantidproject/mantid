@@ -948,6 +948,11 @@ set(QT5_TEST_FILES
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
     test/InterfaceManagerTest.h
+    test/Batch/BuildSubtreeItemsTest.h
+    test/Batch/ExtractSubtreesTest.h
+    test/Batch/FindSubtreeRootsTest.h
+    test/Batch/QtAdaptedModelTest.h
+    test/Batch/RowLocationTest.h
     test/AlgorithmProgress/AlgorithmProgressPresenterTest.h
     test/AlgorithmProgress/AlgorithmProgressDialogPresenterTest.h
     test/WorkspacePresenter/ADSAdapterTest.h

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_MOCKRUNSVIEW_H_
 #define MANTID_CUSTOMINTERFACES_MOCKRUNSVIEW_H_
-#include "DllConfig.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTableView.h"
 #include "MantidKernel/WarningSuppressions.h"

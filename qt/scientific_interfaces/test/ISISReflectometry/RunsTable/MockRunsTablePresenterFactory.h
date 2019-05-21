@@ -9,7 +9,6 @@
 #include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "../ReflMockObjects.h"
-#include "DllConfig.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MockRunsTablePresenter.h"
 #include <gmock/gmock.h>
@@ -26,7 +25,11 @@ public:
       : RunsTablePresenterFactory(instruments, thetaTolerance, plotter) {}
   std::unique_ptr<IRunsTablePresenter>
   operator()(IRunsTableView *view) const override {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     Plotter plotter(nullptr);
+#else
+    Plotter plotter;
+#endif
     return Mantid::Kernel::make_unique<MockRunsTablePresenter>(
         view, m_instruments, m_thetaTolerance, ReductionJobs(), plotter);
   }
