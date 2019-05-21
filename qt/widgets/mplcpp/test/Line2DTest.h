@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
+using namespace MantidQt::Widgets::Common;
 
 class Line2DTest : public CxxTest::TestSuite {
 public:

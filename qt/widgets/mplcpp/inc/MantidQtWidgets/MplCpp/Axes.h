@@ -18,9 +18,9 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-class MANTID_MPLCPP_DLL Axes : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Axes : public Common::Python::InstanceHolder {
 public:
-  explicit Axes(Python::Object obj);
+  explicit Axes(Common::Python::Object obj);
 
   /// @name Formatting
   /// @{

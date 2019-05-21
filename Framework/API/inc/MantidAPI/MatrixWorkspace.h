@@ -430,7 +430,8 @@ public:
 
   std::string YUnit() const;
   void setYUnit(const std::string &newUnit);
-  std::string YUnitLabel() const;
+  std::string YUnitLabel(bool useLatex = false,
+                         bool plotAsDistribution = false) const;
   void setYUnitLabel(const std::string &newLabel);
 
   /// Are the Y-values dimensioned?

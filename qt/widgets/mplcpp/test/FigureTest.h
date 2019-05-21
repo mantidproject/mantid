@@ -15,7 +15,7 @@
 using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+using namespace MantidQt::Widgets::Common;
 
 class FigureTest : public CxxTest::TestSuite {
 public:

@@ -10,7 +10,8 @@
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from qtpy.QtCore import Qt
-from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT as NavigationToolbar
+from mantidqt.MPLwidgets import FigureCanvas
+from .toolbar import SliceViewerNavigationToolbar
 from matplotlib.figure import Figure
 from .dimensionwidget import DimensionWidget
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
@@ -45,7 +46,8 @@ class SliceViewerView(QWidget):
         self.mpl_layout.addWidget(self.colorbar)
 
         # MPL toolbar
-        self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+        self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
+        self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
 
         # layout
         self.layout = QVBoxLayout(self)
@@ -90,6 +92,10 @@ class SliceViewerView(QWidget):
         """
         self.im.set_data(data.T)
         self.colorbar.update_clim()
+
+    def toggle_grid(self):
+        self.ax.grid()
+        self.canvas.draw_idle()
 
     def closeEvent(self, event):
         self.deleteLater()

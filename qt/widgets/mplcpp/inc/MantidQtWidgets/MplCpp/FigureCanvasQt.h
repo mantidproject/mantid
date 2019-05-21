@@ -24,7 +24,7 @@ namespace MplCpp {
  * https://matplotlib.org/examples/user_interfaces/embedding_in_qt5.html
  */
 class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
-                                         public Python::InstanceHolder {
+                                         public Common::Python::InstanceHolder {
   Q_OBJECT
 public:
   FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);

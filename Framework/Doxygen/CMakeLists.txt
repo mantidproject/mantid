@@ -1,5 +1,5 @@
-set(USE_DOT OFF
-    CACHE BOOL "Use dot if found on the system for doxygen. Can be slow.")
+option(USE_DOT
+       "Use dot if found on the system for doxygen. Can be slow.")
 
 if(DOXYGEN_FOUND)
   # check for dot
