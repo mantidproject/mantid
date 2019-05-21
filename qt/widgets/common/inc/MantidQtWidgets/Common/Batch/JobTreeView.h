@@ -43,7 +43,7 @@ public:
                          std::unique_ptr<HintStrategy> hintStrategy) override;
   void setHintsForColumn(int column, HintStrategy *hintStrategy) override;
 
-  void subscribe(JobTreeViewSubscriber &subscriber) override;
+  void subscribe(JobTreeViewSubscriber *subscriber) override;
 
   RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
                                std::vector<Cell> const &rowText) override;
@@ -171,10 +171,6 @@ private:
   FilteredTreeModel m_filteredModel;
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  int m_selectionChangedCalled;
-#endif
 };
 } // namespace Batch
 } // namespace MantidWidgets

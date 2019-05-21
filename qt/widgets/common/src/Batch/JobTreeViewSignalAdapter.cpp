@@ -15,7 +15,7 @@ JobTreeViewSignalAdapter::JobTreeViewSignalAdapter(JobTreeView &view,
   qRegisterMetaType<RowLocation>("MantidQt::MantidWidgets::Batch::RowLocation");
   qRegisterMetaType<std::vector<RowLocation>>(
       "std::vector<MantidQt::MantidWidgets::Batch::RowLocation>");
-  view.subscribe(*this);
+  view.subscribe(this);
 }
 
 void JobTreeViewSignalAdapter::notifyCellTextChanged(

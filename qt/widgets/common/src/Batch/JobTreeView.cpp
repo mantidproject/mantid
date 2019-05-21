@@ -22,13 +22,11 @@ namespace Batch {
 
 JobTreeView::JobTreeView(QStringList const &columnHeadings,
                          Cell const &emptyCellStyle, QWidget *parent)
-    : QTreeView(parent), m_mainModel(0, columnHeadings.size(), this),
+    : QTreeView(parent), m_notifyee(nullptr),
+      m_mainModel(0, columnHeadings.size(), this),
       m_adaptedMainModel(m_mainModel, emptyCellStyle),
       m_filteredModel(RowLocationAdapter(m_mainModel), this),
       m_lastEdited(QModelIndex()) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_selectionChangedCalled = 0;
-#endif
   setModel(&m_mainModel);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -57,25 +55,9 @@ void JobTreeView::commitData(QWidget *editor) {
 void JobTreeView::selectionChanged(const QItemSelection &selected,
                                    const QItemSelection &deselected) {
   QTreeView::selectionChanged(selected, deselected);
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  if (!m_notifyee)
+    return;
   m_notifyee->notifySelectionChanged();
-#else
-  // This section is nessercary because in Qt5 it seems
-  // QTreeView/QAbstractItemView calls selectionChanged as a part of the the
-  // setModel method in the constructor. This is a problem because the
-  // m_notifyee is a dangling pointer at the point it is called. This causes a
-  // Segfault in Qt5 and therefore Workbench. The specific line in the Qt Source
-  // code is:
-  // Qt5 -
-  // https://code.woboq.org/qt5/qtbase/src/widgets/itemviews/qabstractitemview.cpp.html#812
-  // Qt4 -
-  // https://code.woboq.org/kde/qt4/src/gui/itemviews/qabstractitemview.cpp.html#750
-  if (m_selectionChangedCalled >= 2) {
-    m_notifyee->notifySelectionChanged();
-  } else {
-    ++m_selectionChangedCalled;
-  }
-#endif
 }
 
 void JobTreeView::filterRowsBy(std::unique_ptr<RowPredicate> predicate) {
@@ -316,8 +298,8 @@ void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
     resizeColumnToContents(i);
 }
 
-void JobTreeView::subscribe(JobTreeViewSubscriber &subscriber) {
-  m_notifyee = &subscriber;
+void JobTreeView::subscribe(JobTreeViewSubscriber *subscriber) {
+  m_notifyee = subscriber;
 }
 
 bool JobTreeView::hasEditorOpen() const { return m_lastEdited.isValid(); }

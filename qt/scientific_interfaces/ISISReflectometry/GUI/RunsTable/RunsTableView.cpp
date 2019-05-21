@@ -221,7 +221,7 @@ MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
 
 void RunsTableView::subscribe(RunsTableViewSubscriber *notifyee) {
   m_notifyee = notifyee;
-  m_jobs->subscribe(*notifyee);
+  m_jobs->subscribe(notifyee);
   connect(m_ui.processButton, SIGNAL(clicked(bool)), this,
           SLOT(onProcessPressed(bool)));
 }

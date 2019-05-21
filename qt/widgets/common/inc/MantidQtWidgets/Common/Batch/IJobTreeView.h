@@ -47,7 +47,7 @@ public:
   setHintsForColumn(int column, std::unique_ptr<HintStrategy> hintStrategy) = 0;
   virtual void setHintsForColumn(int column, HintStrategy *hintStrategy) = 0;
 
-  virtual void subscribe(JobTreeViewSubscriber &subscriber) = 0;
+  virtual void subscribe(JobTreeViewSubscriber *subscriber) = 0;
 
   virtual RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
                                        std::vector<Cell> const &rowText) = 0;
