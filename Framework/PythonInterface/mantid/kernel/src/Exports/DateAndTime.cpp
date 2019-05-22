@@ -81,6 +81,13 @@ void export_DateAndTime() {
       .def(self - self);
 }
 
+long time_duration_total_nanoseconds(time_duration &self) {
+  PyErr_Warn(
+      PyExc_DeprecationWarning,
+      ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  return self.total_nanoseconds();
+}
+
 void export_time_duration() {
   class_<time_duration>("time_duration", no_init)
       .def("hours", &time_duration::hours, arg("self"),
@@ -99,7 +106,10 @@ void export_time_duration() {
            arg("self"),
            "Get the total number of microseconds truncating any remaining "
            "digits")
-      .def("total_nanoseconds", &time_duration::total_nanoseconds, arg("self"),
+      .def("total_nanoseconds", &time_duration_total_nanoseconds, arg("self"),
+           "Get the total number of nanoseconds truncating any remaining "
+           "digits")
+      .def("totalNanoseconds", &time_duration::total_nanoseconds, arg("self"),
            "Get the total number of nanoseconds truncating any remaining "
            "digits");
 }
