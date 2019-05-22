@@ -157,14 +157,7 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   // Use a different read method if the string is of variable length type
   if (dataType.isVariableStr()) {
     H5std_string buffer;
-    // Need to check for old versions of hdf5
-    if (Hdf5Version::checkVariableLengthStringSupport()) {
-      data.read(buffer, dataType, data.getSpace());
-    } else {
-      throw std::runtime_error("NexusGeometryParser::get1DStringDataset: Only "
-                               "versions 1.8.16 + of hdf5 support the variable "
-                               "string feature");
-    }
+    data.read(buffer, dataType, data.getSpace());
     return buffer;
   } else {
     auto nCharacters = dataType.getSize();
