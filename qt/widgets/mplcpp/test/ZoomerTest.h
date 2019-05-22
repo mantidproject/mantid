@@ -14,7 +14,7 @@
 
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Zoomer;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+using namespace MantidQt::Widgets::Common;
 
 class ZoomerTest : public CxxTest::TestSuite {
 public:

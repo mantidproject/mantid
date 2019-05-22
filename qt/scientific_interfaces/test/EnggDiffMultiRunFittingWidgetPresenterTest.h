@@ -45,7 +45,7 @@ public:
     auto presenter = setUpPresenter();
     const auto ws = createSampleWorkspace();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockModel, addFittedPeaks(runLabel, ws)).Times(1);
 
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
@@ -70,7 +70,7 @@ public:
     auto presenter = setUpPresenter();
     const API::MatrixWorkspace_sptr ws = createSampleWorkspace();
     addBankID(ws, 2);
-    const RunLabel runLabel(0, 2);
+    const RunLabel runLabel("0", 2);
 
     const std::vector<RunLabel> workspaceLabels({runLabel});
     EXPECT_CALL(*m_mockModel, getAllWorkspaceLabels())
@@ -87,7 +87,7 @@ public:
     const API::MatrixWorkspace_sptr ws = createSampleWorkspace();
     addBankID(ws, 2);
 
-    const RunLabel runLabel(0, 2);
+    const RunLabel runLabel("0", 2);
     const std::vector<RunLabel> workspaceLabels({runLabel});
     ON_CALL(*m_mockModel, getAllWorkspaceLabels())
         .WillByDefault(Return(workspaceLabels));
@@ -100,7 +100,7 @@ public:
   void test_getFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockModel, getFittedPeaks(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
@@ -112,7 +112,7 @@ public:
   void test_getFocusedRun() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockModel, getFocusedRun(runLabel))
         .Times(1)
         .WillOnce(Return(boost::none));
@@ -124,7 +124,7 @@ public:
   void test_selectValidRunWithoutFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -149,7 +149,7 @@ public:
   void test_selectRunInvalid() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -167,7 +167,7 @@ public:
   void test_selectValidRunWithFittedPeaks() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     ON_CALL(*m_mockView, getSelectedRunLabel()).WillByDefault(Return(runLabel));
 
     const auto sampleWorkspace = createSampleWorkspace();
@@ -202,7 +202,7 @@ public:
   void test_plotPeaksStateChangedUpdatesPlot() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -241,7 +241,7 @@ public:
   void test_removeRun() {
     auto presenter = setUpPresenter();
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
         .WillOnce(Return(runLabel));
@@ -285,7 +285,7 @@ public:
 
   void test_plotToSeparateWindowValidFocusedRunNoFittedPeaks() {
     auto presenter = setUpPresenter();
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
 
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)
@@ -320,7 +320,7 @@ public:
 
   void test_plotToSeparateWindowWithFittedPeaks() {
     auto presenter = setUpPresenter();
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
 
     EXPECT_CALL(*m_mockView, getSelectedRunLabel())
         .Times(1)

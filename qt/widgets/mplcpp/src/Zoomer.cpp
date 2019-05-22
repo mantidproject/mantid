@@ -8,6 +8,8 @@
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
+using namespace MantidQt::Widgets::Common;
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
