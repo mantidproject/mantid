@@ -96,7 +96,7 @@ public:
 
     ConcreteVectorDblParamParser parser;
     TSM_ASSERT_THROWS("No successor, so should throw!",
-                      parser.createParameter(pRootElem), std::runtime_error);
+                      parser.createParameter(pRootElem), const std::runtime_error &);
   }
 
   DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double)
@@ -161,7 +161,7 @@ public:
     ConcreteVectorBoolParamParser parser;
     TSM_ASSERT_THROWS("Should throw since delegation is not possible.",
                       parser.createWithoutDelegation(pRootElem),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   void testCreateWithoutDelegation() {

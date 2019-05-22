@@ -48,7 +48,7 @@ public:
 
   void testConstructWithNonArtistThrowsInvalidArgument() {
     Python::Object none;
-    TS_ASSERT_THROWS(Artist artist(none), std::invalid_argument);
+    TS_ASSERT_THROWS(Artist artist(none), const std::invalid_argument &);
   }
 };
 

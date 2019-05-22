@@ -61,7 +61,7 @@ public:
     TS_ASSERT_EQUALS(creator.m_matrixWorkspace->getNumberHistograms(), 5);
 
     TS_ASSERT_THROWS(creator.setMatrixWorkspace(MatrixWorkspace_sptr()),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testGetDomainSize() {
@@ -85,7 +85,7 @@ public:
   void testHistogramIsUsable() {
     TestableSeqDomainSpectrumCreator creator(nullptr, "");
 
-    TS_ASSERT_THROWS(creator.histogramIsUsable(0), std::invalid_argument);
+    TS_ASSERT_THROWS(creator.histogramIsUsable(0), const std::invalid_argument &);
 
     // Workspace with 2 histograms, one of which is masked (No. 0)
     std::set<int64_t> masked;

@@ -48,13 +48,13 @@ public:
   void
   test_That_Constructor_Throws_Invalid_Argument_On_Giving_A_Null_Instrument() {
     TS_ASSERT_THROWS(new InstrumentRayTracer(boost::shared_ptr<Instrument>()),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
   test_That_Constructor_Throws_Invalid_Argument_On_Giving_An_Instrument_With_No_Source() {
     Instrument_sptr testInst(new Instrument("empty"));
-    TS_ASSERT_THROWS(new InstrumentRayTracer(testInst), std::invalid_argument);
+    TS_ASSERT_THROWS(new InstrumentRayTracer(testInst), const std::invalid_argument &);
   }
 
   void

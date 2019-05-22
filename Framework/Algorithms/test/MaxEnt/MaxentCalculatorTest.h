@@ -63,25 +63,25 @@ public:
     // Empty image
     TS_ASSERT_THROWS(
         calculator.iterate(vec, vec, emptyVec, bkg, emptyVec, emptyVec),
-        std::invalid_argument);
+        const std::invalid_argument &);
     // Empty errors
     TS_ASSERT_THROWS(
         calculator.iterate(vec, emptyVec, vec, bkg, emptyVec, emptyVec),
-        std::invalid_argument);
+        const std::invalid_argument &);
     // Empty data
     TS_ASSERT_THROWS(
         calculator.iterate(emptyVec, vec, vec, bkg, emptyVec, emptyVec),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // Bad background (should be positive)
     TS_ASSERT_THROWS(calculator.iterate(vec, vec, vec, 0, emptyVec, emptyVec),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // Size mismatch between data and errors
     std::vector<double> vec2 = {0, 1, 1};
     TS_ASSERT_THROWS(
         calculator.iterate(vec, vec2, vec, bkg, emptyVec, emptyVec),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_size_mismatch_data_image() {
@@ -114,7 +114,7 @@ public:
     EXPECT_CALL(*entropy, secondDerivative(vec2, bkg)).Times(0);
     TS_ASSERT_THROWS(
         calculator.iterate(vec1, vec1, vec2, bkg, emptyVec, emptyVec),
-        std::runtime_error);
+        const std::runtime_error &);
 
     Mock::VerifyAndClearExpectations(entropy);
     Mock::VerifyAndClearExpectations(transform);
@@ -213,7 +213,7 @@ public:
     // But this is not: N * data.size() = image.size()
     TS_ASSERT_THROWS(
         calculator.iterate(vec2, vec2, vec1, bkg, emptyVec, emptyVec),
-        std::runtime_error);
+        const std::runtime_error &);
 
     Mock::VerifyAndClearExpectations(entropy);
     Mock::VerifyAndClearExpectations(transform);
@@ -228,12 +228,12 @@ public:
                          boost::shared_ptr<MockTransform>(transform));
 
     // When data were not loaded public methods should throw an exception
-    TS_ASSERT_THROWS(calculator.getReconstructedData(), std::runtime_error);
-    TS_ASSERT_THROWS(calculator.getImage(), std::runtime_error);
-    TS_ASSERT_THROWS(calculator.getSearchDirections(), std::runtime_error);
-    TS_ASSERT_THROWS(calculator.getQuadraticCoefficients(), std::runtime_error);
-    TS_ASSERT_THROWS(calculator.getAngle(), std::runtime_error);
-    TS_ASSERT_THROWS(calculator.getChisq(), std::runtime_error);
+    TS_ASSERT_THROWS(calculator.getReconstructedData(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getImage(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getSearchDirections(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getQuadraticCoefficients(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getAngle(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getChisq(), const std::runtime_error &);
   }
 
   void test_chisq_angle() {

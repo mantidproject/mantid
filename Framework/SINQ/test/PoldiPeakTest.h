@@ -38,7 +38,7 @@ public:
     TS_ASSERT_EQUALS(peak->fwhm(), 0.0);
     TS_ASSERT_EQUALS(peak->intensity(), 0.0);
 
-    TS_ASSERT_THROWS(PoldiPeak::create(0.0), std::domain_error)
+    TS_ASSERT_THROWS(PoldiPeak::create(0.0), const std::domain_error &)
   }
 
   void testCreateQIntensity() {
@@ -49,7 +49,7 @@ public:
     TS_ASSERT_EQUALS(intensity.error(), 0.0);
     TS_ASSERT_EQUALS(peak->d(), 2.0 * M_PI);
 
-    TS_ASSERT_THROWS(PoldiPeak::create(0.0, 23.0), std::domain_error);
+    TS_ASSERT_THROWS(PoldiPeak::create(0.0, 23.0), const std::domain_error &);
   }
 
   void testQDConversion() {

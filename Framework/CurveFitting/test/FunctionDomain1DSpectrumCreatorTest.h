@@ -39,12 +39,12 @@ public:
 
     TS_ASSERT_EQUALS(creator.m_workspaceIndexIsSet, false);
     TS_ASSERT(!creator.m_matrixWorkspace);
-    TS_ASSERT_THROWS(creator.getDomainSize(), std::invalid_argument);
+    TS_ASSERT_THROWS(creator.getDomainSize(), const std::invalid_argument &);
 
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
     TS_ASSERT_THROWS(creator.createDomain(domain, values),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testSetWorkspaceIndex() {
@@ -73,19 +73,19 @@ public:
     TestableFunctionDomain1DSpectrumCreator creator;
 
     // throws, because workspace and index are not set.
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), std::invalid_argument);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
 
     creator.setMatrixWorkspace(
         WorkspaceCreationHelper::create2DWorkspace123(10, 15));
     // still throws, since workspace index has not been set explicitly.
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), std::invalid_argument);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
 
     creator.setWorkspaceIndex(4);
     TS_ASSERT_THROWS_NOTHING(creator.throwIfWorkspaceInvalid());
 
     creator.setWorkspaceIndex(34);
     // throws also, because index is invalid
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), std::invalid_argument);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
   }
 
   void testGetDomainSize() {

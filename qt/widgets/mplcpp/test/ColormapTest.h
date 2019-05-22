@@ -46,7 +46,7 @@ public:
 
   void testConstructionWithNonColorMapObjectThrows() {
     TS_ASSERT_THROWS(Colormap cmap(MantidQt::Widgets::Common::Python::Object{}),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

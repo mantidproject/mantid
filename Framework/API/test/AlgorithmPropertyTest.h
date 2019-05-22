@@ -142,7 +142,7 @@ public:
     IAlgorithm_sptr adder =
         Mantid::API::AlgorithmFactory::Instance().create("SimpleSum", 1);
     TS_ASSERT_THROWS(testAlg.setProperty("CalculateStep", adder),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // Add the required property so now it should pass
     adder->initialize();
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("CalculateStep", adder));

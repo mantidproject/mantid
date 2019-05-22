@@ -482,7 +482,7 @@ public:
           mcpars.push_back(parmax);
           mcpars.push_back(parstepsize);
           parametermcs.emplace(parname, mcpars);
-        } catch (runtime_error err) {
+        } catch (const std::runtime_error &err) {
           ;
         }
       }

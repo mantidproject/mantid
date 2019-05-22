@@ -29,7 +29,7 @@ public:
   }
 
   void testContructorFailsWithInvalidIndexType() {
-    TS_ASSERT_THROWS(IndexTypeProperty("IndexType", 0), std::invalid_argument);
+    TS_ASSERT_THROWS(IndexTypeProperty("IndexType", 0), const std::invalid_argument &);
   }
 
   void testSingleIndexTypeAutomaticallySet() {

@@ -728,7 +728,7 @@ void EnggDiffFittingPresenter::plotAlignedWorkspace(
                             generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
     }
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "
            "engggui_fitting_focused_fitpeaks  workspace. Error "

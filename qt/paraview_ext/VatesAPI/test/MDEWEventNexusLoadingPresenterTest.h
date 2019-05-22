@@ -49,13 +49,13 @@ public:
     TSM_ASSERT_THROWS("Should throw if an empty file string is given.",
                       MDEWEventNexusLoadingPresenter(
                           Mantid::Kernel::make_unique<MockMDLoadingView>(), ""),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testConstructWithNullViewThrows() {
     TSM_ASSERT_THROWS("Should throw if a null view is given.",
                       MDEWEventNexusLoadingPresenter(nullptr, "some_file"),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testConstruct() {
@@ -125,21 +125,21 @@ public:
     MDEWEventNexusLoadingPresenter presenter(
         Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.hasTDimensionAvailable(), std::runtime_error);
+                      presenter.hasTDimensionAvailable(), const std::runtime_error &);
   }
 
   void testCallGetTDimensionValuesThrows() {
     MDEWEventNexusLoadingPresenter presenter(
         Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.getTimeStepValues(), std::runtime_error);
+                      presenter.getTimeStepValues(), const std::runtime_error &);
   }
 
   void testCallGetGeometryThrows() {
     MDEWEventNexusLoadingPresenter presenter(
         Mantid::Kernel::make_unique<MockMDLoadingView>(), getSuitableFile());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.getGeometryXML(), std::runtime_error);
+                      presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testGetWorkspaceTypeName() {

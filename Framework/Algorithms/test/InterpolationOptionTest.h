@@ -87,12 +87,12 @@ public:
   //----------------------------------------------------------------------------
   void test_set_From_String_Throws_With_Unknown_Type() {
     InterpolationOption interpolateOpt;
-    TS_ASSERT_THROWS(interpolateOpt.set("Unknown"), std::invalid_argument);
+    TS_ASSERT_THROWS(interpolateOpt.set("Unknown"), const std::invalid_argument &);
   }
 
   void test_set_From_String_Throws_With_Empty_String() {
     InterpolationOption interpolateOpt;
-    TS_ASSERT_THROWS(interpolateOpt.set(""), std::invalid_argument);
+    TS_ASSERT_THROWS(interpolateOpt.set(""), const std::invalid_argument &);
   }
 
   void test_validateInputSize() {

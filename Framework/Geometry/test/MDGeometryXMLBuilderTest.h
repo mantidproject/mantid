@@ -187,16 +187,16 @@ public:
     MDGeometryBuilderXML<StrictDimensionPolicy> builder;
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "x mapping, which is integrated.",
-                      builder.addXDimension(dimension), std::invalid_argument);
+                      builder.addXDimension(dimension), const std::invalid_argument &);
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "y mapping, which is integrated.",
-                      builder.addYDimension(dimension), std::invalid_argument);
+                      builder.addYDimension(dimension), const std::invalid_argument &);
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "z mapping, which is integrated.",
-                      builder.addZDimension(dimension), std::invalid_argument);
+                      builder.addZDimension(dimension), const std::invalid_argument &);
     TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the "
                       "t mapping, which is integrated.",
-                      builder.addTDimension(dimension), std::invalid_argument);
+                      builder.addTDimension(dimension), const std::invalid_argument &);
   }
 
   // Same as test above, but shouldn't throw.

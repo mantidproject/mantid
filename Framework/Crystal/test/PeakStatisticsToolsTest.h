@@ -134,8 +134,8 @@ public:
   void test_UniqueReflectionRemoveOutliersSigmaCrit() {
     UniqueReflection reflection(V3D(2, 3, 4));
     TS_ASSERT_THROWS_NOTHING(reflection.removeOutliers(3.0));
-    TS_ASSERT_THROWS(reflection.removeOutliers(0.0), std::invalid_argument);
-    TS_ASSERT_THROWS(reflection.removeOutliers(-10.0), std::invalid_argument);
+    TS_ASSERT_THROWS(reflection.removeOutliers(0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(reflection.removeOutliers(-10.0), const std::invalid_argument &);
   }
 
   void test_UniqueReflectionRemoveOutliersFewPeaks() {

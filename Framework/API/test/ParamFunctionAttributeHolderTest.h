@@ -51,9 +51,9 @@ public:
     using namespace Mantid::API;
     FakeParamFunctionAttributeHolder funct;
 
-    TS_ASSERT_THROWS(funct.getAttribute("NonExistent"), std::invalid_argument);
+    TS_ASSERT_THROWS(funct.getAttribute("NonExistent"), const std::invalid_argument &);
     TS_ASSERT_THROWS(funct.setAttribute("NonExistent", IFunction::Attribute(1)),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_hasAttribute_Returns_True_For_Existing_Attribute() {

@@ -37,7 +37,7 @@ public:
     M.identityMatrix();
     TS_ASSERT(!G.isDefined());
     TS_ASSERT_EQUALS(G.getR(), M);
-    TS_ASSERT_THROWS(G.setRotationAngle("Axis4", 3), std::invalid_argument);
+    TS_ASSERT_THROWS(G.setRotationAngle("Axis4", 3), const std::invalid_argument &);
     TS_ASSERT_THROWS_ANYTHING(G.setRotationAngle(1, 2));
     TS_ASSERT_EQUALS((G.axesInfo()).compare("No axis is found\n"), 0);
     TS_ASSERT(!G.isDefined());
@@ -45,7 +45,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(G.pushAxis("Axis2", 0., 0., 1., 30));
     TS_ASSERT(G.isDefined());
     TS_ASSERT_THROWS(G.pushAxis("Axis2", 0., 0., 1., 30),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(G.setRotationAngle("Axis2", 25));
     TS_ASSERT_THROWS_NOTHING(G.setRotationAngle(0, -17));
     TS_ASSERT_EQUALS(G.getAxis(1).angle, 25.);

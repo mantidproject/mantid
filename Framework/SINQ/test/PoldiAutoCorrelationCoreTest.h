@@ -203,9 +203,9 @@ public:
     TS_ASSERT_EQUALS(autoCorrelationCore.getElementFromIndex(3), 40);
 
     TS_ASSERT_THROWS(autoCorrelationCore.getElementFromIndex(10),
-                     std::range_error);
+                     const std::range_error &);
     TS_ASSERT_THROWS(autoCorrelationCore.getElementFromIndex(-10),
-                     std::range_error);
+                     const std::range_error &);
   }
 
   void testgetTofFromIndex() {
@@ -218,9 +218,10 @@ public:
     TS_ASSERT_EQUALS(autoCorrelationCore.getTofFromIndex(0), 345.0);
     TS_ASSERT_EQUALS(autoCorrelationCore.getTofFromIndex(3), 65765.2);
 
-    TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(10), std::range_error);
+    TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(10),
+                     const std::range_error &);
     TS_ASSERT_THROWS(autoCorrelationCore.getTofFromIndex(-10),
-                     std::range_error);
+                     const std::range_error &);
   }
 
   void testgetCounts() {

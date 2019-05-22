@@ -214,11 +214,11 @@ public:
       }
     }
 
-    TS_ASSERT_THROWS(localJacobian.set(20, 3, 30.0), std::out_of_range);
-    TS_ASSERT_THROWS(localJacobian.set(10, 4, 30.0), std::out_of_range);
+    TS_ASSERT_THROWS(localJacobian.set(20, 3, 30.0), const std::out_of_range &);
+    TS_ASSERT_THROWS(localJacobian.set(10, 4, 30.0), const std::out_of_range &);
 
-    TS_ASSERT_THROWS(localJacobian.get(20, 3), std::out_of_range);
-    TS_ASSERT_THROWS(localJacobian.get(10, 4), std::out_of_range);
+    TS_ASSERT_THROWS(localJacobian.get(20, 3), const std::out_of_range &);
+    TS_ASSERT_THROWS(localJacobian.get(10, 4), const std::out_of_range &);
   }
 
   void testLocalJacobianRawValues() {

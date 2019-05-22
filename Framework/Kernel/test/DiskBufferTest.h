@@ -511,7 +511,7 @@ public:
         freeSpaceBlocksArray + sizeof(freeSpaceBlocksArray) / sizeof(uint64_t));
 
     TS_ASSERT_THROWS(dbuf.setFreeSpaceVector(freeSpaceBlocksVector),
-                     std::length_error);
+                     const std::length_error &);
   }
 
   //// Test for setting the DiskBuffer with a zero sized vector

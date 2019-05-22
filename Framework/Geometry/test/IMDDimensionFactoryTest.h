@@ -110,39 +110,39 @@ public:
   }
 
   void testPassInvalidString() {
-    TS_ASSERT_THROWS(createDimension(""), std::invalid_argument);
-    TS_ASSERT_THROWS(createDimension("garbage"), std::invalid_argument);
+    TS_ASSERT_THROWS(createDimension(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(createDimension("garbage"), const std::invalid_argument &);
 
     std::string missingID =
         constructNonReciprocalDimensionXMLString().erase(10, 8);
-    TS_ASSERT_THROWS(createDimension(missingID), std::invalid_argument);
+    TS_ASSERT_THROWS(createDimension(missingID), const std::invalid_argument &);
     std::string missingName =
         constructNonReciprocalDimensionXMLString().erase(19, 19);
-    TS_ASSERT_THROWS(createDimension(missingName), std::invalid_argument);
+    TS_ASSERT_THROWS(createDimension(missingName), const std::invalid_argument &);
     std::string missingUpperBounds =
         constructNonReciprocalDimensionXMLString().erase(38, 30);
     TS_ASSERT_THROWS(createDimension(missingUpperBounds),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     std::string missingUpperBoundsValue =
         constructNonReciprocalDimensionXMLString().erase(51, 3);
     TS_ASSERT_THROWS(createDimension(missingUpperBoundsValue),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     std::string missingLowerBounds =
         constructNonReciprocalDimensionXMLString().erase(68, 28);
     TS_ASSERT_THROWS(createDimension(missingLowerBounds),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     std::string missingLowerBoundsValue =
         constructNonReciprocalDimensionXMLString().erase(81, 1);
     TS_ASSERT_THROWS(createDimension(missingLowerBoundsValue),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     std::string missingNumberOfBins =
         constructNonReciprocalDimensionXMLString().erase(96, 30);
     TS_ASSERT_THROWS(createDimension(missingNumberOfBins),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     std::string missingNumberOfBinsValue =
         constructNonReciprocalDimensionXMLString().erase(110, 1);
     TS_ASSERT_THROWS(createDimension(missingNumberOfBins),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testExtractFrame() {

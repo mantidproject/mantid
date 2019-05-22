@@ -22,9 +22,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class BasicHKLFiltersTest : public CxxTest::TestSuite {
 public:
@@ -39,13 +39,16 @@ public:
     UnitCell cell(10., 10., 10.);
 
     TS_ASSERT_THROWS_NOTHING(HKLFilterDRange dFilter(cell, 1.0));
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, -1.0), std::range_error);
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 0.0), std::range_error);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, -1.0),
+                     const std::range_error &);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 0.0),
+                     const std::range_error &);
 
     TS_ASSERT_THROWS_NOTHING(HKLFilterDRange dFilter(cell, 1.0, 2.0));
-    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, 0.5), std::range_error);
+    TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, 0.5),
+                     const std::range_error &);
     TS_ASSERT_THROWS(HKLFilterDRange dFilter(cell, 1.0, -0.5),
-                     std::range_error);
+                     const std::range_error &);
   }
 
   void testHKLFilterDRangeDescription() {
@@ -73,7 +76,8 @@ public:
 
   void testHKLFilterSpaceGroupConstructor() {
     SpaceGroup_const_sptr invalid;
-    TS_ASSERT_THROWS(HKLFilterSpaceGroup sgFilter(invalid), std::runtime_error);
+    TS_ASSERT_THROWS(HKLFilterSpaceGroup sgFilter(invalid),
+                     const std::runtime_error &);
 
     SpaceGroup_const_sptr sg =
         SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
@@ -108,7 +112,7 @@ public:
   void testHKLFilterStructureFactorConstructor() {
     StructureFactorCalculator_sptr invalid;
     TS_ASSERT_THROWS(HKLFilterStructureFactor sfFilter(invalid),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     StructureFactorCalculator_sptr mock =
         boost::make_shared<MockStructureFactorCalculator>();

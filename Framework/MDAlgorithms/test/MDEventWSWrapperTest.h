@@ -41,12 +41,12 @@ public:
 
     TSM_ASSERT_THROWS("too few dimensions",
                       pws = pWSWrap->createEmptyMDWS(TWS0),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS("too many dimensions",
                       pws = pWSWrap->createEmptyMDWS(TWS10),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS("dimensions have not been defined ",
-                      pWSWrap->nDimensions(), std::invalid_argument);
+                      pWSWrap->nDimensions(), const std::invalid_argument &);
 
     TSM_ASSERT_THROWS_NOTHING("should be fine",
                               pws = pWSWrap->createEmptyMDWS(TWS5));

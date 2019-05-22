@@ -77,8 +77,8 @@ public:
       ax1.setValue(i, static_cast<double>(i + 1));
     }
 
-    TS_ASSERT_THROWS(ax1.indexOfValue(0.9), std::out_of_range);  // start
-    TS_ASSERT_THROWS(ax1.indexOfValue(10.1), std::out_of_range); // end
+    TS_ASSERT_THROWS(ax1.indexOfValue(0.9), const std::out_of_range &);  // start
+    TS_ASSERT_THROWS(ax1.indexOfValue(10.1), const std::out_of_range &); // end
   }
 };
 

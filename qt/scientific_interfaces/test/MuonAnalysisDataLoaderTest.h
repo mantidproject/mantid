@@ -71,7 +71,7 @@ public:
                 << "HIFI";
     files << "emu00006473.nxs";
     MuonAnalysisDataLoader loader(DeadTimesType::None, instruments);
-    TS_ASSERT_THROWS(loader.loadFiles(files), std::runtime_error);
+    TS_ASSERT_THROWS(loader.loadFiles(files), const std::runtime_error &);
   }
 
   /// Test special case for DEVA files
@@ -132,7 +132,7 @@ public:
   void test_getDeadTimesTable_FromFile_NotPresent() {
     MuonAnalysisDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
     LoadResult result;
-    TS_ASSERT_THROWS(loader.getDeadTimesTable(result), std::runtime_error);
+    TS_ASSERT_THROWS(loader.getDeadTimesTable(result), const std::runtime_error &);
   }
 
   void test_getDeadTimesTable_FromFile() {
@@ -342,7 +342,7 @@ private:
 
     if (shouldThrow) {
       TS_ASSERT_THROWS(loader.setProcessAlgorithmProperties(alg, options),
-                       std::invalid_argument);
+                       const std::invalid_argument &);
     } else {
       TS_ASSERT_THROWS_NOTHING(
           loader.setProcessAlgorithmProperties(alg, options));

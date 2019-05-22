@@ -88,14 +88,14 @@ public:
 
     MatrixWorkspace_sptr invalidSpectra;
     TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidSpectra),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // matrix workspace with one bin
     MatrixWorkspace_sptr invalidBins =
         WorkspaceCreationHelper::create2DWorkspace123(1, 1);
 
     TS_ASSERT_THROWS(truncate.setTimeBinWidthFromWorkspace(invalidBins),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testCalculateBinCount() {
@@ -103,16 +103,16 @@ public:
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), std::invalid_argument);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setChopper(chopper);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), std::invalid_argument);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setTimeBinWidth(-10.0);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), std::invalid_argument);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setTimeBinWidth(0.0);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), std::invalid_argument);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
 
     truncate.setTimeBinWidth(3.0);
 
@@ -135,7 +135,7 @@ public:
 
     // throws, because actual bin count is smaller than calculated bin count
     TS_ASSERT_THROWS(truncate.getMaximumTimeValue(calculatedBinCount),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     truncate.setActualBinCount(500);
     TS_ASSERT_EQUALS(truncate.getMaximumTimeValue(calculatedBinCount),
@@ -154,12 +154,12 @@ public:
 
     // throws, because actual bin count is smaller than calculated bin count
     TS_ASSERT_THROWS(truncate.getMinimumExtraTimeValue(calculatedBinCount),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // still throws - there are no extra bins.
     truncate.setActualBinCount(500);
     TS_ASSERT_THROWS(truncate.getMinimumExtraTimeValue(calculatedBinCount),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // this must work
     truncate.setActualBinCount(550);
@@ -193,7 +193,7 @@ public:
     truncate.setTimeBinWidthFromWorkspace(smallWorkspace);
 
     TS_ASSERT_THROWS(truncate.getCroppedWorkspace(smallWorkspace),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testGetExtraCountsWorkspace() {
@@ -223,7 +223,7 @@ public:
     truncate.setTimeBinWidthFromWorkspace(smallWorkspace);
 
     TS_ASSERT_THROWS(truncate.getExtraCountsWorkspace(smallWorkspace),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testGetWorkspaceBelowX() {

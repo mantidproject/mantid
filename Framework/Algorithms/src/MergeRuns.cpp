@@ -612,7 +612,7 @@ void MergeRuns::intersectionParams(const HistogramX &X1, size_t &i,
   }
   auto const overlapbins2 = std::distance(X2.cbegin(), iterX2);
   // We want to use whichever one has the larger bins (on average)
-  if (static_cast<decltype(overlapbins2)>(overlapbins1) < overlapbins2) {
+  if (overlapbins1 < static_cast<size_t>(overlapbins2)) {
     // In this case we want the rest of the bins from the first workspace.....
     for (; i < X1.size(); ++i) {
       params.emplace_back(X1[i] - X1[i - 1]);

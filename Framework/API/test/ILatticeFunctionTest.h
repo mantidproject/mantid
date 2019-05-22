@@ -70,11 +70,11 @@ public:
     EXPECT_CALL(wrongDomain, size()).WillRepeatedly(Return(1));
     FunctionValues values(wrongDomain);
 
-    TS_ASSERT_THROWS(fn.function(wrongDomain, values), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.function(wrongDomain, values), const std::invalid_argument &);
 
     MockJacobian jacobian;
     TS_ASSERT_THROWS(fn.functionDeriv(wrongDomain, jacobian),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

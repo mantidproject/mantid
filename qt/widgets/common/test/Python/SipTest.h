@@ -60,7 +60,7 @@ public:
     struct Foo;
     TS_ASSERT_THROWS(
         MantidQt::Widgets::Common::Python::extract<Foo>(nonSipType),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 };
 

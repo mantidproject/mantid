@@ -131,10 +131,10 @@ public:
   }
 
   void testEncodeOptionalBoolPropertyThrows() {
-    using Mantid::Kernel::Exception::NotImplementedError;
     using Mantid::Kernel::OptionalBool;
+    using Mantid::Kernel::Exception::NotImplementedError;
     OptionalBool truth{OptionalBool::True};
-    TS_ASSERT_THROWS(encodeAsJson(truth), NotImplementedError);
+    TS_ASSERT_THROWS(encodeAsJson(truth), const NotImplementedError &);
   }
 };
 

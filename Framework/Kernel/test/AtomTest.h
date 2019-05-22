@@ -37,8 +37,8 @@ public:
   }
 
   void testError() {
-    TS_ASSERT_THROWS(getAtom(1, 15), std::runtime_error);
-    TS_ASSERT_THROWS(getAtom("garbage"), std::runtime_error);
+    TS_ASSERT_THROWS(getAtom(1, 15), const std::runtime_error &);
+    TS_ASSERT_THROWS(getAtom("garbage"), const std::runtime_error &);
   }
 };
 

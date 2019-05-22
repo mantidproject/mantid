@@ -26,8 +26,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 using HistogramData::LinearGenerator;
 using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
@@ -90,7 +90,7 @@ public:
     // mess with the binning and the results change
     Workspace2D_sptr cloned(ws->clone());
     cloned->setHistogram(0, Points(0), Counts(0));
-    TS_ASSERT_THROWS(cloned->blocksize(), std::logic_error);
+    TS_ASSERT_THROWS(cloned->blocksize(), const std::logic_error &);
     TS_ASSERT(!(cloned->isCommonBins()));
     TS_ASSERT_EQUALS(cloned->size(), 45);
   }
@@ -103,8 +103,8 @@ public:
         nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
-    TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
-    TS_ASSERT_THROWS(ws->setX(nhist + 5, v), std::range_error);
+    TS_ASSERT_THROWS(ws->setX(-1, v), const std::range_error &);
+    TS_ASSERT_THROWS(ws->setX(nhist + 5, v), const std::range_error &);
   }
 
   void testSetX_cowptr() {
@@ -113,8 +113,8 @@ public:
         nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
-    TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
-    TS_ASSERT_THROWS(ws->setX(nhist + 5, v), std::range_error);
+    TS_ASSERT_THROWS(ws->setX(-1, v), const std::range_error &);
+    TS_ASSERT_THROWS(ws->setX(nhist + 5, v), const std::range_error &);
   }
 
   void testSetCounts_cowptr() {

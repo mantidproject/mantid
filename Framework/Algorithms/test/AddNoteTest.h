@@ -55,14 +55,14 @@ public:
     Mantid::Algorithms::AddNote alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""), const std::invalid_argument &);
   }
 
   void test_empty_value_not_allowed() {
     Mantid::Algorithms::AddNote alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""), const std::invalid_argument &);
   }
 
   void test_empty_time_is_allowed() {
@@ -77,7 +77,7 @@ public:
     run.addProperty<std::string>("Test Name", "Test");
     TS_ASSERT_THROWS(
         executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", "Test String"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_Init() {

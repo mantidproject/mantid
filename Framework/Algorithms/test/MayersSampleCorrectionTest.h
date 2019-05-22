@@ -82,14 +82,14 @@ public:
   void test_Input_Workspace_With_No_Instrument_Throws_Error() {
     auto noInstWS = createTestWorkspaceWithNoInstrument();
 
-    TS_ASSERT_THROWS(runAlgorithm(noInstWS, true), std::invalid_argument);
+    TS_ASSERT_THROWS(runAlgorithm(noInstWS, true), const std::invalid_argument &);
   }
 
   void test_InputWorkspace_With_No_Sample_Shape_Throws_Error() {
     auto noSampleShapeWS = createTestWorkspaceWithNoSampleShape();
 
     TS_ASSERT_THROWS(runAlgorithm(noSampleShapeWS, true),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

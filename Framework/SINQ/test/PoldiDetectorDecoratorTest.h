@@ -70,12 +70,12 @@ public:
   void testForwardMethodsInvalidDetector() {
     PoldiDetectorDecorator decorator;
 
-    TS_ASSERT_THROWS(decorator.twoTheta(0), std::runtime_error);
-    TS_ASSERT_THROWS(decorator.distanceFromSample(0), std::runtime_error);
-    TS_ASSERT_THROWS(decorator.elementCount(), std::runtime_error);
-    TS_ASSERT_THROWS(decorator.centralElement(), std::runtime_error);
-    TS_ASSERT_THROWS(decorator.availableElements(), std::runtime_error);
-    TS_ASSERT_THROWS(decorator.qLimits(1.0, 5.0), std::runtime_error);
+    TS_ASSERT_THROWS(decorator.twoTheta(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.distanceFromSample(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.elementCount(), const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.centralElement(), const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.availableElements(), const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.qLimits(1.0, 5.0), const std::runtime_error &);
   }
 };
 

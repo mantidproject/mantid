@@ -311,7 +311,7 @@ LineViewer
 
 public:
 
-void apply()   throw (std::runtime_error);
+void apply()   throw (const std::runtime_error &);
 %Docstring
 void LineViewer::apply()
 ------------------------
@@ -341,7 +341,7 @@ void LineViewer::showFull()
 
 
 //*WIKI* ==== Start/End Points ====
-void setStartXY(double x, double y)   throw (std::runtime_error);
+void setStartXY(double x, double y)   throw (const std::runtime_error &);
 %Docstring
 void LineViewer::setStartXY(double x, double y)
 -----------------------------------------------
@@ -355,7 +355,7 @@ void LineViewer::setStartXY(double x, double y)
 
 %End
 
-void setEndXY(double x, double y)   throw (std::runtime_error);
+void setEndXY(double x, double y)   throw (const std::runtime_error &);
 %Docstring
 void LineViewer::setEndXY(double x, double y)
 ---------------------------------------------
@@ -385,7 +385,7 @@ void LineViewer::setThickness(double width)
 
 %End
 
-void setThickness(int dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(int dim, double width)   throw (std::invalid_argument, const std::runtime_error &);
 %Docstring
 void LineViewer::setThickness(int dim, double width)
 ----------------------------------------------------
@@ -405,7 +405,7 @@ void LineViewer::setThickness(int dim, double width)
 
 %End
 
-void setThickness(const QString & dim, double width)   throw (std::invalid_argument, std::runtime_error);
+void setThickness(const QString & dim, double width)   throw (std::invalid_argument, const std::runtime_error &);
 %Docstring
 void LineViewer::setThickness(const QString & dim, double width)
 ----------------------------------------------------------------
@@ -447,7 +447,7 @@ double LineViewer::getPlanarWidth()
 
 
 //*WIKI* ==== Binning ====
-void setNumBins(int numBins)   throw (std::invalid_argument);
+void setNumBins(int numBins)   throw (const std::invalid_argument &);
 %Docstring
 void LineViewer::setNumBins(int numBins)
 ----------------------------------------
@@ -461,7 +461,7 @@ void LineViewer::setNumBins(int numBins)
 
 %End
 
-void setFixedBinWidthMode(bool fixedWidth, double binWidth)   throw (std::invalid_argument);
+void setFixedBinWidthMode(bool fixedWidth, double binWidth)   throw (const std::invalid_argument &);
 %Docstring
 void LineViewer::setFixedBinWidthMode(bool fixedWidth, double binWidth)
 -----------------------------------------------------------------------
@@ -670,7 +670,7 @@ SliceViewer
 
 public:
   //*WIKI* ==== Basics ====
-  void setWorkspace(const QString & wsName)   throw (std::runtime_error);
+  void setWorkspace(const QString & wsName)   throw (const std::runtime_error &);
 %Docstring
 void SliceViewer::setWorkspace(const QString & wsName)
 ------------------------------------------------------
@@ -708,7 +708,7 @@ void SliceViewer::showControls(bool visible)
 
 %End
 
-  void openFromXML(const QString & xml)   throw (std::invalid_argument, std::runtime_error);
+  void openFromXML(const QString & xml)   throw (std::invalid_argument, const std::runtime_error &);
 %Docstring
 void SliceViewer::openFromXML(const QString & xml)
 --------------------------------------------------
@@ -803,7 +803,7 @@ void SliceViewer::toggleLineMode(bool lineMode)
 
 
   //*WIKI* ==== X/Y Dimension ====
-  void setXYDim(int indexX, int indexY)     throw (std::invalid_argument);
+  void setXYDim(int indexX, int indexY)     throw (const std::invalid_argument &);
 %Docstring
 void SliceViewer::setXYDim(int indexX, int indexY)
 --------------------------------------------------
@@ -822,7 +822,7 @@ void SliceViewer::setXYDim(int indexX, int indexY)
 
 %End
 
-  void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, std::runtime_error);
+  void setXYDim(const QString & dimX, const QString & dimY)     throw (std::invalid_argument, const std::runtime_error &);
 %Docstring
 void SliceViewer::setXYDim(const QString & dimX, const QString & dimY)
 ----------------------------------------------------------------------
@@ -861,7 +861,7 @@ int SliceViewer::getDimY()
 
 
   //*WIKI* ==== Slice Point ====
-  void setSlicePoint(int dim, double value)     throw (std::invalid_argument);
+  void setSlicePoint(int dim, double value)     throw (const std::invalid_argument &);
 %Docstring
 void SliceViewer::setSlicePoint(int dim, double value)
 ------------------------------------------------------
@@ -878,7 +878,7 @@ void SliceViewer::setSlicePoint(int dim, double value)
 
 %End
 
-  void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, std::runtime_error);
+  void setSlicePoint(const QString & dim, double value)   throw (std::invalid_argument, const std::runtime_error &);
 %Docstring
 void SliceViewer::setSlicePoint(const QString & dim, double value)
 ------------------------------------------------------------------
@@ -895,7 +895,7 @@ void SliceViewer::setSlicePoint(const QString & dim, double value)
 
 %End
 
-  double getSlicePoint(int dim) const     throw (std::invalid_argument);
+  double getSlicePoint(int dim) const     throw (const std::invalid_argument &);
 %Docstring
 double SliceViewer::getSlicePoint(int dim)
 ------------------------------------------
@@ -913,7 +913,7 @@ double SliceViewer::getSlicePoint(int dim)
 
 %End
 
-  double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, std::runtime_error);
+  double getSlicePoint(const QString & dim) const   throw (std::invalid_argument, const std::runtime_error &);
 %Docstring
 double SliceViewer::getSlicePoint(const QString & dim)
 ------------------------------------------------------
@@ -1022,7 +1022,7 @@ void SliceViewer::loadColorMap(QString filename)
 
 %End
 
-  void setColorScale(double min, double max, int type)      throw (std::invalid_argument);
+  void setColorScale(double min, double max, int type)      throw (const std::invalid_argument &);
 %Docstring
 void SliceViewer::setColorScale(double min, double max, int type)
 -----------------------------------------------------------------
@@ -1039,7 +1039,7 @@ void SliceViewer::setColorScale(double min, double max, int type)
 
 %End
 
-  void setColorScaleMin(double min)      throw (std::invalid_argument);
+  void setColorScaleMin(double min)      throw (const std::invalid_argument &);
 %Docstring
 void SliceViewer::setColorScaleMin(double min)
 ----------------------------------------------
@@ -1054,7 +1054,7 @@ void SliceViewer::setColorScaleMin(double min)
 
 %End
 
-  void setColorScaleMax(double max)      throw (std::invalid_argument);
+  void setColorScaleMax(double max)      throw (const std::invalid_argument &);
 %Docstring
 void SliceViewer::setColorScaleMax(double max)
 ----------------------------------------------
@@ -1207,7 +1207,7 @@ void SliceViewer::setColorBarAutoScale(bool autoscale)
 %End
 
   //*WIKI* ==== Dynamic Rebinning ====
-  void setRebinThickness(int dim, double thickness)   throw (std::runtime_error);
+  void setRebinThickness(int dim, double thickness)   throw (const std::runtime_error &);
 %Docstring
 void SliceViewer::setRebinThickness(int dim, double thickness)
 --------------------------------------------------------------
@@ -1222,7 +1222,7 @@ void SliceViewer::setRebinThickness(int dim, double thickness)
 
 %End
 
-  void setRebinNumBins(int xBins, int yBins)   throw (std::runtime_error);
+  void setRebinNumBins(int xBins, int yBins)   throw (const std::runtime_error &);
 %Docstring
 void SliceViewer::setRebinNumBins(int xBins, int yBins)
 -------------------------------------------------------
@@ -1237,7 +1237,7 @@ void SliceViewer::setRebinNumBins(int xBins, int yBins)
 
 %End
 
-  void setRebinMode(bool mode)   throw (std::runtime_error);
+  void setRebinMode(bool mode)   throw (const std::runtime_error &);
 %Docstring
 void SliceViewer::setRebinMode(bool mode)
 ------------------------------------------------------
@@ -1252,7 +1252,7 @@ void SliceViewer::setRebinMode(bool mode)
 
 %End
 
-  void refreshRebin()   throw (std::runtime_error);
+  void refreshRebin()   throw (const std::runtime_error &);
 %Docstring
 void SliceViewer::refreshRebin()
 --------------------------------
@@ -1323,7 +1323,7 @@ WidgetFactory
 public:
   static MantidQt::Factory::WidgetFactory* Instance();
   MantidQt::SliceViewer::SliceViewerWindow* createSliceViewerWindow(const QString& wsName, const QString& label);
-  MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (std::runtime_error);
+  MantidQt::SliceViewer::SliceViewerWindow* getSliceViewerWindow(const QString& wsName, const QString& label)   throw (const std::runtime_error &);
   void closeAllSliceViewerWindows();
 %Docstring
 void WidgetFactory::closeAllSliceViewerWindows()

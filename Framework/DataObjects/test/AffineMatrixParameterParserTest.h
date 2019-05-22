@@ -107,7 +107,7 @@ public:
     AffineMatrixParameterParser parser;
     AffineMatrixParameterParser otherParser;
     TS_ASSERT_THROWS(parser.setSuccessorParser(&otherParser),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testThrowsIfWrongXML() {
@@ -120,7 +120,7 @@ public:
 
     AffineMatrixParameterParser parser;
 
-    TS_ASSERT_THROWS(parser.createParameter(pRootElem), std::runtime_error);
+    TS_ASSERT_THROWS(parser.createParameter(pRootElem), const std::runtime_error &);
   }
 };
 #endif

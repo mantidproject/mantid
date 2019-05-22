@@ -129,7 +129,7 @@ public:
 
 public:
   ScriptEditor(const QString &lexer, const QFont &font = QFont(),
-               QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
+               QWidget *parent /TransferThis/ = 0) throw(const std::invalid_argument &);
 
   QString fileName() const;
   SIP_PYTUPLE getSelection() const;
@@ -145,7 +145,7 @@ public:
   QString selectedText() const;
   QString text() const;
 
-  void clearKeyBinding(const QString &keyCombination) throw(std::invalid_argument);
+  void clearKeyBinding(const QString &keyCombination) throw(const std::invalid_argument &);
   void enableAutoCompletion(AutoCompletionSource source);
   void disableAutoCompletion();
   void getCursorPosition(int *line, int *index) const;
@@ -344,7 +344,7 @@ class AlgorithmHistoryWindow : public QDialog {
 #include "MantidQtWidgets/Common/AlgorithmHistoryWindow.h"
 %End
 public:
-	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName) throw(std::invalid_argument);
+	AlgorithmHistoryWindow(QWidget *parent /TransferThis/, const QString &workspaceName) throw(const std::invalid_argument &);
 };
 
 // ---------------------------------

@@ -34,7 +34,7 @@ public:
 public:
   void test_Bare_Pointer_Throws_On_Creation() {
     TS_ASSERT_THROWS(instantiator().createUnwrappedInstance(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Shared_Pointer() {

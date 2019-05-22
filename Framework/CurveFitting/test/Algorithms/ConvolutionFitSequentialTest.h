@@ -64,21 +64,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_empty_startX_is_not_allowed() {
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""), const std::invalid_argument &);
   }
 
   void test_empty_endX_is_not_allowed() {
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""), const std::invalid_argument &);
   }
 
   void test_empty_specMin_is_not_allowed() {
@@ -86,7 +86,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMin", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_empty_specMax_is_not_allowed() {
@@ -94,7 +94,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMax", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_empty_maxIterations_is_not_allowed() {
@@ -102,23 +102,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_spectra_min_or_max_number_can_not_be_negative() {
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMin", "-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("SpecMax", "-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_max_iterations_can_not_be_a_negative_number() {
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", "-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_fit_function_that_does_not_contain_resolution_is_not_allowed() {
@@ -126,7 +126,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(
         alg.setProperty("Function", "function=test,name=Convolution"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_fit_function_that_does_not_contain_convolution_is_not_allowed() {
@@ -134,7 +134,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(
         alg.setProperty("Function", "function=test,name=Resolution"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   //------------------------- Execution cases ---------------------------

@@ -32,8 +32,8 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using Types::Core::DateAndTime;
 using std::size_t;
+using Types::Core::DateAndTime;
 
 // Anonymous namespace
 namespace {
@@ -156,9 +156,9 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
       return;
 
     tsLog->addValue(endTime, tsLog->lastValue());
-  } catch (Exception::NotFoundError) {
+  } catch (const Exception::NotFoundError &) {
     // pass
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // pass
   }
 }

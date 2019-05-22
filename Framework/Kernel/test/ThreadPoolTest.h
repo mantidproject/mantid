@@ -432,7 +432,7 @@ public:
       p.schedule(new TaskThatThrows());
     }
     // joinAll rethrows
-    TS_ASSERT_THROWS(p.joinAll(), std::runtime_error);
+    TS_ASSERT_THROWS(p.joinAll(), const std::runtime_error &);
     // And only one of the tasks actually ran (since we're on one core)
     TS_ASSERT_EQUALS(ThreadPoolTest_TaskThatThrows_counter, 1);
   }

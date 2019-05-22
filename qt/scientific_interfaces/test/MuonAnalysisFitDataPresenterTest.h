@@ -34,9 +34,9 @@ using Mantid::API::TableRow;
 using Mantid::API::Workspace;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -503,7 +503,7 @@ public:
     const std::string baseName("MuonSimulFit_UniqueLabelThatIsNotInTheADS");
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(baseName));
     TS_ASSERT_THROWS(m_presenter->handleFittedWorkspaces(baseName),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_extractFittedWorkspaces_defaultGroupName() {
@@ -569,7 +569,7 @@ public:
     const std::string baseName = "MuonSimulFit_UniqueLabelThatIsNotInTheADS";
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(baseName));
     TS_ASSERT_THROWS(m_presenter->extractFittedWorkspaces(baseName),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_checkAndUpdateFitLabel_Simultaneous_NoOverwrite_ShouldUpdate() {

@@ -51,11 +51,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 1, 2}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 0, 0}));
     TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(3), {3}),
-                     std::out_of_range);
+                     const std::out_of_range &);
   }
 
   void test_constructor_length_mismatch() {
-    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), std::runtime_error);
+    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), const std::runtime_error &);
   }
 
   void test_assign_componentInfo() {

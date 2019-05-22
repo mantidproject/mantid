@@ -182,7 +182,7 @@ public:
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     TSM_ASSERT_THROWS(
         "should throw runtime error on as spectra ID should be positive",
-        m_getAllEi.setProperty("Monitor1SpecID", -1), std::invalid_argument);
+        m_getAllEi.setProperty("Monitor1SpecID", -1), const std::invalid_argument &);
 
     m_getAllEi.setProperty("Monitor1SpecID", 1);
     m_getAllEi.setProperty("Monitor2SpecID", 2);
@@ -193,7 +193,7 @@ public:
 
     TSM_ASSERT_THROWS("should throw runtime error on validation as no "
                       "appropriate logs are defined",
-                      m_getAllEi.execute(), std::runtime_error);
+                      m_getAllEi.execute(), const std::runtime_error &);
     auto log_messages = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("Two logs should fail", log_messages.size(), 2);
     // add invalid property type
@@ -257,7 +257,7 @@ public:
     // Test sort log by run time.
     TSM_ASSERT_THROWS(
         "Attempt to get log without start/stop time set should fail",
-        m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"), std::runtime_error);
+        m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"), const std::runtime_error &);
 
     ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(90, 0),
                                         Types::Core::DateAndTime(10000, 0));
@@ -395,7 +395,7 @@ public:
     TSM_ASSERT_THROWS(
         "Should throw out of range",
         m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof),
-        std::runtime_error);
+        const std::runtime_error &);
 
     t0 = 1;
     guess_tof.resize(0);

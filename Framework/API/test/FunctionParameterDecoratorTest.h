@@ -23,8 +23,8 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ::testing::Mock;
 using ::testing::_;
+using ::testing::Mock;
 
 class FunctionParameterDecoratorTest;
 
@@ -137,13 +137,13 @@ public:
   void testSetDecoratedFunctionInvalidName() {
     TestableFunctionParameterDecorator fn;
     TS_ASSERT_THROWS(fn.setDecoratedFunction("INVALIDFUNCTION"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
     TS_ASSERT(!fn.getDecoratedFunction());
   }
 
   void testThrowIfNoFunctionSet() {
     TestableFunctionParameterDecorator fn;
-    TS_ASSERT_THROWS(fn.throwIfNoFunctionSet(), std::runtime_error);
+    TS_ASSERT_THROWS(fn.throwIfNoFunctionSet(), const std::runtime_error &);
     fn.setDecoratedFunction("FunctionWithParameters");
     TS_ASSERT_THROWS_NOTHING(fn.throwIfNoFunctionSet());
   }
@@ -172,10 +172,13 @@ public:
 
   void testGetSetParameter() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.setParameter(0, 2.0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.getParameter(0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.setParameter("Height", 2.0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.getParameter("Height"), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.setParameter(0, 2.0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.getParameter(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.setParameter("Height", 2.0),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.getParameter("Height"),
+                     const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -185,18 +188,19 @@ public:
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
     TS_ASSERT_EQUALS(fn->getParameter(0), decoratedFunction->getParameter(0));
     TS_ASSERT_EQUALS(fn->getParameter(0), 2.0);
-    TS_ASSERT_THROWS(fn->getParameter(10), std::out_of_range);
+    TS_ASSERT_THROWS(fn->getParameter(10), const std::out_of_range &);
 
     TS_ASSERT_THROWS_NOTHING(fn->setParameter("Height", 4.0));
     TS_ASSERT_EQUALS(fn->getParameter("Height"),
                      decoratedFunction->getParameter("Height"));
     TS_ASSERT_EQUALS(fn->getParameter("Height"), 4.0);
-    TS_ASSERT_THROWS(fn->getParameter("DoesNotExist"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn->getParameter("DoesNotExist"),
+                     const std::invalid_argument &);
   }
 
   void testExplicitelySet() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.isExplicitlySet(0), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.isExplicitlySet(0), const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -213,8 +217,8 @@ public:
 
   void testGetSetError() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.getError(0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.setError(0, 2.0), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.getError(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.setError(0, 2.0), const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -229,9 +233,9 @@ public:
 
   void testFixUnfixIsFixed() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.isFixed(0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.fix(0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.unfix(0), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.isFixed(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.fix(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.unfix(0), const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -287,11 +291,11 @@ public:
 
   void testTies() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.tie("Name", "a=b"), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.applyTies(), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.clearTies(), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.removeTie(0), std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.getTie(0), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.tie("Name", "a=b"), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.applyTies(), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.clearTies(), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.removeTie(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.getTie(0), const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -367,8 +371,9 @@ public:
   void testSetParameterDescription() {
     TestableFunctionParameterDecorator invalidFn;
     TS_ASSERT_THROWS(invalidFn.setParameterDescription(0, "None"),
-                     std::runtime_error);
-    TS_ASSERT_THROWS(invalidFn.parameterDescription(0), std::runtime_error);
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(invalidFn.parameterDescription(0),
+                     const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();
@@ -379,12 +384,12 @@ public:
     TS_ASSERT_EQUALS(fn->parameterDescription(0),
                      decoratedFunction->parameterDescription(0));
     TS_ASSERT_EQUALS(fn->parameterDescription(0), "None");
-    TS_ASSERT_THROWS(fn->parameterDescription(10), std::out_of_range);
+    TS_ASSERT_THROWS(fn->parameterDescription(10), const std::out_of_range &);
 
     TS_ASSERT_THROWS_NOTHING(
         fn->setParameterDescription("Height", "Something"));
     TS_ASSERT_THROWS(fn->setParameterDescription("DoesNotExist", "Something"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testBeforeDecoratedFunctionSetIsCalled() {
@@ -423,7 +428,7 @@ public:
     Workspace_const_sptr ws = boost::make_shared<const WorkspaceGroup>();
 
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.setWorkspace(ws), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.setWorkspace(ws), const std::runtime_error &);
 
     FunctionParameterDecorator_sptr fn =
         getFunctionParameterDecoratorGaussian();

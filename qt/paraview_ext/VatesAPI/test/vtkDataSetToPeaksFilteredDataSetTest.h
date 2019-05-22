@@ -206,14 +206,14 @@ public:
     vtkUnstructuredGrid *in = nullptr;
     auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     TS_ASSERT_THROWS(vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testThrowIfOutputNull() {
     auto in = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkUnstructuredGrid *out = nullptr;
     TS_ASSERT_THROWS(vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testExecThrowIfNoInit() {
@@ -221,7 +221,7 @@ public:
     auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
     FakeProgressAction updateProgress;
-    TS_ASSERT_THROWS(peaksFilter.execute(updateProgress), std::runtime_error);
+    TS_ASSERT_THROWS(peaksFilter.execute(updateProgress), const std::runtime_error &);
   }
 
   void testExecutionWithSingleSphericalPeakInQSample() {

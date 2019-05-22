@@ -306,7 +306,7 @@ public:
     if (expect_throw) {
       TS_ASSERT_THROWS(
           table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS),
-          std::runtime_error);
+          const std::runtime_error &);
     } else {
       TS_ASSERT_THROWS_NOTHING(
           table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS));

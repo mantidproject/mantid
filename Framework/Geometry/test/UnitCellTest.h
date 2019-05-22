@@ -23,7 +23,7 @@ class UnitCellTest : public CxxTest::TestSuite {
 public:
   void testInvalidParametersThrow() {
     TSM_ASSERT_THROWS("Should throw if matrix is not invertible!",
-                      UnitCell(0, 0, 0, 0, 0, 0), std::range_error);
+                      UnitCell(0, 0, 0, 0, 0, 0), const std::range_error &);
   }
 
   void test_Simple() {
@@ -120,7 +120,7 @@ public:
   }
   void test_UnitCellCrash() {
     TS_ASSERT_THROWS(UnitCell(10.4165, 3.4165, 10.4165, 30, 45, 80);
-                     , std::invalid_argument);
+                     , const std::invalid_argument &);
   }
 
   void test_printing() {

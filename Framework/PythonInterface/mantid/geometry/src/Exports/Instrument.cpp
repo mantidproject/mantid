@@ -35,17 +35,18 @@ void export_Instrument() {
            "represents the source")
 
       .def("getComponentByName",
-           (boost::shared_ptr<IComponent>(Instrument::*)(const std::string &)) &
+           (boost::shared_ptr<const IComponent>(CompAssembly::*)(
+               const std::string &, int) const) &
                Instrument::getComponentByName,
            (arg("self"), arg("cname")),
            "Returns the named :class:`~mantid.geometry.Component`")
 
-      .def(
-          "getDetector",
-          (boost::shared_ptr<IDetector>(Instrument::*)(const detid_t &) const) &
-              Instrument::getDetector,
-          (arg("self"), arg("detector_id")),
-          "Returns the :class:`~mantid.geometry.Detector` with the given ID")
+      .def("getDetector",
+           (boost::shared_ptr<const IDetector>(Instrument::*)(const detid_t &)
+                const) &
+               Instrument::getDetector,
+           (arg("self"), arg("detector_id")),
+           "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &

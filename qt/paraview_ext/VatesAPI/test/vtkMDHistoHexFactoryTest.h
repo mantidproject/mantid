@@ -85,13 +85,13 @@ public:
 
     TSM_ASSERT_THROWS(
         "No workspace, so should not be possible to complete initialization.",
-        factory.initialize(ws_sptr), std::invalid_argument);
+        factory.initialize(ws_sptr), const std::invalid_argument &);
   }
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
     vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
-    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate), const std::runtime_error &);
   }
 
   void testInitializationDelegates() {
@@ -136,7 +136,7 @@ public:
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor "
                       "was available.",
-                      factory.initialize(ws_sptr), std::runtime_error);
+                      factory.initialize(ws_sptr), const std::runtime_error &);
   }
 
   void testCreateDelegates() {

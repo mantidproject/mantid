@@ -118,9 +118,9 @@ public:
     auto alg = createAlgorithm();
 
     // Zero
-    TS_ASSERT_THROWS(alg->setProperty("Mass", 0.0), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("Mass", 0.0), const std::invalid_argument &);
     // Negative
-    TS_ASSERT_THROWS(alg->setProperty("Mass", -0.1), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("Mass", -0.1), const std::invalid_argument &);
   }
 
   void test_Input_Workspace_Not_In_TOF_Throws_Error() {
@@ -129,7 +129,7 @@ public:
     testWS->getAxis(0)->setUnit("Wavelength");
 
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Input_Workspace_In_TOF_Without_Instrument_Throws_Error() {
@@ -138,7 +138,7 @@ public:
     testWS->getAxis(0)->setUnit("TOF");
 
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -152,7 +152,7 @@ public:
     alg->setProperty("Mass", 1.0097);
     alg->setRethrows(true);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 };
 

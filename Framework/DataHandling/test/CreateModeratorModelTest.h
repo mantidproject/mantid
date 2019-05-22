@@ -46,14 +46,14 @@ public:
   void test_ModelType_Is_Not_Valid_By_Default() {
     IAlgorithm_sptr alg = createAlgorithm(m_inputName);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Algorithm_Throws_If_Moderator_Model_Is_Unknown() {
     IAlgorithm_sptr alg = createAlgorithm(m_inputName);
 
     TS_ASSERT_THROWS(alg->setPropertyValue("ModelType", "gibberish"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Setting_Parameter_String_Throws_If_It_Is_Empty() {
@@ -61,7 +61,7 @@ public:
         createAlgorithm(m_inputName, "IkedaCarpenterModerator");
 
     TS_ASSERT_THROWS(alg->setPropertyValue("Parameters", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void

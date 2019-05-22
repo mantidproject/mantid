@@ -166,7 +166,7 @@ public:
     Component q("Child", V3D(5, 6, 7), Quat(1, 1, 1, 1), &parent);
 
     TS_ASSERT_THROWS(parent.setDescription("descr"),
-                     Mantid::Kernel::Exception::NotImplementedError);
+                     const Mantid::Kernel::Exception::NotImplementedError &);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->addString(&q, "ChildMessage", "Message from a child");
@@ -294,7 +294,7 @@ public:
 
     // Rotate by angle+axis not implemented yet. Check for exception throw
     TS_ASSERT_THROWS(comp.rotate(45, V3D(1, 1, 1)),
-                     Mantid::Kernel::Exception::NotImplementedError);
+                     const Mantid::Kernel::Exception::NotImplementedError &);
   }
 
   void testRelativeRotate() {

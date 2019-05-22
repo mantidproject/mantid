@@ -47,13 +47,13 @@ public:
     input.pop_back();
 
     TS_ASSERT_THROWS(poldiPeakSearch.getNeighborSums(input),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testSetMinimumDistance() {
     TestablePoldiPeakSearch poldiPeakSearch;
 
-    TS_ASSERT_THROWS(poldiPeakSearch.setMinimumDistance(0), std::runtime_error);
+    TS_ASSERT_THROWS(poldiPeakSearch.setMinimumDistance(0), const std::runtime_error &);
 
     poldiPeakSearch.setMinimumDistance(2);
     TS_ASSERT_EQUALS(poldiPeakSearch.m_minimumDistance, 2);
@@ -197,7 +197,7 @@ public:
     std::list<std::vector<double>::const_iterator> tooManyPeaks(40);
     TS_ASSERT_THROWS(poldiPeakSearch.getNumberOfBackgroundPoints(
                          tooManyPeaks, correlationCounts),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testgetMedianFromSortedVector() {

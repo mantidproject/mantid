@@ -34,7 +34,7 @@ public:
     DiffPeaksWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     // Tolerance has to be positive.
-    TS_ASSERT_THROWS(alg.setProperty("Tolerance", -1.0), std::invalid_argument)
+    TS_ASSERT_THROWS(alg.setProperty("Tolerance", -1.0), const std::invalid_argument &)
   }
 
   // It shouldn't be a problem to subtract identical workspaces. You just get an

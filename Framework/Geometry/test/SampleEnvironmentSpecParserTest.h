@@ -246,13 +246,13 @@ public:
     std::string xml;
     std::istringstream instream(xml);
     SampleEnvironmentSpecParser parser;
-    TS_ASSERT_THROWS(parser.parse("name", instream), std::runtime_error);
+    TS_ASSERT_THROWS(parser.parse("name", instream), const std::runtime_error &);
   }
 
   void test_Root_Tag_Must_Be_EnvironmentSpec() {
     TS_ASSERT_THROWS(parseSpec("name", "<materials>"
                                        "</materials>"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Missing_Geometry_Tag_Under_Can_Throws_Error() {
@@ -281,7 +281,7 @@ public:
                                "  </containers>"
                                " </components>"
                                "</environmentspec>"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Missing_Can_ID_Throws_Error() {
@@ -310,7 +310,7 @@ public:
                                "  </containers>"
                                " </components>"
                                "</environmentspec>"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Missing_Material_For_Can_Throws_Error() {
@@ -339,7 +339,7 @@ public:
                                "  </containers>"
                                " </components>"
                                "</environmentspec>"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   //----------------------------------------------------------------------------

@@ -319,7 +319,7 @@ public:
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Container", "8mm"), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Environment_Args_Without_Container_Invalid() {
@@ -333,7 +333,7 @@ public:
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Name", m_envName), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Environment_Args_With_Empty_Strings_Invalid() {
@@ -347,12 +347,12 @@ public:
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Name", ""), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     args->removeProperty("Name");
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Container", ""), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Negative_FlatPlate_Dimensions_Give_Validation_Errors() {

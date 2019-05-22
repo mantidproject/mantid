@@ -110,12 +110,12 @@ public:
 
     ws->removeColumn("Group");
     TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     ws->addColumn("str", "Group1");
     ws->addColumn("str", "Group2");
     TS_ASSERT_THROWS(QTwoLevelTreeModel(ws, m_whitelist),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testConstructorOneRowTable() {
@@ -703,13 +703,13 @@ public:
 
     // Non-existent row
     TS_ASSERT_THROWS(model.isProcessed(10, model.index(0, 0)),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(model.isProcessed(-1, model.index(0, 0)),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // Non-existent group
-    TS_ASSERT_THROWS(model.isProcessed(10), std::invalid_argument);
-    TS_ASSERT_THROWS(model.isProcessed(-1), std::invalid_argument);
+    TS_ASSERT_THROWS(model.isProcessed(10), const std::invalid_argument &);
+    TS_ASSERT_THROWS(model.isProcessed(-1), const std::invalid_argument &);
 
     // Only the 1st row of 1st group and 2nd group should be highlighted
     TS_ASSERT_EQUALS(model.isProcessed(model.index(0, 0).row(), QModelIndex()),
@@ -729,7 +729,7 @@ public:
     auto rowValues = std::map<QString, QString>{{"Column1", "row_10"},
                                                 {"Column2", "row_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
-    TS_ASSERT_THROWS(model.transfer(rowsToTransfer), std::invalid_argument);
+    TS_ASSERT_THROWS(model.transfer(rowsToTransfer), const std::invalid_argument &);
   }
 
   void testTransferToExistingGroup() {

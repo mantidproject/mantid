@@ -72,23 +72,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg1.setPropertyValue("ScriptParams", "print 'hello world'"));
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     SubmitRemoteJob2 alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     // task name name missing
     TS_ASSERT_THROWS(alg2.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("TransactionID", "id001"));
     TS_ASSERT_THROWS_NOTHING(
         alg2.setPropertyValue("ScriptName", "test script"));
     TS_ASSERT_THROWS_NOTHING(
         alg2.setPropertyValue("ScriptParams", "print 'hello world'"));
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
 
     SubmitRemoteJob2 alg3;
@@ -99,9 +99,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("ScriptParams", "print 'hello world'"));
     TS_ASSERT_THROWS(alg3.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
 
     SubmitRemoteJob2 alg4;
@@ -114,7 +114,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg4.setPropertyValue("ScriptParams", "print 'hello world'"));
 
-    TS_ASSERT_THROWS(alg4.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg4.execute(), const std::runtime_error &);
     TS_ASSERT(!alg4.isExecuted());
 
     SubmitRemoteJob2 alg5;
@@ -125,9 +125,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg5.setPropertyValue("ScriptName", "test script"));
     TS_ASSERT_THROWS(alg5.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg5.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg5.execute(), const std::runtime_error &);
     TS_ASSERT(!alg5.isExecuted());
   }
 
@@ -135,26 +135,26 @@ public:
     SubmitRemoteJob2 s;
     TS_ASSERT_THROWS_NOTHING(s.initialize();)
     TS_ASSERT_THROWS(s.setPropertyValue("Compute", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("NumNodes", "anything"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(s.setPropertyValue("NumNodes", "-3"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(s.setPropertyValue("CoresPerNode", "anything"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(s.setPropertyValue("Task", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("Name", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("Transaction", "anything"),
-                     std::runtime_error);
-    TS_ASSERT_THROWS(s.setPropertyValue("ID", "anything"), std::runtime_error);
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(s.setPropertyValue("ID", "anything"), const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("ScriptName", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(s.setPropertyValue("Scrip", "any name"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("ScriptParams", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_propertiesOK() {

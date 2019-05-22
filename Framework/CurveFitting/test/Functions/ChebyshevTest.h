@@ -41,22 +41,22 @@ public:
     Chebyshev cheb;
     cheb.initialize();
 
-    TS_ASSERT_THROWS(cheb.setAttributeValue("A0", 3.3), std::invalid_argument);
-    TS_ASSERT_THROWS(cheb.setAttributeValue("n", -1), std::invalid_argument);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("A0", 3.3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("n", -1), const std::invalid_argument &);
   }
 
   void testZero() {
     Chebyshev cheb;
     cheb.initialize();
 
-    TS_ASSERT_THROWS(cheb.setAttributeValue("A1", 3.3), std::invalid_argument);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("A1", 3.3), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(cheb.setAttributeValue("n", 0));
   }
 
   void test_wrongStartEnd() {
     Chebyshev cheb;
     cheb.initialize();
-    TS_ASSERT_THROWS(cheb.getAttribute("AX"), std::invalid_argument);
+    TS_ASSERT_THROWS(cheb.getAttribute("AX"), const std::invalid_argument &);
     TS_ASSERT_EQUALS(cheb.getAttribute("StartX").asDouble(), -1.0);
     TS_ASSERT_EQUALS(cheb.getAttribute("EndX").asDouble(), 1.0);
 
@@ -71,7 +71,7 @@ public:
     FunctionDomain1DVector x(startx, endx, 10);
     FunctionValues y(x);
 
-    TS_ASSERT_THROWS(cheb.function(x, y), std::runtime_error);
+    TS_ASSERT_THROWS(cheb.function(x, y), const std::runtime_error &);
 
     startx = 10.0;
     endx = startx;
@@ -85,7 +85,7 @@ public:
     FunctionDomain1DVector x1(startx, endx, 100);
     FunctionValues y1(x1);
 
-    TS_ASSERT_THROWS(cheb.function(x1, y1), std::runtime_error);
+    TS_ASSERT_THROWS(cheb.function(x1, y1), const std::runtime_error &);
   }
 
   void testValuesWorkspace() {

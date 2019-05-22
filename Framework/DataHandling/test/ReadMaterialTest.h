@@ -350,7 +350,7 @@ public:
 
     ReadMaterial reader;
     reader.setMaterialParameters(params);
-    TS_ASSERT_THROWS(reader.buildMaterial(), std::runtime_error);
+    TS_ASSERT_THROWS(reader.buildMaterial(), const std::runtime_error &);
   }
 
 private:

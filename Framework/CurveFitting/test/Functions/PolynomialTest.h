@@ -39,13 +39,13 @@ public:
     Polynomial pol;
     pol.initialize();
 
-    TS_ASSERT_THROWS(pol.setParameter("X", 1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(pol.setParameter("X", 1.0), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(pol.setAttributeValue("n", 3));
-    TS_ASSERT_THROWS(pol.setParameter("A99", 0.0), std::invalid_argument);
+    TS_ASSERT_THROWS(pol.setParameter("A99", 0.0), const std::invalid_argument &);
 
     Polynomial pol2;
     pol2.initialize();
-    TS_ASSERT_THROWS(pol2.setAttributeValue("n", -1), std::invalid_argument);
+    TS_ASSERT_THROWS(pol2.setAttributeValue("n", -1), const std::invalid_argument &);
 
     Polynomial pol3;
     pol3.initialize();

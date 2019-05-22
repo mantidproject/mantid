@@ -40,12 +40,12 @@ public:
   }
 
   void testErrors() {
-    TS_ASSERT_THROWS(getMagneticIon("O", 2), std::runtime_error); // no such ion
+    TS_ASSERT_THROWS(getMagneticIon("O", 2), const std::runtime_error &); // no such ion
     TS_ASSERT_THROWS(getMagneticIon("Am", 12),
-                     std::runtime_error); // no such charge
+                     const std::runtime_error &); // no such charge
     TS_ASSERT_THROWS(getJL("Am", 12),
-                     std::runtime_error); // no such charge - pass to getJL
-    TS_ASSERT_THROWS(getJL("Am", 7, 3), std::runtime_error); // no such l
+                     const std::runtime_error &); // no such charge - pass to getJL
+    TS_ASSERT_THROWS(getJL("Am", 7, 3), const std::runtime_error &); // no such l
   }
 
   void test_Copied_Object_Has_Same_Attributes() {

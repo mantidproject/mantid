@@ -50,16 +50,16 @@ public:
 
   void test_nonpositive_order() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), std::invalid_argument);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), std::invalid_argument);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), const std::invalid_argument &);
   }
 
   void test_nbreak_too_small() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), std::invalid_argument);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), std::invalid_argument);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), const std::invalid_argument &);
     TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_set_uniform_break_points() {
@@ -124,7 +124,7 @@ public:
     inputBreaks[6] = 18.0;
     inputBreaks[7] = 30.0;
     TS_ASSERT_THROWS(bsp.setAttributeValue("BreakPoints", inputBreaks),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_set_wrong_startx_endx() {
@@ -145,7 +145,7 @@ public:
     FunctionDomain1DVector x(startx, endx, 100);
     FunctionValues y(x);
 
-    TS_ASSERT_THROWS(bsp.function(x, y), std::invalid_argument);
+    TS_ASSERT_THROWS(bsp.function(x, y), const std::invalid_argument &);
 
     startx = 10.0;
     endx = startx;
@@ -159,7 +159,7 @@ public:
     FunctionDomain1DVector x1(startx, endx, 100);
     FunctionValues y1(x1);
 
-    TS_ASSERT_THROWS(bsp.function(x1, y1), std::invalid_argument);
+    TS_ASSERT_THROWS(bsp.function(x1, y1), const std::invalid_argument &);
   }
 
   void test_create_with_function_factory_uniform() {

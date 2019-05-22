@@ -46,7 +46,7 @@ public:
   }
 
   void testCreate() {
-    TS_ASSERT_THROWS(factory.create("testEntry"), std::runtime_error)
+    TS_ASSERT_THROWS(factory.create("testEntry"), const std::runtime_error &)
     factory.subscribe<int>("testEntry");
     TS_ASSERT_THROWS_NOTHING(int_ptr i = factory.create("testEntry"));
     TS_ASSERT_THROWS_NOTHING(int_ptr i = factory.create("TESTENTRY"));
@@ -55,11 +55,11 @@ public:
 
   void testCreateCaseSensitive() {
     TS_ASSERT_THROWS(caseSensitiveFactory.create("testEntryCaseSensitive"),
-                     std::runtime_error)
+                     const std::runtime_error &)
     caseSensitiveFactory.subscribe<int>("testEntryCaseSensitive");
     TS_ASSERT_THROWS(
         int_ptr i = caseSensitiveFactory.create("testEntryCaseSENSITIVE"),
-        std::runtime_error); // case error on a case sensitive dynamic factory
+        const std::runtime_error &); // case error on a case sensitive dynamic factory
     TS_ASSERT_THROWS_NOTHING(
         int_ptr i2 = caseSensitiveFactory.create("testEntryCaseSensitive"));
     caseSensitiveFactory.unsubscribe("testEntryCaseSensitive");
@@ -67,7 +67,7 @@ public:
 
   void testCreateUnwrapped() {
     TS_ASSERT_THROWS(factory.createUnwrapped("testUnrappedEntry"),
-                     std::runtime_error)
+                     const std::runtime_error &)
     factory.subscribe<int>("testUnwrappedEntry");
     int *i = nullptr;
     TS_ASSERT_THROWS_NOTHING(i = factory.createUnwrapped("testUnwrappedEntry"));
@@ -82,13 +82,13 @@ public:
   void testCreateUnwrappedCaseSensitive() {
     TS_ASSERT_THROWS(
         caseSensitiveFactory.create("testUnrappedEntryCaseSensitive"),
-        std::runtime_error)
+        const std::runtime_error &)
     caseSensitiveFactory.subscribe<int>("testUnrappedEntryCaseSensitive");
     int *i = nullptr;
     TS_ASSERT_THROWS(
         i = caseSensitiveFactory.createUnwrapped(
             "testUnrappedentrycaseSENSITIVE"),
-        std::runtime_error); // case error on a case sensitive dynamic factory
+        const std::runtime_error &); // case error on a case sensitive dynamic factory
     TS_ASSERT_THROWS_NOTHING(i = caseSensitiveFactory.createUnwrapped(
                                  "testUnrappedEntryCaseSensitive"));
     delete i;
@@ -96,7 +96,7 @@ public:
   }
 
   void testSubscribeWithEmptyNameThrowsInvalidArgument() {
-    TS_ASSERT_THROWS(factory.subscribe<int>(""), std::invalid_argument);
+    TS_ASSERT_THROWS(factory.subscribe<int>(""), const std::invalid_argument &);
   }
 
   void
@@ -105,7 +105,7 @@ public:
         factory.subscribe("int", new Instantiator<int, int>));
     TS_ASSERT_THROWS(factory.subscribe("int", new Instantiator<int, int>,
                                        IntFactory::ErrorIfExists),
-                     std::runtime_error);
+                     const std::runtime_error &);
     factory.unsubscribe("int");
   }
 
@@ -135,7 +135,7 @@ public:
   }
 
   void testUnsubscribeByDefaultDoesNotNotify() {
-    TS_ASSERT_THROWS(factory.unsubscribe("tester"), std::runtime_error);
+    TS_ASSERT_THROWS(factory.unsubscribe("tester"), const std::runtime_error &);
     factory.subscribe<int>("tester");
     m_updateNoticeReceived = false;
     TS_ASSERT_THROWS_NOTHING(factory.unsubscribe("tester"));
@@ -163,7 +163,7 @@ public:
   void testGetKeys() {
     std::string testKey = "testGetKeys";
     // check it is not already present
-    TS_ASSERT_THROWS(factory.create(testKey), std::runtime_error)
+    TS_ASSERT_THROWS(factory.create(testKey), const std::runtime_error &)
     factory.subscribe<int>(testKey);
 
     std::vector<std::string> keys = factory.getKeys();
@@ -180,7 +180,7 @@ public:
   void testGetKeysRetainsCase() {
     std::string testKey = "testGetKeysRetainsCase";
     // check it is not already present
-    TS_ASSERT_THROWS(factory.create(testKey), std::runtime_error)
+    TS_ASSERT_THROWS(factory.create(testKey), const std::runtime_error &)
     factory.subscribe<int>(testKey);
 
     std::vector<std::string> keys = factory.getKeys();

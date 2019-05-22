@@ -82,13 +82,13 @@ public:
   void testIsText() { TS_ASSERT(!spectraAxis->isText()); }
 
   void testOperatorBrackets() {
-    TS_ASSERT_THROWS((*spectraAxis)(-1), Exception::IndexError);
-    TS_ASSERT_THROWS((*spectraAxis)(5), Exception::IndexError);
+    TS_ASSERT_THROWS((*spectraAxis)(-1), const Exception::IndexError &);
+    TS_ASSERT_THROWS((*spectraAxis)(5), const Exception::IndexError &);
   }
 
   void testSpectraNo() {
-    TS_ASSERT_THROWS(spectraAxis->spectraNo(-1), Exception::IndexError);
-    TS_ASSERT_THROWS(spectraAxis->spectraNo(5), Exception::IndexError);
+    TS_ASSERT_THROWS(spectraAxis->spectraNo(-1), const Exception::IndexError &);
+    TS_ASSERT_THROWS(spectraAxis->spectraNo(5), const Exception::IndexError &);
 
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_EQUALS(spectraAxis->spectraNo(i), i + 1);
@@ -117,8 +117,9 @@ public:
 
   // --------------------------------------- Failure cases --------------------
   void testIndexOfValue_Throws_out_of_range_error_If_Input_Not_In_Range() {
-    TS_ASSERT_THROWS(spectraAxis->indexOfValue(0.49), std::out_of_range);
-    TS_ASSERT_THROWS(spectraAxis->indexOfValue(20.), std::out_of_range);
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(0.49),
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(spectraAxis->indexOfValue(20.), const std::out_of_range &);
   }
 
 private:

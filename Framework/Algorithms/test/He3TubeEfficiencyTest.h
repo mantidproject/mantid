@@ -27,8 +27,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace std;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 namespace He3TubeEffeciencyHelper {
 void createWorkspace2DInADS(const std::string inputWS) {
@@ -145,11 +145,11 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setPropertyValue("TubePressure", "-10"),
-                     invalid_argument);
+                     const invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeThickness", "-0.08"),
-                     invalid_argument);
+                     const invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"),
-                     invalid_argument);
+                     const invalid_argument &);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
