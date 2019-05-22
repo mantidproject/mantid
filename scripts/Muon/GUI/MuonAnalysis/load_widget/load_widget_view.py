@@ -43,7 +43,6 @@ class LoadWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.multiple_loading_check)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
-        self.horizontal_layout.setMargin(0)
         self.tool_widget = QtWidgets.QWidget(self)
         self.tool_widget.setLayout(self.horizontal_layout)
 

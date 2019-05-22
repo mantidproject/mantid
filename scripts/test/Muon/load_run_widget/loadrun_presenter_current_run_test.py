@@ -50,7 +50,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
-        self.model.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], "currentRun.nxs", 1234))
+        self.model.load_workspace_from_filename = mock.Mock(return_value=([1, 2, 3], "currentRun.nxs", 1234, False))
         self.view.warning_popup = mock.Mock()
         self.view.disable_load_buttons = mock.Mock()
         self.view.enable_load_buttons = mock.Mock()
@@ -74,7 +74,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_load_current_run_loads_run_into_model(self):
         workspace = self.create_fake_workspace()
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "currentRun.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "currentRun.nxs"
+                                                                                       , False))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -87,7 +88,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_load_current_run_correctly_displays_run_if_load_successful(self):
         workspace = self.create_fake_workspace()
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
+                                                                                       False))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -105,7 +107,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
         # set up previous data
         workspace = self.create_fake_workspace()
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
+                                                                                       False))
         self.view.set_run_edit_text("1234")
         self.presenter.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
@@ -127,7 +130,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.presenter.handle_run_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 9999, "9999.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 9999, "9999.nxs",
+                                                                                       False))
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -140,7 +144,8 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     def test_load_current_run_displays_error_if_incrementing_past_current_run(self):
         # set up current run
         workspace = self.create_fake_workspace()
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=(workspace, 1234, "1234.nxs",
+                                                                                       False))
         self.view.set_run_edit_text("1234")
         self.presenter.handle_load_current_run()
         self.wait_for_thread(self.presenter._load_thread)

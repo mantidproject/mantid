@@ -1,5 +1,11 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 import six
 from mantid.py3compat import mock
@@ -19,12 +25,13 @@ def pair_name():
         name.append("pair_" + str(i+1))
     return name
 
+
 class PairingTablePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QtWidgets.QWidget()
 
         setup_context_for_tests(self)
 
@@ -211,10 +218,8 @@ class PairingTablePresenterTest(unittest.TestCase):
         invalid_names = ["", "@", "name!", "+-"]
 
         for invalid_name in invalid_names:
-            print(self.view.get_table_contents())
             self.view.pairing_table.setCurrentCell(0, 0)
             self.view.pairing_table.item(0, 0).setText(invalid_name)
-            print(self.view.get_table_contents())
 
             self.assertEqual(str(self.view.get_table_item_text(0, 0)), "my_pair_0")
             self.assertIn("my_pair_0", self.model.pair_names)

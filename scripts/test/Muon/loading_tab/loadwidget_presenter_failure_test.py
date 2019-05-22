@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 from mantid.py3compat import mock
 
@@ -41,7 +41,7 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self._qapp = mock_widget.mockQapp()
 
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
-        self.obj = QtGui.QWidget()
+        self.obj = QtWidgets.QWidget()
 
         self.popup_patcher = mock.patch('Muon.GUI.Common.thread_model.warning')
         self.addCleanup(self.popup_patcher.stop)
@@ -78,10 +78,11 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:\\dir1\\EMU0001234.nxs"])
         self.workspace_mock = self.create_fake_workspace(1)
-        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs")
-        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs")
+        self.load_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False)
+        self.load_run_mock.return_value = (self.workspace_mock, 1234, "C:\\dir1\\EMU0001234.nxs", False)
 
         self.presenter.load_file_widget.on_browse_button_clicked()
+        self.context.update_current_data = mock.MagicMock(return_value=([], []))
         self.wait_for_thread(self.presenter.load_file_widget._load_thread)
 
         self.mock_loading_to_throw()

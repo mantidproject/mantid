@@ -59,7 +59,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
     def load_runs(self, runs, filenames, workspaces):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            side_effect=iter(zip(workspaces, runs, filenames)))
+            side_effect=iter(zip(workspaces, runs, filenames, [False] * len(filenames))))
         run_string = ",".join([str(run) for run in runs])
         self.view.set_run_edit_text(run_string)
         self.presenter.handle_run_changed_by_user()
@@ -108,7 +108,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_that_decrement_run_decrements_the_upper_end_of_the_range_of_loaded_runs(self):
         self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1, "file1.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([1], 1, "file1.nxs", False))
 
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
@@ -122,7 +122,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     @run_test_with_and_without_threading
     def test_that_increment_run_increments_the_lower_end_of_the_range_of_loaded_runs(self):
         self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([5], 5, "file5.nxs"))
+        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(return_value=([5], 5, "file5.nxs", False))
 
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)

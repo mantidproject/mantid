@@ -54,7 +54,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def mock_loading_via_user_input_run(self, workspace, filename, run):
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(
-            return_value=(workspace, run, filename))
+            return_value=(workspace, run, filename, False))
         self.view.set_run_edit_text("1234")
 
     # ------------------------------------------------------------------------------------------------------------------
