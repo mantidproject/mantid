@@ -95,8 +95,7 @@ const DblMatrix &OrientedLattice::getU() const { return U; }
  */
 const DblMatrix &OrientedLattice::getUB() const { return UB; }
 
-DblMatrix &OrientedLattice::getModUB() {
-  ModUB = UB * getModHKL();
+const DblMatrix &OrientedLattice::getModUB() const {
   return ModUB;
 }
 
