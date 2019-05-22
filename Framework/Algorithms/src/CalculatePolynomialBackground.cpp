@@ -263,8 +263,7 @@ void evaluateInPlace(const std::string &name,
     bkg->setParameter(param, parameters[d]);
   }
   double *y = const_cast<double *>(ws.mutableY(wsIndex).rawData().data());
-  bkg->function1D(y, ws.points(wsIndex).rawData().data(),
-                   ws.y(wsIndex).size());
+  bkg->function1D(y, ws.points(wsIndex).rawData().data(), ws.y(wsIndex).size());
 }
 } // namespace
 
