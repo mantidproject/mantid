@@ -599,10 +599,10 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   // Read in the temperature file if provided/found
   try {
     readInTemperatureFile(outputWorkspace);
-  } catch (std::invalid_argument &e) {
+  } catch (const std::invalid_argument &e) {
     g_log.warning("Temperature file was not be loaded: " +
                   std::string(e.what()));
-  } catch (std::runtime_error &e) {
+  } catch (const std::runtime_error &e) {
     g_log.warning("Temperature file was not be loaded:" +
                   std::string(e.what()));
   }
@@ -744,6 +744,14 @@ std::string LoadPSIMuonBin::detectTempFile() {
         path.getFileName().find(std::to_string(m_header.numberOfRuns)) !=
             std::string::npos) {
       return path.toString();
+    }
+
+    boost::system::error_code ec;
+    iter.increment(ec);
+    if (ec) {
+      g_log.warning("When searching for temp file, accessing this file: " +
+                    iter->path().string() +
+                    " caused this error: " + ec.message());
     }
   }
   return "";
