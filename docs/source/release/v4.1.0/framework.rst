@@ -30,8 +30,8 @@ Improvements
 - Prevent an error due to the locale settings which may appear when reading, for instance, the incident energy Ei value from the logs in :ref:`ConvertUnits <algm-ConvertUnits>` and many other algorithms.
 - :code:`indices` and :code:`slicepoint` options have been added to :ref:`mantid.plots <mantid.plots>` to allow selection of which plane to plot from an MDHistoWorkspace. :code:`transpose` has also been added to transpose the axes of any 2D plot.
 - :ref:`Pseudo-Voigt <func-PseudoVoigt>` has been modified to be more in line with FULLPROF and GSAS.  One of its basic parameter, Height, is changed to Intensity.
+- 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SEQUOIA, SNAP, and VULCAN have had the axis that signed two-theta is calculated against changed from ``+y`` to ``+x``
-
 
 Bug fixes
 #########
