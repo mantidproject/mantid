@@ -150,12 +150,17 @@ std::vector<ValueType> get1DDataset(const H5File &file,
   return extractVector<ValueType>(data);
 }
 
+/**
+ * Parser as local class. Makes logging (side-effect) easier.
+ */
 class Parser {
 private:
+  // Logger object
   std::unique_ptr<Logger> m_logger;
 
 public:
-  Parser(std::unique_ptr<Logger> &&logger) : m_logger(std::move(logger)) {}
+  explicit Parser(std::unique_ptr<Logger> &&logger)
+      : m_logger(std::move(logger)) {}
 
   std::string get1DStringDataset(const std::string &dataset,
                                  const Group &group) {
@@ -171,7 +176,7 @@ public:
       } else {
         m_logger->warning("NexusGeometryParser::get1DStringDataset: Only "
                           "versions 1.8.16 + of hdf5 support the variable "
-                          "string feature");
+                          "string feature. This could be terminal.");
       }
       return buffer;
     } else {

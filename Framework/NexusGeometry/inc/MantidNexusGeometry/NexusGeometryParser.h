@@ -16,16 +16,22 @@ namespace Geometry {
 class Instrument;
 }
 namespace NexusGeometry {
-/** NexusGeometryParser : Responsible for parsing a nexus geometry file and
-  creating an in-memory Mantid instrument.
-*/
 
+/**
+ * Abstract logger. Avoid hard-coded logging dependencies.
+ */
 MANTID_NEXUSGEOMETRY_DLL class Logger {
 public:
   virtual void warning(const std::string &warning) = 0;
   virtual ~Logger() {}
 };
 
+/**
+ * Creates an Adapter and instantiates and returns one as a unique_ptr
+ *
+ * Make it easy to wrap existing logging frameworks. Note that ownership of
+ * adaptee is NOT transferred to returned Logger.
+ */
 template <typename T> std::unique_ptr<Logger> makeLogger(T *adaptee) {
 
   struct Adapter : public Logger {
@@ -39,7 +45,9 @@ template <typename T> std::unique_ptr<Logger> makeLogger(T *adaptee) {
 }
 
 namespace NexusGeometryParser {
-
+/** createInstrument : Responsible for parsing a nexus geometry file and
+  creating an in-memory Mantid instrument.
+*/
 MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<const Mantid::Geometry::Instrument>
 createInstrument(const std::string &fileName, std::unique_ptr<Logger> logger);
 MANTID_NEXUSGEOMETRY_DLL std::string
