@@ -296,15 +296,6 @@ class MantidAxes(Axes):
             workspace_artist.remove(self)
         return self.is_empty(self)
 
-    def remove_workspace_artist(self, workspace_name, artist):
-        artist.remove(self)
-        try:
-            self.tracked_workspaces[workspace_name].remove(artist)
-            if not self.tracked_workspaces[workspace_name]:
-                self.tracked_workspaces.pop(workspace_name)
-        except ValueError:
-            return False
-        return True
 
     def replace_workspace_artists(self, workspace):
         """
@@ -426,8 +417,8 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            plot_as_dist, _ = get_plot_as_distribution(workspace, pop=False,
-                                                       **kwargs)
+            plot_as_dist, kwargs = get_plot_as_distribution(
+                workspace, self.tracked_workspaces.values(), pop=False, **kwargs)
             is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
@@ -492,9 +483,6 @@ class MantidAxes(Axes):
                 container_orig.remove()
                 # The container does not remove itself from the containers list
                 # but protect this just in case matplotlib starts doing this
-
-                # tracked_idx = self.tracked_workspaces[workspace.name()].index(container_orig)
-                # self.tracked_workspaces[workspace.name()].pop(tracked_idx)
                 try:
                     self.containers.remove(container_orig)
                 except ValueError:
@@ -503,10 +491,6 @@ class MantidAxes(Axes):
                 container_new = plotfunctions.errorbar(self, workspace, **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
-                # self.track_workspace_artist(workspace, container_new,
-                #                             spec_num=kwargs['specNum'],
-                #                             is_distribution=kwargs['plot_as_distribution'])
-                # update line properties to match original
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
                 for artist_orig, artist_new in zip(orig_flat, new_flat):
                     artist_new.update_from(artist_orig)
@@ -517,8 +501,8 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            plot_as_dist, _ = get_plot_as_distribution(workspace, pop=False,
-                                                       **kwargs)
+            plot_as_dist, kwargs = get_plot_as_distribution(
+                workspace, self.tracked_workspaces, pop=False, **kwargs)
             is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),

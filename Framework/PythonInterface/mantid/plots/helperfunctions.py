@@ -50,18 +50,29 @@ def get_distribution(workspace, **kwargs):
     return bool(distribution), kwargs
 
 
-def get_plot_as_distribution(workspace, pop=True, **kwargs):
+def get_plot_as_distribution(workspace, current_artists, pop=True, **kwargs):
     """
     Determine whether or not the workspace should be plotted as a
-    distribution.
+    distribution. If the workspace is a distribution return False, else,
+    if there is already a curves on the axes, return according to
+    whether those curves are distributions. Else go by the global
+    setting.
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
+    :param current_artists: The axes' tracked WorkspaceArtists
     :param pop: Bool. Set to True to remove 'plot_as_distribution' from 'kwargs'
     """
-    getter_func = 'pop' if pop else 'get'
-    plot_as_distribution = getattr(kwargs, getter_func)(
-        'plot_as_distribution',
-        mantid.kernel.config['graph1d.autodistribution'].lower() == 'on')
-    return (not workspace.isDistribution() and plot_as_distribution), kwargs
+    if workspace.isDistribution():
+        return False, kwargs
+
+    if current_artists:
+        current_normalization = any(
+            [artist[0].is_distribution for artist in current_artists])
+    else:
+        current_normalization = mantid.kernel.config[
+                                    'graph1d.autodistribution'].lower() == 'on'
+    plot_as_distribution = getattr(kwargs, 'pop' if pop else 'get')(
+        'plot_as_distribution', current_normalization)
+    return plot_as_distribution, kwargs
 
 
 def get_normalization(md_workspace, **kwargs):

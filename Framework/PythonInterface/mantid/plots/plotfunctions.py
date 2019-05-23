@@ -78,8 +78,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
             axes.set_xlabel("Spectrum")
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
         elif axis == MantidAxType.SPECTRUM:
-            plot_as_distribution, kwargs = get_plot_as_distribution(workspace,
-                                                                    **kwargs)
+            plot_as_distribution, kwargs = get_plot_as_distribution(
+                workspace, axes.tracked_workspaces.values(), **kwargs)
             x, y, dy, dx = get_spectrum(workspace, workspace_index,
                                         plot_as_distribution, with_dy, with_dx)
         else:
