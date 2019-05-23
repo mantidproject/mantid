@@ -156,10 +156,10 @@ class FigureInteraction(object):
         # Create menu
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
-        none_action = norm_menu.addAction('None',
-                                          lambda: self._set_normalization_none(ax))
-        norm_action = norm_menu.addAction('Bin Width',
-                                          lambda: self._set_normalization_bin_width(ax))
+        none_action = norm_menu.addAction(
+            'None', lambda: self._set_normalization_none(ax))
+        norm_action = norm_menu.addAction(
+            'Bin Width', lambda: self._set_normalization_bin_width(ax))
         for action in [none_action, norm_action]:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
@@ -205,6 +205,8 @@ class FigureInteraction(object):
                 if ws_artist.spec_num == arg_set.get('specNum'):
                     ws_artist.replace_data(workspace, arg_set_copy)
                     ws_artist.is_distribution = not is_normalized
+        y_label = get_axes_labels(workspace, plot_as_dist=not is_normalized)[0]
+        ax.set_ylabel(y_label)
         ax.relim()
         ax.autoscale()
         self.canvas.draw()

@@ -19,7 +19,7 @@ from qtpy.QtCore import Qt
 
 # local package imports
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import MagicMock, Mock, PropertyMock, call, patch
+from mantid.py3compat.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
 from mantidqt.plotting.functions import plot
@@ -30,14 +30,11 @@ class FigureInteractionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.ws = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
-                                 DataY=[2, 3, 4, 5, 3, 5],
-                                 DataE=[1, 2, 3, 4, 1, 1],
-                                 NSpec=3,
+        cls.ws = CreateWorkspace(DataX=[10, 20, 30],
+                                 DataY=[2, 3],
                                  Distribution=False,
                                  UnitX='Wavelength',
-                                 VerticalAxisUnit='DeltaE',
-                                 VerticalAxisValues=[4, 6, 8],
+                                 YUnitLabel='Counts',
                                  OutputWorkspace='ws')
 
     @classmethod
@@ -128,10 +125,10 @@ class FigureInteractionTest(unittest.TestCase):
                 self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
-        self._test_toggle_normalization(errobars_on=False)
+        self._toggle_normalization(errobars_on=False)
 
     def test_toggle_normalization_with_errorbars(self):
-        self._test_toggle_normalization(errobars_on=True)
+        self._toggle_normalization(errobars_on=True)
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
@@ -157,7 +154,7 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
-    def _test_toggle_normalization(self, errobars_on):
+    def _toggle_normalization(self, errobars_on):
         fig = plot([self.ws], spectrum_nums=[1], errors=errobars_on,
                    plot_kwargs={'plot_as_distribution': False})
         mock_canvas = MagicMock(figure=fig)
@@ -168,9 +165,11 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor._toggle_normalization(ax)
         self.assertSequenceEqual(list(ax.lines[0]._x), [15, 25])
         self.assertSequenceEqual(list(ax.lines[0]._y), [0.2, 0.3])
+        self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
         fig_interactor._toggle_normalization(ax)
         self.assertSequenceEqual(list(ax.lines[0]._x), [15, 25])
         self.assertSequenceEqual(list(ax.lines[0]._y), [2, 3])
+        self.assertEqual("Counts", ax.get_ylabel())
 
 
 if __name__ == '__main__':
