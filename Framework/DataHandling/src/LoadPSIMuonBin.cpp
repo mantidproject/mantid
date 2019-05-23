@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
@@ -516,9 +516,17 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
                      m_header.histogramBinWidth,
                  outputWorkspace);
 
+  // Length of run
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Length of Run");
+  logAlg->setProperty(
+      "LogText", std::to_string((static_cast<double>(m_histograms[0].size())) *
+                                m_header.histogramBinWidth) +
+                     "MicroSeconds");
+  logAlg->executeAsChildAlg();
   boost::trim_right(m_header.field);
   auto fieldUnit = std::string(1, m_header.field.at(m_header.field.size() - 1));
-  addToSampleLog("sample_magn_field_unit", fieldUnit, outputWorkspace);
+  addToSampleLog("Field Unit", fieldUnit, outputWorkspace);
   m_header.field.pop_back();
   try {
     auto field = std::stod(m_header.field);
@@ -596,13 +604,18 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     }
   }
 
+  // tdcOverflow
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "TDC Overflow");
+  logAlg->setProperty("LogText", std::to_string(m_header.tdcOverflow));
+  logAlg->executeAsChildAlg();
   // Read in the temperature file if provided/found
   try {
     readInTemperatureFile(outputWorkspace);
-  } catch (const std::invalid_argument &e) {
+  } catch (std::invalid_argument &e) {
     g_log.warning("Temperature file was not be loaded: " +
                   std::string(e.what()));
-  } catch (const std::runtime_error &e) {
+  } catch (std::runtime_error &e) {
     g_log.warning("Temperature file was not be loaded:" +
                   std::string(e.what()));
   }
@@ -764,10 +777,20 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
     fileName = detectTempFile();
   }
 
+  if (m_header.realT0[0] != 0) {
+    for (const float &i : m_header.realT0) {
+      if (i == 0)
+        break;
+      logAlg->setProperty("LogType", "String");
+      logAlg->setProperty("LogName", "realT0 + i");
+      logAlg->setProperty("LogText", std::to_string(i));
+      logAlg->executeAsChildAlg();
   if (fileName == "") {
     throw std::invalid_argument(
         "No temperature file could be found/was provided");
   }
+
+  g_log.notice("Temperature file in use by LoadPSIMuonBin: '" + fileName + "'");
 
   std::ifstream in(fileName, std::ios::in);
   std::string contents;

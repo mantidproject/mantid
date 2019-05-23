@@ -7,8 +7,10 @@
 #ifndef MPLCPP_ZOOMER_H
 #define MPLCPP_ZOOMER_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
+
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
@@ -24,7 +26,7 @@ class FigureCanvasQt;
  * it will not keep it alive. It is assumed that the canvas lifetime
  * is handled separately.
  */
-class MANTID_MPLCPP_DLL Zoomer : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Zoomer : public Common::Python::InstanceHolder {
 public:
   explicit Zoomer(FigureCanvasQt *canvas);
 

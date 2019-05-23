@@ -29,6 +29,13 @@ std::string ISO8601StringPlusSpace(DateAndTime &self) {
   return self.toISO8601String() + " ";
 }
 
+int64_t total_nanoseconds(DateAndTime &self) {
+  PyErr_Warn(
+      PyExc_DeprecationWarning,
+      ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  return self.totalNanoseconds();
+}
+
 void export_DateAndTime() {
   class_<DateAndTime>("DateAndTime", no_init)
       // Constructors
@@ -49,7 +56,7 @@ void export_DateAndTime() {
            make_constructor(Converters::to_dateandtime, default_call_policies(),
                             (arg("other"))),
            "Construct from numpy.datetime64")
-      .def("total_nanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
+      .def("total_nanoseconds", &total_nanoseconds, arg("self"),
            "Since 1990-01-01T00:00")
       .def("totalNanoseconds", &DateAndTime::totalNanoseconds, arg("self"),
            "Since 1990-01-01T00:00")
@@ -74,6 +81,13 @@ void export_DateAndTime() {
       .def(self - self);
 }
 
+long time_duration_total_nanoseconds(time_duration &self) {
+  PyErr_Warn(
+      PyExc_DeprecationWarning,
+      ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
+  return self.total_nanoseconds();
+}
+
 void export_time_duration() {
   class_<time_duration>("time_duration", no_init)
       .def("hours", &time_duration::hours, arg("self"),
@@ -92,7 +106,10 @@ void export_time_duration() {
            arg("self"),
            "Get the total number of microseconds truncating any remaining "
            "digits")
-      .def("total_nanoseconds", &time_duration::total_nanoseconds, arg("self"),
+      .def("total_nanoseconds", &time_duration_total_nanoseconds, arg("self"),
+           "Get the total number of nanoseconds truncating any remaining "
+           "digits")
+      .def("totalNanoseconds", &time_duration::total_nanoseconds, arg("self"),
            "Get the total number of nanoseconds truncating any remaining "
            "digits");
 }

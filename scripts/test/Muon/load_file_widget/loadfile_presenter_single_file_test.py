@@ -7,7 +7,6 @@
 import unittest
 
 from mantid.py3compat import mock
-
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
@@ -81,9 +80,10 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
         self.presenter = BrowseFileWidgetPresenter(self.view, self.model)
 
-        patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils')
+        patcher = mock.patch('Muon.GUI.Common.load_file_widget.model.load_utils.load_workspace_from_filename')
         self.addCleanup(patcher.stop)
         self.load_utils_patcher = patcher.start()
+        self.load_utils_patcher.return_value = (self.create_fake_workspace(1), '22222', 'filename')
 
     def mock_browse_button_to_return_files(self, files):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value=files)
@@ -93,8 +93,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     def mock_model_to_load_workspaces(self, workspaces, runs, filenames):
         is_psi_data = [False] * len(filenames)
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs, filenames,
-                                                                                         is_psi_data))
+        self.load_utils_patcher.side_effect = zip(workspaces, runs, filenames, is_psi_data)
 
     def load_workspaces_into_model_and_view_from_browse(self, workspaces, runs, files):
         self.mock_model_to_load_workspaces(workspaces, runs, files)
@@ -103,7 +102,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-    def load_failure(self):
+    def load_failure(self, unused_arg):
         raise ValueError("Error text")
 
     def create_fake_workspace(self, name):
@@ -135,7 +134,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.assertEqual(self.load_utils_patcher.load_workspace_from_filename.call_count, 0)
+        self.assertEqual(self.load_utils_patcher.call_count, 0)
 
     @run_test_with_and_without_threading
     def test_buttons_disabled_while_load_thread_running(self):
@@ -144,19 +143,19 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.load_utils_patcher.load_workspace_from_filename.assert_called_once_with("file.nxs")
+        self.load_utils_patcher.assert_called_once_with("file.nxs")
         self.assertEqual(self.view.disable_load_buttons.call_count, 1)
         self.assertEqual(self.view.enable_load_buttons.call_count, 1)
 
     @run_test_with_and_without_threading
     def test_buttons_enabled_after_load_even_if_load_thread_throws(self):
         self.mock_browse_button_to_return_files(["file.nxs"])
-        self.load_utils_patcher.load_workspace_from_filename.side_effect = self.load_failure
+        self.load_utils_patcher.side_effect = self.load_failure
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.load_utils_patcher.load_workspace_from_filename.assert_called_once_with("file.nxs")
+        self.load_utils_patcher.assert_called_once_with("file.nxs")
         self.assertEqual(self.view.disable_load_buttons.call_count, 1)
         self.assertEqual(self.view.enable_load_buttons.call_count, 1)
 
@@ -207,7 +206,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.side_effect = self.load_failure
 
         set_file_edit_count = self.view.set_file_edit.call_count
         self.presenter.on_browse_button_clicked()
@@ -239,7 +238,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         workspace = self.create_fake_workspace(1)
         self.load_workspaces_into_model_and_view_from_browse([workspace], [1234], ["C:/dir1/EMU0001234.nxs"])
 
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.side_effect = self.load_failure
 
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
@@ -256,7 +255,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         workspace = self.create_fake_workspace(1)
         self.load_workspaces_into_model_and_view_from_browse([workspace], [1234], ["C:/dir1/EMU0001234.nxs"])
 
-        self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_utils_patcher.side_effect = self.load_failure
         self.view.set_file_edit("C:\dir2\EMU000123.nxs")
 
         self.presenter.handle_file_changed_by_user()
