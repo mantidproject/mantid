@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-
+from qtpy import PYQT4, QtWidgets
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI", "ARGUS", "PSI"]
 allowed_extensions = ["nxs", "bin"]
 FILE_SEP = os.sep
