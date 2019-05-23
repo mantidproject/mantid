@@ -122,12 +122,11 @@ EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
 void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
                                 const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexY);
-  auto yWithMarker =
-      new TypeWithMarker<YType>(reinterpret_cast<std::uintptr_t>(index));
+  auto yWithMarker = std::make_shared<TypeWithMarker<YType>>(
+      reinterpret_cast<std::uintptr_t>(index));
   yWithMarker->m_data = std::move(data);
-  auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
-  // And clear up the memory of the old one, if it is dropping out.
-  delete oldData;
+  m_bufferedDataY[thread_num]->insert(yWithMarker);
+  // the memory is cleared automatically due to being a smart_ptr
 }
 
 /** Insert a new histogram into the MRU
@@ -139,12 +138,11 @@ void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
 void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
                                 const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexE);
-  auto eWithMarker =
-      new TypeWithMarker<EType>(reinterpret_cast<std::uintptr_t>(index));
+  auto eWithMarker = std::make_shared<TypeWithMarker<EType>>(
+      reinterpret_cast<std::uintptr_t>(index));
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
-  delete oldData;
 }
 
 /** Delete any entries in the MRU at the given index
