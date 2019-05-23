@@ -35,10 +35,10 @@ void export_Instrument() {
            "represents the source")
 
       .def("getComponentByName",
-           (boost::shared_ptr<const IComponent>(CompAssembly::*)(
+           (boost::shared_ptr<const IComponent>(Instrument::*)(
                const std::string &, int) const) &
                Instrument::getComponentByName,
-           (arg("self"), arg("cname")),
+           (arg("self"), arg("cname"), arg("nlevels") = 0),
            "Returns the named :class:`~mantid.geometry.Component`")
 
       .def("getDetector",
