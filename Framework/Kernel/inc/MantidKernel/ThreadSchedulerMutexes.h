@@ -9,6 +9,8 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
+
+#include <memory>
 #include <mutex>
 #include <numeric>
 #include <set>
@@ -39,7 +41,7 @@ public:
   ~ThreadSchedulerMutexes() override { clear(); }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) override {
+  void push(std::shared_ptr<Task> newTask) override {
     // Cache the total cost
     std::lock_guard<std::mutex> lock(m_queueLock);
     m_cost += newTask->cost();
@@ -49,10 +51,10 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  Task *pop(size_t threadnum) override {
+  std::shared_ptr<Task> pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
 
-    Task *temp = nullptr;
+    std::shared_ptr<Task> temp = nullptr;
 
     std::lock_guard<std::mutex> lock(m_queueLock);
     // Check the size within the same locking block; otherwise the size may
@@ -73,7 +75,7 @@ public:
             auto it2 = map.end();
             --it2;
             // Great, we found something.
-            temp = it2->second;
+            temp = std::move(it2->second);
             // Take it out of the map (popped)
             map.erase(it2);
             break;
@@ -87,7 +89,7 @@ public:
           if (!mutexedMap.second.empty()) {
             InnerMap &map = mutexedMap.second;
             // Use the first one
-            temp = map.begin()->second;
+            temp = std::move(map.begin()->second);
             // And erase that item (pop it)
             map.erase(map.begin());
             break;
@@ -130,7 +132,7 @@ public:
     return std::accumulate(
         m_supermap.cbegin(), m_supermap.cend(), size_t{0},
         [](size_t total,
-           const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
+           const std::pair<const boost::shared_ptr<std::mutex>&, const InnerMap &>
                &mutexedMap) { return total + mutexedMap.second.size(); });
   }
 
@@ -140,7 +142,7 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
     auto mapWithTasks = std::find_if_not(
         m_supermap.cbegin(), m_supermap.cend(),
-        [](const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
+        [](const std::pair<const boost::shared_ptr<std::mutex>, const InnerMap &>
                &mutexedMap) { return mutexedMap.second.empty(); });
     return mapWithTasks == m_supermap.cend();
   }
@@ -152,8 +154,6 @@ public:
     // Empty out the queue and delete the pointers!
     for (auto &it : m_supermap) {
       InnerMap &map = it.second;
-      for (auto &it2 : map)
-        delete it2.second;
       map.clear();
     }
     m_supermap.clear();
@@ -163,7 +163,7 @@ public:
 
 protected:
   /// Map to tasks, sorted by cost
-  using InnerMap = std::multimap<double, Task *>;
+  using InnerMap = std::multimap<double, std::shared_ptr<Task>>;
   /// Map to maps, sorted by Mutex*
   using SuperMap = std::map<boost::shared_ptr<std::mutex>, InnerMap>;
 

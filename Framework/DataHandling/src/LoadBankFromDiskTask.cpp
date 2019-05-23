@@ -482,13 +482,13 @@ void LoadBankFromDiskTask::run() {
   auto event_index_shrd =
       boost::make_shared<std::vector<uint64_t>>(std::move(event_index));
 
-  ProcessBankData *newTask1 = new ProcessBankData(
+  std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankData>(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
       numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
       event_weight_shrd, m_min_id, mid_id);
   scheduler.push(newTask1);
   if (m_loader.splitProcessing && (mid_id < m_max_id)) {
-    ProcessBankData *newTask2 = new ProcessBankData(
+    std::shared_ptr<Task> newTask2 = std::make_shared<ProcessBankData>(
         m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, (mid_id + 1), m_max_id);

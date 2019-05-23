@@ -35,7 +35,7 @@ public:
     std::unique_ptr<ThreadPoolRunnable> tpr;
     std::unique_ptr<ThreadScheduler> sc = std::make_unique<ThreadSchedulerFIFO>();
     tpr = std ::make_unique<ThreadPoolRunnable>(0, sc.get());
-    sc->push(new SimpleTask());
+    sc->push(std::make_shared<SimpleTask>());
     TS_ASSERT_EQUALS(sc->size(), 1);
 
     // Run it
@@ -66,7 +66,7 @@ public:
 
     // Put 10 tasks in
     for (size_t i = 0; i < 10; i++)
-      sc->push(new TaskThatThrows());
+      sc->push(std::make_shared<TaskThatThrows>());
 
     // The task throws but the runnable just aborts instead
     ThreadPoolRunnableTest_value = 0;

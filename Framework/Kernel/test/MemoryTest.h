@@ -56,7 +56,7 @@ public:
   void test_parallel_threadpool() {
     ThreadPool pool;
     for (int i = 0; i < 500; i++) {
-      pool.schedule(new FunctionTask(&MemoryTest_myTaskFunction, 1.0));
+      pool.schedule(std::make_shared<FunctionTask>(&MemoryTest_myTaskFunction, 1.0));
     }
     pool.joinAll();
   }
