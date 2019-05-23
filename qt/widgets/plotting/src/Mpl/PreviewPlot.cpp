@@ -27,6 +27,7 @@ using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::Line2D;
 using MantidQt::Widgets::MplCpp::MantidAxes;
+namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
@@ -132,9 +133,10 @@ void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
  */
 void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
-  const auto lineNameAsCStr = lineName.toLatin1().constData();
-  axes.forEachArtist("lines", [&lineNameAsCStr](Artist &&line) {
-    if (line.pyobj().attr("get_label")() == lineNameAsCStr)
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  const auto lineNameAsUnicode = Python::NewRef(PyUnicode_FromString(lineName.toLatin1().constData()));
+  axes.forEachArtist("lines", [&lineNameAsUnicode](Artist &&line) {
+    if (lineNameAsUnicode == line.pyobj().attr("get_label")())
       line.remove();
   });
 }
