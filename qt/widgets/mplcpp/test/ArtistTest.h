@@ -42,7 +42,7 @@ public:
     using Mantid::PythonInterface::PythonException;
     auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
     Artist label(textModule.attr("Text")());
-    TS_ASSERT_THROWS(label.remove(), PythonException);
+    TS_ASSERT_THROWS(label.remove(), const PythonException &);
   }
   // ----------------- failure tests ---------------------
 

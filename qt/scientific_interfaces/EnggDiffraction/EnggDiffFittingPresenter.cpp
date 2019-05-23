@@ -504,7 +504,7 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       // A userError should be used for this message once the threading has been
       // looked into
       return;
-    } catch (Mantid::API::Algorithm::CancelException) {
+    } catch (const Mantid::API::Algorithm::CancelException &) {
       g_log.error() << "Fit terminated by user.\n";
       return;
     }
