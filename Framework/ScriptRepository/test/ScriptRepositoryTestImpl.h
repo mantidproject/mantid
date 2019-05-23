@@ -227,7 +227,7 @@ ctest -j8 -R ScriptRepositoryTestImpl_  --verbose
 
 **/
 class ScriptRepositoryTestImpl : public CxxTest::TestSuite {
-  ScriptRepositoryImplLocal *repo;
+  std::unique_ptr<ScriptRepositoryImplLocal> repo;
   std::string local_rep;
   std::string backup_local_repository_path;
 
@@ -243,12 +243,12 @@ public:
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
     TS_ASSERT_THROWS_NOTHING(
-        repo = new ScriptRepositoryImplLocal(local_rep, webserverurl));
+        repo = std::make_unique<ScriptRepositoryImplLocal>(local_rep, webserverurl));
   }
 
   // ensure that the local files are free from the test created.
   void tearDown() override {
-    delete repo;
+    repo=nullptr;
     try {
       Poco::File f(local_rep);
       f.remove(true);
@@ -323,11 +323,10 @@ public:
     // after the installation, all the others instances of ScriptRepositoryImpl
     // should be valid,
     // by geting the information from the ScriptRepository settings.
-    ScriptRepositoryImplLocal *other = new ScriptRepositoryImplLocal();
+    auto other = std::make_unique<ScriptRepositoryImplLocal>();
     TSM_ASSERT(
         "All the others should recognize that this is a valid repository",
         other->isValid());
-    delete other;
   }
 
   /**
@@ -934,8 +933,7 @@ public:
   }
 
   void test_construct_without_parameters() {
-    delete repo;
-    TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal());
+    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>());
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
   }
