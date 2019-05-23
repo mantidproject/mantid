@@ -516,14 +516,6 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
                      m_header.histogramBinWidth,
                  outputWorkspace);
 
-  // Length of run
-  logAlg->setProperty("LogType", "String");
-  logAlg->setProperty("LogName", "Length of Run");
-  logAlg->setProperty(
-      "LogText", std::to_string((static_cast<double>(m_histograms[0].size())) *
-                                m_header.histogramBinWidth) +
-                     "MicroSeconds");
-  logAlg->executeAsChildAlg();
   boost::trim_right(m_header.field);
   auto fieldUnit = std::string(1, m_header.field.at(m_header.field.size() - 1));
   addToSampleLog("Field Unit", fieldUnit, outputWorkspace);
@@ -604,11 +596,6 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     }
   }
 
-  // tdcOverflow
-  logAlg->setProperty("LogType", "String");
-  logAlg->setProperty("LogName", "TDC Overflow");
-  logAlg->setProperty("LogText", std::to_string(m_header.tdcOverflow));
-  logAlg->executeAsChildAlg();
   // Read in the temperature file if provided/found
   try {
     readInTemperatureFile(outputWorkspace);
@@ -758,14 +745,6 @@ std::string LoadPSIMuonBin::detectTempFile() {
             std::string::npos) {
       return path.toString();
     }
-
-    boost::system::error_code ec;
-    iter.increment(ec);
-    if (ec) {
-      g_log.warning("When searching for temp file, accessing this file: " +
-                    iter->path().string() +
-                    " caused this error: " + ec.message());
-    }
   }
   return "";
 }
@@ -777,14 +756,6 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
     fileName = detectTempFile();
   }
 
-  if (m_header.realT0[0] != 0) {
-    for (const float &i : m_header.realT0) {
-      if (i == 0)
-        break;
-      logAlg->setProperty("LogType", "String");
-      logAlg->setProperty("LogName", "realT0 + i");
-      logAlg->setProperty("LogText", std::to_string(i));
-      logAlg->executeAsChildAlg();
   if (fileName == "") {
     throw std::invalid_argument(
         "No temperature file could be found/was provided");

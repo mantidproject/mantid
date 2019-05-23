@@ -207,7 +207,7 @@ class MuonDataContext(object):
     @property
     def num_detectors(self):
         try:
-            n_det = self.current_workspace.getNumberHistograms()
+            n_det = self.current_workspace.detectorInfo().size()
         except AttributeError:
             # default to 1
             n_det = 1
