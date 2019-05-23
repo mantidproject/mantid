@@ -71,14 +71,16 @@ public:
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""),
+                     const std::invalid_argument &);
   }
 
   void test_empty_endX_is_not_allowed() {
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""),
+                     const std::invalid_argument &);
   }
 
   void test_empty_specMin_is_not_allowed() {

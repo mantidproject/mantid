@@ -221,7 +221,8 @@ public:
     auto out = vtkSmartPointer<vtkUnstructuredGrid>::New();
     vtkDataSetToPeaksFilteredDataSet peaksFilter(in, out);
     FakeProgressAction updateProgress;
-    TS_ASSERT_THROWS(peaksFilter.execute(updateProgress), const std::runtime_error &);
+    TS_ASSERT_THROWS(peaksFilter.execute(updateProgress),
+                     const std::runtime_error &);
   }
 
   void testExecutionWithSingleSphericalPeakInQSample() {

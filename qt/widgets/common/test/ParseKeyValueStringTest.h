@@ -33,7 +33,8 @@ public:
     TS_ASSERT_THROWS(parseKeyValueString("a = 1, b = 2, c = 3,d"),
                      const std::runtime_error &);
     TS_ASSERT_THROWS(parseKeyValueString(",a = 1"), const std::runtime_error &);
-    TS_ASSERT_THROWS(parseKeyValueString(",a = 1 = 2,="), const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueString(",a = 1 = 2,="),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(parseKeyValueString("=,=,="), const std::runtime_error &);
   }
 
@@ -53,8 +54,10 @@ public:
                      const std::runtime_error &);
     TS_ASSERT_THROWS(parseKeyValueQString("a = 1, b = 2, c = 3,d"),
                      const std::runtime_error &);
-    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1"), const std::runtime_error &);
-    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1 = 2,="), const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1"),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(parseKeyValueQString(",a = 1 = 2,="),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(parseKeyValueQString("=,=,="), const std::runtime_error &);
   }
 };

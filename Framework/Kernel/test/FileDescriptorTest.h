@@ -140,7 +140,8 @@ public:
   //===================== Failure cases
   //============================================
   void test_IsAscii_Throws_For_Inaccessible_Filename() {
-    TS_ASSERT_THROWS(FileDescriptor::isAscii(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(FileDescriptor::isAscii(""),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(FileDescriptor::isAscii("__not_a_File.txt__"),
                      const std::invalid_argument &);
   }

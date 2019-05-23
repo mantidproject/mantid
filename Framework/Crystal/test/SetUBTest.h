@@ -93,9 +93,10 @@ public:
     TS_ASSERT(alg.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS(alg.setPropertyValue("UB", "1,1"),
-                     const std::invalid_argument &); // should fail to initialize UB,
-                                             // since 9 elements are required
+    TS_ASSERT_THROWS(
+        alg.setPropertyValue("UB", "1,1"),
+        const std::invalid_argument &); // should fail to initialize UB,
+                                        // since 9 elements are required
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UB", "0,0,2,0,4,0,-8,0,0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -140,9 +141,10 @@ public:
     TS_ASSERT(alg.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS(alg.setPropertyValue("UB", "1,1"),
-                     const std::invalid_argument &); // should fail to initialize UB,
-                                             // since 9 elements are required
+    TS_ASSERT_THROWS(
+        alg.setPropertyValue("UB", "1,1"),
+        const std::invalid_argument &); // should fail to initialize UB,
+                                        // since 9 elements are required
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UB", "1,1,1,1,1,1,1,1,1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(!alg.isExecuted());
@@ -210,9 +212,10 @@ public:
     TS_ASSERT(alg.isInitialized())
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS(alg.setPropertyValue("alpha", "1"),
-                     const std::invalid_argument &); // should fail to initialize alpha,
-                                             // since angle is too small
+    TS_ASSERT_THROWS(
+        alg.setPropertyValue("alpha", "1"),
+        const std::invalid_argument &); // should fail to initialize alpha,
+                                        // since angle is too small
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("alpha", "90."));
     TS_ASSERT_THROWS(
         alg.setPropertyValue("u", "0,0,2,0,4,0,-8,0,0"),

@@ -270,9 +270,11 @@ public:
         "10", "100000000000000000000000000000", "1,5,10", "1,2,3,4,5,6,22"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
-      TS_ASSERT_THROWS(data->setSpectra(spectraPairs[i]), const std::runtime_error &);
+      TS_ASSERT_THROWS(data->setSpectra(spectraPairs[i]),
+                       const std::runtime_error &);
     for (auto i = 0u; i < spectraStrings.size(); ++i)
-      TS_ASSERT_THROWS(data->setSpectra(spectraStrings[i]), const std::runtime_error &);
+      TS_ASSERT_THROWS(data->setSpectra(spectraStrings[i]),
+                       const std::runtime_error &);
   }
 
   void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {

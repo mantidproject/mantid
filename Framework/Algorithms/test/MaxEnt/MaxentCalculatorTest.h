@@ -228,10 +228,13 @@ public:
                          boost::shared_ptr<MockTransform>(transform));
 
     // When data were not loaded public methods should throw an exception
-    TS_ASSERT_THROWS(calculator.getReconstructedData(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getReconstructedData(),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(calculator.getImage(), const std::runtime_error &);
-    TS_ASSERT_THROWS(calculator.getSearchDirections(), const std::runtime_error &);
-    TS_ASSERT_THROWS(calculator.getQuadraticCoefficients(), const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getSearchDirections(),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(calculator.getQuadraticCoefficients(),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(calculator.getAngle(), const std::runtime_error &);
     TS_ASSERT_THROWS(calculator.getChisq(), const std::runtime_error &);
   }

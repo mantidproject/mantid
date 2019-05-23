@@ -101,7 +101,8 @@ public:
     FunctionValues values(domain);
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
-    TS_ASSERT_THROWS(fn->function(domain, values), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn->function(domain, values),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
                      const std::invalid_argument &);
   }
@@ -119,7 +120,8 @@ public:
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
     TS_ASSERT_THROWS(fn->function(domain, values), const std::runtime_error &);
-    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian), const std::runtime_error &);
+    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
+                     const std::runtime_error &);
   }
 
   void testBeforeDecoratedFunctionSet() {

@@ -96,7 +96,8 @@ public:
 
     ConcreteVectorDblParamParser parser;
     TSM_ASSERT_THROWS("No successor, so should throw!",
-                      parser.createParameter(pRootElem), const std::runtime_error &);
+                      parser.createParameter(pRootElem),
+                      const std::runtime_error &);
   }
 
   DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double)

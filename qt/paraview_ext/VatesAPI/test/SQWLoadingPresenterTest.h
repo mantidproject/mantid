@@ -156,7 +156,8 @@ public:
         Mantid::Kernel::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.hasTDimensionAvailable(), const std::runtime_error &);
+                      presenter.hasTDimensionAvailable(),
+                      const std::runtime_error &);
   }
 
   void testCallGetTDimensionValuesThrows() {
@@ -164,7 +165,8 @@ public:
         Mantid::Kernel::make_unique<MockMDLoadingView>(),
         getSuitableFileNamePath());
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.getTimeStepValues(), const std::runtime_error &);
+                      presenter.getTimeStepValues(),
+                      const std::runtime_error &);
   }
 
   void testCallGetGeometryThrows() {

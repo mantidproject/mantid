@@ -120,7 +120,8 @@ public:
 
     AffineMatrixParameterParser parser;
 
-    TS_ASSERT_THROWS(parser.createParameter(pRootElem), const std::runtime_error &);
+    TS_ASSERT_THROWS(parser.createParameter(pRootElem),
+                     const std::runtime_error &);
   }
 };
 #endif

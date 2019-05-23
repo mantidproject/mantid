@@ -59,7 +59,8 @@ public:
 
     IFunction_sptr fun(new ConcreteFunction1DSpectrum);
 
-    TS_ASSERT_THROWS(fun->function(domain, values), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fun->function(domain, values),
+                     const std::invalid_argument &);
   }
 
 private:

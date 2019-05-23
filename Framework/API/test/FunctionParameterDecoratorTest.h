@@ -23,8 +23,8 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ::testing::_;
 using ::testing::Mock;
+using ::testing::_;
 
 class FunctionParameterDecoratorTest;
 

@@ -13,8 +13,8 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::PythonInterface::PythonException;
-using MantidQt::Widgets::MplCpp::cmapExists;
 using MantidQt::Widgets::MplCpp::Colormap;
+using MantidQt::Widgets::MplCpp::cmapExists;
 using MantidQt::Widgets::MplCpp::getCMap;
 
 class ColormapTest : public CxxTest::TestSuite {

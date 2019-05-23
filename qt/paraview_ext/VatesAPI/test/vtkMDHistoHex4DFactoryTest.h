@@ -96,7 +96,8 @@ public:
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(
         Mantid::VATES::VolumeNormalization, 1);
-    TS_ASSERT_THROWS(factory.create(progressAction), const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressAction),
+                     const std::runtime_error &);
   }
 
   void testInitializationDelegates() {

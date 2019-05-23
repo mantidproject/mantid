@@ -130,7 +130,8 @@ public:
     MDFileObject fileObject("test_file_for_load_md_histo_workspace_test_.txt",
                             2 * 2);
     IAlgorithm_sptr alg = make_standard_algorithm(fileObject);
-    TS_ASSERT_THROWS(alg->setProperty("Filename", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("Filename", ""),
+                     const std::invalid_argument &);
   }
 
   void test_throws_with_non_existant_filename() {

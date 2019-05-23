@@ -28,7 +28,8 @@ public:
 
   void test_workspace_constructor() {
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws), const std::invalid_argument &);
+    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws),
+                     const std::invalid_argument &);
   }
 
   void test_workspace_constructor_fills_map() {
@@ -155,9 +156,12 @@ public:
     SpectrumDetectorMapping map(ws);
     // The happy path is tested in the methods above. Just test invalid entry
     // here.
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1), const std::out_of_range &);
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(0), const std::out_of_range &);
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(-1), const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1),
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(0),
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(-1),
+                     const std::out_of_range &);
   }
 };
 

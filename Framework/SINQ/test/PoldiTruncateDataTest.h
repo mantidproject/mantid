@@ -103,16 +103,20 @@ public:
     EXPECT_CALL(*chopper, cycleTime()).Times(1).WillRepeatedly(Return(1500.0));
 
     TestablePoldiTruncateData truncate;
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
+                     const std::invalid_argument &);
 
     truncate.setChopper(chopper);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
+                     const std::invalid_argument &);
 
     truncate.setTimeBinWidth(-10.0);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
+                     const std::invalid_argument &);
 
     truncate.setTimeBinWidth(0.0);
-    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(truncate.getCalculatedBinCount(),
+                     const std::invalid_argument &);
 
     truncate.setTimeBinWidth(3.0);
 

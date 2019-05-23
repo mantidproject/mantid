@@ -58,7 +58,8 @@ private:
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setCheckDimensionality(doCheckDimensionality);
     if (doCheckDimensionality) {
-      TS_ASSERT_THROWS(factory.initialize(binned_ws), const std::runtime_error &);
+      TS_ASSERT_THROWS(factory.initialize(binned_ws),
+                       const std::runtime_error &);
     } else {
       TS_ASSERT_THROWS_NOTHING(factory.initialize(binned_ws));
       vtkSmartPointer<vtkDataSet> product;
@@ -73,7 +74,8 @@ public:
     FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.",
-                      factory.create(progressUpdater), const std::runtime_error &);
+                      factory.create(progressUpdater),
+                      const std::runtime_error &);
   }
 
   void testInitalizeWithNullWorkspaceThrows() {
@@ -144,7 +146,8 @@ public:
     FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     // initialize not called!
-    TS_ASSERT_THROWS(factory.create(progressUpdater), const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdater),
+                     const std::runtime_error &);
   }
 
   void test_roundUp_positive_numbers() {

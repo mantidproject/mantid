@@ -283,13 +283,15 @@ public:
     // break some things, so we forbid this for now.
     IndexInfo info(3);
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> defs{nullptr};
-    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), const std::runtime_error &);
+    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs),
+                     const std::runtime_error &);
   }
 
   void test_setSpectrumDefinitions_size_mismatch_cow_ptr() {
     IndexInfo info(3);
     const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
-    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), const std::runtime_error &);
+    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs),
+                     const std::runtime_error &);
   }
 
   void test_setSpectrumDefinitions_cow_ptr() {

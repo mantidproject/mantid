@@ -71,7 +71,8 @@ public:
     PoldiDetectorDecorator decorator;
 
     TS_ASSERT_THROWS(decorator.twoTheta(0), const std::runtime_error &);
-    TS_ASSERT_THROWS(decorator.distanceFromSample(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(decorator.distanceFromSample(0),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(decorator.elementCount(), const std::runtime_error &);
     TS_ASSERT_THROWS(decorator.centralElement(), const std::runtime_error &);
     TS_ASSERT_THROWS(decorator.availableElements(), const std::runtime_error &);

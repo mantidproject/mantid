@@ -69,7 +69,8 @@ public:
 
     CoordTransformDistanceParser parser;
     TSM_ASSERT_THROWS("XML root node must be a coordinate transform",
-                      parser.createTransform(pRootElem), const std::invalid_argument &);
+                      parser.createTransform(pRootElem),
+                      const std::invalid_argument &);
   }
 
   void testNoSuccessorThrows() {
@@ -87,7 +88,8 @@ public:
 
     CoordTransformDistanceParser parser;
     TSM_ASSERT_THROWS("Should throw since no successor parser has been set",
-                      parser.createTransform(pRootElem), const std::runtime_error &);
+                      parser.createTransform(pRootElem),
+                      const std::runtime_error &);
   }
 
   void testDelegateToSuccessor() {

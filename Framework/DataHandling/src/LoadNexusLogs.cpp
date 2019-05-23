@@ -32,8 +32,8 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using std::size_t;
 using Types::Core::DateAndTime;
+using std::size_t;
 
 // Anonymous namespace
 namespace {

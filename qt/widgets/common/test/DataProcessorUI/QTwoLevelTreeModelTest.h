@@ -729,7 +729,8 @@ public:
     auto rowValues = std::map<QString, QString>{{"Column1", "row_10"},
                                                 {"Column2", "row_11"}};
     auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
-    TS_ASSERT_THROWS(model.transfer(rowsToTransfer), const std::invalid_argument &);
+    TS_ASSERT_THROWS(model.transfer(rowsToTransfer),
+                     const std::invalid_argument &);
   }
 
   void testTransferToExistingGroup() {

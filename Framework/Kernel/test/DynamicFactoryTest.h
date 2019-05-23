@@ -57,9 +57,10 @@ public:
     TS_ASSERT_THROWS(caseSensitiveFactory.create("testEntryCaseSensitive"),
                      const std::runtime_error &)
     caseSensitiveFactory.subscribe<int>("testEntryCaseSensitive");
-    TS_ASSERT_THROWS(
-        int_ptr i = caseSensitiveFactory.create("testEntryCaseSENSITIVE"),
-        const std::runtime_error &); // case error on a case sensitive dynamic factory
+    TS_ASSERT_THROWS(int_ptr i =
+                         caseSensitiveFactory.create("testEntryCaseSENSITIVE"),
+                     const std::runtime_error
+                         &); // case error on a case sensitive dynamic factory
     TS_ASSERT_THROWS_NOTHING(
         int_ptr i2 = caseSensitiveFactory.create("testEntryCaseSensitive"));
     caseSensitiveFactory.unsubscribe("testEntryCaseSensitive");
@@ -85,10 +86,10 @@ public:
         const std::runtime_error &)
     caseSensitiveFactory.subscribe<int>("testUnrappedEntryCaseSensitive");
     int *i = nullptr;
-    TS_ASSERT_THROWS(
-        i = caseSensitiveFactory.createUnwrapped(
-            "testUnrappedentrycaseSENSITIVE"),
-        const std::runtime_error &); // case error on a case sensitive dynamic factory
+    TS_ASSERT_THROWS(i = caseSensitiveFactory.createUnwrapped(
+                         "testUnrappedentrycaseSENSITIVE"),
+                     const std::runtime_error
+                         &); // case error on a case sensitive dynamic factory
     TS_ASSERT_THROWS_NOTHING(i = caseSensitiveFactory.createUnwrapped(
                                  "testUnrappedEntryCaseSensitive"));
     delete i;

@@ -132,7 +132,8 @@ public:
   void test_getDeadTimesTable_FromFile_NotPresent() {
     MuonAnalysisDataLoader loader(DeadTimesType::FromFile, {"MUSR"});
     LoadResult result;
-    TS_ASSERT_THROWS(loader.getDeadTimesTable(result), const std::runtime_error &);
+    TS_ASSERT_THROWS(loader.getDeadTimesTable(result),
+                     const std::runtime_error &);
   }
 
   void test_getDeadTimesTable_FromFile() {

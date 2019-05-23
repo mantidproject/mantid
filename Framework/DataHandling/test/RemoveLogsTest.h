@@ -110,8 +110,10 @@ public:
     // Ensure it has the correct log data
     TS_ASSERT_DIFFERS(output->run().getLogData().size(), 0);
 
-    TS_ASSERT_THROWS(output->run().getLogData("some_prop"), const std::runtime_error &);
-    TS_ASSERT_THROWS(output->run().getLogData("T0"), const std::runtime_error &);
+    TS_ASSERT_THROWS(output->run().getLogData("some_prop"),
+                     const std::runtime_error &);
+    TS_ASSERT_THROWS(output->run().getLogData("T0"),
+                     const std::runtime_error &);
 
     TS_ASSERT_THROWS_NOTHING(output->run().getLogData("Ei"));
     TS_ASSERT_THROWS_NOTHING(output->run().getLogData("scan_index"));

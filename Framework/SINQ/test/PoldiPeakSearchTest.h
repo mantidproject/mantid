@@ -53,7 +53,8 @@ public:
   void testSetMinimumDistance() {
     TestablePoldiPeakSearch poldiPeakSearch;
 
-    TS_ASSERT_THROWS(poldiPeakSearch.setMinimumDistance(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(poldiPeakSearch.setMinimumDistance(0),
+                     const std::runtime_error &);
 
     poldiPeakSearch.setMinimumDistance(2);
     TS_ASSERT_EQUALS(poldiPeakSearch.m_minimumDistance, 2);

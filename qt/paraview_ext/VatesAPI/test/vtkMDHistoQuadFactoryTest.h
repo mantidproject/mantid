@@ -50,7 +50,8 @@ public:
     FakeProgressAction progressUpdate;
 
     vtkMDHistoQuadFactory factory(Mantid::VATES::VolumeNormalization);
-    TS_ASSERT_THROWS(factory.create(progressUpdate), const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdate),
+                     const std::runtime_error &);
   }
 
   void testInsideThresholds() {

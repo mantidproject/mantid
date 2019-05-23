@@ -14,20 +14,20 @@
 #include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::FrequencyVariances;
-using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::LinearGenerator;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::PointStandardDeviations;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::getHistogramXMode;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:

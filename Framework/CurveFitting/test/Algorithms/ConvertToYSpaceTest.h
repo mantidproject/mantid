@@ -118,9 +118,11 @@ public:
     auto alg = createAlgorithm();
 
     // Zero
-    TS_ASSERT_THROWS(alg->setProperty("Mass", 0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("Mass", 0.0),
+                     const std::invalid_argument &);
     // Negative
-    TS_ASSERT_THROWS(alg->setProperty("Mass", -0.1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg->setProperty("Mass", -0.1),
+                     const std::invalid_argument &);
   }
 
   void test_Input_Workspace_Not_In_TOF_Throws_Error() {

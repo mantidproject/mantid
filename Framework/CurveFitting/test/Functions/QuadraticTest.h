@@ -39,9 +39,12 @@ public:
     Quadratic quad;
     quad.initialize();
 
-    TS_ASSERT_THROWS(quad.setParameter("X", 1.0), const std::invalid_argument &);
-    TS_ASSERT_THROWS(quad.setAttributeValue("n", 3), const std::invalid_argument &);
-    TS_ASSERT_THROWS(quad.setParameter("A99", 0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(quad.setParameter("X", 1.0),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(quad.setAttributeValue("n", 3),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(quad.setParameter("A99", 0.0),
+                     const std::invalid_argument &);
   }
 
   void test_calculate() {

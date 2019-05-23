@@ -50,7 +50,8 @@ public:
   void test_trying_to_construct_object_with_unknown_id_throws_exception() {
     // createEmptyExptInfo();
     auto expt = boost::make_shared<Mantid::API::ExperimentInfo>();
-    TS_ASSERT_THROWS(CachedExperimentInfo(*expt, 1000), const std::out_of_range &);
+    TS_ASSERT_THROWS(CachedExperimentInfo(*expt, 1000),
+                     const std::out_of_range &);
   }
 
   void test_trying_to_construct_object_with_no_chopper_throws() {

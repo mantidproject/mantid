@@ -69,14 +69,16 @@ public:
 
     FieldDataToMetadata function;
     TSM_ASSERT_THROWS("Unknown id requested. Should have thrown.",
-                      function.execute(fieldData, "x"), const std::runtime_error &);
+                      function.execute(fieldData, "x"),
+                      const std::runtime_error &);
   }
 
   void testThrowsIfNullFieldData() {
     vtkFieldData *nullFieldData = nullptr;
     FieldDataToMetadata function;
     TSM_ASSERT_THROWS("Should not be able to execute with null field data.",
-                      function.execute(nullFieldData, "x"), const std::runtime_error &);
+                      function.execute(nullFieldData, "x"),
+                      const std::runtime_error &);
   }
 };
 

@@ -204,7 +204,8 @@ private:
 
     loadTestInstrument();
     // No header
-    TS_ASSERT_THROWS(runUpdateInstrument(filename), const std::invalid_argument &);
+    TS_ASSERT_THROWS(runUpdateInstrument(filename),
+                     const std::invalid_argument &);
 
     // Header claims fewer columns than there actually are
     std::string badHeader = "spectrum,theta,t0,-";

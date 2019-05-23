@@ -58,7 +58,8 @@ public:
     CompositeImplicitFunctionParser functionParser;
     TSM_ASSERT_THROWS(
         "There is no successor parser setup for the PlaneFunctionParser",
-        functionParser.createFunctionBuilder(pRootElem), const std::runtime_error &);
+        functionParser.createFunctionBuilder(pRootElem),
+        const std::runtime_error &);
   }
 
   void disabled_testCallsFunctionParserChain() {

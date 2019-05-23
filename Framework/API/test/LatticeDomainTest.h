@@ -13,8 +13,8 @@
 #include "MantidKernel/Exception.h"
 
 using Mantid::API::LatticeDomain;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Exception::IndexError;
+using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 

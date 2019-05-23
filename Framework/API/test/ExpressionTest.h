@@ -402,7 +402,8 @@ public:
   void testEndOnOperator() {
     {
       Expression expression;
-      TS_ASSERT_THROWS(expression.parse("x+y+z +  "), const std::runtime_error &);
+      TS_ASSERT_THROWS(expression.parse("x+y+z +  "),
+                       const std::runtime_error &);
     }
     {
       Expression expression;

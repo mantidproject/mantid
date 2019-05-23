@@ -76,7 +76,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.23e12));
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("U", 1.23e-2));
 
-    TS_ASSERT_THROWS(scatterer->setProperty("U", -0.2), const std::invalid_argument &);
+    TS_ASSERT_THROWS(scatterer->setProperty("U", -0.2),
+                     const std::invalid_argument &);
   }
 
   void testCreate() {

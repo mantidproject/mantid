@@ -21,7 +21,8 @@ public:
   void testGettingPeaksWorkspaceThrows() {
     NullPeaksPresenterVsi presenter;
     TSM_ASSERT_THROWS("Should not implement this method",
-                      presenter.getPeaksWorkspace(), const std::runtime_error &);
+                      presenter.getPeaksWorkspace(),
+                      const std::runtime_error &);
   }
 
   void testGettingUsablePeaksThrows() {

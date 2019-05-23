@@ -91,7 +91,8 @@ public:
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
     vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);
-    TS_ASSERT_THROWS(factory.create(progressUpdate), const std::runtime_error &);
+    TS_ASSERT_THROWS(factory.create(progressUpdate),
+                     const std::runtime_error &);
   }
 
   void testInitializationDelegates() {

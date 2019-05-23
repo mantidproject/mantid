@@ -57,7 +57,8 @@ public:
       TSM_ASSERT_THROWS_NOTHING("Function should have a C_0 parameter",
                                 profile->getParameter("C_0"));
       TSM_ASSERT_THROWS("Function should not have a C_2 parameter",
-                        profile->getParameter("C_2"), const std::invalid_argument &);
+                        profile->getParameter("C_2"),
+                        const std::invalid_argument &);
       TSM_ASSERT_THROWS_NOTHING("Function should have a C_4 parameter",
                                 profile->getParameter("C_4"));
     }

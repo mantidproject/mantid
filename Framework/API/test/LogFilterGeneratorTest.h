@@ -43,7 +43,8 @@ public:
   void test_logExistsButIsNotNumericTimeSeries_throws() {
     auto ws = createTestWorkspace();
     LogFilterGenerator generator(LogFilterGenerator::FilterType::Status, ws);
-    TS_ASSERT_THROWS(generator.generateFilter("BadLog"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(generator.generateFilter("BadLog"),
+                     const std::invalid_argument &);
   }
 
   void test_typeIsNone_noFilterReturned() {

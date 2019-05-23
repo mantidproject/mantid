@@ -196,7 +196,8 @@ public:
 
   void
   test_that_setResolution_will_throw_when_provided_an_index_that_is_out_of_range() {
-    TS_ASSERT_THROWS(m_model->setResolution(m_workspace, 5), const std::out_of_range &);
+    TS_ASSERT_THROWS(m_model->setResolution(m_workspace, 5),
+                     const std::out_of_range &);
   }
 
 private:

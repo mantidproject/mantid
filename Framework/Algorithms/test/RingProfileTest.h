@@ -33,7 +33,8 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // check numbins is only integer > 1
-    TS_ASSERT_THROWS(alg.setProperty("NumBins", -3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NumBins", -3),
+                     const std::invalid_argument &);
     // ange between [-360, 360]
     TS_ASSERT_THROWS(alg.setProperty("StartAngle", 500.0),
                      const std::invalid_argument &);

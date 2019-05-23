@@ -50,14 +50,18 @@ public:
 
   void test_nonpositive_order() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0),
+                     const std::invalid_argument &);
   }
 
   void test_nbreak_too_small() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3),
                      const std::invalid_argument &);
   }

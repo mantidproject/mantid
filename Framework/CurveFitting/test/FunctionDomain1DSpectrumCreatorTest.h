@@ -73,19 +73,22 @@ public:
     TestableFunctionDomain1DSpectrumCreator creator;
 
     // throws, because workspace and index are not set.
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(),
+                     const std::invalid_argument &);
 
     creator.setMatrixWorkspace(
         WorkspaceCreationHelper::create2DWorkspace123(10, 15));
     // still throws, since workspace index has not been set explicitly.
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(),
+                     const std::invalid_argument &);
 
     creator.setWorkspaceIndex(4);
     TS_ASSERT_THROWS_NOTHING(creator.throwIfWorkspaceInvalid());
 
     creator.setWorkspaceIndex(34);
     // throws also, because index is invalid
-    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(creator.throwIfWorkspaceInvalid(),
+                     const std::invalid_argument &);
   }
 
   void testGetDomainSize() {

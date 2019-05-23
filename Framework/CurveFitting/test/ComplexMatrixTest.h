@@ -315,7 +315,8 @@ public:
     m.set(3, 2, 32);
     m.set(3, 3, 33);
 
-    TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3), const std::runtime_error &);
+    TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3),
+                     const std::runtime_error &);
   }
 
   void test_eigenSystem_rectangular_throw() {

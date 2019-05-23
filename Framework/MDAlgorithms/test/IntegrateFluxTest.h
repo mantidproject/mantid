@@ -239,7 +239,8 @@ private:
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inWSName);
     alg.setPropertyValue("OutputWorkspace", outWSName);
-    TS_ASSERT_THROWS(alg.setProperty("NPoints", 1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NPoints", 1),
+                     const std::invalid_argument &);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();

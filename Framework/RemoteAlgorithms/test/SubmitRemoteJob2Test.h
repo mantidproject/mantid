@@ -148,7 +148,8 @@ public:
                      const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("Transaction", "anything"),
                      const std::runtime_error &);
-    TS_ASSERT_THROWS(s.setPropertyValue("ID", "anything"), const std::runtime_error &);
+    TS_ASSERT_THROWS(s.setPropertyValue("ID", "anything"),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(s.setPropertyValue("ScriptName", ""),
                      const std::invalid_argument &);
     TS_ASSERT_THROWS(s.setPropertyValue("Scrip", "any name"),

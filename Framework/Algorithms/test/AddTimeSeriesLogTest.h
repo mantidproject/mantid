@@ -81,21 +81,24 @@ public:
     Mantid::Algorithms::AddTimeSeriesLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""),
+                     const std::invalid_argument &);
   }
 
   void test_empty_time_not_allowed() {
     Mantid::Algorithms::AddTimeSeriesLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Time", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Time", ""),
+                     const std::invalid_argument &);
   }
 
   void test_empty_value_not_allowed() {
     Mantid::Algorithms::AddTimeSeriesLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""),
+                     const std::invalid_argument &);
   }
 
   void test_time_as_non_iso_formatted_string_throws_invalid_argument() {

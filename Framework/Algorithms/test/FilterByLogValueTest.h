@@ -46,7 +46,8 @@ public:
         "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // LogName must not be empty
-    TS_ASSERT_THROWS(alg.setProperty("LogName", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogName", ""),
+                     const std::invalid_argument &);
 
     // TimeTolerance cannot be negative
     TS_ASSERT_THROWS(alg.setProperty("TimeTolerance", -0.1),
@@ -55,7 +56,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 0.0));
 
     // LogBoundary must be one of "Centre" and "Left"
-    TS_ASSERT_THROWS(alg.setProperty("LogBoundary", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogBoundary", ""),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setProperty("LogBoundary", "Middle"),
                      const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary", "Left"));

@@ -217,8 +217,10 @@ public:
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1), const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", -1),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("NoOfMasses", 0),
+                     const std::invalid_argument &);
   }
 
   void test_setting_sampledensity_zero_or_negative_throws_invalid_argument() {
@@ -251,7 +253,8 @@ public:
 
     TS_ASSERT_THROWS(alg.setProperty("BeamRadius", -1.5),
                      const std::invalid_argument &);
-    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("BeamRadius", 0.0),
+                     const std::invalid_argument &);
   }
 
   void test_input_workspace_with_detector_that_has_no_shape_throws_exception() {

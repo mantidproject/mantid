@@ -137,7 +137,8 @@ public:
     TS_ASSERT(!i.getSource());
     ObjComponent *s = new ObjComponent("");
     // Cannot have an unnamed source
-    TS_ASSERT_THROWS(i.markAsSource(s), const Exception::InstrumentDefinitionError &);
+    TS_ASSERT_THROWS(i.markAsSource(s),
+                     const Exception::InstrumentDefinitionError &);
     s->setName("source");
     TS_ASSERT_THROWS_NOTHING(i.markAsSource(s));
     TS_ASSERT_EQUALS(i.getSource().get(), s);

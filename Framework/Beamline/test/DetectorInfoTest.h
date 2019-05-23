@@ -55,7 +55,8 @@ public:
   }
 
   void test_constructor_length_mismatch() {
-    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), const std::runtime_error &);
+    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)),
+                     const std::runtime_error &);
   }
 
   void test_assign_componentInfo() {

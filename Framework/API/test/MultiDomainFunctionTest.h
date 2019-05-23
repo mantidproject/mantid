@@ -233,10 +233,12 @@ public:
     FunctionValues values(domain);
 
     multi.setDomainIndex(0, 3);
-    TS_ASSERT_THROWS(multi.function(domain, values), const std::invalid_argument &);
+    TS_ASSERT_THROWS(multi.function(domain, values),
+                     const std::invalid_argument &);
 
     multi.setDomainIndex(0, 4);
-    TS_ASSERT_THROWS(multi.function(domain, values), const std::invalid_argument &);
+    TS_ASSERT_THROWS(multi.function(domain, values),
+                     const std::invalid_argument &);
   }
 
   void test_calc() {

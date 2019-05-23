@@ -22,7 +22,8 @@ public:
   void test_Default_Object_Throws_When_Computing_Pulse_Variance() {
     using namespace Mantid::API;
     FermiChopperModel chopper;
-    TS_ASSERT_THROWS(chopper.pulseTimeVariance(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(chopper.pulseTimeVariance(),
+                     const std::invalid_argument &);
   }
 
   void test_Getters_Produce_Expected_Values_When_Set_By_Settings() {
@@ -67,7 +68,8 @@ public:
     chopper->setAngularVelocityInHz(350);
     chopper->setChopperRadius(155.0 / 1000.);
 
-    TS_ASSERT_THROWS(chopper->pulseTimeVariance(), const std::invalid_argument &);
+    TS_ASSERT_THROWS(chopper->pulseTimeVariance(),
+                     const std::invalid_argument &);
   }
 
   void

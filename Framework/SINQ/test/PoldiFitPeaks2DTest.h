@@ -63,8 +63,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(spectrumCalculator.setDeltaT(2.0));
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 2.0);
 
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(0.0), const std::invalid_argument &);
-    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(-1.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(0.0),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(spectrumCalculator.setDeltaT(-1.0),
+                     const std::invalid_argument &);
   }
 
   void testSetDeltaTFromWorkspace() {

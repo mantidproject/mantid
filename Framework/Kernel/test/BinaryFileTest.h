@@ -62,7 +62,8 @@ public:
   BinaryFileTest() { dummy_file = "dummy.bin"; }
 
   void testFileNotFound() {
-    TS_ASSERT_THROWS(file.open("nonexistentfile.dat"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(file.open("nonexistentfile.dat"),
+                     const std::invalid_argument &);
   }
 
   void testFileWrongSize() {
@@ -185,7 +186,8 @@ public:
     DasEvent *buffer = nullptr;
     TS_ASSERT_EQUALS(file2.getNumElements(), 0);
     TS_ASSERT_THROWS(file2.loadAll(), const std::runtime_error &);
-    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(), const std::runtime_error &);
+    TS_ASSERT_THROWS(data = file2.loadAllIntoVector(),
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), const std::runtime_error &);
   }
 };

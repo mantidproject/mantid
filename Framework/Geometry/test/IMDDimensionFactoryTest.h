@@ -118,7 +118,8 @@ public:
     TS_ASSERT_THROWS(createDimension(missingID), const std::invalid_argument &);
     std::string missingName =
         constructNonReciprocalDimensionXMLString().erase(19, 19);
-    TS_ASSERT_THROWS(createDimension(missingName), const std::invalid_argument &);
+    TS_ASSERT_THROWS(createDimension(missingName),
+                     const std::invalid_argument &);
     std::string missingUpperBounds =
         constructNonReciprocalDimensionXMLString().erase(38, 30);
     TS_ASSERT_THROWS(createDimension(missingUpperBounds),

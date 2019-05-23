@@ -170,7 +170,8 @@ public:
 
   void test_Setting_Neither_ChemicalFormula_And_AtomicNumber_Throws_Error() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setName("Nickel").build(), const std::runtime_error &);
+    TS_ASSERT_THROWS(builder.setName("Nickel").build(),
+                     const std::runtime_error &);
   }
 
   void test_Setting_Both_ChemicalFormula_And_AtomicNumber_Throws_Error() {

@@ -479,8 +479,9 @@ public:
 
     DblMatrix M43 = boost::lexical_cast<DblMatrix>(
         "Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
-    TS_ASSERT_THROWS(M43.operator*(v),
-                     const Mantid::Kernel::Exception::MisMatch<size_t> &); // V3D only
+    TS_ASSERT_THROWS(
+        M43.operator*(v),
+        const Mantid::Kernel::Exception::MisMatch<size_t> &); // V3D only
   }
 
   /// Test that the constructor taking preset sizes returns a zero matrix

@@ -161,9 +161,11 @@ public:
 
   void testGaussiannDConstructor() {
     TSM_ASSERT_THROWS("GaussianWeighting2D should not allow unsigned cuttoff",
-                      GaussianWeightingnD(-1, 1), const std::invalid_argument &);
+                      GaussianWeightingnD(-1, 1),
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS("GaussianWeighting2D should not allow unsigned sigma",
-                      GaussianWeightingnD(1, -1), const std::invalid_argument &);
+                      GaussianWeightingnD(1, -1),
+                      const std::invalid_argument &);
     TSM_ASSERT_THROWS_NOTHING("GaussianWeighting2D should have constructed "
                               "with the valid provided arguments",
                               GaussianWeightingnD(1, 1));

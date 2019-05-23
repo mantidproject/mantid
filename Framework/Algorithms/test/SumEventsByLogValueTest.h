@@ -41,7 +41,8 @@ public:
         "InputWorkspace", WorkspaceCreationHelper::createEventWorkspace()));
 
     // LogName must not be empty
-    TS_ASSERT_THROWS(alg.setProperty("LogName", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(alg.setProperty("LogName", ""),
+                     const std::invalid_argument &);
   }
 
   void test_validateInputs() {

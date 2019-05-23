@@ -83,9 +83,12 @@ public:
   }
 
   void test_SetValueFromString() {
-    TS_ASSERT_THROWS(iProp->setValue("1"), const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(dProp->setValue("5.5"), const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(sProp->setValue("aValue"), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(iProp->setValue("1"),
+                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(dProp->setValue("5.5"),
+                     const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->setValue("aValue"),
+                     const Exception::NotImplementedError &);
   }
 
   void test_SetValueFromJson() {
