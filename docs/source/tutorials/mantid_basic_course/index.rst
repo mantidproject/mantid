@@ -16,8 +16,9 @@ Mantid Basic Course
    fitting_data/index
    live_data_analysis/index
    multi_dimensional_workspaces/index
+   using_workbench/index
 
-The mantid basics course gives a hands-on introdcution to many of the important features of Mantid.
+The mantid basics course gives a hands-on introduction to many of the important features of Mantid.
 You will learn how to load, process, visualise and analyse data using Mantid.
 
 **Sections** 
@@ -29,4 +30,5 @@ You will learn how to load, process, visualise and analyse data using Mantid.
 * :ref:`fitting_data`
 * :ref:`live_data_analysis`
 * :ref:`multi_dimensional_workspaces`
+* :ref:`using_workbench`
 
