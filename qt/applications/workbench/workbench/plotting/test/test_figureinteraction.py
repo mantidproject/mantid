@@ -32,6 +32,7 @@ class FigureInteractionTest(unittest.TestCase):
     def setUpClass(cls):
         cls.ws = CreateWorkspace(DataX=[10, 20, 30],
                                  DataY=[2, 3],
+                                 DataE=[0.02, 0.02],
                                  Distribution=False,
                                  UnitX='Wavelength',
                                  YUnitLabel='Counts',
