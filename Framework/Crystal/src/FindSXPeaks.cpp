@@ -346,13 +346,13 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   for (auto &finalPeak : finalv) {
     finalPeak.reduce();
     try {
-      Geometry::IPeak *peak = m_peaks->createPeak(finalPeak.getQ());
+      std::unique_ptr<Geometry::IPeak> peak = std::unique_ptr<Geometry::IPeak>(
+          m_peaks->createPeak(finalPeak.getQ()));
       if (peak) {
         peak->setIntensity(finalPeak.getIntensity());
         peak->setDetectorID(finalPeak.getDetectorId());
         peak->setGoniometerMatrix(goniometerMatrix);
         m_peaks->addPeak(*peak);
-        delete peak;
       }
     } catch (std::exception &e) {
       g_log.error() << e.what() << '\n';
