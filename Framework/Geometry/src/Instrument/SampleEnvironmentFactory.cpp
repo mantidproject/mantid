@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 namespace Mantid {
@@ -21,6 +23,8 @@ namespace Geometry {
 // Anonyomous
 //------------------------------------------------------------------------------
 namespace {
+// static logger object
+Mantid::Kernel::Logger g_log("SampleEnvironment");
 
 // Typedef for cache
 using SampleEnvironmentSpecCache =
@@ -136,18 +140,31 @@ SampleEnvironmentSpecFileFinder::find(const std::string &facility,
                                       const std::string &name) const {
   using Poco::File;
   using Poco::Path;
-  Path relpath(facility);
-  relpath.append(instrument).append(name + m_fileext);
-  for (const auto &prefixStr : m_rootDirs) {
-    Path prefix(prefixStr);
-    // Ensure the path is a directory (note that this does not create it!)
-    prefix.makeDirectory();
-    File fullpath(Poco::Path(prefix, relpath));
-    if (fullpath.exists()) {
-      return parseSpec(name, fullpath.path());
+
+  Path relpath_instr(facility);
+  relpath_instr.append(instrument).append(name + m_fileext);
+
+  Path relpath_facil(facility);
+  relpath_facil.append(name + m_fileext);
+
+  // check for the instrument environment, then facility environment
+  for (const auto rel_path : {relpath_instr, relpath_facil}) {
+    for (const auto &prefixStr : m_rootDirs) {
+      Path prefix(prefixStr);
+      // Ensure the path is a directory (note that this does not create it!)
+      prefix.makeDirectory();
+      File fullpath(Poco::Path(prefix, rel_path));
+      if (fullpath.exists()) {
+        g_log.debug() << "Found environment at \"" << fullpath.path() << "\"\n";
+        return parseSpec(name, fullpath.path());
+      } else {
+        g_log.debug() << "Failed to find environment at \"" << fullpath.path()
+                      << "\"\n";
+      }
     }
   }
-  // No match if we get here
+
+  // no match if we get here
   std::ostringstream msg;
   msg << "Unable to find sample environment file '" << name
       << "' for facility '" << facility << "' and instrument '" << instrument

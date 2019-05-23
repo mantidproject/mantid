@@ -32,6 +32,7 @@ Improvements
 - :ref:`Pseudo-Voigt <func-PseudoVoigt>` has been modified to be more in line with FULLPROF and GSAS.  One of its basic parameter, Height, is changed to Intensity.
 - 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - ARCS, CNCS, HYSPEC, NOMAD, POWGEN, SEQUOIA, SNAP, and VULCAN have had the axis that signed two-theta is calculated against changed from ``+y`` to ``+x``
+- :ref: `SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
 
 Bug fixes
 #########
