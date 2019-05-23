@@ -289,8 +289,8 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
   if (n != sizeof(comm)) {
     return -1;
   }
-  *command = reinterpret_cast<char *>(malloc(sizeof(comm.command) + 1));
   const auto commCommandSize = sizeof(comm.command);
+  *command = reinterpret_cast<char *>(malloc(commCommandSize + 1));
   strncpy(*command, comm.command, commCommandSize);
   (*command)[commCommandSize] = '\0';
   len_data = comm.len - sizeof(comm); /* in bytes */
