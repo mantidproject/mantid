@@ -3,6 +3,7 @@ set(PY_FILES
     helperfunctions.py
     plotfunctions.py
     plotfunctions3D.py
+    scales.py
     utility.py)
 
 add_subdirectory(modest_image)

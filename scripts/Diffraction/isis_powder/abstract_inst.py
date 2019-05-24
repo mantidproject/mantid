@@ -243,6 +243,23 @@ class AbstractInst(object):
 
         return d_spacing_group, tof_group
 
+    def create_solid_angle_corrections(self, vanadium, run_details):
+        """
+        Creates and saves the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
+        :param vanadium: The vanadium used to create this
+        :param run_details: The run details used
+        """
+        return None
+
+    def get_solid_angle_corrections(self, vanadium, run_details):
+        """
+        loads the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
+        :param vanadium: The vanadium run number used to create the solid angle corrections
+        :param run_details: The run details used
+        :return: the sold angle correction workspace on hrpd, otherwise none
+        """
+        return None
+
     # Steps applicable to all instruments
 
     @staticmethod

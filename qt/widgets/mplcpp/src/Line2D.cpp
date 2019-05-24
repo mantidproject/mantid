@@ -11,6 +11,7 @@
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using MantidQt::Widgets::MplCpp::ColorConverter;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {

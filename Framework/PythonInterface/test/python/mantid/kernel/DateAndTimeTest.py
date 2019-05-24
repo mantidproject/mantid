@@ -30,7 +30,7 @@ class DateAndTimeTest(unittest.TestCase):
 
     def test_convert_to_np(self):
         dt = DateAndTime(598471118000000000)
-        dt_np = timedelta64(dt.total_nanoseconds(), 'ns') + datetime64('1990-01-01T00:00')
+        dt_np = timedelta64(dt.totalNanoseconds(), 'ns') + datetime64('1990-01-01T00:00')
 
         # convert both into ISO8601 strings up to the seconds
         dt = str(dt)[:19]

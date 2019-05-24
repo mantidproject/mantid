@@ -66,6 +66,26 @@ class HelperFunctionsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.g1da = config['graph1d.autodistribution']
         config['graph1d.autodistribution'] = 'On'
+        cls.ws2d_non_distribution = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30],
+            DataY=[2, 3, 4, 5],
+            DataE=[1, 2, 3, 4],
+            NSpec=2,
+            Distribution=False,
+            UnitX='Wavelength',
+            YUnitLabel='Counts per microAmp.hour',
+            VerticalAxisUnit='DeltaE',
+            VerticalAxisValues=[4, 6, 8],
+            OutputWorkspace='ws2d_non_distribution')
+        cls.ws2d_distribution = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30],
+            DataY=[2, 3, 4, 5, 6],
+            DataE=[1, 2, 3, 4, 6],
+            NSpec=1,
+            Distribution=True,
+            UnitX='Wavelength',
+            YUnitLabel='Counts per microAmp.hour',
+            OutputWorkspace='ws2d_distribution')
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
                                          DataY=[2, 3, 4, 5],
                                          DataE=[1, 2, 3, 4],
@@ -138,6 +158,8 @@ class HelperFunctionsTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         config['graph1d.autodistribution'] = cls.g1da
+        DeleteWorkspace('ws2d_non_distribution')
+        DeleteWorkspace('ws2d_distribution')
         DeleteWorkspace('ws2d_histo')
         DeleteWorkspace('ws2d_point')
         DeleteWorkspace('ws1d_point')
@@ -164,7 +186,39 @@ class HelperFunctionsTest(unittest.TestCase):
 
     def test_get_axes_labels(self):
         axs = funcs.get_axes_labels(self.ws2d_histo)
-        self.assertEqual(axs, ('', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
+        self.assertEqual(axs, ('($\\AA$)$^{-1}$', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))
+
+    def test_y_units_correct_on_distribution_workspace(self):
+        ws = self.ws2d_distribution
+        labels = funcs.get_axes_labels(ws)
+        self.assertEqual(labels[0], 'Counts (microAmp.hour)$^{-1}$')
+
+    def test_y_units_for_distribution_and_autodist_off_with_latex(self):
+        ws = self.ws2d_distribution
+        labels = funcs.get_axes_labels(ws, plot_as_dist=False, use_latex=True)
+        self.assertEqual(labels[0], 'Counts (microAmp.hour)$^{-1}$')
+
+    def test_y_units_for_non_distribution_and_autodist_on_with_ascii(self):
+        ws = self.ws2d_non_distribution
+        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=False)
+        self.assertEqual(labels[0], 'Counts per microAmp.hour per Angstrom')
+
+    def test_y_units_for_non_distribution_and_autodist_on_with_latex(self):
+        ws = self.ws2d_non_distribution
+        labels = funcs.get_axes_labels(ws, plot_as_dist=True)
+        self.assertEqual(labels[0], 'Counts (microAmp.hour $\\AA$)$^{-1}$')
+
+    def test_y_units_for_non_distribution_with_no_x_or_y_unit_and_autodist_on(self):
+        ws = self.ws1d_point
+        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        self.assertEqual(labels[0], '')
+
+    def test_y_units_for_non_distribution_with_no_x_unit_and_autodist_on(self):
+        ws = self.ws2d_point
+        ws.setYUnit("Counts")
+        labels = funcs.get_axes_labels(ws, plot_as_dist=True, use_latex=True)
+        self.assertEqual(labels[0], 'Counts')
+        ws.setYUnit('')
 
     def test_get_axes_label_2d_MDWS(self):
         axs = funcs.get_axes_labels(self.ws_MD_2d)
@@ -226,6 +280,15 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
         np.testing.assert_allclose(data, np.arange(25).reshape(5, 5) * 0.1, atol=1e-10)
 
+    def test_get_md_data2d_bin_centers_transpose(self):
+        """
+        Same as the test above but should be the transpose
+        """
+        x, y, data = funcs.get_md_data2d_bin_centers(self.ws_MD_2d, mantid.api.MDNormalization.NumEventsNormalization, transpose=True)
+        np.testing.assert_allclose(x, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
+        np.testing.assert_allclose(y, np.array([-2.4, -1.2, 0, 1.2, 2.4]), atol=1e-10)
+        np.testing.assert_allclose(data, np.arange(25).reshape(5, 5).T * 0.1, atol=1e-10)
+
     def test_get_md_data1d(self):
         coords, data, err = funcs.get_md_data1d(self.ws_MD_1d, mantid.api.MDNormalization.NumEventsNormalization)
         np.testing.assert_allclose(coords, np.array([-8, -4, 0, 4, 8]), atol=1e-10)
@@ -251,6 +314,29 @@ class HelperFunctionsTest(unittest.TestCase):
         x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=True)
         np.testing.assert_allclose(x, np.array([[10, 20, 30], [10, 20, 30], [10, 20, 30]]))
         np.testing.assert_allclose(y, np.array([[4, 4, 4], [6, 6, 6], [8, 8, 8]]))
+
+    def test_get_matrix_2d_data_rect_transpose(self):
+        # same as the test above bur should be the transpose
+        # contour from aligned point data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_point, True, histogram2D=False, transpose=True)
+        np.testing.assert_allclose(y, np.array([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]]).T)
+        np.testing.assert_allclose(x, np.array([[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]]).T)
+        # mesh from aligned point data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_point, True, histogram2D=True, transpose=True)
+        np.testing.assert_allclose(y, np.array(
+            [[0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5], [0.5, 1.5, 2.5, 3.5, 4.5],
+             [0.5, 1.5, 2.5, 3.5, 4.5]]).T)
+        np.testing.assert_allclose(x, np.array(
+            [[0.5, 0.5, 0.5, 0.5, 0.5], [1.5, 1.5, 1.5, 1.5, 1.5], [2.5, 2.5, 2.5, 2.5, 2.5],
+             [3.5, 3.5, 3.5, 3.5, 3.5]]).T)
+        # contour from aligned histo data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=False, transpose=True)
+        np.testing.assert_allclose(y, np.array([[15, 25], [15, 25]]).T)
+        np.testing.assert_allclose(x, np.array([[5, 5], [7, 7]]).T)
+        # mesh from aligned histo data
+        x, y, z = funcs.get_matrix_2d_data(self.ws2d_histo, True, histogram2D=True, transpose=True)
+        np.testing.assert_allclose(y, np.array([[10, 20, 30], [10, 20, 30], [10, 20, 30]]).T)
+        np.testing.assert_allclose(x, np.array([[4, 4, 4], [6, 6, 6], [8, 8, 8]]).T)
 
     def test_get_matrix_2d_data_rag(self):
         # contour from ragged point data
@@ -288,7 +374,8 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(y, np.array([0.5, 1.5, 2.5]))
         # mesh from ragged histo data
         x, y, z = funcs.get_matrix_2d_ragged(self.ws2d_histo_rag, True, histogram2D=True)
-        np.testing.assert_allclose(x, np.array([1.03125, 1.96875, 2.90625, 3.84375, 4.78125, 5.71875, 6.65625, 7.59375, 8.53125, 9.46875]))
+        np.testing.assert_allclose(x, np.array(
+            [1.03125, 1.96875, 2.90625, 3.84375, 4.78125, 5.71875, 6.65625, 7.59375, 8.53125, 9.46875]))
         np.testing.assert_allclose(y, np.array([4., 6, 8., 10.]))
         # check that fails for uneven data
         self.assertRaises(ValueError, funcs.get_matrix_2d_data, self.ws2d_point_uneven, True)
@@ -593,6 +680,7 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_equal(indices, (1,slice(None),slice(None)))
         self.assertIn('label', kwargs)
         self.assertEqual(kwargs['label'], 'ws_MD_2d: Dim1=-1.2')
+
 
 if __name__ == '__main__':
     unittest.main()

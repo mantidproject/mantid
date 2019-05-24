@@ -1,5 +1,5 @@
 
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtWidgets, QtCore, QtGui, PYQT4
 from qtpy.QtCore import Slot
 
 """
@@ -384,8 +384,16 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
                 mime_data = QtCore.QMimeData()
                 drag.setMimeData(mime_data)
 
-                # Create the appearance of dragging the tab content
-                pixmap = QtGui.QPixmap.grabWindow(self.parentWidget().currentWidget().winId())
+                if PYQT4:
+                    pixmap = QtGui.QPixmap.grabWindow(self.parentWidget().currentWidget().winId())
+                else:
+                    app = QtWidgets.QApplication.instance()
+                    desktop = app.desktop()
+                    screen_number = desktop.screenNumber(self.parentWidget().currentWidget())
+                    screen = app.screens()[screen_number]
+                    # Create the appearance of dragging the tab content
+                    pixmap = QtGui.QScreen.grabWindow(screen, self.parentWidget().currentWidget().winId())
+
                 target_pixmap = QtGui.QPixmap(pixmap.size())
                 target_pixmap.fill(QtCore.Qt.transparent)
                 painter = QtGui.QPainter(target_pixmap)

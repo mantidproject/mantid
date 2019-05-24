@@ -1348,6 +1348,11 @@ void IFunction::setAttributeValue(const std::string &attName,
   setAttribute(attName, att);
 }
 
+/// Returns the pointer to a child function
+IFunction_sptr IFunction::getFunction(std::size_t) const {
+  throw std::runtime_error("Function " + name() + " doesn't have children.");
+}
+
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;

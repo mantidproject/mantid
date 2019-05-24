@@ -18,7 +18,7 @@ parseListWidgetItem(const QString &listWidgetItem) {
         "Unexpected run label: \"" + listWidgetItem.toStdString() +
         "\". Please contact the development team with this message");
   }
-  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toInt(),
+  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toStdString(),
                                               pieces[1].toUInt());
 }
 
@@ -85,7 +85,7 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFittedPeaks(
     const RunLabel &runLabel) {
   userError("Invalid fitted peaks identifier",
             "Tried to plot invalid fitted peaks, run number " +
-                std::to_string(runLabel.runNumber) + " and bank ID " +
+                runLabel.runNumber + " and bank ID " +
                 std::to_string(runLabel.bank) +
                 ". Please contact the development team with this message");
 }
@@ -94,7 +94,7 @@ void EnggDiffMultiRunFittingQtWidget::reportPlotInvalidFocusedRun(
     const RunLabel &runLabel) {
   userError("Invalid focused run identifier",
             "Tried to plot invalid focused run, run number " +
-                std::to_string(runLabel.runNumber) + " and bank ID " +
+                runLabel.runNumber + " and bank ID " +
                 std::to_string(runLabel.bank) +
                 ". Please contact the development team with this message");
 }
@@ -240,7 +240,7 @@ void EnggDiffMultiRunFittingQtWidget::updateRunList(
     const std::vector<RunLabel> &runLabels) {
   m_ui.listWidget_runLabels->clear();
   for (const auto &runLabel : runLabels) {
-    const auto labelStr = QString::number(runLabel.runNumber) + tr("_") +
+    const auto labelStr = QString(runLabel.runNumber.c_str()) + tr("_") +
                           QString::number(runLabel.bank);
     m_ui.listWidget_runLabels->addItem(labelStr);
   }

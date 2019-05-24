@@ -20,6 +20,7 @@ class MuonGuiContext(dict):
     def __init__(self, *args, **kwargs):
         super(MuonGuiContext, self).__init__(*args, **kwargs)
         self.gui_variables_notifier = GuiVariablesNotifier(self)
+        self.gui_variable_non_calulation_notifier = GuiVariablesNotifier(self)
 
     def update_and_send_signal(self, *args, **kwargs):
         updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
@@ -29,8 +30,19 @@ class MuonGuiContext(dict):
         super(MuonGuiContext, self).update(*args, **kwargs)
         self.gui_variables_notifier.notify_subscribers()
 
+    def update_and_send_non_calculation_signal(self, *args, **kwargs):
+        updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
+        if not updated_items and kwargs:
+            return
+
+        super(MuonGuiContext, self).update(*args, **kwargs)
+        self.gui_variable_non_calulation_notifier.notify_subscribers()
+
     def add_subscriber(self, observer):
         self.gui_variables_notifier.add_subscriber(observer)
+
+    def add_non_calc_subscriber(self, observer):
+        self.gui_variable_non_calulation_notifier.add_subscriber(observer)
 
     def period_string(self, run=None):
         summed_periods = self["SummedPeriods"] if 'SummedPeriods' in self else [1]

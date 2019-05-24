@@ -122,7 +122,7 @@ class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
 
         # check the refined peaks.
         refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
-        self.assertEquals(refinedPeaks.rowCount(), 11)
+        self.assertEquals(refinedPeaks.rowCount(), 10)
 
         # check that raw parameters exist
         self.assertTrue(AnalysisDataService.doesExist('poldi_data_6904_raw_fit_parameters'))

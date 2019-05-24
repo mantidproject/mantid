@@ -851,16 +851,19 @@
 <facility name="ANSTO" FileExtensions=".nxs,.tar,.hdf">
   <timezone>Australia/Sydney</timezone>
 
-  <instrument name="Bilby">
+  <instrument name="BILBY" shortname="BBY">
+    <zeropadding size="7"/>
     <technique>Small Angle Scattering</technique>
   </instrument>
 
-  <instrument name="EMUau">
+  <instrument name="EMUau" shortname="EMU">
+    <zeropadding size="7"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
 
-  <instrument name="PELICAN">
+  <instrument name="PELICAN" shortname="PLN">
+    <zeropadding size="7"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Inelastic Neutron Scattering</technique>
   </instrument>

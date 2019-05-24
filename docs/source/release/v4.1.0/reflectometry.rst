@@ -9,6 +9,15 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+
+ISIS Reflectometry Interface
+----------------------------
+
+Bug fixes
+#########
+
+- Fixed an error about an unknown property value when starting the live data monitor from the reflectometry interface.
+
 Algorithms
 ----------
 

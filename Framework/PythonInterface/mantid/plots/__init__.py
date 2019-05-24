@@ -20,6 +20,7 @@ from collections import Iterable
 from mantid.kernel import logger
 from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots import plotfunctions3D
+from mantid.plots.scales import PowerScale, SquareScale
 from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
@@ -29,6 +30,7 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
+from matplotlib.scale import register_scale
 from matplotlib.table import Table
 
 try:
@@ -953,3 +955,5 @@ class MantidAxes3D(Axes3D):
 
 register_projection(MantidAxes)
 register_projection(MantidAxes3D)
+register_scale(PowerScale)
+register_scale(SquareScale)

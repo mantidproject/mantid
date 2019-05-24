@@ -95,7 +95,7 @@ void IKafkaStreamDecoder::loadInstrument(const std::string &name,
     alg->execute();
   } catch (std::exception &exc) {
     logger.warning() << "Error loading instrument '" << name
-                    << "': " << exc.what() << "\n";
+                     << "': " << exc.what() << "\n";
   }
 }
 } // namespace LiveData
