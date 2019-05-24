@@ -133,23 +133,6 @@ std::vector<ValueType> extractVector(const DataSet &data) {
   return values;
 }
 
-// Function to read in a dataset into a vector
-template <typename ValueType>
-std::vector<ValueType> get1DDataset(const H5std_string &dataset,
-                                    const H5::Group &group) {
-  DataSet data = group.openDataSet(dataset);
-  return extractVector<ValueType>(data);
-}
-
-// Function to read in a dataset into a vector
-template <typename ValueType>
-std::vector<ValueType> get1DDataset(const H5File &file,
-                                    const H5std_string &dataset) {
-  // Open data set
-  DataSet data = file.openDataSet(dataset);
-  return extractVector<ValueType>(data);
-}
-
 /**
  * Parser as local class. Makes logging (side-effect) easier.
  */
@@ -158,14 +141,44 @@ private:
   // Logger object
   std::unique_ptr<Logger> m_logger;
 
-public:
-  explicit Parser(std::unique_ptr<Logger> &&logger)
-      : m_logger(std::move(logger)) {}
+  /**
+   * The function allows us to determine where problems are and logs key
+   * information.
+   */
+  template <typename T> DataSet openDataSet(T host, const std::string name) {
+    DataSet ret;
+    try {
+      ret = host.openDataSet(name);
+    } catch (H5::Exception &ex) {
+      // Capture key information
+      m_logger->error(ex.getFuncName());
+      m_logger->error(ex.getDetailMsg());
+      throw;
+    }
+    return ret;
+  }
+
+  // Function to read in a dataset into a vector
+  template <typename ValueType>
+  std::vector<ValueType> get1DDataset(const H5std_string &dataset,
+                                      const H5::Group &group) {
+    DataSet data = openDataSet(group, dataset);
+    return extractVector<ValueType>(data);
+  }
+
+  // Function to read in a dataset into a vector
+  template <typename ValueType>
+  std::vector<ValueType> get1DDataset(const H5File &file,
+                                      const H5std_string &dataset) {
+    // Open data set
+    DataSet data = openDataSet(file, dataset);
+    return extractVector<ValueType>(data);
+  }
 
   std::string get1DStringDataset(const std::string &dataset,
                                  const Group &group) {
     // Open data set
-    DataSet data = group.openDataSet(dataset);
+    DataSet data = openDataSet(group, dataset);
     auto dataType = data.getDataType();
     // Use a different read method if the string is of variable length type
     if (dataType.isVariableStr()) {
@@ -233,7 +246,7 @@ public:
         H5std_string childPath = parentGroup.getObjnameByIdx(i);
         // Open the sub group
         if (childPath == name) {
-          auto childDataset = parentGroup.openDataSet(childPath);
+          auto childDataset = openDataSet(parentGroup, childPath);
           return boost::optional<DataSet>(childDataset);
         }
       }
@@ -401,7 +414,7 @@ public:
     // (they are _passive_ transformations)
     while (dependency != NO_DEPENDENCY) {
       // Open the transformation data set
-      DataSet transformation = file.openDataSet(dependency);
+      DataSet transformation = openDataSet(file, dependency);
 
       // Get magnitude of current transformation
       double magnitude = get1DDataset<double>(file, dependency)[0];
@@ -478,7 +491,7 @@ public:
     for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
       H5std_string objName = detectorGroup.getObjnameByIdx(i);
       if (objName == DETECTOR_IDS) {
-        const auto data = detectorGroup.openDataSet(objName);
+        const auto data = openDataSet(detectorGroup, objName);
         if (data.getDataType().getSize() == 8) {
           // Note the narrowing here!
           detIds = convertVector<int64_t, Mantid::detid_t>(
@@ -711,6 +724,10 @@ public:
       }
     }
   }
+
+public:
+  explicit Parser(std::unique_ptr<Logger> &&logger)
+      : m_logger(std::move(logger)) {}
 
   std::unique_ptr<const Mantid::Geometry::Instrument>
   extractInstrument(const H5File &file, const Group &root) {

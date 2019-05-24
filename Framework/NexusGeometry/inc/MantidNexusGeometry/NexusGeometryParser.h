@@ -23,6 +23,7 @@ namespace NexusGeometry {
 class MANTID_NEXUSGEOMETRY_DLL Logger {
 public:
   virtual void warning(const std::string &warning) = 0;
+  virtual void error(const std::string &warning) = 0;
   virtual ~Logger() {}
 };
 
@@ -39,6 +40,9 @@ template <typename T> std::unique_ptr<Logger> makeLogger(T *adaptee) {
     Adapter(T *adaptee) : m_adaptee(adaptee) {}
     virtual void warning(const std::string &message) override {
       m_adaptee->warning(message);
+    }
+    virtual void error(const std::string &message) override {
+      m_adaptee->error(message);
     }
   };
   return std::make_unique<Adapter>(adaptee);
