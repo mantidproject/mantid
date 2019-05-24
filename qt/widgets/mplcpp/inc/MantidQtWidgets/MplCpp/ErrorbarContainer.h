@@ -7,16 +7,17 @@
 #ifndef MPLCPP_ERRORBARCONTAINER_H
 #define MPLCPP_ERRORBARCONTAINER_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-class MANTID_MPLCPP_DLL ErrorbarContainer : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL ErrorbarContainer
+    : public Common::Python::InstanceHolder {
 public:
-  ErrorbarContainer(Python::Object pyInstance);
+  explicit ErrorbarContainer(Common::Python::Object pyInstance);
 };
 
 } // namespace MplCpp

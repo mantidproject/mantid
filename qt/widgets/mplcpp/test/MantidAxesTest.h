@@ -19,6 +19,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace MantidQt::Widgets::MplCpp;
+using namespace MantidQt::Widgets::Common;
 
 class MantidAxesTest : public CxxTest::TestSuite {
 public:

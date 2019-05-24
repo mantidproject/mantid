@@ -14,7 +14,7 @@
 
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::PanZoomTool;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+namespace Python = MantidQt::Widgets::Common::Python;
 
 class PanZoomToolTest : public CxxTest::TestSuite {
 public:

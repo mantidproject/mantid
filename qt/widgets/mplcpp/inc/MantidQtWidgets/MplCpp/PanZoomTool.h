@@ -7,8 +7,8 @@
 #ifndef MPLCPP_PANZOOMTOOL_H
 #define MPLCPP_PANZOOMTOOL_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -23,7 +23,7 @@ class FigureCanvasQt;
  * it will not keep it alive. It is assumed that the canvas lifetime
  * is handled separately.
  */
-class MANTID_MPLCPP_DLL PanZoomTool : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL PanZoomTool : public Common::Python::InstanceHolder {
 public:
   explicit PanZoomTool(FigureCanvasQt *canvas);
   /// @name Zoom tools

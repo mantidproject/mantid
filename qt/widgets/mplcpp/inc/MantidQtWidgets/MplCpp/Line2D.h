@@ -31,7 +31,7 @@ public:
 
 public:
   explicit Line2D(Common::Python::Object obj);
-  Line2D(Python::Object obj, std::vector<double> &&xdataOwner,
+  Line2D(Common::Python::Object obj, std::vector<double> &&xdataOwner,
          std::vector<double> &&ydataOwner);
   Line2D(Common::Python::Object obj, Line2D::Data &&dataOwner);
   ~Line2D() noexcept;

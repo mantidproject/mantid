@@ -14,6 +14,7 @@ using Mantid::PythonInterface::callMethodNoCheck;
 
 namespace MantidQt {
 namespace Widgets {
+namespace Python = Common::Python;
 namespace MplCpp {
 
 namespace {

@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace Widgets {
+namespace Python = Common::Python;
 namespace MplCpp {
 
 ErrorbarContainer::ErrorbarContainer(Python::Object pyInstance)

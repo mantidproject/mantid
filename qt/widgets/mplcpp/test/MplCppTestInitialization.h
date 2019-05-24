@@ -26,7 +26,7 @@ class PythonInterpreter : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
     using Mantid::Kernel::ConfigService;
-    namespace Python = MantidQt::Widgets::MplCpp::Python;
+    namespace Python = MantidQt::Widgets::Common::Python;
 
     Py_Initialize();
     PyEval_InitThreads();

@@ -20,7 +20,7 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL MantidAxes : public Axes {
 public:
-  MantidAxes(Python::Object pyObj);
+  MantidAxes(Common::Python::Object pyObj);
 
   /// @name Plot creation functions
   ///@{

@@ -11,6 +11,7 @@ using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace MantidQt {
 namespace Widgets {
+namespace Python = Common::Python;
 namespace MplCpp {
 using MatrixWorkpaceToPython = Python::ToPythonValue<MatrixWorkspace_sptr>;
 
