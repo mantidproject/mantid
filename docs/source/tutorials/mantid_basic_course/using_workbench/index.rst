@@ -18,7 +18,7 @@ Mantid Workbench
 **Sections** 
 
 * :ref:`01_opening_mantid_workbench`
-* :ref:`02_plotting_in_workbenc`
+* :ref:`02_plotting_in_workbench`
 * :ref:`03_Working_with_Python_in_Workbench`
-* :ref:`02_plotting_in_workbenc`
 * :ref:`04_What_is_missing`
+* :ref:`05_Exercises`

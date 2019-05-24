@@ -4,7 +4,7 @@
 Exercises
 =========
 
-It is possible to replicate plots you've made previously in MantidPlot entirly using python script in Workbench. 
+It is possible to replicate plots you've made previously in MantidPlot entirely using python script in Workbench. 
 For all these exercises do not make any changes to the default imports given by the Workbench script editor.
 You can execute the script after each step to make sure that there are no errors raised.
 

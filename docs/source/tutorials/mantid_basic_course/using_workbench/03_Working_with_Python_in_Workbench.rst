@@ -30,20 +30,20 @@ all print statements must not use brackets.
 
    from mantid.simpleapi import *
    
-This imports all the algorithems from Mantid to be used within your Python script.
+This imports all the algorithms from Mantid to be used within your Python script.
 
 .. code-block:: python
 
    import matplotlib.pyplot as plt
    import numpy as np
 
-This imports Matplotlib for use as well the the excellent NumPy package.
+This imports Matplotlib for use as well as the excellent NumPy package.
 
 2. Tabs and multiple scripts
 ============================
 
 To open a new script you can click on the **+** button, or to open an existing script in a new tab go to “File” -> “Open Script” in the Workbench taskbar or use the hotkey `Ctrl + o`.
-From the script window you can also tab different scripts working on each independanty and multiple scripts can be run simultainiusly. Workbench will restore any tabs that were open
+From the script window you can also tab different scripts working on each independently and multiple scripts can be run simultaneously. Workbench will restore any tabs that were open
 the last time Mantid was shut down.
 
 3. Running, aborting, and options
@@ -56,7 +56,7 @@ From here you can run or abort your script, toggle options for accesability, and
 
 * Run: This executes the currently selected text in your script, if nothing is selected it will run the entire script. The green play button serves as a shortcut for this option.
 * Run All: This will run the entire script regardless of whether any text is selected.
-* Abort: This imediatly aborts the currently running script. The red stop button serves as a shortcut for this option.
+* Abort: This immediately aborts the currently running script. The red stop button serves as a shortcut for this option.
 * Find/Replace: this opens the find and replace toolbar which can be used to make quick mass changes to your script or find sections of code.
 * Comment/Uncomment: This tool comments out or removes commenting on highlighted lines by adding or removing ``#`` at the begining of the line.
 * Toggle Whitespace visible: Turning this on will make all spaces apear as faint dots and all tabs appear as arrows.

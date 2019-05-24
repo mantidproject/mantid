@@ -55,7 +55,8 @@ MantidPlot provides a range of different interfaces that are not yet available i
   
 Check with others that these are not in Workbench or what command opens it.
 ===========================================================================
-You can not open dialoge boxes via the interpreter of script editor using funtions such as ``LoadDialog()``. This may limit the interactablity of scripts run 
+You can not open dialog boxes via the interpreter or script editor using functions such as ``LoadDialog()``. This may limit the ability to interact with scripts run 
+``
 through Workbench.
 
 getInstrumentView("workspace-name")
