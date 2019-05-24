@@ -608,9 +608,9 @@ bool VesuvioCalculateMS::generateScatter(const Kernel::V3D &startPos,
   if (m_sampleShape->interceptSurface(scatterTrack) != 1) {
     return false;
   }
+
   // Find distance inside object and compute probability of scattering
-  const auto &link = scatterTrack.cbegin();
-  double totalObjectDist = link->distInsideObject;
+  double totalObjectDist = scatterTrack.distInsideObject();
   const double scatterProb = 1.0 - exp(-m_sampleProps->mu * totalObjectDist);
   // Select a random point on the track that is the actual scatter point
   // from the scattering probability distribution
@@ -618,9 +618,9 @@ bool VesuvioCalculateMS::generateScatter(const Kernel::V3D &startPos,
       -log(1.0 - m_randgen->flat() * scatterProb) / m_sampleProps->mu;
   const double fraction = dist / totalObjectDist;
   // Scatter point is then entry point + fraction of width in each direction
-  scatterPt = link->entryPoint;
-  V3D edgeDistances = (link->exitPoint - link->entryPoint);
-  scatterPt += edgeDistances * fraction;
+  const auto &link = scatterTrack.cbegin(); // only one link allowed
+  const V3D edgeDistances = (link->exitPoint - link->entryPoint);
+  scatterPt = link->entryPoint + (edgeDistances * fraction);
   // Update weight
   weight *= scatterProb;
   return true;
@@ -745,8 +745,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(
     Geometry::Track scatterToDet(scatterPt, scToDet);
     if (m_sampleShape->interceptSurface(scatterToDet) > 0) {
       scang = direcBeforeSc.angle(scToDet);
-      const auto &link = scatterToDet.cbegin();
-      distToExit = link->distInsideObject;
+      distToExit = scatterToDet.distInsideObject();
       break;
     }
     // if point is very close surface then there may be no valid intercept so
