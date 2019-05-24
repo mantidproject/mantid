@@ -71,8 +71,8 @@ MDNorm::MDNorm()
     : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true),
       m_W(3, 3, true), m_transformation(), m_hX(), m_kX(), m_lX(), m_eX(),
       m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0),
-      m_Ei(0.0), m_diffraction(true), m_accumulate(false),
-      m_dEIntegrated(true), m_samplePos(), m_beamDir(), convention("") {}
+      m_Ei(0.0), m_diffraction(true), m_accumulate(false), m_dEIntegrated(true),
+      m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -793,8 +793,8 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
   auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
-    Mantid::Geometry::MDFrameArgument argument(Mantid::Geometry::HKL::HKLName,
-                                               Mantid::Kernel::Units::Symbol::RLU);
+    Mantid::Geometry::MDFrameArgument argument(
+        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
     auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
     Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
     for (size_t i : qDimensionIndices) {
@@ -974,15 +974,14 @@ for (int64_t i = 0; i < ndets; i++) {
 
   // get the flux spectrum number
   size_t wsIdx = 0;
-  if(m_diffraction) {
-    auto index=fluxDetToIdx.find(detID);
+  if (m_diffraction) {
+    auto index = fluxDetToIdx.find(detID);
     if (index != fluxDetToIdx.end()) {
       wsIdx = index->second;
-    } else { //masked detector in flux, but not in input workspace
+    } else { // masked detector in flux, but not in input workspace
       continue;
     }
   }
-
 
   // Intersections
   this->calculateIntersections(intersections, theta, phi, Qtransform,
