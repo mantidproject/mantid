@@ -26,7 +26,7 @@ from mantid.kernel import config
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
-    get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_plot_as_distribution
+    get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_normalize_by_bin_width
 
 import mantid.plots.modest_image
 
@@ -38,11 +38,11 @@ _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 # ================================================
 
 
-def _setLabels1D(axes, workspace, indices=None, plot_as_dist=True):
+def _setLabels1D(axes, workspace, indices=None, normalize_by_bin_width=True):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
-    labels = get_axes_labels(workspace, indices, plot_as_dist)
+    labels = get_axes_labels(workspace, indices, normalize_by_bin_width)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[0])
 
@@ -82,10 +82,10 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                 workspace_artists = axes.tracked_workspaces.values()
             except AttributeError:
                 workspace_artists = None
-            plot_as_distribution, kwargs = get_plot_as_distribution(
+            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, workspace_artists, **kwargs)
             x, y, dy, dx = get_spectrum(workspace, workspace_index,
-                                        plot_as_distribution, with_dy, with_dx)
+                                        normalize_by_bin_width, with_dy, with_dx)
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
@@ -121,8 +121,8 @@ def _plot_impl(axes, workspace, args, kwargs):
         kwargs['linestyle'] = 'steps-post'
     else:
         x, y, _, _, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-        plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
-        _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
+        normalize_by_bin_width = on_off_to_bool(config['graph1d.autodistribution'])
+        _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
     return x, y, args, kwargs
 
 
@@ -141,7 +141,7 @@ def plot(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
-    :param plot_as_distribution: Plot the workspace as a distribution. If None default to config['graph1d.autodistribution']
+    :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to config['graph1d.autodistribution']
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
@@ -215,8 +215,8 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
-    plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
-    _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
+    normalize_by_bin_width = on_off_to_bool(config['graph1d.autodistribution'])
+    _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
 

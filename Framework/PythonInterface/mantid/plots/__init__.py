@@ -53,7 +53,7 @@ except ImportError:
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-from mantid.plots.helperfunctions import get_plot_as_distribution
+from mantid.plots.helperfunctions import get_normalize_by_bin_width
 
 
 def plot_decorator(func):
@@ -76,19 +76,19 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb, is_distribution,
+    def __init__(self, artists, data_replace_cb, is_normalized,
                  spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
-        :param is_distribution: bool specifying whether the line being plotted is a distribution
+        :param is_normalized: bool specifying whether the line being plotted is a distribution
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
         self.spec_num = spec_num
-        self.is_distribution = is_distribution
+        self.is_normalized = is_normalized
 
     def remove(self, axes):
         """
@@ -232,7 +232,7 @@ class MantidAxes(Axes):
             return None
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
-                               spec_num=None, is_distribution=None):
+                               spec_num=None, is_normalized=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -241,7 +241,7 @@ class MantidAxes(Axes):
         :param data_replace_cb: A function to call when the data is replaced to update
         the artist (optional)
         :param spec_num: The spectrum number associated with the artist (optional)
-        :param is_distribution: bool. The line being plotted is a distribution.
+        :param is_normalized: bool. The line being plotted is normalized by bin width
             This can be from either a distribution workspace or a workspace being
             plotted as a distribution
         :returns: The artists variable as it was passed in.
@@ -254,7 +254,7 @@ class MantidAxes(Axes):
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 is_distribution,
+                                                 is_normalized,
                                                  spec_num))
             self.check_axes_distribution_consistency()
         return artists
@@ -276,7 +276,7 @@ class MantidAxes(Axes):
         tracked_ws_distributions = []
         for artists in self.tracked_workspaces.values():
             for artist in artists:
-                tracked_ws_distributions.append(artist.is_distribution)
+                tracked_ws_distributions.append(artist.is_normalized)
         if len(tracked_ws_distributions) > 0:
             if not all(tracked_ws_distributions) and any(tracked_ws_distributions):
                 logger.warning("You are overlaying distribution and "
@@ -423,12 +423,12 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            plot_as_dist, kwargs = get_plot_as_distribution(
+            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self.tracked_workspaces.values(), pop=False, **kwargs)
-            is_distribution = workspace.isDistribution() or plot_as_dist
+            is_normalized = workspace.isDistribution() or normalize_by_bin_width
             return self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
-                _data_update, spec_num, is_distribution)
+                _data_update, spec_num, is_normalized)
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -512,12 +512,12 @@ class MantidAxes(Axes):
 
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
-            plot_as_dist, kwargs = get_plot_as_distribution(
+            normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self.tracked_workspaces.values(), pop=False, **kwargs)
-            is_distribution = workspace.isDistribution() or plot_as_dist
+            is_normalized = workspace.isDistribution() or normalize_by_bin_width
             return self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
-                _data_update, spec_num, is_distribution)
+                _data_update, spec_num, is_normalized)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 

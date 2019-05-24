@@ -157,7 +157,7 @@ class FigureInteractionTest(unittest.TestCase):
 
     def _test_toggle_normalization(self, errobars_on):
         fig = plot([self.ws], spectrum_nums=[1], errors=errobars_on,
-                   plot_kwargs={'plot_as_distribution': False})
+                   plot_kwargs={'normalize_by_bin_width': False})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)

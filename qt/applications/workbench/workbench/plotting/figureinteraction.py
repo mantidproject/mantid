@@ -174,7 +174,7 @@ class FigureInteraction(object):
         menu.addMenu(norm_menu)
 
     def _is_normalized(self, ax):
-        return ax.tracked_workspaces.values()[0][0].is_distribution
+        return ax.tracked_workspaces.values()[0][0].is_normalized
 
     def _set_normalization_bin_width(self, ax):
         if self._is_normalized(ax):
@@ -190,7 +190,7 @@ class FigureInteraction(object):
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
             workspace = ads.retrieve(arg_set['workspaces'])
-            arg_set['plot_as_distribution'] = not is_normalized
+            arg_set['normalize_by_bin_width'] = not is_normalized
             arg_set_copy = copy(arg_set)
             [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
             if 'specNum' not in arg_set:
@@ -204,8 +204,8 @@ class FigureInteraction(object):
             for ws_artist in ax.tracked_workspaces[workspace.name()]:
                 if ws_artist.spec_num == arg_set.get('specNum'):
                     ws_artist.replace_data(workspace, arg_set_copy)
-                    ws_artist.is_distribution = not is_normalized
-        y_label = get_axes_labels(workspace, plot_as_dist=not is_normalized)[0]
+                    ws_artist.is_normalized = not is_normalized
+        y_label = get_axes_labels(workspace, normalize_by_bin_width=not is_normalized)[0]
         ax.set_ylabel(y_label)
         ax.relim()
         ax.autoscale()
@@ -219,13 +219,13 @@ class FigureInteraction(object):
         :param ax: A MantidAxes object
         :return: bool
         """
-        plotted_as_distribution = []
+        plotted_normalized = []
         for workspace_name, artists in ax.tracked_workspaces.items():
             if not ads.retrieve(workspace_name).isDistribution():
-                plotted_as_distribution += [a.is_distribution for a in artists]
+                plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False
-        if all(plotted_as_distribution) or not any(plotted_as_distribution):
+        if all(plotted_normalized) or not any(plotted_normalized):
             return True
         return False
 
