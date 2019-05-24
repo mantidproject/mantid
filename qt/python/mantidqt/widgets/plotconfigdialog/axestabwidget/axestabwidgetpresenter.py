@@ -45,7 +45,8 @@ class AxesTabWidgetPresenter:
         ax.set_ylabel(new_props.ylabel)
         ax.set_yscale(new_props.yscale)
 
-    def generate_ax_name(self, ax):
+    @staticmethod
+    def generate_ax_name(ax):
         """
         Generate a name for the given axes. This will come from the
         title of the axes (if there is one) and the position of the axes
@@ -86,15 +87,19 @@ class AxesTabWidgetPresenter:
                        key=lambda x: x[x.rfind("("):])
         self.view.populate_select_axes_combo_box(names)
 
-    def replace_current_axes_name(self, old_name, new_name):
-        self.axes_names_dict[new_name] = self.axes_names_dict.pop(old_name)
+    def rename_current_axes(self, new_name):
+        """
+        Rename the current axes, updating the axes_names_dict and
+        the select_axes_combo_box
+        """
+        old_name = self.get_current_ax_name()
         self.view.set_current_axes_selector_text(new_name)
+        self.axes_names_dict[new_name] = self.axes_names_dict.pop(old_name)
 
     def set_ax_title(self, ax, new_title):
         """Set axes' title and update its entry in the axes selector"""
         ax.set_title(new_title)
-        self.replace_current_axes_name(self.get_current_ax_name(),
-                                       self.generate_ax_name(ax))
+        self.rename_current_axes(self.generate_ax_name(ax))
 
     def set_selected_ax_view_properties(self):
         """Update the properties in the view from the selected axes"""

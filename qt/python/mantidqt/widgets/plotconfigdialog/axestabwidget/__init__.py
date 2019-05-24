@@ -21,10 +21,10 @@ class AxProperties:
         cls.title = ax.get_title().encode('unicode_escape')
         cls.xlim = ax.get_xlim()
         cls.xlabel = ax.get_xlabel()
-        cls.xscale = ax.get_xscale()
+        cls.xscale = ax.get_xscale().title()
         cls.ylim = ax.get_ylim()
         cls.ylabel = ax.get_ylabel()
-        cls.yscale = ax.get_yscale()
+        cls.yscale = ax.get_yscale().title()
         return cls()
 
     @classmethod
@@ -37,9 +37,3 @@ class AxProperties:
         cls.ylabel = view.get_ylabel()
         cls.yscale = view.get_yscale()
         return cls()
-
-    def __str__(self):
-        s = ""
-        for attr, val in self.__dict__.items():
-            s += "{}: {}\n".format(attr, val)
-        return s
