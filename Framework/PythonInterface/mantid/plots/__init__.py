@@ -296,7 +296,6 @@ class MantidAxes(Axes):
             workspace_artist.remove(self)
         return self.is_empty(self)
 
-
     def replace_workspace_artists(self, workspace):
         """
         Replace the data of any artists relating to this workspace.
