@@ -145,7 +145,7 @@ private:
    * The function allows us to determine where problems are and logs key
    * information.
    */
-  template <typename T> DataSet openDataSet(T host, const std::string name) {
+  template <typename T> DataSet openDataSet(T host, const std::string &name) {
     DataSet ret;
     try {
       ret = host.openDataSet(name);
