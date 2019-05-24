@@ -156,6 +156,16 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
                 rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                 rebin_alg.execute()
                 workspace = rebin_alg.getProperty("OutputWorkspace").value
+        else:
+            pass
+            rebin_name = "RebinToWorkspace"
+            rebin_option = {"WorkspaceToRebin": workspace,
+                            "WorkspaceToMatch": monitor_workspace,
+                            "OutputWorkspace": EMPTY_NAME,
+                            "PreserveEvents": False}
+            rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
+            rebin_alg.execute()
+            workspace = rebin_alg.getProperty("OutputWorkspace").value
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY END
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -425,6 +435,18 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         clone_alg = create_child_algorithm(self, clone_name, **clone_options)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
+
+    def _create_dummy_mask_workspace(self, workspace):
+        x = list(workspace.readX(0))
+        y = [0.] * (len(x) - 1)  # y values are irrelevant
+
+        create_workspace_options = {"OutputWorkspace": "DummyMaskWorkspace",
+                                    "DataX": x,
+                                    "DataY": y,
+                                    "UnitX": "TOF"}
+        create_workspace_alg = create_child_algorithm(self, "CreateWorkspace", **create_workspace_options)
+        create_workspace_alg.execute()
+        return create_workspace_alg.getProperty("OutputWorkspace").value
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=10)
