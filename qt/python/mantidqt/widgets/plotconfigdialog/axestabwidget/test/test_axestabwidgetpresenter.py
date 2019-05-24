@@ -32,7 +32,6 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax.set_yscale('Log')
         ax2 = cls.fig.add_subplot(212)
         ax2.plot([-1000000, 10000], [10, 12], 'rx')
-        ax2.set_title("Second Axes")
 
     def _generate_presenter(self):
         mock_view = mock.MagicMock()
@@ -43,13 +42,15 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax0_name = Presenter.generate_ax_name(self.fig.get_axes()[0])
         self.assertEqual("My Axes: (0, 0)", ax0_name)
         ax1_name = Presenter.generate_ax_name(self.fig.get_axes()[1])
-        self.assertEqual("Second Axes: (1, 0)", ax1_name)
+        self.assertEqual("(1, 0)", ax1_name)
 
     def test_apply_properties_calls_setters_with_correct_properties(self):
         ax_mock = mock.MagicMock()
         presenter = self._generate_presenter()
         with mock.patch.object(presenter, 'get_current_ax', lambda: ax_mock):
             presenter.apply_properties()
+            # Mock properties object and view then test that the view's setters
+            # are called with the correct property values
             view_mock = presenter.view
             get_props_mock = view_mock.get_properties
             view_mock.get_properties.assert_called_once_with()
@@ -72,7 +73,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter()
         actual_dict = presenter.get_axes_names_dict()
         expected = {"My Axes: (0, 0)": self.fig.get_axes()[0],
-                    "Second Axes: (1, 0)": self.fig.get_axes()[1]}
+                    "(1, 0)": self.fig.get_axes()[1]}
         self.assertEqual(expected, actual_dict)
 
     def test_get_current_ax(self):
@@ -97,7 +98,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter()
         view_mock = presenter.view
         view_mock.populate_select_axes_combo_box.assert_called_once_with(
-            ["My Axes: (0, 0)", "Second Axes: (1, 0)"]
+            ["My Axes: (0, 0)", "(1, 0)"]
         )
 
     def test_rename_current_axes_calls_set_current_axes_selector_text(self):
@@ -114,7 +115,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         presenter.rename_current_axes(new_name)
         self.assertEqual(presenter.axes_names_dict,
                          {new_name: self.fig.get_axes()[0],
-                          "Second Axes: (1, 0)": self.fig.get_axes()[1]})
+                          "(1, 0)": self.fig.get_axes()[1]})
 
     def test_set_ax_title_sets_title_and_updates_axes_names_dict(self):
         presenter = self._generate_presenter()
