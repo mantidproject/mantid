@@ -304,7 +304,7 @@ def get_spectrum(workspace, wkspIndex, plot_as_distribution, withDy=False, withD
         dx = workspace.readDx(wkspIndex)
 
     if workspace.isHistogramData():
-        if plot_as_distribution:
+        if plot_as_distribution and not workspace.isDistribution():
             y = y / (x[1:] - x[0:-1])
             if dy is not None:
                 dy = dy / (x[1:] - x[0:-1])
@@ -413,7 +413,8 @@ def get_matrix_2d_ragged(workspace, distribution, histogram2D=False, transpose=F
     y = mantid.plots.helperfunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     z = numpy.empty([num_hist, num_edges], dtype=numpy.float64)
     for i in range(num_hist):
-        centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(workspace, i, distribution=distribution, withDy=False, withDx=False)
+        centers, ztmp, _, _ = mantid.plots.helperfunctions.get_spectrum(
+            workspace, i, plot_as_distribution=distribution, withDy=False, withDx=False)
         f = interp1d(centers, ztmp, kind='nearest', bounds_error=False, fill_value=numpy.nan)
         z[i] = f(x_centers)
     if histogram2D:

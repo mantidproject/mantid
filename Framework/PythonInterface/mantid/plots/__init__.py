@@ -108,13 +108,16 @@ class _WorkspaceArtists(object):
         if (not axes.is_empty(axes)) and axes.legend_ is not None:
             axes.legend().draggable()
 
-    def replace_data(self, workspace, plot_kwargs):
+    def replace_data(self, workspace, plot_kwargs=None):
         """Replace or replot artists based on a new workspace
         :param workspace: The new workspace containing the data
         :param plot_kwargs: Key word args to pass to plotting function
         """
-        new_artists = self._data_replace_cb(self._artists, workspace,
-                                            plot_kwargs)
+        if plot_kwargs:
+            new_artists = self._data_replace_cb(self._artists, workspace,
+                                                plot_kwargs)
+        else:
+            new_artists = self._data_replace_cb(self._artists, workspace)
         self._set_artists(new_artists)
 
     def _set_artists(self, artists):
@@ -228,8 +231,8 @@ class MantidAxes(Axes):
         else:
             return None
 
-    def track_workspace_artist(self, workspace, artists, is_distribution,
-                               data_replace_cb=None, spec_num=None):
+    def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
+                               spec_num=None, is_distribution=None):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -405,9 +408,13 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace, kwargs):
+            def _data_update(artists, workspace, new_kwargs=None):
                 # It's only possible to plot 1 line at a time from a workspace
-                x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
+                if new_kwargs:
+                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
+                                                           new_kwargs)
+                else:
+                    x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
                                                        kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
@@ -421,7 +428,7 @@ class MantidAxes(Axes):
             is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
-                is_distribution, _data_update, spec_num)
+                _data_update, spec_num, is_distribution)
         else:
             return Axes.plot(self, *args, **kwargs)
 
@@ -473,7 +480,7 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _data_update(artists, workspace, kwargs):
+            def _data_update(artists, workspace, new_kwargs=None):
                 # errorbar with workspaces can only return a single container
                 container_orig = artists[0]
                 # It is not possible to simply reset the error bars so
@@ -487,7 +494,12 @@ class MantidAxes(Axes):
                 except ValueError:
                     pass
                 # this gets pushed back onto the containers list
-                container_new = plotfunctions.errorbar(self, workspace, **kwargs)
+                if new_kwargs:
+                    container_new = plotfunctions.errorbar(self, workspace,
+                                                           **new_kwargs)
+                else:
+                    container_new = plotfunctions.errorbar(self, workspace,
+                                                           **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
                 orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
@@ -505,7 +517,7 @@ class MantidAxes(Axes):
             is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
-                is_distribution, _data_update, spec_num)
+                _data_update, spec_num, is_distribution)
         else:
             return Axes.errorbar(self, *args, **kwargs)
 
@@ -620,7 +632,10 @@ class MantidAxes(Axes):
         if helperfunctions.validate_args(*args):
             logger.debug('using plotfunctions')
 
-            def _update_data(artists, workspace):
+            def _update_data(artists, workspace, new_kwargs=None):
+                if new_kwargs:
+                    return self._redraw_colorplot(plotfunctions_func,
+                                                  artists, workspace, **new_kwargs)
                 return self._redraw_colorplot(plotfunctions_func,
                                               artists, workspace, **kwargs)
             workspace = args[0]
