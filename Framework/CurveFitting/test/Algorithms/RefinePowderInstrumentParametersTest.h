@@ -190,11 +190,6 @@ public:
             AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 21);
-    /*
-    cout << "Number of peak positions = " << dataws->readX(0).size() << '\n';
-    for (size_t i = 0; i < dataws->readX(0).size(); ++i)
-      cout << i << "\t\t" << dataws->readX(0)[i] << '\n';
-      */
 
     DataObjects::TableWorkspace_sptr mcresultws =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
@@ -482,7 +477,7 @@ public:
           mcpars.push_back(parmax);
           mcpars.push_back(parstepsize);
           parametermcs.emplace(parname, mcpars);
-        } catch (const std::runtime_error &err) {
+        } catch (const std::runtime_error &) {
           ;
         }
       }
