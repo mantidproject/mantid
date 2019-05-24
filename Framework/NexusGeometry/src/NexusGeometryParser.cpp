@@ -159,19 +159,10 @@ private:
   }
 
   // Function to read in a dataset into a vector
-  template <typename ValueType>
-  std::vector<ValueType> get1DDataset(const H5std_string &dataset,
-                                      const H5::Group &group) {
-    DataSet data = openDataSet(group, dataset);
-    return extractVector<ValueType>(data);
-  }
-
-  // Function to read in a dataset into a vector
-  template <typename ValueType>
-  std::vector<ValueType> get1DDataset(const H5File &file,
+  template <typename ValueType, typename T>
+  std::vector<ValueType> get1DDataset(const T &host,
                                       const H5std_string &dataset) {
-    // Open data set
-    DataSet data = openDataSet(file, dataset);
+    DataSet data = openDataSet(host, dataset);
     return extractVector<ValueType>(data);
   }
 
@@ -332,13 +323,13 @@ private:
     for (unsigned int i = 0; i < detectorGroup.getNumObjs(); i++) {
       H5std_string objName = detectorGroup.getObjnameByIdx(i);
       if (objName == X_PIXEL_OFFSET) {
-        xValues = get1DDataset<double>(objName, detectorGroup);
+        xValues = get1DDataset<double>(detectorGroup, objName);
       }
       if (objName == Y_PIXEL_OFFSET) {
-        yValues = get1DDataset<double>(objName, detectorGroup);
+        yValues = get1DDataset<double>(detectorGroup, objName);
       }
       if (objName == Z_PIXEL_OFFSET) {
-        zValues = get1DDataset<double>(objName, detectorGroup);
+        zValues = get1DDataset<double>(detectorGroup, objName);
       }
     }
 
@@ -508,12 +499,12 @@ private:
   boost::shared_ptr<const Geometry::IObject>
   parseNexusCylinder(const Group &shapeGroup) {
     H5std_string pointsToVertices = "cylinders";
-    std::vector<int> cPoints = get1DDataset<int>(pointsToVertices, shapeGroup);
+    std::vector<int> cPoints = get1DDataset<int>(shapeGroup, pointsToVertices);
 
     H5std_string verticesData = "vertices";
     // 1D reads row first, then columns
     std::vector<double> vPoints =
-        get1DDataset<double>(verticesData, shapeGroup);
+        get1DDataset<double>(shapeGroup, verticesData);
     Eigen::Map<Eigen::Matrix<double, 3, 3>> vertices(vPoints.data());
     // Read points into matrix, sorted by cPoints ordering
     Eigen::Matrix<double, 3, 3> vSorted;
@@ -527,10 +518,10 @@ private:
   boost::shared_ptr<const Geometry::IObject>
   parseNexusMesh(const Group &shapeGroup) {
     const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>("faces", shapeGroup));
+        get1DDataset<int32_t>(shapeGroup, "faces"));
     const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>("winding_order", shapeGroup));
-    const auto vertices = get1DDataset<float>("vertices", shapeGroup);
+        get1DDataset<int32_t>(shapeGroup, "winding_order"));
+    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
     return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                                 vertices);
   }
@@ -614,12 +605,12 @@ private:
     // Load mapping between detector IDs and faces, winding order of vertices
     // for faces, and face corner vertices.
     const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>("detector_faces", shapeGroup));
+        get1DDataset<int32_t>(shapeGroup, "detector_faces"));
     const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>("faces", shapeGroup));
+        get1DDataset<int32_t>(shapeGroup, "faces"));
     const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>("winding_order", shapeGroup));
-    const auto vertices = get1DDataset<float>("vertices", shapeGroup);
+        get1DDataset<int32_t>(shapeGroup, "winding_order"));
+    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
 
     // Build a map of detector IDs to the index of occurrence in the
     // "detector_number" dataset
@@ -713,7 +704,7 @@ private:
         for (auto &monitor : monitorGroups) {
           if (!findDataset(monitor, DETECTOR_ID))
             throw std::invalid_argument("NXmonitors must have " + DETECTOR_ID);
-          auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
+          auto detectorId = get1DDataset<int64_t>(monitor, DETECTOR_ID)[0];
           bool proxy = false;
           auto monitorShape = parseNexusShape(monitor, proxy);
           auto monitorTransforms = getTransformations(file, monitor);
