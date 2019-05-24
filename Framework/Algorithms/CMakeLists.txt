@@ -181,6 +181,7 @@ set(SRC_FILES
     src/MagFormFactorCorrection.cpp
     src/MaskBins.cpp
     src/MaskBinsFromTable.cpp
+    src/MaskBinsFromWorkspace.cpp
     src/MaskBinsIf.cpp
     src/MaskDetectorsIf.cpp
     src/MaskInstrument.cpp
@@ -521,6 +522,7 @@ set(INC_FILES
     inc/MantidAlgorithms/MagFormFactorCorrection.h
     inc/MantidAlgorithms/MaskBins.h
     inc/MantidAlgorithms/MaskBinsFromTable.h
+    inc/MantidAlgorithms/MaskBinsFromWorkspace.h
     inc/MantidAlgorithms/MaskBinsIf.h
     inc/MantidAlgorithms/MaskDetectorsIf.h
     inc/MantidAlgorithms/MaskInstrument.h
