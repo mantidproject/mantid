@@ -44,7 +44,6 @@ def check_facility():
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):
-
     """
     The Frequency Domain Analaysis 2.0 interface.
     """

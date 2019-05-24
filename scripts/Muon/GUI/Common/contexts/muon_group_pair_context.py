@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -173,3 +172,39 @@ class MuonGroupPairContext(object):
             if item.name == name:
                 return False
         return True
+
+    def get_group_workspace_names(self, runs, groups, rebin):
+        workspace_list = []
+
+        for group_name in groups:
+            group = self[group_name]
+            if rebin:
+                sub_list = group.get_asymmetry_workspace_names_rebinned(runs)
+            else:
+                sub_list = group.get_asymmetry_workspace_names(runs)
+
+            workspace_list += sub_list
+
+        return workspace_list
+
+    def get_pair_workspace_names(self, runs, pairs, rebin):
+        workspace_list = []
+
+        for pair_name in pairs:
+            pair = self[pair_name]
+            if rebin:
+                sub_list = pair.get_asymmetry_workspace_names_rebinned(runs)
+            else:
+                sub_list = pair.get_asymmetry_workspace_names(runs)
+
+            workspace_list += sub_list
+
+        return workspace_list
+
+    def get_equivalent_group_pair(self, workspace_name):
+        for item in self._groups + self._pairs:
+            equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
+            if equivalent_name:
+                return equivalent_name
+
+        return None

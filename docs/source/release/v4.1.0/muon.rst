@@ -26,4 +26,5 @@ Improvements
 Bug Fixes
 #########
 
-* Muon Analysis no longer crashes when `TF Asymmetry` mode is activated. 
+* Muon Analysis no longer crashes when `TF Asymmetry` mode is activated.
+* Frequency Domain Analysis GUI added to workbench.
