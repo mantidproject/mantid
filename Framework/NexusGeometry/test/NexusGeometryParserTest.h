@@ -18,6 +18,7 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <H5Cpp.h>
@@ -45,7 +46,9 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
 
 class MockLogger : public NexusGeometry::Logger {
 public:
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(warning, void(const std::string &));
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 } // namespace
