@@ -70,6 +70,12 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.addCleanup(self.popup_patcher.stop)
         self.popup_mock = self.popup_patcher.start()
 
+        def setGroupAndPairsToEmptyList(grouping_context):
+            grouping_context._groups = []
+            grouping_context._pairs = []
+        self.group_context.reset_group_and_pairs_to_default = mock.MagicMock(
+            side_effect=setGroupAndPairsToEmptyList(self.group_context))
+
     def tearDown(self):
         self.obj = None
 

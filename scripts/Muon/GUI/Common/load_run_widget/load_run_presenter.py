@@ -238,7 +238,11 @@ class LoadRunWidgetPresenter(object):
     def on_loading_finished(self):
         try:
             if self.run_list and self.run_list[0] == 'Current':
-                self.run_list = self._model.get_latest_loaded_run()
+                latest_loaded_run = self._model.get_latest_loaded_run()
+                if isinstance(latest_loaded_run, list):
+                    self.run_list = latest_loaded_run
+                else:
+                    self.run_list[0] = latest_loaded_run
                 self._model.current_run = self.run_list
 
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
