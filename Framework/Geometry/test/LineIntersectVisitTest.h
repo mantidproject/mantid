@@ -25,9 +25,9 @@ class LineIntersectVisitTest : public CxxTest::TestSuite {
 public:
   void testConstructor() {
     LineIntersectVisit A(V3D(-1.0, -1.0, -1.0), V3D(1.0, 0.0, 0.0));
-    TS_ASSERT_EQUALS(A.getNPoints(), 0);
+    TS_ASSERT_EQUALS(A.size(), 0);
     TS_ASSERT_EQUALS(A.getPoints(), std::list<Kernel::V3D>());
-    TS_ASSERT_EQUALS(A.getDistance(), std::list<double>());
+    TS_ASSERT_EQUALS(A.getDistances(), std::list<double>());
   }
 
   void testAcceptPlane() {
@@ -36,11 +36,11 @@ public:
     B.setPlane(V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(extractString(B), "-1 px 0\n");
     A.Accept(B);
-    TS_ASSERT_EQUALS(A.getNPoints(), 1);
+    TS_ASSERT_EQUALS(A.size(), 1);
     std::list<Kernel::V3D> Pnts{{0.0, -1.0, -1.0}};
     TS_ASSERT_EQUALS(A.getPoints(), Pnts);
     std::list<double> Dist{1.0};
-    TS_ASSERT_EQUALS(A.getDistance(), Dist);
+    TS_ASSERT_EQUALS(A.getDistances(), Dist);
   }
 
   void testAcceptSphere() {
@@ -53,11 +53,11 @@ public:
     // changed for forward going only intercepts on quadratice surfaces
     // pntOut.emplace_back(-2.0,0.0,0.0);
     std::list<V3D> pntOut{{2.0, 0.0, 0.0}};
-    TS_ASSERT_EQUALS(A.getNPoints(), 1);
+    TS_ASSERT_EQUALS(A.size(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::list<double> Dist;
     Dist.push_back(2.0);
-    TS_ASSERT_EQUALS(A.getDistance(), Dist);
+    TS_ASSERT_EQUALS(A.getDistances(), Dist);
   }
 
   void testAcceptCone() {
@@ -69,13 +69,13 @@ public:
 
     A.Accept(B);
     // change for forward only intercept
-    TS_ASSERT_EQUALS(A.getNPoints(), 1);
+    TS_ASSERT_EQUALS(A.size(), 1);
     const auto &pntOut = A.getPoints();
     TS_ASSERT_DELTA(pntOut.front().X(), 1, 0.0000001);
     TS_ASSERT_DELTA(pntOut.front().Y(), 0.0, 0.0000001);
     TS_ASSERT_DELTA(pntOut.front().Z(), 0.0, 0.0000001);
 
-    const auto &Dist = A.getDistance();
+    const auto &Dist = A.getDistances();
     TS_ASSERT_DELTA(Dist.front(), 1.0, 0.0000001);
   }
 
@@ -93,16 +93,16 @@ public:
     // forward only
     // pntOut.emplace_back(-1.0,0.0,0.0);
     std::list<V3D> pntOut{{1.0, 0.0, 0.0}};
-    TS_ASSERT_EQUALS(A.getNPoints(), 1);
+    TS_ASSERT_EQUALS(A.size(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::list<double> Dist;
     // Dist.push_back(1.0);
     Dist.push_back(1.0);
-    TS_ASSERT_EQUALS(A.getDistance(), Dist);
+    TS_ASSERT_EQUALS(A.getDistances(), Dist);
 
     LineIntersectVisit C(V3D(1.1, 0.0, 0.0), V3D(-1.0, 0.0, 0.0));
     C.Accept(B);
-    TS_ASSERT_EQUALS(C.getNPoints(), 2);
+    TS_ASSERT_EQUALS(C.size(), 2);
     std::list<V3D> pntOut2{{-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(C.getPoints(), pntOut2);
   }

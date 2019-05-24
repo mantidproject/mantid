@@ -1099,31 +1099,30 @@ int CSGObject::procString(const std::string &Line) {
  * @param UT :: Initial track
  * @return Number of segments added
  */
-size_t CSGObject::interceptSurface(Geometry::Track &UT) const {
-  size_t originalCount = UT.size(); // Number of intersections original track
+size_t CSGObject::interceptSurface(Geometry::Track &track) const {
+  size_t originalCount = track.size(); // Number of intersections original track
   // Loop over all the surfaces.
-  LineIntersectVisit LI(UT.startPoint(), UT.direction());
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    (*vc)->acceptVisitor(LI);
+  LineIntersectVisit visitor(track.startPoint(), track.direction());
+  for (const auto &surface : m_SurList) {
+    surface->acceptVisitor(visitor);
   }
-  const auto &IPoints(LI.getPoints());
-  const auto &dPoints(LI.getDistance());
+  const auto &intersectionPoints(visitor.getPoints());
+  const auto &distances(visitor.getDistances());
 
-  auto ditr = dPoints.begin();
-  auto itrEnd = IPoints.end();
-  for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
+  auto ditr = distances.begin();
+  auto itrEnd = intersectionPoints.end();
+  for (auto iitr = intersectionPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, UT.direction());
+      const TrackDirection flag = calcValidType(*iitr, track.direction());
       if (flag != TrackDirection::INVALID)
-        UT.addPoint(flag, *iitr, *this);
+        track.addPoint(flag, *iitr, *this);
     }
   }
-  UT.buildLink();
+  track.buildLink();
   // Return number of track segments added
-  return (UT.size() - originalCount);
+  return (track.size() - originalCount);
 }
 
 /**

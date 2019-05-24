@@ -23,10 +23,10 @@ namespace Geometry {
 
 LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt,
                                        const Kernel::V3D &uVec)
-    : ATrack(Pt, uVec)
-/**
-  Constructor
-*/
+    : m_line(Pt, uVec)
+      /**
+        Constructor
+      */
 {}
 
 void LineIntersectVisit::Accept(const Surface &Surf)
@@ -45,7 +45,7 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPoints, Surf);
   procTrack();
 }
 
@@ -55,7 +55,7 @@ void LineIntersectVisit::Accept(const Plane &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPoints, Surf);
   procTrack();
 }
 
@@ -65,7 +65,7 @@ void LineIntersectVisit::Accept(const Cone &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPoints, Surf);
   procTrack();
 }
 
@@ -75,7 +75,7 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPoints, Surf);
   procTrack();
 }
 
@@ -85,7 +85,7 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPoints, Surf);
   procTrack();
 }
 
@@ -95,7 +95,7 @@ void LineIntersectVisit::Accept(const General &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPoints, Surf);
   procTrack();
 }
 
@@ -106,9 +106,10 @@ void LineIntersectVisit::procTrack()
 */
 {
   // Calculate the distances to the points
-  DOut.resize(PtOut.size());
-  std::transform(PtOut.begin(), PtOut.end(), DOut.begin(),
-                 boost::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
+  m_distances.resize(m_intersectionPoints.size());
+  std::transform(m_intersectionPoints.begin(), m_intersectionPoints.end(),
+                 m_distances.begin(),
+                 boost::bind(&Kernel::V3D::distance, m_line.getOrigin(), _1));
 }
 
 } // namespace Geometry
