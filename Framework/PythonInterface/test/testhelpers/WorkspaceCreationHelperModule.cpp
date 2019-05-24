@@ -83,11 +83,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //===================================
 
   def("createPeaksWorkspace",
-      reinterpret_cast<PeaksWorkspace_sptr (*)(const int, bool)>(
-          createPeaksWorkspace),
-      return_value_policy<AsType<Workspace_sptr>>());
-  def("createPeaksWorkspace",
       (PeaksWorkspace_sptr(*)(const int, const bool))createPeaksWorkspace,
+      (arg("numPeaks") = 2, arg("createOrientedLattice") = false),
       return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== MD Workspaces
