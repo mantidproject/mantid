@@ -40,6 +40,9 @@ class HomeGroupingWidgetModel(object):
         else:
             return None
 
+    def update_selected_group_pair_in_context(self, name):
+        self._context.gui_context.update_and_send_non_calculation_signal(selected_group_pair=name)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Periods
     # ------------------------------------------------------------------------------------------------------------------

@@ -11,10 +11,9 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContex
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
+from mantid.py3compat import mock
+from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
+
 
 class MuonGroupPairContextTest(unittest.TestCase):
     def setUp(self):
@@ -129,6 +128,13 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEquals(self.context.pair_names, ['pair_1', 'pair_3'])
 
+    def test_get_group_workspace_names_returns_correct_workspace_names(self):
+        group = create_group_populated_by_two_workspace()
+        self.context.add_group(group)
+
+        workspace_list = self.context.get_group_workspace_names([[33333]], ['group1'], False)
+
+        self.assertEqual(workspace_list, ['asymmetry_name_33333'])
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

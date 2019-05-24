@@ -25,10 +25,10 @@ class HelpWidgetPresenterTest(unittest.TestCase):
         self.view = None
 
     @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.ManageUserDirectories')
-    def test_that_manage_directories_button_clicked_opens_directory_manager(self, mock_ManageUserDirectories):
+    def test_that_manage_directories_button_clicked_opens_directory_manager(self, ManageUserDirectories_mock):
         self.view.manage_user_dir_button.clicked.emit(True)
 
-        mock_ManageUserDirectories.openUserDirsDialog.assert_called_once_with(self.view)
+        ManageUserDirectories_mock.openUserDirsDialog.assert_called_once_with(self.view)
 
 
 if __name__ == '__main__':
