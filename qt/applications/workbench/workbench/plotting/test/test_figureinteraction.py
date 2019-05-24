@@ -126,10 +126,10 @@ class FigureInteractionTest(unittest.TestCase):
                 self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
-        self._toggle_normalization(errobars_on=False)
+        self._test_toggle_normalization(errobars_on=False)
 
     def test_toggle_normalization_with_errorbars(self):
-        self._toggle_normalization(errobars_on=True)
+        self._test_toggle_normalization(errobars_on=True)
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
@@ -155,7 +155,7 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
-    def _toggle_normalization(self, errobars_on):
+    def _test_toggle_normalization(self, errobars_on):
         fig = plot([self.ws], spectrum_nums=[1], errors=errobars_on,
                    plot_kwargs={'plot_as_distribution': False})
         mock_canvas = MagicMock(figure=fig)

@@ -502,7 +502,7 @@ class MantidAxes(Axes):
             workspace = args[0]
             spec_num = self._get_spec_number(workspace, kwargs)
             plot_as_dist, kwargs = get_plot_as_distribution(
-                workspace, self.tracked_workspaces, pop=False, **kwargs)
+                workspace, self.tracked_workspaces.values(), pop=False, **kwargs)
             is_distribution = workspace.isDistribution() or plot_as_dist
             return self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
