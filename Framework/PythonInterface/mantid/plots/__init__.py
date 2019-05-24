@@ -415,7 +415,7 @@ class MantidAxes(Axes):
                                                            new_kwargs)
                 else:
                     x, y, _, __ = plotfunctions._plot_impl(self, workspace, args,
-                                                       kwargs)
+                                                           kwargs)
                 artists[0].set_data(x, y)
                 self.relim()
                 self.autoscale()
