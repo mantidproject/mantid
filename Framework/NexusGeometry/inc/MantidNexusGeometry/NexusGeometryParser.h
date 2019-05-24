@@ -20,7 +20,7 @@ namespace NexusGeometry {
 /**
  * Abstract logger. Avoid hard-coded logging dependencies.
  */
-MANTID_NEXUSGEOMETRY_DLL class Logger {
+class MANTID_NEXUSGEOMETRY_DLL Logger {
 public:
   virtual void warning(const std::string &warning) = 0;
   virtual ~Logger() {}
