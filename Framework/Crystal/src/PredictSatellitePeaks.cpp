@@ -339,7 +339,7 @@ void PredictSatellitePeaks::predictOffsets(
     int indexModulatedVector, V3D offsets, int &maxOrder, V3D &hkl,
     HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
     bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
-  if (offsets == V3D(0, 0, 0))
+  if (offsets == V3D(0, 0, 0) && !includeOrderZero)
     return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
   IPeak &peak1 = Peaks->getPeak(0);
@@ -396,7 +396,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
     HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
     bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets1 == V3D(0, 0, 0) && offsets2 == V3D(0, 0, 0) &&
-      offsets3 == V3D(0, 0, 0))
+      offsets3 == V3D(0, 0, 0) && !includeOrderZero)
     return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
   IPeak &peak1 = Peaks->getPeak(0);
