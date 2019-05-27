@@ -200,7 +200,7 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
 
 /// Get a list of dataset names.
 QStringList FunctionBrowser::getDatasetNames() const {
-    return m_presenter->getDatasetNames();
+  return m_presenter->getDatasetNames();
 }
 
 /// Add some datasets to those already set.
