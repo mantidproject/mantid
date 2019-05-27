@@ -15,3 +15,4 @@ class ResultsTabWidget(object):
         self.results_tab_presenter = ResultsTabPresenter(context, self.results_tab_view)
 
         self.results_tab_view.fit_function_combo.currentIndexChanged.connect(self.results_tab_presenter.handle_fit_function_changed)
+        self.results_tab_view.output_results_table_button.clicked.connect(self.results_tab_presenter.handle_create_results_table_button_clicked)

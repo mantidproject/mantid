@@ -50,3 +50,8 @@ class FittingContext(object):
 
     def get_list_of_fit_functions(self):
         return list(set([fit.fit_function_name for fit in self.fit_list]))
+
+    def get_fit_object_from_parameter_name(self, parameter_name):
+        for fit in self.fit_list:
+            if fit.parameter_name == parameter_name:
+                return fit

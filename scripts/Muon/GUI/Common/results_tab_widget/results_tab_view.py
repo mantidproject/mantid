@@ -52,5 +52,11 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
     def update_fit_selector_model(self, new_model_dictionary):
         self.fit_selector_presenter.update_model(new_model_dictionary)
 
+    def update_log_selector_model(self, new_model_dictionary):
+        self.log_selector_presenter.update_model(new_model_dictionary)
+
     def get_selected_fit_list(self):
         return self.fit_selector_presenter.get_selected_items()
+
+    def get_selected_logs_list(self):
+        return self.log_selector_presenter.get_selected_items()
