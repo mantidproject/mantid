@@ -150,22 +150,14 @@ def run_simultaneous_Fit(parameters_dict, alg):
                              key not in ['InputWorkspace', 'StartX', 'EndX']}
     alg.setProperties(pruned_parameter_dict)
 
-    output_workspace_list = []
-    output_parameter_list = []
-
     for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
         index_str = '_' + str(index) if index else ''
         alg.setProperty('InputWorkspace' + index_str, input_workspace)
         alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
         alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
-        output_workspace_list.append('OutputWorkspace' + index_str)
-        output_parameter_list.append('OutputParameters' + index_str)
 
     alg.execute()
-    # return [alg.getProperty(output).value for output in output_workspace_list], [alg.getProperty(output).value for
-    #                                                                              output in
-    #                                                                              output_parameter_list], alg.getProperty(
-    #     "Function").value
+
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value
 
 

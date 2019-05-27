@@ -91,15 +91,18 @@ class FittingTabPresenter(object):
     def handle_fit_clicked(self):
         fit_type = self.view.fit_type
 
-        if fit_type == 'Single Fit':
-            single_fit_parameters = self.get_parameters_for_single_fit()
-            self.model.do_single_fit(single_fit_parameters)
-        elif fit_type == 'Simultaneous Fit':
-            simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
-            self.model.do_simultaneous_fit(simultaneous_fit_parameters)
-        elif fit_type == 'Sequential Fit':
-            sequential_fit_parameters = self.get_multi_domain_fit_parameters()
-            self.model.do_sequential_fit(sequential_fit_parameters)
+        try:
+            if fit_type == 'Single Fit':
+                single_fit_parameters = self.get_parameters_for_single_fit()
+                self.model.do_single_fit(single_fit_parameters)
+            elif fit_type == 'Simultaneous Fit':
+                simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
+                self.model.do_simultaneous_fit(simultaneous_fit_parameters)
+            elif fit_type == 'Sequential Fit':
+                sequential_fit_parameters = self.get_multi_domain_fit_parameters()
+                self.model.do_sequential_fit(sequential_fit_parameters)
+        except ValueError as e:
+            self.view.warning_popup(e)
 
     def handle_start_x_updated(self):
         value = self.view.start_time

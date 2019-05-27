@@ -20,7 +20,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         super(FittingTabView, self).__init__(parent)
         self.setupUi(self)
         self.setup_fit_options_table()
-        self.undo_fit_button.hide()
 
         self.function_browser = FunctionBrowser(self, True)
         self.function_browser_layout.addWidget(self.function_browser)
@@ -76,7 +75,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox.stateChanged.connect(slot)
 
     def set_slot_for_fit_type_changed(self, slot):
-        self.fit_type_combo.currentIndexChanged.connect(slot)
+        self.single_fit_radio.toggled.connect(slot)
+        self.simul_fit_radio.toggled.connect(slot)
+        self.sequential_fit_radio.toggled.connect(slot)
 
     def set_slot_for_fit_button_clicked(self, slot):
         self.fit_button.clicked.connect(slot)
@@ -121,7 +122,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     @property
     def fit_type(self):
-        return str(self.fit_type_combo.currentText())
+        if self.single_fit_radio.isChecked():
+            return self.single_fit_radio.text()
+        if self.simul_fit_radio.isChecked():
+            return self.simul_fit_radio.text()
+        if self.sequential_fit_radio.isChecked():
+            return self.sequential_fit_radio.text()
 
     @property
     def fit_to_raw(self):
@@ -168,21 +174,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
              'Damped GaussNewton', 'FABADA', 'Levenberg-MarquardtMD', 'Simplex',
              'SteepestDescent', 'Trust Region'])
 
-        # table_utils.setRowName(self.fit_options_table, 3, "TF Asymmetry Mode")
-        # self.tf_asymmetry_mode_checkbox = table_utils.addCheckBoxWidgetToTable(
-        #     self.fit_options_table, False, 3)
-        #
-        # table_utils.setRowName(self.fit_options_table, 4, "Plot Difference")
-        # self.plot_differences_checkbox = table_utils.addCheckBoxWidgetToTable(
-        #     self.fit_options_table, True, 4)
-
         table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
             self.fit_options_table, True, 3)
-
-        # table_utils.setRowName(self.fit_options_table, 6, "Show Parameter Errors")
-        # self.show_parameter_errors_checkbox = table_utils.addCheckBoxWidgetToTable(
-        #     self.fit_options_table, True, 6)
 
         table_utils.setRowName(self.fit_options_table, 4, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 4, ['CentrePoint', 'Histogram'])
