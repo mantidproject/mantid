@@ -135,7 +135,12 @@ def run_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(False)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    alg.setProperties(parameters_dict)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+    alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
+    alg.setProperty('StartX', parameters_dict['StartX'])
+    alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
     return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
         "Function").value
