@@ -55,10 +55,11 @@ class FittingTabModel(object):
         return name, directory
 
     def do_simultaneous_fit(self, parameter_dict):
-        output_workspace, fitting_parameters_table, function_string = self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
+        output_workspace, fitting_parameters_table, function_string =\
+            self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         workspace_name, directory = self.create_multi_domain_fitted_workspace_name(parameter_dict['InputWorkspace'][0],
-                                                                      parameter_dict['Function'])
+                                                                                   parameter_dict['Function'])
         table_name, directory = self.create_parameter_table_name(parameter_dict['InputWorkspace'][0] + '+ ...',
                                                                  parameter_dict['Function'])
 
