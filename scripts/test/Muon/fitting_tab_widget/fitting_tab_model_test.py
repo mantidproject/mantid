@@ -96,6 +96,5 @@ class FittingTabModelTest(unittest.TestCase):
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
 
 
-
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -112,3 +112,7 @@ class ListSelectorPresenter(object):
     def update_filter_list(self, filter_list):
         self.filter_list = filter_list
         self.update_view_from_model()
+
+    def update_model(self, new_model):
+        self.model = new_model
+        self.update_view_from_model()
