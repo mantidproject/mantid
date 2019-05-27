@@ -9,9 +9,10 @@ from __future__ import (absolute_import, division, print_function)
 import os, math
 import numpy as np
 from mantid import config, mtd, logger
+from mantid.dataobjects import TableWorkspace
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
-    WorkspaceGroupProperty, FileAction, Progress
+    WorkspaceGroupProperty, FileAction, Progress, WorkspaceProperty, PropertyMode
 from mantid.simpleapi import *  # noqa
 
 
@@ -115,6 +116,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.declareProperty(name='MonitorCutoff', defaultValue=0.5,
                              validator=FloatBoundedValidator(lower=0., upper=1.),
                              doc='Choose the cutoff fraction wrt the maximum of the monitor counts.')
+
+        self.declareProperty(WorkspaceProperty('InputElasticChannelWorkspace', '',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
+                             doc='The name of the input elastic channel workspace.')
+
+        self.declareProperty(WorkspaceProperty('OutputElasticChannelWorkspace', '',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
+                             doc='The name of the output elastic channel workspace.')
 
     def validateInputs(self):
 
@@ -291,7 +302,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self._load_map_file()
 
-        run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
+        run = str(mtd[self._red_ws].getRun().getLogData('run_number').value)[:6]
 
         self._ws = self._red_ws + '_' + run
 
@@ -328,27 +339,59 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace',self._red_ws)
 
+    def _create_elastic_channel_ws(self, channel, speed, phase, delay):
+        tws = TableWorkspace()
+        tws.addColumn('double', 'ElasticChannel')
+        tws.addColumn('double', 'ChopperSpeed')
+        tws.addColumn('double', 'ChopperPhase')
+        tws.addColumn('double', 'PSD_TOF_Delay')
+        tws.addRow([channel, speed, phase, delay])
+        return tws
+
+    def _t0_offset(self, center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
+        return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (shifted_psd_delay - center_psd_delay) * 1E-6
+
     def _reduce_bats(self, ws):
         """
         Reduces inverted TOF mode (BATS)
         @param ws :: input workspace
         """
-        equator_ws = '__'+self._ws+'_eq'
-        epp_ws = '__'+self._ws+'_epp'
+        t0_offset = 0.
+        input_epp = self.getPropertyValue('InputElasticChannelWorkspace')
+        output_epp = self.getPropertyValue('OutputElasticChannelWorkspace')
+        if not input_epp:
+            epp_ws = '__'+self._ws+'_epp'
+            equator_ws = '__'+self._ws+'_eq'
+            equator_grouping_filename = self._instrument.getStringParameter('EquatorialGroupingFile')[0]
+            grouping_file = os.path.join(config['groupingFiles.directory'], equator_grouping_filename)
+            GroupDetectors(InputWorkspace=self._ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
+            to_crop = mtd[self._ws].blocksize() / 4
+            CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
+            FindEPP(InputWorkspace=equator_ws, OutputWorkspace=epp_ws)
+            elastic_channel = mtd[epp_ws].cell(0,1)
+            if output_epp:
+                run = mtd[self._ws].getRun()
+                tws = self._create_elastic_channel_ws(elastic_channel, run.getLogData('CH3.rotation_speed').value,
+                                                      run.getLogData('CH3.phase').value, run.getLogData('PSD.time_of_flight_2').value)
+                self.setProperty('OutputElasticChannelWorkspace', tws)
+            DeleteWorkspaces([equator_ws, epp_ws])
+        else:
+            elastic_channel = mtd[input_epp].cell(0,0)
+            center_chopper_speed = mtd[input_epp].cell(0,1)
+            center_chopper_phase = mtd[input_epp].cell(0,2)
+            center_psd_delay = mtd[input_epp].cell(0,3)
+            shifted_chopper_phase = mtd[self._ws].getRun().getLogData('CH3.phase').value
+            shifted_psd_delay = mtd[self._ws].getRun().getLogData('PSD.time_of_flight_2').value
+            t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase,
+                                        shifted_chopper_phase, center_psd_delay, shifted_psd_delay)
+            self.log().information('T0 Offset is {0} [sec]'.format(t0_offset))
         mon_ws = '__'+self._ws+'_mon'
         rebin_ws = self._ws + '_reb'
-        equator_grouping_filename = self._instrument.getStringParameter('EquatorialGroupingFile')[0]
-        grouping_file = os.path.join(config['groupingFiles.directory'], equator_grouping_filename)
-        GroupDetectors(InputWorkspace=self._ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
-        to_crop = mtd[self._ws].blocksize() / 4
-        CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
-        FindEPP(InputWorkspace=equator_ws, OutputWorkspace=epp_ws)
-        elastic_channel = mtd[epp_ws].cell(0,1)
         detectro_info = mtd[self._ws].detectorInfo()
         l1 = detectro_info.l1()
         l2_equator = (detectro_info.l2(65) + detectro_info.l2(66)) / 2.
         v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
-        elastic_tof = (l1 + l2_equator) * 1E+6 / v_fixed
+        elastic_tof = ((l1 + l2_equator) / v_fixed + t0_offset) * 1E+6
         run = mtd[self._ws].getRun()
         channel_width = run.getLogData('PSD.time_of_flight_0').value
         formula = '{0} + (x - {1})*{2}'.format(elastic_tof, elastic_channel, channel_width)
@@ -356,7 +399,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ExtractMonitors(InputWorkspace=self._ws, DetectorWorkspace=self._ws, MonitorWorkspace=mon_ws)
         if self._normalise_to == 'Monitor':
             if not run.hasProperty('monitor.time_of_flight_2') or not run.hasProperty('PSD.time_of_flight_2'):
-                raise RuntimeError('Unable to normalise to monitor: missing chopper phase delay information.')
+                raise RuntimeError('Unable to normalise to monitor: missing chopper delay information.')
             phase_offset = run.getLogData('monitor.time_of_flight_2').value - run.getLogData('PSD.time_of_flight_2').value
             ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=phase_offset, Operation='Add')
             frame_width = 1E+6 * 2 * 4./v_fixed
@@ -382,7 +425,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ExtractSingleSpectrum(InputWorkspace=self._ws, OutputWorkspace=rebin_ws, WorkspaceIndex=0)
         RebinToWorkspace(WorkspaceToRebin=self._ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=self._ws)
         GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
-        DeleteWorkspaces([epp_ws, equator_ws, rebin_ws, mon_ws])
+        DeleteWorkspaces([rebin_ws, mon_ws])
 
     def _group_pixels(self, by=4):
         pattern = ''
