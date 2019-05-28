@@ -20,6 +20,16 @@ class FittingContextTest(unittest.TestCase):
 
         self.assertEqual(fit_information_object, self.fitting_context.fit_list[0])
 
+    def test_fitfunctions_gives_list_of_unique_function_names(self):
+        test_fit_function = 'MuonGuassOsc'
+        self.fitting_context.add_fit_from_values(mock.MagicMock(), test_fit_function, mock.MagicMock())
+        self.fitting_context.add_fit_from_values(mock.MagicMock(), test_fit_function, mock.MagicMock())
+
+        fit_functions = self.fitting_context.fit_function_names()
+
+        self.assertEqual(len(fit_functions), 1)
+        self.assertEqual(test_fit_function, fit_functions[0])
+
     def test_can_retrieve_a_list_of_fit_objects_based_on_fit_function_name(self):
         fit_information_object_0 = FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock())
         fit_information_object_1 = FitInformation(mock.MagicMock(), 'MuonOsc', mock.MagicMock())
@@ -28,7 +38,7 @@ class FittingContextTest(unittest.TestCase):
         self.fitting_context.add_fit(fit_information_object_1)
         self.fitting_context.add_fit(fit_information_object_2)
 
-        result = self.fitting_context.get_list_of_fits_for_a_given_fit_function('MuonGuassOsc')
+        result = self.fitting_context.find_fits_for_function('MuonGuassOsc')
 
         self.assertEqual([fit_information_object_0, fit_information_object_2], result)
 
