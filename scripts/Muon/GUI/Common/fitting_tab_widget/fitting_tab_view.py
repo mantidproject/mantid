@@ -13,6 +13,9 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
+allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate gradient (Polak-Ribiere imp.)',
+                      'Damped GaussNewton', 'FABADA', 'Levenberg-MarquardtMD', 'Simplex',
+                      'SteepestDescent', 'Trust Region']
 
 
 class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
@@ -28,12 +31,14 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
 
     def update_displayed_data_combo_box(self, data_list):
+        self.parameter_display_combo.blockSignals(True)
         name = self.parameter_display_combo.currentText()
         self.parameter_display_combo.clear()
 
         self.parameter_display_combo.addItems(data_list)
 
         index = self.parameter_display_combo.findText(name)
+        self.parameter_display_combo.blockSignals(False)
 
         if index != -1:
             self.parameter_display_combo.setCurrentIndex(index)
@@ -150,6 +155,18 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             return self.sequential_fit_radio.text()
 
     @property
+    def single_fit(self):
+        return self.single_fit_radio.text()
+
+    @property
+    def simultaneous_fit(self):
+        return self.simul_fit_radio.text()
+
+    @property
+    def sequential_fit(self):
+        return self.sequential_fit_radio.text()
+
+    @property
     def fit_to_raw(self):
         return self.fit_to_raw_data_checkbox.isChecked()
 
@@ -166,9 +183,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             return 0
 
         current_index = self.parameter_display_combo.currentIndex()
-        current_index = current_index if current_index != -1 else 0
-
-        return current_index
+        return current_index if current_index != -1 else 0
 
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(5)
@@ -189,10 +204,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
 
-        self.minimizer_combo.addItems(
-            ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate gradient (Polak-Ribiere imp.)',
-             'Damped GaussNewton', 'FABADA', 'Levenberg-MarquardtMD', 'Simplex',
-             'SteepestDescent', 'Trust Region'])
+        self.minimizer_combo.addItems(allowed_minimizers)
 
         table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")
         self.fit_to_raw_data_checkbox = table_utils.addCheckBoxWidgetToTable(
