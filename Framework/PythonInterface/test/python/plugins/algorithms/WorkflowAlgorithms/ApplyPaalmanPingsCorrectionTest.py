@@ -89,18 +89,18 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
     def _create_group_of_factors(self, corrections, factors):
         def is_factor(workspace, factor):
             if factor == "ass":
-                return factor in workspace.getName() and not 'assc' in workspace.getName()
+                return factor in workspace.name() and not 'assc' in workspace.name()
             else:
-                return factor in workspace.getName()
+                return factor in workspace.name()
 
         def is_factor_workspace(workspace):
             return any([is_factor(workspace, factor) for factor in factors])
 
         filtered_corr = filter(is_factor_workspace, corrections)
         cloned_corr = [CloneWorkspace(InputWorkspace=correction,
-                                      OutputWorkspace=correction.getName() + "_clone")
+                                      OutputWorkspace=correction.name() + "_clone")
                        for correction in filtered_corr]
-        correction_names = [correction.getName() for correction in cloned_corr]
+        correction_names = [correction.name() for correction in cloned_corr]
         return GroupWorkspaces(InputWorkspaces=correction_names, OutputWorkspace="factor_group")
 
 
