@@ -7,6 +7,9 @@
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.observer_pattern import GenericObserver
 from mantid.api import FunctionFactory
+from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
+from Muon.GUI.Common import thread_model
+import functools
 
 
 class FittingTabPresenter(object):
@@ -100,15 +103,30 @@ class FittingTabPresenter(object):
         try:
             if fit_type == self.view.single_fit:
                 single_fit_parameters = self.get_parameters_for_single_fit()
-                self.model.do_single_fit(single_fit_parameters)
+                calculation_function = functools.partial(self.model.do_single_fit, single_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
             elif fit_type == self.view.simultaneous_fit:
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
-                self.model.do_simultaneous_fit(simultaneous_fit_parameters)
+                calculation_function = functools.partial(self.model.do_simultaneous_fit, simultaneous_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
             elif fit_type == self.view.sequential_fit:
                 sequential_fit_parameters = self.get_multi_domain_fit_parameters()
-                self.model.do_sequential_fit(sequential_fit_parameters)
+                calculation_function = functools.partial(self.model.do_sequential_fit, sequential_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
+
+            self.calculation_thread.threadWrapperSetUp(self.handle_started, self.handle_finished, self.handle_error)
+            self.calculation_thread.start()
         except ValueError as error:
             self.view.warning_popup(error)
+
+    def handle_started(self):
+        self.view.setEnabled(False)
+
+    def handle_finished(self):
+        self.view.setEnabled(True)
+
+    def handle_error(self, error):
+        self.view.warning_popup(error)
 
     def handle_start_x_updated(self):
         value = self.view.start_time
@@ -176,3 +194,7 @@ class FittingTabPresenter(object):
 
     def update_end_x(self, index, value):
         self._end_x[index] = value
+
+    def create_thread(self, callback):
+        self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
+        return thread_model.ThreadModel(self.fitting_calculation_model)
