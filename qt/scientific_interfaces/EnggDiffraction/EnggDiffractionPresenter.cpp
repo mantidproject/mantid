@@ -215,7 +215,7 @@ void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
   }
 
   try {
-    grabCalibParms(fname);
+    grabCalibParms(fname, vanNo, ceriaNo);
     updateCalibParmsTable();
     m_view->newCalibLoaded(vanNo, ceriaNo, fname);
   } catch (std::runtime_error &rexc) {
@@ -231,8 +231,12 @@ void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
  * process.
  *
  * @param fname name of the calibration/GSAS iparm file
+ * @param vanNo output param to hold the vanadium run
+ * @param ceriaNo output param to hold the ceria run
  */
-void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
+void EnggDiffractionPresenter::grabCalibParms(const std::string &fname,
+                                              std::string &vanNo,
+                                              std::string &ceriaNo) {
   std::vector<GSASCalibrationParms> parms;
 
   // To grab the bank indices, lines like "INS   BANK     2"
@@ -269,6 +273,10 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
                           << " elements as expected. The calibration may not "
                              "load correctly\n";
         }
+      } else if (line.find("CALIB") != std::string::npos) {
+        Mantid::Kernel::StringTokenizer tokenizer(line, " ", opts);
+        ceriaNo = tokenizer[2];
+        vanNo = tokenizer[3];
       }
     }
 
@@ -336,8 +344,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
   m_view->showStatus("Calculating calibration...");
   m_view->enableCalibrateFocusFitUserActions(false);
   // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo, specNos);
-  // calibrationFinished()
+  // doNewCalibration(outFilename, vanNo, ceriaNo, "");
+  // calibrationFinished();
   startAsyncCalibWorker(outFilename, vanNo, ceriaNo, "");
 }
 
@@ -383,9 +391,6 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
 
   m_view->showStatus("Calculating cropped calibration...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // alternatively, this would be GUI-blocking:
-  // doNewCalibration(outFilename, vanNo, ceriaNo, specNo/bankName);
-  // calibrationFinished()
   startAsyncCalibWorker(outFilename, vanNo, ceriaNo, specNo);
 }
 
@@ -531,9 +536,6 @@ void EnggDiffractionPresenter::startFocusing(
 
   m_view->showStatus("Focusing...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // GUI-blocking alternative:
-  // doFocusRun(outFilenames, runNo, banks, specNos, dgFile)
-  // focusingFinished()
   startAsyncFocusWorker(multi_RunNo, banks, specNos, dgFile);
 }
 
@@ -561,9 +563,6 @@ void EnggDiffractionPresenter::processRebinTime() {
 
   m_view->showStatus("Rebinning by time...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // GUI-blocking alternative:
-  // doRebinningTime(runNo, bin, outWSName)
-  // rebinningFinished()
   startAsyncRebinningTimeWorker(runNo, bin, outWSName);
 }
 
@@ -589,9 +588,6 @@ void EnggDiffractionPresenter::processRebinMultiperiod() {
 
   m_view->showStatus("Rebinning by pulses...");
   m_view->enableCalibrateFocusFitUserActions(false);
-  // GUI-blocking alternative:
-  // doRebinningPulses(runNo, nperiods, timeStep, outWSName)
-  // rebinningFinished()
   startAsyncRebinningPulsesWorker(runNo, nperiods, timeStep, outWSName);
 }
 
@@ -671,44 +667,7 @@ std::string EnggDiffractionPresenter::isValidRunNumber(
   if (userPaths.empty() || userPaths.front().empty()) {
     return run_number;
   }
-
-  for (const auto &path : userPaths) {
-    run_number = "";
-    try {
-      if (Poco::File(path).exists()) {
-        Poco::Path inputDir = path;
-
-        // get file name via poco::path
-        std::string filename = inputDir.getFileName();
-
-        // convert to int or assign it to size_t
-        for (const char &ch : filename) {
-          if (std::isdigit(ch)) {
-            run_number += ch;
-          }
-        }
-        run_number.erase(0, run_number.find_first_not_of('0'));
-
-        // The path of this file needs to be added in the search
-        // path as the user can browse to any path not included in
-        // the interface settings
-        recordPathBrowsedTo(inputDir.toString());
-      }
-
-    } catch (std::runtime_error &re) {
-      throw std::invalid_argument("Error while checking the selected file: " +
-                                  static_cast<std::string>(re.what()));
-    } catch (Poco::FileNotFoundException &rexc) {
-      throw std::invalid_argument("Error while checking the selected file. "
-                                  "There was a problem with the file: " +
-                                  std::string(rexc.what()));
-    }
-  }
-
-  g_log.debug() << "Run number inferred from browse path (" << userPaths.front()
-                << ") is: " << run_number << '\n';
-
-  return run_number;
+  return userPaths[0];
 }
 
 /**
@@ -724,45 +683,7 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
   std::vector<std::string> multi_run_number;
   if (paths.empty() || paths.front().empty())
     return multi_run_number;
-
-  for (const auto &path : paths) {
-    std::string run_number;
-    try {
-      if (Poco::File(path).exists()) {
-        Poco::Path inputDir = path;
-
-        // get file name name via poco::path
-        std::string filename = inputDir.getFileName();
-
-        // convert to int or assign it to size_t
-        for (const char &ch : filename) {
-          if (std::isdigit(ch)) {
-            run_number += ch;
-          }
-        }
-        run_number.erase(0, run_number.find_first_not_of('0'));
-
-        recordPathBrowsedTo(inputDir.toString());
-      }
-    } catch (std::runtime_error &re) {
-      throw std::invalid_argument(
-          "Error while looking for a run number in the files selected: " +
-          static_cast<std::string>(re.what()));
-    } catch (Poco::FileNotFoundException &rexc) {
-      throw std::invalid_argument("Error while looking for a run number in the "
-                                  "files selected. There was a problem with "
-                                  "the file(s): " +
-                                  std::string(rexc.what()));
-    }
-
-    multi_run_number.push_back(run_number);
-  }
-
-  g_log.debug()
-      << "First and last run number inferred from a multi-run selection: "
-      << multi_run_number.front() << " ... " << multi_run_number.back() << '\n';
-
-  return multi_run_number;
+  return paths;
 }
 
 /**
@@ -887,24 +808,8 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
                                 "the expected instrument name: " +
                                 m_currentInst + ".\n\n" + explMsg);
   }
-  const std::string castMsg =
-      "It is not possible to interpret as an integer number ";
-  try {
-    boost::lexical_cast<int>(parts[1]);
-  } catch (std::runtime_error &) {
-    throw std::invalid_argument(
-        castMsg + "the Vanadium number part of the file name.\n\n" + explMsg);
-  }
-  try {
-    boost::lexical_cast<int>(parts[2]);
-  } catch (std::runtime_error &) {
-    throw std::invalid_argument(
-        castMsg + "the Ceria number part of the file name.\n\n" + explMsg);
-  }
 
   instName = parts[0];
-  vanNo = parts[1];
-  ceriaNo = parts[2];
 }
 
 /**
@@ -971,19 +876,26 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
     doCalib(cs, vanNo, ceriaNo, outFilename, specNos);
   } catch (std::runtime_error &rexc) {
     m_calibFinishedOK = false;
+    m_calibError = "The calibration calculations failed. One of the "
+                   "algorithms did not execute correctly. See log messages for "
+                   "further details.";
     g_log.error()
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
            "further details. Error: " +
                std::string(rexc.what())
         << '\n';
-  } catch (std::invalid_argument &) {
+  } catch (std::invalid_argument &iaexc) {
     m_calibFinishedOK = false;
+    m_calibError = "The calibration calculations failed. Some input properties "
+                   "were not valid. See log messages for details. \n Error: " +
+                   std::string(iaexc.what());
     g_log.error()
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. \n";
   } catch (Mantid::API::Algorithm::CancelException &) {
     m_calibFinishedOK = false;
+    m_cancelled = true;
     g_log.error() << "Execution terminated by user. \n";
   }
   // restore normal data search paths
@@ -1000,8 +912,11 @@ void EnggDiffractionPresenter::calibrationFinished() {
 
   m_view->enableCalibrateFocusFitUserActions(true);
   if (!m_calibFinishedOK) {
-    g_log.warning() << "The calibration did not finish correctly. Please "
-                       "check previous log messages for details.\n";
+    if (!m_cancelled) {
+      m_view->userWarning("Calibration Error", m_calibError);
+    }
+    m_cancelled = false;
+
     m_view->showStatus("Calibration didn't finish succesfully. Ready");
   } else {
     const std::string vanNo = isValidRunNumber(m_view->newVanadiumNo());
@@ -1043,8 +958,17 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 
   // default extension for calibration files
   const std::string calibExt = ".prm";
+  std::string vanFilename = Poco::Path(vanNo).getBaseName();
+  std::string ceriaFilename = Poco::Path(ceriaNo).getBaseName();
+  std::string vanRun =
+      vanFilename.substr(vanFilename.find(instStr) + instStr.size());
+  std::string ceriaRun =
+      ceriaFilename.substr(ceriaFilename.find(instStr) + instStr.size());
+  vanRun.erase(0, std::min(vanRun.find_first_not_of('0'), vanRun.size() - 1));
+  ceriaRun.erase(
+      0, std::min(ceriaRun.find_first_not_of('0'), ceriaRun.size() - 1));
   std::string sugg =
-      instStr + "_" + vanNo + "_" + ceriaNo + nameAppendix + calibExt;
+      instStr + "_" + vanRun + "_" + ceriaRun + nameAppendix + calibExt;
 
   return sugg;
 }
@@ -1070,6 +994,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &outFilename,
                                        const std::string &specNos) {
   if (cs.m_inputDirCalib.empty()) {
+    m_calibError =
+        "No calibration directory selected. Please select a calibration "
+        "directory in Settings. This will be used to "
+        "cache Vanadium calibration data";
     g_log.warning("No calibration directory selected. Please select a "
                   "calibration directory in Settings. This will be used to "
                   "cache Vanadium calibration data");
@@ -1078,11 +1006,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     m_calibFinishedOK = false;
     return;
   }
-
-  // Append current instrument name if numerical only entry
-  // to help Load algorithm determine instrument
-  std::string vanFileHint, cerFileHint;
-  appendCalibInstPrefix(vanNo, ceriaNo, vanFileHint, cerFileHint);
 
   // TODO: the settings tab should emit a signal when these are changed, on
   // which the vanadium corrections model should be updated automatically
@@ -1097,7 +1020,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   try {
     auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
-    load->setPropertyValue("Filename", cerFileHint);
+    load->setPropertyValue("Filename", ceriaNo);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
     load->setPropertyValue("OutputWorkspace", ceriaWSName);
     load->execute();
@@ -1428,9 +1351,20 @@ std::vector<std::string>
 EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
                                                const std::vector<bool> &banks) {
   const std::string instStr = m_view->currentInstrument();
+  const std::string runNumber = Poco::Path(runNo).getBaseName();
   std::vector<std::string> res;
   res.reserve(banks.size());
-  std::string prefix = instStr + "_" + runNo + "_focused_bank_";
+  const auto instrumentPresent = runNumber.find(instStr);
+  std::string runName =
+      (instrumentPresent != std::string::npos)
+          ? runNumber.substr(instrumentPresent + instStr.size())
+          : runNumber;
+
+  std::string prefix = instStr + "_" +
+                       runName.erase(0, std::min(runName.find_first_not_of('0'),
+                                                 runName.size() - 1)) +
+                       "_focused_bank_";
+
   for (size_t b = 1; b <= banks.size(); b++) {
     res.emplace_back(prefix + boost::lexical_cast<std::string>(b) + ".nxs");
   }
@@ -1440,8 +1374,16 @@ EnggDiffractionPresenter::outputFocusFilenames(const std::string &runNo,
 std::string
 EnggDiffractionPresenter::outputFocusCroppedFilename(const std::string &runNo) {
   const std::string instStr = m_view->currentInstrument();
-
-  return instStr + "_" + runNo + "_focused_cropped.nxs";
+  const std::string runNumber = Poco::Path(runNo).getBaseName();
+  const auto instrumentPresent = runNumber.find(instStr);
+  std::string runName =
+      (instrumentPresent != std::string::npos)
+          ? runNumber.substr(instrumentPresent + instStr.size())
+          : runNumber;
+  return instStr + "_" +
+         runName.erase(
+             0, std::min(runName.find_first_not_of('0'), runName.size() - 1)) +
+         "_focused_cropped.nxs";
 }
 
 std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
@@ -1460,10 +1402,12 @@ std::vector<std::string> EnggDiffractionPresenter::sumOfFilesLoadVec() {
 std::vector<std::string> EnggDiffractionPresenter::outputFocusTextureFilenames(
     const std::string &runNo, const std::vector<size_t> &bankIDs) {
   const std::string instStr = m_view->currentInstrument();
-
+  const std::string runNumber = Poco::Path(runNo).getBaseName();
+  const std::string runName =
+      runNumber.substr(runNumber.find(instStr) + instStr.size());
   std::vector<std::string> res;
   res.reserve(bankIDs.size());
-  std::string prefix = instStr + "_" + runNo + "_focused_texture_bank_";
+  std::string prefix = instStr + "_" + runName + "_focused_texture_bank_";
   for (auto bankID : bankIDs) {
     res.emplace_back(prefix + boost::lexical_cast<std::string>(bankID) +
                      ".nxs");
@@ -1591,8 +1535,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &runNo,
                    << effectiveFilenames[idx] << '\n';
     try {
 
-      doFocusing(cs, RunLabel(std::stoi(runNo), bankIDs[idx]), specs[idx],
-                 dgFile);
+      doFocusing(cs, runNo, bankIDs[idx], specs[idx], dgFile);
       m_focusFinishedOK = true;
     } catch (std::runtime_error &rexc) {
       m_focusFinishedOK = false;
@@ -1722,7 +1665,9 @@ void EnggDiffractionPresenter::focusingFinished() {
  * @param cs user settings for calibration (this does not calibrate but
  * uses calibration input files such as vanadium runs
  *
- * @param runLabel run number and bank ID of the run to focus
+ * @param runLabel run number of the run to focus
+ *
+ * @param bank the Bank ID to focus
  *
  * @param specNos string specifying a list of spectra (for "cropped"
  * focusing or "texture" focusing), only considered if not empty
@@ -1731,7 +1676,8 @@ void EnggDiffractionPresenter::focusingFinished() {
  * texture focusing
  */
 void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
-                                          const RunLabel &runLabel,
+                                          const std::string &runLabel,
+                                          const size_t bank,
                                           const std::string &specNos,
                                           const std::string &dgFile) {
   MatrixWorkspace_sptr inWS;
@@ -1752,9 +1698,9 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   for (size_t i = 0; i < multi_RunNo.size(); i++) {
     // if last run number in list
     if (i + 1 == multi_RunNo.size())
-      loadInput += instStr + multi_RunNo[i];
+      loadInput += multi_RunNo[i];
     else
-      loadInput += instStr + multi_RunNo[i] + '+';
+      loadInput += multi_RunNo[i] + '+';
   }
 
   // if its not empty the global variable is set for sumOfFiles
@@ -1794,8 +1740,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     try {
       auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
-      load->setPropertyValue("Filename",
-                             instStr + std::to_string(runLabel.runNumber));
+      load->setPropertyValue("Filename", runLabel);
       load->setPropertyValue("OutputWorkspace", inWSName);
       load->execute();
 
@@ -1807,14 +1752,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
                        "Could not run the algorithm Load succesfully for "
                        "the focusing "
                        "sample (run number: " +
-                           std::to_string(runLabel.runNumber) +
-                           "). Error description: " + re.what() +
+                           runLabel + "). Error description: " + re.what() +
                            " Please check also the previous log messages "
                            "for details.";
       throw;
     }
   }
-  const auto bankString = std::to_string(runLabel.bank);
+  const auto bankString = std::to_string(bank);
   std::string outWSName;
   if (!dgFile.empty()) {
     // doing focus "texture"
@@ -1857,11 +1801,14 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   const bool saveOutputFiles = m_view->saveFocusedOutputFiles();
   if (saveOutputFiles) {
     try {
-      saveFocusedXYE(runLabel, outWSName);
-      saveGSS(runLabel, outWSName);
-      saveOpenGenie(runLabel, outWSName);
-      saveNexus(runLabel, outWSName);
-      exportSampleLogsToHDF5(outWSName, userHDFRunFilename(runLabel.runNumber));
+      const auto runNo =
+          runLabel.substr(runLabel.rfind(instStr) + instStr.size());
+      RunLabel label(runNo, bank);
+      saveFocusedXYE(label, outWSName);
+      saveGSS(label, outWSName);
+      saveOpenGenie(label, outWSName);
+      saveNexus(label, outWSName);
+      exportSampleLogsToHDF5(outWSName, userHDFRunFilename(runNo));
     } catch (std::runtime_error &re) {
       g_log.error() << "Error saving focused data. ",
           "There was an error while saving focused data. "
@@ -2377,7 +2324,7 @@ EnggDiffractionPresenter::outFileNameFactory(const std::string &inputWorkspace,
                                              const std::string &format) {
   std::string fullFilename;
 
-  const auto runNo = std::to_string(runLabel.runNumber);
+  const auto runNo = runLabel.runNumber;
   const auto bank = std::to_string(runLabel.bank);
 
   // calibration output files
@@ -2406,7 +2353,7 @@ std::string EnggDiffractionPresenter::vanadiumCurvesPlotFactory() {
       "if(mtd.doesExist(van_curve_twin_ws)):\n"
       " DeleteWorkspace(van_curve_twin_ws)\n"
 
-      "CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves_ws\", "
+      "CloneWorkspace(InputWorkspace = \"engggui_vanadium_curves\", "
       "OutputWorkspace = van_curve_twin_ws)\n"
 
       "van_curves_ws = workspace(van_curve_twin_ws)\n"
@@ -2627,10 +2574,10 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) const {
   return dir;
 }
 
-std::string
-EnggDiffractionPresenter::userHDFRunFilename(const int runNumber) const {
+std::string EnggDiffractionPresenter::userHDFRunFilename(
+    const std::string &runNumber) const {
   auto userOutputDir = outFilesUserDir("Runs");
-  userOutputDir.append(std::to_string(runNumber) + ".hdf5");
+  userOutputDir.append(runNumber + ".hdf5");
   return userOutputDir.toString();
 }
 
@@ -2641,8 +2588,8 @@ std::string EnggDiffractionPresenter::userHDFMultiRunFilename(
   const auto minLabel = std::min_element(begin, end);
   const auto maxLabel = std::max_element(begin, end);
   auto userOutputDir = outFilesUserDir("Runs");
-  userOutputDir.append(std::to_string(minLabel->runNumber) + "_" +
-                       std::to_string(maxLabel->runNumber) + ".hdf5");
+  userOutputDir.append((minLabel->runNumber) + "_" + (maxLabel->runNumber) +
+                       ".hdf5");
   return userOutputDir.toString();
 }
 
@@ -2889,8 +2836,8 @@ void EnggDiffractionPresenter::writeOutCalibFile(
   // normalize apparently not needed after the replace, but to be double-safe:
   pyCode += "GSAS_iparm_fname = os.path.normpath('" + safeOutFname + "')\n";
   pyCode += "bank_names = []\n";
-  pyCode += "ceria_number = " + ceriaNo + "\n";
-  pyCode += "van_number = " + vanNo + "\n";
+  pyCode += "ceria_number = \"" + ceriaNo + "\"\n";
+  pyCode += "van_number = \"" + vanNo + "\"\n";
   pyCode += "Difcs = []\n";
   pyCode += "Zeros = []\n";
   std::string templateFileVal = "None";

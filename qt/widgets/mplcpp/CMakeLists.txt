@@ -12,6 +12,7 @@ set(LIB_SRCS
     src/FigureCanvasQt.cpp
     src/Line2D.cpp
     src/MantidColorMap.cpp
+    src/Plot.cpp
     src/ScalarMappable.cpp
     src/Zoomer.cpp)
 
@@ -29,6 +30,7 @@ set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/Figure.h
     inc/MantidQtWidgets/MplCpp/Line2D.h
     inc/MantidQtWidgets/MplCpp/MantidColorMap.h
+    inc/MantidQtWidgets/MplCpp/Plot.h
     inc/MantidQtWidgets/MplCpp/ScalarMappable.h
     inc/MantidQtWidgets/MplCpp/Zoomer.h)
 
@@ -57,6 +59,8 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsMplCpp
                      ${Boost_LIBRARIES}
                      ${PYTHON_LIBRARIES}
                      PythonInterfaceCore
+                   MTD_QT_LINK_LIBS
+                     MantidQtWidgetsCommon
                    INSTALL_DIR
                      ${LIB_DIR}
                      ${WORKBENCH_LIB_DIR}

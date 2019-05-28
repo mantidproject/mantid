@@ -334,6 +334,57 @@ public:
     compareMaterial(*material, check);
   }
 
+  void testCalculateDensity() {
+    // test getting the number density from the table
+    const ReadMaterial::MaterialParameters tableParams = [this]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = FORMULA;
+      return setMaterial;
+    }
+    ();
+
+    {
+      ReadMaterial reader;
+      reader.setMaterialParameters(tableParams);
+      auto material = reader.buildMaterial();
+
+      TS_ASSERT_DELTA(material->numberDensity(), NUMBER_DENSITY, 1e-7);
+    }
+
+    // test getting the number density from the mass density
+    const ReadMaterial::MaterialParameters massParams = [this]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = FORMULA;
+      setMaterial.sampleMassDensity = MASS_DENSITY;
+      return setMaterial;
+    }
+    ();
+
+    {
+      ReadMaterial reader;
+      reader.setMaterialParameters(massParams);
+      auto material = reader.buildMaterial();
+      TS_ASSERT_DELTA(material->numberDensity(), NUMBER_DENSITY, 1e-7);
+    }
+
+    // test getting the number density from the mass and volume
+    const ReadMaterial::MaterialParameters sampleParams = [this]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = FORMULA;
+      setMaterial.sampleMass = 5.; // grams
+      setMaterial.sampleVolume = setMaterial.sampleMass / MASS_DENSITY;
+      return setMaterial;
+    }
+    ();
+
+    {
+      ReadMaterial reader;
+      reader.setMaterialParameters(sampleParams);
+      auto material = reader.buildMaterial();
+      TS_ASSERT_DELTA(material->numberDensity(), NUMBER_DENSITY, 1e-7);
+    }
+  }
+
   void testNoMaterialFailure() {
     const ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
@@ -354,10 +405,13 @@ public:
   }
 
 private:
-  const double EMPTY_DOUBLE_VAL = 8.9884656743115785e+307;
-  const double PRECISION = 1e-8;
-  const std::string EMPTY = "";
-  const std::string FORMULA = "V";
+  // these values are for elemental vanadium
+  const double EMPTY_DOUBLE_VAL{8.9884656743115785e+307};
+  const double PRECISION{1e-8};
+  const double NUMBER_DENSITY{0.0722305};
+  const double MASS_DENSITY{6.11}; // matches the number density
+  const std::string EMPTY{""};
+  const std::string FORMULA{"V"};
 
   void compareMaterial(const Material &material, const Material &check) {
     std::vector<Material::FormulaUnit> checkFormula = check.chemicalFormula();

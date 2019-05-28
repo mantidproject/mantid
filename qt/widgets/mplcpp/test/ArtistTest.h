@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
+using namespace MantidQt::Widgets::Common;
 
 class ArtistTest : public CxxTest::TestSuite {
 public:

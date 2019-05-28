@@ -7,7 +7,7 @@
 #ifndef MANTID_PYTHONINTERFACE_TOPYLISTTEST_H
 #define MANTID_PYTHONINTERFACE_TOPYLISTTEST_H
 
-#include "MantidPythonInterface/kernel/Converters/ToPyList.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include <boost/python/errors.hpp>
 #include <cxxtest/TestSuite.h>
 
