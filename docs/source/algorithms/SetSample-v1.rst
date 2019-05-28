@@ -61,6 +61,7 @@ procedure is used when trying to find a named definition, e.g ``CRYO-01``:
 
   - otherwise if the file does not exist continue onto the next ``INSTDIR``
 
+  - repeat for the facility directories if not found in for the specific instrument
 
 Geometry
 ########
