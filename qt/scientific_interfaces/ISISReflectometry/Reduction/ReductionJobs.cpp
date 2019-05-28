@@ -58,7 +58,8 @@ bool ReductionJobs::hasGroupWithName(std::string const &groupName) const {
 }
 
 bool ReductionJobs::containsSingleEmptyGroup() const {
-  return groups().size() == 1 && groups()[0].rows().size() == 0;
+  return groups().size() == 1 && groups()[0].rows().size() == 0 &&
+         groups()[0].name().empty();
 }
 
 void ReductionJobs::removeGroup(int index) {
