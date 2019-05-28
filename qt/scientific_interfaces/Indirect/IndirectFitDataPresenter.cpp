@@ -166,7 +166,9 @@ void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
 }
 
 void IndirectFitDataPresenter::setModelWorkspace(const QString &name) {
+  observeReplace(false);
   setSingleModelData(name.toStdString());
+  observeReplace(true);
 }
 
 void IndirectFitDataPresenter::loadSettings(const QSettings &settings) {
