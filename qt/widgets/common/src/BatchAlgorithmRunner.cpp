@@ -50,7 +50,6 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
 BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
 
 void BatchAlgorithmRunner::addAllObservers() {
-  removeAllObservers();
   m_notificationCenter.addObserver(m_batchCompleteObserver);
   m_notificationCenter.addObserver(m_batchCancelledObserver);
   m_notificationCenter.addObserver(m_algorithmStartedObserver);
