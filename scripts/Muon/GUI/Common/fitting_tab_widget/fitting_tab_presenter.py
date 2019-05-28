@@ -17,6 +17,8 @@ class FittingTabPresenter(object):
         self._selected_data = []
         self._start_x = [self.view.start_time]
         self._end_x = [self.view.end_time]
+        self._fit_status = []
+        self._fit_chi_squared = []
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserver(self.update_selected_workspace_guess)
@@ -94,13 +96,18 @@ class FittingTabPresenter(object):
         try:
             if fit_type == 'Single Fit':
                 single_fit_parameters = self.get_parameters_for_single_fit()
-                self.model.do_single_fit(single_fit_parameters)
+                fit_function, output_status, output_chi_squared = self.model.do_single_fit(single_fit_parameters)
+                self.view.update_global_fit_state(1 if output_status == 'success' else 0, 1)
             elif fit_type == 'Simultaneous Fit':
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
-                self.model.do_simultaneous_fit(simultaneous_fit_parameters)
+                fit_function, output_status, output_chi_squared = self.model.do_simultaneous_fit(simultaneous_fit_parameters)
+                fit_number = len(simultaneous_fit_parameters['StartX'])
+                self.view.update_global_fit_state(fit_number if output_status == 'success' else 0, fit_number)
             elif fit_type == 'Sequential Fit':
                 sequential_fit_parameters = self.get_multi_domain_fit_parameters()
                 self.model.do_sequential_fit(sequential_fit_parameters)
+
+            self.view.update_with_fit_outputs(fit_function, output_status, output_chi_squared)
         except ValueError as e:
             self.view.warning_popup(e)
 

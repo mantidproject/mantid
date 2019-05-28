@@ -65,6 +65,26 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.function_browser.addDatasets(data_set_name_list)
 
+    def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
+        self.function_browser.setFunction(str(fit_function))
+        if output_status == 'success':
+            self.fit_status_success_failure.setText('Success')
+            self.fit_status_success_failure.setStyleSheet('color: green')
+        else:
+            self.fit_status_success_failure.setText('Failure: {}'.format(output_status))
+            self.fit_status_success_failure.setStyleSheet('color: red')
+
+        self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
+
+    def update_global_fit_state(self, number_succesfully_fitted, total_number_fitted):
+        self.global_fit_status_label.setText('Fit successful for {} of {} workspaces'.
+                                             format(number_succesfully_fitted, total_number_fitted))
+
+        if number_succesfully_fitted == total_number_fitted:
+            self.global_fit_status_label.setStyleSheet('color: green')
+        else:
+            self.global_fit_status_label.setStyleSheet('color: red')
+
     def set_slot_for_select_workspaces_to_fit(self, slot):
         self.select_workspaces_to_fit_button.clicked.connect(slot)
 
