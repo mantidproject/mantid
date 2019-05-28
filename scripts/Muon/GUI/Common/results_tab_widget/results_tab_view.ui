@@ -14,32 +14,25 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="6">
-    <layout class="QGridLayout" name="log_value_layout">
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Fit function Selection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="6">
+    <layout class="QGridLayout" name="fit_layout">
      <property name="sizeConstraint">
       <enum>QLayout::SetFixedSize</enum>
      </property>
     </layout>
-   </item>
-   <item row="3" column="4" colspan="2">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>196</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="5" column="3" colspan="2">
-    <widget class="QPushButton" name="output_results_table_button">
-     <property name="text">
-      <string>Output Results</string>
-     </property>
-    </widget>
    </item>
    <item row="5" column="5">
     <spacer name="horizontalSpacer_3">
@@ -54,36 +47,33 @@
      </property>
     </spacer>
    </item>
-   <item row="4" column="0" colspan="6">
-    <layout class="QGridLayout" name="fit_layout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
-     </property>
-    </layout>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_2">
+   <item row="3" column="1" colspan="3">
+    <widget class="QComboBox" name="fit_function_selector">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Fit Selection</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="label_3">
+   <item row="5" column="3" colspan="2">
+    <widget class="QPushButton" name="output_results_table_btn">
+     <property name="text">
+      <string>Output Results</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QLineEdit" name="results_name_editor">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Fit function Selection</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -100,29 +90,6 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="2">
-    <widget class="QLineEdit" name="results_table_line_edit">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>ResultsTable</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1" colspan="3">
-    <widget class="QComboBox" name="fit_function_combo">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0" colspan="2">
     <widget class="QLabel" name="label_4">
      <property name="text">
@@ -130,18 +97,42 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Fit Selection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="4" colspan="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="0" colspan="6">
+    <layout class="QGridLayout" name="log_value_layout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetFixedSize</enum>
+     </property>
+    </layout>
+   </item>
   </layout>
-  <zorder>gridLayoutWidget</zorder>
-  <zorder>gridLayoutWidget_2</zorder>
-  <zorder>fit_function_combo</zorder>
+  <zorder>fit_function_selector</zorder>
   <zorder>label</zorder>
   <zorder>label_2</zorder>
   <zorder>label_3</zorder>
-  <zorder>label_3</zorder>
   <zorder>horizontalSpacer</zorder>
-  <zorder>output_results_table_button</zorder>
+  <zorder>output_results_table_btn</zorder>
   <zorder>horizontalSpacer_3</zorder>
-  <zorder>results_table_line_edit</zorder>
+  <zorder>results_name_editor</zorder>
   <zorder>label_4</zorder>
  </widget>
  <resources/>

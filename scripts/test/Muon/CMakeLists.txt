@@ -47,6 +47,7 @@ set ( TEST_PY_FILES
    muon_group_pair_context_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
+   results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
    utilities/muon_group_test.py

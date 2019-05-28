@@ -30,18 +30,9 @@ class ResultsTabModel(object):
         self._results_table_name = DEFAULT_TABLE_NAME
         self._context = fitting_context
 
-    @property
     def results_table_name(self):
         """Return the current name of the results table"""
         return self._results_table_name
-
-    @results_table_name.setter
-    def results_table_name(self, name):
-        """Set the name of the output table
-
-        :param name: A new name for the table
-        """
-        self._results_table_name = name
 
     def set_results_table_name(self, name):
         """Set the name of the output table

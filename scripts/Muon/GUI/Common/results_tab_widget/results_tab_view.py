@@ -6,57 +6,112 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets
 from mantidqt.utils.qt import load_ui
+from qtpy import QtCore, QtWidgets
+
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
+
+# Constants
+FIT_SELECTOR_COL0_WIDTH = 600
+# from_row, from_col, row_span, col_span
+FIT_SELECTOR_GRID_POS = (0, 1, 4, 1)
+LOG_SELECTOR_COL0_WIDTH = FIT_SELECTOR_COL0_WIDTH
+LOG_SELECTOR_GRID_POS = FIT_SELECTOR_GRID_POS
 
 ui_fitting_tab, _ = load_ui(__file__, "results_tab_view.ui")
 
 
 class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
+    # Public signals
+    function_selection_changed = QtCore.Signal()
+    results_name_edited = QtCore.Signal()
+
     def __init__(self, parent=None):
         super(ResultsTabView, self).__init__(parent)
+        self._init_layout()
+        self._init_signals()
+
+    def set_output_results_button_enabled(self, on):
+        """
+        Set the status of the output results button
+        :param on: If True then enable the button otherwise disable it
+        """
+        self.output_results_table_btn.setEnabled(on)
+
+    def results_table_name(self):
+        """Return the name of the output table."""
+        return self.results_name_editor.text()
+
+    def set_results_table_name(self, name):
+        """Set the name of the output table.
+
+        :param name: A new name for the table
+        """
+        self.results_name_editor.setText(name)
+
+    def selected_fit_function(self):
+        """Return the text of the selected item in the function
+        selection box"""
+        return self.fit_function_selector.currentText()
+
+    # Private methods
+    def _init_layout(self):
+        """Setup the layout of the view"""
         self.setupUi(self)
 
-        self.log_selector_widget = ListSelectorView(self)
-        self.fit_selector_widget = ListSelectorView(self)
+        self.log_selector_presenter = _create_empty_list_selector(
+            self, LOG_SELECTOR_COL0_WIDTH)
+        self.log_value_layout.addWidget(self.log_selector_presenter.view,
+                                        *FIT_SELECTOR_GRID_POS)
+        self.fit_selector_presenter = _create_empty_list_selector(
+            self, FIT_SELECTOR_COL0_WIDTH)
+        self.fit_layout.addWidget(self.fit_selector_presenter.view,
+                                  *LOG_SELECTOR_GRID_POS)
 
-        self.log_value_layout.addWidget(self.log_selector_widget, 0, 1, 4, 1)
-        self.log_value_layout.setContentsMargins(0, 0, 0, 0)
-        self.fit_layout.addWidget(self.fit_selector_widget, 0, 1, 4, 1)
-        self.fit_layout.setContentsMargins(0, 0, 0, 0)
-        self.log_selector_widget.item_table_widget.setColumnWidth(0, 600)
-        self.fit_selector_widget.item_table_widget.setColumnWidth(0, 600)
+    def _init_signals(self):
+        """Connect internal signals to external notifiers"""
+        self.fit_function_selector.currentIndexChanged.connect(
+            self.function_selection_changed)
+        self.results_name_editor.editingFinished.connect(
+            self.results_name_edited)
 
-        self.log_selector_presenter = ListSelectorPresenter(self.log_selector_widget, {})
-        self.fit_selector_presenter = ListSelectorPresenter(self.fit_selector_widget, {})
+    # def update_fit_function_list(self, fit_function_list):
+    #     name = self.fit_function_combo.currentText()
+    #     self.fit_function_combo.clear()
+    #
+    #     self.fit_function_combo.addItems(fit_function_list)
+    #
+    #     index = self.fit_function_combo.findText(name)
+    #
+    #     if index != -1:
+    #         self.fit_function_combo.setCurrentIndex(index)
+    #     else:
+    #         self.fit_function_combo.setCurrentIndex(0)
+    #
+    # def update_fit_selector_model(self, new_model_dictionary):
+    #     self.fit_selector_presenter.update_model(new_model_dictionary)
+    #
+    # def update_log_selector_model(self, new_model_dictionary):
+    #     self.log_selector_presenter.update_model(new_model_dictionary)
+    #
+    # def get_selected_fit_list(self):
+    #     return self.fit_selector_presenter.get_selected_items()
+    #
+    # def get_selected_logs_list(self):
+    #     return self.log_selector_presenter.get_selected_items()
 
-    def update_fit_function_list(self, fit_function_list):
-        name = self.fit_function_combo.currentText()
-        self.fit_function_combo.clear()
 
-        self.fit_function_combo.addItems(fit_function_list)
+# Private helper functions
+def _create_empty_list_selector(parent, col_zero_width):
+    """
+    Create a ListSelector around the given parent
+    and return the presenter
 
-        index = self.fit_function_combo.findText(name)
-
-        if index != -1:
-            self.fit_function_combo.setCurrentIndex(index)
-        else:
-            self.fit_function_combo.setCurrentIndex(0)
-
-    @property
-    def fit_function(self):
-        return self.fit_function_combo.currentText()
-
-    def update_fit_selector_model(self, new_model_dictionary):
-        self.fit_selector_presenter.update_model(new_model_dictionary)
-
-    def update_log_selector_model(self, new_model_dictionary):
-        self.log_selector_presenter.update_model(new_model_dictionary)
-
-    def get_selected_fit_list(self):
-        return self.fit_selector_presenter.get_selected_items()
-
-    def get_selected_logs_list(self):
-        return self.log_selector_presenter.get_selected_items()
+    :param parent: The parent widget for the selector
+    :param col_zero_width: The width of the first column
+    :return: A new presenter that controls the widget
+    """
+    presenter = ListSelectorPresenter(ListSelectorView(parent), {})
+    presenter.view.item_table_widget.setColumnWidth(0, col_zero_width)
+    return presenter

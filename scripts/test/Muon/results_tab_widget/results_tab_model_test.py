@@ -12,28 +12,36 @@ import unittest
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
+from mantid.py3compat import mock
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, ResultsTabModel)
 
+# constants
+FITTING_CONTEXT_CLS = 'Muon.GUI.Common.contexts.fitting_context.FittingContext'
+
 
 class ResultsTabModelTest(unittest.TestCase):
+    def setUp(self):
+        self.context_patcher = mock.patch(FITTING_CONTEXT_CLS, autospec=True)
+        self.fitting_context = self.context_patcher.start()
+        self.model = ResultsTabModel(self.fitting_context)
+
     def tearDown(self):
+        self.context_patcher.stop()
         AnalysisDataService.Instance().clear()
 
     # ------------------------- success tests ----------------------------
     def test_default_model_has_results_table_name(self):
-        model = ResultsTabModel()
-        self.assertEqual(model.results_table_name, DEFAULT_TABLE_NAME)
+        self.assertEqual(self.model.results_table_name(), DEFAULT_TABLE_NAME)
 
     def test_updating_model_results_table_name(self):
-        model = ResultsTabModel()
         table_name = 'table_name'
-        model.results_table_name = table_name
-        self.assertEqual(model.results_table_name, table_name)
+        self.model.set_results_table_name(table_name)
+        self.assertEqual(self.model.results_table_name(), table_name)
 
     def test_log_names_from_workspace_with_logs(self):
-        fake_ws = create_test_workspace(add_logs=True)
+        fake_ws = create_test_workspace()
         run = fake_ws.run()
         # populate with log data
         time_series_names = ('ts_1', 'ts_2')
@@ -42,31 +50,29 @@ class ResultsTabModelTest(unittest.TestCase):
         single_value_log_names = ('sv_1', 'sv_2')
         for name in itertools.chain(single_value_log_names,
                                     ALLOWED_NON_TIME_SERIES_LOGS):
-            run.addProperty(name,
-                            StringPropertyWithValue(name, 'test'),
-                            replace=True)
+            run.addProperty(
+                name, StringPropertyWithValue(name, 'test'), replace=True)
         # verify
-        model = ResultsTabModel()
-        allowed_logs = model.log_names(fake_ws.name())
+        allowed_logs = self.model.log_names(fake_ws.name())
         for name in itertools.chain(time_series_names,
                                     ALLOWED_NON_TIME_SERIES_LOGS):
             self.assertTrue(
                 name in allowed_logs,
                 msg="{} not found in allowed log list".format(name))
         for name in single_value_log_names:
-            self.assertFalse(name in allowed_logs,
-                             msg="{} found in allowed log list".format(name))
+            self.assertFalse(
+                name in allowed_logs,
+                msg="{} found in allowed log list".format(name))
 
     def test_log_names_from_workspace_without_logs(self):
         fake_ws = create_test_workspace()
-        model = ResultsTabModel()
-        allowed_logs = model.log_names(fake_ws.name())
+        allowed_logs = self.model.log_names(fake_ws.name())
         self.assertEqual(0, len(allowed_logs))
 
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
-        model = ResultsTabModel()
-        self.assertRaises(KeyError, model.log_names, 'not a workspace in ADS')
+        self.assertRaises(KeyError, self.model.log_names,
+                          'not a workspace in ADS')
 
 
 def create_test_workspace():

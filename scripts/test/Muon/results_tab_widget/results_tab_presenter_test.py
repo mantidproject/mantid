@@ -1,35 +1,61 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
-from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
-from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from mantid.api import FunctionFactory
+from Muon.GUI.Common.results_tab_widget.results_tab_presenter import ResultsTabPresenter
+
+RESULTS_TAB_MODEL_CLS = 'Muon.GUI.Common.results_tab_widget.results_tab_model.ResultsTabModel'
+RESULTS_TAB_VIEW_CLS = 'Muon.GUI.Common.results_tab_widget.results_tab_widget.ResultsTabView'
 
 
-def retrieve_combobox_info(combo_box):
-    output_list = []
-    for i in range(combo_box.count()):
-        output_list.append(str(combo_box.itemText(i)))
-
-    return output_list
-
-
-class ResultsTabPresenterTest(GuiTest):
+class ResultsTabPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.context = setup_context()
-        self.results_tab_widget = ResultsTabWidget(self.context, None)
-        self.view = self.results_tab_widget.results_tab_view
-        self.presenter = self.results_tab_widget.results_tab_presenter
+        self.model_patcher = mock.patch(RESULTS_TAB_MODEL_CLS, autospec=True)
+        self.view_patcher = mock.patch(RESULTS_TAB_VIEW_CLS, autospec=True)
 
-    def test_that_widget_initialises_correctly(self):
-        self.assertEqual(self.presenter.get_selected_fit_list(), [])
-        self.assertEqual(self.presenter.get_selected_logs_list(), [])
+        self.mock_model = self.model_patcher.start()
+        self.mock_view = self.view_patcher.start()
+        self.mock_view.function_selection_changed.connect = mock.MagicMock()
+        self.mock_view.results_name_edited.connect = mock.MagicMock()
+
+    def tearDown(self):
+        self.view_patcher.stop()
+        self.model_patcher.stop()
+
+    def test_presenter_sets_up_view_correctly(self):
+        self.mock_model.results_table_name.return_value='default_table'
+        self.mock_view.function_selection_changed.connect = mock.MagicMock()
+        self.mock_view.results_name_edited.connect = mock.MagicMock()
+
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        self.mock_view.set_results_table_name.assert_called_once_with(
+            'default_table')
+        self.mock_view.results_name_edited.connect.assert_called_once_with(
+            presenter.on_results_table_name_edited)
+        self.mock_view.set_output_results_button_enabled.assert_called_once_with(
+            False)
+
+    def test_editing_results_name_updates_model_value(self):
+        new_name = 'edited_name'
+        self.mock_view.results_table_name.return_value = new_name
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter.on_results_table_name_edited()
+
+        self.mock_view.results_table_name.assert_called_once_with()
+        self.mock_model.set_results_table_name.assert_called_once_with(
+            new_name)
+
+    # def test_changing_function_name(self):
+    #     # new_name = 'edited_name'
+    #     # self.mock_view.results_table_name.return_value = new_name
+    #     presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+    #     presenter.on_function_selection_changed()
+    #
+    #     self.mock_view.selected_fit_function.assert_called_once()
 
 
 if __name__ == '__main__':
