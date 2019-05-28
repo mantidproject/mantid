@@ -15,8 +15,11 @@ Pre-processing parameters
 **Time Zero** This is the time zero value used. By default the time zero is taken from the file but
 it can be specified here in which case the specified time zero is used for all calculations.
 
-**First Good Data** This is the first good data value used. By default the time zero is taken from the file but
+**First Good Data** This is the first good data value used. By default the first good data is taken from the file but
 it can be specified here in which case the specified first good data is used for all calculations.
+
+**Last Good Data** This is the Last good data value used. By default the last good data is taken from the file but
+it can be specified here in which case the specified last good data is used for all calculations.
 
 **Deadtime** The default is to use no deadtime correction. There are three deadtime correction options if required.
 
