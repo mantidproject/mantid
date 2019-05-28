@@ -130,6 +130,8 @@ void SaveSampleEnvironmentAndShape::exec() {
         "Attempted to Save out non mesh based Sample or Environment");
   }
 }
+
+// Add a mesh to the vectors
 void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
   auto vertices = mesh.getV3Ds();
   auto triangles = mesh.getTriangles();
@@ -139,6 +141,8 @@ void SaveSampleEnvironmentAndShape::addMeshToVector(const MeshObject &mesh) {
                     std::end(triangles));
 }
 
+// Add a mesh to the vectors, with the addresses changed by the offset, then
+// return the new offset
 size_t SaveSampleEnvironmentAndShape::addMeshToVector(
     const Mantid::Geometry::MeshObject &mesh, size_t offset) {
   auto vertices = mesh.getV3Ds();
