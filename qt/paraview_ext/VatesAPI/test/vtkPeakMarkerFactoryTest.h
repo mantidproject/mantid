@@ -162,13 +162,14 @@ public:
 
     TSM_ASSERT_THROWS(
         "No workspace, so should not be possible to complete initialization.",
-        factory.initialize(ws_sptr), std::runtime_error);
+        factory.initialize(ws_sptr), const std::runtime_error &);
   }
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
     vtkPeakMarkerFactory factory("signal");
-    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate),
+                     const std::runtime_error &);
   }
 
   void testTypeName() {

@@ -75,8 +75,10 @@ public:
   }
 
   void test_domain_create() {
-    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(0), std::invalid_argument);
-    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(-10), std::length_error);
+    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(0),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::FunctionDomain d(-10),
+                     const std::length_error &);
     TS_ASSERT_THROWS_NOTHING(Mantid::API::FunctionDomain d(1));
   }
 };

@@ -160,7 +160,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TSM_ASSERT_THROWS("Should throw because fetchInputPropertyName is "
                       "returning the name of a property which doesn't exist.",
-                      alg.execute(), std::runtime_error);
+                      alg.execute(), const std::runtime_error &);
   }
 
   void test_input_property_doesnt_exist_throws() {
@@ -200,7 +200,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TSM_ASSERT_THROWS("Should throw because fetchInputPropertyName is "
                       "returning the name of a property which doesn't exist.",
-                      alg.execute(), Kernel::Exception::NotFoundError);
+                      alg.execute(), const Kernel::Exception::NotFoundError &);
   }
 
   void test_process_groups_with_array_input() {

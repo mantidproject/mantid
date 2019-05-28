@@ -77,14 +77,14 @@ public:
     LoadFITS lf;
     TS_ASSERT_THROWS_NOTHING(lf.initialize());
     TS_ASSERT_THROWS_NOTHING(lf.setPropertyValue("Filename", g_smallFname1));
-    TS_ASSERT_THROWS(lf.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(lf.execute(), const std::runtime_error &);
     TS_ASSERT(!lf.isExecuted());
 
     LoadFITS lf2;
     TS_ASSERT_THROWS_NOTHING(lf2.initialize());
     TS_ASSERT_THROWS_NOTHING(
         lf2.setPropertyValue("OutputWorkspace", "out_ws_name"));
-    TS_ASSERT_THROWS(lf2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(lf2.execute(), const std::runtime_error &);
     TS_ASSERT(!lf2.isExecuted());
   }
 
@@ -92,28 +92,28 @@ public:
     LoadFITS lf;
     TS_ASSERT_THROWS_NOTHING(lf.initialize());
     TS_ASSERT_THROWS(lf.setPropertyValue("file", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(lf.setPropertyValue("output", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(lf.setPropertyValue("FITS", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "-1"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "0"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(lf.setPropertyValue("FilterNoiseLevel", "-10"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(lf.setPropertyValue("FilterNoiseLevel", "0"));
 
     TS_ASSERT_THROWS(lf.setPropertyValue("ImageKey", "anything"),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
     TS_ASSERT_THROWS(lf.setPropertyValue("BITPIX", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(lf.setPropertyValue("NAXIS", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(lf.setPropertyValue("NAXIS1", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_initGood() {
@@ -127,7 +127,7 @@ public:
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     inputFile = g_smallFname1 + ", " + g_smallFname2;
     algToBeTested.setPropertyValue("Filename", inputFile);
@@ -135,7 +135,7 @@ public:
     // Set the ImageKey to be 0 (this used to be required, but the key
     // should not be there any longer);
     TS_ASSERT_THROWS(algToBeTested.setProperty<int>("ImageKey", 0),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_performAssertions() {

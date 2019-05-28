@@ -32,7 +32,7 @@ public:
     boost::shared_ptr<FacilityInfo> another;
     TS_ASSERT_THROWS(another = createCRInfoInMinimalFacility(
                          "<computeResource fooAtt=\"barVal\"/>"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT(!another);
   }
 
@@ -44,7 +44,7 @@ public:
                               "</computeResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT(!fac);
   }
 
@@ -56,7 +56,7 @@ public:
                               "</compResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
-                     Poco::XML::XMLException);
+                     const Poco::XML::XMLException &);
     TS_ASSERT(!fac);
   }
 
@@ -103,7 +103,7 @@ public:
 
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     TS_ASSERT(!fac);
   }

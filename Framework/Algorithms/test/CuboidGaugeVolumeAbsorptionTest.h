@@ -40,7 +40,7 @@ public:
 
     TS_ASSERT_THROWS(
         atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void testFailsIfNoSampleShape() {

@@ -407,7 +407,7 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   Types::Core::DateAndTime runstart(0);
   try {
     runstart = run_obj.startTime();
-  } catch (std::runtime_error &) {
+  } catch (const std::runtime_error &) {
     // Swallow the error - startTime will just be 0
   }
 

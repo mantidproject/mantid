@@ -25,7 +25,7 @@ public:
   void testEmptyConstructor() {
     CompAssembly q;
     TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "");
     TS_ASSERT(!q.getParent());
@@ -38,7 +38,7 @@ public:
   void testNameValueConstructor() {
     CompAssembly q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "Name");
     TS_ASSERT(!q.getParent());
@@ -54,7 +54,7 @@ public:
     CompAssembly *q = new CompAssembly("Child", parent);
     TS_ASSERT_EQUALS(q->getName(), "Child");
     TS_ASSERT_EQUALS(q->nelements(), 0);
-    TS_ASSERT_THROWS((*q)[0], std::runtime_error);
+    TS_ASSERT_THROWS((*q)[0], const std::runtime_error &);
     // check the parent
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
@@ -72,7 +72,7 @@ public:
     Component *det2 = new Component("Det2Name");
     Component *det3 = new Component("Det3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
+    TS_ASSERT_THROWS(bank[0], const std::runtime_error &);
     bank.add(det1);
     bank.add(det2);
     bank.add(det3);
@@ -92,11 +92,11 @@ public:
     TS_ASSERT_EQUALS(bank.nelements(), 1);
     // Throws if you try to remove a component that's not in there
     Component *det2 = new Component("Det2Name");
-    TS_ASSERT_THROWS(bank.remove(det2), std::runtime_error);
+    TS_ASSERT_THROWS(bank.remove(det2), const std::runtime_error &);
     delete det2;
     // Works on components that are in the assembly
     TS_ASSERT_EQUALS(bank.remove(det1), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
+    TS_ASSERT_THROWS(bank[0], const std::runtime_error &);
   }
 
   //-----------------------------------------------------------------------------
@@ -184,7 +184,7 @@ public:
     Component det2("Det2Name");
     Component det3("Det3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
+    TS_ASSERT_THROWS(bank[0], const std::runtime_error &);
     bank.addCopy(&det1);
     bank.addCopy(&det2);
     bank.addCopy(&det3, "ChangedDet3Name");

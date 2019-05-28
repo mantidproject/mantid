@@ -40,7 +40,7 @@ public:
   void testWrongAlgThrows() {
     TS_ASSERT_THROWS(
         MDTransfFactory::Instance().create("Non_existing_ChildAlgorithm"),
-        Kernel::Exception::NotFoundError);
+        const Kernel::Exception::NotFoundError &);
   }
 
   void testGetAlg() {

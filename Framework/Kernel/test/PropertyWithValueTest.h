@@ -680,7 +680,7 @@ public:
     std::string value = prop;
     TS_ASSERT_EQUALS(value, "Hello");
 
-    TS_ASSERT_THROWS(prop = "Mantid", std::invalid_argument);
+    TS_ASSERT_THROWS(prop = "Mantid", const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(prop = "1");
     value = prop;

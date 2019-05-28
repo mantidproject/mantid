@@ -42,7 +42,7 @@ public:
                       ew->displayNormalizationHisto(), histoNormalization);
 
     TS_ASSERT_THROWS(ew = MDEventFactory::CreateMDWorkspace(0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_box_factory() {
@@ -84,10 +84,10 @@ public:
 
     TS_ASSERT_THROWS(MDEventFactory::createBox(
                          0, MDEventFactory::BoxType::MDBoxWithLean, bc),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(MDEventFactory::createBox(
                          10, MDEventFactory::BoxType::MDGridBoxWithFat, bc),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   // Templated function that will be called for a specific MDEW

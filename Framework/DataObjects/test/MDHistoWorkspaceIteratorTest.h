@@ -1493,7 +1493,7 @@ public:
     bool maskDim[] = {true};
     TSM_ASSERT_THROWS("Not implemented yet, should throw",
                       it->getVertexesArray(numVertexes, outDimensions, maskDim),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   void test_getIsMasked() {

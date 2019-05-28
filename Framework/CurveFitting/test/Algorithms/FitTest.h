@@ -102,14 +102,14 @@ public:
     TS_ASSERT_THROWS(
         alg->setProperty("Function",
                          boost::dynamic_pointer_cast<IFunction>(multi)),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_empty_function_str() {
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     TS_ASSERT_THROWS(alg->setPropertyValue("Function", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   // Test that Fit copies minimizer's output properties to Fit

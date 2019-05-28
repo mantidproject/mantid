@@ -86,7 +86,8 @@ public:
     alg.setProperty("RotationMatrix", "-1,0,1,0,0,0,0,1");
     boost::shared_ptr<MeshObject> environmentMesh = nullptr;
     environmentMesh = loadCube();
-    TS_ASSERT_THROWS(alg.rotate(environmentMesh), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.rotate(environmentMesh),
+                     const std::invalid_argument &);
   }
 
   void testRotateFailInvalidMatrix() {
@@ -95,7 +96,8 @@ public:
     alg.setProperty("RotationMatrix", "6,1,1,4,-2,5,2,8,7");
     boost::shared_ptr<MeshObject> environmentMesh = nullptr;
     environmentMesh = loadCube();
-    TS_ASSERT_THROWS(alg.rotate(environmentMesh), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.rotate(environmentMesh),
+                     const std::invalid_argument &);
   }
 
   void testSetMaterial() {

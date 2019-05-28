@@ -113,9 +113,9 @@ public:
             << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(finder.getLogValue("boolProp", StatisticType::Mean, 1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_getLogValue_nonExistentWorkspace_throws() {
@@ -127,7 +127,7 @@ public:
     LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(
         finder.getLogValue("dblProp", StatisticType::Mean, "no_workspace"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_getLogValue_indexOutOfRange_throws() {
@@ -138,7 +138,7 @@ public:
             << QString::fromStdString(ws1.name());
     LogValueFinder finder(wsNames);
     TS_ASSERT_THROWS(finder.getLogValue("dblProp", StatisticType::Mean, 2),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

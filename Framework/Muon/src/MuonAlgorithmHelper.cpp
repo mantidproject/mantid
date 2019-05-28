@@ -478,7 +478,7 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
   try {
     group1 = parseWorkspaceName(WSname1);
     group2 = parseWorkspaceName(WSname2);
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     throw std::invalid_argument(
         "Ensure workspaces have the correctly formatted name (see "
         "documentation).");

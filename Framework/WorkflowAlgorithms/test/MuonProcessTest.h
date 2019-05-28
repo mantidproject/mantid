@@ -413,7 +413,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
 
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -424,7 +424,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", emptyWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_errorReporting_badWSType() {
@@ -453,7 +453,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -484,7 +484,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -513,7 +513,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -545,7 +545,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", output.name()));
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

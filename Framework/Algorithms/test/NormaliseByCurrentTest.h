@@ -162,7 +162,7 @@ public:
       norm.initialize();
 
     // Check it fails if properties haven't been set
-    TS_ASSERT_THROWS(norm.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(norm.execute(), const std::runtime_error &);
     TS_ASSERT(!norm.isExecuted());
   }
 
