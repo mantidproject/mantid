@@ -145,13 +145,14 @@ class FittingTabPresenter(object):
     @selected_data.setter
     def selected_data(self, value):
         self._selected_data = value
-        self.view.update_displayed_data_combo_box(value)
-
         if self.view.fit_type != 'Single Fit':
             self._start_x = [self.view.start_time] * len(value)
             self._end_x = [self.view.end_time] * len(value)
+
         if self.view.fit_type == 'Simultaneous Fit':
             self.view.set_datasets_in_function_browser(self._selected_data)
+
+        self.view.update_displayed_data_combo_box(value)
 
     @property
     def start_x(self):
