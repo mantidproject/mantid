@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import os, math
+import os
+import math
 import numpy as np
 from mantid import config, mtd, logger
 from mantid.dataobjects import TableWorkspace
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     WorkspaceGroupProperty, FileAction, Progress, WorkspaceProperty, PropertyMode
-from mantid.simpleapi import *  # noqa
+from mantid.simpleapi import *
 
 
 def _ws_or_none(s):
@@ -130,16 +131,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     def validateInputs(self):
 
         issues = dict()
-
         self._psd_int_range = self.getProperty('ManualPSDIntegrationRange').value
-
         if not self.getPropertyValue('MapFile'):
             if len(self._psd_int_range) != 2:
                 issues['ManualPSDIntegrationRange'] = 'Specify comma separated pixel range, e.g. 1,128'
             elif self._psd_int_range[0] < 1 or self._psd_int_range[1] > 128 \
                     or self._psd_int_range[0] >= self._psd_int_range[1]:
                 issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
-
         return issues
 
     def setUp(self):
@@ -153,7 +151,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
         self._normalise_to = self.getPropertyValue('NormaliseTo')
         self._monitor_cutoff = self.getProperty('MonitorCutoff').value
-
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == 128):
             self._use_map_file = True
         else:
@@ -164,7 +161,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         Loads the detector grouping map file
         @throws RuntimeError :: if neither the user defined nor the default file is found
         """
-
         self._instrument_name = self._instrument.getName()
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
@@ -172,7 +168,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
         self._parameter_file = os.path.join(idf_directory, ipf_name)
         self.log().information('Set parameter file : {0}'.format(self._parameter_file))
-
         if self._use_map_file:
             if self._map_file == '':
                 # path name for default map file
@@ -192,11 +187,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param   xend         :: MaskBins between x[xend] and x[-1]
         """
         x_values = mtd[ws].readX(0)
-
         if xstart > 0:
             logger.debug('Mask bins smaller than {0}'.format(xstart))
             MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[0], XMax=x_values[xstart])
-
         if xend < len(x_values) - 1:
             logger.debug('Mask bins larger than {0}'.format(xend))
             MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
@@ -206,14 +199,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         Converts the x-axis from raw channel number to energy transfer
         @param ws :: input workspace name
         """
-
         x = mtd[ws].readX(0)
         size = mtd[ws].blocksize()
         mid = (x[-1] + x[0])/ 2.
         scale = 0.001  # from micro ev to mili ev
-
         factor = size / (size - 1)
-
         # minus sign is needed
         if self._doppler_energy != 0:
             formula = '-(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
@@ -221,9 +211,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             # Center the data for elastic fixed window scan, for integration over the elastic peak
             formula = '-(x-{0})*{1}'.format(mid-0.5, 1. / scale)
             self.log().notice('The only energy value is 0 meV. Ignore the x-axis.')
-
         self.log().information('Energy conversion formula is: {0}'.format(formula))
-
         ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits = 'DeltaE')
 
     def _monitor_max_range(self, ws):
@@ -232,7 +220,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: input workspace name
         return    :: [xmin,xmax]
         """
-
         y = mtd[ws].readY(0)
         size = len(y)
         mid = int(size / 2)
@@ -246,7 +233,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: input workspace name
         return    :: [start,end]
         """
-
         y = mtd[ws].readY(0)
         nonzero = np.argwhere(y!=0)
         start = nonzero[0][0] if nonzero.any() else 0
@@ -258,16 +244,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         Sets up the doppler properties, and deduces the reduction type
         @throws RuntimeError :: If anyone of the 3 required entries is missing
         """
-
         run = mtd[self._ws].getRun()
-
         message = 'is not defined. Check your data.'
-
         if run.hasProperty('Doppler.mirror_sense'):
             self._mirror_sense = run.getLogData('Doppler.mirror_sense').value
         else:
             raise RuntimeError('Mirror sense '+ message)
-
         if run.hasProperty('Doppler.maximum_delta_energy'):
             self._doppler_energy = run.getLogData('Doppler.maximum_delta_energy').value
         else:
@@ -277,7 +259,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._velocity_profile = run.getLogData('Doppler.velocity_profile').value
         else:
             raise RuntimeError('Velocity profile '+ message)
-
         if self._doppler_energy == 0.:
             self._reduction_type = 'EFWS'
         else:
@@ -285,7 +266,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 self._reduction_type = 'QENS'
             else:
                 self._reduction_type = 'IFWS'
-
         if run.hasProperty('acquisition_mode'):
             if run.getLogData('acquisition_mode').value == 1:
                 self._reduction_type = 'BATS'
@@ -293,35 +273,22 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     def PyExec(self):
 
         self.setUp()
-
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._run_file.count('+'))
-
         LoadAndMerge(Filename=self._run_file, OutputWorkspace=self._red_ws, LoaderName='LoadILLIndirect')
-
         self._instrument = mtd[self._red_ws].getInstrument()
-
         self._load_map_file()
-
         run = str(mtd[self._red_ws].getRun().getLogData('run_number').value)[:6]
-
         self._ws = self._red_ws + '_' + run
-
         if self._run_file.count('+') > 0:  # multiple summed files
             self._ws += '_multiple'
-
         RenameWorkspace(InputWorkspace=self._red_ws, OutputWorkspace=self._ws)
-
         LoadParameterFile(Workspace=self._ws, Filename=self._parameter_file)
-
         self._efixed = self._instrument.getNumberParameter('Efixed')[0]
-
         self._setup_run_properties()
-
         if self._reduction_type == 'BATS':
             self._reduce_bats(self._ws)
         else:
             if self._mirror_sense == 14:      # two wings, extract left and right
-
                 size = mtd[self._ws].blocksize()
                 left = self._ws + '_left'
                 right = self._ws + '_right'
@@ -331,15 +298,20 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 self._reduce_one_wing(left)
                 self._reduce_one_wing(right)
                 GroupWorkspaces(InputWorkspaces=[left,right],OutputWorkspace=self._red_ws)
-
             elif self._mirror_sense == 16:    # one wing
-
                 self._reduce_one_wing(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
-
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _create_elastic_channel_ws(self, channel, speed, phase, delay):
+        """
+        Creates a table workspace for elastic channel calibration (BATS)
+        @param channel : the channel of the elastic peak
+        @param speed : trigger chopper rotation speed
+        @param phase : trigger chopper phase
+        @param delay : PDF TOF delay
+        @return the table workspace
+        """
         tws = TableWorkspace()
         tws.addColumn('double', 'ElasticChannel')
         tws.addColumn('double', 'ChopperSpeed')
@@ -349,6 +321,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         return tws
 
     def _t0_offset(self, center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
+        """
+        Calculates the TOF offset for a measurement with inelastic offset wrt a reference measurement without offset
+        """
         return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (shifted_psd_delay - center_psd_delay) * 1E-6
 
     def _reduce_bats(self, ws):
@@ -413,10 +388,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             monitor = mtd[mon_ws].readY(0)
             x_axis = mtd[mon_ws].readX(0)
             cutoff = np.max(monitor) * self._monitor_cutoff
-            range = x_axis[:-1][monitor > cutoff]
-            self.log().information('Cutoff from {0} to {1} in Energy [mev]'.format(range[0], range[-1]))
-            CropWorkspace(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, XMin=range[0], XMax=range[-1])
-            CropWorkspace(InputWorkspace=self._ws, OutputWorkspace=self._ws, XMin=range[0], XMax=range[-1])
+            mon_range = x_axis[:-1][monitor > cutoff]
+            self.log().information('Cutoff from {0} to {1} in Energy [mev]'.format(mon_range[0], mon_range[-1]))
+            CropWorkspace(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, XMin=mon_range[0], XMax=mon_range[-1])
+            CropWorkspace(InputWorkspace=self._ws, OutputWorkspace=self._ws, XMin=mon_range[0], XMax=mon_range[-1])
             RebinToWorkspace(WorkspaceToRebin=self._ws, WorkspaceToMatch=mon_ws, OutputWorkspace=self._ws)
             Divide(LHSWorkspace=self._ws, RHSWorkspace=mon_ws, OutputWorkspace=self._ws)
             ReplaceSpecialValues(InputWorkspace=self._ws, OutputWorkspace=self._ws,
@@ -441,32 +416,23 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         Reduces given workspace assuming it is one wing already
         @param ws :: input workspace name
         """
-
         mon = '__mon_'+ws
-
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=mon, WorkspaceIndex=0)
-
         if self._use_map_file:
             GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file)
         else:
             self._group_detectors_with_range(ws)
-
         xmin, xmax = self._monitor_zero_range(mon)
-
         if self._normalise_to == 'Monitor':
             self._normalise_to_monitor(ws, mon)
-
         if self._reduction_type == 'QENS':
             if self._dead_channels:
                 CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=float(xmin),XMax=float(xmax+1.))
                 ScaleX(InputWorkspace=ws, OutputWorkspace=ws, Factor=-float(xmin), Operation='Add')
             else:
                 self._mask(ws, xmin, xmax)
-
         DeleteWorkspace(mon)
-
         self._convert_to_energy(ws)
-
         target = None
         if self._spectrum_axis == '2Theta':
             target = 'Theta'
@@ -474,7 +440,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             target = 'ElasticQ'
         elif self._spectrum_axis == 'Q2':
             target = 'ElasticQSquared'
-
         if self._spectrum_axis != 'SpectrumNumber':
             ConvertSpectrumAxis(InputWorkspace=ws,OutputWorkspace=ws,
                                 EMode='Indirect',Target=target,EFixed=self._efixed)
@@ -485,25 +450,19 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param ws :: input workspace name
         """
         pattern = ''
-
         for tube in range(1,17):
             pattern += str((tube - 1) * 128 + self._psd_int_range[0])
             pattern += '-'
             pattern += str((tube - 1) * 128 + self._psd_int_range[1])
             pattern += ','
-
         num_single_det = mtd[ws].getNumberHistograms()-16*128-1
-
         for single_det in range(num_single_det):
             sd_index = 16*128 + single_det + 1
             pattern += str(sd_index)
             pattern += ','
-
         pattern = pattern.rstrip(',')
-
         self.log().information("Grouping the detectors with pattern:\n {0}"
                                .format(pattern))
-
         GroupDetectors(InputWorkspace=ws,OutputWorkspace=ws,GroupingPattern=pattern)
 
     def _normalise_to_monitor(self, ws, mon):
@@ -513,58 +472,42 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         @param mon :: ws's monitor
         """
         x = mtd[ws].readX(0)
-
         if self._reduction_type == 'QENS':
             # Normalise bin-to-bin, do not use NormaliseToMonitor, it uses scaling that we don't want
             Divide(LHSWorkspace=ws,OutputWorkspace=ws,RHSWorkspace=mon)
-
         elif self._reduction_type == 'EFWS':
             # Integrate over the whole range
-
-            int = '__integral1_' + ws
-            Integration(InputWorkspace=mon, OutputWorkspace=int,
+            integral = '__integral1_' + ws
+            Integration(InputWorkspace=mon, OutputWorkspace=integral,
                         RangeLower=x[0], RangeUpper=x[-1])
-
-            if mtd[int].readY(0)[0] !=0: # this needs to be checked
-                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int].readY(0)[0])
-
+            if mtd[integral].readY(0)[0] !=0: # this needs to be checked
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[integral].readY(0)[0])
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int].readY(0)[0]), EnableLogging = False)
-
-            DeleteWorkspace(int)
-
+                         LogText=str(mtd[integral].readY(0)[0]), EnableLogging = False)
+            DeleteWorkspace(integral)
         elif self._reduction_type == 'IFWS':
             # Integrate over the two peaks at the beginning and at the end and sum
             size = mtd[ws].blocksize()
             x_start, x_end = self._monitor_max_range(mon)
-
             i1 = '__integral1_' + ws
             i2 = '__integral2_' + ws
-            int = '__integral_' + ws
-
+            integral = '__integral_' + ws
             Integration(InputWorkspace=mon, OutputWorkspace=i1,
                         RangeLower=x[0], RangeUpper=x[2*x_start])
-
             Integration(InputWorkspace=mon, OutputWorkspace=i2,
                         RangeLower=x[-2*(size - x_end)], RangeUpper=x[-1])
-
-            Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int)
-
-            if mtd[int].readY(0)[0] != 0: # this needs to be checked
-                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int].readY(0)[0])
-
+            Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=integral)
+            if mtd[integral].readY(0)[0] != 0: # this needs to be checked
+                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[integral].readY(0)[0])
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int].readY(0)[0]), EnableLogging = False)
-
+                         LogText=str(mtd[integral].readY(0)[0]), EnableLogging = False)
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
-            DeleteWorkspace(int)
-
+            DeleteWorkspace(integral)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLEnergyTransfer)
