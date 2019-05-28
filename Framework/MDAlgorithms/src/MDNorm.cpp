@@ -927,7 +927,6 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
 
   // Mappings
   const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
-  detid2index_map fluxDetToIdx;
   detid2index_map solidAngDetToIdx;
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
@@ -937,9 +936,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
     haveSA = true;
     solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }
-  if (m_diffraction) {
-    fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
-  }
+  const detid2index_map fluxDetToIdx = (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap() : detid2index_map();
 
   const size_t vmdDims = (m_diffraction) ? 3 : 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
