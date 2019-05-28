@@ -137,7 +137,7 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("ZDegrees", "180");
-    boost::shared_ptr<MeshObject> environmentMesh =loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
