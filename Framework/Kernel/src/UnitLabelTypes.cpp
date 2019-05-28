@@ -37,7 +37,7 @@ const UnitLabel Symbol::Nanometre("nm");
 /// Inverse centimeters
 const UnitLabel Symbol::InverseCM("cm^-1", L"cm\u207b\u00b9", "cm^{-1}");
 /// Reciprocal lattice (dimensionless)
-const UnitLabel Symbol::RLU("r.l.u");
+const UnitLabel Symbol::RLU("r.l.u.");
 
 } // namespace Units
 } // namespace Kernel
