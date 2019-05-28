@@ -13,8 +13,6 @@
 #include "Poco/Path.h"
 
 #include <fstream>
-#include <iostream>
-#include <sstream>
 
 namespace Mantid {
 namespace Geometry {
@@ -148,7 +146,7 @@ SampleEnvironmentSpecFileFinder::find(const std::string &facility,
   relpath_facil.append(name + m_fileext);
 
   // check for the instrument environment, then facility environment
-  for (const auto rel_path : {relpath_instr, relpath_facil}) {
+  for (const auto &rel_path : {relpath_instr, relpath_facil}) {
     for (const auto &prefixStr : m_rootDirs) {
       Path prefix(prefixStr);
       // Ensure the path is a directory (note that this does not create it!)
