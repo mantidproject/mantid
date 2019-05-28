@@ -21,7 +21,7 @@ class CatalogRunNotifier : public IRunNotifier, public MainWindowSubscriber {
 public:
   static auto constexpr POLLING_INTERVAL_MILLISECONDS = 5000;
 
-  CatalogRunNotifier(IMainWindowView *view);
+  explicit CatalogRunNotifier(IMainWindowView *view);
   ~CatalogRunNotifier() override{};
 
   void subscribe(RunNotifierSubscriber *notifyee) override;
