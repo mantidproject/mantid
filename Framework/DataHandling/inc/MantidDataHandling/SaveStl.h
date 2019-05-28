@@ -31,6 +31,7 @@ private:
   const std::vector<uint32_t> m_triangle;
   const std::vector<Kernel::V3D> m_vertices;
   const ScaleUnits m_units;
+  void writeHeader(Kernel::BinaryStreamWriter streamWriter);
   void writeTriangle(Kernel::BinaryStreamWriter streamWriter,
                      uint32_t triangle);
   float removeScale(double value);

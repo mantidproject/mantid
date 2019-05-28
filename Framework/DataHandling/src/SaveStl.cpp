@@ -16,18 +16,6 @@ namespace Mantid {
 namespace DataHandling {
 enum class ScaleUnits { metres, centimetres, millimetres };
 namespace {
-void writeHeader(Kernel::BinaryStreamWriter streamWriter) {
-  const std::string headerStart =
-      "Binary STL File created using Mantid Environment:";
-  const auto timeString =
-      Types::Core::DateAndTime::getCurrentTime().toFormattedString(
-          "%Y-%b-%dT%H:%M:%S") +
-      ":";
-  // TODO add scale type
-  const size_t emptySize =
-      80 - size_t(headerStart.size() + timeString.size() + 4);
-  streamWriter << headerStart + timeString + std::string(emptySize, ' ');
-}
 
 void writeNumberTriangles(Kernel::BinaryStreamWriter streamWriter,
                           uint32_t numberTrianglesLong) {
@@ -44,6 +32,31 @@ void writeNormal(Kernel::BinaryStreamWriter StreamWriter) {
 }
 
 } // namespace
+
+void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
+  const std::string headerStart =
+      "Binary STL File created using Mantid Environment:";
+  const auto timeString =
+      Types::Core::DateAndTime::getCurrentTime().toFormattedString(
+          "%Y-%b-%dT%H:%M:%S") +
+      ":";
+  std::string unitString;
+  switch (m_units) {
+  case ScaleUnits::centimetres:
+    unitString = "cm:";
+    break;
+  case ScaleUnits::millimetres:
+    unitString = "mm:";
+    break;
+  case ScaleUnits::metres:
+    unitString = "m:";
+    break;
+  }
+  const size_t emptySize = 80 - size_t(headerStart.size() + timeString.size() +
+                                       4 + unitString.size());
+  streamWriter << headerStart + timeString + unitString +
+                      std::string(emptySize, ' ');
+}
 
 void SaveStl::writeStl() {
   if (m_triangle.size() % 3 != 0) {
