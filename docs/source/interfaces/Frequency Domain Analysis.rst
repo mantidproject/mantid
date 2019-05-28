@@ -3,7 +3,7 @@
 Frequency Domain Analysis
 =========================
 
-.. image::  ../images/frequency_domain_analysis_2_home
+.. image::  ../images/frequency_domain_analysis_2.png
    :align: right
    :height: 400px
 
