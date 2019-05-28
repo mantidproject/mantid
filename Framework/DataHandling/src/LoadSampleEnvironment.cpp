@@ -347,9 +347,9 @@ Matrix<double> LoadSampleEnvironment::generateMatrix() {
  * @returns a matrix of doubles to use as the x axis rotation matrix
  */
 Matrix<double> LoadSampleEnvironment::generateXRotation() {
-  const double xRotation = getProperty("xDegrees");
-  const double sinX = sin(DegreesToRadians(xRotation));
-  const double cosX = cos(DegreesToRadians(xRotation));
+  const double xRotation = DegreesToRadians(getProperty("xDegrees"));
+  const double sinX = sin(xRotation);
+  const double cosX = cos(xRotation);
   std::vector<double> matrixList = {1, 0, 0, 0, cosX, -sinX, 0, sinX, cosX};
   return Kernel::Matrix<double>(matrixList);
 }
@@ -360,9 +360,9 @@ Matrix<double> LoadSampleEnvironment::generateXRotation() {
  * @returns a matrix of doubles to use as the y axis rotation matrix
  */
 Matrix<double> LoadSampleEnvironment::generateYRotation() {
-  const double yRotation = getProperty("yDegrees");
-  const double sinY = sin(DegreesToRadians(yRotation));
-  const double cosY = cos(DegreesToRadians(yRotation));
+  const double yRotation = DegreesToRadians(getProperty("yDegrees"));
+  const double sinY = sin(yRotation);
+  const double cosY = cos(yRotation);
   std::vector<double> matrixList = {cosY, 0, sinY, 0, 1, 0, -sinY, 0, cosY};
   return Kernel::Matrix<double>(matrixList);
 }
@@ -373,9 +373,9 @@ Matrix<double> LoadSampleEnvironment::generateYRotation() {
  * @returns a matrix of doubles to use as the z axis rotation matrix
  */
 Matrix<double> LoadSampleEnvironment::generateZRotation() {
-  const double zRotation = getProperty("zDegrees");
-  const double sinZ = sin(DegreesToRadians(zRotation));
-  const double cosZ = cos(DegreesToRadians(zRotation));
+  const double zRotation = DegreesToRadians(getProperty("zDegrees"));
+  const double sinZ = sin(zRotation);
+  const double cosZ = cos(zRotation);
   std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
   return Kernel::Matrix<double>(matrixList);
 }

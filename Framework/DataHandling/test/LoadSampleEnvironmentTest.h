@@ -45,8 +45,7 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("TranslationVector", "5,5,15");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.translate(environmentMesh);
     auto translatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {0,  0,  0,  10, 10, 0, 10, 0,
@@ -59,8 +58,7 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("TranslationVector", "-1,0,1,0,0,0,0,1");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     TS_ASSERT_THROWS(alg.translate(environmentMesh), std::invalid_argument &);
   }
 
@@ -108,8 +106,7 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("XDegrees", "45");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {
@@ -125,8 +122,7 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("YDegrees", "90");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
@@ -141,8 +137,7 @@ public:
     LoadSampleEnvironment alg;
     alg.initialize();
     alg.setProperty("ZDegrees", "180");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh =loadCube();
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
@@ -159,8 +154,7 @@ public:
     alg.setProperty("XDegrees", "70");
     alg.setProperty("YDegrees", "20");
     alg.setProperty("ZDegrees", "35");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
     std::vector<double> vectorToMatch = {
@@ -178,8 +172,7 @@ public:
     alg.initialize();
     alg.setProperty("YDegrees", "90");
     alg.setProperty("TranslationVector", "0,0,15");
-    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-    environmentMesh = loadCube();
+    boost::shared_ptr<MeshObject> environmentMesh = loadCube();
     alg.translate(environmentMesh);
     alg.rotate(environmentMesh);
     std::vector<double> rotatedVertices = environmentMesh->getVertices();
