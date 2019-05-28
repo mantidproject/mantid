@@ -1640,7 +1640,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_SANS2D_workspace_is_renamed_correctly(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_rear"))
         self.assertTrue(out_name == "test_rear")
@@ -1674,7 +1674,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_LOQ_workspace_is_renamed_correctly(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
         out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_main"))
         self.assertTrue(out_name == "test_main")
@@ -1690,7 +1690,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_LARMOR_workspace_is_not_renamed(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
 
         out_name = su.rename_workspace_correctly("LARMOR", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test"))
@@ -1701,7 +1701,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_raies_for_unkown_reduction_type(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
         args = ["SANS2D", "jsdlkfsldkfj", "test", workspace_name]
 
         self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
@@ -1710,7 +1710,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_run_number_should_be_replaced_if_workspace_starts_with_number(self):
         workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t1_T2')
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
 
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, 'NewName', workspace_name)
 
