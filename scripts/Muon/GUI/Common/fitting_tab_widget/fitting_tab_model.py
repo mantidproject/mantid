@@ -64,7 +64,8 @@ class FittingTabModel(object):
                                                                  parameter_dict['Function'])
 
         self.add_workspace_to_ADS(output_workspace, workspace_name, directory)
-        self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'], parameter_dict['Function'])
+        if len(parameter_dict['InputWorkspace']) > 1:
+            self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'], parameter_dict['Function'])
         self.add_workspace_to_ADS(fitting_parameters_table, table_name, directory)
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
