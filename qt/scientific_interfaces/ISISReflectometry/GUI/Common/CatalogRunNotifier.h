@@ -17,7 +17,9 @@ namespace CustomInterfaces {
 CatalogRunNotifier implements IRunNotifier to provide functionality to
 poll for new runs.
 */
-class CatalogRunNotifier : public IRunNotifier, public MainWindowSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL CatalogRunNotifier
+    : public IRunNotifier,
+      public MainWindowSubscriber {
 public:
   static auto constexpr POLLING_INTERVAL_MILLISECONDS = 5000;
 

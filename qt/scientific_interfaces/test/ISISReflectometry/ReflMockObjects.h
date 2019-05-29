@@ -196,6 +196,11 @@ public:
   MOCK_METHOD0(stopPolling, void());
 };
 
+class MockRunNotifierSubscriber : public RunNotifierSubscriber {
+public:
+  MOCK_METHOD0(notifyCheckForNewRuns, void());
+};
+
 class MockSearchModel : public SearchModel {
 public:
   MockSearchModel(std::string const &run, std::string const &description,
