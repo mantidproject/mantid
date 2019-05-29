@@ -1,7 +1,6 @@
 set(RUNS_SRC_FILES
     RunsPresenter.cpp
     RunsView.cpp
-    CatalogRunNotifier.cpp
     CatalogSearcher.cpp
     Autoreduction.cpp
     SearchModel.cpp)
@@ -16,10 +15,8 @@ set(RUNS_INC_FILES
     RunsPresenterFactory.h
     RunsView.h
     IAutoreduction.h
-    IRunNotifier.h
     ISearcher.h
     Autoreduction.h
-    CatalogRunNotifier.h
     CatalogSearcher.h
     SearchModel.h)
 

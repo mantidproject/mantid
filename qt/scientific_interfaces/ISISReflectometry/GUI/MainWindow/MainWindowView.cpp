@@ -7,8 +7,8 @@
 #include "MainWindowView.h"
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchView.h"
+#include "GUI/Common/CatalogRunNotifier.h"
 #include "GUI/Common/Plotter.h"
-#include "GUI/Runs/CatalogRunNotifier.h"
 #include "MantidKernel/make_unique.h"
 #include <QMessageBox>
 #include <QToolButton>

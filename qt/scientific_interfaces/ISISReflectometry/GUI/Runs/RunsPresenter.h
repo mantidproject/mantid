@@ -8,11 +8,11 @@
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
 
 #include "Common/DllConfig.h"
+#include "GUI/Common/IRunNotifier.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/IRunsView.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
-#include "IRunNotifier.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"

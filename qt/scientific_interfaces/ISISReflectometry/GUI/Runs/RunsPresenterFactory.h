@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H
-#include "../RunsTable/RunsTablePresenterFactory.h"
 #include "Autoreduction.h"
-#include "CatalogRunNotifier.h"
 #include "CatalogSearcher.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/CatalogRunNotifier.h"
+#include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
 #include "IRunsView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
