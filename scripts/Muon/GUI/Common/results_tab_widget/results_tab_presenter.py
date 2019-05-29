@@ -31,6 +31,9 @@ class ResultsTabPresenter(object):
         self.view.set_fit_result_workspaces(
             self.model.fit_selection(
                 existing_selection=self.view.fit_result_workspaces()))
+        self.view.set_log_values(
+            self.model.log_selection(
+                existing_selection=self.view.log_values()))
         self.view.set_output_results_button_enabled(True)
 
     # private api

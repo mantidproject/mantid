@@ -15,10 +15,12 @@ from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import mock
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
-    DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, ResultsTabModel)
+    DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, log_names,
+    ResultsTabModel)
 
 # constants
 FITTING_CONTEXT_CLS = 'Muon.GUI.Common.contexts.fitting_context.FittingContext'
+LOG_NAMES_FUNC = 'Muon.GUI.Common.results_tab_widget.results_tab_model.log_names'
 
 
 class ResultsTabModelTest(unittest.TestCase):
@@ -54,7 +56,7 @@ class ResultsTabModelTest(unittest.TestCase):
                             StringPropertyWithValue(name, 'test'),
                             replace=True)
         # verify
-        allowed_logs = self.model.log_names(fake_ws.name())
+        allowed_logs = log_names(fake_ws.name())
         for name in itertools.chain(time_series_names,
                                     ALLOWED_NON_TIME_SERIES_LOGS):
             self.assertTrue(
@@ -66,17 +68,21 @@ class ResultsTabModelTest(unittest.TestCase):
 
     def test_log_names_from_workspace_without_logs(self):
         fake_ws = create_test_workspace()
-        allowed_logs = self.model.log_names(fake_ws.name())
+        allowed_logs = log_names(fake_ws.name())
         self.assertEqual(0, len(allowed_logs))
 
     def test_default_model_has_zero_fit_functions(self):
-        self.assertEqual(len(self.model.fit_functions()))
+        self.assertEqual(len(self.model.fit_functions()), 0)
 
     def test_model_returns_fit_functions_from_context(self):
         test_functions = ['func_1', 'func2']
         self.fitting_context.fit_function_names.return_value = test_functions
 
         self.assertEqual(test_functions, self.model.fit_functions())
+
+    def test_model_returns_no_fit_selection_if_not_fits_present(self):
+        self.fitting_context.fit_list = []
+        self.assertEqual(len(self.model.fit_selection({})), 0)
 
     def test_model_creates_fit_selection_given_zero_existing_state(self):
         test_fits, expected_list_state = create_test_fits(('ws1', 'ws2'))
@@ -97,10 +103,48 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(expected_list_state,
                          self.model.fit_selection(orig_list_state))
 
+    def test_model_returns_no_log_selection_if_not_fits_present(self):
+        self.fitting_context.fit_list = []
+        self.assertEqual(0, len(self.model.log_selection({})))
+
+    def test_model_returns_log_selection_of_first_workspace(self):
+        self.fitting_context.fit_list = create_test_fits(('ws1', 'ws2'))[0]
+        with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
+            ws1_logs = ('run_number', 'run_start')
+            ws2_logs = ('temp', 'magnetic_field')
+
+            def side_effect(name):
+                return ws1_logs if name == 'ws1' else ws2_logs
+
+            mock_log_names.side_effect = side_effect
+            expected_selection = {
+                'run_number': [0, False, True],
+                'run_start': [1, False, True],
+            }
+
+            self.assertEqual(expected_selection, self.model.log_selection({}))
+
+    def test_model_combines_existing_selection(self):
+        self.fitting_context.fit_list = create_test_fits(('ws1',))[0]
+        with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
+            mock_log_names.return_value = ('run_number', 'run_start',
+                                           'magnetic_field')
+
+            existing_selection = {
+                'run_number': [0, False, True],
+                'run_start': [1, True, True]
+            }
+            expected_selection = {
+                'run_number': [0, False, True],
+                'run_start': [1, True, True],
+                'magnetic_field': [2, True, True]
+            }
+            self.assertEqual(expected_selection,
+                             self.model.log_selection(existing_selection))
+
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
-        self.assertRaises(KeyError, self.model.log_names,
-                          'not a workspace in ADS')
+        self.assertRaises(KeyError, log_names, 'not a workspace in ADS')
 
 
 def create_test_workspace():

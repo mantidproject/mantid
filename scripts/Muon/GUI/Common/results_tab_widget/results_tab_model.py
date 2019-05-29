@@ -41,18 +41,6 @@ class ResultsTabModel(object):
         """
         self._results_table_name = name
 
-    def log_names(self, workspace_name):
-        """
-        Return a list of log names from the given workspace.
-
-        :param workspace: A string name of a workspace in the ADS
-        :return: A list of sample log names
-        :raises KeyError: if the workspace does not exist in the ADS
-        """
-        all_logs = AnalysisDataService.retrieve(
-            workspace_name).run().getLogData()
-        return [log.name for log in all_logs if _log_should_be_displayed(log)]
-
     def fit_functions(self):
         """
         :return: The list of fit functions known to have been fitted
@@ -79,7 +67,45 @@ class ResultsTabModel(object):
 
         return selection
 
+    def log_selection(self, existing_selection):
+        """
+        Combine the existing selection state of log values with the the set for the current
+        workspace at the top of the list
+        :param existing_selection: A dict defining any current selection model. The
+        format matches that of the ListSelectorPresenter class' model.
+        :return: The logs in the first workspace along with their selection status. The
+        format matches that of the ListSelectorPresenter class' model.
+        """
+        selection = {}
+        fits = self._fit_context.fit_list
+        if not fits:
+            return selection
 
+        logs = log_names(fits[0].input_workspace)
+        for index, name in enumerate(logs):
+            if name in existing_selection:
+                checked = existing_selection[name][1]
+            else:
+                checked = False
+            selection[name] = [index, checked, True]
+
+        return selection
+
+
+# Public helper functions
+def log_names(workspace_name):
+    """
+    Return a list of log names from the given workspace.
+
+    :param workspace: A string name of a workspace in the ADS
+    :return: A list of sample log names
+    :raises KeyError: if the workspace does not exist in the ADS
+    """
+    all_logs = AnalysisDataService.retrieve(
+        workspace_name).run().getLogData()
+    return [log.name for log in all_logs if _log_should_be_displayed(log)]
+
+# Private helper functions
 def _log_should_be_displayed(log):
     """Returns true if the given log should be included in the display"""
     return isinstance(log, FloatTimeSeriesProperty) or \

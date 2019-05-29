@@ -77,6 +77,20 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         selection box"""
         return self.fit_function_selector.currentText()
 
+    def log_values(self):
+        """
+        :return: The current state of the log list selector
+        """
+        return self.log_selector_presenter.model
+
+    def set_log_values(self, logs_list_state):
+        """Set the map of log values and selected status
+
+        :param logs_list_state: Dictionary containing the updated
+        state for the workspace list selector
+        """
+        self.log_selector_presenter.update_model(logs_list_state)
+
     # Private methods
     def _init_layout(self):
         """Setup the layout of the view"""

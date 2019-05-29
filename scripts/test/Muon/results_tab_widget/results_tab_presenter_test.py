@@ -83,6 +83,34 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_view.set_output_results_button_enabled.assert_called_once_with(
             True)
 
+    def test_adding_new_fit_updates_log_values(self):
+        existing_selection = {
+            'run_number': [0, False, True],
+            'run_start': [1, True, True]
+        }
+        self.mock_view.log_values.return_value = existing_selection
+        final_selection = {
+            'run_number': [0, False, True],
+            'run_start': [1, True, True],
+            'magnetic_field': [2, True, True]
+        }
+        self.mock_model.log_selection.return_value = final_selection
+
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        # previous test verifies this is correct on construction
+        self.mock_view.set_output_results_button_enabled.reset_mock()
+        presenter.on_new_fit_performed()
+
+        self.mock_view.log_values.assert_called_once_with()
+        self.mock_model.log_selection.assert_called_once_with(
+            existing_selection)
+        final_selection = {
+            'run_number': [0, False, True],
+            'run_start': [1, True, True],
+            'magnetic_field': [2, True, True]
+        }
+        self.mock_view.set_log_values.assert_called_once_with(final_selection)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
