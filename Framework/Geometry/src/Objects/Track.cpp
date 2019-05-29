@@ -138,8 +138,16 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
     // should be inserted in practice it doesn't seem to matter
     const bool sameDirectionAsPrevious =
         (lowestPtr->direction == newPoint.direction);
-    if (!sameDirectionAsPrevious)
-      m_surfPoints.insert(lowestPtr, newPoint);
+    if (sameDirectionAsPrevious) {
+      if (lowestPtr != m_surfPoints.end()) {
+        // replace the point
+        m_surfPoints.insert(lowestPtr, std::move(newPoint));
+        m_surfPoints.erase(lowestPtr);
+      }
+      // don't add it at the end
+    } else {
+      m_surfPoints.insert(lowestPtr, std::move(newPoint));
+    }
   }
 }
 
