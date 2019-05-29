@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
+#include "../ModelCreationHelpers.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MockBatchView.h"
@@ -32,24 +33,12 @@ public:
   static void destroySuite(BatchPresenterTest *suite) { delete suite; }
 
   BatchPresenterTest()
-      : m_view(),
-        m_jobRunner(nullptr), m_instruments{"INTER", "OFFSPEC", "POLREF",
-                                            "SURF", "CRISP"},
-        m_tolerance(0.1),
-        m_experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                     SummationType::SumInLambda, false, false,
-                     PolarizationCorrections(PolarizationCorrectionType::None),
-                     FloodCorrections(FloodCorrectionType::Workspace),
-                     boost::none, std::map<std::string, std::string>(),
-                     std::vector<PerThetaDefaults>()),
-        m_instrument(
-            RangeInLambda(0.0, 0.0),
-            MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
-                               RangeInLambda(0.0, 0.0)),
-            DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
-        m_runsTable(m_instruments, 0.1, ReductionJobs()),
-        m_slicing(), m_mockAlgorithmsList{
-                         boost::make_shared<MockBatchJobAlgorithm>()} {
+      : m_view(), m_jobRunner(nullptr),
+        m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"},
+        m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
+        m_instrument(makeEmptyInstrument()),
+        m_runsTable(m_instruments, 0.1, ReductionJobs()), m_slicing(),
+        m_mockAlgorithmsList{boost::make_shared<MockBatchJobAlgorithm>()} {
     Mantid::API::FrameworkManager::Instance();
   }
 

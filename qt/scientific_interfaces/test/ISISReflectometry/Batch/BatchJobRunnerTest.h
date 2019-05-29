@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchJobRunner.h"
+#include "../ModelCreationHelpers.h"
 #include "../ReflMockObjects.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -406,76 +407,14 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobAlgorithm));
   }
 
-  Experiment makeExperiment() {
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      PolarizationCorrections(PolarizationCorrectionType::None),
-                      FloodCorrections(FloodCorrectionType::Workspace),
-                      boost::none, std::map<std::string, std::string>(),
-                      std::vector<PerThetaDefaults>());
-  }
-
-  Instrument makeInstrument() {
-    return Instrument(
-        RangeInLambda(0.0, 0.0),
-        MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
-                           RangeInLambda(0.0, 0.0)),
-        DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
-  }
-
   RunsTable makeRunsTable(ReductionJobs reductionJobs) {
     return RunsTable(m_instruments, m_tolerance, std::move(reductionJobs));
   }
 
-  Row makeRow(std::string const &run, double theta) {
-    return Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
-               ReductionOptionsMap(),
-               ReductionWorkspaces({"IvsLam", "IvsQ", "IvsQBin"},
-                                   TransmissionRunPair()));
-  }
-
-  ReductionJobs makeReductionJobsWithSingleRowGroup() {
-    auto groups = std::vector<Group>();
-    // Create some rows for the first group
-    auto group1Rows = std::vector<boost::optional<Row>>();
-    group1Rows.emplace_back(makeRow("12345", 0.5));
-    groups.emplace_back(Group("Test group 1", group1Rows));
-    // Create the reduction jobs
-    return ReductionJobs(groups);
-  }
-
-  ReductionJobs makeReductionJobsWithTwoRowGroup() {
-    auto groups = std::vector<Group>();
-    // Create some rows for the first group
-    auto group1Rows = std::vector<boost::optional<Row>>();
-    group1Rows.emplace_back(makeRow("12345", 0.5));
-    group1Rows.emplace_back(makeRow("12346", 0.8));
-    groups.emplace_back(Group("Test group 1", group1Rows));
-    // Create the reduction jobs
-    return ReductionJobs(groups);
-  }
-
-  ReductionJobs makeReductionJobsWithTwoGroups() {
-    auto groups = std::vector<Group>();
-    // Create some rows for the first group
-    auto group1Rows = std::vector<boost::optional<Row>>();
-    group1Rows.emplace_back(makeRow("12345", 0.5));
-    group1Rows.emplace_back(boost::none); // indicates invalid row
-    group1Rows.emplace_back(makeRow("12346", 0.8));
-    groups.emplace_back(Group("Test group 1", group1Rows));
-    // Create some rows for the second group
-    auto group2Rows = std::vector<boost::optional<Row>>();
-    group2Rows.emplace_back(makeRow("22345", 0.5));
-    group2Rows.emplace_back(makeRow("22346", 0.9));
-    groups.emplace_back(Group("Second Group", group2Rows));
-    // Create the reduction jobs
-    return ReductionJobs(groups);
-  }
-
   BatchJobRunnerFriend
   makeJobRunner(ReductionJobs reductionJobs = ReductionJobs()) {
-    m_experiment = makeExperiment();
-    m_instrument = makeInstrument();
+    m_experiment = makeEmptyExperiment();
+    m_instrument = makeEmptyInstrument();
     m_runsTable = makeRunsTable(std::move(reductionJobs));
     m_slicing = Slicing();
     return BatchJobRunnerFriend(
