@@ -6,6 +6,7 @@ set ( COMMON_SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( COMMON_INC_FILES
   CatalogRunNotifier.h
+  IMessageHandler.h
   IRunNotifier.h
   IPlotter.h
   Plotter.h

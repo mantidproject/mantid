@@ -7,10 +7,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
-#include "Common/IMessageHandler.h"
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IRunNotifier.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"

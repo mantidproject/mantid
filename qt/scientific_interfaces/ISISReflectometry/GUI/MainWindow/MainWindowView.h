@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
 
-#include "Common/IMessageHandler.h"
+#include "GUI/Common/IMessageHandler.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include "MainWindowPresenter.h"
