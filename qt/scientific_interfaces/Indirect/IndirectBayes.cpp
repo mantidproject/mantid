@@ -5,23 +5,18 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayes.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "Quasi.h"
 #include "ResNorm.h"
 #include "Stretch.h"
 
-// Add this class to the list of specialised dialogs in this namespace
+using namespace MantidQt::CustomInterfaces;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectBayes)
-}
-} // namespace MantidQt
-
-using namespace MantidQt::CustomInterfaces;
 
 IndirectBayes::IndirectBayes(QWidget *parent)
-    : UserSubWindow(parent),
+    : IndirectInterface(parent),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -35,7 +30,9 @@ IndirectBayes::IndirectBayes(QWidget *parent)
                       new Quasi(m_uiForm.indirectBayesTabs->widget(QUASI)));
   m_bayesTabs.emplace(STRETCH,
                       new Stretch(m_uiForm.indirectBayesTabs->widget(STRETCH)));
+}
 
+void IndirectBayes::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectBayesTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
@@ -47,14 +44,14 @@ IndirectBayes::IndirectBayes(QWidget *parent)
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect
-  // Bayes interface
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
-}
 
-void IndirectBayes::initLayout() {}
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings(getInterfaceSettings());
+}
 
 /**
  * @param :: the detected close event
@@ -100,34 +97,19 @@ void IndirectBayes::loadSettings() {
   settings.endGroup();
 }
 
-/**
- * Slot to open a new browser window and navigate to the help page
- * on the wiki for the currently selected tab.
- */
-void IndirectBayes::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Indirect Bayes"));
+void IndirectBayes::applySettings(
+    std::map<std::string, QVariant> const &settings) {
+  for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
+    tab->second->filterInputData(settings.at("RestrictInput").toBool());
+    tab->second->setPlotErrorBars(settings.at("ErrorBars").toBool());
+  }
 }
 
-/**
- * Slot to show the manage user dicrectories dialog when the user clicks
- * the button on the interface.
- */
-void IndirectBayes::manageUserDirectories() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message :: The message to display in the message box
- */
-void IndirectBayes::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectBayes::documentationPage() const {
+  return "Indirect Bayes";
 }
 
 IndirectBayes::~IndirectBayes() {}
+
+} // namespace CustomInterfaces
+} // namespace MantidQt

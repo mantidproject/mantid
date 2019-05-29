@@ -125,20 +125,20 @@ public:
   void test_Filename_Property_Throws_If_Not_Found() {
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS(alg->setPropertyValue("Filename", "x.sqw"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Unknown_Q3DFrame_Is_Not_Accepted() {
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS(alg->setPropertyValue("Q3DFrames", "Unknown"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Unsupported_SQW_Type_Throws_Error() {
     auto algm = createAlgorithm();
     algm->setProperty("Filename", "horace_dnd_test_file.sqw");
     algm->setRethrows(true);
-    TS_ASSERT_THROWS(algm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algm->execute(), const std::runtime_error &);
   }
 
 private:

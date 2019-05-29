@@ -52,7 +52,7 @@ public:
     // Test that no form factor work space is created
     TS_ASSERT_THROWS(
         outws = AnalysisDataService::Instance().retrieve(formFactorWSname),
-        Exception::NotFoundError);
+        const Exception::NotFoundError &);
   }
 
   void testExec() {

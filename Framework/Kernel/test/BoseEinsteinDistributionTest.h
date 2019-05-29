@@ -29,9 +29,9 @@ public:
     const double temperature = 35.0;
 
     TS_ASSERT_THROWS(BoseEinsteinDistribution::n(energy, temperature),
-                     std::domain_error);
+                     const std::domain_error &);
     TS_ASSERT_THROWS(BoseEinsteinDistribution::n(temperature, energy),
-                     std::domain_error);
+                     const std::domain_error &);
   }
 
   void

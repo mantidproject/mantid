@@ -20,6 +20,7 @@ using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
 using Mantid::PythonInterface::callMethodNoCheck;
+using namespace MantidQt::Widgets::Common;
 
 namespace {
 /**

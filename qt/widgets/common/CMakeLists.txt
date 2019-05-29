@@ -118,7 +118,8 @@ set(QT5_SRC_FILES
     src/QtPropertyBrowser/qtvariantproperty.cpp
     src/QtPropertyBrowser/StringDialogEditor.cpp
     src/QtPropertyBrowser/StringEditorFactory.cpp
-    src/QtPropertyBrowser/WorkspaceEditorFactory.cpp)
+    src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
+    src/Python/Sip.cpp)
 
 set(
   QT5_MOC_FILES
@@ -143,7 +144,6 @@ set(
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
-  inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -177,7 +177,6 @@ set(
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
   inc/MantidQtWidgets/Common/VatesViewerInterface.h
-  inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
@@ -219,6 +218,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
     inc/MantidQtWidgets/Common/HelpWindow.h
+    inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/IFunctionView.h
@@ -232,6 +232,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+    inc/MantidQtWidgets/Common/WorkspaceIcons.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
     inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
@@ -254,7 +255,10 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
-    inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h)
+    inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
+    inc/MantidQtWidgets/Common/Python/Sip.h
+    inc/MantidQtWidgets/Common/Python/Object.h
+    inc/MantidQtWidgets/Common/Python/QHashToDict.h)
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/DataSelector.ui
@@ -817,6 +821,8 @@ mtd_add_qt_library(TARGET_NAME
                    LINUX_INSTALL_RPATH
                    "\$ORIGIN/../${LIB_DIR}")
 
+find_package(BoostPython REQUIRED)
+
 mtd_add_qt_library(TARGET_NAME
                    MantidQtWidgetsCommon
                    QT_VERSION
@@ -836,9 +842,12 @@ mtd_add_qt_library(TARGET_NAME
                    ${_webengine_def}
                    INCLUDE_DIRS
                    inc
+                   ../../../Framework/PythonInterface/core/inc
                    ${PYTHON_INCLUDE_PATH}
                    LINK_LIBS
                    ${TARGET_LIBRARIES}
+                   ${Boost_LIBRARIES}
+                   ${PYTHON_LIBRARIES}
                    QT5_LINK_LIBS
                    Qt5::Concurrent
                    Qt5::Help
@@ -933,6 +942,10 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h)
 
+if(NOT APPLE)
+  list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
+endif()
+
 mtd_add_qt_tests(TARGET_NAME
                  MantidQtWidgetsCommonTest
                  QT_VERSION
@@ -951,6 +964,9 @@ mtd_add_qt_tests(TARGET_NAME
                  ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                  LINK_LIBS
                  ${TARGET_LIBRARIES}
+                 ${PYTHON_LIBRARIES}
+                 ${Boost_LIBRARIES}
+                 PythonInterfaceCore
                  DataObjects
                  ${GMOCK_LIBRARIES}
                  ${GTEST_LIBRARIES}

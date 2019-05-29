@@ -27,6 +27,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/lexical_cast.hpp>
 
@@ -69,8 +71,8 @@ MDNorm::MDNorm()
     : m_normWS(), m_inputWS(), m_isRLU(false), m_UB(3, 3, true),
       m_W(3, 3, true), m_transformation(), m_hX(), m_kX(), m_lX(), m_eX(),
       m_hIdx(-1), m_kIdx(-1), m_lIdx(-1), m_eIdx(-1), m_numExptInfos(0),
-      m_Ei(0.0), m_diffraction(true), m_accumulate(false),
-      m_dEIntegrated(false), m_samplePos(), m_beamDir(), convention("") {}
+      m_Ei(0.0), m_diffraction(true), m_accumulate(false), m_dEIntegrated(true),
+      m_samplePos(), m_beamDir(), convention("") {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string MDNorm::name() const { return "MDNorm"; }
@@ -457,6 +459,7 @@ void MDNorm::exec() {
     // if more than one experiment info, keep accumulating
     m_accumulate = true;
   }
+
   IAlgorithm_sptr divideMD = createChildAlgorithm("DivideMD", 0.99, 1.);
   divideMD->setProperty("LHSWorkspace", outputDataWS);
   divideMD->setProperty("RHSWorkspace", m_normWS);
@@ -790,8 +793,8 @@ MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
   auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
-    Mantid::Geometry::MDFrameArgument argument(Mantid::Geometry::HKL::HKLName,
-                                               "r.l.u.");
+    Mantid::Geometry::MDFrameArgument argument(
+        Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
     auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
     Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
     for (size_t i : qDimensionIndices) {
@@ -924,19 +927,19 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
 
   // Mappings
   const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
-  detid2index_map fluxDetToIdx;
-  detid2index_map solidAngDetToIdx;
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
   API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   if (solidAngleWS != nullptr) {
     haveSA = true;
-    solidAngDetToIdx = solidAngleWS->getDetectorIDToWorkspaceIndexMap();
   }
-  if (m_diffraction) {
-    fluxDetToIdx = integrFlux->getDetectorIDToWorkspaceIndexMap();
-  }
+  const detid2index_map solidAngDetToIdx =
+      (haveSA) ? solidAngleWS->getDetectorIDToWorkspaceIndexMap()
+               : detid2index_map();
+  const detid2index_map fluxDetToIdx =
+      (m_diffraction) ? integrFlux->getDetectorIDToWorkspaceIndexMap()
+                      : detid2index_map();
 
   const size_t vmdDims = (m_diffraction) ? 3 : 4;
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
@@ -949,7 +952,6 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   auto prog =
       make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
                                  0.3 + progStep * (1. + progIndex), ndets);
-
   bool safe = true;
   if (m_diffraction) {
     safe = Kernel::threadSafe(*integrFlux);
@@ -970,6 +972,17 @@ for (int64_t i = 0; i < ndets; i++) {
   // If the dtefctor is a group, this should be the ID of the first detector
   const auto detID = detector.getID();
 
+  // get the flux spectrum number
+  size_t wsIdx = 0;
+  if (m_diffraction) {
+    auto index = fluxDetToIdx.find(detID);
+    if (index != fluxDetToIdx.end()) {
+      wsIdx = index->second;
+    } else { // masked detector in flux, but not in input workspace
+      continue;
+    }
+  }
+
   // Intersections
   this->calculateIntersections(intersections, theta, phi, Qtransform,
                                lowValues[i], highValues[i]);
@@ -981,7 +994,6 @@ for (int64_t i = 0; i < ndets; i++) {
     solid =
         solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
   }
-
   if (m_diffraction) {
     // -- calculate integrals for the intersection --
     // momentum values at intersections
@@ -993,8 +1005,6 @@ for (int64_t i = 0; i < ndets; i++) {
     for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
       *x = (*it)[3];
     }
-    // get the flux spetrum number
-    size_t wsIdx = fluxDetToIdx.find(detID)->second;
     // calculate integrals at momenta from xValues by interpolating between
     // points in spectrum sp
     // of workspace integrFlux. The result is stored in yValues

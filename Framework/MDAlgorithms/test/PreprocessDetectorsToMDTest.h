@@ -288,7 +288,7 @@ public:
     TSM_ASSERT("can not interpet the workspace as table workspace", tws);
 
     TSM_ASSERT_THROWS("No such column", tws->getColVector<int>("detMask"),
-                      std::runtime_error);
+                      const std::runtime_error &);
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState", "1"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo", "1"));

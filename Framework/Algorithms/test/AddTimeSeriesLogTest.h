@@ -81,21 +81,24 @@ public:
     Mantid::Algorithms::AddTimeSeriesLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Name", ""),
+                     const std::invalid_argument &);
   }
 
   void test_empty_time_not_allowed() {
     Mantid::Algorithms::AddTimeSeriesLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Time", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Time", ""),
+                     const std::invalid_argument &);
   }
 
   void test_empty_value_not_allowed() {
     Mantid::Algorithms::AddTimeSeriesLog alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Value", ""),
+                     const std::invalid_argument &);
   }
 
   void test_time_as_non_iso_formatted_string_throws_invalid_argument() {
@@ -103,11 +106,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("Time", "NotATime"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("Time", "2014 03 31 09 30"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("Time", "09:30:00"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_algorithm_fails_if_log_exists_but_is_not_a_time_series() {
@@ -116,7 +119,7 @@ public:
     run.addProperty<double>("Test Name", 1.0);
     TS_ASSERT_THROWS(
         executeAlgorithm(ws, "Test Name", "2010-09-14T04:20:12", 20.0),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_algorithm_fails_if_time_series_exists_but_it_is_incorrect_type() {
@@ -128,7 +131,7 @@ public:
     run.addLogData(timeSeries);
     TS_ASSERT_THROWS(
         executeAlgorithm(ws, logName, "2010-09-14T04:20:30", 30, Integer),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
 private:

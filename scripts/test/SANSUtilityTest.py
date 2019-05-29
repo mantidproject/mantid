@@ -379,7 +379,7 @@ class AddOperationTest(unittest.TestCase):
         # Total time difference is TIME1 - (TIME2 + extraShift)
         shift = 0.0
         if isOverlay:
-            shift = time_duration.total_nanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift
+            shift = time_duration.totalNanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift
 
         # Check ws1 against output
         # We shift the second workspace onto the first workspace
@@ -539,7 +539,7 @@ class TestOverlayWorkspaces(unittest.TestCase):
         time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
 
         # Assert
-        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        expected_time_difference = time_duration.totalNanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
         self.assertEqual(time_difference, expected_time_difference)
 
         # Clean up
@@ -564,7 +564,7 @@ class TestOverlayWorkspaces(unittest.TestCase):
         time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
 
         # Assert
-        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        expected_time_difference = time_duration.totalNanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
         expected_time_difference -= optional_time_shift # Need to subtract as we add the time shift to the subtrahend
         self.assertEqual(time_difference, expected_time_difference)
 

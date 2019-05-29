@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
+using namespace MantidQt::Widgets::Common;
 
 class AxesTest : public CxxTest::TestSuite {
 public:
@@ -108,19 +109,21 @@ public:
   // ----------------- failure tests ---------------------
   void testPlotThrowsWithEmptyData() {
     Axes axes(pyAxes());
-    TS_ASSERT_THROWS(axes.plot({}, {}), std::invalid_argument);
-    TS_ASSERT_THROWS(axes.plot({1}, {}), std::invalid_argument);
-    TS_ASSERT_THROWS(axes.plot({}, {1}), std::invalid_argument);
+    TS_ASSERT_THROWS(axes.plot({}, {}), const std::invalid_argument &);
+    TS_ASSERT_THROWS(axes.plot({1}, {}), const std::invalid_argument &);
+    TS_ASSERT_THROWS(axes.plot({}, {1}), const std::invalid_argument &);
   }
 
   void testSetXScaleWithUnknownScaleTypeThrows() {
     Axes axes(pyAxes());
-    TS_ASSERT_THROWS(axes.setXScale("notascaletype"), std::invalid_argument);
+    TS_ASSERT_THROWS(axes.setXScale("notascaletype"),
+                     const std::invalid_argument &);
   }
 
   void testSetYScaleWithUnknownScaleTypeThrows() {
     Axes axes(pyAxes());
-    TS_ASSERT_THROWS(axes.setYScale("notascaletype"), std::invalid_argument);
+    TS_ASSERT_THROWS(axes.setYScale("notascaletype"),
+                     const std::invalid_argument &);
   }
 
 private:

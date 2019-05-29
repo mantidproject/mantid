@@ -133,7 +133,7 @@ public:
     TS_ASSERT(group->contains("ws0"));
     // cannot add a workspace which doesn't exist
     TS_ASSERT_THROWS(group->add("noworkspace"),
-                     Kernel::Exception::NotFoundError);
+                     const Kernel::Exception::NotFoundError &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -206,8 +206,8 @@ public:
     Workspace_sptr ws11 = group->getItem("ws1");
     TS_ASSERT_EQUALS(ws1, ws11);
     // Test for failure too
-    TS_ASSERT_THROWS(group->getItem("non-existent"), std::out_of_range);
-    TS_ASSERT_THROWS(group->getItem(""), std::out_of_range);
+    TS_ASSERT_THROWS(group->getItem("non-existent"), const std::out_of_range &);
+    TS_ASSERT_THROWS(group->getItem(""), const std::out_of_range &);
     AnalysisDataService::Instance().clear();
   }
 
@@ -222,7 +222,7 @@ public:
 
   void test_removeItem() {
     WorkspaceGroup_sptr group1 = makeGroup();
-    TS_ASSERT_THROWS(group1->removeItem(1), std::runtime_error);
+    TS_ASSERT_THROWS(group1->removeItem(1), const std::runtime_error &);
 
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     Workspace_sptr ws1(new WorkspaceTester());
@@ -373,7 +373,7 @@ public:
     // catch a cycle
     group1->addWorkspace(group);
     Workspace_sptr b = boost::make_shared<WorkspaceTester>();
-    TS_ASSERT_THROWS(group->isInGroup(*b), std::runtime_error);
+    TS_ASSERT_THROWS(group->isInGroup(*b), const std::runtime_error &);
     group1->removeAll();
   }
 

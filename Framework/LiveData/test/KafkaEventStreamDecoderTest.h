@@ -375,7 +375,7 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
 
-    TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }
@@ -393,7 +393,7 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
 
-    TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }
@@ -410,7 +410,7 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     startCapturing(*decoder, 1);
-    TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }

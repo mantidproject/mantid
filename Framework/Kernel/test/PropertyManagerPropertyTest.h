@@ -241,7 +241,8 @@ public:
   // Failure tests
   //----------------------------------------------------------------------------
   void test_Empty_Name_Is_Not_Accepted() {
-    TS_ASSERT_THROWS(PropertyManagerProperty(""), std::invalid_argument);
+    TS_ASSERT_THROWS(PropertyManagerProperty(""),
+                     const std::invalid_argument &);
   }
 
   void test_String_Not_Holding_Valid_Json_or_Global_PM_Name_Returns_Error() {

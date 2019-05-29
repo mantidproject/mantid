@@ -63,7 +63,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setPropertyValue("DataSources", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_psi_right_size() {
@@ -85,7 +85,7 @@ public:
     alg.setPropertyValue("Gl", "0");      // Right size
     alg.setPropertyValue("Gs", "0");      // Right size
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
@@ -111,7 +111,7 @@ public:
     alg.setPropertyValue("Gl", "0,0"); // Too large
     alg.setPropertyValue("Gs", "0");   // Right size
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(
@@ -137,7 +137,7 @@ public:
     alg.setPropertyValue("Gl", "0");   // Right size
     alg.setPropertyValue("Gs", "0,0"); // Too large
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
 
     // Clean up
     Mantid::API::AnalysisDataService::Instance().remove(

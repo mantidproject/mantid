@@ -97,7 +97,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("InputWorkspace", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_empty_x_column_is_not_allowed() {
@@ -105,7 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("ColumnX", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_empty_param_names_is_not_allowed() {
@@ -113,7 +113,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("ParameterNames", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_empty_output_is_not_allowed() {
@@ -121,7 +121,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_property_input() {

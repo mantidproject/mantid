@@ -288,7 +288,7 @@ public:
     fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues="
                                  "10,ConvergenceCriteria = 0.01");
 
-    TS_ASSERT_THROWS(fit.execute(), std::length_error);
+    TS_ASSERT_THROWS(fit.execute(), const std::length_error &);
 
     TS_ASSERT(!fit.isExecuted());
   }

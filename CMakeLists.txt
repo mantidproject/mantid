@@ -61,6 +61,8 @@ include(Bootstrap)
 # Configure Eigen early
 include(Eigen)
 
+include(Span)
+
 # Set ParaView information since later items depend on it
 
 # VATES flag. Requires ParaView

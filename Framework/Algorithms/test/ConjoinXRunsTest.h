@@ -163,7 +163,7 @@ public:
 
     m_testee.setProperty("InputWorkspaces",
                          std::vector<std::string>{"ws1", "ws5"});
-    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
 
   void testPassDifferentAxes() {
@@ -220,7 +220,7 @@ public:
     m_testee.setProperty("SampleLogAsXAxis", "TestNumLog");
 
     // blocksize must be one in case of scalar log, fail
-    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
 
   void testPassWithNumLog() {
@@ -275,7 +275,7 @@ public:
     m_testee.setProperty("SampleLogAsXAxis", "TestStrLog");
 
     // string log not supported, fail
-    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
 
   void testPassWithNumSeriesLog() {
@@ -347,7 +347,7 @@ public:
                          std::vector<std::string>{"ws1", "ws2"});
 
     // ws1 has 3 bins, ws2 has 2, fail
-    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
 
   void testMergeSampleLogFail() {
@@ -371,7 +371,7 @@ public:
     m_testee.setProperty("InputWorkspaces",
                          std::vector<std::string>{"ws1", "ws2"});
 
-    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(m_testee.execute(), const std::runtime_error &);
   }
 
 private:

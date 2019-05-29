@@ -63,7 +63,7 @@ public:
 
     TSM_ASSERT_THROWS("Unknown flag should cause failure",
                       logFile->createParamValue(&series),
-                      Kernel::Exception::InstrumentDefinitionError)
+                      const Kernel::Exception::InstrumentDefinitionError &)
   }
 
   void test_filter_by_first_value() {

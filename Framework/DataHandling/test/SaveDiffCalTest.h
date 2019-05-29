@@ -103,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -120,7 +120,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", calWS));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

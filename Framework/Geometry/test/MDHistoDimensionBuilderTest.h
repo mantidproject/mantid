@@ -173,7 +173,7 @@ public:
     builder.setMax(2);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testNoIdThrows() {
@@ -185,7 +185,7 @@ public:
     builder.setMax(2);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testNoUnitThrows() {
@@ -197,7 +197,7 @@ public:
     builder.setMax(2);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testNoMaxThrows() {
@@ -209,7 +209,7 @@ public:
     // builder.setMax(2);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testNoMinThrows() {
@@ -221,7 +221,7 @@ public:
     builder.setMax(2);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testMinLessThanMaxThrows() {
@@ -233,7 +233,7 @@ public:
     builder.setMax(0);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testMinEqualToMaxThrows() {
@@ -245,7 +245,7 @@ public:
     builder.setMax(1);
     builder.setNumBins(1);
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 
   void testNBinsLessThanOneThrows() {
@@ -257,7 +257,7 @@ public:
     builder.setMax(2);
     builder.setNumBins(0); // No bins!
 
-    TS_ASSERT_THROWS(builder.create(), std::invalid_argument);
+    TS_ASSERT_THROWS(builder.create(), const std::invalid_argument &);
   }
 };
 

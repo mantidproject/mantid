@@ -45,6 +45,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   std::size_t getOutWsNumberOfSpectra() const;
   Mantid::API::MatrixWorkspace_const_sptr

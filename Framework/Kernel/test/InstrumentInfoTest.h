@@ -23,13 +23,13 @@ class InstrumentInfoTest : public CxxTest::TestSuite {
 public:
   void test_throws_if_unnamed_instrument() {
     TS_ASSERT_THROWS(createInstInfoInMinimalFacility("<instrument />"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_throws_if_no_techinque_given() {
     TS_ASSERT_THROWS(
         createInstInfoInMinimalFacility("<instrument name=\"inst\"/>"),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void test_mostly_default_instrument() {
@@ -187,7 +187,7 @@ public:
         "</instrument>";
 
     TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_error_1_in_multiple_zeropadding() {
@@ -198,7 +198,7 @@ public:
         "</instrument>";
 
     TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_error_2_in_multiple_zeropadding() {
@@ -209,7 +209,7 @@ public:
         "</instrument>";
 
     TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_error_3_in_multiple_zeropadding() {
@@ -220,7 +220,7 @@ public:
         "</instrument>";
 
     TS_ASSERT_THROWS(createInstInfoInMinimalFacility(instStr),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_equality_operator() {

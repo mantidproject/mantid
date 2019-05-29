@@ -235,7 +235,7 @@ void DgsConvertToEnergyTransfer::exec() {
 
     monPeak = getei->getProperty("FirstMonitorPeak");
     const specnum_t monIndex =
-        static_cast<const specnum_t>(getei->getProperty("FirstMonitorIndex"));
+        static_cast<specnum_t>(getei->getProperty("FirstMonitorIndex"));
     // Why did the old way get it from the log?
     incidentEnergy = getei->getProperty("IncidentEnergy");
 

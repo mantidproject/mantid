@@ -43,8 +43,9 @@ public:
     LinearBackground lin;
     lin.initialize();
     // set up fitting function
-    TS_ASSERT_THROWS(lin.setParameter("X", 1.0), std::invalid_argument);
-    TS_ASSERT_THROWS(lin.setParameter("A9", 1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(lin.setParameter("X", 1.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(lin.setParameter("A9", 1.0),
+                     const std::invalid_argument &);
 
     const double a1 = 2;
     const double a0 = 0.3;

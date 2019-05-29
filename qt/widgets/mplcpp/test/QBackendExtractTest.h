@@ -4,23 +4,23 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_SIPTEST_H
-#define MPLCPP_SIPTEST_H
+#ifndef MPLCPP_QBACKENDEXTRACTTEST_H
+#define MPLCPP_QBACKENDEXTRACTTEST_H
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
-#include "MantidQtWidgets/MplCpp/Python/Sip.h"
 
 #include <QWidget>
 
 using MantidQt::Widgets::MplCpp::backendModule;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+using namespace MantidQt::Widgets::Common;
 
-class SipTest : public CxxTest::TestSuite {
+class QBackendExtractTest : public CxxTest::TestSuite {
 public:
-  static SipTest *createSuite() { return new SipTest; }
-  static void destroySuite(SipTest *suite) { delete suite; }
+  static QBackendExtractTest *createSuite() { return new QBackendExtractTest; }
+  static void destroySuite(QBackendExtractTest *suite) { delete suite; }
 
 public:
   // ----------------- success tests ---------------------
@@ -41,8 +41,9 @@ public:
     const Python::Object nonSipType{
         Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
     struct Foo;
-    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType), std::runtime_error);
+    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType),
+                     const std::runtime_error &);
   }
 };
 
-#endif // MPLCPP_SIPTEST_H
+#endif // MPLCPP_QBACKENDEXTRACTTEST_H

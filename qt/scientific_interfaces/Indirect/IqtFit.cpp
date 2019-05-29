@@ -50,9 +50,6 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setupFitTab() {
-  setSampleWSSuffices({"_iqt"});
-  setSampleFBSuffices({"_iqt.nxs"});
-
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
   const auto exponential = functionFactory.createFunction("ExpDecay");

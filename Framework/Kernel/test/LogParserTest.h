@@ -231,7 +231,7 @@ public:
     const auto &ti_dataLast = rv->first.to_tm();
     TS_ASSERT_EQUALS(ti_dataLast.tm_hour, 14);
     TS_ASSERT_EQUALS(ti_dataLast.tm_min, 3);
-    TS_ASSERT_THROWS(timeMean(p1.get()), std::runtime_error);
+    TS_ASSERT_THROWS(timeMean(p1.get()), const std::runtime_error &);
   }
 
   // Test a variant of the log file containing CHANGE_PERIOD flags

@@ -97,6 +97,19 @@ Stretch::Stretch(QWidget *parent)
           SLOT(plotCurrentPreview()));
 }
 
+void Stretch::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Stretch");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
+}
+
 void Stretch::setup() {}
 
 /**
@@ -320,7 +333,12 @@ void Stretch::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void Stretch::handleSampleInputReady(const QString &filename) {
-  m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+  try {
+    m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
+
   // update the maximum and minimum range bar positions
   QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
@@ -352,8 +370,12 @@ void Stretch::previewSpecChanged(int value) {
 
   m_uiForm.ppPlot->clear();
 
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  auto const sampleName = m_uiForm.dsSample->getCurrentDataName();
+  try {
+    m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 }
 
 /**

@@ -671,7 +671,7 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
 
   // Create and fill another vector for the X axis
   auto timeChannels = new float[lengthIn + 1]();
-  nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn + 1));
+  nxload.getTimeChannels(timeChannels, static_cast<int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
 
   localWorkspace->setHistogram(

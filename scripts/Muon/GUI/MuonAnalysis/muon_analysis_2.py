@@ -44,7 +44,7 @@ def check_facility():
 
 class MuonAnalysisGui(QtWidgets.QMainWindow):
     """
-    The Frequency Domain Analaysis 2.0 interface.
+    The Muon Analaysis 2.0 interface.
     """
     @staticmethod
     def warning_popup(message):

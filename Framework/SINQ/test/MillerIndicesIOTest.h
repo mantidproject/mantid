@@ -39,15 +39,15 @@ public:
 
     std::string hklInvalidStringLong("1 3 4 2");
     TS_ASSERT_THROWS(MillerIndicesIO::fromString(hklInvalidStringLong),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     std::string hklInvalidStringShort("2 3");
     TS_ASSERT_THROWS(MillerIndicesIO::fromString(hklInvalidStringShort),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     std::string hklInvalidStringGarbage("q43tn rufninc");
     TS_ASSERT_THROWS(MillerIndicesIO::fromString(hklInvalidStringGarbage),
-                     boost::bad_lexical_cast);
+                     const boost::bad_lexical_cast &);
   }
 
   void testComplementarity() {

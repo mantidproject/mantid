@@ -109,7 +109,7 @@ public:
         pAlg->setPropertyValue("OutputWorkspace", "EnergyTransferND"));
     // unknown Q-dimension trows
     TS_ASSERT_THROWS(pAlg->setPropertyValue("QDimensions", "unknownQ"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // correct Q-dimension fine
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "|Q|"));
     // additional dimensions requested -- fine

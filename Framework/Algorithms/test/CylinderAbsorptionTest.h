@@ -65,7 +65,7 @@ public:
 
     // intentionally skip the sample information
     configureAbsCommon(atten, testWS, "factors");
-    TS_ASSERT_THROWS(atten.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(atten.execute(), const std::invalid_argument &);
     TS_ASSERT(!atten.isExecuted());
   }
 

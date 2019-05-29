@@ -258,33 +258,33 @@ public:
   void test_interpolatelinear_throws_for_undefined_ymode_type() {
     TS_ASSERT_THROWS(
         interpolateLinear(Histogram(Points(10, LinearGenerator(0, 0.5))), 10),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void test_interpolatelinear_throws_if_number_points_less_than_3() {
     TS_ASSERT_THROWS(
         interpolateLinear(Histogram(Points(2, LinearGenerator(0, 0.5))), 1),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         interpolateLinear(Histogram(Points(2, LinearGenerator(0, 0.5))), 1),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void test_interpolatelinearinplace_throws_if_input_has_less_than_2_points() {
     Histogram input(Points(1, LinearGenerator(0.1, 0.1)));
     Histogram output(Points(1, LinearGenerator(0.1, 0.1)));
     TS_ASSERT_THROWS(interpolateLinearInplace(input, output),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 
   void
   test_interpolatelinear_throws_if_stepsize_greater_or_equal_number_points() {
     TS_ASSERT_THROWS(
         interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 6),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         interpolateLinear(Histogram(Points(6, LinearGenerator(0, 0.5))), 7),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   // ---------------------------------------------------------------------------
@@ -293,33 +293,33 @@ public:
   void test_interpolatecspline_throws_for_undefined_ymode_type() {
     TS_ASSERT_THROWS(
         interpolateCSpline(Histogram(Points(10, LinearGenerator(0, 0.5))), 10),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void test_interpolatecspline_throws_if_less_than_4_calculated_points() {
     TS_ASSERT_THROWS(
         interpolateCSpline(Histogram(Points(2, LinearGenerator(0, 0.5))), 1),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         interpolateCSpline(Histogram(Points(3, LinearGenerator(0, 0.5))), 1),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void test_interpolatecsplineinplace_throws_if_input_has_less_than_3_points() {
     Histogram input(Points(2, LinearGenerator(0, 1.0)));
     Histogram output(Points(5, LinearGenerator(0.1, 0.1)));
     TS_ASSERT_THROWS(interpolateCSplineInplace(input, output),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 
   void
   test_interpolatecspline_throws_if_stepsize_greater_or_equal_number_points() {
     TS_ASSERT_THROWS(
         interpolateCSpline(Histogram(Points(6, LinearGenerator(0, 0.5))), 6),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         interpolateCSpline(Histogram(Points(6, LinearGenerator(0, 0.5))), 7),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 };
 
