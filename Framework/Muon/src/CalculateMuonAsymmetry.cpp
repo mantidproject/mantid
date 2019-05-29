@@ -223,7 +223,8 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   double endX = getProperty("EndX");
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");
-  API::IAlgorithm_sptr fit = API::AlgorithmManager::Instance().createUnmanaged("Fit");
+  API::IAlgorithm_sptr fit =
+      API::AlgorithmManager::Instance().createUnmanaged("Fit");
   fit->initialize();
 
   API::IFunction_sptr function = getProperty("InputFunction");

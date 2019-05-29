@@ -542,7 +542,8 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS,
       int numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
-        IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Plus");
+        IAlgorithm_sptr alg =
+            AlgorithmManager::Instance().createUnmanaged("Plus");
         alg->initialize();
         alg->setChild(true);
         alg->setRethrows(true);
@@ -606,7 +607,8 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
 
 void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
                   const std::string &logValue) {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
   alg->initialize();
   alg->setChild(true);
   alg->setRethrows(true);
