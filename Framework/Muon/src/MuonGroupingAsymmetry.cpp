@@ -42,6 +42,7 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
                                        const double normalizationIn) {
   IAlgorithm_sptr asym = AlgorithmManager::Instance().createUnmanaged(
       "EstimateMuonAsymmetryFromCounts");
+  asym->initialize();
   asym->setChild(true);
   asym->setProperty("InputWorkspace", inputWS);
   asym->setProperty("WorkspaceName", inputWS->getName());
