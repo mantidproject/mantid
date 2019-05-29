@@ -103,6 +103,7 @@ class FittingTabPresenterTest(GuiTest):
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
+
         call_args_dict = self.presenter.model.do_simultaneous_fit.call_args[0][0]
 
         self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
@@ -141,7 +142,34 @@ class FittingTabPresenterTest(GuiTest):
 
         self.assertEqual(retrieve_combobox_info(self.view.parameter_display_combo), new_workspace_list)
 
-    # def test_when_new_data_is_selected
+    def test_when_new_data_is_selected_updates_fit_property_browser_appropriately_for_single_and_sequential(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+
+        self.presenter.handle_workspace_list_changed(new_workspace_list)
+
+        self.assertEqual(self.view.function_browser.getDatasetNames(), ['MUSR22725; Group; top; Asymmetry'])
+        self.assertEqual(self.view.function_browser.getNumberOfDatasets(), 1)
+
+    def test_when_new_data_is_selected_updates_fit_property_browser_appropriately_for_simultaneous(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+        self.view.simul_fit_radio.toggle()
+
+        self.presenter.handle_workspace_list_changed(new_workspace_list)
+
+        self.assertEqual(self.view.function_browser.getDatasetNames(), new_workspace_list)
+        self.assertEqual(self.view.function_browser.getNumberOfDatasets(), 3)
+
+    def test_when_switching_to_simultaneous_function_browser_setup_correctly(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+        self.presenter.handle_workspace_list_changed(new_workspace_list)
+
+        self.view.simul_fit_radio.toggle()
+
+        self.assertEqual(self.view.function_browser.getDatasetNames(), ['MUSR22725; Group; top; Asymmetry'])
+        self.assertEqual(self.view.function_browser.getNumberOfDatasets(), 1)
 
 
 if __name__ == '__main__':

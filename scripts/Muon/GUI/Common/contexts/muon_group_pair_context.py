@@ -145,6 +145,8 @@ class MuonGroupPairContext(object):
         self[name].show(str(run))
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
+        import pydevd
+        pydevd.settrace('localhost', port=5534, stdoutToServer=True, stderrToServer=True)
         self._groups, self._pairs = get_default_grouping(workspace, instrument, main_field_direction)
 
     def _check_name_unique(self, name):
