@@ -28,7 +28,7 @@ class ResultsTabModel(object):
         fitting
         """
         self._results_table_name = DEFAULT_TABLE_NAME
-        self._context = fitting_context
+        self._fit_context = fitting_context
 
     def results_table_name(self):
         """Return the current name of the results table"""
@@ -52,6 +52,21 @@ class ResultsTabModel(object):
         all_logs = AnalysisDataService.retrieve(
             workspace_name).run().getLogData()
         return [log.name for log in all_logs if _log_should_be_displayed(log)]
+
+    def fit_functions(self):
+        """
+        :return: The list of fit functions known to have been fitted
+        """
+        return self._fit_context.fit_function_names()
+
+    def fit_input_workspaces(self):
+        """
+        :return: The list of workspace names of the original data used as input to the fits
+        """
+        return {
+            fit.input_workspace: [index, True, True]
+            for index, fit in enumerate(self._fit_context.fit_list)
+        }
 
 
 def _log_should_be_displayed(log):

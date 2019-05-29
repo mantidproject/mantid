@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division)
 
+from Muon.GUI.Common.observer_pattern import GenericObserver
+
 
 class ResultsTabPresenter(object):
     """Controller for the results tab"""
@@ -13,6 +15,8 @@ class ResultsTabPresenter(object):
     def __init__(self, view, model):
         self.view = view
         self.model = model
+        self.new_fit_performed_observer = GenericObserver(self.on_new_fit_performed)
+
         self._init_view()
 
     # callbacks
@@ -22,7 +26,9 @@ class ResultsTabPresenter(object):
 
     def on_new_fit_performed(self):
         """React to a new fit created in the fitting tab"""
-        pass
+        self.view.set_fit_function_names(self.model.fit_functions())
+        self.view.set_fit_result_workspaces(self.model.fit_input_workspaces())
+        self.view.set_output_results_button_enabled(True)
 
     # private api
     def _init_view(self):

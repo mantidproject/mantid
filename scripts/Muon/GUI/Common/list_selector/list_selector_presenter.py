@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, unicode_literals)
+
 model_position = 0
 model_selected = 1
 model_enabled = 2
@@ -15,6 +17,12 @@ view_item_enabled = 2
 
 class ListSelectorPresenter(object):
     def __init__(self, view, model):
+        """
+        Initialize with a view and model reference
+        :param view: A reference to a view to control
+        :param model: A reference to a dictionary to act as a model. The following structure is expected:
+        {'name': [index_position, ticked, enabled]}
+        """
         self.view = view
         self.model = model
         self.filter_string = ''

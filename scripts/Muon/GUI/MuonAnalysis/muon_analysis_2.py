@@ -38,16 +38,17 @@ def check_facility():
     """
     current_facility = ConfigServiceImpl.Instance().getFacility().name()
     if current_facility not in SUPPORTED_FACILITIES:
-        raise AttributeError("Your facility {} is not supported by MuonAnalysis 2.0, so you"
+        raise AttributeError(
+            "Your facility {} is not supported by MuonAnalysis 2.0, so you"
                              "will not be able to load any files. \n \n"
-                             "Supported facilities are :"
-                             + "\n - ".join(SUPPORTED_FACILITIES))
+            "Supported facilities are :" + "\n - ".join(SUPPORTED_FACILITIES))
 
 
 class MuonAnalysisGui(QtWidgets.QMainWindow):
     """
     The Muon Analaysis 2.0 interface.
     """
+
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
@@ -65,12 +66,15 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.loaded_data = MuonLoadData()
         self.data_context = MuonDataContext(self.loaded_data)
         self.gui_context = MuonGuiContext()
-        self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
+        self.group_pair_context = MuonGroupPairContext(
+            self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
         self.fitting_context = FittingContext()
 
-        self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
+        self.context = MuonContext(muon_data_context=self.data_context,
+                                   muon_gui_context=self.gui_context,
+                                   muon_group_context=self.group_pair_context,
+                                   muon_phase_context=self.phase_context,
                                    fitting_context=self.fitting_context)
 
         # construct all the widgets.
@@ -79,7 +83,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.home_tab = HomeTabWidget(self.context, self)
         self.phase_tab = PhaseTabWidget(self.context, self)
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.results_tab = ResultsTabWidget(self.context, self)
+        self.results_tab = ResultsTabWidget(self.context.fitting_context, self)
 
         self.setup_tabs()
         self.help_widget = HelpWidget("Muon Analysis 2")
@@ -119,7 +123,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.setup_fitting_notifier()
 
-        self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
+        self.context.data_context.message_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
         """
@@ -128,8 +133,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
-        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
-        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view,
+                                  'Grouping')
+        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view,
+                                  'Phase Table')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
 
@@ -140,13 +147,16 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.loadObserver)
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(self.phase_tab.phase_table_presenter.run_change_observer)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.run_change_observer)
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(self.fitting_tab.fitting_tab_presenter.run_changed_observer)
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.run_changed_observer)
 
     def setup_gui_variable_observers(self):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer
+        )
 
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
@@ -225,7 +235,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         pass
 
     def setup_fitting_notifier(self):
-        self.fitting_context.new_fit_notifier.add_subscriber(self.results_tab.results_tab_presenter.new_fit_performed_observer)
+        """Connect fitting and results tabs to inform of new fits"""
+        self.fitting_context.new_fit_notifier.add_subscriber(
+            self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

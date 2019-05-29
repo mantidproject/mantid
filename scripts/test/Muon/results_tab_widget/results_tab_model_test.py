@@ -50,8 +50,9 @@ class ResultsTabModelTest(unittest.TestCase):
         single_value_log_names = ('sv_1', 'sv_2')
         for name in itertools.chain(single_value_log_names,
                                     ALLOWED_NON_TIME_SERIES_LOGS):
-            run.addProperty(
-                name, StringPropertyWithValue(name, 'test'), replace=True)
+            run.addProperty(name,
+                            StringPropertyWithValue(name, 'test'),
+                            replace=True)
         # verify
         allowed_logs = self.model.log_names(fake_ws.name())
         for name in itertools.chain(time_series_names,
@@ -60,14 +61,28 @@ class ResultsTabModelTest(unittest.TestCase):
                 name in allowed_logs,
                 msg="{} not found in allowed log list".format(name))
         for name in single_value_log_names:
-            self.assertFalse(
-                name in allowed_logs,
-                msg="{} found in allowed log list".format(name))
+            self.assertFalse(name in allowed_logs,
+                             msg="{} found in allowed log list".format(name))
 
     def test_log_names_from_workspace_without_logs(self):
         fake_ws = create_test_workspace()
         allowed_logs = self.model.log_names(fake_ws.name())
         self.assertEqual(0, len(allowed_logs))
+
+    def test_default_model_has_zero_fit_functions(self):
+        self.assertEqual(len(self.model.fit_functions()))
+
+    def test_model_returns_fit_functions_from_context(self):
+        test_functions = ['func_1', 'func2']
+        self.fitting_context.fit_function_names.return_value = test_functions
+
+        self.assertEqual(test_functions, self.model.fit_functions())
+
+    def test_model_creates_expected_map_input_workspaces_to_include_state(self):
+        test_fits, expected_list_state = create_test_fits()
+        self.fitting_context.fit_list = test_fits
+
+        self.assertEqual(expected_list_state, self.model.fit_input_workspaces())
 
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
@@ -80,6 +95,20 @@ def create_test_workspace():
     ws_name = 'results_tab_model_test_log_names_fake_ws'
     AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
     return fake_ws
+
+
+def create_test_fits():
+    input_workspaces = ['ws1', 'ws2']
+    fits = []
+    list_state = {}
+    checked, enabled = True, True
+    for index, name in enumerate(input_workspaces):
+        fit_info = mock.MagicMock()
+        fit_info.input_workspace = name
+        fits.append(fit_info)
+        list_state[name] = [index, checked, enabled]
+
+    return fits, list_state
 
 
 if __name__ == '__main__':

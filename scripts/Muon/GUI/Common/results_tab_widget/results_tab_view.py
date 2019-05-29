@@ -50,6 +50,22 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         """
         self.results_name_editor.setText(name)
 
+    def set_fit_function_names(self, names):
+        """Set a new list of function names for the function selector.
+
+        :param names: A list of strings specifying function names used in known fits
+        """
+        self.fit_function_selector.clear()
+        self.fit_function_selector.addItems(names)
+
+    def set_fit_result_workspaces(self, workspace_list_state):
+        """Set the map of workspaces
+
+        :param workspace_list_state: Dictionary containing the updated
+        state for the workspace list selector
+        """
+        self.fit_selector_presenter.update_model(workspace_list_state)
+
     def selected_fit_function(self):
         """Return the text of the selected item in the function
         selection box"""
