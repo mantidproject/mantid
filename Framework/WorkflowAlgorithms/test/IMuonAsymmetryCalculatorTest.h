@@ -619,7 +619,7 @@ public:
         Mantid::Kernel::make_unique<MuonPairAsymmetryCalculator>(
             inputWSGroup, summed, subtracted, firstIndex, secondIndex);
     MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS(ws = calc->calculate(), std::out_of_range);
+    TS_ASSERT_THROWS(ws = calc->calculate(), const std::out_of_range &);
     TS_ASSERT(!ws);
   }
 

@@ -86,7 +86,7 @@ public:
     TS_ASSERT_EQUALS(info.address(), "A");
     TS_ASSERT_EQUALS(info.listener(), "L");
 
-    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), std::runtime_error);
+    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), const std::runtime_error &);
   }
 
   void test_xml_two_connections_default() {
@@ -116,7 +116,7 @@ public:
     TS_ASSERT_EQUALS(info.address(), "A");
     TS_ASSERT_EQUALS(info.listener(), "L");
 
-    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), std::runtime_error);
+    TS_ASSERT_THROWS(inst.liveListenerInfo("n3"), const std::runtime_error &);
   }
 
   void test_manual_construction() {

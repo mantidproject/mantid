@@ -122,7 +122,7 @@ public:
   void test_setSplitTopIntoThrowsForWrongDimension() {
     BoxController sc(1);
     TSM_ASSERT_THROWS("Should throw for setting a wrong dimension",
-                      sc.setSplitTopInto(1, 10), std::invalid_argument);
+                      sc.setSplitTopInto(1, 10), const std::invalid_argument &);
   }
 
   void doTest_numBoxes(BoxController &bc, size_t expectedNumEntries) {

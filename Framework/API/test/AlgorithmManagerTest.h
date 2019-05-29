@@ -111,7 +111,7 @@ public:
   void testVersionFail() {
     const size_t nalgs = AlgorithmFactory::Instance().getKeys().size();
     TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(),
-                     std::runtime_error);
+                     const std::runtime_error &);
     // Size should be the same
     TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs);
   }
@@ -124,9 +124,9 @@ public:
   void testInstance() {
     TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTest"));
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest", 3),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testClear() {

@@ -316,7 +316,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                            channelWidthSum, channelWidthTimes);
       binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
                                          channelWidthSum, channelWidthTimes);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       vtof = false;
     }
     if (!vtof) {
@@ -632,10 +632,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     const std::string entryResolution = instrumentNamePath + "/selector/";
     try {
       wavelengthRes = entry.getFloat(entryResolution + "wavelength_res");
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       try {
         wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
-      } catch (std::runtime_error) {
+      } catch (const std::runtime_error &) {
         g_log.warning("Could not find wavelength resolution, assuming 10%");
       }
     }

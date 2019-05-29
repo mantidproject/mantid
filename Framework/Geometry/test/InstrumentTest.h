@@ -67,8 +67,8 @@ public:
     TS_ASSERT(!i.getSource());
     TS_ASSERT(!i.getSample());
     TS_ASSERT(!i.isParametrized());
-    TS_ASSERT_THROWS(i.baseInstrument(), std::runtime_error);
-    TS_ASSERT_THROWS(i.getParameterMap(), std::runtime_error);
+    TS_ASSERT_THROWS(i.baseInstrument(), const std::runtime_error &);
+    TS_ASSERT_THROWS(i.getParameterMap(), const std::runtime_error &);
 
     Instrument ii("anInstrument");
     TS_ASSERT(!ii.getSource());
@@ -86,8 +86,8 @@ public:
     TS_ASSERT_EQUALS(i.getDefaultView(), instrument.getDefaultView());
     TS_ASSERT_EQUALS(i.getDefaultAxis(), instrument.getDefaultAxis());
     // Should not be parameterized - there's a different constructor for that
-    TS_ASSERT_THROWS(i.baseInstrument(), std::runtime_error);
-    TS_ASSERT_THROWS(i.getParameterMap(), std::runtime_error);
+    TS_ASSERT_THROWS(i.baseInstrument(), const std::runtime_error &);
+    TS_ASSERT_THROWS(i.getParameterMap(), const std::runtime_error &);
     TS_ASSERT_EQUALS(i.getValidFromDate(), instrument.getValidFromDate());
     TS_ASSERT_EQUALS(i.getValidToDate(), instrument.getValidToDate());
 
@@ -137,7 +137,8 @@ public:
     TS_ASSERT(!i.getSource());
     ObjComponent *s = new ObjComponent("");
     // Cannot have an unnamed source
-    TS_ASSERT_THROWS(i.markAsSource(s), Exception::InstrumentDefinitionError);
+    TS_ASSERT_THROWS(i.markAsSource(s),
+                     const Exception::InstrumentDefinitionError &);
     s->setName("source");
     TS_ASSERT_THROWS_NOTHING(i.markAsSource(s));
     TS_ASSERT_EQUALS(i.getSource().get(), s);
@@ -152,8 +153,9 @@ public:
   void test_Marking_Chopper_Point_Without_Defined_Source_Throws_Exception() {
     Instrument instr;
     const ObjComponent *chopper = new ObjComponent("chopper1");
-    TS_ASSERT_THROWS(instr.markAsChopperPoint(chopper),
-                     Mantid::Kernel::Exception::InstrumentDefinitionError);
+    TS_ASSERT_THROWS(
+        instr.markAsChopperPoint(chopper),
+        const Mantid::Kernel::Exception::InstrumentDefinitionError &);
     delete chopper;
   }
 
@@ -167,13 +169,14 @@ public:
   void test_Marking_Unamed_Chopper_As_Chopper_Throws_Exception() {
     Instrument_sptr instr = createInstrumentWithSource();
     const ObjComponent *chopper = new ObjComponent("");
-    TS_ASSERT_THROWS(instr->markAsChopperPoint(chopper), std::invalid_argument);
+    TS_ASSERT_THROWS(instr->markAsChopperPoint(chopper),
+                     const std::invalid_argument &);
     delete chopper; // It was not added to the assembly
   }
 
   void test_Retrieving_Chopper_With_Invalid_Index_Throws_Exception() {
     Instrument_sptr instr = createInstrumentWithSource();
-    TS_ASSERT_THROWS(instr->getChopperPoint(0), std::invalid_argument);
+    TS_ASSERT_THROWS(instr->getChopperPoint(0), const std::invalid_argument &);
   }
 
   void test_Inserting_Chopper_Closest_To_Source_Gets_Set_To_Index_Zero() {
@@ -224,7 +227,7 @@ public:
     ObjComponent *s = new ObjComponent("");
     // Cannot have an unnamed source
     TS_ASSERT_THROWS(i.markAsSamplePos(s),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
     s->setName("sample");
     TS_ASSERT_THROWS_NOTHING(i.markAsSamplePos(s));
     TS_ASSERT_EQUALS(i.getSample().get(), s);
@@ -250,9 +253,11 @@ public:
   }
 
   void testDetector() {
-    TS_ASSERT_THROWS(instrument.getDetector(0), Exception::NotFoundError);
+    TS_ASSERT_THROWS(instrument.getDetector(0),
+                     const Exception::NotFoundError &);
     TS_ASSERT_EQUALS(instrument.getDetector(1).get(), det);
-    TS_ASSERT_THROWS(instrument.getDetector(2), Exception::NotFoundError);
+    TS_ASSERT_THROWS(instrument.getDetector(2),
+                     const Exception::NotFoundError &);
     Detector *d = new Detector("det", 2, nullptr);
     TS_ASSERT_THROWS_NOTHING(instrument.markAsDetector(d));
     TS_ASSERT_EQUALS(instrument.getDetector(2).get(), d);
@@ -267,15 +272,15 @@ public:
     // Next 2 lines demonstrate what can happen if detector cache and
     // CompAssembly tree are inconsistent
     // Unfortunately, the way things were written means that this can happen
-    TS_ASSERT_THROWS(i.removeDetector(d), std::runtime_error);
-    TS_ASSERT_THROWS(i.getDetector(1).get(), Exception::NotFoundError);
+    TS_ASSERT_THROWS(i.removeDetector(d), const std::runtime_error &);
+    TS_ASSERT_THROWS(i.getDetector(1).get(), const Exception::NotFoundError &);
     // Now make the 2 calls necessary to do it properly
     TS_ASSERT_THROWS_NOTHING(i.add(d));
     TS_ASSERT_THROWS_NOTHING(i.markAsDetector(d));
     TS_ASSERT_EQUALS(i.getDetectorIDs(false).size(), 1);
     TS_ASSERT_EQUALS(i.nelements(), 1);
     TS_ASSERT_THROWS_NOTHING(i.removeDetector(d));
-    TS_ASSERT_THROWS(i.getDetector(1).get(), Exception::NotFoundError);
+    TS_ASSERT_THROWS(i.getDetector(1).get(), const Exception::NotFoundError &);
     TS_ASSERT_EQUALS(i.nelements(), 0);
 
     // Now check it does the right thing for a monitor as well
@@ -326,7 +331,7 @@ public:
 
     std::vector<IDetector_const_sptr> dets;
     TS_ASSERT_THROWS(dets = instrument.getDetectors(detIDs),
-                     Kernel::Exception::NotFoundError);
+                     const Kernel::Exception::NotFoundError &);
   }
 
   void testCasts() {
@@ -406,7 +411,7 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
     std::vector<IDetector_const_sptr> dets;
     TS_ASSERT_THROWS(inst->getDetectorsInBank(dets, "bank_in_the_dark_side"),
-                     Exception::NotFoundError)
+                     const Exception::NotFoundError &)
   }
 
   void test_getDetectors() {
@@ -653,7 +658,8 @@ public:
     // GridDetectorPixel (parameters ignored by
     // GridDetectorPixel::getRelativePos), so we cannot support this.
     detInfo.setPosition(3, detInfo.position(3) + detOffset);
-    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
+    TS_ASSERT_THROWS(instr->makeLegacyParameterMap(),
+                     const std::runtime_error &);
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacyMap->size(), 2);

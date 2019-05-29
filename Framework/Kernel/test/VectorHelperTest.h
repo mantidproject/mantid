@@ -170,21 +170,21 @@ public:
     const std::vector<double> rbParams = {1.0};
     std::vector<double> axis;
     TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis),
-                     const std::runtime_error)
+                     const std::runtime_error &)
   }
 
   void test_createAxisFromRebinParams_throwsOnInfiniteVal() {
     const std::vector<double> params = {1.0, INFINITY};
     std::vector<double> axis;
     TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
-                     const std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_createAxisFromRebinParams_throwsOnNaNVal() {
     const std::vector<double> params = {1.0, NAN};
     std::vector<double> axis;
     TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
-                     const std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {
@@ -331,19 +331,6 @@ public:
     TS_ASSERT_EQUALS(y.size(), 2);
   }
 
-  // TODO: Figure out proper behavior if given stupidity as inputs
-  //  void test_splitStringIntoVector_badNumber_gives0()
-  //  {
-  //    std::vector<int> vec;
-  //    vec = VectorHelper::splitStringIntoVector<int>("2, monkey, potato,
-  //    134");
-  //    TS_ASSERT_EQUALS( vec.size(), 4);
-  //    TS_ASSERT_EQUALS( vec[0], 2);
-  //    TS_ASSERT_EQUALS( vec[1], 0);
-  //    TS_ASSERT_EQUALS( vec[2], 0);
-  //    TS_ASSERT_EQUALS( vec[3], 134);
-  //  }
-
   void test_getBinIndex_Returns_Zero_For_Value_Lower_Than_Input_Range() {
     const double testValue = m_test_bins.front() - 1.1;
     int index(-1);
@@ -410,7 +397,7 @@ public:
     std::vector<double> output;
     TS_ASSERT_THROWS(
         VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries),
-        std::invalid_argument);
+        const std::invalid_argument &);
     inputBoundaries.push_back(6);
     VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries);
 

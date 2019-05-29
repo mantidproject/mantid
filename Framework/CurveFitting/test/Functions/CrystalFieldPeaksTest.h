@@ -114,10 +114,10 @@ public:
     peaks.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     peaks.setAttributeValue("Ion", "something");
     TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
-                     std::runtime_error);
+                     const std::runtime_error &);
     peaks.setAttributeValue("Ion", "S2.4");
     TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
-                     std::runtime_error);
+                     const std::runtime_error &);
     peaks.setAttributeValue("Ion", "S2.5");
     TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
     TS_ASSERT_EQUALS(nre, -5);

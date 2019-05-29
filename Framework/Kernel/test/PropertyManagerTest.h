@@ -161,11 +161,11 @@ public:
                      std::string("9.99"));
 
     TS_ASSERT_THROWS(mgr.declareProperty(std::move(copy)),
-                     Exception::ExistsError);
+                     const Exception::ExistsError &);
     TS_ASSERT_THROWS(
         mgr.declareProperty(
             Mantid::Kernel::make_unique<PropertyWithValue<int>>("", 0)),
-        std::invalid_argument);
+        const std::invalid_argument &);
     mgr.declareProperty(
         Mantid::Kernel::make_unique<PropertyWithValue<int>>("GoodIntProp", 1),
         "Test doc");
@@ -177,8 +177,9 @@ public:
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("myProp", 1));
     TS_ASSERT(!mgr.getPropertyValue("myProp").compare("1"));
-    TS_ASSERT_THROWS(mgr.declareProperty("MYPROP", 5), Exception::ExistsError);
-    TS_ASSERT_THROWS(mgr.declareProperty("", 5), std::invalid_argument);
+    TS_ASSERT_THROWS(mgr.declareProperty("MYPROP", 5),
+                     const Exception::ExistsError &);
+    TS_ASSERT_THROWS(mgr.declareProperty("", 5), const std::invalid_argument &);
   }
 
   void testdeclareProperty_double() {
@@ -198,8 +199,9 @@ public:
     TS_ASSERT_EQUALS(mgr.getPointerToProperty("withDoc")->documentation(),
                      "Test doc doub");
     TS_ASSERT_THROWS(mgr.declareProperty("MYPROP", 5.5),
-                     Exception::ExistsError);
-    TS_ASSERT_THROWS(mgr.declareProperty("", 5.5), std::invalid_argument);
+                     const Exception::ExistsError &);
+    TS_ASSERT_THROWS(mgr.declareProperty("", 5.5),
+                     const std::invalid_argument &);
   }
 
   void testdeclareProperty_string() {
@@ -213,8 +215,9 @@ public:
     TS_ASSERT_EQUALS(p->documentation(), "hello");
 
     TS_ASSERT_THROWS(mgr.declareProperty("MYPROP", "aValue"),
-                     Exception::ExistsError);
-    TS_ASSERT_THROWS(mgr.declareProperty("", "aValue"), std::invalid_argument);
+                     const Exception::ExistsError &);
+    TS_ASSERT_THROWS(mgr.declareProperty("", "aValue"),
+                     const std::invalid_argument &);
   }
 
   void testDeclareOrReplaceProperty() {
@@ -300,17 +303,17 @@ public:
     TS_ASSERT(!manager->getPropertyValue("aProp").compare("10"));
     manager->setPropertyValue("aProp", "1");
     TS_ASSERT_THROWS(manager->setPropertyValue("fhfjsdf", "0"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void testSetProperty() {
     TS_ASSERT_THROWS_NOTHING(manager->setProperty("AProp", 5));
     TS_ASSERT_THROWS(manager->setProperty("wefhui", 5),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
     TS_ASSERT_THROWS(manager->setProperty("APROP", 5.55),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(manager->setProperty("APROP", "value"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(manager->setProperty("AProp", 1));
   }
 
@@ -353,7 +356,7 @@ public:
   void testGetPropertyValue() {
     TS_ASSERT(!manager->getPropertyValue("APROP").compare("1"));
     TS_ASSERT_THROWS(manager->getPropertyValue("sdfshdu"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void testGetProperty() {
@@ -365,13 +368,14 @@ public:
     TS_ASSERT(typeid(int) == *p->type_info());
 
     TS_ASSERT_THROWS(p = manager->getProperty("werhui"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
 
     int i(0);
     TS_ASSERT_THROWS_NOTHING(i = manager->getProperty("aprop"));
     TS_ASSERT_EQUALS(i, 1);
     double dd(0.0);
-    TS_ASSERT_THROWS(dd = manager->getProperty("aprop"), std::runtime_error);
+    TS_ASSERT_THROWS(dd = manager->getProperty("aprop"),
+                     const std::runtime_error &);
     TS_ASSERT_EQUALS(dd, 0.0); // If dd is bot used you get a compiler warning
     std::string s = manager->getProperty("aprop");
     TS_ASSERT(!s.compare("1"));
@@ -380,7 +384,7 @@ public:
     TS_ASSERT_EQUALS(d, 1.11);
     int ii(0);
     TS_ASSERT_THROWS(ii = manager->getProperty("anotherprop"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_EQUALS(ii, 0); // Compiler warning if ii is not used
     std::string ss = manager->getProperty("anotherprop");
     // Note that some versions of boost::lexical_cast > 1.34 give a string such

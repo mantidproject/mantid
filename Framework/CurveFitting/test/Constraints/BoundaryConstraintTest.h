@@ -85,7 +85,8 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("Sigma==20");
-    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false), std::invalid_argument);
+    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false),
+                     const std::invalid_argument &);
   }
 
   void testInitialize6() {
@@ -94,7 +95,8 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("a<Sigma<b");
-    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false), std::invalid_argument);
+    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false),
+                     const std::invalid_argument &);
   }
 
   // test constructor with lower boundary only

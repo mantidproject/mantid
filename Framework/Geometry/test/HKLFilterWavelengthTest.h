@@ -32,17 +32,17 @@ public:
         HKLFilterWavelength wavelengthFilter(ub, 0.9, 6.0));
 
     TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, -0.9, 6.0),
-                     std::range_error);
+                     const std::range_error &);
     TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.9, -6.0),
-                     std::range_error);
+                     const std::range_error &);
     TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, -0.9, -6.0),
-                     std::range_error);
+                     const std::range_error &);
     TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.0, 6.0),
-                     std::range_error);
+                     const std::range_error &);
     TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.9, 0.0),
-                     std::range_error);
+                     const std::range_error &);
     TS_ASSERT_THROWS(HKLFilterWavelength wavelengthFilter(ub, 0.0, 0.0),
-                     std::range_error);
+                     const std::range_error &);
   }
 
   void testDescription() {

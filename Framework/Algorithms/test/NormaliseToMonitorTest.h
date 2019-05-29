@@ -93,7 +93,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
   if (!norm.isInitialized())
     norm.initialize();
   // Check it fails if properties haven't been set
-  TS_ASSERT_THROWS(norm.execute(), std::runtime_error)
+  TS_ASSERT_THROWS(norm.execute(), const std::runtime_error &)
   TS_ASSERT(!norm.isExecuted())
   TS_ASSERT_THROWS_NOTHING(norm.setPropertyValue("InputWorkspace", "normMon"))
   std::string outputWS("normMon");

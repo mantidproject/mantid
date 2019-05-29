@@ -293,7 +293,7 @@ public:
 
   void testExecute() {
     ToyAlgorithm myAlg;
-    TS_ASSERT_THROWS(myAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(myAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!myAlg.isExecuted());
     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
     TS_ASSERT_THROWS_NOTHING(myAlg.execute());
@@ -303,7 +303,7 @@ public:
   void testSetPropertyValue() {
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("prop1", "val"))
     TS_ASSERT_THROWS(alg.setPropertyValue("prop3", "1"),
-                     Exception::NotFoundError)
+                     const Exception::NotFoundError &)
   }
 
   void testExistsProperty() {
@@ -315,7 +315,8 @@ public:
     std::string value;
     TS_ASSERT_THROWS_NOTHING(value = alg.getPropertyValue("prop2"))
     TS_ASSERT(!value.compare("1"))
-    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"), Exception::NotFoundError)
+    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"),
+                     const Exception::NotFoundError &)
   }
 
   void testGetProperties() {
@@ -373,7 +374,7 @@ public:
 
   void test_From_String_With_Invalid_Input_Throws() {
     const std::string input = "()";
-    TS_ASSERT_THROWS(Algorithm::fromString(input), std::runtime_error);
+    TS_ASSERT_THROWS(Algorithm::fromString(input), const std::runtime_error &);
   }
 
   void test_Construction_Via_Valid_String_With_No_Properties() {
@@ -988,11 +989,11 @@ public:
 
     TS_ASSERT_THROWS(
         indexAlg.getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace2"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         (indexAlg.setWorkspaceInputProperties<MatrixWorkspace, std::string>(
             "InputWorkspace2", "wksp", IndexType::SpectrumNum, "1:5")),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testIndexingAlgorithm_failExistingIndexProperty() {
@@ -1001,7 +1002,7 @@ public:
     TS_ASSERT_THROWS(indexAlg.declareProperty(
                          make_unique<WorkspaceProperty<MatrixWorkspace>>(
                              "InputWorkspace", "", Direction::Input)),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

@@ -29,7 +29,7 @@ public:
     ObjCompAssembly pq(&q, pmap.get());
 
     TS_ASSERT_EQUALS(pq.nelements(), 0);
-    TS_ASSERT_THROWS(pq[0], std::runtime_error);
+    TS_ASSERT_THROWS(pq[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(pq.getName(), "Name");
     TS_ASSERT(!pq.getParent());
@@ -49,7 +49,7 @@ public:
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
     TS_ASSERT_EQUALS(pq.nelements(), 0);
-    TS_ASSERT_THROWS(pq[0], std::runtime_error);
+    TS_ASSERT_THROWS(pq[0], const std::runtime_error &);
     // check the parent
     TS_ASSERT(pq.getParent());
     TS_ASSERT_EQUALS(pq.getParent()->getName(), parent->getName());
@@ -67,7 +67,7 @@ public:
     Component *det2 = new ObjComponent("Det2Name");
     Component *det3 = new ObjComponent("Det3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 0);
-    TS_ASSERT_THROWS(bank[0], std::runtime_error);
+    TS_ASSERT_THROWS(bank[0], const std::runtime_error &);
     bank.add(det1);
     bank.add(det2);
     bank.add(det3);

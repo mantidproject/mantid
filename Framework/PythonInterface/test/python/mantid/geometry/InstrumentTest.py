@@ -11,6 +11,7 @@ from mantid.kernel import DateAndTime
 from mantid.geometry import(Detector, Instrument, ObjComponent, ReferenceFrame)
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
+
 class InstrumentTest(unittest.TestCase):
 
     __testws = None

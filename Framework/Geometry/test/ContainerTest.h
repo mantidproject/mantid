@@ -32,7 +32,7 @@ public:
     Container can;
     TS_ASSERT_EQUALS(false, can.hasSampleShape());
     TS_ASSERT_THROWS(can.createSampleShape(Container::ShapeArgs()),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Construction_With_XML_Assumes_XML_For_Can_Itself() {
@@ -105,7 +105,7 @@ public:
     TS_ASSERT_THROWS(can->setSampleShape("<sphere id=\"shape\"> "
                                          "<radius val=\"1.0\" /> "
                                          "</sphere>"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

@@ -161,7 +161,7 @@ public:
     crop.setProperty("OutputWorkspace", "dummy");
     crop.setProperty("ComponentNames", componentNames);
     TSM_ASSERT_THROWS("Invalid detector names will throw.", crop.execute(),
-                      std::runtime_error)
+                      const std::runtime_error &)
   }
 
   void test_that_det_ids_are_ordered() {

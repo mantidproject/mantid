@@ -630,7 +630,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -659,7 +659,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "0"))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -692,7 +692,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", m_outputWSName))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &)
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -718,7 +718,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS(
         alg.setPropertyValue("InputWorkspaces", "ws00, ws01, ws10, ws11"),
-        std::invalid_argument)
+        const std::invalid_argument &)
   }
 
 private:

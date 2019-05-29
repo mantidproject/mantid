@@ -98,7 +98,7 @@ public:
         "createunwrapped.",
         Mantid::API::ImplicitFunctionParameterParserFactory::Instance().create(
             ""),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 };
 

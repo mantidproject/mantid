@@ -110,7 +110,7 @@ private:
   void attemptToLoadBadFile(const std::string &filename) {
     const std::string filepath = getTestFilePath(filename);
     TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", filepath));
-    TS_ASSERT_THROWS(testAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
   }
 
   LoadSESANS testAlg;

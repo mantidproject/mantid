@@ -77,7 +77,7 @@ public:
     ss << malformedRepresentation;
 
     TS_ASSERT_THROWS(ONCatEntity::fromJSONStream(ss),
-                     MalformedRepresentationError);
+                     const MalformedRepresentationError &);
   }
 
   void test_throws_on_malformed_representation() {
@@ -90,7 +90,7 @@ public:
     ss << missingTypeRepresentation;
 
     TS_ASSERT_THROWS(ONCatEntity::fromJSONStream(ss),
-                     MalformedRepresentationError);
+                     const MalformedRepresentationError &);
   }
 
   void test_nested_values_with_various_types() {

@@ -114,23 +114,25 @@ public:
     TS_ASSERT_EQUALS(target.getEventType(), EventType::TOF)
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
     TS_ASSERT_EQUALS(target.getEvents(), eventList.getEvents());
-    TS_ASSERT_THROWS(target.getWeightedEvents(), std::runtime_error);
-    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getWeightedEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(),
+                     const std::runtime_error &);
 
     eventList.switchTo(EventType::WEIGHTED);
     target.copyDataFrom(eventList);
     TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED)
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
-    TS_ASSERT_THROWS(target.getEvents(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(target.getWeightedEvents(), eventList.getWeightedEvents());
-    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getWeightedEventsNoTime(),
+                     const std::runtime_error &);
 
     eventList.switchTo(EventType::WEIGHTED_NOTIME);
     target.copyDataFrom(eventList);
     TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED_NOTIME)
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
-    TS_ASSERT_THROWS(target.getEvents(), std::runtime_error);
-    TS_ASSERT_THROWS(target.getWeightedEvents(), std::runtime_error);
+    TS_ASSERT_THROWS(target.getEvents(), const std::runtime_error &);
+    TS_ASSERT_THROWS(target.getWeightedEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(),
                      eventList.getWeightedEventsNoTime());
   }
@@ -295,12 +297,14 @@ public:
     this->fake_data();
     TS_ASSERT_EQUALS(el.getEvents().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
-    TS_ASSERT_THROWS(el.getWeightedEvents().size(), std::runtime_error);
-    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(), std::runtime_error);
+    TS_ASSERT_THROWS(el.getWeightedEvents().size(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(),
+                     const std::runtime_error &);
 
     el.switchTo(WEIGHTED);
-    TS_ASSERT_THROWS(el.getEvents().size(), std::runtime_error);
-    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(), std::runtime_error);
+    TS_ASSERT_THROWS(el.getEvents().size(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEventsNoTime().size(),
+                     const std::runtime_error &);
     TS_ASSERT_EQUALS(el.getWeightedEvents().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getEvent(0).weight(), 1.0);
@@ -312,8 +316,8 @@ public:
     // Start with a bit of fake data
     this->fake_data();
     el.switchTo(WEIGHTED_NOTIME);
-    TS_ASSERT_THROWS(el.getEvents().size(), std::runtime_error);
-    TS_ASSERT_THROWS(el.getWeightedEvents().size(), std::runtime_error);
+    TS_ASSERT_THROWS(el.getEvents().size(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.getWeightedEvents().size(), const std::runtime_error &);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime().size(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getNumberEvents(), NUMEVENTS);
     TS_ASSERT_EQUALS(el.getWeightedEventsNoTime()[0].weight(), 1.0);
@@ -596,9 +600,9 @@ public:
 
   void test_divide_by_zero() {
     // Perform the multiply
-    TS_ASSERT_THROWS(el.divide(0.0, 0.5), std::invalid_argument);
-    TS_ASSERT_THROWS(el.divide(0.0), std::invalid_argument);
-    TS_ASSERT_THROWS(el /= 0, std::invalid_argument);
+    TS_ASSERT_THROWS(el.divide(0.0, 0.5), const std::invalid_argument &);
+    TS_ASSERT_THROWS(el.divide(0.0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(el /= 0, const std::invalid_argument &);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -982,7 +986,7 @@ public:
 
     TSM_ASSERT_THROWS(
         "We don't support WeightedEvents with this feature at present.",
-        eList.generateHistogramPulseTime(X, Y, E), std::runtime_error);
+        eList.generateHistogramPulseTime(X, Y, E), const std::runtime_error &);
   }
 
   void test_histogram_by_time_at_sample_pulse_only() {
@@ -1656,7 +1660,7 @@ public:
 
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, out),
-                         std::runtime_error);
+                         const std::runtime_error &);
       } else {
         TS_ASSERT_THROWS_NOTHING(el.filterByPulseTime(100, 200, out););
 
@@ -1683,7 +1687,8 @@ public:
   }
 
   void test_filterByPulseTime_output_same_as_input_throws() {
-    TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, el), std::invalid_argument);
+    TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, el),
+                     const std::invalid_argument &);
   }
 
   void test_filter_by_time_at_sample_behaves_like_filter_by_pulse_time() {
@@ -1705,7 +1710,7 @@ public:
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(
             el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out),
-            std::runtime_error);
+            const std::runtime_error &);
       } else {
         TS_ASSERT_THROWS_NOTHING(
             el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out););
@@ -1752,7 +1757,7 @@ public:
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch,
                                                  tofFactor, tofOffset, out),
-                         std::runtime_error);
+                         const std::runtime_error &);
       } else {
         TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(
             startTEpoch, endTEpoch, tofFactor, tofOffset, out););
@@ -1809,7 +1814,7 @@ public:
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch,
                                                  tofFactor, tofOffset, out),
-                         std::runtime_error);
+                         const std::runtime_error &);
       } else {
         TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(
             startTEpoch, endTEpoch, tofFactor, tofOffset, out););
@@ -1940,7 +1945,8 @@ public:
 
       if (curType == WEIGHTED_NOTIME) {
         // Error cause no time
-        TS_ASSERT_THROWS(el.splitByTime(split, outputs), std::runtime_error);
+        TS_ASSERT_THROWS(el.splitByTime(split, outputs),
+                         const std::runtime_error &);
       } else {
         // Do the splitting
         TS_ASSERT_THROWS_NOTHING(el.splitByTime(split, outputs););
@@ -2062,7 +2068,7 @@ public:
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
     TimeSplitterType split;
-    TS_ASSERT_THROWS(el.filterInPlace(split), std::runtime_error)
+    TS_ASSERT_THROWS(el.filterInPlace(split), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------------------------------
@@ -2159,7 +2165,7 @@ public:
     EventList el_notime = this->fake_data(WEIGHTED_NOTIME);
     TS_ASSERT_THROWS(el_notime.compressFatEvents(10., DateAndTime(0), 10.,
                                                  &el_notime_output),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     // integration range
     const double XMIN = 0.;
@@ -2687,10 +2693,10 @@ public:
 
   void test_readYE_throws_without_MRU() {
     const EventList el;
-    TS_ASSERT_THROWS(el.readY(), std::runtime_error);
-    TS_ASSERT_THROWS(el.dataY(), std::runtime_error);
-    TS_ASSERT_THROWS(el.readE(), std::runtime_error);
-    TS_ASSERT_THROWS(el.dataE(), std::runtime_error);
+    TS_ASSERT_THROWS(el.readY(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.dataY(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.readE(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.dataE(), const std::runtime_error &);
   }
 
   void test_counts_works_without_MRU() {
@@ -2703,7 +2709,7 @@ public:
     EventList el;
     el.setHistogram(HistogramData::BinEdges{0, 2});
     TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
-    TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setPoints(1), const std::runtime_error &);
     // Uncertainties for X are always for Points, this must work.
     TS_ASSERT_THROWS_NOTHING(el.setPointVariances(1));
     TS_ASSERT_THROWS_NOTHING(el.setPointStandardDeviations(1));
@@ -2712,31 +2718,33 @@ public:
   void test_setCounts_fails() {
     EventList el;
     el.setHistogram(HistogramData::BinEdges{0, 2});
-    TS_ASSERT_THROWS(el.setCounts(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setCountVariances(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setCountStandardDeviations(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCounts(1), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setCountVariances(1), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setCountStandardDeviations(1),
+                     const std::runtime_error &);
   }
 
   void test_setFrequencies_fails() {
     EventList el;
     el.setHistogram(HistogramData::BinEdges{0, 2});
-    TS_ASSERT_THROWS(el.setFrequencies(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setFrequencyVariances(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencies(1), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setFrequencyVariances(1), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1),
+                     const std::runtime_error &);
   }
 
   void test_setShared_fails() {
     EventList el;
     TS_ASSERT_THROWS_NOTHING(el.setSharedX(el.sharedX()));
-    TS_ASSERT_THROWS(el.setSharedY(el.sharedY()), std::runtime_error);
-    TS_ASSERT_THROWS(el.setSharedE(el.sharedE()), std::runtime_error);
+    TS_ASSERT_THROWS(el.setSharedY(el.sharedY()), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.setSharedE(el.sharedE()), const std::runtime_error &);
   }
 
   void test_mutable_access_fails() {
     EventList el;
     TS_ASSERT_THROWS_NOTHING(el.mutableX());
-    TS_ASSERT_THROWS(el.mutableY(), std::runtime_error);
-    TS_ASSERT_THROWS(el.mutableE(), std::runtime_error);
+    TS_ASSERT_THROWS(el.mutableY(), const std::runtime_error &);
+    TS_ASSERT_THROWS(el.mutableE(), const std::runtime_error &);
   }
 
   void test_histogram() {
@@ -2772,9 +2780,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(el.setHistogram(histogram));
     TS_ASSERT_EQUALS(el.sharedX(), histogram.sharedX());
     histogram.setCounts(2);
-    TS_ASSERT_THROWS(el.setHistogram(histogram), std::runtime_error);
+    TS_ASSERT_THROWS(el.setHistogram(histogram), const std::runtime_error &);
     HistogramData::Histogram points(HistogramData::Points{0, 2});
-    TS_ASSERT_THROWS(el.setHistogram(points), std::runtime_error);
+    TS_ASSERT_THROWS(el.setHistogram(points), const std::runtime_error &);
   }
 
   void test_YMode() {
@@ -2788,7 +2796,7 @@ public:
     h.setYMode(HistogramData::Histogram::YMode::Counts);
     TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
     h.setYMode(HistogramData::Histogram::YMode::Frequencies);
-    TS_ASSERT_THROWS(e.setHistogram(h), std::runtime_error);
+    TS_ASSERT_THROWS(e.setHistogram(h), const std::runtime_error &);
   }
 
   void test_setHistogram_preserves_YMode_when_setting_uninitialized() {
