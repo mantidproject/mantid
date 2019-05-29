@@ -73,10 +73,6 @@ class MockBatchPresenter : public IBatchPresenter {
 public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
-  MOCK_METHOD2(notifyReductionCompletedForGroup,
-               void(GroupData const &, std::string const &));
-  MOCK_METHOD2(notifyReductionCompletedForRow,
-               void(GroupData const &, std::string const &));
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());

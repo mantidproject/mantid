@@ -337,21 +337,6 @@ private:
     return presenter;
   }
 
-  GroupData makeGroupWithOneRow() {
-    int const numberOfColumns = 3;
-    auto row0 = std::make_shared<RowData>(numberOfColumns);
-    auto group = GroupData({{0, row0}});
-    return group;
-  }
-
-  GroupData makeGroupWithTwoRows() {
-    int const numberOfColumns = 3;
-    auto row0 = std::make_shared<RowData>(numberOfColumns);
-    auto row1 = std::make_shared<RowData>(numberOfColumns);
-    auto group = GroupData({{0, row0}, {1, row1}});
-    return group;
-  }
-
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_asciiSaver));
