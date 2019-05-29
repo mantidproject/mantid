@@ -24,9 +24,7 @@ Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
+
 IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
                                                    QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
@@ -34,9 +32,6 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
           SLOT(tabExecutionComplete(bool)));
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 IndirectDataReductionTab::~IndirectDataReductionTab() {}
 
 void IndirectDataReductionTab::runTab() {
@@ -284,6 +279,24 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   ranges["back-end-tof"] = tofData[4];
 
   return ranges;
+}
+
+/**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectDataReductionTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
+/**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void IndirectDataReductionTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
 }
 
 } // namespace CustomInterfaces

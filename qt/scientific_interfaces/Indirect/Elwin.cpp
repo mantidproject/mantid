@@ -443,6 +443,12 @@ void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
 }
 
+void Elwin::setFileExtensionsByName(bool filter) {
+  auto const tabName("Elwin");
+  m_uiForm.dsInputFiles->setFileExtensions(filter ? getSampleFBSuffixes(tabName)
+                                                  : getExtensions(tabName));
+}
+
 void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                                  const QPair<double, double> &range) {
   auto inst = ws->getInstrument();

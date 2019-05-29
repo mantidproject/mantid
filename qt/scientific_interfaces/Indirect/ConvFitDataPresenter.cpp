@@ -84,6 +84,18 @@ ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   return std::move(dialog);
 }
 
+void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
+    convDialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
+}
+
+void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
+    convDialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

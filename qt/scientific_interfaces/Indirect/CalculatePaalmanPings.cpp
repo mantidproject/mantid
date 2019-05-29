@@ -445,6 +445,19 @@ void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
   m_uiForm.dsContainer->readSettings(settings.group());
 }
 
+void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("CalculatePaalmanPings");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                             : noSuffixes);
+}
+
 /**
  * Slot that tries to populate correction details from
  * instrument parameters on sample workspace selection

@@ -19,6 +19,7 @@ using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
+Mantid::Kernel::Logger g_log("ISISEnergyTransfer");
 
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
@@ -798,6 +799,16 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
     plotSpectrum(QString::fromStdString(name) + "_grp");
   }
   setPlotTimeIsPlotting(false);
+}
+
+void ISISEnergyTransfer::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ISISEnergyTransfer");
+  m_uiForm.dsCalibrationFile->setFBSuffixes(
+      filter ? getCalibrationFBSuffixes(tabName)
+             : getCalibrationExtensions(tabName));
+  m_uiForm.dsCalibrationFile->setWSSuffixes(
+      filter ? getCalibrationWSSuffixes(tabName) : noSuffixes);
 }
 
 /**

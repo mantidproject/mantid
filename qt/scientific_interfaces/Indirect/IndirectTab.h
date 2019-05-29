@@ -63,9 +63,27 @@ public:
   IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
+  /// Get the suffixes used for an interface from the xml file
+  QStringList getExtensions(std::string const &interfaceName) const;
+  QStringList getCalibrationExtensions(std::string const &interfaceName) const;
+  QStringList getSampleFBSuffixes(std::string const &interfaceName) const;
+  QStringList getSampleWSSuffixes(std::string const &interfaceName) const;
+  QStringList getVanadiumFBSuffixes(std::string const &interfaceName) const;
+  QStringList getVanadiumWSSuffixes(std::string const &interfaceName) const;
+  QStringList getResolutionFBSuffixes(std::string const &interfaceName) const;
+  QStringList getResolutionWSSuffixes(std::string const &interfaceName) const;
+  QStringList getCalibrationFBSuffixes(std::string const &interfaceName) const;
+  QStringList getCalibrationWSSuffixes(std::string const &interfaceName) const;
+  QStringList getContainerFBSuffixes(std::string const &interfaceName) const;
+  QStringList getContainerWSSuffixes(std::string const &interfaceName) const;
+  QStringList getCorrectionsFBSuffixes(std::string const &interfaceName) const;
+  QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) const;
+
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
   /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0,
-                    const bool &errorBars = false);
+  void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0);
 
 public slots:
   void runTab();
@@ -98,7 +116,7 @@ protected:
                            const std::vector<int> &workspaceIndices);
   /// Plot a spectrum plot with a given ws index
   void plotSpectrum(const QStringList &workspaceNames,
-                    const int &spectraIndex = 0, const bool &errorBars = false);
+                    const int &spectraIndex = 0);
 
   /// Plot a spectrum plot with a given spectra range
   void plotSpectrum(const QStringList &workspaceNames, int specStart,
@@ -113,6 +131,10 @@ protected:
   /// Plot a spectrum plot with a given set of spectra of a given workspace
   void plotSpectra(const QString &workspaceName,
                    const std::vector<int> &wsIndices);
+
+  /// Plot multiple spectra in a tiled plot
+  void plotTiled(std::string const &workspaceName, std::size_t const &fromIndex,
+                 std::size_t const &toIndex);
 
   /// Plot a time bin plot given a list of workspace names
   void plotTimeBin(const QStringList &workspaceNames, int binIndex = 0);
@@ -197,6 +219,9 @@ protected:
   /// Use a Python runner for when we need the output of a script
   MantidQt::API::PythonRunner m_pythonRunner;
 
+  /// Plot error bars when plotting a spectrum
+  bool m_plotErrorBars;
+
   /// Validator for int inputs
   QIntValidator *m_valInt;
   /// Validator for double inputs
@@ -221,6 +246,11 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
+
+private:
+  std::string getInterfaceProperty(std::string const &interfaceName,
+                                   std::string const &propertyName,
+                                   std::string const &attribute) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

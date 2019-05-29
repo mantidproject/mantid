@@ -40,6 +40,7 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);

@@ -1,3 +1,5 @@
+.. _interface-indirect-corrections:
+
 Indirect Corrections
 ====================
 
@@ -18,6 +20,10 @@ These interfaces do not support GroupWorkspace's as input.
 
 Action Buttons
 ~~~~~~~~~~~~~~
+
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
 
 ?
   Opens this help page.
