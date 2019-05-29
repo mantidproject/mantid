@@ -25,16 +25,16 @@ using Kernel::V3D;
 
 Line::Line()
     : m_origin(), m_direction()
-      /**
-      Constructor
-      */
+/**
+Constructor
+*/
 {}
 
 Line::Line(const Kernel::V3D &O, const Kernel::V3D &D)
     : m_origin(O), m_direction(normalize(D))
-      /**
-      Constructor
-      */
+/**
+Constructor
+*/
 {}
 
 Line *Line::clone() const
@@ -182,15 +182,15 @@ added. It does not check the points for validity.
 
 int Line::intersect(std::list<Kernel::V3D> &intersectionPoints,
                     const Plane &plane) const
-    /**
-    For the line that intersects the cylinder generate
-    add the point to the VecOut, return number of points
-    added. It does not check the points for validity.
+/**
+For the line that intersects the cylinder generate
+add the point to the VecOut, return number of points
+added. It does not check the points for validity.
 
-    @param PntOut :: Vector of points found by the line/cylinder intersection
-    @param Pln :: Plane for intersect
-    @return Number of points found by intersection
-    */
+@param PntOut :: Vector of points found by the line/cylinder intersection
+@param Pln :: Plane for intersect
+@return Number of points found by intersection
+*/
 {
   const double DdotN = m_direction.scalar_prod(plane.getNormal());
   if (fabs(DdotN) < Kernel::Tolerance) // Plane and line parallel

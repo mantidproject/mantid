@@ -24,9 +24,9 @@ namespace Geometry {
 LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt,
                                        const Kernel::V3D &uVec)
     : m_line(Pt, uVec)
-      /**
-        Constructor
-      */
+/**
+  Constructor
+*/
 {}
 
 void LineIntersectVisit::Accept(const Surface &Surf)
