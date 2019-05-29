@@ -244,7 +244,7 @@ public:
     alg->setProperty("FixEi", false);
     alg->setProperty("EnergyEstimate", 15.0);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
 
     AnalysisDataService::Instance().remove(outputName);
   }

@@ -281,7 +281,7 @@ void AlignDetectors::align(const ConversionFactors &converter,
 
       auto &x = outputWS.mutableX(i);
       std::transform(x.begin(), x.end(), x.begin(), toDspacing);
-    } catch (Exception::NotFoundError &) {
+    } catch (const Exception::NotFoundError &) {
       // Zero the data in this case
       outputWS.setHistogram(i, BinEdges(outputWS.x(i).size()),
                             Counts(outputWS.y(i).size()));

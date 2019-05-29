@@ -32,7 +32,7 @@ public:
     const auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(ws, fileHandle.path());
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void testEventWSThrows() {
@@ -44,7 +44,7 @@ public:
     const auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(ws, fileHandle.path());
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void testFileMatchesExpectedFormat() {

@@ -387,7 +387,7 @@ public:
       return;
 
     TS_ASSERT_THROWS(auto outWS = listener->extractData(),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     dae.cancel();
     res.wait();
@@ -417,7 +417,7 @@ public:
     TS_ASSERT_THROWS(auto listener =
                          Mantid::API::LiveListenerFactory::Instance().create(
                              "TESTHISTOLISTENER", true, &alg),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     dae.cancel();
     res.wait();

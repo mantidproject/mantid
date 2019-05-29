@@ -42,11 +42,11 @@ public:
     HistogramBuilder builder;
     builder.setX(5);
     builder.setY(3);
-    TS_ASSERT_THROWS(builder.build(), std::logic_error);
+    TS_ASSERT_THROWS(builder.build(), const std::logic_error &);
     builder.setY(6);
-    TS_ASSERT_THROWS(builder.build(), std::logic_error);
+    TS_ASSERT_THROWS(builder.build(), const std::logic_error &);
     builder.setDx(3);
-    TS_ASSERT_THROWS(builder.build(), std::logic_error);
+    TS_ASSERT_THROWS(builder.build(), const std::logic_error &);
   }
 
   void test_build_from_size() {

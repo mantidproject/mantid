@@ -198,7 +198,7 @@ public:
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(
                          dataset, "", std::move(workspaceProvider)),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testThrowsIfWorkspaceNameEmptyAndUsingADSWorkspaceProvider() {
@@ -208,7 +208,7 @@ public:
     TS_ASSERT_THROWS(
         vtkDataSetToNonOrthogonalDataSet temp(dataset.GetPointer(), "",
                                               std::move(workspaceProvider)),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testThrowIfVtkDatasetWrongType() {
@@ -217,7 +217,7 @@ public:
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(grid.GetPointer(), "name",
                                                std::move(workspaceProvider));
-    TS_ASSERT_THROWS(converter.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(converter.execute(), const std::runtime_error &);
   }
 
   void testSimpleDataset() {
@@ -240,7 +240,7 @@ public:
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
-    TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(converter.execute(), const std::invalid_argument &);
   }
 
   void testThrowsSimpleDatasetNoUB() {
@@ -251,7 +251,7 @@ public:
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
-    TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(converter.execute(), const std::invalid_argument &);
   }
 
   void testThrowsSimpleDatasetNoWMatrix() {
@@ -262,7 +262,7 @@ public:
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName,
                                                std::move(workspaceProvider));
-    TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(converter.execute(), const std::invalid_argument &);
   }
 
   void testNoThrowsSimpleDataSetNoAffineMatrix() {

@@ -164,7 +164,7 @@ public:
   void test_throws_if_file_does_not_exist() {
     TS_ASSERT_THROWS(
         EventLoader::load(Communicator{}, "abcdefg", "", {}, {}, {}),
-        H5::FileIException);
+        const H5::FileIException &);
   }
 
   void test_H5DataType_parameter_pack_conversion() {

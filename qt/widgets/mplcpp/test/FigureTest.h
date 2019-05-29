@@ -68,7 +68,7 @@ public:
   // -------------------------- Failure tests ---------------------------
   void testFigureConstructedWithNonFigureThrows() {
     TS_ASSERT_THROWS(Figure fig(Python::NewRef(Py_BuildValue("(i)", 1))),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

@@ -52,10 +52,10 @@ public:
 
     // Algorithms with no input workspace properties
     TS_ASSERT_THROWS(ProcessingAlgorithm("Stitch1DMany", prefix, 0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // Algorithms with no output workspace properties
     TS_ASSERT_THROWS(ProcessingAlgorithm("SaveAscii", prefix, 0),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
   void test_ReflectometryReductionOneAuto() {
 
@@ -69,12 +69,12 @@ public:
     // This should throw
     TS_ASSERT_THROWS(
         ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // This should also throw
     TS_ASSERT_THROWS(
         ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
-        std::invalid_argument);
+        const std::invalid_argument &);
     // But this should be OK
     prefixes.emplace_back("IvsLam_");
     TS_ASSERT_THROWS_NOTHING(

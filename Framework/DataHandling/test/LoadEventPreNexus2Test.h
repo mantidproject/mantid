@@ -66,9 +66,9 @@ public:
   void test_file_not_found() {
     TS_ASSERT_THROWS(eventLoader->setPropertyValue(
                          "EventFilename", "this_file_doesnt_exist.blabla.data"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // Execute fails since the properties aren't set correctly.
-    TS_ASSERT_THROWS(eventLoader->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(eventLoader->execute(), const std::runtime_error &);
   }
 
   void test_data_sizes() {
@@ -267,7 +267,7 @@ public:
                                   "CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("ChunkNumber", "3");
     eventLoader->setPropertyValue("TotalChunks", "2");
-    TS_ASSERT_THROWS(eventLoader->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(eventLoader->execute(), const std::runtime_error &);
   }
 
   void test_loading_chunks() {

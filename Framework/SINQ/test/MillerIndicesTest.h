@@ -43,7 +43,7 @@ public:
 
     hkl.push_back(3);
 
-    TS_ASSERT_THROWS(MillerIndices fails(hkl), std::runtime_error);
+    TS_ASSERT_THROWS(MillerIndices fails(hkl), const std::runtime_error &);
   }
 
   void testdirectAccess() {
@@ -61,8 +61,8 @@ public:
     TS_ASSERT_EQUALS(hkl[1], 1);
     TS_ASSERT_EQUALS(hkl[2], 0);
 
-    TS_ASSERT_THROWS(hkl[-2], std::range_error);
-    TS_ASSERT_THROWS(hkl[3], std::range_error);
+    TS_ASSERT_THROWS(hkl[-2], const std::range_error &);
+    TS_ASSERT_THROWS(hkl[3], const std::range_error &);
   }
 
   void testvectorAccess() {

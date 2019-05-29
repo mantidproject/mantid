@@ -30,7 +30,7 @@ public:
     TS_ASSERT_THROWS(
         MDResolutionConvolutionFactory::Instance().createConvolution(
             "__NOT_VALID", "FakeForeground", fakeFunction),
-        Exception::NotFoundError);
+        const Exception::NotFoundError &);
   }
 
   void

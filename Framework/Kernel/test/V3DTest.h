@@ -468,7 +468,7 @@ public:
 
   void test_toCrystllographic() {
     V3D a0;
-    TS_ASSERT_THROWS(a0.toMillerIndexes(), std::invalid_argument);
+    TS_ASSERT_THROWS(a0.toMillerIndexes(), const std::invalid_argument &);
 
     V3D a1(0.1, 0.2, 5);
     TS_ASSERT_THROWS_NOTHING(a1.toMillerIndexes());

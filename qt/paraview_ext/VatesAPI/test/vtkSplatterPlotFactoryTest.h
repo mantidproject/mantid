@@ -44,7 +44,8 @@ public:
     FakeProgressAction progressUpdate;
     vtkSplatterPlotFactory factory("signal");
     TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.",
-                      factory.create(progressUpdate), std::runtime_error);
+                      factory.create(progressUpdate),
+                      const std::runtime_error &);
   }
 
   void testInitializeWithNullWorkspaceThrows() {
@@ -52,7 +53,7 @@ public:
     IMDEventWorkspace *ws = nullptr;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
                       factory.initialize(Workspace_sptr(ws)),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   /*Demonstrative tests*/

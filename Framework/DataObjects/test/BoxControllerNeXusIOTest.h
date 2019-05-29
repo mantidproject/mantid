@@ -56,7 +56,8 @@ public:
     TS_ASSERT_EQUALS("MDEvent", typeName);
 
     // set size
-    TS_ASSERT_THROWS(pSaver->setDataType(9, typeName), std::invalid_argument);
+    TS_ASSERT_THROWS(pSaver->setDataType(9, typeName),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(pSaver->setDataType(8, typeName));
     TS_ASSERT_THROWS_NOTHING(pSaver->getDataType(CoordSize, typeName));
     TS_ASSERT_EQUALS(8, CoordSize);
@@ -64,7 +65,7 @@ public:
 
     // set type
     TS_ASSERT_THROWS(pSaver->setDataType(4, "UnknownEvent"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(pSaver->setDataType(4, "MDLeanEvent"));
     TS_ASSERT_THROWS_NOTHING(pSaver->getDataType(CoordSize, typeName));
     TS_ASSERT_EQUALS(4, CoordSize);
@@ -85,7 +86,8 @@ public:
     std::string FullPathFile;
 
     TSM_ASSERT_THROWS("new file does not open in read mode",
-                      pSaver->openFile(this->xxfFileName, "r"), FileError);
+                      pSaver->openFile(this->xxfFileName, "r"),
+                      const FileError &);
 
     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName, "w"));
     TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());

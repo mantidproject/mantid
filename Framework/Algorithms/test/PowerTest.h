@@ -83,7 +83,7 @@ public:
     power.initialize();
     TSM_ASSERT_THROWS("Exponent cannot be non-numeric",
                       power.setPropertyValue("Exponent", "x"),
-                      std::invalid_argument)
+                      const std::invalid_argument &)
   }
 
   void testNegativeExponent() {

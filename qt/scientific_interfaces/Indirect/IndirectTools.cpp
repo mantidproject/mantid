@@ -7,11 +7,9 @@
 #include "IndirectTools.h"
 #include "IndirectLoadILL.h"
 #include "IndirectTransmissionCalc.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
-// Add this class to the list of specialised dialogs in this namespace
+#include "MantidKernel/ConfigService.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectTools)
@@ -21,7 +19,7 @@ DECLARE_SUBWINDOW(IndirectTools)
 using namespace MantidQt::CustomInterfaces;
 
 IndirectTools::IndirectTools(QWidget *parent)
-    : UserSubWindow(parent),
+    : IndirectInterface(parent),
       m_changeObserver(*this, &IndirectTools::handleDirectoryChange) {}
 
 void IndirectTools::initLayout() {
@@ -49,9 +47,8 @@ void IndirectTools::initLayout() {
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect
-  // Bayes interface
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(manageUserDirectories()));
 }
@@ -114,34 +111,8 @@ void IndirectTools::runClicked() {
   m_tabs[tabIndex]->runTab();
 }
 
-/**
- * Slot to open a new browser window and navigate to the help page
- * on the wiki for the currently selected tab.
- */
-void IndirectTools::helpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Indirect Tools"));
-}
-
-/**
- * Slot to show the manage user dicrectories dialog when the user clicks
- * the button on the interface.
- */
-void IndirectTools::manageUserDirectories() {
-  MantidQt::API::ManageUserDirectories *ad =
-      new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
-}
-
-/**
- * Slot to wrap the protected showInformationBox method defined
- * in UserSubWindow and provide access to composed tabs.
- *
- * @param message :: The message to display in the message box
- */
-void IndirectTools::showMessageBox(const QString &message) {
-  showInformationBox(message);
+std::string IndirectTools::documentationPage() const {
+  return "Indirect Tools";
 }
 
 IndirectTools::~IndirectTools() {}

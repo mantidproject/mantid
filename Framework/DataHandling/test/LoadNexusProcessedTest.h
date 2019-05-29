@@ -625,7 +625,7 @@ public:
       {
         TS_ASSERT_THROWS(ConstColumnVector<int64_t> column =
                              ws->getVector("Integer"),
-                         std::runtime_error);
+                         const std::runtime_error &);
         ConstColumnVector<int> column = ws->getVector("Integer");
         TS_ASSERT_EQUALS(column[0], 5);
         TS_ASSERT_EQUALS(column[1], 3);

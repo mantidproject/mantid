@@ -44,7 +44,7 @@ public:
     filteralg.initialize();
     TS_ASSERT_THROWS(filteralg.setProperty(
                          "EventFilename", "this_file_doesnt_exist.blabla.data"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_setProperty() {

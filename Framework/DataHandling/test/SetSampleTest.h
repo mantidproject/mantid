@@ -29,6 +29,7 @@
 #include <fstream>
 
 using Mantid::DataHandling::SetSample;
+using Mantid::Kernel::PropertyWithValue;
 
 class SetSampleTest : public CxxTest::TestSuite {
 public:
@@ -285,6 +286,37 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
   }
 
+  void test_Setting_Geometry_No_Volume() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+    // this must match geometry created in createCylinderGeometryProps()
+    constexpr double VOLUME = M_PI * 5. * 5. * 2.; // pi * (r^2) * h
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createCylinderGeometryProps());
+    alg->setProperty("Material", createMaterialProps(VOLUME));
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cylinder");
+    TS_ASSERT(tag != std::string::npos);
+
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
+
+    const auto &material = inputWS->sample().getMaterial();
+    TS_ASSERT_EQUALS("V", material.name());
+    TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
+  }
+
   void test_Setting_Geometry_As_HollowCylinder() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
@@ -319,7 +351,7 @@ public:
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Container", "8mm"), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Environment_Args_Without_Container_Invalid() {
@@ -333,7 +365,7 @@ public:
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Name", m_envName), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Environment_Args_With_Empty_Strings_Invalid() {
@@ -347,12 +379,12 @@ public:
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Name", ""), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     args->removeProperty("Name");
     args->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("Container", ""), "");
     alg->setProperty("Environment", args);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_Negative_FlatPlate_Dimensions_Give_Validation_Errors() {
@@ -455,7 +487,8 @@ private:
     workspace->setInstrument(inst);
   }
 
-  Mantid::Kernel::PropertyManager_sptr createMaterialProps() {
+  Mantid::Kernel::PropertyManager_sptr
+  createMaterialProps(const double volume = 0.) {
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
@@ -463,6 +496,11 @@ private:
     props->declareProperty(
         Mantid::Kernel::make_unique<StringProperty>("ChemicalFormula", "V"),
         "");
+    if (volume > 0.) // <mass> = <standard mass density for vanadium> x <volume>
+      props->declareProperty(
+          Mantid::Kernel::make_unique<PropertyWithValue<double>>("SampleMass",
+                                                                 6.11 * volume),
+          "");
     return props;
   }
 

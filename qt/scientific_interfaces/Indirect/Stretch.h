@@ -46,6 +46,8 @@ private slots:
   void previewSpecChanged(int value);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   void populateContourWorkspaceComboBox();
   void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();

@@ -12,6 +12,7 @@ from mantid.kernel import V3D
 from mantid.geometry import OrientedLattice
 from mantid.api import IPeaksWorkspace, IPeak
 
+
 class IPeaksWorkspaceTest(unittest.TestCase):
     """
     Test the python interface to PeaksWorkspace's

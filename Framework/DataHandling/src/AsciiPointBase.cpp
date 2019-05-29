@@ -72,7 +72,7 @@ void AsciiPointBase::exec() {
     throw std::runtime_error("Cannot treat InputWorkspace");
   try {
     m_length = m_ws->y(0).size();
-  } catch (std::range_error) {
+  } catch (const std::range_error &) {
     g_log.error("InputWorkspace does not contain data");
   }
   extraHeaders(file);

@@ -50,6 +50,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,

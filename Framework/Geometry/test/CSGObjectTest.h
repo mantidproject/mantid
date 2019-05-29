@@ -949,7 +949,7 @@ public:
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
     TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testGeneratePointInsideRespectsActiveRegion() {
@@ -1201,7 +1201,7 @@ public:
 
   void testVolumeThrowsWhenBoundingBoxIsInvalid() {
     CSGObject shape("This text gives an invalid Object.");
-    TS_ASSERT_THROWS(shape.volume(), std::runtime_error);
+    TS_ASSERT_THROWS(shape.volume(), const std::runtime_error &);
   }
 
   void testGetBoundingBoxForCylinder()
@@ -1295,7 +1295,7 @@ public:
     xmin = 3.0;
     TS_ASSERT_THROWS(
         geom_obj->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
   void testSurfaceTriangulation()
   /**

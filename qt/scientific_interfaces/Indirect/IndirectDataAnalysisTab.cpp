@@ -51,6 +51,24 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
 }
 
 /**
+ * Prevents the loading of data with incorrect naming if passed true
+ *
+ * @param filter :: true if you want to allow filtering
+ */
+void IndirectDataAnalysisTab::filterInputData(bool filter) {
+  setFileExtensionsByName(filter);
+}
+
+/**
+ * Allows the user to turn the plotting of error bars off and on
+ *
+ * @param errorBars :: true if you want output plots to have error bars
+ */
+void IndirectDataAnalysisTab::setPlotErrorBars(bool errorBars) {
+  IndirectTab::setPlotErrorBars(errorBars);
+}
+
+/**
  * Sets the active browser workspace when the tab is changed
  */
 void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
