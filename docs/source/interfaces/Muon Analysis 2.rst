@@ -1,9 +1,9 @@
-.. _Frequency_Domain_Analysis_2-ref:
+.. _MuonAnalysis_2-ref:
 
 Frequency Domain Analysis
 =========================
 
-.. image::  ../images/frequency_domain_analysis_2.png
+.. image::  ../images/MuonAnalysis_2.png
    :align: right
    :height: 400px
 
@@ -13,11 +13,9 @@ Frequency Domain Analysis
 Interface Overview
 ------------------
 
-This interface is used to analyse the data collected on Muon instruments in the frequency domain. The interface can be
-accessed from the main menu of MantidPlot, in *Interfaces → Muon → Frequency Domain Analysis*. For sample
+This interface is used to analyse the data collected on Muon instruments. The interface can be
+accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Analysis 2*. For sample
 datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.
-
-Analysis of the frequency spectrum can be achieved by clicking the fit function icon.
 
 Loading
 -------
@@ -45,7 +43,7 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Home Tab <muon_home_tab-ref>`
 * :ref:`Grouping Tab <muon_grouping_tab-ref>`
 * :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
-* :ref:`Transform Tab <muon_transform_tab-ref>`
+* :ref:`Fitting Tab <muon_fitting_tab-ref>`
 
 Feedback & Comments
 -------------------
