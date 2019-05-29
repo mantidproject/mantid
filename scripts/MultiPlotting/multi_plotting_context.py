@@ -7,8 +7,9 @@
 from __future__ import absolute_import, print_function
 
 from MultiPlotting.gridspec_engine import gridspecEngine
-
 from MultiPlotting.subplot.subplot_context import subplotContext
+
+
 import mantid.simpleapi as mantid
 
 
@@ -49,16 +50,22 @@ class PlottingContext(object):
     def add_vline(self, subplotName, xvalue, name):
         self.subplots[subplotName].add_vline(xvalue, name)
 
+    def removePlotLine(self, subplotName, name):
+        try:
+            self.subplots[subplotName].removePlotLine(name)
+        except KeyError:
+            return
+
     def removeLabel(self, subplotName, name):
         try:
             self.subplots[subplotName].removeLabel(name)
-        except:
+        except KeyError:
             return
 
     def removeVLine(self, subplotName, name):
         try:
             self.subplots[subplotName].removeVLine(name)
-        except:
+        except KeyError:
             return
 
     def get_xBounds(self):
@@ -89,3 +96,9 @@ class PlottingContext(object):
     def delete(self, name):
         self.subplots[name].delete()
         del self.subplots[name]
+
+    def get_lines_from_WS(self, subplot, workspace_name):
+        return self.subplots[subplot].get_lines_from_WS_name(workspace_name)
+
+    def is_subplot_empty(self, subplot):
+        return self.subplots[subplot].size == 0
