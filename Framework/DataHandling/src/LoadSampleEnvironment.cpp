@@ -32,6 +32,10 @@
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+double DegreesToRadians(double angle) { return angle * M_PI / 180; }
+} // namespace
+
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadSampleEnvironment)
 
@@ -73,10 +77,10 @@ void LoadSampleEnvironment::init() {
       make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
       "Vector by which to translate the loaded environment");
 
-  // Matrix to rotate mesh
-  declareProperty(make_unique<ArrayProperty<double>>(
-                      "RotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
-                  "Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
+  // Rotation angles
+  declareProperty("XDegrees", 0.0, "The degrees to rotate on the x axis by");
+  declareProperty("YDegrees", 0.0, "The degrees to rotate on the y axis by");
+  declareProperty("ZDegrees", 0.0, "The degrees to rotate on the z axis by");
 
   declareProperty("SetMaterial", false);
 
@@ -313,31 +317,67 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
 }
 
 /**
- * Rotates the environment by a provided matrix
+ * Rotates the environment by a generated matrix
  * @param environmentMesh The environment to rotate
  * @returns a shared pointer to the newly rotated environment
  */
 boost::shared_ptr<MeshObject>
 LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
-  const std::vector<double> rotationMatrix = getProperty("RotationMatrix");
-  double valueList[] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0};
-  std::vector<double> checkVector1 =
-      std::vector<double>(std::begin(valueList), std::end(valueList));
-  if (rotationMatrix != checkVector1) {
-    if (rotationMatrix.size() != 9) {
-
-      throw std::invalid_argument(
-          "Invalid Rotation Matrix, must have exactly 9 values, not: " +
-          std::to_string(rotationMatrix.size()));
-    }
-    Matrix<double> rotation = Matrix<double>(rotationMatrix);
-    double determinant = rotation.determinant();
-    if (!(std::abs(determinant) == 1.0)) {
-      throw std::invalid_argument("Invalid Rotation Matrix");
-    }
-    environmentMesh->rotate(rotation);
-  }
+  const std::vector<double> rotationMatrix = generateMatrix();
+  environmentMesh->rotate(rotationMatrix);
   return environmentMesh;
+}
+
+/**
+ * Generates a rotation Matrix applying the x rotation then y rotation, then z
+ * rotation
+ * @returns a matrix of doubles to use as the rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateMatrix() {
+  Kernel::Matrix<double> xMatrix = generateXRotation();
+  Kernel::Matrix<double> yMatrix = generateYRotation();
+  Kernel::Matrix<double> zMatrix = generateZRotation();
+
+  return zMatrix * yMatrix * xMatrix;
+}
+
+/**
+ * Generates the x component of the rotation matrix
+ * using the xDegrees Property.
+ * @returns a matrix of doubles to use as the x axis rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateXRotation() {
+  const double xRotation = DegreesToRadians(getProperty("xDegrees"));
+  const double sinX = sin(xRotation);
+  const double cosX = cos(xRotation);
+  std::vector<double> matrixList = {1, 0, 0, 0, cosX, -sinX, 0, sinX, cosX};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+/**
+ * Generates the y component of the rotation matrix
+ * using the yDegrees Property.
+ * @returns a matrix of doubles to use as the y axis rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateYRotation() {
+  const double yRotation = DegreesToRadians(getProperty("yDegrees"));
+  const double sinY = sin(yRotation);
+  const double cosY = cos(yRotation);
+  std::vector<double> matrixList = {cosY, 0, sinY, 0, 1, 0, -sinY, 0, cosY};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+/**
+ * Generates the z component of the rotation matrix
+ * using the zDegrees Property.
+ * @returns a matrix of doubles to use as the z axis rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateZRotation() {
+  const double zRotation = DegreesToRadians(getProperty("zDegrees"));
+  const double sinZ = sin(zRotation);
+  const double cosZ = cos(zRotation);
+  std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
+  return Kernel::Matrix<double>(matrixList);
 }
 
 } // namespace DataHandling
