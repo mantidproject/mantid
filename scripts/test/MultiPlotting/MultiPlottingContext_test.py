@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.simpleapi import *
 from mantid.py3compat import mock
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot_context import subplotContext
@@ -38,7 +37,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one",subplot) 
             self.context.addLine("one",ws,specNum)
-            self.assertEquals(patch.call_count,1)
+            self.assertEqual(patch.call_count,1)
             patch.assert_called_with(ws,specNum)
 
     def test_add_line_2(self):
@@ -51,7 +50,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one",subplot) 
             self.context.addLine("one",ws,specNum)
-            self.assertEquals(patch.call_count,1)
+            self.assertEqual(patch.call_count,1)
             patch.assert_called_with(mockWS,specNum)
 
     def test_updateLayout(self):
@@ -66,7 +65,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         self.context._gridspec = gridspec
         with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.update_gridspec") as patch:
             self.context.update_layout(figure)
-            self.assertEquals(patch.call_count,3)
+            self.assertEqual(patch.call_count,3)
             # only last iteration survives
             patch.assert_called_with(gridspec,figure,2)
 
@@ -77,7 +76,7 @@ class MultiPlottingContextTest(unittest.TestCase):
             self.context.addSubplot(name, mock.Mock())
 
         for name in names:
-             self.assertEquals(self.context.is_subplot_empty(name),True)
+             self.assertEqual(self.context.is_subplot_empty(name),True)
  
     def test_subplotEmptyFalse(self):
         names = ["one","two","three"]
@@ -95,7 +94,7 @@ class MultiPlottingContextTest(unittest.TestCase):
                 no_lines +=1
 
         for name in names:
-             self.assertEquals(self.context.is_subplot_empty(name),False)
+             self.assertEqual(self.context.is_subplot_empty(name),False)
         
 if __name__ == "__main__":
     unittest.main()

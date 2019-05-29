@@ -16,7 +16,6 @@ class SubplotADSObserver(AnalysisDataServiceObserver):
         super(SubplotADSObserver, self).__init__()
         self._subplot = subplot
 
-        # self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
 

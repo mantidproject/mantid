@@ -53,19 +53,19 @@ class PlottingContext(object):
     def removePlotLine(self, subplotName, name):
         try:
             self.subplots[subplotName].removePlotLine(name)
-        except:
+        except KeyError:
             return
 
     def removeLabel(self, subplotName, name):
         try:
             self.subplots[subplotName].removeLabel(name)
-        except:
+        except KeyError:
             return
 
     def removeVLine(self, subplotName, name):
         try:
             self.subplots[subplotName].removeVLine(name)
-        except:
+        except KeyError:
             return
 
     def get_xBounds(self):
