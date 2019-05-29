@@ -71,6 +71,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.function_browser.addDatasets(data_set_name_list)
 
     def update_with_fit_outputs(self, fit_function, output_status, output_chi_squared):
+        if not fit_function:
+            self.fit_status_success_failure.setText('No Fit')
+            self.fit_status_success_failure.setStyleSheet('color: black')
+            self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
+            return
+
         self.function_browser.setFunction(str(fit_function))
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
@@ -82,12 +88,18 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
 
     def update_global_fit_state(self, output_list):
-        boolean_list = [output == 'success' for output in output_list]
+
+        boolean_list = [output == 'success' for output in output_list if output != 'no fit']
+        if not boolean_list:
+            self.global_fit_status_label.setText('No Fit')
+            self.global_fit_status_label.setStyleSheet('color: black')
+            return
+
         if all(boolean_list):
             self.global_fit_status_label.setText('Fit Successful')
             self.global_fit_status_label.setStyleSheet('color: green')
         else:
-            self.global_fit_status_label.setText('{} of {} fits failed'.format(sum(boolean_list), len(boolean_list)))
+            self.global_fit_status_label.setText('{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
             self.global_fit_status_label.setStyleSheet('color: red')
 
     def set_slot_for_select_workspaces_to_fit(self, slot):
@@ -179,9 +191,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         warning(message, parent=self)
 
     def get_index_for_start_end_times(self):
-        if self.fit_type == self.single_fit:
-            return 0
-
         current_index = self.parameter_display_combo.currentIndex()
         return current_index if current_index != -1 else 0
 

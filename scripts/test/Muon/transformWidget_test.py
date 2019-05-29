@@ -22,9 +22,9 @@ from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_select
 class TransformTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
-        self.load=  mock.create_autospec( load_utils.LoadUtils,spec_set=True)
-        self.fft=   mock.create_autospec( fft_presenter.FFTPresenter,spec_Set=True)
-        self.maxent=mock.create_autospec( maxent_presenter.MaxEntPresenter,spec_set=True)
+        self.load=  mock.create_autospec(load_utils.LoadUtils,spec_set=True)
+        self.fft=   mock.create_autospec(fft_presenter.FFTPresenter,spec_Set=True)
+        self.maxent=mock.create_autospec(maxent_presenter.MaxEntPresenter,spec_set=True)
 
         # create widget
         self.widget=transform_widget.TransformWidget(self.load, FFTWidget, MaxEntWidget)

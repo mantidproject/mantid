@@ -20,9 +20,9 @@ class FittingTabPresenter(object):
         self._selected_data = []
         self._start_x = [self.view.start_time]
         self._end_x = [self.view.end_time]
-        self._fit_status = []
-        self._fit_chi_squared = []
-        self._fit_function = []
+        self._fit_status = ['no fit']
+        self._fit_chi_squared = [0.0]
+        self._fit_function = [None]
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserver(self.update_selected_workspace_guess)
@@ -43,15 +43,6 @@ class FittingTabPresenter(object):
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
-
-    def handle_workspace_list_changed(self, new_workspace_list):
-        self.selected_data = new_workspace_list
-        self.manual_selection_made = False
-        self._fit_status = ['no fit'] * len(new_workspace_list)
-        self._fit_chi_squared = [0.0] * len(new_workspace_list)
-        self._fit_function = [None] * len(new_workspace_list)
-        self._start_x = [self.view.start_time] * len(new_workspace_list)
-        self._end_x = [self.view.end_time] * len(new_workspace_list)
 
     def update_selected_workspace_guess(self):
         fit_type = self.view.fit_type
@@ -84,6 +75,7 @@ class FittingTabPresenter(object):
 
         if fit_type != self.view.simultaneous_fit:
             self.view.set_datasets_in_function_browser([self.view.display_workspace])
+            self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index], self._fit_chi_squared[current_index])
         else:
             self.view.function_browser.setCurrentDataset(current_index)
 
@@ -108,6 +100,19 @@ class FittingTabPresenter(object):
             self.view.workspace_combo_box_label.setText('Display parameters for')
 
         self.update_selected_workspace_guess()
+
+        if self.view.fit_type == self.view.simultaneous_fit:
+            self.view.set_datasets_in_function_browser(self.selected_data)
+        else:
+            self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
+
+        self._fit_status = ['no fit'] * len(self.selected_data)
+        self._fit_chi_squared = [0.0] * len(self.selected_data)
+        self._fit_function = [None] * len(self.selected_data)
+        current_index = self.view.get_index_for_start_end_times()
+        self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
+                                          self._fit_chi_squared[current_index])
+        self.view.update_global_fit_state(self._fit_status)
 
     def handle_fit_clicked(self):
         fit_type = self.view.fit_type
@@ -136,12 +141,26 @@ class FittingTabPresenter(object):
 
     def handle_finished(self):
         self.view.setEnabled(True)
-        self._fit_function, self._output_status, self._output_chi_squared = self.fitting_calculation_model.result
-        self.view.update_with_fit_outputs(self._fit_function, self._output_status, self._output_chi_squared)
-        self.view.update_global_fit_state(self._output_status)
+        fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
+        index = self.view.get_index_for_start_end_times()
 
-        index = self.view.get_index_for_fit_specification()
-        self.view.update_with_fit_outputs(self._fit_function[index], self._output_status[index], self._output_chi_squared[index])
+        if self.view.fit_type == self.view.sequential_fit:
+            self._fit_function = fit_function
+            self._fit_status = fit_status
+            self._fit_chi_squared = fit_chi_squared
+        elif self.view.fit_type == self.view.single_fit:
+            self._fit_function[index] = fit_function
+            self._fit_status[index] = fit_status
+            self._fit_chi_squared[index] = fit_chi_squared
+        elif self.view.fit_type == self.view.simultaneous_fit:
+            self._fit_function = [fit_function] * len(self.start_x)
+            self._fit_status = [fit_status] * len(self.start_x)
+            self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
+
+        self.view.update_global_fit_state(self._fit_status)
+
+        index = self.view.get_index_for_start_end_times()
+        self.view.update_with_fit_outputs(self._fit_function[index], self._fit_status[index], self._fit_chi_squared[index])
 
     def handle_error(self, error):
         self.view.warning_popup(error)
@@ -187,17 +206,24 @@ class FittingTabPresenter(object):
 
     @selected_data.setter
     def selected_data(self, selected_data):
+        if self._selected_data == selected_data:
+            return
+
         self._selected_data = selected_data
-        if self.view.fit_type != self.view.single_fit:
-            self._start_x = [self.view.start_time] * len(selected_data)
-            self._end_x = [self.view.end_time] * len(selected_data)
+        self.handle_workspace_list_changed(selected_data)
 
+    def handle_workspace_list_changed(self, new_workspace_list):
+        self._fit_status = ['no fit'] * len(new_workspace_list)
+        self._fit_chi_squared = [0.0] * len(new_workspace_list)
+        self._fit_function = [None] * len(new_workspace_list)
+        self._start_x = [self.view.start_time] * len(new_workspace_list)
+        self._end_x = [self.view.end_time] * len(new_workspace_list)
         if self.view.fit_type == self.view.simultaneous_fit:
-            self.view.set_datasets_in_function_browser(self._selected_data)
+            self.view.set_datasets_in_function_browser(self.selected_data)
         else:
-            self.view.set_datasets_in_function_browser([self._selected_data[0]] if self._selected_data else [])
+            self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
 
-        self.view.update_displayed_data_combo_box(selected_data)
+        self.view.update_displayed_data_combo_box(self.selected_data)
 
     @property
     def start_x(self):

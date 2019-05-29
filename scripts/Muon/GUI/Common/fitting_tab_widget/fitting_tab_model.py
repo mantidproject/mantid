@@ -9,7 +9,7 @@ import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_base_directory
 from mantid.simpleapi import RenameWorkspace
-
+from mantid.api import FunctionFactory
 
 class FittingTabModel(object):
     def __init__(self):
@@ -93,7 +93,9 @@ class FittingTabModel(object):
             sub_parameter_dict['Function'] = function_string
 
             function_string, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict)
-            function_string_list.append(function_string)
+            # This is required so that a new function object is created that is not overwritten in subsequent iterations
+            new_function = FunctionFactory.createInitialized(str(function_string))
+            function_string_list.append(new_function)
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
 
