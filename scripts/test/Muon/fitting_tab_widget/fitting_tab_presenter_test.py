@@ -1,6 +1,7 @@
 import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
+from qtpy import QtWidgets
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory
@@ -12,6 +13,12 @@ def retrieve_combobox_info(combo_box):
         output_list.append(str(combo_box.itemText(i)))
 
     return output_list
+
+
+def wait_for_thread(thread_model):
+    if thread_model:
+        thread_model._thread.wait()
+        QtWidgets.QApplication.instance().processEvents()
 
 
 class FittingTabPresenterTest(GuiTest):
@@ -59,6 +66,7 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.selected_data = ['Input Workspace Name']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
@@ -93,6 +101,8 @@ class FittingTabPresenterTest(GuiTest):
             '$domains=i;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i')
 
         self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
+
         call_args_dict = self.presenter.model.do_simultaneous_fit.call_args[0][0]
 
         self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
