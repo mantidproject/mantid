@@ -17,27 +17,26 @@ In this mode the interface displays two tables, FFT and Advanced options. The FF
 all of the information required to produce a forward FFT. The Advanced Options table contains the information
 for adding padding and apodization functions to the data.
 
-**Workspace** This selects the workspace to be transformed. If the workspace contains the word ``PhaseQuad`` it will
-run the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm on the selected run when ``Calculate`` is pressed. If no phase table
-is available then the one will be generated and the result will be stored as ``PhaseTable``.
+**Workspace** This selects the data to be transformed.
 
 **Imaginary Data** If unchecked the FFT will be performed without an imaginary component.
 
 **Imaginary Workspace** The imaginary component for the FFT.
 
-**Auto shift** If this is checked it will automatically calculate and apply phase shift, if this is unchecked it will
-ask you to supply a correction (defaults to 0.0).
+**Auto shift** If this is checked it will automatically calculate and apply the phase shift, if this is unchecked the user
+can select a value (defaults to 0.0).
 
-**Use Raw data** If this is checked it will use the raw data from the instrument with its default bins, if it is
+**Fit To Raw Data** If this is checked it will use the raw data for the FFT.
+If it is unchecked it will use the rebinned data as specified on the home tab.
 unchecked it will use data rebinned using the specifications from the home tab.
 
-The Advanced Options table contains the information for adding padding and apodization functions to the data.
+The Advanced Options table contains the information for adding padding and applying apodization functions to the data.
 
-**Apodization Function** selects th apodization function to apply to the data before performing the FFT.
+**Apodization Function** Selects the apodization function to apply to the data before performing the FFT.
 
 **Decay Constant** The decay constant for the apodization function.
 
-**Negative Padding** If this si checked it will add padding to both sides of the data.
+**Negative Padding** If this is checked it will add padding to both sides of the data.
 
 **Padding** The amount of padding to be added to the data.
 
@@ -60,7 +59,7 @@ the basic quantities used during the calculation.
 
 **Phase Table** Select a phase table to be used for the initial phase values.
 
-**Fit dead times** Check this to fit dead times.
+**Fit dead times** If checked this will fit for dead times.
 
 **Output (phase table/deadtimes/reconstructed data/phase convergence)** If these are checked it will output the chosen
 results in the appropriate workspace group.

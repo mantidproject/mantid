@@ -1,7 +1,7 @@
 .. _MuonAnalysis_2-ref:
 
-Frequency Domain Analysis
-=========================
+Muon Analysis
+=============
 
 .. image::  ../images/MuonAnalysis_2.png
    :align: right
@@ -13,7 +13,7 @@ Frequency Domain Analysis
 Interface Overview
 ------------------
 
-This interface is used to analyse the data collected on Muon instruments. The interface can be
+This interface is used to analyse the time domain data collected on Muon instruments. The interface can be
 accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Analysis 2*. For sample
 datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.
 
@@ -23,17 +23,17 @@ Loading
 The loading section is used to load data as well as to specify what the current runs of interest are.
 
 **Load Current Run** This will load the latest run for the selected instrument. You must be connected to the
-ISIS data archive for this to work. It also currently only works on windows.
+ data archive. It also currently only works on windows.
 
-**Run selection box** This takes a comma seperated list of run numbers and loads them all in. You may also
-specify ranged of runs with a dash. For example ``62260, 62270-3`` will load ``62260, 62270, 62271, 62273``. This also specifies
-which runs are used by the rest of the GUI.
+**Run selection box** This takes a comma seperated list of run numbers for the GUI to load. A range 
+be specified with a dash. For example ``62260, 62270-3`` will load ``62260, 62270, 62271, 62273``. This specifies
+the runs that are used in the rest of the GUI.
 
-**Browse** This lets you browse locally for files to load.
+**Browse** This opens a dialog window that allows local files to be loaded.
 
 **Clear All** This clears all the data from the current GUI.
 
-**Co-Add** If selected the list of runs chosen are added rather than being loaded individually.
+**Co-Add** If selected the runs are added together for improved statistics. 
 
 Tabs
 ----
