@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
-#include "../../../ISISReflectometry/GUI/Plotting/Plotter.h"
+#include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <gmock/gmock.h>

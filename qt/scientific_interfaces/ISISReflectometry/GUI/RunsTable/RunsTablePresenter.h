@@ -9,7 +9,7 @@
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "../Runs/IRunsPresenter.h"
 #include "Common/DllConfig.h"
-#include "GUI/Plotting/IPlotter.h"
+#include "GUI/Common/IPlotter.h"
 #include "IRunsTablePresenter.h"
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"

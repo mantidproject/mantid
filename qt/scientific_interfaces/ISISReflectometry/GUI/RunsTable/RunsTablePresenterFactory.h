@@ -8,7 +8,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #include "Common/DllConfig.h"
-#include "GUI/Plotting/Plotter.h"
+#include "GUI/Common/Plotter.h"
 #include "IRunsTablePresenter.h"
 #include <memory>
 #include <string>
