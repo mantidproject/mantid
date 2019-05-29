@@ -3,7 +3,7 @@
 Home Tab
 --------
 
-.. image::  ../images/frequency_domain_analysis_2_home.png
+.. image::  ../images/muon_interface_tab_home.png
    :align: right
    :height: 500px
 
@@ -43,5 +43,5 @@ all groups and pairs.
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`
+:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`,
 :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`

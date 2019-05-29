@@ -21,14 +21,14 @@ for adding padding and apodization functions to the data.
 run the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm on the selected run when ``Calculate`` is pressed. If no phase table
 is available then the one will be generated and the result will be stored as ``PhaseTable``.
 
-**Imaginary Data** If this is checked you will
+**Imaginary Data** If unchecked the FFT will be performed without an imaginary component.
 
 **Imaginary Workspace** The imaginary component for the FFT.
 
 **Auto shift** If this is checked it will automatically calculate and apply phase shift, if this is unchecked it will
 ask you to supply a correction (defaults to 0.0).
 
-**Use Raw data** If this is checked it will use the raw data from the instrument with its defailt bins, if it is
+**Use Raw data** If this is checked it will use the raw data from the instrument with its default bins, if it is
 unchecked it will use data rebinned using the specifications from the home tab.
 
 The Advanced Options table contains the information for adding padding and apodization functions to the data.
