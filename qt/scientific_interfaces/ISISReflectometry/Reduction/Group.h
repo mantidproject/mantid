@@ -87,6 +87,10 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
     }
   }
 }
+
+size_t totalItems(Group const &group);
+size_t completedItems(Group const &group);
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

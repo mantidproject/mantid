@@ -186,6 +186,36 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex) {
   return jobs[groupIndex].name();
 }
 
+/* Return the total number of rows and groups that have processing or
+ * postprocessing associated with them */
+size_t totalItems(ReductionJobs const &jobs) {
+  auto const &groups = jobs.groups();
+  return std::accumulate(
+      groups.cbegin(), groups.cend(), 0,
+      [](int &count, Group const &group) { return count + totalItems(group); });
+}
+
+/* Return the total number of rows and groups that have been processed or
+ * postprocessed */
+size_t completedItems(ReductionJobs const &jobs) {
+  auto const &groups = jobs.groups();
+  return std::accumulate(groups.cbegin(), groups.cend(), 0,
+                         [](int &count, Group const &group) {
+                           return count + completedItems(group);
+                         });
+}
+
+/* Return the percentage of items that have been completed */
+int percentComplete(ReductionJobs const &jobs) {
+  auto const total = totalItems(jobs);
+
+  // If there's nothing to process we're 100% complete
+  if (total == 0)
+    return 100;
+
+  return static_cast<int>(completedItems(jobs) * 100 / total);
+}
+
 Group const &ReductionJobs::operator[](int index) const {
   return m_groups[index];
 }

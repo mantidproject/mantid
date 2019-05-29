@@ -20,11 +20,13 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
                              int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
-  m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
-      QStringList({"Run(s)", "Angle", "First Transmission Run",
-                   "Second Transmission Run", "Q min", "Q max", "dQ/Q", "Scale",
-                   "Options"}),
-      MantidQt::MantidWidgets::Batch::Cell(""), this);
+  m_ui.progressBar->setRange(0, 100);
+  m_jobs =
+      std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
+          QStringList({"Run(s)", "Angle", "First Transmission Run",
+                       "Second Transmission Run", "Q min", "Q max", "dQ/Q",
+                       "Scale", "Options"}),
+          MantidQt::MantidWidgets::Batch::Cell(""), this);
   m_ui.mainLayout->insertWidget(2, m_jobs.get());
   showAlgorithmPropertyHintsInOptionsColumn();
   addToolbarActions();

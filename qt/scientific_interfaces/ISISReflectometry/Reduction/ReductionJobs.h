@@ -71,6 +71,10 @@ bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue);
 std::string groupName(ReductionJobs const &jobs, int groupIndex);
 
+size_t totalItems(ReductionJobs const &jobs);
+size_t completedItems(ReductionJobs const &jobs);
+int percentComplete(ReductionJobs const &jobs);
+
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
                        double thetaTolerance, std::string const &groupName,
                        bool (*rowChanged)(Row const &rowA, Row const &rowB));

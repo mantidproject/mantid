@@ -81,6 +81,7 @@ void RunsTablePresenter::mergeAdditionalJobs(
     ReductionJobs const &additionalJobs) {
   mergeJobsInto(m_model.mutableReductionJobs(), additionalJobs,
                 m_model.thetaTolerance(), m_jobViewUpdater);
+  updateProgressBar();
 }
 
 void RunsTablePresenter::removeRowsFromModel(
@@ -536,7 +537,14 @@ void RunsTablePresenter::setRowStylingForItem(
   };
 }
 
+void RunsTablePresenter::updateProgressBar() {
+  m_view->setProgress(
+      static_cast<int>(percentComplete(m_model.reductionJobs())));
+}
+
 void RunsTablePresenter::notifyRowStateChanged() {
+  updateProgressBar();
+
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
     auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};

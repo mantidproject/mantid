@@ -28,9 +28,14 @@ bool Group::isGroup() const { return true; }
 std::string const &Group::name() const { return m_name; }
 
 /** Returns true if postprocessing is applicable for this group, i.e. if it
- * has multiple rows whose outputs will be stitched
+ * has multiple valid rows whose outputs will be stitched
  */
-bool Group::hasPostprocessing() const { return m_rows.size() > 1; }
+bool Group::hasPostprocessing() const {
+  auto numberOfValidRows = std::count_if(
+      m_rows.cbegin(), m_rows.cend(),
+      [](boost::optional<Row> const &row) { return row.is_initialized(); });
+  return numberOfValidRows > 1;
+}
 
 /** Returns true if the group requires processing; that is if any of its rows
  * require processing (note the 'processing' here means reduction, not
@@ -59,7 +64,7 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
   // If all rows are valid and complete then we're ready to postprocess
   return std::all_of(m_rows.cbegin(), m_rows.cend(),
                      [&reprocessFailed](boost::optional<Row> const &row) {
-                       return row && row->state() == State::ITEM_COMPLETE;
+                       return row && row->success();
                      });
 }
 
@@ -183,6 +188,36 @@ void Group::renameOutputWorkspace(std::string const &oldName,
                                   std::string const &newName) {
   UNUSED_ARG(oldName);
   m_postprocessedWorkspaceName = newName;
+}
+
+size_t totalItems(Group const &group) {
+  // Include the group if postprocessing is applicable
+  auto initCount = group.hasPostprocessing() ? 1 : 0;
+  // Include all valid rows
+  auto const &rows = group.rows();
+  return std::accumulate(
+      rows.cbegin(), rows.cend(), initCount,
+      [](int &count, boost::optional<Row> const &row) -> size_t {
+        if (row.is_initialized())
+          return count + 1;
+        else
+          return count;
+      });
+}
+
+size_t completedItems(Group const &group) {
+  // Include the group if it has been postprocessing
+  auto initCount = group.complete() ? 1 : 0;
+  // Include all valid rows that have been processed
+  auto const &rows = group.rows();
+  return std::accumulate(
+      rows.cbegin(), rows.cend(), initCount,
+      [](int &count, boost::optional<Row> const &row) -> size_t {
+        if (row.is_initialized() && row->complete())
+          return count + 1;
+        else
+          return count;
+      });
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -37,6 +37,9 @@ public:
   virtual void setOutputNames(std::vector<std::string> const &outputNames) = 0;
   virtual void resetOutputNames() = 0;
 
+  bool complete() const;
+  bool success() const;
+
   void setProgress(double p, std::string const &msg);
   void setStarting();
   void setRunning();
