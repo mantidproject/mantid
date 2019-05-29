@@ -84,14 +84,14 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
         ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
         converted_workspaces.append(ws)
 
-    converted_group = mantid.GroupWorkspaces(",".join(ws.getName() for ws in converted_workspaces))
+    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
     mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
     mantid.DeleteWorkspace(converted_group)
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.getName(), Target="MomentumTransfer")
+    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
     if merge_banks:
         raise RuntimeError("Merging banks is currently not supported")
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",

@@ -209,9 +209,9 @@ class VesuvioTOFFitRoutineIteration(object):
             if verbose_output:
                 UnGroupWorkspace(corrections_result[0])
                 UnGroupWorkspace(corrections_result[1])
-            mtd.remove(prefit_result[1].getName())
-            mtd.remove(corrections_result[-1].getName())
-            mtd.remove(fit_result[1].getName())
+            mtd.remove(prefit_result[1].name())
+            mtd.remove(corrections_result[-1].name())
+            mtd.remove(fit_result[1].name())
 
         return vesuvio_output
 
@@ -865,7 +865,7 @@ def _conjoin_groups(workspace_groups):
 
 
 def _conjoin(workspace1, workspace2):
-    workspace_name = workspace1.getName()
+    workspace_name = workspace1.name()
     ConjoinWorkspaces(InputWorkspace1=workspace_name, InputWorkspace2=workspace2, EnableLogging=False)
     return mtd[workspace_name]
 
@@ -900,7 +900,7 @@ def _change_in_cost_function(previous_output, current_output):
 
 def _add_fit_output_to_ads(vesuvio_output, fit_namer):
     if vesuvio_output.fit_output_workspaces:
-        return GroupWorkspaces(InputWorkspaces=[workspace.getName() for workspace
+        return GroupWorkspaces(InputWorkspaces=[workspace.name() for workspace
                                                 in vesuvio_output.fit_output_workspaces],
                                OutputWorkspace=fit_namer.fit_output_group_name)
     return None
@@ -926,7 +926,7 @@ def _add_corrections_to_ads(corrections_group, prefix):
     corrections_names = []
 
     for correction_workspace in corrections_group:
-        name = prefix + correction_workspace.getName().rsplit('_', 1)[1]
+        name = prefix + correction_workspace.name().rsplit('_', 1)[1]
         mtd.addOrReplace(name, correction_workspace)
         corrections_names.append(name)
     return corrections_names
