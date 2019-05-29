@@ -182,7 +182,7 @@ public:
   }
 
   void testGetWorkspacesToSaveForOnlyRowInGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithSingleRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
@@ -202,7 +202,7 @@ public:
   }
 
   void testGetWorkspacesToSaveForRowInMultiRowGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
@@ -222,7 +222,7 @@ public:
   }
 
   void testGetWorkspacesToSaveForGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto *group = &reductionJobs.mutableGroups()[0];
@@ -244,7 +244,7 @@ public:
   }
 
   void testDeletedWorkspaceResetsStateForRow() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
@@ -257,7 +257,7 @@ public:
   }
 
   void testDeletedWorkspaceResetsOutputNamesForRow() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
@@ -272,7 +272,7 @@ public:
   }
 
   void testDeleteWorkspaceResetsStateForGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[0];
@@ -285,7 +285,7 @@ public:
   }
 
   void testDeleteWorkspaceResetsOutputNamesForGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[0];
@@ -298,7 +298,7 @@ public:
   }
 
   void testRenameWorkspaceDoesNotResetStateForRow() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
@@ -311,7 +311,7 @@ public:
   }
 
   void testRenameWorkspaceUpdatesCorrectWorkspaceForRow() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
@@ -326,7 +326,7 @@ public:
   }
 
   void testRenameWorkspaceDoesNotResetStateForGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[0];
@@ -339,7 +339,7 @@ public:
   }
 
   void testRenameWorkspaceUpdatesPostprocessedNameForGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[0];
@@ -352,7 +352,7 @@ public:
   }
 
   void testDeleteAllWorkspacesResetsStateForRowAndGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
@@ -369,7 +369,7 @@ public:
   }
 
   void testDeleteAllWorkspacesResetsOutputNamesForRowAndGroup() {
-    auto jobRunner = makeJobRunner(makeReductionJobsWithTwoRowGroup());
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto &reductionJobs =
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];

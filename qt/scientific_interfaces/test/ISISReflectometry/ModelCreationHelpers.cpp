@@ -34,8 +34,8 @@ Row makeRow(double theta = 0.5) {
 }
 
 Row makeRow(std::string const &run, double theta) {
-  return Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
-             ReductionOptionsMap(),
+  return Row({run}, theta, TransmissionRunPair({"A", "B"}), RangeInQ(),
+             boost::none, ReductionOptionsMap(),
              ReductionWorkspaces({"IvsLam", "IvsQ", "IvsQBin"},
                                  TransmissionRunPair()));
 }
@@ -81,42 +81,57 @@ Group makeGroupWithTwoRowsWithNonstandardNames() {
 
 /* Reduction Jobs */
 
-ReductionJobs makeReductionJobsWithSingleRowGroup() {
-  auto groups = std::vector<Group>();
-  // Create some rows for the first group
-  auto group1Rows = std::vector<boost::optional<Row>>();
-  group1Rows.emplace_back(makeRow("12345", 0.5));
-  groups.emplace_back(Group("Test group 1", group1Rows));
-  // Create the reduction jobs
-  return ReductionJobs(groups);
+ReductionJobs oneGroupWithARowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
 }
 
-ReductionJobs makeReductionJobsWithTwoRowGroup() {
-  auto groups = std::vector<Group>();
-  // Create some rows for the first group
-  auto group1Rows = std::vector<boost::optional<Row>>();
-  group1Rows.emplace_back(makeRow("12345", 0.5));
-  group1Rows.emplace_back(makeRow("12346", 0.8));
-  groups.emplace_back(Group("Test group 1", group1Rows));
-  // Create the reduction jobs
-  return ReductionJobs(groups);
+ReductionJobs oneGroupWithTwoRowsModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group1));
+  return reductionJobs;
 }
 
-ReductionJobs makeReductionJobsWithTwoGroups() {
-  auto groups = std::vector<Group>();
-  // Create some rows for the first group
-  auto group1Rows = std::vector<boost::optional<Row>>();
-  group1Rows.emplace_back(makeRow("12345", 0.5));
-  group1Rows.emplace_back(boost::none); // indicates invalid row
-  group1Rows.emplace_back(makeRow("12346", 0.8));
-  groups.emplace_back(Group("Test group 1", group1Rows));
-  // Create some rows for the second group
-  auto group2Rows = std::vector<boost::optional<Row>>();
-  group2Rows.emplace_back(makeRow("22345", 0.5));
-  group2Rows.emplace_back(makeRow("22346", 0.9));
-  groups.emplace_back(Group("Second Group", group2Rows));
-  // Create the reduction jobs
-  return ReductionJobs(groups);
+ReductionJobs twoEmptyGroupsModel() {
+  auto reductionJobs = ReductionJobs();
+  reductionJobs.appendGroup(Group("Group 1"));
+  reductionJobs.appendGroup(Group("Group 2"));
+  return reductionJobs;
+}
+
+ReductionJobs twoGroupsWithARowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Group 1");
+  group1.appendRow(makeRow());
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Group 2");
+  group2.appendRow(makeRow());
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
+}
+
+ReductionJobs twoGroupsWithMixedRowsModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  group1.appendRow(boost::none);
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Second Group");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(makeRow("22346", 0.9));
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
 }
 
 /* Experiment */

@@ -10,6 +10,7 @@
 #include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
+#include "../ModelCreationHelpers.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MockRunsTableView.h"
 
@@ -31,41 +32,6 @@ public:
   void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView,
                   MockRunsTableView &view) {
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
-  }
-
-  Row basicRow() {
-    return Row(std::vector<std::string>({"101", "102"}), 1.2,
-               TransmissionRunPair{"A", "B"}, RangeInQ(), boost::none, {},
-               ReductionWorkspaces({}, TransmissionRunPair()));
-  }
-
-  ReductionJobs twoEmptyGroupsModel() {
-    auto reductionJobs = ReductionJobs();
-    reductionJobs.appendGroup(Group("Group 1"));
-    reductionJobs.appendGroup(Group("Group 2"));
-    return reductionJobs;
-  }
-
-  ReductionJobs twoGroupsWithARowModel() {
-    auto reductionJobs = ReductionJobs();
-    auto group1 = Group("Group 1");
-    group1.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group1));
-
-    auto group2 = Group("Group 2");
-    group2.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group2));
-
-    return reductionJobs;
-  }
-
-  ReductionJobs oneGroupWithTwoRowsModel() {
-    auto reductionJobs = ReductionJobs();
-    auto group1 = Group("Group 1");
-    group1.appendRow(basicRow());
-    group1.appendRow(basicRow());
-    reductionJobs.appendGroup(std::move(group1));
-    return reductionJobs;
   }
 
   RunsTablePresenterTest() : m_jobs(), m_view() {

@@ -27,9 +27,11 @@ Group makeGroupWithTwoRows();
 Group makeGroupWithTwoRowsWithNonstandardNames();
 
 /* Reduction Jobs */
-ReductionJobs makeReductionJobsWithSingleRowGroup();
-ReductionJobs makeReductionJobsWithTwoRowGroup();
-ReductionJobs makeReductionJobsWithTwoGroups();
+ReductionJobs oneGroupWithARowModel();
+ReductionJobs oneGroupWithTwoRowsModel();
+ReductionJobs twoEmptyGroupsModel();
+ReductionJobs twoGroupsWithARowModel();
+ReductionJobs twoGroupsWithMixedRowsModel();
 
 /* Experiment */
 std::vector<PerThetaDefaults> makePerThetaDefaults();

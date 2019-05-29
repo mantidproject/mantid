@@ -342,7 +342,7 @@ private:
   }
 
   RunsTable makeRunsTableWithContent() {
-    auto reductionJobs = makeReductionJobsWithSingleRowGroup();
+    auto reductionJobs = oneGroupWithARowModel();
     return RunsTable(m_instruments, m_thetaTolerance, reductionJobs);
   }
 
