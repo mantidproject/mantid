@@ -200,6 +200,7 @@ bool RunsPresenter::resumeAutoreduction() {
 void RunsPresenter::autoreductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->autoreductionResumed();
+  m_progressView->setAsEndlessIndicator();
 }
 
 void RunsPresenter::autoreductionPaused() {
@@ -207,6 +208,7 @@ void RunsPresenter::autoreductionPaused() {
   m_autoreduction.stop();
   updateWidgetEnabledState();
   tablePresenter()->autoreductionPaused();
+  m_progressView->setAsPercentageIndicator();
 }
 
 void RunsPresenter::autoreductionCompleted() {
