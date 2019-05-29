@@ -78,7 +78,6 @@ class HomeTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.update_all_widgets()
-            # self.outer.show_all_data()
 
     class GroupingObserver(Observer):
 
