@@ -45,6 +45,9 @@ public:
   bool complete() const;
   bool success() const;
 
+  bool complete() const;
+  bool success() const;
+
   void setProgress(double p, std::string const &msg);
   void setStarting();
   void setRunning();
