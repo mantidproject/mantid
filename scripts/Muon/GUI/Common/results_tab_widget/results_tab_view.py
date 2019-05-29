@@ -58,6 +58,12 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_function_selector.clear()
         self.fit_function_selector.addItems(names)
 
+    def fit_result_workspaces(self):
+        """
+        :return: The current state of the workspace list selector
+        """
+        return self.fit_selector_presenter.model
+
     def set_fit_result_workspaces(self, workspace_list_state):
         """Set the map of workspaces
 

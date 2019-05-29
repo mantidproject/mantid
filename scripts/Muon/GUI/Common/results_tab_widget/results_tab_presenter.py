@@ -15,7 +15,8 @@ class ResultsTabPresenter(object):
     def __init__(self, view, model):
         self.view = view
         self.model = model
-        self.new_fit_performed_observer = GenericObserver(self.on_new_fit_performed)
+        self.new_fit_performed_observer = GenericObserver(
+            self.on_new_fit_performed)
 
         self._init_view()
 
@@ -27,14 +28,17 @@ class ResultsTabPresenter(object):
     def on_new_fit_performed(self):
         """React to a new fit created in the fitting tab"""
         self.view.set_fit_function_names(self.model.fit_functions())
-        self.view.set_fit_result_workspaces(self.model.fit_input_workspaces())
+        self.view.set_fit_result_workspaces(
+            self.model.fit_selection(
+                existing_selection=self.view.fit_result_workspaces()))
         self.view.set_output_results_button_enabled(True)
 
     # private api
     def _init_view(self):
         """Perform any setup for the view that is related to the model"""
         self.view.set_results_table_name(self.model.results_table_name())
-        self.view.results_name_edited.connect(self.on_results_table_name_edited)
+        self.view.results_name_edited.connect(
+            self.on_results_table_name_edited)
         self.view.set_output_results_button_enabled(False)
 
     # def get_performed_fits_by_fit_function(self, fit_function_name):

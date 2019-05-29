@@ -78,11 +78,24 @@ class ResultsTabModelTest(unittest.TestCase):
 
         self.assertEqual(test_functions, self.model.fit_functions())
 
-    def test_model_creates_expected_map_input_workspaces_to_include_state(self):
-        test_fits, expected_list_state = create_test_fits()
+    def test_model_creates_fit_selection_given_zero_existing_state(self):
+        test_fits, expected_list_state = create_test_fits(('ws1', 'ws2'))
         self.fitting_context.fit_list = test_fits
 
-        self.assertEqual(expected_list_state, self.model.fit_input_workspaces())
+        self.assertEqual(expected_list_state, self.model.fit_selection({}))
+
+    def test_model_creates_fit_selection_given_existing_state(self):
+        orig_test_fits, orig_list_state = create_test_fits(('ws1', 'ws2'),
+                                                           (True, False))
+        # add new fit for ws2 & ws4 but ws2 should stay unchecked
+        added_test_fits, _ = create_test_fits(('ws2', 'ws4'))
+        all_test_fits, _ = create_test_fits(('ws1', 'ws2', 'ws4'))
+        self.fitting_context.fit_list = all_test_fits
+
+        expected_list_state = orig_list_state
+        expected_list_state.update({'ws4': [2, True, True]})
+        self.assertEqual(expected_list_state,
+                         self.model.fit_selection(orig_list_state))
 
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
@@ -97,12 +110,14 @@ def create_test_workspace():
     return fake_ws
 
 
-def create_test_fits():
-    input_workspaces = ['ws1', 'ws2']
+def create_test_fits(input_workspaces, checked_states=None):
     fits = []
     list_state = {}
-    checked, enabled = True, True
-    for index, name in enumerate(input_workspaces):
+    if checked_states is None:
+        checked_states = (True for _ in input_workspaces)
+    enabled = True
+    for index, (name,
+                checked) in enumerate(zip(input_workspaces, checked_states)):
         fit_info = mock.MagicMock()
         fit_info.input_workspace = name
         fits.append(fit_info)

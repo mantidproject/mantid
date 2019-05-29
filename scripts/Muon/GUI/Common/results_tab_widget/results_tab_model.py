@@ -59,14 +59,25 @@ class ResultsTabModel(object):
         """
         return self._fit_context.fit_function_names()
 
-    def fit_input_workspaces(self):
+    def fit_selection(self, existing_selection):
         """
-        :return: The list of workspace names of the original data used as input to the fits
+        Combine the existing selection state of workspaces with the workspace names
+        of fits stored here. New workspaces are always checked for inclusion.
+        :param existing_selection: A dict defining any current selection model. The
+        format matches that of the ListSelectorPresenter class' model.
+        :return: The workspaces that have had fits performed on them along with their selection status. The
+        format matches that of the ListSelectorPresenter class' model.
         """
-        return {
-            fit.input_workspace: [index, True, True]
-            for index, fit in enumerate(self._fit_context.fit_list)
-        }
+        selection = {}
+        for index, fit in enumerate(self._fit_context.fit_list):
+            name = fit.input_workspace
+            if name in existing_selection:
+                checked = existing_selection[name][1]
+            else:
+                checked = True
+            selection[name] = [index, checked, True]
+
+        return selection
 
 
 def _log_should_be_displayed(log):

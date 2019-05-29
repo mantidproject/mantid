@@ -27,7 +27,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.model_patcher.stop()
 
     def test_presenter_sets_up_view_correctly(self):
-        self.mock_model.results_table_name.return_value='default_table'
+        self.mock_model.results_table_name.return_value = 'default_table'
         self.mock_view.function_selection_changed.connect = mock.MagicMock()
         self.mock_view.results_name_edited.connect = mock.MagicMock()
 
@@ -49,32 +49,39 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_model.set_results_table_name.assert_called_once_with(
             new_name)
 
-    def test_adding_new_fit_populates_tables(self):
-        test_functions = ['func1', 'func2']
-        expected_ws_list_state = {
-            name: [index, True, True]
-            for index, name in enumerate(('ws1', 'ws2'))
+    def test_adding_new_fit_to_existing_fits_preserves_current_selections(
+            self):
+        orig_ws_list_state = {
+            name: [index, checked, True]
+            for index, (name, checked) in enumerate((('ws1', True), ('ws2',
+                                                                     False)))
         }
+        final_ws_list_state = {
+            name: [index, checked, True]
+            for index, (name, checked) in enumerate((('ws1', True),
+                                                     ('ws2', False), ('ws3',
+                                                                      True)))
+        }
+        test_functions = ['func1', 'func2']
         self.mock_model.fit_functions.return_value = test_functions
-        self.mock_model.fit_input_workspaces.return_value = expected_ws_list_state
+        self.mock_model.fit_selection.return_value = final_ws_list_state
+        self.mock_view.fit_result_workspaces.return_value = orig_ws_list_state
+
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
         # previous test verifies this is correct on construction
         self.mock_view.set_output_results_button_enabled.reset_mock()
-
         presenter.on_new_fit_performed()
 
         self.mock_model.fit_functions.assert_called_once_with()
-        self.mock_view.set_fit_function_names.assert_called_once_with(test_functions)
-        self.mock_view.set_fit_result_workspaces.assert_called_once_with(expected_ws_list_state)
-        self.mock_view.set_output_results_button_enabled.assert_called_once_with(True)
-
-    # def test_changing_function_name(self):
-    #     # new_name = 'edited_name'
-    #     # self.mock_view.results_table_name.return_value = new_name
-    #     presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
-    #     presenter.on_function_selection_changed()
-    #
-    #     self.mock_view.selected_fit_function.assert_called_once()
+        self.mock_model.fit_selection.assert_called_once_with(
+            orig_ws_list_state)
+        self.mock_view.set_fit_function_names.assert_called_once_with(
+            test_functions)
+        self.mock_view.fit_result_workspaces.assert_called_once_with()
+        self.mock_view.set_fit_result_workspaces.assert_called_once_with(
+            final_ws_list_state)
+        self.mock_view.set_output_results_button_enabled.assert_called_once_with(
+            True)
 
 
 if __name__ == '__main__':
