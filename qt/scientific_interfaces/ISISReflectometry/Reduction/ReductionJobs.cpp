@@ -73,13 +73,13 @@ void ReductionJobs::removeAllGroups() {
 }
 
 void ReductionJobs::resetState() {
-  for (auto &group : m_groups)
-    group.resetState();
+  std::for_each(m_groups.begin(), m_groups.end(),
+                [](Group &group) { group.resetState(); });
 }
 
 void ReductionJobs::resetSkippedItems() {
-  for (auto &group : m_groups)
-    group.resetSkipped();
+  std::for_each(m_groups.begin(), m_groups.end(),
+                [](Group &group) { group.resetSkipped(); });
 }
 
 std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }

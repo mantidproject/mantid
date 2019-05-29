@@ -32,16 +32,15 @@ std::string const &Group::name() const { return m_name; }
  */
 bool Group::hasPostprocessing() const { return m_rows.size() > 1; }
 
-/** Returns true if the group requires processing; that is if its rows require
- * processing (note the 'processing' here means reduction, not postprocessing)
+/** Returns true if the group requires processing; that is if any of its rows
+ * require processing (note the 'processing' here means reduction, not
+ * postprocessing)
  */
 bool Group::requiresProcessing(bool reprocessFailed) const {
-  for (auto const &row : m_rows) {
-    if (row && row->requiresProcessing(reprocessFailed))
-      return true;
-  }
-
-  return false;
+  return std::any_of(m_rows.cbegin(), m_rows.cend(),
+                     [&reprocessFailed](boost::optional<Row> const &row) {
+                       return row && row->requiresProcessing(reprocessFailed);
+                     });
 }
 
 /** Returns true if the group is ready to be postprocessed, i.e. if its rows
@@ -57,14 +56,11 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
   if (!Item::requiresProcessing(reprocessFailed))
     return false;
 
-  // If any of the rows are invalid or not completed successfully, then we're
-  // not ready to postprocess
-  for (auto const &row : m_rows) {
-    if (!row || row->state() != State::ITEM_COMPLETE)
-      return false;
-  }
-
-  return true;
+  // If all rows are valid and complete then we're ready to postprocess
+  return std::all_of(m_rows.cbegin(), m_rows.cend(),
+                     [&reprocessFailed](boost::optional<Row> const &row) {
+                       return row && row->state() == State::ITEM_COMPLETE;
+                     });
 }
 
 std::string Group::postprocessedWorkspaceName() const {
