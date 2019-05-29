@@ -131,6 +131,29 @@ void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
+int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
+  Item::resetState();
+
+  // If the row is not sortable, or there is nothing in the list yet, append it
+  if (!row.is_initialized() || m_rows.size() == 0) {
+    appendRow(row);
+    return static_cast<int>(m_rows.size());
+  }
+
+  // Find the first row with theta greater than the row we're inserting (or
+  // end, if not found)
+  auto valueLessThanRowTheta = [](double lhs, boost::optional<Row> const &rhs) {
+    if (!rhs.is_initialized())
+      return false;
+    return lhs < rhs->theta();
+  };
+  auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(),
+                                     row->theta(), valueLessThanRowTheta);
+  auto const insertedRowIndex = std::distance(m_rows.cbegin(), insertIter);
+  m_rows.insert(insertIter, row); // invalidates iterator
+  return static_cast<int>(insertedRowIndex);
+}
+
 void Group::removeRow(int rowIndex) {
   Item::resetState();
   m_rows.erase(m_rows.begin() + rowIndex);

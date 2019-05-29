@@ -21,7 +21,7 @@ class MockModificationListener {
 public:
   MOCK_METHOD2_T(groupAppended, void(int, Group const &));
   MOCK_METHOD1_T(groupRemoved, void(int));
-  MOCK_METHOD3_T(rowAppended, void(int, int, Row const &));
+  MOCK_METHOD3_T(rowInserted, void(int, int, Row const &));
   MOCK_METHOD3_T(rowModified, void(int, int, Row const &));
 };
 
@@ -123,14 +123,14 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
-  void testCallsAppendWhenAddingRow() {
+  void testCallsInsertWhenAddingRow() {
     MockModificationListener listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
     auto addition = ReductionJobs();
     addition.appendGroup(Group("A", {rowWithAngle(0.2)}));
 
-    EXPECT_CALL(listener, rowAppended(0, 1, _)).Times(1);
+    EXPECT_CALL(listener, rowInserted(0, 1, _)).Times(1);
 
     mergeJobsInto(target, addition, m_thetaTolerance, listener);
 

@@ -40,6 +40,7 @@ public:
   void appendEmptyRow();
   void appendRow(boost::optional<Row> const &row);
   void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex);
+  int insertRowSortedByAngle(boost::optional<Row> const &row);
   void removeRow(int rowIndex);
   void updateRow(int rowIndex, boost::optional<Row> const &row);
   bool allRowsAreValid() const;
@@ -80,10 +81,8 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
         intoHere.updateRow(updateAtIndex, updatedRow);
         listener.rowModified(groupIndex, updateAtIndex, updatedRow);
       } else {
-        intoHere.appendRow(maybeRow.get());
-        listener.rowAppended(groupIndex,
-                             static_cast<int>(intoHere.rows().size() - 1),
-                             maybeRow.get());
+        auto insertedRowIndex = intoHere.insertRowSortedByAngle(fromRow);
+        listener.rowInserted(groupIndex, insertedRowIndex, fromRow);
       }
     }
   }

@@ -161,7 +161,7 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
     if (rowChanged(newRowValue, rowToUpdate))
       group.updateRow(indexOfRowToUpdate.get(), newRowValue);
   } else {
-    group.appendRow(row);
+    group.insertRowSortedByAngle(row);
   }
 }
 

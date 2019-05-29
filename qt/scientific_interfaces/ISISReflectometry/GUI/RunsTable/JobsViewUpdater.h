@@ -65,9 +65,9 @@ public:
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}));
   }
 
-  void rowAppended(int groupIndex, int, Row const &row) {
-    m_view.appendChildRowOf(
-        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),
+  void rowInserted(int groupIndex, int rowIndex, Row const &row) {
+    m_view.insertChildRowOf(
+        MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}), rowIndex,
         cellsFromRow(row));
   }
 
