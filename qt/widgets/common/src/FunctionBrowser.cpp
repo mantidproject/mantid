@@ -198,6 +198,11 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
   m_presenter->removeDatasets(indices);
 }
 
+/// Get a list of dataset names.
+QStringList FunctionBrowser::getDatasetNames() const {
+  return m_presenter->getDatasetNames();
+}
+
 /// Add some datasets to those already set.
 /// @param names :: A list of names fr the new datasets.
 void FunctionBrowser::addDatasets(const QStringList &names) {

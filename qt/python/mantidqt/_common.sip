@@ -704,6 +704,10 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i);
     int getCurrentDataset() const;
+    void setDatasetNames(const QStringList &names);
+    void addDatasets(const QStringList &names);
+    void removeDatasets(QList<int> indices);
+    QStringList getDatasetNames() const;
 signals:
     void functionStructureChanged();
 };
