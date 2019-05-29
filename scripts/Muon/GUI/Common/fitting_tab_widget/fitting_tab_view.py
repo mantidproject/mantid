@@ -81,13 +81,13 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
 
-    def update_global_fit_state(self, number_succesfully_fitted, total_number_fitted):
-        self.global_fit_status_label.setText('Fit successful for {} of {} workspaces'.
-                                             format(number_succesfully_fitted, total_number_fitted))
-
-        if number_succesfully_fitted == total_number_fitted:
+    def update_global_fit_state(self, output_list):
+        boolean_list = [output == 'success' for output in output_list]
+        if all(boolean_list):
+            self.global_fit_status_label.setText('Fit Successful')
             self.global_fit_status_label.setStyleSheet('color: green')
         else:
+            self.global_fit_status_label.setText('{} of {} fits failed'.format(sum(boolean_list), len(boolean_list)))
             self.global_fit_status_label.setStyleSheet('color: red')
 
     def set_slot_for_select_workspaces_to_fit(self, slot):
@@ -179,10 +179,18 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         warning(message, parent=self)
 
     def get_index_for_start_end_times(self):
-        if self.fit_type == 'Single Fit':
+        if self.fit_type == self.single_fit:
             return 0
 
         current_index = self.parameter_display_combo.currentIndex()
+        return current_index if current_index != -1 else 0
+
+    def get_index_for_fit_specification(self):
+        if self.fit_type == self.sequential_fit:
+            current_index = self.parameter_display_combo.currentIndex()
+        else:
+            current_index = 0
+
         return current_index if current_index != -1 else 0
 
     def setup_fit_options_table(self):

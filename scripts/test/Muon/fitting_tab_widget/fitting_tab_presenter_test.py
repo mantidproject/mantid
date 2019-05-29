@@ -1,6 +1,7 @@
 import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
+from qtpy import QtWidgets
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory
@@ -12,6 +13,12 @@ def retrieve_combobox_info(combo_box):
         output_list.append(str(combo_box.itemText(i)))
 
     return output_list
+
+
+def wait_for_thread(thread_model):
+    if thread_model:
+        thread_model._thread.wait()
+        QtWidgets.QApplication.instance().processEvents()
 
 
 class FittingTabPresenterTest(GuiTest):
@@ -58,7 +65,9 @@ class FittingTabPresenterTest(GuiTest):
             self):
         self.presenter.selected_data = ['Input Workspace Name']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+
         self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
@@ -93,12 +102,46 @@ class FittingTabPresenterTest(GuiTest):
             '$domains=i;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i')
 
         self.view.fit_button.clicked.emit(True)
+        wait_for_thread(self.presenter.calculation_thread)
         call_args_dict = self.presenter.model.do_simultaneous_fit.call_args[0][0]
 
         self.assertEqual(call_args_dict['InputWorkspace'], ['Input Workspace Name_1', 'Input Workspace Name 2'])
         self.assertEqual(call_args_dict['Minimizer'], 'Levenberg-Marquardt')
         self.assertEqual(call_args_dict['StartX'], [0.0, 0.0])
         self.assertEqual(call_args_dict['EndX'], [15.0, 15.0])
+
+    def test_when_new_data_is_selected_clear_out_old_fits_and_information(self):
+        self.presenter._fit_status = ['success', 'success', 'success']
+        self.presenter._fit_chi_squared = [12.3, 3.4, 0.35]
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        self.presenter_fit_function = [fit_function, fit_function, fit_function]
+        self.presenter.manual_selection_made = True
+        self.presenter._start_x = [0.15, 0.45, 0.67]
+        self.presenter._end_x = [0.56, 0.78, 0.34]
+        self.view.end_time = 0.56
+        self.view.start_time = 0.15
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+
+        self.presenter.handle_workspace_list_changed(new_workspace_list)
+
+        self.assertEqual(self.presenter._fit_status, ['no fit', 'no fit', 'no fit'])
+        self.assertEqual(self.presenter._fit_chi_squared, [0.0, 0.0, 0.0])
+        self.assertEqual(self.presenter._fit_function, [None, None, None])
+        self.assertEqual(self.presenter._selected_data, new_workspace_list)
+        self.assertEqual(self.presenter.manual_selection_made, False)
+        self.assertEqual(self.presenter.start_x, [0.15, 0.15, 0.15])
+        self.assertEqual(self.presenter.end_x, [0.56, 0.56, 0.56])
+
+    def test_when_new_data_is_selected_updates_combo_box_on_view(self):
+        new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                              'MUSR22725; Group; fwd; Asymmetry']
+
+        self.presenter.handle_workspace_list_changed(new_workspace_list)
+
+        self.assertEqual(retrieve_combobox_info(self.view.parameter_display_combo), new_workspace_list)
+
+    # def test_when_new_data_is_selected
 
 
 if __name__ == '__main__':

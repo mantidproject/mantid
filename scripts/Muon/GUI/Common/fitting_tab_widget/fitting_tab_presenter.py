@@ -22,6 +22,7 @@ class FittingTabPresenter(object):
         self._end_x = [self.view.end_time]
         self._fit_status = []
         self._fit_chi_squared = []
+        self._fit_function = []
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserver(self.update_selected_workspace_guess)
@@ -42,6 +43,15 @@ class FittingTabPresenter(object):
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
+
+    def handle_workspace_list_changed(self, new_workspace_list):
+        self.selected_data = new_workspace_list
+        self.manual_selection_made = False
+        self._fit_status = ['no fit'] * len(new_workspace_list)
+        self._fit_chi_squared = [0.0] * len(new_workspace_list)
+        self._fit_function = [None] * len(new_workspace_list)
+        self._start_x = [self.view.start_time] * len(new_workspace_list)
+        self._end_x = [self.view.end_time] * len(new_workspace_list)
 
     def update_selected_workspace_guess(self):
         fit_type = self.view.fit_type
@@ -126,9 +136,12 @@ class FittingTabPresenter(object):
 
     def handle_finished(self):
         self.view.setEnabled(True)
-        fit_function, output_status, output_chi_squared = self.fitting_calculation_model.result
-        self.view.update_with_fit_outputs(fit_function, output_status, output_chi_squared)
-        self.view.update_global_fit_state(1 if output_status == 'success' else 0, 1)
+        self._fit_function, self._output_status, self._output_chi_squared = self.fitting_calculation_model.result
+        self.view.update_with_fit_outputs(self._fit_function, self._output_status, self._output_chi_squared)
+        self.view.update_global_fit_state(self._output_status)
+
+        index = self.view.get_index_for_fit_specification()
+        self.view.update_with_fit_outputs(self._fit_function[index], self._output_status[index], self._output_chi_squared[index])
 
     def handle_error(self, error):
         self.view.warning_popup(error)
