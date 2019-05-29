@@ -187,8 +187,9 @@ For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
 added. It does not check the points for validity.
 
-@param PntOut :: Vector of points found by the line/cylinder intersection
-@param Pln :: Plane for intersect
+@param intersectionPoints :: Vector of points found by the line/cylinder
+intersection
+@param plane :: Plane for intersect
 @return Number of points found by intersection
 */
 {

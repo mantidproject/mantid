@@ -1096,7 +1096,7 @@ int CSGObject::procString(const std::string &Line) {
 
 /**
  * Given a track, fill the track with valid section
- * @param UT :: Initial track
+ * @param track :: Initial track
  * @return Number of segments added
  */
 size_t CSGObject::interceptSurface(Geometry::Track &track) const {
