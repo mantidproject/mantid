@@ -51,7 +51,7 @@ public:
 
     auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(1, groups.size());
-    TS_ASSERT_EQUALS("Group 2", groups[0].name());
+    TS_ASSERT_EQUALS("Test group 2", groups[0].name());
 
     verifyAndClearExpectations();
   }

@@ -74,10 +74,10 @@ public:
     auto &groups = jobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("Group 1", groups[0].name());
+    TS_ASSERT_EQUALS("Test group 1", groups[0].name());
     TS_ASSERT_EQUALS("Group1",
                      groups[1].name()); // default name for inserted group
-    TS_ASSERT_EQUALS("Group 2", groups[2].name());
+    TS_ASSERT_EQUALS("Test group 2", groups[2].name());
 
     verifyAndClearExpectations();
   }

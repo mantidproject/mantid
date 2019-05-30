@@ -42,6 +42,7 @@ ReductionJobs oneGroupWithTwoRunsInARowModel();
 ReductionJobs oneGroupWithTwoRowsModel();
 ReductionJobs anotherGroupWithARowModel();
 ReductionJobs twoGroupsWithARowModel();
+ReductionJobs twoGroupsWithTwoRowsModel();
 ReductionJobs twoGroupsWithMixedRowsModel();
 
 /* Experiment */

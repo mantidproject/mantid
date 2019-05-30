@@ -28,10 +28,9 @@ Row makeEmptyRow() {
 }
 
 Row makeRow(double theta) {
-  return Row(
-      {}, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(),
-      boost::none, ReductionOptionsMap(),
-      ReductionWorkspaces({}, TransmissionRunPair({"Trans A", "Trans B"})));
+  return Row({}, theta, TransmissionRunPair({"22348", "22349"}), RangeInQ(),
+             boost::none, ReductionOptionsMap(),
+             ReductionWorkspaces({}, TransmissionRunPair()));
 }
 
 Row makeRow(std::string const &run, double theta) {
@@ -46,6 +45,14 @@ Row makeRow(std::vector<std::string> const &runs, double theta) {
       runs, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(),
       boost::none, ReductionOptionsMap(),
       ReductionWorkspaces(runs, TransmissionRunPair({"Trans A", "Trans B"})));
+}
+
+Row makeCompletedRow() {
+  auto row = Row({}, 0.0, TransmissionRunPair(), RangeInQ(), boost::none,
+                 ReductionOptionsMap(),
+                 ReductionWorkspaces({}, TransmissionRunPair()));
+  row.setSuccess();
+  return row;
 }
 
 Row makeRowWithMainCellsFilled(double theta) {
@@ -167,6 +174,21 @@ ReductionJobs twoGroupsWithARowModel() {
 
   auto group2 = Group("Test group 2");
   group2.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group2));
+
+  return reductionJobs;
+}
+
+ReductionJobs twoGroupsWithTwoRowsModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(std::move(group1));
+
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("22345", 0.5));
+  group2.appendRow(makeRow("22346", 0.8));
   reductionJobs.appendGroup(std::move(group2));
 
   return reductionJobs;
