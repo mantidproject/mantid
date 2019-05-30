@@ -21,6 +21,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_view = self.view_patcher.start()
         self.mock_view.function_selection_changed.connect = mock.MagicMock()
         self.mock_view.results_name_edited.connect = mock.MagicMock()
+        self.mock_view.output_results_requested.connect = mock.MagicMock()
 
     def tearDown(self):
         self.view_patcher.stop()
@@ -28,14 +29,14 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
     def test_presenter_sets_up_view_correctly(self):
         self.mock_model.results_table_name.return_value = 'default_table'
-        self.mock_view.function_selection_changed.connect = mock.MagicMock()
-        self.mock_view.results_name_edited.connect = mock.MagicMock()
 
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
         self.mock_view.set_results_table_name.assert_called_once_with(
             'default_table')
         self.mock_view.results_name_edited.connect.assert_called_once_with(
             presenter.on_results_table_name_edited)
+        self.mock_view.output_results_requested.connect.assert_called_once_with(
+            presenter.on_output_results_request)
         self.mock_view.set_output_results_button_enabled.assert_called_once_with(
             False)
 
@@ -110,6 +111,31 @@ class ResultsTabPresenterTest(unittest.TestCase):
             'magnetic_field': [2, True, True]
         }
         self.mock_view.set_log_values.assert_called_once_with(final_selection)
+
+    def test_results_table_request_calls_table_creation_on_model(self):
+        fit_selection = ['ws1']
+        log_selection = []
+        self.mock_view.selected_result_workspaces.return_value = fit_selection
+        self.mock_view.selected_log_values.return_value = log_selection
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        # previous test verifies this is correct on construction
+        self.mock_view.set_output_results_button_enabled.reset_mock()
+
+        presenter.on_output_results_request()
+
+        self.mock_model.create_results_table.assert_called_once_with(
+            log_selection, fit_selection)
+
+    def test_results_table_request_with_empty_results_does_nothing(self):
+        self.mock_view.selected_result_workspaces.return_value = []
+
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        # previous test verifies this is correct on construction
+        self.mock_view.set_output_results_button_enabled.reset_mock()
+
+        presenter.on_output_results_request()
+
+        self.assertEqual(0, self.mock_model.create_results_table.call_count)
 
 
 if __name__ == '__main__':

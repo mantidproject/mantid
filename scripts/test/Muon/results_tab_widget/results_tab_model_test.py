@@ -10,13 +10,14 @@ from __future__ import (absolute_import, unicode_literals)
 import itertools
 import unittest
 
-from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import mock
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ALLOWED_NON_TIME_SERIES_LOGS, log_names,
     ResultsTabModel)
+from Muon.GUI.Common.contexts.fitting_context import FitInformation
 
 # constants
 FITTING_CONTEXT_CLS = 'Muon.GUI.Common.contexts.fitting_context.FittingContext'
@@ -41,6 +42,14 @@ class ResultsTabModelTest(unittest.TestCase):
         table_name = 'table_name'
         self.model.set_results_table_name(table_name)
         self.assertEqual(self.model.results_table_name(), table_name)
+
+    def test_default_model_has_no_selected_function(self):
+        self.assertTrue(self.model.selected_fit_function() is None)
+
+    def test_updating_model_selected_fut_function(self):
+        new_selection = 'func2'
+        self.model.set_selected_fit_function(new_selection)
+        self.assertEqual(self.model.selected_fit_function(), new_selection)
 
     def test_log_names_from_workspace_with_logs(self):
         fake_ws = create_test_workspace()
@@ -85,17 +94,20 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(len(self.model.fit_selection({})), 0)
 
     def test_model_creates_fit_selection_given_zero_existing_state(self):
-        test_fits, expected_list_state = create_test_fits(('ws1', 'ws2'))
+        test_fits, expected_list_state = create_test_fits_with_only_workspace_names(
+            ('ws1', 'ws2'))
         self.fitting_context.fit_list = test_fits
 
         self.assertEqual(expected_list_state, self.model.fit_selection({}))
 
     def test_model_creates_fit_selection_given_existing_state(self):
-        orig_test_fits, orig_list_state = create_test_fits(('ws1', 'ws2'),
-                                                           (True, False))
+        orig_test_fits, orig_list_state = create_test_fits_with_only_workspace_names(
+            ('ws1', 'ws2'), (True, False))
         # add new fit for ws2 & ws4 but ws2 should stay unchecked
-        added_test_fits, _ = create_test_fits(('ws2', 'ws4'))
-        all_test_fits, _ = create_test_fits(('ws1', 'ws2', 'ws4'))
+        added_test_fits, _ = create_test_fits_with_only_workspace_names(
+            ('ws2', 'ws4'))
+        all_test_fits, _ = create_test_fits_with_only_workspace_names(
+            ('ws1', 'ws2', 'ws4'))
         self.fitting_context.fit_list = all_test_fits
 
         expected_list_state = orig_list_state
@@ -108,7 +120,8 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(0, len(self.model.log_selection({})))
 
     def test_model_returns_log_selection_of_first_workspace(self):
-        self.fitting_context.fit_list = create_test_fits(('ws1', 'ws2'))[0]
+        self.fitting_context.fit_list = create_test_fits_with_only_workspace_names(
+            ('ws1', 'ws2'))[0]
         with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
             ws1_logs = ('run_number', 'run_start')
             ws2_logs = ('temp', 'magnetic_field')
@@ -125,7 +138,8 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(expected_selection, self.model.log_selection({}))
 
     def test_model_combines_existing_selection(self):
-        self.fitting_context.fit_list = create_test_fits(('ws1',))[0]
+        self.fitting_context.fit_list = create_test_fits_with_only_workspace_names(
+            ('ws1', ))[0]
         with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
             mock_log_names.return_value = ('run_number', 'run_start',
                                            'magnetic_field')
@@ -142,6 +156,39 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(expected_selection,
                              self.model.log_selection(existing_selection))
 
+    def test_create_results_table_with_no_logs(self):
+        parameters = {
+            'Name': ['Height', 'PeakCentre', 'Sigma', 'Cost function value'],
+            'Value': [2309.2, 2.1, 0.04, 30.8],
+            'Error': [16, 0.002, 0.003, 0]
+        }
+        self.fitting_context.fit_list = create_test_fits(('ws1', ), 'func1',
+                                                         parameters)
+        selected_results = [('ws1', 0)]
+        table = self.model.create_results_table([], selected_results)
+
+        self.assertTrue(isinstance(table, ITableWorkspace))
+        self.assertEqual(8, table.columnCount())
+        self.assertEqual(1, table.rowCount())
+        expected_cols = [
+            'workspace_name', 'Height', 'HeightError', 'PeakCentre',
+            'PeakCentreError', 'Sigma', 'SigmaError', 'Cost function value'
+        ]
+        self.assertEqual(expected_cols, table.getColumnNames())
+        self.assertEqual('ws1_Parameters', table.cell(0, 0))
+        for index, (expected_val, expected_err) in enumerate(
+                zip(parameters['Value'], parameters['Error'])):
+            self.assertAlmostEqual(expected_val,
+                                   table.cell(0, 2*index + 1),
+                                   places=2)
+            if 2*index + 2 < table.columnCount():
+                self.assertAlmostEqual(expected_err,
+                                       table.cell(0, 2*index + 2),
+                                       places=2)
+
+        self.assertTrue(
+            self.model.results_table_name() in AnalysisDataService.Instance())
+
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
         self.assertRaises(KeyError, log_names, 'not a workspace in ADS')
@@ -154,7 +201,15 @@ def create_test_workspace():
     return fake_ws
 
 
-def create_test_fits(input_workspaces, checked_states=None):
+def create_test_fits_with_only_workspace_names(input_workspaces,
+                                               checked_states=None):
+    """
+    Create a minimal list of fits and selection states with only
+    workspace names attached to them.
+    :param input_workspaces: The name of the input workspaces to create
+    :param checked_states: Option set of checked states (list of boolean)
+    :return: A 2-tuple of fits, selection states
+    """
     fits = []
     list_state = {}
     if checked_states is None:
@@ -168,6 +223,24 @@ def create_test_fits(input_workspaces, checked_states=None):
         list_state[name] = [index, checked, enabled]
 
     return fits, list_state
+
+
+def create_test_fits(input_workspaces, function_name, parameters):
+    """
+    Create a list of fits
+    :param input_workspaces: The input workspaces
+    :param function_name: The name of the function
+    :param parameters: The parameters list
+    :return: A list of Fits
+    """
+    fits = []
+    for name in input_workspaces:
+        parameter_workspace = mock.NonCallableMagicMock()
+        parameter_workspace.workspace.toDict.return_value = parameters
+        parameter_workspace.workspace_name = name + '_Parameters'
+        fits.append(FitInformation(parameter_workspace, function_name, name))
+
+    return fits
 
 
 if __name__ == '__main__':

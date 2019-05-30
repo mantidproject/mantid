@@ -36,24 +36,24 @@ class ResultsTabPresenter(object):
                 existing_selection=self.view.log_values()))
         self.view.set_output_results_button_enabled(True)
 
+    def on_output_results_request(self):
+        """React to the output results table request"""
+        results_selection = self.view.selected_result_workspaces()
+        if not results_selection:
+            return
+        log_selection = self.view.selected_log_values()
+        self.model.create_results_table(log_selection, results_selection)
+
     # private api
     def _init_view(self):
         """Perform any setup for the view that is related to the model"""
         self.view.set_results_table_name(self.model.results_table_name())
         self.view.results_name_edited.connect(
             self.on_results_table_name_edited)
+        self.view.output_results_requested.connect(
+            self.on_output_results_request)
         self.view.set_output_results_button_enabled(False)
 
-    # def get_performed_fits_by_fit_function(self, fit_function_name):
-    #     return self.context.fitting_context.get_list_of_fits_for_a_given_fit_function(fit_function_name)
-    #
-    # def get_list_of_fit_functions_used(self):
-    #     return self.context.fitting_context.get_list_of_fit_functions()
-    #
-    # def handle_new_fit_performed(self):
-    #     fit_function_list = self.get_list_of_fit_functions_used()
-    #     self.view.update_fit_function_list(fit_function_list)
-    #
     # def handle_fit_function_changed(self):
     #     currently_selected_workspaces = self.view.get_selected_fit_list()
     #     updated_fit_list = self.get_performed_fits_by_fit_function(self.view.fit_function)

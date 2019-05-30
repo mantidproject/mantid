@@ -78,7 +78,7 @@ class FittingContext(object):
 
     def find_fits_for_function(self, fit_function_name):
         """
-        Find the functoins in the list whose function name matches
+        Find the fits in the list whose function name matches
         :param fit_function_name: The name of the function
         :return: A list of any matching fits
         """

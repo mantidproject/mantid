@@ -26,6 +26,7 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
     # Public signals
     function_selection_changed = QtCore.Signal()
     results_name_edited = QtCore.Signal()
+    output_results_requested = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(ResultsTabView, self).__init__(parent)
@@ -58,6 +59,12 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_function_selector.clear()
         self.fit_function_selector.addItems(names)
 
+    def selected_result_workspaces(self):
+        """
+        :return: The list of selected workspaces and their positions in the list
+        """
+        return self.fit_selector_presenter.get_selected_items_and_positions()
+
     def fit_result_workspaces(self):
         """
         :return: The current state of the workspace list selector
@@ -76,6 +83,12 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         """Return the text of the selected item in the function
         selection box"""
         return self.fit_function_selector.currentText()
+
+    def selected_log_values(self):
+        """
+        :return: A list of selected log values and their positions in the list
+        """
+        return self.log_selector_presenter.get_selected_items()
 
     def log_values(self):
         """
@@ -111,6 +124,8 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.function_selection_changed)
         self.results_name_editor.editingFinished.connect(
             self.results_name_edited)
+        self.output_results_table_btn.clicked.connect(
+            self.output_results_requested)
 
     # def update_fit_function_list(self, fit_function_list):
     #     name = self.fit_function_combo.currentText()
