@@ -182,6 +182,7 @@ class GroupingTabPresenter(object):
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()
+            self.handle_update_all_clicked()
         else:
             self.on_clear_requested()
 
