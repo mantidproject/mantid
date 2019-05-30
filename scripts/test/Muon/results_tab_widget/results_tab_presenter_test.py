@@ -33,6 +33,8 @@ class ResultsTabPresenterTest(unittest.TestCase):
         presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
         self.mock_view.set_results_table_name.assert_called_once_with(
             'default_table')
+        self.mock_view.function_selection_changed.connect.assert_called_once_with(
+            presenter.on_function_selection_changed)
         self.mock_view.results_name_edited.connect.assert_called_once_with(
             presenter.on_results_table_name_edited)
         self.mock_view.output_results_requested.connect.assert_called_once_with(
@@ -48,6 +50,16 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         self.mock_view.results_table_name.assert_called_once_with()
         self.mock_model.set_results_table_name.assert_called_once_with(
+            new_name)
+
+    def test_changing_function_selection(self):
+        new_name = 'func 2'
+        self.mock_view.selected_fit_function.return_value = new_name
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter.on_function_selection_changed()
+
+        self.mock_view.selected_fit_function.assert_called_once_with()
+        self.mock_model.set_selected_fit_function.assert_called_once_with(
             new_name)
 
     def test_adding_new_fit_to_existing_fits_preserves_current_selections(

@@ -11,6 +11,8 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 import numpy as np
 
+from Muon.GUI.Common.observer_pattern import GenericObserver
+
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
 ALLOWED_NON_TIME_SERIES_LOGS = ("run_number", "run_start", "run_end", "group",
@@ -34,6 +36,10 @@ class ResultsTabModel(object):
         self._fit_context = fitting_context
         self._results_table_name = DEFAULT_TABLE_NAME
         self._selected_fit_function = None
+
+        self._update_selected_fit_function()
+        self._new_fit_observer = GenericObserver(self._on_new_fit_performed)
+        fitting_context.new_fit_notifier.add_subscriber(self._new_fit_observer)
 
     def results_table_name(self):
         """Return the current name of the results table"""
@@ -74,6 +80,8 @@ class ResultsTabModel(object):
         """
         selection = {}
         for index, fit in enumerate(self._fit_context.fit_list):
+            if fit.fit_function_name != self.selected_fit_function():
+                continue
             name = fit.input_workspace
             if name in existing_selection:
                 checked = existing_selection[name][1]
@@ -131,14 +139,15 @@ class ResultsTabModel(object):
             fit = fit_list[position]
             row_dict = {'workspace_name': fit.parameter_name}
             # logs first
-            workspace = ads[fit.input_workspace]
-            ws_run = workspace.run()
-            for log_name in log_selection:
-                try:
-                    log_value = ws_run.getPropertyAsSingleValue(log_name)
-                except Exception:
-                    log_value = np.nan
-                row_dict.update({log_name: log_value})
+            if len(log_selection) > 0:
+                workspace = ads[fit.input_workspace]
+                ws_run = workspace.run()
+                for log_name in log_selection:
+                    try:
+                        log_value = ws_run.getPropertyAsSingleValue(log_name)
+                    except Exception:
+                        log_value = np.nan
+                    row_dict.update({log_name: log_value})
             # fit parameters
             parameter_dict = fit.parameter_workspace.workspace.toDict()
             for name, value, error in zip(parameter_dict['Name'],
@@ -175,6 +184,24 @@ class ResultsTabModel(object):
         return table
 
     # Private API
+    def _on_new_fit_performed(self):
+        """Called when a new fit has been added to the context.
+        The function name is set to the name fit if it is the first time"""
+        if self.selected_fit_function() is None:
+            self._update_selected_fit_function()
+
+    def _update_selected_fit_function(self):
+        """
+        If there are fits present then set the selected function name or else
+        clear it
+        """
+        if len(self._fit_context) > 0:
+            function_name = self._fit_context.fit_list[0].fit_function_name
+        else:
+            function_name = None
+
+        self.set_selected_fit_function(function_name)
+
     def _first_fit_parameters(self, results_selection):
         """
         Return the first fit in the selected list.
@@ -203,4 +230,4 @@ def log_names(workspace_name):
 def _log_should_be_displayed(log):
     """Returns true if the given log should be included in the display"""
     return isinstance(log, FloatTimeSeriesProperty) or \
-           log.name in ALLOWED_NON_TIME_SERIES_LOGS
+        log.name in ALLOWED_NON_TIME_SERIES_LOGS

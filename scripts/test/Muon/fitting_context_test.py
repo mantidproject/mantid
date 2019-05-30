@@ -13,6 +13,22 @@ class FittingContextTest(unittest.TestCase):
     def setUp(self):
         self.fitting_context = FittingContext()
 
+    def test_len_gives_length_of_fit_list(self):
+        self.assertEqual(0, len(self.fitting_context))
+        self.fitting_context.add_fit(
+            FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
+        self.assertEqual(1, len(self.fitting_context))
+
+    def test_items_can_be_added_to_fitting_context(self):
+        fit_information_object = FitInformation(mock.MagicMock(),
+                                                'MuonGuassOsc',
+                                                mock.MagicMock())
+
+        self.fitting_context.add_fit(fit_information_object)
+
+        self.assertEqual(fit_information_object,
+                         self.fitting_context.fit_list[0])
+
     def test_items_can_be_added_to_fitting_context(self):
         fit_information_object = FitInformation(mock.MagicMock(),
                                                 'MuonGuassOsc',

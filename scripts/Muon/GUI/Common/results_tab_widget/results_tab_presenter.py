@@ -28,12 +28,9 @@ class ResultsTabPresenter(object):
     def on_new_fit_performed(self):
         """React to a new fit created in the fitting tab"""
         self.view.set_fit_function_names(self.model.fit_functions())
-        self.view.set_fit_result_workspaces(
-            self.model.fit_selection(
-                existing_selection=self.view.fit_result_workspaces()))
-        self.view.set_log_values(
-            self.model.log_selection(
-                existing_selection=self.view.log_values()))
+
+        self._update_fit_results_view()
+        self._update_logs_view()
         self.view.set_output_results_button_enabled(True)
 
     def on_output_results_request(self):
@@ -44,6 +41,11 @@ class ResultsTabPresenter(object):
         log_selection = self.view.selected_log_values()
         self.model.create_results_table(log_selection, results_selection)
 
+    def on_function_selection_changed(self):
+        """React to the change in function selection"""
+        self.model.set_selected_fit_function(self.view.selected_fit_function())
+        self._update_fit_results_view()
+
     # private api
     def _init_view(self):
         """Perform any setup for the view that is related to the model"""
@@ -52,15 +54,18 @@ class ResultsTabPresenter(object):
             self.on_results_table_name_edited)
         self.view.output_results_requested.connect(
             self.on_output_results_request)
+        self.view.function_selection_changed.connect(
+            self.on_function_selection_changed)
         self.view.set_output_results_button_enabled(False)
 
-    # def handle_fit_function_changed(self):
-    #     currently_selected_workspaces = self.view.get_selected_fit_list()
-    #     updated_fit_list = self.get_performed_fits_by_fit_function(self.view.fit_function)
-    #
-    #     new_model_dictionary = {item.parameter_name: [index, item.parameter_name in currently_selected_workspaces, True]
-    #                             for index, item in enumerate(updated_fit_list)}
-    #
-    #     self.view.update_fit_selector_model(new_model_dictionary)
-    #     self.update_logs_list(updated_fit_list)
-    #
+    def _update_fit_results_view(self):
+        """Update the view of results workspaces based on the current model"""
+        self.view.set_fit_result_workspaces(
+            self.model.fit_selection(
+                existing_selection=self.view.fit_result_workspaces()))
+
+    def _update_logs_view(self):
+        """Update the view of logs based on the current model"""
+        self.view.set_log_values(
+            self.model.log_selection(
+                existing_selection=self.view.log_values()))

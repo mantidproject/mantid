@@ -52,12 +52,19 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.results_name_editor.setText(name)
 
     def set_fit_function_names(self, names):
-        """Set a new list of function names for the function selector.
+        """Set a new list of function names for the function selector. This blocks
+        signals from the widget during the update
 
         :param names: A list of strings specifying function names used in known fits
         """
-        self.fit_function_selector.clear()
-        self.fit_function_selector.addItems(names)
+        function_selector = self.fit_function_selector
+        original_selection = function_selector.currentText()
+        function_selector.blockSignals(True)
+        function_selector.clear()
+        function_selector.addItems(names)
+        if original_selection:
+            function_selector.setCurrentText(original_selection)
+        function_selector.blockSignals(False)
 
     def selected_result_workspaces(self):
         """

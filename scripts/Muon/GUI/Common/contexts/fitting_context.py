@@ -33,8 +33,8 @@ class FitInformation(object):
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
         return self.parameter_workspace == other.parameter_workspace and \
-               self.fit_function_name == other.fit_function_name and \
-               self.input_workspace == other.input_workspace
+            self.fit_function_name == other.fit_function_name and \
+            self.input_workspace == other.input_workspace
 
 
 class FittingContext(object):
@@ -51,6 +51,12 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+
+    def __len__(self):
+        """
+        :return: The number of fits in the list
+        """
+        return len(self.fit_list)
 
     def add_fit_from_values(self, parameter_workspace, fit_function_name,
                             input_workspace):
