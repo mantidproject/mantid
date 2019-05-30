@@ -400,36 +400,22 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     NeXus::NXInt &data, const std::vector<double> &timeBinning,
     size_t firstIndex = 0) {
 
-  g_log.debug("Loading the data into the workspace:");
-  g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << '\n';
-  g_log.debug() << "\t"
-                << "Number of Tubes : data.dim0() = " << data.dim0() << '\n';
-  g_log.debug() << "\t"
-                << "Number of Pixels : data.dim1() = " << data.dim1() << '\n';
-  g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << '\n';
-  g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << '\n';
-
   // Workaround to get the number of tubes / pixels
   const size_t numberOfTubes = data.dim0();
   const size_t numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
-  size_t spec = firstIndex;
 
-  for (size_t i = 0; i < numberOfTubes; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
-      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-      ++spec;
+      m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
     }
   }
 
-  g_log.debug() << "Data loading inti WS done....\n";
-
-  return spec;
+  return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }
 
 /**
