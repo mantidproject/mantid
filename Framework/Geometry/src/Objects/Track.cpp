@@ -141,8 +141,9 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
     if (sameDirectionAsPrevious) {
       if (lowestPtr != m_surfPoints.end()) {
         // replace the point
+        const IntersectionPoint removable(*lowestPtr);
         m_surfPoints.insert(lowestPtr, std::move(newPoint));
-        m_surfPoints.erase(lowestPtr);
+        m_surfPoints.remove(removable);
       }
       // don't add it at the end
     } else {

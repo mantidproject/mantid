@@ -127,6 +127,17 @@ struct IntersectionPoint {
                                       : direction < other.direction;
   }
 
+  inline bool operator==(const IntersectionPoint &other) const {
+    if (direction != other.direction)
+      return false;
+
+    const double diff = fabs(distFromStart - other.distFromStart);
+    if (diff > Kernel::Tolerance)
+      return false;
+
+    return endPoint == other.endPoint;
+  }
+
   /** @name Attributes. */
   //@{
   TrackDirection direction; ///< Directional flag
