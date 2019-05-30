@@ -38,7 +38,7 @@ public:
 
   void testConstructWithNonCyclerThrowsInvalidArgument() {
     Python::Object none;
-    TS_ASSERT_THROWS(Cycler cycler(none), std::invalid_argument);
+    TS_ASSERT_THROWS(Cycler cycler(none), const std::invalid_argument &);
   }
 };
 

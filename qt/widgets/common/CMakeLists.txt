@@ -144,7 +144,6 @@ set(
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/IFunctionView.h
-  inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
@@ -178,7 +177,6 @@ set(
   inc/MantidQtWidgets/Common/UserFunctionDialog.h
   inc/MantidQtWidgets/Common/UserSubWindow.h
   inc/MantidQtWidgets/Common/VatesViewerInterface.h
-  inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
@@ -220,6 +218,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
     inc/MantidQtWidgets/Common/HelpWindow.h
+    inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/IFunctionView.h
@@ -233,6 +232,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
+    inc/MantidQtWidgets/Common/WorkspaceIcons.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
     inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h

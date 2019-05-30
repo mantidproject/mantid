@@ -194,8 +194,8 @@ public:
   test_Index_Greater_Than_numDims_Or_Less_Than_Zero_Throws_Invalid_Argument() {
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    TS_ASSERT_THROWS(PlotAxis(*ws, 2), std::invalid_argument);
-    TS_ASSERT_THROWS(PlotAxis(*ws, -1), std::invalid_argument);
+    TS_ASSERT_THROWS(PlotAxis(*ws, 2), const std::invalid_argument &);
+    TS_ASSERT_THROWS(PlotAxis(*ws, -1), const std::invalid_argument &);
   }
 };
 

@@ -234,7 +234,7 @@ public:
     TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     TS_ASSERT_THROWS(cf = Material::parseChemicalFormula("H2*O"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_EQUALS(cf.size(), 2);
     TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
     TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);

@@ -68,8 +68,9 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
 
     # Generate the paths
     grouping_file_path = os.path.join(calibration_dir,  grouping_file_name)
-    splined_van_path = os.path.join(calibration_dir, label, splined_van_name)
-    unsplined_van_path = os.path.join(calibration_dir, label, unsplined_van_name)
+    van_paths = os.path.join(calibration_dir, label)
+    splined_van_path = os.path.join(van_paths, splined_van_name)
+    unsplined_van_path = os.path.join(van_paths, unsplined_van_name)
     van_absorb_path = os.path.join(calibration_dir, van_abs_file_name) if van_abs_file_name else None
 
     return _RunDetails(empty_run_number=empty_run_number, file_extension=file_extension,
@@ -77,7 +78,7 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
                        offset_file_path=offset_file_path, grouping_file_path=grouping_file_path,
                        splined_vanadium_path=splined_van_path, vanadium_run_number=vanadium_string,
                        sample_empty=sample_empty, vanadium_abs_path=van_absorb_path,
-                       unsplined_vanadium_path=unsplined_van_path, output_suffix=suffix)
+                       unsplined_vanadium_path=unsplined_van_path, output_suffix=suffix,van_paths=van_paths)
 
 
 def get_cal_mapping_dict(run_number_string, cal_mapping_path):
@@ -95,7 +96,7 @@ class _RunDetails(object):
 
     def __init__(self, empty_run_number, file_extension, run_number, output_run_string, label,
                  offset_file_path, grouping_file_path, splined_vanadium_path, vanadium_run_number,
-                 sample_empty, vanadium_abs_path, unsplined_vanadium_path, output_suffix):
+                 sample_empty, vanadium_abs_path, unsplined_vanadium_path, output_suffix,van_paths):
 
         # Essential attribute
         self.empty_runs = empty_run_number
@@ -116,3 +117,4 @@ class _RunDetails(object):
         self.sample_empty = sample_empty
         self.vanadium_absorption_path = vanadium_abs_path
         self.output_suffix = output_suffix
+        self.van_paths = van_paths

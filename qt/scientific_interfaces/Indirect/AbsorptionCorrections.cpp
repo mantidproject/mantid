@@ -438,6 +438,19 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCanInput->readSettings(settings.group());
 }
 
+void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("CalculateMonteCarlo");
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                               : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                               : noSuffixes);
+  m_uiForm.dsCanInput->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                            : getExtensions(tabName));
+  m_uiForm.dsCanInput->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                            : noSuffixes);
+}
+
 void AbsorptionCorrections::processWavelengthWorkspace() {
   auto correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
   if (correctionsWs) {

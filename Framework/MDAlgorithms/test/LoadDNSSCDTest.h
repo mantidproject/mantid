@@ -817,7 +817,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Normalization", "monitor"));
 
     // algorithm should throw if no valid files is provided
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

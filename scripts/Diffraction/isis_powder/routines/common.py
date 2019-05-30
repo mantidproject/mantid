@@ -129,7 +129,7 @@ def extract_ws_spectra(ws_to_split):
     num_spectra = ws_to_split.getNumberHistograms()
     spectra_bank_list = []
     for i in range(0, num_spectra):
-        output_name = ws_to_split.getName() + "-" + str(i + 1)
+        output_name = ws_to_split.name() + "-" + str(i + 1)
         # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
         spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
                                                       StartWorkspaceIndex=i, EndWorkspaceIndex=i))
@@ -545,7 +545,7 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
 def _strip_vanadium_peaks(workspaces_to_strip):
     out_list = []
     for i, ws in enumerate(workspaces_to_strip):
-        out_name = ws.getName() + "_toSpline-" + str(i+1)
+        out_name = ws.name() + "_toSpline-" + str(i+1)
         out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
     return out_list
 

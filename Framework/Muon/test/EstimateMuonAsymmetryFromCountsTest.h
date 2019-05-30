@@ -199,7 +199,7 @@ public:
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
   void test_BackwardsRange() {
     auto ws = createWorkspace(1, 50);
@@ -211,7 +211,7 @@ public:
     alg->setProperty("StartX", 0.9);
     alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
   void test_NumberOfDataPoints() {
 

@@ -213,6 +213,19 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
 }
 
+void ContainerSubtraction::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ContainerSubtraction");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                             : noSuffixes);
+}
+
 /**
  * Displays the sample data on the plot preview
  * @param dataName Name of new data source

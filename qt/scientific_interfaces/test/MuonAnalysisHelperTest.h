@@ -404,7 +404,7 @@ public:
     const auto currentWs = createWs("MUSR", 15189);
     const auto loadedWs = nullptr;
     TS_ASSERT_THROWS(isReloadGroupingNecessary(currentWs, loadedWs),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_isReloadGroupingNecessary_noLogs() {

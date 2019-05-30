@@ -854,7 +854,7 @@ public:
     auto geom_obj = createOctahedron();
     size_t maxAttempts(1);
     TS_ASSERT_THROWS(geom_obj->generatePointInObject(rng, maxAttempts),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testVolumeOfCube() {

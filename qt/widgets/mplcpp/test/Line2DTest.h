@@ -37,7 +37,7 @@ public:
   // ---------------------- failure tests --------------------
   void testConstructionWithNonLine2DObjectThrowsInvalidArgument() {
     Python::Object obj{Python::NewRef(Py_BuildValue("(i)", 1))};
-    TS_ASSERT_THROWS(Line2D line(obj, {}, {}), std::invalid_argument);
+    TS_ASSERT_THROWS(Line2D line(obj, {}, {}), const std::invalid_argument &);
   }
 
 private:

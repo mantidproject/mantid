@@ -105,7 +105,7 @@ public:
 
     PoldiInstrumentAdapter_sptr invalid;
     TS_ASSERT_THROWS(transformer.initializeFromPoldiInstrument(invalid),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void TestCalculatedTotalIntensity() {

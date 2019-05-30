@@ -476,7 +476,7 @@ public:
 
     for (auto &&invalidName : invalidWorkspaceNames)
       TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidName),
-                       std::invalid_argument);
+                       const std::invalid_argument &);
   }
 
   void test_checkValidPair_throws_if_ItemType_Asym() {
@@ -485,7 +485,7 @@ public:
     const std::string invalidWorkspaceName =
         "EMU000015189; Group; fwd; Asym; 1+2; #1";
     TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_checkValidPair_throws_if_different_instruments() {
@@ -494,7 +494,7 @@ public:
     const std::string invalidWorkspaceName =
         "MUSR00015189; Group; fwd; Counts; 1+2; #1";
     TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_checkValidPair_does_not_throw_if_same_group() {
@@ -503,7 +503,7 @@ public:
     const std::string invalidWorkspaceName =
         "EMU000015189; Group; fwd; Counts; 1+2; #1";
     TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_checkValidGroupPairName_invalid_names() {

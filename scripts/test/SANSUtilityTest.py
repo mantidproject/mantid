@@ -379,7 +379,7 @@ class AddOperationTest(unittest.TestCase):
         # Total time difference is TIME1 - (TIME2 + extraShift)
         shift = 0.0
         if isOverlay:
-            shift = time_duration.total_nanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift
+            shift = time_duration.totalNanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift
 
         # Check ws1 against output
         # We shift the second workspace onto the first workspace
@@ -539,7 +539,7 @@ class TestOverlayWorkspaces(unittest.TestCase):
         time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
 
         # Assert
-        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        expected_time_difference = time_duration.totalNanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
         self.assertEqual(time_difference, expected_time_difference)
 
         # Clean up
@@ -564,7 +564,7 @@ class TestOverlayWorkspaces(unittest.TestCase):
         time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
 
         # Assert
-        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        expected_time_difference = time_duration.totalNanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
         expected_time_difference -= optional_time_shift # Need to subtract as we add the time shift to the subtrahend
         self.assertEqual(time_difference, expected_time_difference)
 
@@ -1640,7 +1640,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_SANS2D_workspace_is_renamed_correctly(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_rear"))
         self.assertTrue(out_name == "test_rear")
@@ -1674,7 +1674,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_LOQ_workspace_is_renamed_correctly(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
         out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_main"))
         self.assertTrue(out_name == "test_main")
@@ -1690,7 +1690,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_LARMOR_workspace_is_not_renamed(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
 
         out_name = su.rename_workspace_correctly("LARMOR", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test"))
@@ -1701,7 +1701,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_that_raies_for_unkown_reduction_type(self):
         workspace = self._create_sample_workspace()
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
         args = ["SANS2D", "jsdlkfsldkfj", "test", workspace_name]
 
         self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
@@ -1710,7 +1710,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
     def test_run_number_should_be_replaced_if_workspace_starts_with_number(self):
         workspace = self._create_sample_workspace(name='12345rear_1D_w1_W2_t1_T2')
-        workspace_name = workspace.getName()
+        workspace_name = workspace.name()
 
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, 'NewName', workspace_name)
 

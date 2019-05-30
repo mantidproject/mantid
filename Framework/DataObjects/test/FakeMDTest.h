@@ -37,7 +37,7 @@ public:
 
     TS_ASSERT_THROWS(
         FakeMD(uniformParams, peakParams, randomSeed, randomizeSignal),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   //---------------------------------------------------------------------------

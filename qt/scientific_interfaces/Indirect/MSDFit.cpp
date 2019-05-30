@@ -53,9 +53,6 @@ void MSDFit::setupFitTab() {
   addComboBoxFunctionGroup("Peters", {peters});
   addComboBoxFunctionGroup("Yi", {yi});
 
-  setSampleWSSuffices({"_eq"});
-  setSampleFBSuffices({"_eq.nxs"});
-
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));

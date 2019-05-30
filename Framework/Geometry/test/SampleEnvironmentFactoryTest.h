@@ -62,14 +62,14 @@ public:
     SampleEnvironmentFactory factory(
         Mantid::Kernel::make_unique<NullSampleEnvSpecFinder>());
     TS_ASSERT_THROWS(factory.create("unknown", "unknown", "unknown", "unknown"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Known_Specification_Unknown_Container_Throws() {
     SampleEnvironmentFactory factory(
         Mantid::Kernel::make_unique<TestSampleEnvSpecFinder>());
     TS_ASSERT_THROWS(factory.create("unknown", "unknown", "CRYO001", "unknown"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   //----------------------------------------------------------------------------

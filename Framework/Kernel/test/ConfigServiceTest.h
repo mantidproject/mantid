@@ -146,10 +146,6 @@ public:
     ConfigService::Instance().setFacility("SNS");
     const FacilityInfo &fac1 = ConfigService::Instance().getFacility();
     TS_ASSERT_EQUALS(fac1.name(), "SNS");
-
-    //    // Non existent facility
-    //    TS_ASSERT_THROWS(ConfigService::Instance().setFacility(""),
-    //    Mantid::Kernel::Exception::NotFoundError);
   }
 
   void testFacilityList() {
@@ -187,7 +183,7 @@ public:
 
     // Check we throw the correct error for a nonsense beamline.
     // TS_ASSERT_THROWS(ConfigService::Instance().getInstrument("MyBeamline").name(),
-    // NotFoundError);
+    // const NotFoundError &);
 
     // Now find by using short name
     TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BSS").name(),

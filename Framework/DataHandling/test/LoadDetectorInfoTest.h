@@ -275,7 +275,7 @@ public:
     makeTestWorkspace(SmallTestDatFile::NDETECTS, NBINS, m_InoutWS);
     loadDetInfo.setPropertyValue("Workspace", m_InoutWS);
     loadDetInfo.setPropertyValue("DataFilename", "argus0026287.nxs");
-    TS_ASSERT_THROWS(loadDetInfo.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(loadDetInfo.execute(), const std::invalid_argument &);
 
     AnalysisDataService::Instance().remove(m_InoutWS);
   }

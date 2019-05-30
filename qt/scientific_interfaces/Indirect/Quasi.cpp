@@ -10,8 +10,13 @@
 
 using namespace Mantid::API;
 
+namespace {
+Mantid::Kernel::Logger g_log("Quasi");
+}
+
 namespace MantidQt {
 namespace CustomInterfaces {
+
 Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
@@ -89,6 +94,19 @@ void Quasi::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
   m_uiForm.dsResNorm->readSettings(settings.group());
   m_uiForm.mwFixWidthDat->readSettings(settings.group());
+}
+
+void Quasi::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Quasi");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
 }
 
 void Quasi::setup() {}
@@ -243,7 +261,11 @@ void Quasi::updateMiniPlot() {
   m_uiForm.ppPlot->clear();
 
   QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  try {
+    m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 
   // Update fit plot
   QString program = m_uiForm.cbProgram->currentText();
@@ -294,8 +316,12 @@ void Quasi::updateMiniPlot() {
     else
       continue;
 
-    m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex,
-                                 curveColour);
+    try {
+      m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex,
+                                   curveColour);
+    } catch (std::exception const &ex) {
+      g_log.warning(ex.what());
+    }
   }
 }
 

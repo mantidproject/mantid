@@ -105,7 +105,7 @@ public:
   void testcheckAndSanitizeHistogramThrowsNullY() {
     Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
     BinEdges edges{-0.04, 1.7};
-    TS_ASSERT_THROWS(h.setHistogram(edges), std::invalid_argument);
+    TS_ASSERT_THROWS(h.setHistogram(edges), const std::invalid_argument &);
   }
 
   void testcheckAndSanitizeHistogramThrowsNullE() {
@@ -114,7 +114,7 @@ public:
     Histogram histogram{edges};
     Counts counts{23};
     histogram.setCounts(counts);
-    TS_ASSERT_THROWS(h.setHistogram(histogram), std::invalid_argument);
+    TS_ASSERT_THROWS(h.setHistogram(histogram), const std::invalid_argument &);
   }
 
   void testsetgetXvector() {
@@ -171,16 +171,16 @@ public:
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
-    TS_ASSERT_THROWS(h.dataX().at(nel), std::out_of_range);
+    TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
-    TS_ASSERT_THROWS(h.dataY().at(nel), std::out_of_range);
+    TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
-    TS_ASSERT_THROWS(h.dataE().at(nel), std::out_of_range);
+    TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
   }
 
   void test_copy_constructor() {

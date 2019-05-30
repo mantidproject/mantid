@@ -71,6 +71,12 @@ public:
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
+  /// Prevent loading of data with incorrect naming
+  void filterInputData(bool filter);
+
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
 protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
@@ -97,15 +103,12 @@ protected slots:
   void inputChanged();
 
 private:
-  /// Overidden by child class.
   void setup() override = 0;
-  /// Overidden by child class.
   void run() override = 0;
-  /// Overidden by child class.
   bool validate() override = 0;
 
-  /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
+  virtual void setFileExtensionsByName(bool filter) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

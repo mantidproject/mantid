@@ -129,7 +129,7 @@ class Pearl(AbstractInst):
         # Ensure the name is unique if we are in tt_mode all
         new_workspace_names = []
         for ws in splined_list:
-            new_name = ws.getName() + '_' + self._inst_settings.tt_mode
+            new_name = ws.name() + '_' + self._inst_settings.tt_mode
             new_workspace_names.append(mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace=new_name))
 
         return new_workspace_names

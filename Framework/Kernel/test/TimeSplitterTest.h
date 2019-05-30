@@ -143,14 +143,14 @@ public:
     stop_b = DateAndTime("2007-11-30T16:17:02");
     b = SplittingInterval(start_b, stop_b, 0);
     TS_ASSERT(!a.overlaps(b));
-    TS_ASSERT_THROWS(c = a | b;, std::invalid_argument);
+    TS_ASSERT_THROWS(c = a | b;, const std::invalid_argument &);
 
     // No overlap (a < b)
     start_b = DateAndTime("2007-11-30T16:17:30");
     stop_b = DateAndTime("2007-11-30T16:17:42");
     b = SplittingInterval(start_b, stop_b, 0);
     TS_ASSERT(!a.overlaps(b));
-    TS_ASSERT_THROWS(c = a | b;, std::invalid_argument);
+    TS_ASSERT_THROWS(c = a | b;, const std::invalid_argument &);
   }
 
   //----------------------------------------------------------------------------
@@ -474,7 +474,7 @@ public:
     TS_ASSERT_EQUALS(i.index(), 2);
 
     // This fails since you can't add splitters together
-    TS_ASSERT_THROWS(b + b, std::invalid_argument);
+    TS_ASSERT_THROWS(b + b, const std::invalid_argument &);
   }
 
   //----------------------------------------------------------------------------

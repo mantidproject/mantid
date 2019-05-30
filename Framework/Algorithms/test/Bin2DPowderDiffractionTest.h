@@ -229,7 +229,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

@@ -519,6 +519,23 @@ void ApplyAbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
 }
 
+void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ApplyCorrections");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                             : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                             : noSuffixes);
+  m_uiForm.dsCorrections->setFBSuffixes(
+      filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsCorrections->setWSSuffixes(
+      filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
+}
+
 /**
  * Replots the preview plot.
  *

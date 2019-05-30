@@ -48,6 +48,12 @@ public:
                            QObject *parent = nullptr);
   ~IndirectDataReductionTab() override;
 
+  /// Prevent loading of data with incorrect naming
+  void filterInputData(bool filter);
+
+  /// Allows the user to turn the plotting of error bars off and on
+  void setPlotErrorBars(bool errorBars);
+
 public slots:
   void runTab();
 
@@ -86,6 +92,8 @@ private slots:
   void tabExecutionComplete(bool error);
 
 private:
+  virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+
   IndirectDataReduction *m_idrUI;
   bool m_tabRunning;
 };

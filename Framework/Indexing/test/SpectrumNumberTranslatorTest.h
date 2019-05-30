@@ -148,7 +148,7 @@ public:
 
     spectrumNumbers[1] = 7; // 7 is not in parent.
     TS_ASSERT_THROWS(SpectrumNumberTranslator(spectrumNumbers, parent),
-                     std::out_of_range);
+                     const std::out_of_range &);
   }
 
   void test_access_bad_spectrum_numbers() {
@@ -169,9 +169,9 @@ public:
     // Access via spectrum numbers fails.
     TS_ASSERT_THROWS(
         translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(3)),
-        std::logic_error);
+        const std::logic_error &);
     TS_ASSERT_THROWS(translator.makeIndexSet(makeSpectrumNumbers({1})),
-                     std::logic_error);
+                     const std::logic_error &);
     // Access via global spectrum index works.
     TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet(GlobalSpectrumIndex(1),
                                                      GlobalSpectrumIndex(2)));
@@ -249,11 +249,11 @@ public:
   void test_makeIndexSet_minmax_range_failures() {
     auto t = makeTranslator(1, 0);
     TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(0), SpectrumNumber(5)),
-                     std::out_of_range);
+                     const std::out_of_range &);
     TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(1), SpectrumNumber(6)),
-                     std::out_of_range);
+                     const std::out_of_range &);
     TS_ASSERT_THROWS(t->makeIndexSet(SpectrumNumber(1), SpectrumNumber(3)),
-                     std::out_of_range);
+                     const std::out_of_range &);
   }
 
   void test_makeIndexSet_minmax_full_1_rank() {
@@ -314,21 +314,21 @@ public:
     auto t = makeTranslator(3, 1);
     TS_ASSERT_THROWS(
         t->makeIndexSet(GlobalSpectrumIndex(1), GlobalSpectrumIndex(0)),
-        std::logic_error);
+        const std::logic_error &);
     TS_ASSERT_THROWS(
         t->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(4)),
-        std::out_of_range);
+        const std::out_of_range &);
     TS_ASSERT_THROWS(
         t->makeIndexSet(GlobalSpectrumIndex(5), GlobalSpectrumIndex(4)),
-        std::logic_error);
+        const std::logic_error &);
     // -1 converted to size_t is positive and >> 1
     TS_ASSERT_THROWS(
         t->makeIndexSet(GlobalSpectrumIndex(-1), GlobalSpectrumIndex(1)),
-        std::logic_error);
+        const std::logic_error &);
     // -1 converted to size_t is > 0 but out of range
     TS_ASSERT_THROWS(
         t->makeIndexSet(GlobalSpectrumIndex(0), GlobalSpectrumIndex(-1)),
-        std::out_of_range);
+        const std::out_of_range &);
   }
 
   void test_makeIndexSet_minmax_GlobalSpectrumIndex_3_ranks() {
@@ -360,7 +360,7 @@ public:
   void test_makeIndexSet_partial_3_ranks_range_checks() {
     auto translator = makeTranslator(3, 1);
     TS_ASSERT_THROWS(translator->makeIndexSet(makeSpectrumNumbers({0})),
-                     std::out_of_range);
+                     const std::out_of_range &);
     // Index is not on this rank but it is correct.
     TS_ASSERT_THROWS_NOTHING(
         translator->makeIndexSet(makeSpectrumNumbers({2})));
@@ -393,9 +393,9 @@ public:
   void test_makeIndexSet_GlobalSpectrumIndex_partial_3_ranks_range_checks() {
     auto t = makeTranslator(3, 0);
     TS_ASSERT_THROWS(t->makeIndexSet(makeGlobalSpectrumIndices({-1})),
-                     std::out_of_range);
+                     const std::out_of_range &);
     TS_ASSERT_THROWS(t->makeIndexSet(makeGlobalSpectrumIndices({4})),
-                     std::out_of_range);
+                     const std::out_of_range &);
     // Index is not on this rank but it is correct.
     TS_ASSERT_THROWS_NOTHING(t->makeIndexSet(makeGlobalSpectrumIndices({1})));
     TS_ASSERT_EQUALS(t->makeIndexSet(makeGlobalSpectrumIndices({1})).size(), 0);
