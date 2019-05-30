@@ -87,7 +87,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         self.mock_model.fit_functions.assert_called_once_with()
         self.mock_model.fit_selection.assert_called_once_with(
-            orig_ws_list_state)
+            existing_selection=orig_ws_list_state)
         self.mock_view.set_fit_function_names.assert_called_once_with(
             test_functions)
         self.mock_view.fit_result_workspaces.assert_called_once_with()
@@ -116,7 +116,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
         self.mock_view.log_values.assert_called_once_with()
         self.mock_model.log_selection.assert_called_once_with(
-            existing_selection)
+            existing_selection=existing_selection)
         final_selection = {
             'run_number': [0, False, True],
             'run_start': [1, True, True],
