@@ -12,6 +12,7 @@ SANS Changes
 :ref:`Release 4.1.0 <v4.1.0>`
 
 - New IDF for EQSANS
+- New algorithm :ref:`SANSMaskDTP <algm-SANSMaskDTP>` which masks detectors, tubes or pixels in an ORNL SANS instrument
 
 ISIS SANS Interface
 -------------------
