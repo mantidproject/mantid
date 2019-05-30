@@ -78,7 +78,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget()
+        self.help_widget = HelpWidget("Frequency Domain Analysis")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
