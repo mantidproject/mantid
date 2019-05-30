@@ -133,6 +133,7 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         compatibility = state.compatibility
         is_event_workspace = isinstance(workspace, IEventWorkspace)
+        use_dummy_workspace = False
         if compatibility.use_compatibility_mode and is_event_workspace:
             # We convert the workspace here to a histogram workspace, since we cannot otherwise
             # compare the results between the old and the new reduction workspace in a meaningful manner.
@@ -156,16 +157,16 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
                 rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
                 rebin_alg.execute()
                 workspace = rebin_alg.getProperty("OutputWorkspace").value
-        else:
-            pass
+        elif is_event_workspace and not compatibility.use_compatibility_mode:
+            use_dummy_workspace = True
             rebin_name = "RebinToWorkspace"
             rebin_option = {"WorkspaceToRebin": workspace,
                             "WorkspaceToMatch": monitor_workspace,
-                            "OutputWorkspace": EMPTY_NAME,
+                            "OutputWorkspace": "dummy_mask_workspace",
                             "PreserveEvents": False}
             rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
             rebin_alg.execute()
-            workspace = rebin_alg.getProperty("OutputWorkspace").value
+            dummy_mask_workspace = rebin_alg.getProperty("OutputWorkspace").value
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY END
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -189,13 +190,32 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         # 6. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
-        workspace = self._convert_to_wavelength(state_serialized, workspace)
+        workspace, conversion_factor = self._convert_to_wavelength(state_serialized, workspace)
+        # Convert and rebin the dummy workspace to get correct bin flags
+        if use_dummy_workspace:
+            dummy_mask_workspace = mask_bins(state.mask, dummy_mask_workspace, DetectorType.from_string(component_as_string))
+            dummy_mask_workspace, _ = self._convert_to_wavelength(state_serialized, dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
         workspace = self._scale(state_serialized, workspace)
+
+
+        # ------------------------------------------------------------
+        # 9. Convert event workspaces to histogram workspaces
+        # ------------------------------------------------------------
+        progress.report("Converting to histogram mode ...")
+        workspace = self._convert_to_histogram(workspace)
+
+        # ------------------------------------------------------------
+        # 10. ? Re-mask. We need to bin mask in histogram mode in order
+        #      to have knowledge of masked regions: masking
+        #      EventWorkspaces simply removes their events
+        # ------------------------------------------------------------
+        if use_dummy_workspace:
+            workspace = self._copy_bin_masks(workspace, dummy_mask_workspace)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are
@@ -353,6 +373,14 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         return wavelength_adjustment, pixel_adjustment, wavelength_and_pixel_adjustment, \
             calculated_transmission_workspace, unfitted_transmission_workspace
 
+    def _copy_bin_masks(self, workspace, dummy_workspace):
+        mask_options = {"InputWorkspace": workspace,
+                        "MaskedWorkspace": dummy_workspace,
+                        "OutputWorkspace": EMPTY_NAME}
+        mask_alg = create_child_algorithm(self, "MaskBinsFromWorkspace", **mask_options)
+        mask_alg.execute()
+        return mask_alg.getProperty("OutputWorkspace").value
+
     def _convert_to_histogram(self, workspace):
         if isinstance(workspace, IEventWorkspace):
             convert_name = "RebinToWorkspace"
@@ -435,18 +463,6 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         clone_alg = create_child_algorithm(self, clone_name, **clone_options)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
-
-    def _create_dummy_mask_workspace(self, workspace):
-        x = list(workspace.readX(0))
-        y = [0.] * (len(x) - 1)  # y values are irrelevant
-
-        create_workspace_options = {"OutputWorkspace": "DummyMaskWorkspace",
-                                    "DataX": x,
-                                    "DataY": y,
-                                    "UnitX": "TOF"}
-        create_workspace_alg = create_child_algorithm(self, "CreateWorkspace", **create_workspace_options)
-        create_workspace_alg.execute()
-        return create_workspace_alg.getProperty("OutputWorkspace").value
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=10)
