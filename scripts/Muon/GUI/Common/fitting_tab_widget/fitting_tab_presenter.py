@@ -5,11 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
-from Muon.GUI.Common.observer_pattern import GenericObserver
+from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from mantid.api import FunctionFactory
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
+import re
 
 
 class FittingTabPresenter(object):
@@ -25,7 +26,7 @@ class FittingTabPresenter(object):
         self._fit_function = [None]
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
-        self.gui_context_observer = GenericObserver(self.update_selected_workspace_guess)
+        self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
 
     def handle_select_fit_data_clicked(self):
@@ -43,6 +44,13 @@ class FittingTabPresenter(object):
     def handle_new_data_loaded(self):
         self.manual_selection_made = False
         self.update_selected_workspace_guess()
+
+    def handle_gui_changes_made(self, changed_values):
+        for key in changed_values.keys():
+            if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
+                self.reset_start_time_to_first_good_data_value()
+            if key == 'selected_group_pair' and changed_values[key]:
+                self.update_selected_workspace_guess()
 
     def update_selected_workspace_guess(self):
         fit_type = self.view.fit_type
@@ -78,6 +86,9 @@ class FittingTabPresenter(object):
             self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index], self._fit_chi_squared[current_index])
         else:
             self.view.function_browser.setCurrentDataset(current_index)
+
+        if self.view.fit_type == self.view.single_fit:
+            self.view.update_global_fit_state(self._fit_status)
 
     def handle_use_rebin_changed(self):
         if not self.view.fit_to_raw and not self.context._do_rebin():
@@ -216,14 +227,13 @@ class FittingTabPresenter(object):
         self._fit_status = ['no fit'] * len(new_workspace_list)
         self._fit_chi_squared = [0.0] * len(new_workspace_list)
         self._fit_function = [None] * len(new_workspace_list)
-        self._start_x = [self.view.start_time] * len(new_workspace_list)
-        self._end_x = [self.view.end_time] * len(new_workspace_list)
         if self.view.fit_type == self.view.simultaneous_fit:
             self.view.set_datasets_in_function_browser(self.selected_data)
         else:
             self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
 
         self.view.update_displayed_data_combo_box(self.selected_data)
+        self.reset_start_time_to_first_good_data_value()
 
     @property
     def start_x(self):
@@ -242,3 +252,15 @@ class FittingTabPresenter(object):
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
         return thread_model.ThreadModel(self.fitting_calculation_model)
+
+    def retrieve_first_good_data_from_run_name(self, workspace_name):
+        run = [float(re.search('[0-9]+', workspace_name).group())]
+
+        return self.context.first_good_data(run)
+
+    def reset_start_time_to_first_good_data_value(self):
+        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data]
+        self._end_x = [self.view.end_time] * len(self.selected_data)
+        current_index = self.view.get_index_for_start_end_times()
+        self.view.start_time = self.start_x[current_index] if current_index < len(self.start_x) else 0.0
+        self.view.end_time = self.end_x[current_index] if current_index < len(self.end_x) else 15.0

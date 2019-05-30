@@ -261,5 +261,14 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(self.view.function_browser.getFitFunctionString(), 'name=GausOsc,A=0.6,Sigma=0.6,Frequency=0.6,Phi=0')
         self.assertEqual(self.view.fit_status_success_failure.text(), 'Failure: failure with message')
 
+    def test_get_first_good_data_for_workspace_retrieves_correct_first_good_data(self):
+        self.presenter.context.first_good_data = mock.MagicMock(return_value=0.34)
+
+        first_good_data = self.presenter.retrieve_first_good_data_from_run_name('MUSR62260; Group; top; Asymmetry; #1')
+
+        self.assertEqual(first_good_data, 0.34)
+        self.presenter.context.first_good_data.assert_called_once_with('62260')
+
+
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

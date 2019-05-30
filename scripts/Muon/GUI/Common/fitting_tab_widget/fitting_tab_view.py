@@ -26,6 +26,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         self.function_browser = FunctionBrowser(self, True)
         self.function_browser_layout.addWidget(self.function_browser)
+        self.function_browser.setErrorsEnabled(True)
 
         self.increment_parameter_display_button.clicked.connect(self.increment_display_combo_box)
         self.decrement_parameter_display_button.clicked.connect(self.decrement_display_combo_box)
@@ -88,8 +89,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
 
     def update_global_fit_state(self, output_list):
+        if self.fit_type == self.single_fit:
+            indexed_fit = output_list[self.get_index_for_start_end_times()]
+            boolean_list = [indexed_fit == 'success'] if indexed_fit != 'no fit' else []
+        else:
+            boolean_list = [output == 'success' for output in output_list if output != 'no fit']
 
-        boolean_list = [output == 'success' for output in output_list if output != 'no fit']
         if not boolean_list:
             self.global_fit_status_label.setText('No Fit')
             self.global_fit_status_label.setStyleSheet('color: black')
