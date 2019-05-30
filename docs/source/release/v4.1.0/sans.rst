@@ -11,6 +11,8 @@ SANS Changes
 
 :ref:`Release 4.1.0 <v4.1.0>`
 
+- New IDF for EQSANS
+
 ISIS SANS Interface
 -------------------
 
