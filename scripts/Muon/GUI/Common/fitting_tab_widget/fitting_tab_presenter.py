@@ -254,13 +254,14 @@ class FittingTabPresenter(object):
     def retrieve_first_good_data_from_run_name(self, workspace_name):
         try:
             run = [float(re.search('[0-9]+', workspace_name).group())]
-        except AttributeError as error:
+        except AttributeError:
             return 0.0
 
         return self.context.first_good_data(run)
 
     def reset_start_time_to_first_good_data_value(self):
-        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if self.selected_data else [0.0]
+        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if\
+            self.selected_data else [0.0]
         self._end_x = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
         self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
         self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0
