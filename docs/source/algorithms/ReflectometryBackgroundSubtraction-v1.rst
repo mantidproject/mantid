@@ -69,9 +69,9 @@ Output:
    ws_bkg_subtr = ReflectometryBackgroundSubtraction(ws, InputWorkspaceIndexType='SpectrumNumber', InputWorkspaceIndexSet = "1-4,6-9", BackgroundCalculationMethod = "Polynomial", DegreeOfPolynomial = 2)
 
    Y = ws.readY(4)[0]
-   print('Peak height with background: {}'.format(Y))
+   print('Peak height with background: {:.1f}'.format(Y))
    Y = ws_bkg_subtr.readY(4)[0]
-   print('Background subtracted peak height: {}'.format(Y))
+   print('Background subtracted peak height: {:.1f}'.format(Y))
 
 Output:
 

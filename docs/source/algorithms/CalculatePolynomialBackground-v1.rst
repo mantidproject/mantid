@@ -34,9 +34,9 @@ Usage
 
    peakIndex = numpy.argmax(ws.extractY())
    Y = ws.readY(0)[peakIndex]
-   print('Peak height with background: {}'.format(Y))
+   print('Peak height with background: {:.1f}'.format(Y))
    Y = ws_bkg_subtr.readY(0)[peakIndex]
-   print('Background subtracted peak height: {}'.format(Y))
+   print('Background subtracted peak height: {:.1f}'.format(Y))
 
 Output:
 
