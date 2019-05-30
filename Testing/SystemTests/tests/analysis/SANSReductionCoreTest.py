@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 import systemtesting
+import time
 
 import mantid
 from mantid.api import AlgorithmManager
@@ -137,7 +138,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         if os.path.exists(f_name):
             os.remove(f_name)
 
-    def test_that_reduction_core_evaluates_LAB(self):
+    def xtest_that_reduction_core_evaluates_LAB(self):
         # Arrange
         # Build the data information
         file_information_factory = SANSFileInformationFactory()
@@ -184,6 +185,83 @@ class SANSReductionCoreTest(unittest.TestCase):
         unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference.nxs"
         self._compare_workspace(calculated_transmission, calculated_transmission_reference_file)
         self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
+
+    def test_similarity_between_results_in_compatibility_mode_and_non_compatibility_mode(self):
+        # Arrange
+        # Build the data information
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information("SANS2D00034484")
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
+        data_builder.set_sample_scatter("SANS2D00034484")
+        data_builder.set_sample_transmission("SANS2D00034505")
+        data_builder.set_sample_direct("SANS2D00034461")
+        data_builder.set_calibration("TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
+        data_state = data_builder.build()
+
+        ################################################################################################################
+        # Compatibility mode
+        ################################################################################################################
+        # Get the rest of the state from the user file
+        user_file_director = StateDirectorISIS(data_state, file_information)
+        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
+
+        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
+
+        # Construct the final state
+        state = user_file_director.construct()
+
+        # Load the sample workspaces
+        workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
+
+        # Act
+        compat_start = time.time()
+        reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
+                                                      transmission_workspace, direct_workspace)
+        compat_end = time.time()
+        compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
+
+        ################################################################################################################
+        # Non-compatibility mode
+        ################################################################################################################
+        user_file_director = StateDirectorISIS(data_state, file_information)
+        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
+
+        user_file_director.set_compatibility_builder_use_compatibility_mode(False)
+
+        # Construct the final state
+        state = user_file_director.construct()
+
+        # Load the sample workspaces
+        workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
+
+        # Act
+        non_compat_start = time.time()
+        reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
+                                                      transmission_workspace, direct_workspace)
+        non_compat_end = time.time()
+        non_compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
+
+        self.assertTrue((non_compat_end-non_compat_start) < (compat_end-compat_start))
+        ################################################################################################################
+        # Compare workspaces
+        ################################################################################################################
+        compare_name = "CompareWorkspaces"
+        compare_options = {"Workspace1": non_compatibility_output_workspace,
+                           "Workspace2": compatibility_output_workspace,
+                           "Tolerance": 1,
+                           "CheckInstrument": False,
+                           "CheckSample": False,
+                           "ToleranceRelErr": True,
+                           "CheckAllData": True,
+                           "CheckMasking": True,
+                           "CheckType": True,
+                           "CheckAxes": True,
+                           "CheckSpectraMap": True}
+        compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
+        compare_alg.setChild(False)
+        compare_alg.execute()
+        result = compare_alg.getProperty("Result").value
+        self.assertTrue(result)
 
 
 class SANSReductionCoreRunnerTest(systemtesting.MantidSystemTest):
