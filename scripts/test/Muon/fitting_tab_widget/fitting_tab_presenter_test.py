@@ -121,12 +121,13 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter._end_x = [0.56, 0.78, 0.34]
         self.view.end_time = 0.56
         self.view.start_time = 0.15
+        self.presenter.retrieve_first_good_data_from_run_name = mock.MagicMock(return_value=0.15)
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; Asymmetry']
 
         self.presenter.selected_data = new_workspace_list
 
-        self.assertEqual(self.presenter._fit_status, ['no fit', 'no fit', 'no fit'])
+        self.assertEqual(self.presenter._fit_status, [None, None, None])
         self.assertEqual(self.presenter._fit_chi_squared, [0.0, 0.0, 0.0])
         self.assertEqual(self.presenter._fit_function, [None, None, None])
         self.assertEqual(self.presenter._selected_data, new_workspace_list)
@@ -267,7 +268,14 @@ class FittingTabPresenterTest(GuiTest):
         first_good_data = self.presenter.retrieve_first_good_data_from_run_name('MUSR62260; Group; top; Asymmetry; #1')
 
         self.assertEqual(first_good_data, 0.34)
-        self.presenter.context.first_good_data.assert_called_once_with('62260')
+        self.presenter.context.first_good_data.assert_called_once_with([62260])
+
+    def test_setting_selected_list_empty_list_handled_correctly(self):
+        self.presenter.selected_data = ['MUSR62260 top']
+
+        self.presenter.selected_data = []
+
+        self.assertEqual(self.view.fit_status_success_failure.text(), 'No Fit')
 
 
 if __name__ == '__main__':

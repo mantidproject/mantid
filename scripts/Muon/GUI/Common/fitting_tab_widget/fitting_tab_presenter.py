@@ -21,10 +21,11 @@ class FittingTabPresenter(object):
         self._selected_data = []
         self._start_x = [self.view.start_time]
         self._end_x = [self.view.end_time]
-        self._fit_status = ['no fit']
+        self._fit_status = [None]
         self._fit_chi_squared = [0.0]
         self._fit_function = [None]
         self.manual_selection_made = False
+        self.thread_success = True
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
@@ -83,12 +84,10 @@ class FittingTabPresenter(object):
 
         if fit_type != self.view.simultaneous_fit:
             self.view.set_datasets_in_function_browser([self.view.display_workspace])
-            self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index], self._fit_chi_squared[current_index])
         else:
             self.view.function_browser.setCurrentDataset(current_index)
 
-        if self.view.fit_type == self.view.single_fit:
-            self.view.update_global_fit_state(self._fit_status)
+        self.update_fit_status_information_in_view()
 
     def handle_use_rebin_changed(self):
         if not self.view.fit_to_raw and not self.context._do_rebin():
@@ -117,13 +116,7 @@ class FittingTabPresenter(object):
         else:
             self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
 
-        self._fit_status = ['no fit'] * len(self.selected_data)
-        self._fit_chi_squared = [0.0] * len(self.selected_data)
-        self._fit_function = [None] * len(self.selected_data)
-        current_index = self.view.get_index_for_start_end_times()
-        self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
-                                          self._fit_chi_squared[current_index])
-        self.view.update_global_fit_state(self._fit_status)
+        self.update_fit_status_information_in_view()
 
     def handle_fit_clicked(self):
         fit_type = self.view.fit_type
@@ -149,8 +142,12 @@ class FittingTabPresenter(object):
 
     def handle_started(self):
         self.view.setEnabled(False)
+        self.thread_success = True
 
     def handle_finished(self):
+        if not self.thread_success:
+            return
+
         self.view.setEnabled(True)
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
         index = self.view.get_index_for_start_end_times()
@@ -168,13 +165,12 @@ class FittingTabPresenter(object):
             self._fit_status = [fit_status] * len(self.start_x)
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
 
-        self.view.update_global_fit_state(self._fit_status)
-
-        index = self.view.get_index_for_start_end_times()
-        self.view.update_with_fit_outputs(self._fit_function[index], self._fit_status[index], self._fit_chi_squared[index])
+        self.update_fit_status_information_in_view()
 
     def handle_error(self, error):
+        self.thread_success = False
         self.view.warning_popup(error)
+        self.view.setEnabled(True)
 
     def handle_start_x_updated(self):
         value = self.view.start_time
@@ -221,19 +217,21 @@ class FittingTabPresenter(object):
             return
 
         self._selected_data = selected_data
-        self.handle_workspace_list_changed(selected_data)
+        self.clear_and_reset_gui_state()
 
-    def handle_workspace_list_changed(self, new_workspace_list):
-        self._fit_status = ['no fit'] * len(new_workspace_list)
-        self._fit_chi_squared = [0.0] * len(new_workspace_list)
-        self._fit_function = [None] * len(new_workspace_list)
+    def clear_and_reset_gui_state(self):
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
+
         if self.view.fit_type == self.view.simultaneous_fit:
             self.view.set_datasets_in_function_browser(self.selected_data)
         else:
             self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
 
-        self.view.update_displayed_data_combo_box(self.selected_data)
         self.reset_start_time_to_first_good_data_value()
+        self.view.update_displayed_data_combo_box(self.selected_data)
+        self.update_fit_status_information_in_view()
 
     @property
     def start_x(self):
@@ -254,13 +252,21 @@ class FittingTabPresenter(object):
         return thread_model.ThreadModel(self.fitting_calculation_model)
 
     def retrieve_first_good_data_from_run_name(self, workspace_name):
-        run = [float(re.search('[0-9]+', workspace_name).group())]
+        try:
+            run = [float(re.search('[0-9]+', workspace_name).group())]
+        except AttributeError as error:
+            return 0.0
 
         return self.context.first_good_data(run)
 
     def reset_start_time_to_first_good_data_value(self):
-        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data]
-        self._end_x = [self.view.end_time] * len(self.selected_data)
+        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if self.selected_data else [0.0]
+        self._end_x = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
+        self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
+        self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0
+
+    def update_fit_status_information_in_view(self):
         current_index = self.view.get_index_for_start_end_times()
-        self.view.start_time = self.start_x[current_index] if current_index < len(self.start_x) else 0.0
-        self.view.end_time = self.end_x[current_index] if current_index < len(self.end_x) else 15.0
+        self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
+                                          self._fit_chi_squared[current_index])
+        self.view.update_global_fit_state(self._fit_status)
