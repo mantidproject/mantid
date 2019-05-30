@@ -13,10 +13,15 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+/* Helper methods to create reduction configuration models for the
+ * reflectometry GUI tests */
+
 /* Rows */
 Row makeEmptyRow();
 Row makeRow(double theta = 0.5);
 Row makeRow(std::string const &run, double theta = 0.5);
+Row makeRow(std::vector<std::string> const &runs, double theta = 0.5);
 Row makeRowWithMainCellsFilled(double theta = 0.5);
 Row makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options);
 
@@ -27,9 +32,15 @@ Group makeGroupWithTwoRows();
 Group makeGroupWithTwoRowsWithNonstandardNames();
 
 /* Reduction Jobs */
-ReductionJobs oneGroupWithARowModel();
-ReductionJobs oneGroupWithTwoRowsModel();
+ReductionJobs oneEmptyGroupModel();
 ReductionJobs twoEmptyGroupsModel();
+ReductionJobs oneGroupWithAnInvalidRowModel();
+ReductionJobs oneGroupWithARowModel();
+ReductionJobs oneGroupWithAnotherRowModel();
+ReductionJobs oneGroupWithAnotherRunWithSameAngleModel();
+ReductionJobs oneGroupWithTwoRunsInARowModel();
+ReductionJobs oneGroupWithTwoRowsModel();
+ReductionJobs anotherGroupWithARowModel();
 ReductionJobs twoGroupsWithARowModel();
 ReductionJobs twoGroupsWithMixedRowsModel();
 

@@ -27,20 +27,28 @@ Row makeEmptyRow() {
              ReductionWorkspaces({}, TransmissionRunPair()));
 }
 
-Row makeRow(double theta = 0.5) {
-  return Row({}, theta, TransmissionRunPair(), RangeInQ(), boost::none,
-             ReductionOptionsMap(),
-             ReductionWorkspaces({}, TransmissionRunPair()));
+Row makeRow(double theta) {
+  return Row(
+      {}, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(),
+      boost::none, ReductionOptionsMap(),
+      ReductionWorkspaces({}, TransmissionRunPair({"Trans A", "Trans B"})));
 }
 
 Row makeRow(std::string const &run, double theta) {
-  return Row({run}, theta, TransmissionRunPair({"A", "B"}), RangeInQ(),
-             boost::none, ReductionOptionsMap(),
-             ReductionWorkspaces({"IvsLam", "IvsQ", "IvsQBin"},
-                                 TransmissionRunPair()));
+  return Row(
+      {run}, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(),
+      boost::none, ReductionOptionsMap(),
+      ReductionWorkspaces({run}, TransmissionRunPair({"Trans A", "Trans B"})));
 }
 
-Row makeRowWithMainCellsFilled(double theta = 0.5) {
+Row makeRow(std::vector<std::string> const &runs, double theta) {
+  return Row(
+      runs, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(),
+      boost::none, ReductionOptionsMap(),
+      ReductionWorkspaces(runs, TransmissionRunPair({"Trans A", "Trans B"})));
+}
+
+Row makeRowWithMainCellsFilled(double theta) {
   return Row({"12345", "12346"}, theta, TransmissionRunPair("92345", "92346"),
              RangeInQ(0.1, 0.09, 0.91), 2.2, ReductionOptionsMap(),
              ReductionWorkspaces({"12345", "12346"},
@@ -55,7 +63,7 @@ Row makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options) {
 
 /* Groups */
 
-Group makeEmptyGroup() { return Group("test_group"); }
+Group makeEmptyGroup() { return Group("Test group 1"); }
 
 Group makeGroupWithOneRow() {
   return Group("single_row_group",
@@ -81,10 +89,55 @@ Group makeGroupWithTwoRowsWithNonstandardNames() {
 
 /* Reduction Jobs */
 
+ReductionJobs oneEmptyGroupModel() {
+  auto reductionJobs = ReductionJobs();
+  reductionJobs.appendGroup(Group("Test group 1"));
+  return reductionJobs;
+}
+
+ReductionJobs twoEmptyGroupsModel() {
+  auto reductionJobs = ReductionJobs();
+  reductionJobs.appendGroup(Group("Test group 1"));
+  reductionJobs.appendGroup(Group("Test group 2"));
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithAnInvalidRowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(boost::none);
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
 ReductionJobs oneGroupWithARowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow("12345", 0.5));
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithAnotherRowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithAnotherRunWithSameAngleModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12346", 0.5));
+  reductionJobs.appendGroup(group1);
+  return reductionJobs;
+}
+
+ReductionJobs oneGroupWithTwoRunsInARowModel() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow(std::vector<std::string>{"12345", "12346"}, 0.5));
   reductionJobs.appendGroup(group1);
   return reductionJobs;
 }
@@ -98,21 +151,22 @@ ReductionJobs oneGroupWithTwoRowsModel() {
   return reductionJobs;
 }
 
-ReductionJobs twoEmptyGroupsModel() {
+ReductionJobs anotherGroupWithARowModel() {
   auto reductionJobs = ReductionJobs();
-  reductionJobs.appendGroup(Group("Group 1"));
-  reductionJobs.appendGroup(Group("Group 2"));
+  auto group1 = Group("Test group 2");
+  group1.appendRow(makeRow("12346", 0.8));
+  reductionJobs.appendGroup(group1);
   return reductionJobs;
 }
 
 ReductionJobs twoGroupsWithARowModel() {
   auto reductionJobs = ReductionJobs();
-  auto group1 = Group("Group 1");
-  group1.appendRow(makeRow());
+  auto group1 = Group("Test group 1");
+  group1.appendRow(makeRow("12345", 0.5));
   reductionJobs.appendGroup(std::move(group1));
 
-  auto group2 = Group("Group 2");
-  group2.appendRow(makeRow());
+  auto group2 = Group("Test group 2");
+  group2.appendRow(makeRow("12346", 0.8));
   reductionJobs.appendGroup(std::move(group2));
 
   return reductionJobs;

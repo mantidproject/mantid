@@ -314,5 +314,13 @@ Row ReductionJobs::getRowFromPath(
     throw std::invalid_argument("Path given does not point to a row.");
   }
 }
+
+bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) {
+  return lhs.groups() == rhs.groups();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

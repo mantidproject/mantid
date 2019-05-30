@@ -88,6 +88,11 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
   }
 }
 
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Group const &lhs,
+                                               Group const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Group const &lhs,
+                                               Group const &rhs);
+
 int totalItems(Group const &group);
 int completedItems(Group const &group);
 

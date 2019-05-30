@@ -54,6 +54,11 @@ private:
   size_t m_groupNameSuffix;
 };
 
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionJobs const &lhs,
+                                               ReductionJobs const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionJobs const &lhs,
+                                               ReductionJobs const &rhs);
+
 void appendEmptyRow(ReductionJobs &jobs, int groupIndex);
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow);
 void removeRow(ReductionJobs &jobs, int groupIndex, int rowIndex);
