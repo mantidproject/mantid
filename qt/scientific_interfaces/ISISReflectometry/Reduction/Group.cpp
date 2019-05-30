@@ -191,34 +191,40 @@ void Group::renameOutputWorkspace(std::string const &oldName,
   m_postprocessedWorkspaceName = newName;
 }
 
-size_t totalItems(Group const &group) {
+bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
+
+bool operator==(Group const &lhs, Group const &rhs) {
+  return lhs.name() == rhs.name() &&
+         lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
+         lhs.rows() == rhs.rows();
+}
+
+int totalItems(Group const &group) {
   // Include the group if postprocessing is applicable
   auto initCount = group.hasPostprocessing() ? 1 : 0;
   // Include all valid rows
   auto const &rows = group.rows();
-  return std::accumulate(
-      rows.cbegin(), rows.cend(), initCount,
-      [](int &count, boost::optional<Row> const &row) -> size_t {
-        if (row.is_initialized())
-          return count + 1;
-        else
-          return count;
-      });
+  return std::accumulate(rows.cbegin(), rows.cend(), initCount,
+                         [](int &count, boost::optional<Row> const &row) {
+                           if (row.is_initialized())
+                             return count + 1;
+                           else
+                             return count;
+                         });
 }
 
-size_t completedItems(Group const &group) {
+int completedItems(Group const &group) {
   // Include the group if it has been postprocessing
   auto initCount = group.complete() ? 1 : 0;
   // Include all valid rows that have been processed
   auto const &rows = group.rows();
-  return std::accumulate(
-      rows.cbegin(), rows.cend(), initCount,
-      [](int &count, boost::optional<Row> const &row) -> size_t {
-        if (row.is_initialized() && row->complete())
-          return count + 1;
-        else
-          return count;
-      });
+  return std::accumulate(rows.cbegin(), rows.cend(), initCount,
+                         [](int &count, boost::optional<Row> const &row) {
+                           if (row.is_initialized() && row->complete())
+                             return count + 1;
+                           else
+                             return count;
+                         });
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

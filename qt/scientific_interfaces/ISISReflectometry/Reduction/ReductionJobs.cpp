@@ -190,7 +190,7 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex) {
 
 /* Return the total number of rows and groups that have processing or
  * postprocessing associated with them */
-size_t totalItems(ReductionJobs const &jobs) {
+int totalItems(ReductionJobs const &jobs) {
   auto const &groups = jobs.groups();
   return std::accumulate(
       groups.cbegin(), groups.cend(), 0,
@@ -199,7 +199,7 @@ size_t totalItems(ReductionJobs const &jobs) {
 
 /* Return the total number of rows and groups that have been processed or
  * postprocessed */
-size_t completedItems(ReductionJobs const &jobs) {
+int completedItems(ReductionJobs const &jobs) {
   auto const &groups = jobs.groups();
   return std::accumulate(groups.cbegin(), groups.cend(), 0,
                          [](int &count, Group const &group) {
