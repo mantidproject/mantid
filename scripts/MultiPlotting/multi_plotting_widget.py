@@ -117,6 +117,13 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.set_errors(errors)
         self._change_errors(errors, names)
 
+    def set_all_values_to(self,xrange,yrange):
+        self._context.set_xBounds(xrange)
+        self._context.set_yBounds(yrange)
+        self._x_range_changed(xrange)
+        self._y_range_changed(yrange)
+ 
+
     def connectCloseSignal(self, slot):
         self.closeSignal.connect(slot)
 
@@ -128,6 +135,9 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def removeSubplotDisonnect(self):
         self.plots.disconnect_rm_subplot_signal()
+
+    def has_subplot(self, name):
+        return name in self._context.subplots.keys()
 
     """ update GUI """
 

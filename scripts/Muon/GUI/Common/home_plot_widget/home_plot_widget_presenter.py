@@ -26,9 +26,10 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         pass
 
     def handle_plot_button_clicked(self):
+        is_raw = self._view.if_raw()
         ws_list = self._model.context.get_names_of_workspaces_to_fit(runs='All',
                                                                group_and_pair=self._model.context.gui_context[
-                                                               'selected_group_pair'], phasequad=False)
+                                                               'selected_group_pair'], phasequad=False, rebin=not is_raw)
         new_plot = False
         if self._plot_window is None:
            new_plot = True
@@ -42,7 +43,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             # need to check if subplot exists first
             # probably want a subplot for each x label
             if not self.keep:
-                self.plotting.add_subplot("Time domain")
+                if not self.plotting.has_subplot("Time domain"):
+                    self.plotting.add_subplot("Time domain")
                 self.keep = True
             for ws_name in ws_list:
                 self.plotting.plot("Time domain", ws_name)
@@ -52,7 +54,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                 self.plotting.plot(ws_name, ws_name)
         # only do below line if its a new multi plot
         if new_plot:
-            self.plotting.set_all_values()
+            self.plotting.set_all_values_to([0.0,15.0],[-30.,30])
         self._plot_window.show()
 
     def _close_plot(self):

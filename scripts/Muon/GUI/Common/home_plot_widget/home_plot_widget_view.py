@@ -36,12 +36,10 @@ class HomePlotWidgetView(QtWidgets.QWidget):
         self.plot_label.setObjectName("plotLabel")
         self.plot_label.setText("Plot type : ")
 
-        self.plot_label = QtWidgets.QLabel(self)
-        self.plot_label.setObjectName("plotLabel")
-        self.plot_label.setText("Plot type : ")
-
         self.overlay = QtWidgets.QCheckBox("overlay",self)
-        self.keep = QtWidgets.QCheckBox("keep",self)
+        self.keep = QtWidgets.QCheckBox("append",self)
+        self.raw = QtWidgets.QCheckBox("plot raw",self)
+        self.raw.setChecked(True)
 
         self.plot_selector = QtWidgets.QComboBox(self)
         self.plot_selector.setObjectName("plotSelector")
@@ -65,6 +63,8 @@ class HomePlotWidgetView(QtWidgets.QWidget):
         self.horizontal_layout.addWidget(self.overlay)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.keep)
+        self.horizontal_layout.addStretch(0)
+        self.horizontal_layout.addWidget(self.raw)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
@@ -101,6 +101,9 @@ class HomePlotWidgetView(QtWidgets.QWidget):
 
     def if_keep(self):
         return self.keep.isChecked()
+
+    def if_raw(self):
+        return self.raw.isChecked()
 
     def on_plot_button_clicked(self, slot):
         self.plot_button.clicked.connect(slot)
