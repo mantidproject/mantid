@@ -130,11 +130,14 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
     // no need to compare directions, just add the segment
     m_surfPoints.push_back(newPoint);
   } else {
-    // the segment shorter than this one
+    // the segment >= (greater than or equal to) this one
     auto lowestPtr =
         std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
 
-    // in principle there should be a check for the point after where this
+    if (newPoint == *lowestPtr)
+      return; // don't add the same point twice
+
+    // in principle there should be a check for the point before where this
     // should be inserted in practice it doesn't seem to matter
     const bool sameDirectionAsPrevious =
         (lowestPtr->direction == newPoint.direction);
