@@ -286,6 +286,30 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
   }
 
+  void test_Setting_Geometry_As_Cylinder_With_Axis() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createCylinderWithAxisGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    auto tag = dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)
+                   .getShapeXML()
+                   .find("cylinder");
+    TS_ASSERT(tag != std::string::npos);
+
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.049, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.06, -0.001)));
+  }
+
   void test_Setting_Geometry_No_Volume() {
     using Mantid::Kernel::V3D;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
@@ -336,6 +360,24 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
 
+  void test_Setting_Geometry_As_HollowCylinder_With_Axis() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createHollowCylinderWithAxisGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.019)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.035, 0.001)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
+  }
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -589,6 +631,17 @@ private:
     return props;
   }
 
+  Mantid::Kernel::PropertyManager_sptr createCylinderWithAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    auto props = createCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    std::vector<double> axis{0, 0, 1};
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleArrayProperty>("Axis", axis), "");
+    return props;
+  }
+
   Mantid::Kernel::PropertyManager_sptr createHollowCylinderGeometryProps() {
     using namespace Mantid::Kernel;
     using DoubleArrayProperty = ArrayProperty<double>;
@@ -610,6 +663,18 @@ private:
                                "Center", std::move(center)),
                            "");
 
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr
+  createHollowCylinderWithAxisGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    auto props = createHollowCylinderGeometryProps();
+    // Use the same pointing up direction as in the without axis test
+    std::vector<double> axis{0, 0, 1};
+    props->declareProperty(
+        Mantid::Kernel::make_unique<DoubleArrayProperty>("Axis", axis), "");
     return props;
   }
 
