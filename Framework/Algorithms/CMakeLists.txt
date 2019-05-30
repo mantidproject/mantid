@@ -873,6 +873,7 @@ set(TEST_FILES
     MCInteractionVolumeTest.h
     MagFormFactorCorrectionTest.h
     MaskBinsFromTableTest.h
+    MaskBinsFromWorkspaceTest.h
     MaskBinsIfTest.h
     MaskBinsTest.h
     MaskDetectorsIfTest.h
