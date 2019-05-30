@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
+import numpy as np
 
 # Constants
 DEFAULT_TABLE_NAME = 'ResultsTable'
@@ -124,11 +125,22 @@ class ResultsTabModel(object):
         results_table = self._create_empty_results_table(
             log_selection, results_selection)
 
+        ads = AnalysisDataService.Instance()
         fit_list = self._fit_context.fit_list
-        for workspace, position in results_selection:
+        for _, position in results_selection:
             fit = fit_list[position]
-            parameter_dict = fit.parameter_workspace.workspace.toDict()
             row_dict = {'workspace_name': fit.parameter_name}
+            # logs first
+            workspace = ads[fit.input_workspace]
+            ws_run = workspace.run()
+            for log_name in log_selection:
+                try:
+                    log_value = ws_run.getPropertyAsSingleValue(log_name)
+                except Exception:
+                    log_value = np.nan
+                row_dict.update({log_name: log_value})
+            # fit parameters
+            parameter_dict = fit.parameter_workspace.workspace.toDict()
             for name, value, error in zip(parameter_dict['Name'],
                                           parameter_dict['Value'],
                                           parameter_dict['Error']):

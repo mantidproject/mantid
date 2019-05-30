@@ -179,11 +179,58 @@ class ResultsTabModelTest(unittest.TestCase):
         for index, (expected_val, expected_err) in enumerate(
                 zip(parameters['Value'], parameters['Error'])):
             self.assertAlmostEqual(expected_val,
-                                   table.cell(0, 2*index + 1),
+                                   table.cell(0, 2 * index + 1),
                                    places=2)
-            if 2*index + 2 < table.columnCount():
+            if 2 * index + 2 < table.columnCount():
                 self.assertAlmostEqual(expected_err,
-                                       table.cell(0, 2*index + 2),
+                                       table.cell(0, 2 * index + 2),
+                                       places=2)
+
+        self.assertTrue(
+            self.model.results_table_name() in AnalysisDataService.Instance())
+
+    def test_create_results_table_with_logs_selected(self):
+        parameters = {
+            'Name': ['Height', 'PeakCentre', 'Sigma', 'Cost function value'],
+            'Value': [2309.2, 2.1, 0.04, 30.8],
+            'Error': [16, 0.002, 0.003, 0]
+        }
+        logs = ['sample_temp', 'sample_magn_field']
+        self.fitting_context.fit_list = create_test_fits_with_logs(
+            ('ws1', ), 'func1', parameters, logs)
+        selected_results = [('ws1', 0)]
+        table = self.model.create_results_table(logs, selected_results)
+
+        self.assertTrue(isinstance(table, ITableWorkspace))
+        self.assertEqual(10, table.columnCount())
+        self.assertEqual(1, table.rowCount())
+
+        expected_cols = ['workspace_name'] + logs + [
+            'Height', 'HeightError', 'PeakCentre', 'PeakCentreError', 'Sigma',
+            'SigmaError', 'Cost function value'
+        ]
+        self.assertEqual(expected_cols, table.getColumnNames())
+
+        # first value is workspace name
+        self.assertEqual('ws1_Parameters', table.cell(0, 0))
+
+        # first check log columns
+        nlogs = len(logs)
+        for index, _ in enumerate(logs):
+            expected_val = 0.5 * (float(index) + float(index + 1))
+            self.assertAlmostEqual(expected_val,
+                                   table.cell(0, index + 1),
+                                   places=2)
+        checked_columns = 1 + nlogs
+        for index, (expected_val, expected_err) in enumerate(
+                zip(parameters['Value'], parameters['Error'])):
+            self.assertAlmostEqual(expected_val,
+                                   table.cell(0, 2 * index + checked_columns),
+                                   places=2)
+            err_col_idx = 2 * index + checked_columns + 1
+            if err_col_idx < table.columnCount():
+                self.assertAlmostEqual(expected_err,
+                                       table.cell(0, err_col_idx),
                                        places=2)
 
         self.assertTrue(
@@ -194,9 +241,9 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertRaises(KeyError, log_names, 'not a workspace in ADS')
 
 
-def create_test_workspace():
+def create_test_workspace(ws_name=None):
     fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
-    ws_name = 'results_tab_model_test_log_names_fake_ws'
+    ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
     AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
     return fake_ws
 
@@ -239,6 +286,32 @@ def create_test_fits(input_workspaces, function_name, parameters):
         parameter_workspace.workspace.toDict.return_value = parameters
         parameter_workspace.workspace_name = name + '_Parameters'
         fits.append(FitInformation(parameter_workspace, function_name, name))
+
+    return fits
+
+
+def create_test_fits_with_logs(input_workspaces, function_name, parameters,
+                               logs):
+    """
+    Create a list of fits with time series logs on the workspaces
+    :param input_workspaces: See create_test_fits
+    :param function_name: See create_test_fits
+    :param parameters: See create_test_fits
+    :param logs: A list of log names to create
+    :return: A list of Fits with workspaces/logs attached
+    """
+    fits = create_test_fits(input_workspaces, function_name, parameters)
+    for fit, workspace_name in zip(fits, input_workspaces):
+        test_ws = create_test_workspace(workspace_name)
+        run = test_ws.run()
+        # populate with log data
+        for index, name in enumerate(logs):
+            tsp = FloatTimeSeriesProperty(name)
+            tsp.addValue("2019-05-30T09:00:00", float(index))
+            tsp.addValue("2019-05-30T09:00:05", float(index + 1))
+            run.addProperty(name, tsp, replace=True)
+
+        fit.input_workspace = workspace_name
 
     return fits
 
