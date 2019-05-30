@@ -9,6 +9,7 @@
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <cmath>
+#include <numeric>
 
 namespace MantidQt {
 namespace CustomInterfaces {
