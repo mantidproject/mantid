@@ -105,5 +105,8 @@ class HomePlotWidgetView(QtWidgets.QWidget):
     def if_raw(self):
         return self.raw.isChecked()
 
+    def get_selected(self):
+        return self.plot_selector.currentText()
+
     def on_plot_button_clicked(self, slot):
         self.plot_button.clicked.connect(slot)
