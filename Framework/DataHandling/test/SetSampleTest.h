@@ -422,6 +422,7 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -681,8 +682,8 @@ private:
     auto props = createCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
     std::vector<double> axis{0, 0, 1};
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Axis", axis), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
+                           "");
     return props;
   }
 
@@ -693,8 +694,8 @@ private:
     auto props = createCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
     int axis{2};
-    props->declareProperty(
-        std::make_unique<IntProperty>("Axis", axis), "");
+    props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
+
     return props;
   }
 
@@ -729,8 +730,8 @@ private:
     auto props = createHollowCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
     std::vector<double> axis{0, 0, 1};
-    props->declareProperty(
-        std::make_unique<DoubleArrayProperty>("Axis", axis), "");
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis),
+                           "");
     return props;
   }
 
@@ -742,8 +743,7 @@ private:
     auto props = createHollowCylinderGeometryProps();
     // Use the same pointing up direction as in the without axis test
     int axis{2};
-    props->declareProperty(
-        std::make_unique<IntProperty>("Axis", axis), "");
+    props->declareProperty(std::make_unique<IntProperty>("Axis", axis), "");
     return props;
   }
 

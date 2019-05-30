@@ -604,52 +604,52 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
     const unsigned axisId = static_cast<unsigned>(refFrame.pointingUp());
     XMLString << axisXML(axisId);
     baseCentre = cylBaseCentre(centre, height, axisId);
+
+    std::ostringstream xmlShapeStream;
+    xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
+                   << "<centre-of-bottom-base x=\"" << baseCentre.X()
+                   << "\" y=\"" << baseCentre.Y() << "\" z=\"" << baseCentre.Z()
+                   << "\" /> " << XMLString.str() << "<height val=\"" << height
+                   << "\" /> ";
+    if (hollow) {
+      xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\"/>"
+                     << "<outer-radius val=\"" << outerRadius << "\"/>";
+
+    } else {
+      xmlShapeStream << "<radius val=\"" << outerRadius << "\"/>";
+    }
+    xmlShapeStream << "</" << tag << ">";
+    return xmlShapeStream.str();
   }
 
-  std::ostringstream xmlShapeStream;
-  xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
-                 << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
-                 << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
-                 << XMLString.str() << "<height val=\"" << height << "\" /> ";
-  if (hollow) {
-    xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\"/>"
-                   << "<outer-radius val=\"" << outerRadius << "\"/>";
-
-  } else {
-    xmlShapeStream << "<radius val=\"" << outerRadius << "\"/>";
+  /**
+   * Run SetSampleShape as an algorithm to set the shape of the sample
+   * @param workspace A reference to the workspace
+   * @param xml A string containing the XML definition
+   */
+  void SetSample::runSetSampleShape(API::MatrixWorkspace_sptr & workspace,
+                                    const std::string &xml) {
+    auto alg = createChildAlgorithm("CreateSampleShape");
+    alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
+    alg->setProperty("ShapeXML", xml);
+    alg->executeAsChildAlg();
   }
-  xmlShapeStream << "</" << tag << ">";
-  return xmlShapeStream.str();
-}
 
-/**
- * Run SetSampleShape as an algorithm to set the shape of the sample
- * @param workspace A reference to the workspace
- * @param xml A string containing the XML definition
- */
-void SetSample::runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
-                                  const std::string &xml) {
-  auto alg = createChildAlgorithm("CreateSampleShape");
-  alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
-  alg->setProperty("ShapeXML", xml);
-  alg->executeAsChildAlg();
-}
-
-/**
- * Run the named child algorithm on the given workspace. It assumes an in/out
- * workspace property called InputWorkspace
- * @param name The name of the algorithm to run
- * @param workspace A reference to the workspace
- * @param args A PropertyManager specifying the required arguments
- */
-void SetSample::runChildAlgorithm(const std::string &name,
-                                  API::MatrixWorkspace_sptr &workspace,
-                                  const Kernel::PropertyManager &args) {
-  auto alg = createChildAlgorithm(name);
-  alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
-  alg->updatePropertyValues(args);
-  alg->executeAsChildAlg();
-}
+  /**
+   * Run the named child algorithm on the given workspace. It assumes an in/out
+   * workspace property called InputWorkspace
+   * @param name The name of the algorithm to run
+   * @param workspace A reference to the workspace
+   * @param args A PropertyManager specifying the required arguments
+   */
+  void SetSample::runChildAlgorithm(const std::string &name,
+                                    API::MatrixWorkspace_sptr &workspace,
+                                    const Kernel::PropertyManager &args) {
+    auto alg = createChildAlgorithm(name);
+    alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
+    alg->updatePropertyValues(args);
+    alg->executeAsChildAlg();
+  }
 
 } // namespace DataHandling
-} // namespace Mantid
+} // namespace DataHandling
