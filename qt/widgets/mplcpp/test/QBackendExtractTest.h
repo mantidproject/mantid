@@ -41,7 +41,8 @@ public:
     const Python::Object nonSipType{
         Python::NewRef(Py_BuildValue("(ii)", 1, 2))};
     struct Foo;
-    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType), std::runtime_error);
+    TS_ASSERT_THROWS(Python::extract<Foo>(nonSipType),
+                     const std::runtime_error &);
   }
 };
 

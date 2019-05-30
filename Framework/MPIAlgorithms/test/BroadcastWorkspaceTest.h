@@ -43,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         broadcaster.setPropertyValue("OutputWorkspace", "blah"));
     TS_ASSERT_THROWS(broadcaster.setProperty("BroadcasterRank", 1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testExecute() {

@@ -129,7 +129,7 @@ public:
     // Ei is not defined
     TSM_ASSERT_THROWS("WS has to have input energy for indirect methods",
                       pAlg->preprocessDetectorsPositions(ws2DNew),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
     ws2DNew->mutableRun().addProperty("Ei", 130., "meV", true);
 
     auto TableWS6 = pAlg->preprocessDetectorsPositions(ws2DNew);
@@ -143,7 +143,7 @@ public:
     TSM_ASSERT_THROWS("WS has to have input energy for indirect methods "
                       "despite the table workspace is already calculated",
                       pAlg->preprocessDetectorsPositions(ws2DNew),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
   void testUpdateMasksSkipped() {
     Mantid::API::MatrixWorkspace_sptr ws2Dp =

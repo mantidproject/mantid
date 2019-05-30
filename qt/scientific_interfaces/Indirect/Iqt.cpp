@@ -242,6 +242,7 @@ void Iqt::setup() {
           SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
           SLOT(setTiledPlotLastPlot(int)));
+
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
@@ -392,22 +393,10 @@ void Iqt::plotTiled() {
       getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
   cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
 
-  // Plot tiledwindow
-  std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;
-  if (numberOfPlots != 0) {
-    QString pyInput = "from mantidplot import newTiledWindow\n";
-    pyInput += "newTiledWindow(sources=[";
-    for (auto index = firstTiledPlot; index <= lastTiledPlot; ++index) {
-      if (index > firstTiledPlot) {
-        pyInput += ",";
-      }
-      std::string const pyInStr =
-          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-      pyInput += QString::fromStdString(pyInStr);
-    }
-    pyInput += "])\n";
-    runPythonCode(pyInput);
-  }
+  auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
+
+  IndirectTab::plotTiled(tiledPlotWsName, firstTiledPlot, lastTiledPlot);
+
   setTiledPlotIsPlotting(false);
 }
 
@@ -541,6 +530,19 @@ void Iqt::loadSettings(const QSettings &settings) {
 }
 
 void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+
+void Iqt::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Iqt");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                         : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
+}
 
 void Iqt::plotInput(const QString &wsname) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,

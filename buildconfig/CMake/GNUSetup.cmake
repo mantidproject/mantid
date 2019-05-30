@@ -41,7 +41,7 @@ endif()
 # -Wno-unused-result: Do not warn about unused return values in some C functions
 add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
-                      -Wno-write-strings -Wno-unused-result )
+                      -Wno-write-strings -Wno-unused-result)
 # C++-specific flags
 add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>

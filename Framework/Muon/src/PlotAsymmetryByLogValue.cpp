@@ -568,7 +568,8 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
   ScopedWorkspace dt(deadTimes);
 
   IAlgorithm_sptr applyCorr =
-      AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+      AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
+  applyCorr->initialize();
   applyCorr->setLogging(false);
   applyCorr->setRethrows(true);
   applyCorr->setPropertyValue("InputWorkspace", ws.name());
@@ -613,7 +614,8 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
   ScopedWorkspace outWS;
 
   IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("MuonGroupDetectors");
+      AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
+  alg->initialize();
   alg->setLogging(false);
   alg->setPropertyValue("InputWorkspace", inWS.name());
   alg->setPropertyValue("DetectorGroupingTable", grWS.name());

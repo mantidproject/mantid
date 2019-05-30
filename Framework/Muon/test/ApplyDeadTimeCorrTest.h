@@ -108,7 +108,7 @@ public:
         applyDeadTime.setProperty("DeadTimeTable", deadTimes));
     TS_ASSERT_THROWS_NOTHING(
         applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
-    TS_ASSERT_THROWS(applyDeadTime.execute(), std::logic_error);
+    TS_ASSERT_THROWS(applyDeadTime.execute(), const std::logic_error &);
 
     // Check new table wasn't created
     MatrixWorkspace_sptr output = applyDeadTime.getProperty("OutputWorkspace");
@@ -194,7 +194,7 @@ public:
     applyDT.initialize();
     applyDT.setChild(true);
     TS_ASSERT_THROWS(applyDT.setProperty("InputWorkspace", rebinned),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   // Test that algorithm throws if input workspace does not contain number of
@@ -216,7 +216,7 @@ public:
         applyDeadTime.setProperty("DeadTimeTable", deadTimes));
     TS_ASSERT_THROWS_NOTHING(
         applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
-    TS_ASSERT_THROWS(applyDeadTime.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(applyDeadTime.execute(), const std::invalid_argument &);
     TS_ASSERT(!applyDeadTime.isExecuted());
   }
 

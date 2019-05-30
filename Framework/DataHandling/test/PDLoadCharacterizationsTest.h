@@ -439,7 +439,7 @@ public:
     alg.setPropertyValue("ExpIniFilename", "NOMAD_exp.ini");
     alg.setPropertyValue("OutputWorkspace", WKSP_NAME);
     alg.setRethrows(true); // so the exception can be seen by testing
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 

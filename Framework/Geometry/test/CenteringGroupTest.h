@@ -53,8 +53,8 @@ public:
   }
 
   void testInvalidCentering() {
-    TS_ASSERT_THROWS(CenteringGroup group("G"), std::invalid_argument);
-    TS_ASSERT_THROWS(CenteringGroup group("f"), std::invalid_argument);
+    TS_ASSERT_THROWS(CenteringGroup group("G"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(CenteringGroup group("f"), const std::invalid_argument &);
   }
 
 private:

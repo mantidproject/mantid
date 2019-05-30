@@ -52,7 +52,7 @@ public:
 
     TSM_ASSERT_THROWS(" the workspace X axis does not have units ",
                       pAlg->setPropertyValue("InputWorkspace", ws2D->getName()),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
   }

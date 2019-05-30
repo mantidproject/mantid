@@ -59,7 +59,7 @@ public:
     TSM_ASSERT_THROWS(
         "Should throw with null view.",
         MDHWInMemoryLoadingPresenter(nullptr, new MockWorkspaceProvider, "_"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void testConstructWithNullRepositoryThrows() {
@@ -67,7 +67,7 @@ public:
         "Should throw with null repository.",
         MDHWInMemoryLoadingPresenter(
             Mantid::Kernel::make_unique<MockMDLoadingView>(), nullptr, "_"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void testConstructWithEmptyWsNameThrows() {
@@ -76,7 +76,7 @@ public:
                       MDHWInMemoryLoadingPresenter(
                           Mantid::Kernel::make_unique<MockMDLoadingView>(),
                           new MockWorkspaceProvider, emptyName),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testConstruction() {
@@ -152,7 +152,7 @@ public:
     // Test that it doesn't work when not setup.
     TSM_ASSERT_THROWS("::executeLoadMetadata is critical to setup, should "
                       "throw if not run first.",
-                      presenter.getGeometryXML(), std::runtime_error);
+                      presenter.getGeometryXML(), const std::runtime_error &);
 
     // Test that it does work when setup.
     presenter.executeLoadMetadata();
@@ -220,7 +220,8 @@ public:
         Mantid::Kernel::make_unique<MockMDLoadingView>(),
         new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.hasTDimensionAvailable(), std::runtime_error);
+                      presenter.hasTDimensionAvailable(),
+                      const std::runtime_error &);
   }
 
   void testCallGetTDimensionValuesThrows() {
@@ -228,7 +229,8 @@ public:
         Mantid::Kernel::make_unique<MockMDLoadingView>(),
         new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.getTimeStepValues(), std::runtime_error);
+                      presenter.getTimeStepValues(),
+                      const std::runtime_error &);
   }
 
   void testCallGetGeometryThrows() {
@@ -236,7 +238,7 @@ public:
         Mantid::Kernel::make_unique<MockMDLoadingView>(),
         new MockWorkspaceProvider, "_");
     TSM_ASSERT_THROWS("Should throw. Execute not yet run.",
-                      presenter.getGeometryXML(), std::runtime_error);
+                      presenter.getGeometryXML(), const std::runtime_error &);
   }
 
   void testGetWorkspaceTypeName() {

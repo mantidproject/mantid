@@ -67,9 +67,10 @@ private:
   spectrumNumbers(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
   struct SpectrumNumberHash {
-    std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
-      return std::hash<std::int32_t>()(
-          static_cast<const int32_t>(spectrumNumber));
+    // Pass-by-value as qualifiers ignored on cast result type and
+    // SpectrumNumber is a trivial type (int32_t).
+    std::size_t operator()(SpectrumNumber spectrumNumber) const {
+      return std::hash<std::int32_t>()(static_cast<int32_t>(spectrumNumber));
     }
   };
 

@@ -1035,7 +1035,7 @@ public:
     fit.setProperty("Function", "name=FlatBackground");
     fit.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(fit.setProperty("Exclude", exclude),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_exclude_unordered() {
@@ -1048,7 +1048,7 @@ public:
     fit.setProperty("Function", "name=FlatBackground");
     fit.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS(fit.setProperty("Exclude", exclude),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_exclude_overlapped() {

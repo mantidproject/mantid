@@ -58,7 +58,7 @@ public:
     if (!align.isInitialized())
       align.initialize();
 
-    TS_ASSERT_THROWS(align.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(align.execute(), const std::runtime_error &);
 
     align.setPropertyValue("InputWorkspace", inputWS);
     const std::string outputWS = "aligned";

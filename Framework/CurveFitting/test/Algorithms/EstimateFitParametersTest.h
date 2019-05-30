@@ -48,7 +48,7 @@ public:
     alg.setPropertyValue("Function",
                          "name=UserFunction,Formula=a*x+b,a=1,ties=(b=0)");
     alg.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_no_lower_bound() {
@@ -61,7 +61,7 @@ public:
     alg.setPropertyValue(
         "Function", "name=UserFunction,Formula=a*x+b,constraints=(a<4, b<4)");
     alg.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_no_upper_bound() {
@@ -74,7 +74,7 @@ public:
     alg.setPropertyValue(
         "Function", "name=UserFunction,Formula=a*x+b,constraints=(a>4, b>4)");
     alg.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_all_free() {

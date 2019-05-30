@@ -419,7 +419,7 @@ public:
     auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
     alg->initialize();
     TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_underdefinded() {

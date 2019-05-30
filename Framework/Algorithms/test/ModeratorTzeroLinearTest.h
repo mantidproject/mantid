@@ -84,7 +84,8 @@ public:
     alg.setProperty("OutputWorkspace", "testWS");
     alg.setRethrows(true); // necessary, otherwise the algorithm will catch all
                            // exceptions and not return them
-    TS_ASSERT_THROWS(alg.execute(), Exception::InstrumentDefinitionError);
+    TS_ASSERT_THROWS(alg.execute(),
+                     const Exception::InstrumentDefinitionError &);
     AnalysisDataService::Instance().remove("testWS");
   }
 
@@ -99,7 +100,8 @@ public:
     alg.setProperty("OutputWorkspace", "testWS");
     alg.setRethrows(true); // necessary, otherwise the algorithm will catch all
                            // exceptions and not return them
-    TS_ASSERT_THROWS(alg.execute(), Exception::InstrumentDefinitionError);
+    TS_ASSERT_THROWS(alg.execute(),
+                     const Exception::InstrumentDefinitionError &);
     AnalysisDataService::Instance().remove("testWS");
   }
 

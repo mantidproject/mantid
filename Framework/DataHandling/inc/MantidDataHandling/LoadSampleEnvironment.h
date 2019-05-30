@@ -8,6 +8,7 @@
 #define DATAHANDLING_LOAD_ENVIRONMENT_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -21,6 +22,7 @@ namespace DataHandling {
  * The following file types are supported:
  *   - STL file with suffix .stl
  */
+
 class DLLExport LoadSampleEnvironment : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -42,10 +44,16 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
+
   boost::shared_ptr<Geometry::MeshObject>
   translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
   boost::shared_ptr<Geometry::MeshObject>
   rotate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
+
+  Kernel::Matrix<double> generateMatrix();
+  Kernel::Matrix<double> generateXRotation();
+  Kernel::Matrix<double> generateYRotation();
+  Kernel::Matrix<double> generateZRotation();
   std::map<std::string, std::string> validateInputs() override;
 
 private:

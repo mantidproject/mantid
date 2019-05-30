@@ -55,11 +55,6 @@ void ConvFit::setupFitTab() {
   setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
 
-  setSampleWSSuffices({"_red", "_sqw"});
-  setSampleFBSuffices({"_red.nxs", "_sqw.nxs", "_sqw.dave"});
-  setResolutionWSSuffices({"_res", "_red", "_sqw"});
-  setResolutionFBSuffices({"_res.nxs", "_red.nxs", "_sqw.nxs", "_sqw.dave"});
-
   // Initialise fitTypeStrings
   m_fitStrings["None"] = "";
   m_fitStrings["One Lorentzian"] = "1L";

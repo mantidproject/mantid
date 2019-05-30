@@ -73,7 +73,7 @@ public:
     const size_t nHist = inputWS->getNumberHistograms();
     const size_t nBins = inputWS->blocksize();
 
-    TS_ASSERT_THROWS(transpose->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(transpose->execute(), const std::runtime_error &);
     TS_ASSERT(!transpose->isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(

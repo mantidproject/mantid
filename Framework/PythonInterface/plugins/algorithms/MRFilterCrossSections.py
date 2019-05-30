@@ -175,7 +175,7 @@ class MRFilterCrossSections(PythonAlgorithm):
                 change_list.extend(extract_times(time_dict['start'], True, is_veto2=True))
                 change_list.extend(extract_times(time_dict['stop'], False, is_veto2=True))
 
-        start_time = ws_raw.run().startTime().total_nanoseconds()
+        start_time = ws_raw.run().startTime().totalNanoseconds()
 
         change_list = sorted(change_list, key=itemgetter(0))
         split_table_ws = self.create_table(change_list, start_time,

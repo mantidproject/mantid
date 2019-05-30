@@ -4,10 +4,15 @@ set ( TEST_PY_FILES
    FFTModel_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
+   fitting_tab_widget/workspace_selector_dialog_presenter_test.py
+   fitting_tab_widget/fitting_tab_presenter_test.py
+   fitting_tab_widget/fitting_tab_model_test.py
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
    home_runinfo_presenter_test.py
+   list_selector/list_selector_view_test.py
+   list_selector/list_selector_presenter_test.py
    load_run_widget/loadrun_model_test.py
    load_run_widget/loadrun_presenter_current_run_test.py
    load_run_widget/loadrun_presenter_single_file_test.py

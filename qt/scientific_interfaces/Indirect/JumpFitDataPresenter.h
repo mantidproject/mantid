@@ -54,6 +54,9 @@ private:
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
 
+  void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
+  void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
+
   std::string m_activeParameterType;
   std::size_t m_dataIndex;
 

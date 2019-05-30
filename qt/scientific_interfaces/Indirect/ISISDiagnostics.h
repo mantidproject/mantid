@@ -80,6 +80,8 @@ private slots:
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
 
+  void setFileExtensionsByName(bool filter) override;
+
   Ui::ISISDiagnostics m_uiForm;
 };
 } // namespace CustomInterfaces

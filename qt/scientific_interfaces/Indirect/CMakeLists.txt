@@ -1,4 +1,4 @@
-set(SRC_FILES
+set (SRC_FILES
     AbsorptionCorrections.cpp
     ApplyAbsorptionCorrections.cpp
     CalculatePaalmanPings.cpp
@@ -39,10 +39,15 @@ set(SRC_FILES
     IndirectFitPlotView.cpp
     IndirectFittingModel.cpp
     IndirectInstrumentConfig.cpp
+    IndirectInterface.cpp
     IndirectLoadILL.cpp
     IndirectMolDyn.cpp
     IndirectMoments.cpp
     IndirectSassena.cpp
+    IndirectSettings.cpp
+    IndirectSettingsModel.cpp
+    IndirectSettingsPresenter.cpp
+    IndirectSettingsView.cpp
     IndirectSimulation.cpp
     IndirectSimulationTab.cpp
     IndirectSpectrumSelectionPresenter.cpp
@@ -69,9 +74,8 @@ set(SRC_FILES
     Stretch.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
-# find it.
-set(INC_FILES
+# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
+set (INC_FILES
     DllConfig.h
     AbsorptionCorrections.h
     ApplyAbsorptionCorrections.h
@@ -90,6 +94,7 @@ set(INC_FILES
     IIndirectFitOutputOptionsModel.h
     IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
+    IIndirectSettingsView.h
     ILLEnergyTransfer.h
     ISISCalibration.h
     ISISDiagnostics.h
@@ -117,10 +122,15 @@ set(INC_FILES
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectFittingModel.h
+    IndirectInterface.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
     IndirectSassena.h
+    IndirectSettings.h
+    IndirectSettingsModel.h
+    IndirectSettingsPresenter.h
+    IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
     IndirectSpectrumSelectionPresenter.h
@@ -128,6 +138,7 @@ set(INC_FILES
     IndirectSqw.h
     IndirectSymmetrise.h
     IndirectTab.h
+    IndirectTools.h
     IndirectToolsTab.h
     IndirectTransmission.h
     IndirectTransmissionCalc.h
@@ -162,6 +173,7 @@ set(MOC_FILES
     IIndirectFitDataView.h
     IIndirectFitOutputOptionsView.h
     IIndirectFitPlotView.h
+    IIndirectSettingsView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h
@@ -182,10 +194,14 @@ set(MOC_FILES
     IndirectFitPlotPresenter.h
     IndirectFitPlotView.h
     IndirectInstrumentConfig.h
+    IndirectInterface.h
     IndirectLoadILL.h
     IndirectMolDyn.h
     IndirectMoments.h
     IndirectSassena.h
+    IndirectSettings.h
+    IndirectSettingsPresenter.h
+    IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
     IndirectSpectrumSelectionPresenter.h
@@ -212,7 +228,7 @@ set(MOC_FILES
     ISISDiagnostics.h
     ISISEnergyTransfer.h)
 
-set(UI_FILES
+set (UI_FILES
     AbsorptionCorrections.ui
     ApplyAbsorptionCorrections.ui
     CalculatePaalmanPings.ui
@@ -232,18 +248,20 @@ set(UI_FILES
     IndirectFitDataView.ui
     IndirectFitOutputOptions.ui
     IndirectFitPreviewPlot.ui
+    IndirectInterfaceSettings.ui
     IndirectInstrumentConfig.ui
     IndirectLoadILL.ui
     IndirectMolDyn.ui
     IndirectMoments.ui
     IndirectSassena.ui
+    IndirectSettings.ui
     IndirectSimulation.ui
     IndirectSpectrumSelector.ui
     IndirectSqw.ui
     IndirectSymmetrise.ui
+    IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
-    IndirectTools.ui
     Iqt.ui
     IqtFit.ui
     JumpFit.ui
@@ -256,12 +274,16 @@ set(UI_FILES
     ISISDiagnostics.ui
     ISISEnergyTransfer.ui)
 
+set (RES_FILES
+    IndirectInterfaceResources.qrc)
+
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                    QT_VERSION 4
                    SRC ${SRC_FILES}
                    MOC ${MOC_FILES}
                    NOMOC ${INC_FILES}
                    UI ${UI_FILES}
+                   RES ${RES_FILES}
                    DEFS IN_MANTIDQT_INDIRECT
                    PRECOMPILED PrecompiledHeader.h
                    INCLUDE_DIRS
@@ -276,6 +298,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                      ${JSONCPP_LIBRARIES}
                    QT4_LINK_LIBS
                      Qwt5
+                     Qt4::QtXml
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
                      MantidQtWidgetsPlotting
@@ -287,6 +310,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesIndirect
                      @loader_path/../../plugins/qt4
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
-
+    
 # Testing target
 add_subdirectory(test)

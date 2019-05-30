@@ -42,6 +42,8 @@ Improvements
 Bugfixes
 ########
 
+- :ref:`MDNorm <algm-MDNorm>` now allows completely integrating the energy transfer dimension.
+
 Python
 ------
 

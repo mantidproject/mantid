@@ -55,7 +55,7 @@ public:
     std::vector<int> spectra(1, 1);
     TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
                       SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   // Test out of bounds construction arguments.
@@ -68,7 +68,7 @@ public:
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
         SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void testSXPeakGetters() {
@@ -183,7 +183,7 @@ public:
                       "strategy is not AbsoluteBackgroundStrategy",
                       Mantid::Kernel::make_unique<AllPeaksStrategy>(
                           backgroundStrategy.get(), spectrumInfo);
-                      , std::invalid_argument);
+                      , const std::invalid_argument &);
   }
 
   void testThatCanReduceWithSimpleReduceStrategy() {
