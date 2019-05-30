@@ -96,6 +96,7 @@ set ( TEST_PY_FILES_QT5
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    results_tab_widget/results_tab_presenter_test.py
+   results_tab_widget/results_tab_model_test.py
    help_widget_presenter_test.py
 )
 
