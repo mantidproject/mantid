@@ -77,7 +77,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab = FittingTabWidget(self.context, self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget()
+        self.help_widget = HelpWidget("Muon Analysis 2")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
