@@ -145,7 +145,9 @@ void export_IFunction() {
                (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
                "Sets the value of the ith parameter"))
 
-      .def("setError", &IFunction::setError, (args("self"), args("i"), args("err")), "Sets the error on parameter index i")   
+      .def("setError", &IFunction::setError,
+           (args("self"), args("i"), args("err")),
+           "Sets the error on parameter index i")
 
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(
