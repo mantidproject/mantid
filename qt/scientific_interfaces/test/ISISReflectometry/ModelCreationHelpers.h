@@ -54,6 +54,6 @@ MonitorCorrections makeMonitorCorrections();
 DetectorCorrections makeDetectorCorrections();
 Instrument makeInstrument();
 Instrument makeEmptyInstrument();
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_MODELCREATIONHELPERS_H_

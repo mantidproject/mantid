@@ -33,12 +33,14 @@ public:
   static void destroySuite(BatchPresenterTest *suite) { delete suite; }
 
   BatchPresenterTest()
-      : m_view(), m_jobRunner(nullptr),
-        m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"},
+      : m_view(),
+        m_jobRunner(nullptr), m_instruments{"INTER", "OFFSPEC", "POLREF",
+                                            "SURF", "CRISP"},
         m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
         m_instrument(makeEmptyInstrument()),
-        m_runsTable(m_instruments, 0.1, ReductionJobs()), m_slicing(),
-        m_mockAlgorithmsList{boost::make_shared<MockBatchJobAlgorithm>()} {
+        m_runsTable(m_instruments, 0.1, ReductionJobs()),
+        m_slicing(), m_mockAlgorithmsList{
+                         boost::make_shared<MockBatchJobAlgorithm>()} {
     Mantid::API::FrameworkManager::Instance();
   }
 
