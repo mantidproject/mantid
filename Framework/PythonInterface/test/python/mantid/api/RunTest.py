@@ -67,8 +67,8 @@ class RunTest(unittest.TestCase):
         self.assertEquals(self._expt_ws.run().get('not_a_log', 5.), 5.)
 
     def test_run_getPropertyAsSingleValue_with_number(self):
-        nspectra = self._expt_ws.run().getPropertyAsSingleValue('nspectra')
-        self.assertEquals(nspectra, float(self._nspec))
+        charge = self._expt_ws.run().getPropertyAsSingleValue('gd_prtn_chrg')
+        self.assertAlmostEqual(10.05, charge)
 
     def test_add_property_with_known_type_succeeds(self):
         run = self._expt_ws.run()
