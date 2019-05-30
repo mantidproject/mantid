@@ -82,33 +82,15 @@ set ( TEST_PY_FILES_QT5
    loading_tab/loadwidget_presenter_multiple_file_test.py
    loading_tab/loadwidget_presenter_failure_test.py
    phase_table_widget/phase_table_presenter_test.py
-   phase_table_widget/phase_table_context_test.py
-   frequency_domain_context_test.py
    grouping_tab/grouping_table_presenter_test.py
    grouping_tab/pairing_table_presenter_test.py
    grouping_tab/grouping_tab_presenter_test.py
    grouping_tab/pairing_table_group_selector_test.py
    grouping_tab/pairing_table_alpha_test.py
-   MaxEntModel_test.py
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
-   muon_context_test.py
-   muon_data_context_test.py
-   muon_gui_context_test.py
-   muon_group_pair_context_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
-   transformWidget_test.py
-   utilities/muon_group_test.py
-   utilities/muon_pair_test.py
-   utilities/load_utils_test.py
-   utilities/thread_model_test.py
-   utilities/muon_workspace_wrapper_test.py
-   utilities/muon_workspace_wrapper_directory_test.py
-   utilities/muon_load_data_test.py
-   utilities/muon_file_utils_test.py
-   utilities/run_string_utils_operator_test.py
-   utilities/run_string_utils_conversion_test.py
    help_widget_presenter_test.py
 )
 
