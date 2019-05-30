@@ -224,7 +224,7 @@ std::string makeFunctionString(const std::string &name,
  *  @param parameters a vector containing the polynomial coefficients
  *  @return a string containing the name of the polynomial
  */
-std::string makeNameString(const int degree) {
+std::string makeNameString(const size_t degree) {
   std::ostringstream name;
   switch (degree) {
   case 0:
