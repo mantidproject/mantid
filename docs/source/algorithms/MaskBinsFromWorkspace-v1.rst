@@ -19,7 +19,7 @@ Usage
 
 **Masking of a small workspace**
 
-.. testcode:: exMaskBinsSimple
+.. testcode:: exMaskBinsFromWorkspaceSimple
 
    # Create workspace with 10 bins of width 10
    ws = CreateSampleWorkspace(BankPixelWidth=1, Xmax=100, BinWidth=10)
@@ -38,10 +38,10 @@ Usage
 
 Output:
 
-.. testoutput:: exMaskBinsSimple
+.. testoutput:: exMaskBinsFromWorkspaceSimple
 
    After mask copying: [  0.3   0.3   0.3   0.3   0.3  10.3   0.3   0.3   0.3   0.3]
-   Masked bin indices: [ 1, 2, 3]
+   Masked bin indices: [1,2,3]
 
 .. categories::
 

@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 import systemtesting
-import time
 
 import mantid
 from mantid.api import AlgorithmManager
@@ -138,7 +137,7 @@ class SANSReductionCoreTest(unittest.TestCase):
         if os.path.exists(f_name):
             os.remove(f_name)
 
-    def xtest_that_reduction_core_evaluates_LAB(self):
+    def test_that_reduction_core_evaluates_LAB(self):
         # Arrange
         # Build the data information
         file_information_factory = SANSFileInformationFactory()
@@ -214,10 +213,8 @@ class SANSReductionCoreTest(unittest.TestCase):
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
 
         # Act
-        compat_start = time.time()
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
-        compat_end = time.time()
         compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
 
         ################################################################################################################
@@ -235,13 +232,10 @@ class SANSReductionCoreTest(unittest.TestCase):
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
 
         # Act
-        non_compat_start = time.time()
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
-        non_compat_end = time.time()
         non_compatibility_output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
 
-        self.assertTrue((non_compat_end-non_compat_start) < (compat_end-compat_start))
         ################################################################################################################
         # Compare workspaces
         ################################################################################################################

@@ -45,7 +45,7 @@ public:
     ads.add(workspaceName,
             WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
     ads.add(maskedWorkspaceName,
-            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25 ,0.0));
+            WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
     TS_ASSERT_THROWS_NOTHING(
         masker.setPropertyValue("InputWorkspace", workspaceName));

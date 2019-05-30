@@ -8,7 +8,6 @@
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/HistogramValidator.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -24,9 +23,10 @@ void MaskBinsFromWorkspace::init() {
       "The name of the input workspace. Must contain histogram data.",
       boost::make_shared<HistogramValidator>());
   declareWorkspaceInputProperties<MatrixWorkspace>(
-          "MaskedWorkspace",
-          "The name of the workspaces containing masked bins to copy over. Must contain histogram data.",
-          boost::make_shared<HistogramValidator>());
+      "MaskedWorkspace",
+      "The name of the workspaces containing masked bins to copy over. Must "
+      "contain histogram data.",
+      boost::make_shared<HistogramValidator>());
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -37,7 +37,8 @@ void MaskBinsFromWorkspace::init() {
  */
 void MaskBinsFromWorkspace::exec() {
   MatrixWorkspace_sptr inputWS;
-  std::tie(inputWS, indexSet) = getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
+  std::tie(inputWS, indexSet) =
+      getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
   MatrixWorkspace_sptr maskedWS = getProperty("MaskedWorkspace");
 
   // Only create the output workspace if it's different to the input one
