@@ -258,7 +258,7 @@ void evaluateInPlace(const std::string &name,
     att.fromString(std::to_string(degree));
     bkg->setAttribute("n", att);
   }
-  for (auto d = 0; d <= degree; ++d) {
+  for (size_t d = 0; d <= degree; ++d) {
     std::string param = 'A' + std::to_string(d);
     bkg->setParameter(param, parameters[d]);
   }
