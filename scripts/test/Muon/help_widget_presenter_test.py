@@ -16,7 +16,7 @@ from Muon.GUI.Common.test_helpers import mock_widget
 class HelpWidgetPresenterTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
-        self.view = HelpWidgetView()
+        self.view = HelpWidgetView("test")
         self.presenter = HelpWidgetPresenter(self.view)
 
         self.view.warning_popup = mock.MagicMock()

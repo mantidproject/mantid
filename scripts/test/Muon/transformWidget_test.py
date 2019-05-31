@@ -7,8 +7,8 @@
 import unittest
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
@@ -19,30 +19,29 @@ from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
 
 
-class TransformTest(unittest.TestCase):
+class TransformTest(GuiTest):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-        self.load=  mock.create_autospec(load_utils.LoadUtils,spec_set=True)
-        self.fft=   mock.create_autospec(fft_presenter.FFTPresenter,spec_Set=True)
-        self.maxent=mock.create_autospec(maxent_presenter.MaxEntPresenter,spec_set=True)
+        self.load = mock.create_autospec(load_utils.LoadUtils, spec_set=True)
+        self.fft = mock.create_autospec(fft_presenter.FFTPresenter, spec_Set=True)
+        self.maxent = mock.create_autospec(maxent_presenter.MaxEntPresenter, spec_set=True)
 
         # create widget
-        self.widget=transform_widget.TransformWidget(self.load, FFTWidget, MaxEntWidget)
+        self.widget = transform_widget.TransformWidget(self.load, FFTWidget, MaxEntWidget)
         # create the view
-        self.view=mock.create_autospec(transform_view.TransformView,spec_set=False)
-        self.view.getView=mock.Mock()
-        self.view.getMethods=mock.Mock(return_value=["FFT","MaxEnt"])
-        self.view.hideAll=mock.Mock()
-        self.view.showMethod=mock.Mock()
-        self.view.selection=mock.create_autospec(transform_selection_view.TransformSelectionView,spec_set=True)
-        self.view.selection.changeMethodSignal=mock.Mock()
+        self.view = mock.create_autospec(transform_view.TransformView, spec_set=False)
+        self.view.getView = mock.Mock()
+        self.view.getMethods = mock.Mock(return_value=["FFT", "MaxEnt"])
+        self.view.hideAll = mock.Mock()
+        self.view.showMethod = mock.Mock()
+        self.view.selection = mock.create_autospec(transform_selection_view.TransformSelectionView, spec_set=True)
+        self.view.selection.changeMethodSignal = mock.Mock()
         # set the mocked view to the widget
-        self.widget.mockWidget(self.view)  
+        self.widget.mockWidget(self.view)
 
     def test_changeDisplay(self):
         self.widget.updateDisplay(1)
-        assert(self.view.hideAll.call_count==1)
-        self.assertEquals(self.view.showMethod.call_count,1)
+        assert (self.view.hideAll.call_count == 1)
+        self.assertEquals(self.view.showMethod.call_count, 1)
 
 
 if __name__ == '__main__':

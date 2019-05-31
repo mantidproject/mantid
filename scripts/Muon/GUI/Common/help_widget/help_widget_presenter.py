@@ -18,6 +18,6 @@ class HelpWidgetPresenter(object):
 
 
 class HelpWidget(object):
-    def __init__(self):
-        self.view = HelpWidgetView()
+    def __init__(self, doc):
+        self.view = HelpWidgetView(doc)
         self.presenter = HelpWidgetPresenter(self.view)
