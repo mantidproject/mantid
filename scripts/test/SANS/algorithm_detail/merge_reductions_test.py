@@ -146,8 +146,8 @@ class MergeReductionsTest(unittest.TestCase):
 
         scale = result.scale
         shift = result.shift
-        self.assertTrue(scale != scale_input)
-        self.assertTrue(shift != shift_input)
+        self.assertNotEqual(scale,  scale_input)
+        self.assertNotEqual(shift,  shift_input)
         self.assertTrue(abs(scale - (-15.0)) < 1e-4)
         self.assertTrue(abs(shift - 0.0472222222222) < 1e-4)
 
@@ -173,7 +173,7 @@ class MergeReductionsTest(unittest.TestCase):
         scale = result.scale
         shift = result.shift
 
-        self.assertTrue(shift != shift_input)
+        self.assertNotEqual(shift,  shift_input)
         self.assertTrue(abs(scale - scale_input) < 1e-4)
         self.assertTrue(abs(shift - 0.823602794411) < 1e-4)
 
@@ -199,7 +199,7 @@ class MergeReductionsTest(unittest.TestCase):
         scale = result.scale
         shift = result.shift
 
-        self.assertTrue(scale != scale_input)
+        self.assertNotEqual(scale,  scale_input)
         self.assertTrue(abs(scale-1.0) < 1e-4)
         self.assertTrue(abs(shift-shift_input) < 1e-4)
 

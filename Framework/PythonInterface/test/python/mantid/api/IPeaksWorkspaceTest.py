@@ -68,7 +68,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
 
         # Simple test that the creational method is exposed
         p = pws.createPeakHKL([1,1,1])
-        self.assertTrue(IPeak != None)
+        self.assertNotEqual(IPeak,  None)
 
     def test_peak_setQLabFrame(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)

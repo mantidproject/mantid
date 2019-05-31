@@ -351,7 +351,7 @@ class SpectrumInfoTest(unittest.TestCase):
         # Check inequality with not (by negating equals())
         # and != to make sure same result is given
         self.assertTrue(not spectrumDefinitionOne.equals(spectrumDefinitionTwo))
-        self.assertTrue(spectrumDefinitionOne != spectrumDefinitionTwo)
+        self.assertNotEqual(spectrumDefinitionOne,  spectrumDefinitionTwo)
 
     def test_spectrumDefintionGet(self):
         """ See if indexing works """

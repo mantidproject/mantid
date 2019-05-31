@@ -87,7 +87,7 @@ class V3DTest(unittest.TestCase):
         p2 = V3D(1.0, -5.0, 8.0)  # different objects, same value
         self.assertFalse(p1 != p2)
         p3 = V3D(1.0, -5.0, 10.0)
-        self.assertTrue(p1 != p3)
+        self.assertNotEqual(p1,  p3)
 
     def test_directionAngles_rads(self):
         v = V3D(1, 1, 1)

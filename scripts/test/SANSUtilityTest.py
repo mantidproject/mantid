@@ -679,7 +679,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         print(message)
        # self.assertTrue(not message)
         #self.assertTrue(complete)
-        self.assertTrue(mtd[ws_name] != mtd[ws_clone_name])
+        self.assertNotEqual(mtd[ws_name],  mtd[ws_clone_name])
 
         self._removeWorkspace(ws_name)
         self._removeWorkspace(ws_clone_name)
@@ -709,18 +709,18 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         # Act and Assert
         errors = ws.dataE
         self.assertEqual(errors(0)[0],  0.0)
-        self.assertTrue(errors(1)[0] != 0.0)
+        self.assertNotEqual(errors(1)[0],  0.0)
         self.assertEqual(errors(2)[0],  0.0)
-        self.assertTrue(errors(3)[0] != 0.0)
+        self.assertNotEqual(errors(3)[0],  0.0)
 
         su.remove_zero_errors_from_workspace(ws)
 
         self.assertEqual(errors(0)[0],  su.ZERO_ERROR_DEFAULT)
-        self.assertTrue(errors(1)[0] != 0.0)
-        self.assertTrue(errors(1)[0] != su.ZERO_ERROR_DEFAULT)
+        self.assertNotEqual(errors(1)[0],  0.0)
+        self.assertNotEqual(errors(1)[0],  su.ZERO_ERROR_DEFAULT)
         self.assertEqual(errors(2)[0],  su.ZERO_ERROR_DEFAULT)
-        self.assertTrue(errors(3)[0] != 0.0)
-        self.assertTrue(errors(3)[0] != su.ZERO_ERROR_DEFAULT)
+        self.assertNotEqual(errors(3)[0],  0.0)
+        self.assertNotEqual(errors(3)[0],  su.ZERO_ERROR_DEFAULT)
 
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)

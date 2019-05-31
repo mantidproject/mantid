@@ -144,7 +144,7 @@ class WishMasking(systemtesting.MantidSystemTest):
             update_mask_boundary_outside = self.get_masking_for_index(update_cal_file, masking_edge+1)
 
                         #Test that the merged output cal file has actually taken the masking from the update file.
-            self.assertTrue(merged_mask_boundary_inside != merged_mask_boundary_outside)
+            self.assertNotEqual(merged_mask_boundary_inside,  merged_mask_boundary_outside)
             self.assertEqual(merged_mask_boundary_inside,  update_mask_boundary_inside)
             self.assertEqual(merged_mask_boundary_outside,  update_mask_boundary_outside)
 
