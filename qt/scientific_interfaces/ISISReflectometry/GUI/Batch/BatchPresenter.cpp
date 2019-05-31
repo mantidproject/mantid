@@ -306,6 +306,13 @@ bool BatchPresenter::isAutoreducing() const {
   return m_jobRunner->isAutoreducing();
 }
 
+/** Get the percent of jobs that have been completed out of the current
+    processing list
+ */
+int BatchPresenter::percentComplete() const {
+  return m_jobRunner->percentComplete();
+}
+
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
   m_jobRunner->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowStateChanged();

@@ -73,6 +73,7 @@ public:
   RunsTable &mutableRunsTable() override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+  int percentComplete() const override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;

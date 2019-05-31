@@ -11,6 +11,7 @@
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
 #include "../ModelCreationHelpers.h"
+#include "../ReflMockObjects.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MockRunsTableView.h"
 
@@ -44,6 +45,7 @@ public:
   bool verifyAndClearExpectations() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
     return true;
   }
 
@@ -65,12 +67,7 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    Plotter plotter(nullptr);
-#else
-    Plotter plotter;
-#endif
-    return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), plotter);
+    return makePresenter(view, ReductionJobs());
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
@@ -79,11 +76,15 @@ public:
 #else
     Plotter plotter;
 #endif
-    return RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
+    auto presenter =
+        RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
+    presenter.acceptMainPresenter(&m_mainPresenter);
+    return presenter;
   }
 
 protected:
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockRunsTableView> m_view;
+  NiceMock<MockRunsPresenter> m_mainPresenter;
 };
 #endif // MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERTEST_H_

@@ -20,6 +20,7 @@ public:
 
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
+  virtual int percentComplete() const = 0;
   virtual void reductionResumed() = 0;
   virtual void reductionPaused() = 0;
   virtual void autoreductionResumed() = 0;

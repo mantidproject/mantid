@@ -47,28 +47,22 @@ RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
 std::vector<Group> RunsTable::selectedGroups() const {
   std::vector<Group> groups;
   for (const auto &rowLocation : m_selectedRowLocations) {
-    const auto rowPath = rowLocation.path();
-    try {
-      const auto group = m_reductionJobs.getGroupFromPath(rowPath);
-      groups.emplace_back(group);
-    } catch (std::invalid_argument) {
-      // We should assume that a row was found here, or the row was not
-      // initialised.
-    }
+    if (!isGroupLocation(rowLocation))
+      continue;
+    const auto group = m_reductionJobs.getGroupFromPath(rowLocation);
+    groups.emplace_back(group);
   }
   return groups;
 }
+
 std::vector<Row> RunsTable::selectedRows() const {
   std::vector<Row> rows;
   for (const auto &rowLocation : m_selectedRowLocations) {
-    const auto rowPath = rowLocation.path();
-    try {
-      const auto row = m_reductionJobs.getRowFromPath(rowPath);
-      rows.emplace_back(row);
-    } catch (std::invalid_argument) {
-      // We should assume that a group was found here, or the row was not
-      // initialised.
-    }
+    if (!isRowLocation(rowLocation))
+      continue;
+    const auto row = m_reductionJobs.getRowFromPath(rowLocation);
+    if (row.is_initialized())
+      rows.emplace_back(row.get());
   }
   return rows;
 }

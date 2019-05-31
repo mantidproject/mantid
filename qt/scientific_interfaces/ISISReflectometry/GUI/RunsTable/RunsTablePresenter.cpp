@@ -538,8 +538,7 @@ void RunsTablePresenter::setRowStylingForItem(
 }
 
 void RunsTablePresenter::updateProgressBar() {
-  m_view->setProgress(
-      static_cast<int>(percentComplete(m_model.reductionJobs())));
+  m_view->setProgress(m_mainPresenter->percentComplete());
 }
 
 void RunsTablePresenter::notifyRowStateChanged() {

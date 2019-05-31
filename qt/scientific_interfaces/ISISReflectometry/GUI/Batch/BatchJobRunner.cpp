@@ -13,6 +13,46 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace { // unnamed
+
+int totalJobsForLocation(
+    ReductionJobs const &jobs,
+    MantidWidgets::Batch::RowLocation const &location,
+    std::vector<MantidWidgets::Batch::RowLocation> const &locations) {
+  // Count groups and their child rows
+  if (isGroupLocation(location))
+    return jobs.getGroupFromPath(location).totalItems();
+
+  // Valid rows have a single processing step but we want to
+  // ignore them if their parent group is also in the
+  // selection or they will be counted twice.
+  auto const &row = jobs.getRowFromPath(location);
+  if (row.is_initialized() && !containsPath(locations, {groupOf(location)}))
+    return 1;
+
+  return 0;
+}
+
+int completedJobsForLocation(
+    ReductionJobs const &jobs,
+    MantidWidgets::Batch::RowLocation const &location,
+    std::vector<MantidWidgets::Batch::RowLocation> const &locations) {
+  // Count groups and their child rows
+  if (isGroupLocation(location))
+    return jobs.getGroupFromPath(location).completedItems();
+
+  // Valid rows have a single processing step but we want to
+  // ignore them if their parent group is also in the
+  // selection or they will be counted twice.
+  auto const &row = jobs.getRowFromPath(location);
+  if (row.is_initialized() && row->complete() &&
+      !containsPath(locations, {groupOf(location)}))
+    return 1;
+
+  return 0;
+}
+} // unnamed namespace
+
 using API::IConfiguredAlgorithm_sptr;
 
 BatchJobRunner::BatchJobRunner(Batch batch)
@@ -23,14 +63,50 @@ bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
 bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
+int BatchJobRunner::totalItemsInSelection() const {
+  auto const &jobs = m_batch.runsTable().reductionJobs();
+  auto const &locations = m_rowLocationsToProcess;
+  return std::accumulate(
+      m_rowLocationsToProcess.cbegin(), m_rowLocationsToProcess.cend(), 0,
+      [&jobs, &locations](int &count,
+                          MantidWidgets::Batch::RowLocation const &location) {
+        return count + totalJobsForLocation(jobs, location, locations);
+      });
+}
+
+int BatchJobRunner::completedItemsInSelection() const {
+  auto const &jobs = m_batch.runsTable().reductionJobs();
+  auto const &locations = m_rowLocationsToProcess;
+  return std::accumulate(
+      m_rowLocationsToProcess.cbegin(), m_rowLocationsToProcess.cend(), 0,
+      [&jobs, &locations](int &count,
+                          MantidWidgets::Batch::RowLocation const &location) {
+        return count + completedJobsForLocation(jobs, location, locations);
+      });
+}
+
+int BatchJobRunner::percentComplete() const {
+  // If processing everything, get the percent from the whole table
+  if (m_processAll)
+    return MantidQt::CustomInterfaces::percentComplete(
+        m_batch.runsTable().reductionJobs());
+
+  // If processing a selection but there is nothing to process, return 100%
+  if (totalItemsInSelection() == 0)
+    return 100;
+
+  // Otherwise calculate the percentage of completed items in the selection
+  return completedItemsInSelection() * 100 / totalItemsInSelection();
+}
+
 void BatchJobRunner::reductionResumed() {
-  // Cache the selection when the user starts a reduction
-  m_selectedRowLocations = m_batch.selectedRowLocations();
+  // Cache the set of rows to process when the user starts a reduction
+  m_rowLocationsToProcess = m_batch.selectedRowLocations();
   m_isProcessing = true;
   // If the user has manually selected failed rows, reprocess them; otherwise
   // skip them. If we're autoreducing, or there are no selected rows, process
   // everything
-  if (m_selectedRowLocations.empty()) {
+  if (m_rowLocationsToProcess.empty()) {
     // Nothing selected so process everything. Skip failed rows.
     m_processAll = true;
     m_reprocessFailed = false;
@@ -47,7 +123,7 @@ void BatchJobRunner::reductionResumed() {
 void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
 
 void BatchJobRunner::autoreductionResumed() {
-  m_selectedRowLocations.clear();
+  m_rowLocationsToProcess.clear();
   m_isAutoreducing = true;
   m_isProcessing = true;
   m_reprocessFailed = true;
@@ -62,7 +138,7 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
 }
 
 template <typename T> bool BatchJobRunner::isSelected(T const &item) {
-  return m_processAll || m_batch.isInSelection(item, m_selectedRowLocations);
+  return m_processAll || m_batch.isInSelection(item, m_rowLocationsToProcess);
 }
 
 bool BatchJobRunner::hasSelectedRows(Group const &group) {

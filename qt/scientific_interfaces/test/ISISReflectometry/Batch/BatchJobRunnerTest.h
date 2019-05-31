@@ -39,18 +39,8 @@ public:
 
   BatchJobRunnerTest()
       : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"},
-        m_tolerance(0.1),
-        m_experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                     SummationType::SumInLambda, false, false,
-                     PolarizationCorrections(PolarizationCorrectionType::None),
-                     FloodCorrections(FloodCorrectionType::Workspace),
-                     boost::none, std::map<std::string, std::string>(),
-                     std::vector<PerThetaDefaults>()),
-        m_instrument(
-            RangeInLambda(0.0, 0.0),
-            MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
-                               RangeInLambda(0.0, 0.0)),
-            DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
+        m_tolerance(0.1), m_experiment(makeEmptyExperiment()),
+        m_instrument(makeEmptyInstrument()),
         m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
     m_jobAlgorithm = boost::make_shared<MockBatchJobAlgorithm>();
   }

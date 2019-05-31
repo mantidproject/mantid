@@ -289,28 +289,19 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return boost::none;
 }
 
-Group ReductionJobs::getGroupFromPath(
+Group const &ReductionJobs::getGroupFromPath(
     const MantidWidgets::Batch::RowLocation rowLocation) const {
   if (isGroupLocation(rowLocation)) {
-    // Is group
-    const auto path = rowLocation.path();
-    return m_groups[path[0]];
+    return groups()[groupOf(rowLocation)];
   } else {
     throw std::invalid_argument("Path given does not point to a group.");
   }
 }
 
-Row ReductionJobs::getRowFromPath(
+boost::optional<Row> const &ReductionJobs::getRowFromPath(
     const MantidWidgets::Batch::RowLocation rowLocation) const {
-  if (!isGroupLocation(rowLocation)) {
-    // Is Row
-    const auto path = rowLocation.path();
-    const auto group = m_groups[path[0]];
-    const auto row = group[path[1]];
-    if (row.is_initialized())
-      return row.get();
-    else
-      throw std::invalid_argument("Row is not initialised");
+  if (isRowLocation(rowLocation)) {
+    return groups()[groupOf(rowLocation)].rows()[rowOf(rowLocation)];
   } else {
     throw std::invalid_argument("Path given does not point to a row.");
   }

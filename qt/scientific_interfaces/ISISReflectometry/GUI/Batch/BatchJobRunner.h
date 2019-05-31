@@ -27,6 +27,7 @@ public:
 
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+  int percentComplete() const override;
 
   void reductionResumed() override;
   void reductionPaused() override;
@@ -60,7 +61,10 @@ protected:
   bool m_processAll;
 
 private:
-  std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
+  std::vector<MantidWidgets::Batch::RowLocation> m_rowLocationsToProcess;
+
+  int totalItemsInSelection() const;
+  int completedItemsInSelection() const;
 
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
