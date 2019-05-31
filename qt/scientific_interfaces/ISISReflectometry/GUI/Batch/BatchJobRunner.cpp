@@ -198,8 +198,7 @@ void BatchJobRunner::addAlgorithmsForProcessingRowsInGroup(
     Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
-    if (row && isSelected(row.get()) &&
-        row->requiresProcessing(m_reprocessFailed))
+    if (row && row->requiresProcessing(m_reprocessFailed))
       addAlgorithmForProcessingRow(row.get(), algorithms);
   }
 }
