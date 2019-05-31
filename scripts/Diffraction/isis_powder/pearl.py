@@ -40,7 +40,6 @@ class Pearl(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
-        print(kwargs)
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
                 for new_tt_mode in ["tt35", "tt70", "tt88"]:
