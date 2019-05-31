@@ -10,6 +10,7 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
 import re
+from mantid.api import FunctionFactory
 
 
 class FittingTabPresenter(object):
@@ -158,7 +159,7 @@ class FittingTabPresenter(object):
             self._fit_status = fit_status
             self._fit_chi_squared = fit_chi_squared
         elif self.view.fit_type == self.view.single_fit:
-            self._fit_function[index] = fit_function
+            self._fit_function[index] = FunctionFactory.createInitialized(str(fit_function))
             self._fit_status[index] = fit_status
             self._fit_chi_squared[index] = fit_chi_squared
         elif self.view.fit_type == self.view.simultaneous_fit:
@@ -230,10 +231,9 @@ class FittingTabPresenter(object):
         else:
             self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
 
+        self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
         self.update_fit_status_information_in_view()
-
-        self.reset_start_time_to_first_good_data_value()
 
     def clear_fit_information(self):
         self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
