@@ -62,7 +62,7 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         function_selector.blockSignals(True)
         function_selector.clear()
         function_selector.addItems(names)
-        if original_selection:
+        if original_selection in names:
             function_selector.setCurrentText(original_selection)
         function_selector.blockSignals(False)
 
