@@ -37,7 +37,9 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the low-resolution axis to integrate over")
         self.declareProperty("SumPeak", False, doc="If True, the resulting peak will be summed")
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "",Direction.Output), "The workspace to check.")
+        detector_list = ["2D-Detector", "LinearDetector"]
+        self.declareProperty("TypeOfDetector", "2D-Detector", StringListValidator(detector_list), doc="The type of detector used")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "The workspace to check.")
 
     def PyExec(self):
         workspace = self.getProperty("InputWorkspace").value
@@ -59,10 +61,14 @@ class LRSubtractAverageBackground(PythonAlgorithm):
 
         sum_peak = self.getProperty("SumPeak").value
 
-        # Number of pixels in each direction
-        #TODO: revisit this when we update the IDF
-        number_of_pixels_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        number_of_pixels_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        detector = self.getProperty("TypeOfDetector").value
+        if detector == "LinearDetector":
+            number_of_pixels_x = 1
+            number_of_pixels_y = int(workspace.getNumberHistograms())
+        else:
+            # TODO: revisit this when we update the IDF
+            number_of_pixels_x = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            number_of_pixels_y = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
         left_bck = None
         if peak_min > bck_min:
