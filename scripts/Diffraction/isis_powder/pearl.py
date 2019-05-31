@@ -97,7 +97,7 @@ class Pearl(AbstractInst):
 
         # reset spline path
         self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
-                                                                          [self._inst_settings.tt_mode])
+                                                                      [self._inst_settings.tt_mode])
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round

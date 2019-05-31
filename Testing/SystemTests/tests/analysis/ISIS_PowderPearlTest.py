@@ -135,6 +135,7 @@ class FocusTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
 
+
 class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
     focus_results = None

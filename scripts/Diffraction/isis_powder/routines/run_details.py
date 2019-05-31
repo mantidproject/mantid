@@ -136,4 +136,3 @@ class _RunDetails(object):
 
         splined_van_name = common.generate_splined_name(self.vanadium_run_numbers, splined_list)
         self.splined_vanadium_file_path = os.path.join(self.van_paths, splined_van_name)
-
