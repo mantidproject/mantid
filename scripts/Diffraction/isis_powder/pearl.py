@@ -78,11 +78,27 @@ class Pearl(AbstractInst):
 
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs):
+
+        # set temporary settings
         if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
             self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+
+        # check that cache exists
+        run_number_string_key = self._generate_run_details_fingerprint(self._inst_settings.run_number,
+                                                                       self._inst_settings.file_extension,
+                                                                       self._inst_settings.tt_mode)
+        if run_number_string_key in self._cached_run_details:
+            # update spline path of cache
+            self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
+                                                                          [self._inst_settings.tt_mode])
         yield
+        # reset instrument settings
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
+
+        # reset spline path
+        self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
+                                                                          [self._inst_settings.tt_mode])
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
