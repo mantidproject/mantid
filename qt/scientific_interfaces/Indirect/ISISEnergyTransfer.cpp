@@ -114,25 +114,25 @@ void deleteWorkspace(std::string const &name) {
   deleter->execute();
 }
 
-double getSampleLog(std::string const &workspaceName,
+double getSampleLog(MatrixWorkspace_const_sptr workspace,
                     std::string const &logName, double const &defaultValue) {
   try {
-    return getADSMatrixWorkspace(workspaceName)->getLogAsSingleValue(logName);
+    return workspace->getLogAsSingleValue(logName);
   } catch (std::exception const &) {
     return defaultValue;
   }
 }
 
-double getSampleLog(std::string const &workspaceName,
+double getSampleLog(MatrixWorkspace_const_sptr workspace,
                     std::vector<std::string> const &logNames,
                     double const &defaultValue) {
   double value(defaultValue);
   for (auto const &logName : logNames) {
-    value = getSampleLog(workspaceName, logName, defaultValue);
+    value = getSampleLog(workspace, logName, defaultValue);
     if (value != defaultValue)
       break;
   }
-  deleteWorkspace(workspaceName);
+  deleteWorkspace(workspace->getName());
   return value;
 }
 
@@ -143,7 +143,8 @@ double loadSampleLog(std::string const &filename,
   auto loader = loadAlgorithm(filename, temporaryWorkspace);
   loader->execute();
 
-  return getSampleLog(temporaryWorkspace, logNames, defaultValue);
+  return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
+                      defaultValue);
 }
 
 } // namespace
