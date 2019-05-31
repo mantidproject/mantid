@@ -17,17 +17,51 @@ This tab is for performing fits on the data.
 
 **Simultaneous Fit** This option will perform a fit for multiple data sets, which may share parameters. 
 
-Select data to fit
-^^^^^^^^^^^^^^^^^^
-This launches a dialog box for selecting the data to be used in the fit.
+**Select data to fit** This launches a dialog box for selecting the data to be used in the fit.
+
+Data Selection
+^^^^^^^^^^^^^^
+
+.. image::  ../images/muon_interface_data_selection.png
+   :height: 250px
+
+**Search bar** The search bar can be used to find (Include) or filter out (Exclude) data sets by name.
+
+**Show Selected** If this option is checked the selection box will be limited to only the data sets that have already
+been selected to be output.
+
+**Selection Box** data sets are listed in this section, they can be selected individually by checking the boxes on the
+right side of the box.
+
+**Unselect/Select All** When clicked these buttons will automatically unselect or select all log values currently in the
+selection box
+
+**Run selection** Filter desplayed data sets by run number
+
+**Group & Pair selection** filter by group or pair name.
+
+**Time Domain**
+
+**All**
+
+**Show PhaseQuad** If this option is checked the selection box will show any PhaseQuads that have been calculated for these runs.
 
 
 Fit function browser
 ^^^^^^^^^^^^^^^^^^^^
 
+.. image::  ../images/muon_interface_tab_fitting_browser.png
+   :height: 250px
+
 Right clicking in the central box will bring up a context menu for adding or removing functions.
-Once functions or backgrounds are added to the browser you can use to modify the initial guess for a varabile and set it
-If the parameter is to be the same for all of the data sets, the global check box should be ticked.
+
+**Property** This is a list of property names, individual functions can be collapsed down for greater legibility.
+
+**Value** This lists the initial guesses for variables within fitting functions. Variables can be fixed for a given fit
+from the edit paramiter values dialog box (the ellipsis to the right of the value box)
+
+**Global** If multiple runs are being plotted then variables can be made identical for each run by checking the box next to it.
+
 All selected workspaces will share the same composite fitting function but can have different variables.
 
 Fit properties browser
