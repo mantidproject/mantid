@@ -11,9 +11,8 @@ from qtpy import QtWidgets, QtCore
 
 from copy import deepcopy
 
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
 from MultiPlotting.edit_windows.select_subplot import SelectSubplot
