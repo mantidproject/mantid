@@ -176,8 +176,16 @@ template <typename T>
 inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
   // try to split the string
   std::size_t pos = strvalue.find(':');
+  std::size_t numChar = std::string::npos; // go to the end of the string
+  T step{1};
   if (pos == std::string::npos) {
     pos = strvalue.find('-', 1);
+  } else {
+    const auto posStep = strvalue.find(':', pos + 1);
+    if (posStep != std::string::npos) {
+      step = boost::lexical_cast<T>(strvalue.substr(posStep + 1));
+      numChar = posStep - pos - 1;
+    }
   }
 
   // just convert the whole thing into a value
@@ -186,11 +194,27 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
     return;
   }
 
+  if (step == static_cast<T>(0))
+    throw std::runtime_error("Step size must be non-zero");
+
   // convert the input string into boundaries and run through a list
-  T start = boost::lexical_cast<T>(strvalue.substr(0, pos));
-  T stop = boost::lexical_cast<T>(strvalue.substr(pos + 1));
-  for (T i = start; i <= stop; i++)
-    value.push_back(i);
+  const auto start = boost::lexical_cast<T>(strvalue.substr(0, pos));
+  const auto stop = boost::lexical_cast<T>(strvalue.substr(pos + 1, numChar));
+  if (start <= stop) {
+    for (auto i = start; i <= stop;) {
+      value.push_back(i);
+      // done inside the loop because gcc7 doesn't like i+=step for short
+      // unsigned int
+      i = static_cast<T>(i + step);
+    }
+  } else {
+    for (auto i = start; i >= stop;) {
+      value.push_back(i);
+      // done inside the loop because gcc7 doesn't like i+=step for short
+      // unsigned int
+      i = static_cast<T>(i + step);
+    }
+  }
 }
 
 template <typename T> void toValue(const std::string &strvalue, T &value) {

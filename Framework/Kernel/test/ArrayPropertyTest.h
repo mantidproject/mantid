@@ -85,8 +85,7 @@ public:
   }
 
   void testConstructorByString() {
-    const std::string &i_stringValue = "1,2,3";
-    ArrayProperty<int> i("i", i_stringValue);
+    ArrayProperty<int> i("i", "1,2,3");
     TS_ASSERT_EQUALS(i.operator()()[0], 1);
     TS_ASSERT_EQUALS(i.operator()()[1], 2);
     TS_ASSERT_EQUALS(i.operator()()[2], 3);
@@ -98,33 +97,43 @@ public:
     TS_ASSERT_EQUALS(i2.operator()()[1], 0);
     TS_ASSERT_EQUALS(i2.operator()()[2], 1);
 
-    ArrayProperty<int> i4("i", "-1:1");
-    TS_ASSERT_EQUALS(i4.operator()()[0], -1);
-    TS_ASSERT_EQUALS(i4.operator()()[1], 0);
-    TS_ASSERT_EQUALS(i4.operator()()[2], 1);
+    ArrayProperty<int> i3("i", "-1:1");
+    TS_ASSERT_EQUALS(i3.operator()()[0], -1);
+    TS_ASSERT_EQUALS(i3.operator()()[1], 0);
+    TS_ASSERT_EQUALS(i3.operator()()[2], 1);
 
-    ArrayProperty<int> i5("i", "-3--1");
+    ArrayProperty<int> i4("i", "-3--1");
+    TS_ASSERT_EQUALS(i4.operator()()[0], -3);
+    TS_ASSERT_EQUALS(i4.operator()()[1], -2);
+    TS_ASSERT_EQUALS(i4.operator()()[2], -1);
+
+    ArrayProperty<int> i5("i", "-3:-1");
     TS_ASSERT_EQUALS(i5.operator()()[0], -3);
     TS_ASSERT_EQUALS(i5.operator()()[1], -2);
     TS_ASSERT_EQUALS(i5.operator()()[2], -1);
 
-    ArrayProperty<int> i7("i", "-3:-1");
-    TS_ASSERT_EQUALS(i7.operator()()[0], -3);
-    TS_ASSERT_EQUALS(i7.operator()()[1], -2);
-    TS_ASSERT_EQUALS(i7.operator()()[2], -1);
+    ArrayProperty<int> i6("i", "-3:0:2");
+    TS_ASSERT_EQUALS(i6.operator()()[0], -3);
+    TS_ASSERT_EQUALS(i6.operator()()[1], -1);
 
-    ArrayProperty<unsigned int> i3("i", "0:2,5");
-    TS_ASSERT_EQUALS(i3.operator()()[0], 0);
-    TS_ASSERT_EQUALS(i3.operator()()[1], 1);
-    TS_ASSERT_EQUALS(i3.operator()()[2], 2);
-    TS_ASSERT_EQUALS(i3.operator()()[3], 5);
+    // negative step size
+    ArrayProperty<int> i7("i", "5:1:-2");
+    TS_ASSERT_EQUALS(i7.operator()()[0], 5);
+    TS_ASSERT_EQUALS(i7.operator()()[1], 3);
+    TS_ASSERT_EQUALS(i7.operator()()[2], 1);
 
-    ArrayProperty<unsigned int> i6("i", "5,0-2,5");
-    TS_ASSERT_EQUALS(i6.operator()()[0], 5);
-    TS_ASSERT_EQUALS(i6.operator()()[1], 0);
-    TS_ASSERT_EQUALS(i6.operator()()[2], 1);
-    TS_ASSERT_EQUALS(i6.operator()()[3], 2);
-    TS_ASSERT_EQUALS(i6.operator()()[4], 5);
+    ArrayProperty<unsigned int> u1("i", "0:2,5");
+    TS_ASSERT_EQUALS(u1.operator()()[0], 0);
+    TS_ASSERT_EQUALS(u1.operator()()[1], 1);
+    TS_ASSERT_EQUALS(u1.operator()()[2], 2);
+    TS_ASSERT_EQUALS(u1.operator()()[3], 5);
+
+    ArrayProperty<unsigned int> u2("i", "5,0-2,5");
+    TS_ASSERT_EQUALS(u2.operator()()[0], 5);
+    TS_ASSERT_EQUALS(u2.operator()()[1], 0);
+    TS_ASSERT_EQUALS(u2.operator()()[2], 1);
+    TS_ASSERT_EQUALS(u2.operator()()[3], 2);
+    TS_ASSERT_EQUALS(u2.operator()()[4], 5);
 
     ArrayProperty<double> d("d", "7.77,8.88,9.99");
     TS_ASSERT_EQUALS(d.operator()()[0], 7.77)
