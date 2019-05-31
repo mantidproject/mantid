@@ -223,22 +223,8 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         progress.report("Multiplying by volume and absolute scale ...")
         workspace = self._scale(state_serialized, workspace)
 
-        # ------------------------------------------------------------
-        # 8. Convert event workspaces to histogram workspaces
-        # ------------------------------------------------------------
-        progress.report("Converting to histogram mode ...")
-        workspace = self._convert_to_histogram(workspace)
-
-        # ------------------------------------------------------------
-        # 9. ? Re-mask. We need to bin mask in histogram mode in order
-        #      to have knowledge of masked regions: masking
-        #      EventWorkspaces simply removes their events
-        # ------------------------------------------------------------
-        if use_dummy_workspace:
-            workspace = self._copy_bin_masks(workspace, dummy_mask_workspace)
-
         # --------------------------------------------------------------------------------------------------------------
-        # 9. Create adjustment workspaces, those are
+        # 8. Create adjustment workspaces, those are
         #     1. pixel-based adjustments
         #     2. wavelength-based adjustments
         #     3. pixel-and-wavelength-based adjustments
@@ -252,11 +238,13 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
             calculated_transmission_workspace, unfitted_transmission_workspace = \
             self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
-        # ------------------------------------------------------------
-        # 9. Convert event workspaces to histogram workspaces
-        # ------------------------------------------------------------
+        # ----------------------------------------------------------------
+        # 9. Convert event workspaces to histogram workspaces, and re-mask
+        # ----------------------------------------------------------------
         progress.report("Converting to histogram mode ...")
         workspace = self._convert_to_histogram(workspace)
+        if use_dummy_workspace:
+            workspace = self._copy_bin_masks(workspace, dummy_mask_workspace)
 
         # ------------------------------------------------------------
         # 10. Convert to Q
