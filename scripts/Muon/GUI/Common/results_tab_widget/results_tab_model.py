@@ -7,8 +7,9 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
 
-from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty
+from mantid.py3compat import string_types
 import numpy as np
 
 from Muon.GUI.Common.observer_pattern import GenericObserver
@@ -82,7 +83,7 @@ class ResultsTabModel(object):
         for index, fit in enumerate(self._fit_context.fit_list):
             if fit.fit_function_name != self.selected_fit_function():
                 continue
-            name = fit.input_workspace
+            name = _result_workspace_name(fit)
             if name in existing_selection:
                 checked = existing_selection[name][1]
             else:
@@ -133,14 +134,13 @@ class ResultsTabModel(object):
         results_table = self._create_empty_results_table(
             log_selection, results_selection)
 
-        ads = AnalysisDataService.Instance()
         fit_list = self._fit_context.fit_list
         for _, position in results_selection:
             fit = fit_list[position]
             row_dict = {'workspace_name': fit.parameter_name}
             # logs first
             if len(log_selection) > 0:
-                workspace = ads[fit.input_workspace]
+                workspace = _workspace_for_logs(fit.input_workspace)
                 ws_run = workspace.run()
                 for log_name in log_selection:
                     try:
@@ -218,16 +218,58 @@ def log_names(workspace_name):
     """
     Return a list of log names from the given workspace.
 
-    :param workspace: A string name of a workspace in the ADS
+    :param workspace: A string name of a workspace in the ADS. If the name points to
+    a group then the logs of the first workspace are returned
     :return: A list of sample log names
     :raises KeyError: if the workspace does not exist in the ADS
     """
-    all_logs = AnalysisDataService.retrieve(workspace_name).run().getLogData()
+    workspace = _workspace_for_logs(workspace_name)
+    all_logs = workspace.run().getLogData()
     return [log.name for log in all_logs if _log_should_be_displayed(log)]
 
 
-# Private helper functions
+def _workspace_for_logs(name_or_names):
+    """Return the workspace handle to be used to access the logs.
+    We assume workspace_name is a string or a list of strings
+    :param name_or_names: The name or list of names in the ADS
+    """
+    if not isinstance(name_or_names, string_types):
+        name_or_names = name_or_names[0]
+
+    workspace = AnalysisDataService.retrieve(name_or_names)
+    if isinstance(workspace, WorkspaceGroup):
+        workspace = workspace[0]
+
+    return workspace
+
+
 def _log_should_be_displayed(log):
     """Returns true if the given log should be included in the display"""
     return isinstance(log, FloatTimeSeriesProperty) or \
         log.name in ALLOWED_NON_TIME_SERIES_LOGS
+
+
+def _result_workspace_name(fit):
+    """
+    Return the result workspace name for a given FitInformation object. The fit.input_workspace
+    can be a list of workspaces or a single value. If a list is found then the
+    first workspace is returned.
+    :param fit: A FitInformation object describing the fit
+    :return: A workspace name to be used in the fit results
+    """
+    name_or_names = fit.input_workspace
+    if isinstance(name_or_names, string_types):
+        return name_or_names
+    else:
+        return _create_multi_domain_fitted_workspace_name(
+            name_or_names, fit.fit_function_name)
+
+
+def _create_multi_domain_fitted_workspace_name(input_workspaces, function):
+    """Construct a name for a result workspace from the input list and function
+
+    :param input_workspaces: The list of input workspaces used for the fit
+    :param function: The fit function name
+    :return: A string result name
+    """
+    return input_workspaces[0] + '+ ...; Fitted; ' + function

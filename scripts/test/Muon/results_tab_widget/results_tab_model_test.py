@@ -10,7 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 import itertools
 import unittest
 
-from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
+from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import mock
 
@@ -89,6 +89,24 @@ class ResultsTabModelTest(unittest.TestCase):
         fake_ws = create_test_workspace()
         allowed_logs = log_names(fake_ws.name())
         self.assertEqual(0, len(allowed_logs))
+
+    def test_log_names_from_workspacegroup_uses_first_workspace(self):
+        def add_log(workspace, name):
+            run = workspace.run()
+            run.addProperty(name,
+                            FloatTimeSeriesProperty(name),
+                            replace=True)
+
+        fake_group = create_test_workspacegroup(size=2)
+        logs = ['log_1', 'log_2']
+        for index, name in enumerate(logs):
+            add_log(fake_group[index], name)
+
+        visible_logs = log_names(fake_group.name())
+        self.assertTrue(logs[0] in visible_logs,
+                        msg="{} not found in log list".format(logs[0]))
+        self.assertFalse(logs[1] in visible_logs,
+                         msg="{} not found in log list".format(logs[1]))
 
     def test_model_returns_fit_functions_from_context(self):
         self.assertEqual(['func1'], self.model.fit_functions())
@@ -238,6 +256,20 @@ def create_test_workspace(ws_name=None):
     ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
     AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
     return fake_ws
+
+
+def create_test_workspacegroup(size, group_name=None):
+    group_name = group_name if group_name is not None else 'results_tab_model_testgroup'
+    ads = AnalysisDataService.Instance()
+    group = WorkspaceGroup()
+    for i in range(size):
+        fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
+        ws_name = '{}_{}'.format(group_name, i)
+        ads.addOrReplace(ws_name, fake_ws)
+        group.addWorkspace(fake_ws)
+
+    ads.addOrReplace(group_name, group)
+    return group
 
 
 def create_test_fits_with_only_workspace_names(input_workspaces,
