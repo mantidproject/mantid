@@ -356,7 +356,7 @@ class TableModelTest(unittest.TestCase):
 
         # Test that can be set to valid value
         setattr(table_model, prop, __file__)
-        self.assertTrue(getattr(table_model, prop) == __file__)
+        self.assertEqual(getattr(table_model, prop), __file__)
 
     @staticmethod
     def _batch_file_wrapper(value):

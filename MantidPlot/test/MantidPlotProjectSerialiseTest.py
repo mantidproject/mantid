@@ -212,7 +212,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
         # Check graph and layer exist
         self.assertTrue('Graph' in str(graph))
-        self.assertTrue(layer is not None)
+        self.assertNotEqual(layer, None)
 
         # Check plot curves exist
         curve1 = layer.curve(0)

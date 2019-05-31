@@ -47,7 +47,7 @@ class StateMoveWorkspaceTest(unittest.TestCase):
         state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
                            DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
         self.assertEqual(state.sample_offset,  0.0)
-        self.assertTrue(state.sample_offset_direction is CanonicalCoordinates.Z)
+        self.assertEqual(state.sample_offset_direction, CanonicalCoordinates.Z)
         self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  0.0)
         self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_translation_correction,  0.0)
         self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_translation_correction,  0.0)

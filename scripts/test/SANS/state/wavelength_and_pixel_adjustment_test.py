@@ -75,7 +75,7 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)
-        self.assertTrue(state.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(state.wavelength_step_type, RangeStepType.Lin)
 
 
 if __name__ == '__main__':

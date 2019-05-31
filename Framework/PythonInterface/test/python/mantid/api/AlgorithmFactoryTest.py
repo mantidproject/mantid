@@ -27,7 +27,7 @@ class AlgorithmFactoryTest(unittest.TestCase):
         FrameworkManagerImpl.Instance()
 
     def test_get_algorithm_factory_does_not_return_None(self):
-        self.assertTrue(AlgorithmFactory is not None )
+        self.assertNotEqual(AlgorithmFactory, None )
 
     def test_getDescriptors(self):
 

@@ -121,15 +121,15 @@ class StateReductionBuilderTest(unittest.TestCase):
         # Assert
         self.assertEqual(state.prompt_peak_correction_min,  12.0)
         self.assertEqual(state.prompt_peak_correction_max,  17.0)
-        self.assertTrue(state.rebin_type is RebinType.Rebin)
+        self.assertEqual(state.rebin_type, RebinType.Rebin)
         self.assertEqual(state.wavelength_low,  [1.5])
         self.assertEqual(state.wavelength_high,  [2.7])
         self.assertEqual(state.wavelength_step,  0.5)
-        self.assertTrue(state.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(state.wavelength_step_type, RangeStepType.Lin)
         self.assertEqual(state.background_TOF_general_start,  1.4)
         self.assertEqual(state.background_TOF_general_stop,  34.4)
-        self.assertTrue(len(set(state.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())) == 2)
-        self.assertTrue(len(set(state.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())) == 2)
+        self.assertEqual(len(set(state.background_TOF_monitor_start.items()) & set({"1": 123, "2": 123}.items())), 2)
+        self.assertEqual(len(set(state.background_TOF_monitor_stop.items()) & set({"1": 234, "2": 2323}.items())), 2)
         self.assertEqual(state.incident_monitor,  1)
 
 

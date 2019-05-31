@@ -90,7 +90,7 @@ class StateDataBuilderTest(unittest.TestCase):
         self.assertEqual(data_state.sample_scatter,  "LOQ74044")
         self.assertEqual(data_state.sample_scatter_period,  3)
         self.assertEqual(data_state.sample_direct_period,  0)
-        self.assertTrue(data_state.instrument is SANSInstrument.LOQ)
+        self.assertEqual(data_state.instrument,  SANSInstrument.LOQ)
         self.assertEqual(data_state.sample_scatter_run_number,  74044)
 
 

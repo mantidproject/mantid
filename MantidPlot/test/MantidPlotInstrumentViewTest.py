@@ -41,11 +41,11 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
 
     def test_get_tab_can_use_title_index_or_enum(self):
         render_tab = INST_WIN.getTab("Render")
-        self.assertTrue(render_tab is not None)
+        self.assertNotEqual(render_tab, None)
         render_tab = INST_WIN.getTab(InstrumentWidget.RENDER)
-        self.assertTrue(render_tab is not None)
+        self.assertNotEqual(render_tab, None)
         render_tab = INST_WIN.getTab(0)
-        self.assertTrue(render_tab is not None)
+        self.assertNotEqual(render_tab, None)
 
     def test_integration_range_can_be_changed(self):
         INST_WIN.setBinRange(5,10)
@@ -74,7 +74,7 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
     def test_window_render_tab(self):
         render_tab = INST_WIN.getTab("Render")
         render_tab.setSurfaceType(InstrumentWidgetRenderTab.FULL3D)
-        self.assertTrue(render_tab is not None)
+        self.assertNotEqual(render_tab, None)
         current_scale = render_tab.getScaleType()
         self.assertTrue(isinstance(current_scale, GraphOptions.ScaleType))
         render_tab.setScaleType(GraphOptions.Log10)
@@ -82,7 +82,7 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
     def test_closing_window_invalidates_reference(self):
         inst = getInstrumentView("loq_inst")
         inst.close()
-        self.assertTrue(inst._getHeldObject() is None)
+        self.assertEqual(inst._getHeldObject(), None)
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotInstrumentViewTest)

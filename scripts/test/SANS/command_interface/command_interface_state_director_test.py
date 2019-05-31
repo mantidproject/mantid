@@ -120,21 +120,21 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         # Assert
         # We check here that the elements we set up above (except for from the user file) are being applied
-        self.assertTrue(state is not None)
+        self.assertNotEqual(state, None)
         self.assertTrue(state.mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_start[-1]
                         == 197)
         self.assertTrue(state.mask.detectors[DetectorType.to_string(DetectorType.HAB)].range_horizontal_strip_stop[-1]
                         == 199)
         self.assertEqual(state.adjustment.normalize_to_monitor.incident_monitor,  1)
-        self.assertTrue(state.adjustment.normalize_to_monitor.rebin_type is RebinType.InterpolatingRebin)
+        self.assertEqual(state.adjustment.normalize_to_monitor.rebin_type, RebinType.InterpolatingRebin)
         self.assertEqual(state.adjustment.calculate_transmission.incident_monitor,  7)
-        self.assertTrue(state.adjustment.calculate_transmission.rebin_type is RebinType.Rebin)
-        self.assertTrue(state.reduction.reduction_dimensionality is ReductionDimensionality.TwoDim)
-        self.assertTrue(state.convert_to_q.reduction_dimensionality is ReductionDimensionality.TwoDim)
+        self.assertEqual(state.adjustment.calculate_transmission.rebin_type, RebinType.Rebin)
+        self.assertEqual(state.reduction.reduction_dimensionality, ReductionDimensionality.TwoDim)
+        self.assertEqual(state.convert_to_q.reduction_dimensionality, ReductionDimensionality.TwoDim)
         self.assertEqual(state.move.sample_offset,  23.6/1000.)
         self.assertEqual(state.data.sample_scatter,  "SANS2D00022024")
         self.assertEqual(state.data.sample_scatter_period,  3)
-        self.assertTrue(state.reduction.reduction_mode is ISISReductionMode.HAB)
+        self.assertEqual(state.reduction.reduction_mode, ISISReductionMode.HAB)
         self.assertTrue(state.convert_to_q.use_gravity)
         self.assertEqual(state.convert_to_q.gravity_extra_length,  12.4)
         self.assertEqual(state.move.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1,  12.4/1000.)
@@ -152,8 +152,8 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         self.assertEqual(state.reduction.merge_scale,  1.2)
         self.assertEqual(state.reduction.merge_shift,  2.4)
-        self.assertTrue(state.reduction.merge_fit_mode is FitModeForMerge.ScaleOnly)
-        self.assertTrue(state.reduction.merge_range_min is None)
+        self.assertEqual(state.reduction.merge_fit_mode, FitModeForMerge.ScaleOnly)
+        self.assertEqual(state.reduction.merge_range_min, None)
         self.assertEqual(state.reduction.merge_range_max,  7.2)
 
         # Event slices
@@ -177,10 +177,10 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.wavelength.wavelength_low,  [1.23])
         self.assertEqual(state.adjustment.normalize_to_monitor.wavelength_high,  [23.])
         self.assertEqual(state.adjustment.wavelength_and_pixel_adjustment.wavelength_step,  1.1)
-        self.assertTrue(state.adjustment.calculate_transmission.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(state.adjustment.calculate_transmission.wavelength_step_type, RangeStepType.Lin)
         self.assertEqual(state.convert_to_q.q_xy_max,  23.)
         self.assertEqual(state.convert_to_q.q_xy_step,  1.1)
-        self.assertTrue(state.convert_to_q.q_xy_step_type is RangeStepType.Lin)
+        self.assertEqual(state.convert_to_q.q_xy_step_type, RangeStepType.Lin)
 
     def test_that_can_remove_last_command(self):
         # Arrange

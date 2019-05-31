@@ -176,7 +176,7 @@ class QResolutionCalculatorTest(unittest.TestCase):
         q_resolution_workspace = create_q_resolution_workspace(mock_state.convert_to_q,
                                                                QResolutionCalculatorTest.data_workspace)
         # Assert
-        self.assertTrue(q_resolution_workspace is not None)
+        self.assertNotEqual(q_resolution_workspace, None)
         self.assertEqual(len(q_resolution_workspace.dataX(0)),  len(QResolutionCalculatorTest.data_workspace.dataX(0)))
         self.assertEqual(len(q_resolution_workspace.dataY(0)),  len(QResolutionCalculatorTest.data_workspace.dataY(0)))
         for e1, e2 in zip(q_resolution_workspace.dataX(0), QResolutionCalculatorTest.data_workspace.dataX(0)):

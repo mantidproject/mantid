@@ -32,7 +32,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_init_reducer(self):
         tReducer = self.reducer
-        self.assertFalse(tReducer.prop_man is None)
+        self.assertNotEqual(tReducer.prop_man, None)
 
         prop_man = tReducer.prop_man
         self.assertEqual(prop_man.instr_name,"MARI")
@@ -147,9 +147,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # direct and indirect access to prop_man properties
         tReducer.sample_run = None
         #sample run has not been defined
-        self.assertTrue(getattr(tReducer,'sample_run') is None)
+        self.assertEqual(getattr(tReducer,'sample_run'), None)
         prop_man = tReducer.prop_man
-        self.assertTrue(getattr(prop_man ,'sample_run') is None)
+        self.assertNotEqual(getattr(prop_man ,'sample_run'), None)
         # define sample run
         tReducer.sample_run =10234
         self.assertEqual(tReducer.sample_run,10234)

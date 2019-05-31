@@ -218,7 +218,7 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_default_wavelength_step_type_is_linear(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(state_gui_model.wavelength_step_type,  RangeStepType.Lin)
 
     def test_that_can_set_wavelength(self):
         state_gui_model = StateGuiModel({"test": [1]})

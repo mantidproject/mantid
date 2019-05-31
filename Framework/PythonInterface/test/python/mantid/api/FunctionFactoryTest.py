@@ -43,7 +43,7 @@ class FunctionFactoryTest(unittest.TestCase):
         FrameworkManagerImpl.Instance()
 
     def test_get_function_factory_does_not_return_None(self):
-        self.assertTrue(FunctionFactory is not None)
+        self.assertNotEqual(FunctionFactory, None)
 
     def test_get_functions(self):
         all_funcs = FunctionFactory.getFunctionNames()

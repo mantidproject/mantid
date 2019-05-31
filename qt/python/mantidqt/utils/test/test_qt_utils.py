@@ -40,7 +40,7 @@ class CreateActionTest(GuiTest):
     def test_parent_can_be_none(self):
         action = create_action(None, "Test Action")
         self.assertTrue(isinstance(action, QAction))
-        self.assertTrue(action.parent() is None)
+        self.assertEqual(action.parent(), None)
 
     def test_supplied_triggered_callback_attaches_to_triggered_signal(self):
         class Receiver(QObject):

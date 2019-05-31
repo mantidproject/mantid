@@ -228,13 +228,13 @@ class TestStateBase(unittest.TestCase):
     def _assert_simple_state(self, state):
         self.assertEqual(state.string_parameter,  "String_in_SimpleState")
         self.assertFalse(state.bool_parameter)
-        self.assertTrue(state.float_parameter is None)  # We did not set it on the instance
+        self.assertEqual(state.float_parameter, None)  # We did not set it on the instance
         self.assertEqual(state.positive_float_parameter,  1.)
         self.assertEqual(state.positive_integer_parameter,  6)
         self.assertEqual(state.dict_parameter["1"],  123)
         self.assertEqual(state.dict_parameter["2"],  "test")
         self.assertEqual(state.float_with_none_parameter,  325.)
-        self.assertTrue(state.positive_float_with_none_parameter is None)
+        self.assertEqual(state.positive_float_with_none_parameter, None)
 
         self.assertEqual(len(state.float_list_parameter),  2)
         self.assertEqual(state.float_list_parameter[0],  123.)
@@ -249,7 +249,7 @@ class TestStateBase(unittest.TestCase):
         self.assertEqual(state.positive_integer_list_parameter[1],  2)
         self.assertEqual(state.positive_integer_list_parameter[2],  3)
 
-        self.assertTrue(state.class_type_parameter is TestType.TypeA)
+        self.assertEqual(state.class_type_parameter, TestType.TypeA)
         self.assertEqual(len(state.class_type_list_parameter),  2)
         self.assertEqual(state.class_type_list_parameter[0],  TestType.TypeA)
         self.assertEqual(state.class_type_list_parameter[1],  TestType.TypeB)

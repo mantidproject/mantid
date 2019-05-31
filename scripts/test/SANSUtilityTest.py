@@ -1602,23 +1602,23 @@ class TestAddingUserFileExtension(unittest.TestCase):
 
 class TestSelectNewDetector(unittest.TestCase):
     def test_that_for_SANS2D_correct_settings_are_selected(self):
-        self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear") == "rear")
-        self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT") == "front")
-        self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear-detector") == "rear")
-        self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT-DETECTOR") == "front")
-        self.assertTrue(su.get_correct_combinDet_setting("sAnS2d", "boTH") == "both")
-        self.assertTrue(su.get_correct_combinDet_setting("sans2d", "merged") == "merged")
+        self.assertEqual(su.get_correct_combinDet_setting("SANS2d", "rear"), "rear")
+        self.assertEqual(su.get_correct_combinDet_setting("SANS2D", "FRONT"), "front")
+        self.assertEqual(su.get_correct_combinDet_setting("SANS2d", "rear-detector"), "rear")
+        self.assertEqual(su.get_correct_combinDet_setting("SANS2D", "FRONT-DETECTOR"), "front")
+        self.assertEqual(su.get_correct_combinDet_setting("sAnS2d", "boTH"), "both")
+        self.assertEqual(su.get_correct_combinDet_setting("sans2d", "merged"), "merged")
 
     def test_that_for_LOQ_correct_settings_are_selected(self):
-        self.assertTrue(su.get_correct_combinDet_setting("Loq", "main-detector-bank") == "rear")
-        self.assertTrue(su.get_correct_combinDet_setting("Loq", "main") == "rear")
-        self.assertTrue(su.get_correct_combinDet_setting("LOQ", "Hab") == "front")
-        self.assertTrue(su.get_correct_combinDet_setting("lOQ", "boTH") == "both")
-        self.assertTrue(su.get_correct_combinDet_setting("loq", "merged") == "merged")
+        self.assertEqual(su.get_correct_combinDet_setting("Loq", "main-detector-bank"), "rear")
+        self.assertEqual(su.get_correct_combinDet_setting("Loq", "main"), "rear")
+        self.assertEqual(su.get_correct_combinDet_setting("LOQ", "Hab"), "front")
+        self.assertEqual(su.get_correct_combinDet_setting("lOQ", "boTH"), "both")
+        self.assertEqual(su.get_correct_combinDet_setting("loq", "merged"), "merged")
 
     def test_that_for_LARMOR_correct_settings_are_selected(self):
-        self.assertTrue(su.get_correct_combinDet_setting("larmor", "main") is None)
-        self.assertTrue(su.get_correct_combinDet_setting("LARMOR", "DetectorBench") is None)
+        self.assertNotEqual(su.get_correct_combinDet_setting("larmor", "main"), None)
+        self.assertNotEqual(su.get_correct_combinDet_setting("LARMOR", "DetectorBench"), None)
 
     def test_that_for_unknown_instrument_raises(self):
         args = ["unknown_instrument", "main"]

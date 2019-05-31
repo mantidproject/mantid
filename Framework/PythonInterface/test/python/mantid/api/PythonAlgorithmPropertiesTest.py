@@ -147,7 +147,7 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         alg = DummyAlg()
         alg.initialize()
         settings = alg.getProperty("BasicProp2").settings
-        self.assertTrue(settings is not None)
+        self.assertNotEqual(settings, None)
         self.assertTrue(settings.isEnabled(alg))
         alg.setProperty("BasicProp1", 2) # not default
         self.assertTrue(not settings.isEnabled(alg))

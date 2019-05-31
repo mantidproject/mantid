@@ -51,8 +51,8 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         mask = state.mask
         self.assertEqual(mask.radius_min,  12/1000.)
         self.assertEqual(mask.radius_max,  15/1000.)
-        self.assertTrue(mask.clear is True)
-        self.assertTrue(mask.clear_time is True)
+        self.assertEqual(mask.clear, True)
+        self.assertEqual(mask.clear_time, True)
         self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.LAB)].single_horizontal_strip_mask,  [0])
         self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.LAB)].single_vertical_strip_mask,  [0, 191])
         self.assertEqual(mask.detectors[DetectorType.to_string(DetectorType.HAB)].single_horizontal_strip_mask,  [0])
@@ -68,7 +68,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
 
     def _assert_reduction(self, state):
         reduction = state.reduction
-        self.assertTrue(reduction.reduction_mode is ISISReductionMode.LAB)
+        self.assertEqual(reduction.reduction_mode, ISISReductionMode.LAB)
         self.assertFalse(reduction.merge_mask)
         self.assertEqual(reduction.merge_min,  None)
         self.assertEqual(reduction.merge_max,  None)
@@ -82,7 +82,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(wavelength.wavelength_low,  [1.5])
         self.assertEqual(wavelength.wavelength_high,  [12.5])
         self.assertEqual(wavelength.wavelength_step,  0.125)
-        self.assertTrue(wavelength.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(wavelength.wavelength_step_type, RangeStepType.Lin)
 
     def _assert_convert_to_q(self, state):
         convert_to_q = state.convert_to_q
@@ -107,11 +107,11 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         normalize_to_monitor = adjustment.normalize_to_monitor
         self.assertEqual(normalize_to_monitor.prompt_peak_correction_min,  1000)
         self.assertEqual(normalize_to_monitor.prompt_peak_correction_max,  2000)
-        self.assertTrue(normalize_to_monitor.rebin_type is RebinType.InterpolatingRebin)
+        self.assertEqual(normalize_to_monitor.rebin_type, RebinType.InterpolatingRebin)
         self.assertEqual(normalize_to_monitor.wavelength_low,  [1.5])
         self.assertEqual(normalize_to_monitor.wavelength_high,  [12.5])
         self.assertEqual(normalize_to_monitor.wavelength_step,  0.125)
-        self.assertTrue(normalize_to_monitor.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(normalize_to_monitor.wavelength_step_type, RangeStepType.Lin)
         self.assertEqual(normalize_to_monitor.background_TOF_general_start,  3500)
         self.assertEqual(normalize_to_monitor.background_TOF_general_stop,  4500)
         self.assertEqual(normalize_to_monitor.background_TOF_monitor_start["1"],  35000)
@@ -131,16 +131,16 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.transmission_roi_files,  ["test.xml", "test2.xml"])
         self.assertEqual(calculate_transmission.transmission_mask_files,  ["test3.xml", "test4.xml"])
         self.assertEqual(calculate_transmission.transmission_monitor,  4)
-        self.assertTrue(calculate_transmission.rebin_type is RebinType.InterpolatingRebin)
+        self.assertEqual(calculate_transmission.rebin_type, RebinType.InterpolatingRebin)
         self.assertEqual(calculate_transmission.wavelength_low,  [1.5])
         self.assertEqual(calculate_transmission.wavelength_high,  [12.5])
         self.assertEqual(calculate_transmission.wavelength_step,  0.125)
-        self.assertTrue(calculate_transmission.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(calculate_transmission.wavelength_step_type, RangeStepType.Lin)
         self.assertFalse(calculate_transmission.use_full_wavelength_range)
-        self.assertTrue(calculate_transmission.wavelength_full_range_low ==
-                        Configurations.SANS2D.wavelength_full_range_low)
-        self.assertTrue(calculate_transmission.wavelength_full_range_high ==
-                        Configurations.SANS2D.wavelength_full_range_high)
+        self.assertEqual(calculate_transmission.wavelength_full_range_low,
+                         Configurations.SANS2D.wavelength_full_range_low)
+        self.assertEqual(calculate_transmission.wavelength_full_range_high,
+                         Configurations.SANS2D.wavelength_full_range_high)
         self.assertEqual(calculate_transmission.background_TOF_general_start,  3500)
         self.assertEqual(calculate_transmission.background_TOF_general_stop,  4500)
         self.assertEqual(calculate_transmission.background_TOF_monitor_start["1"],  35000)
@@ -149,11 +149,11 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(calculate_transmission.background_TOF_monitor_stop["2"],  98000)
         self.assertEqual(calculate_transmission.background_TOF_roi_start,  123)
         self.assertEqual(calculate_transmission.background_TOF_roi_stop,  466)
-        self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Sample)].fit_type is FitType.Logarithmic)
+        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].fit_type, FitType.Logarithmic)
         self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_low,  1.5)
         self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_high,  12.5)
         self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Sample)].polynomial_order,  0)
-        self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type is FitType.Logarithmic)
+        self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type, FitType.Logarithmic)
         self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low,  1.5)
         self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high,  12.5)
         self.assertEqual(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order,  0)
@@ -163,7 +163,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_low,  [1.5])
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_high,  [12.5])
         self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step,  0.125)
-        self.assertTrue(wavelength_and_pixel_adjustment.wavelength_step_type is RangeStepType.Lin)
+        self.assertEqual(wavelength_and_pixel_adjustment.wavelength_step_type, RangeStepType.Lin)
         self.assertTrue(wavelength_and_pixel_adjustment.adjustment_files[
                         DetectorType.to_string(DetectorType.LAB)].wavelength_adjustment_file ==
                         "DIRECTM1_15785_12m_31Oct12_v12.dat")
@@ -232,7 +232,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(state.scale.width,  1.)
         self.assertEqual(state.scale.height,  1.5)
         self.assertEqual(state.scale.thickness,  12.)
-        self.assertTrue(state.scale.shape is SampleShape.FlatPlate)
+        self.assertEqual(state.scale.shape, SampleShape.FlatPlate)
 
         # clean up
         if os.path.exists(user_file_path):

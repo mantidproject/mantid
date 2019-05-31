@@ -129,7 +129,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
                                                                                           norm_workspace, state, True)
         # Assert
-        self.assertTrue(pixel_adjustment is None)
+        self.assertEqual(pixel_adjustment, None)
         self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
         expected = np.array(data_trans)*np.array(data_norm)
         data_y = wavelength_adjustment.dataY(0)
@@ -155,7 +155,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         wavelength_adjustment, pixel_adjustment = SANSCalculateTransmissionTest._run_test(transmission_workspace,
                                                                                           norm_workspace, state, False)
         # Assert
-        self.assertTrue(pixel_adjustment is None)
+        self.assertEqual(pixel_adjustment, None)
         self.assertEqual(wavelength_adjustment.getNumberHistograms(),  1)
         expected = np.array(data_trans)*np.array(data_norm)*np.array(expected_direct_file_workspace)
         data_y = wavelength_adjustment.dataY(0)

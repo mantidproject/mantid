@@ -150,7 +150,7 @@ class SANSLoadTest(unittest.TestCase):
                 self.assertTrue(isinstance(ws, workspace_type[index]))
         else:
             ws = load_alg.getProperty(workspace_name).value
-            self.assertTrue(ws is None)
+            self.assertEqual(ws, None)
 
     def _do_test_output(self, load_alg, expected_number_of_workspaces, expected_number_on_ads, workspace_type):
         #  Check the number of workspaces

@@ -864,7 +864,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_ties_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -882,7 +882,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_ties_single_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -902,7 +902,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_constraints_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -920,7 +920,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_constraints_single_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -938,7 +938,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_constraints_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -1000,7 +1000,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_all_peak_constraints_multi_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -1025,7 +1025,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_bad_input(self):
         from CrystalField import CrystalField

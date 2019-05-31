@@ -148,7 +148,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual("other_map.myExt",tReducer.monovan_mapfile)
 
         tReducer.save_format = 'unknown'
-        self.assertTrue(tReducer.save_format is None)
+        self.assertEqual(tReducer.save_format, None)
 
         tReducer.save_format = '.spe'
         self.assertEqual(['.spe'],tReducer.save_format)
@@ -157,7 +157,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer = self.reducer
 
         tReducer.save_format = ''
-        self.assertTrue(tReducer.save_format is None)
+        self.assertEqual(tReducer.save_format, None)
 
         #self.assertRaises(KeyError,tReducer.energy_bins=20,None)
     def test_default_warnings(self):
@@ -200,7 +200,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         pws = mtd[ws_name]
         self.assertEqual(pws.name(),ws_name)
-        self.assertTrue(tReducer.save_format is None)
+        self.assertEqual(tReducer.save_format, None)
         # do nothing
         tReducer.save_results(pws,'test_path')
         tReducer.test_name=''
@@ -221,10 +221,10 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # set non-exisiting format
         tReducer.save_format = 'non-existing-format'
-        self.assertTrue(tReducer.save_format is None)
+        self.assertEqual(tReducer.save_format, None)
 
         tReducer.save_format = 'spe'
-        self.assertTrue(tReducer.save_format is None)
+        self.assertEqual(tReducer.save_format, None)
 
         tReducer.save_format = '.spe'
         self.assertEqual(tReducer.save_format,['.spe'])
@@ -245,7 +245,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         #clear all previous default formats
         tReducer.save_format=[]
-        self.assertTrue(tReducer.save_format is None)
+        self.assertEqual(tReducer.save_format, None)
 
         format_list = ['.nxspe','.nxs','.spe']
         file_long_name = ''
@@ -262,18 +262,18 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_set_spectra_to_mon(self):
         tReducer = self.reducer
 
-        self.assertTrue(tReducer.spectra_to_monitors_list is None)
+        self.assertEqual(tReducer.spectra_to_monitors_list, None)
 
         tReducer.spectra_to_monitors_list = 35
         self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list))
         self.assertEquals(35,tReducer.spectra_to_monitors_list[0])
 
         tReducer.spectra_to_monitors_list = None
-        self.assertTrue(tReducer.spectra_to_monitors_list is None)
+        self.assertEqual(tReducer.spectra_to_monitors_list, None)
         tReducer.spectra_to_monitors_list = 'None'
-        self.assertTrue(tReducer.spectra_to_monitors_list is None)
+        self.assertEqual(tReducer.spectra_to_monitors_list, None)
         tReducer.spectra_to_monitors_list = []
-        self.assertTrue(tReducer.spectra_to_monitors_list is None)
+        self.assertEqual(tReducer.spectra_to_monitors_list, None)
 
         tReducer.spectra_to_monitors_list = '467'
         self.assertEquals(467,tReducer.spectra_to_monitors_list[0])

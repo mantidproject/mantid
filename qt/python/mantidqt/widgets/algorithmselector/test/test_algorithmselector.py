@@ -148,7 +148,7 @@ class WidgetTest(GuiTest):
         widget = AlgorithmSelectorWidget()
         self._select_in_tree(widget, 'DoStuff v.2')
         widget.search_box.lineEdit().setText('abc')
-        self.assertTrue(widget.get_selected_algorithm() is None)
+        self.assertEqual(widget.get_selected_algorithm(), None)
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
     def test_run_dialog_opens_on_execute_button_click(self):

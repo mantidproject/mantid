@@ -36,7 +36,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertRaises(RuntimeError, DummyClass.to_string, DummyClass)
 
     def test_that_can_convert_from_string(self):
-        self.assertTrue(DummyClass.from_string("TypeC") is DummyClass.TypeC)
+        self.assertEqual(DummyClass.from_string("TypeC"), DummyClass.TypeC)
 
     def test_that_raises_run_time_error_if_string_is_not_known(self):
         self.assertRaises(RuntimeError, DummyClass.from_string, "TypeD")

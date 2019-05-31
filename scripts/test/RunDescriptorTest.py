@@ -44,8 +44,8 @@ class RunDescriptorTest(unittest.TestCase):
     def test_descr_basic(self):
         propman  = PropertyManager('MAR')
 
-        self.assertTrue(propman.sample_run is None)
-        self.assertTrue(PropertyManager.sample_run.get_workspace() is None)
+        self.assertEqual(propman.sample_run, None)
+        self.assertEqual(PropertyManager.sample_run.get_workspace(), None)
 
         propman.sample_run = 10
         self.assertEqual(propman.sample_run,10)
@@ -297,7 +297,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(runs[0],10204)
         sum_list,sum_ws,n_sum = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sum_list),0)
-        self.assertTrue(sum_ws is None)
+        self.assertEqual(sum_ws, None)
         self.assertEqual(n_sum,0)
 
 
@@ -471,7 +471,7 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(propman.sample_run,10111)
         sums,ws,n_sums = PropertyManager.sample_run.get_runs_to_sum()
         self.assertEqual(len(sums),0)
-        self.assertTrue(ws is None)
+        self.assertEqual(ws, None)
         self.assertEqual(n_sums,0)
 
     def test_find_runfiles(self):

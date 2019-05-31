@@ -132,10 +132,10 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.checkStr(i.ReductionSingleton().mask.time_mask_r, "")
         self.checkStr(i.ReductionSingleton().mask.time_mask_f, "")
         self.checkStr(i.ReductionSingleton().mask.time_mask_f, "")
-        self.assertTrue(i.ReductionSingleton().mask.arm_width is None)
-        self.assertTrue(i.ReductionSingleton().mask.arm_angle is None)
-        self.assertTrue(i.ReductionSingleton().mask.arm_x is None)
-        self.assertTrue(i.ReductionSingleton().mask.arm_y is None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_width, None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_angle, None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_x, None)
+        self.assertEqual(i.ReductionSingleton().mask.arm_y, None)
         self.assertTrue(i.ReductionSingleton().mask.phi_mirror)
 
     def applyGUISettings(self):

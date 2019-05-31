@@ -123,7 +123,7 @@ class StateConvertToQBuilderTest(unittest.TestCase):
         self.assertEqual(state.q_min,  12.0)
         self.assertEqual(state.q_max,  17.0)
         self.assertEqual(state.q_1d_rebin_string,  "12.0,-1.2,17.0")
-        self.assertTrue(state.reduction_dimensionality is ReductionDimensionality.OneDim)
+        self.assertEqual(state.reduction_dimensionality, ReductionDimensionality.OneDim)
 
 
 if __name__ == '__main__':

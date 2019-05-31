@@ -377,7 +377,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
-        self.assertTrue(fun is not None)
+        self.assertNotEqual(fun, None)
 
     def test_constraints_multi_spectrum(self):
         from mantid.simpleapi import FlatBackground, Gaussian
