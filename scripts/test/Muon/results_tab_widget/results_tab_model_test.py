@@ -93,9 +93,7 @@ class ResultsTabModelTest(unittest.TestCase):
     def test_log_names_from_workspacegroup_uses_first_workspace(self):
         def add_log(workspace, name):
             run = workspace.run()
-            run.addProperty(name,
-                            FloatTimeSeriesProperty(name),
-                            replace=True)
+            run.addProperty(name, FloatTimeSeriesProperty(name), replace=True)
 
         fake_group = create_test_workspacegroup(size=2)
         logs = ['log_1', 'log_2']
@@ -249,6 +247,35 @@ class ResultsTabModelTest(unittest.TestCase):
     # ------------------------- failure tests ----------------------------
     def test_log_names_from_workspace_not_in_ADS_raises_exception(self):
         self.assertRaises(KeyError, log_names, 'not a workspace in ADS')
+
+    def test_create_results_table_raises_error_if_number_params_different(
+            self):
+        parameters = {
+            'Name': ['Height', 'Cost function value'],
+            'Value': [2309.2, 30.8],
+            'Error': [16, 0]
+        }
+        fits = create_test_fits_with_logs(('ws1', ), 'func1', parameters,
+                                          self.logs)
+        self.fitting_context = FittingContext()
+        for fit in fits:
+            self.fitting_context.add_fit(fit)
+
+        parameters = {
+            'Name': ['Height', 'A0', 'Cost function value'],
+            'Value': [2309.2, 0.1, 30.8],
+            'Error': [16, 0.001, 0]
+        }
+        fits = create_test_fits_with_logs(('ws2', ), 'func1', parameters,
+                                          self.logs)
+        for fit in fits:
+            self.fitting_context.add_fit(fit)
+        self.model = ResultsTabModel(self.fitting_context)
+
+        selected_results = [('ws1', 0), ('ws2', 1)]
+        self.assertRaises(
+            RuntimeError,
+            self.model.create_results_table, [], selected_results)
 
 
 def create_test_workspace(ws_name=None):

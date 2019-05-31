@@ -11,6 +11,7 @@ from qtpy import PYQT4, QtCore, QtWidgets
 
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
+from Muon.GUI.Common.message_box import warning
 
 # Constants
 FIT_SELECTOR_COL0_WIDTH = 600
@@ -114,6 +115,13 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         state for the workspace list selector
         """
         self.log_selector_presenter.update_model(logs_list_state)
+
+    def show_warning(self, msg):
+        """
+        Display a warning on that something went wrong
+        :param msg: The message to include
+        """
+        warning(msg, self)
 
     # Private methods
     def _init_layout(self):

@@ -133,7 +133,6 @@ class ResultsTabModel(object):
         """
         results_table = self._create_empty_results_table(
             log_selection, results_selection)
-
         fit_list = self._fit_context.fit_list
         for _, position in results_selection:
             fit = fit_list[position]
@@ -157,7 +156,12 @@ class ResultsTabModel(object):
                 if name not in RESULTS_TABLE_COLUMNS_NO_ERRS:
                     row_dict.update({name + 'Error': error})
 
-            results_table.addRow(row_dict)
+            try:
+                results_table.addRow(row_dict)
+            except ValueError:
+                msg = "Incompatible fits for results table:\n"
+                msg += " fit 1 and {} have a different parameters".format(position + 1)
+                raise RuntimeError(msg)
 
         AnalysisDataService.Instance().addOrReplace(self.results_table_name(),
                                                     results_table)
@@ -228,6 +232,7 @@ def log_names(workspace_name):
     return [log.name for log in all_logs if _log_should_be_displayed(log)]
 
 
+# Private helper functions
 def _workspace_for_logs(name_or_names):
     """Return the workspace handle to be used to access the logs.
     We assume workspace_name is a string or a list of strings
