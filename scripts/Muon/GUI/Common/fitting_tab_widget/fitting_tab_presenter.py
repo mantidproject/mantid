@@ -105,6 +105,7 @@ class FittingTabPresenter(object):
 
     def handle_fit_type_changed(self):
         fit_type = self.view.fit_type
+        self.clear_fit_information()
 
         if fit_type == self.view.single_fit:
             self.view.workspace_combo_box_label.setText('Select Workspace')
