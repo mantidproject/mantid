@@ -17,7 +17,9 @@ This tab is for performing fits on the data.
 
 **Simultaneous Fit** This option will perform a fit for multiple data sets, which may share parameters. 
 
-**Select data to fit** This launches a dialog box for selecting the data to be used in the fit.
+Select data to fit
+^^^^^^^^^^^^^^^^^^
+This launches a dialog box for selecting the data to be used in the fit.
 
 
 Fit function browser
