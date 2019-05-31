@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, unicode_literals)
 import unittest
 from mantid.py3compat import mock
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
@@ -18,16 +19,6 @@ class FittingContextTest(unittest.TestCase):
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'MuonGuassOsc', mock.MagicMock()))
         self.assertEqual(1, len(self.fitting_context))
-
-    def test_items_can_be_added_to_fitting_context(self):
-        fit_information_object = FitInformation(mock.MagicMock(),
-                                                'MuonGuassOsc',
-                                                mock.MagicMock())
-
-        self.fitting_context.add_fit(fit_information_object)
-
-        self.assertEqual(fit_information_object,
-                         self.fitting_context.fit_list[0])
 
     def test_items_can_be_added_to_fitting_context(self):
         fit_information_object = FitInformation(mock.MagicMock(),

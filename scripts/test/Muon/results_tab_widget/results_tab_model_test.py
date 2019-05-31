@@ -135,24 +135,24 @@ class ResultsTabModelTest(unittest.TestCase):
 
             self.assertEqual(expected_selection, self.model.log_selection({}))
 
-    # def test_model_combines_existing_selection(self):
-    #     self.fitting_context.fit_list = create_test_fits_with_only_workspace_names(
-    #         ('ws1', ))[0]
-    #     with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
-    #         mock_log_names.return_value = ('run_number', 'run_start',
-    #                                        'magnetic_field')
-    #
-    #         existing_selection = {
-    #             'run_number': [0, False, True],
-    #             'run_start': [1, True, True]
-    #         }
-    #         expected_selection = {
-    #             'run_number': [0, False, True],
-    #             'run_start': [1, True, True],
-    #             'magnetic_field': [2, True, True]
-    #         }
-    #         self.assertEqual(expected_selection,
-    #                          self.model.log_selection(existing_selection))
+    def test_model_combines_existing_selection(self):
+        self.fitting_context.fit_list = create_test_fits_with_only_workspace_names(
+            ('ws1', ))[0]
+        with mock.patch(LOG_NAMES_FUNC) as mock_log_names:
+            mock_log_names.return_value = ('run_number', 'run_start',
+                                           'magnetic_field')
+
+            existing_selection = {
+                'run_number': [0, False, True],
+                'run_start': [1, True, True],
+            }
+            expected_selection = {
+                'run_number': [0, False, True],
+                'run_start': [1, True, True],
+                'magnetic_field': [2, False, True]
+            }
+            self.assertDictEqual(expected_selection,
+                                 self.model.log_selection(existing_selection))
 
     def test_create_results_table_with_no_logs(self):
         parameters = {
