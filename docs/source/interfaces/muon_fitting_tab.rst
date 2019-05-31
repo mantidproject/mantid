@@ -40,10 +40,6 @@ selection box
 
 **Group & Pair selection** filter by group or pair name.
 
-**Time Domain**
-
-**All**
-
 **Show PhaseQuad** If this option is checked the selection box will show any PhaseQuads that have been calculated for these runs.
 
 
