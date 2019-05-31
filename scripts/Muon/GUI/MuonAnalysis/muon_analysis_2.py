@@ -177,12 +177,18 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
             self.load_widget.load_widget.enable_observer)
 
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+
     def setup_group_calculation_disabler_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.home_tab.home_tab_widget.disable_observer)
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
             self.load_widget.load_widget.disable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
 
     def setup_on_load_enabler(self):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
@@ -191,12 +197,18 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.enable_observer)
 
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+
     def setup_on_load_disabler(self):
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.home_tab.home_tab_widget.disable_observer)
 
         self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.disable_observer)
+
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
 
     def setup_phase_quad_changed_notifer(self):
         pass

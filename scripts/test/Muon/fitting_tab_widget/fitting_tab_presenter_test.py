@@ -97,9 +97,6 @@ class FittingTabPresenterTest(GuiTest):
         self.view.simul_fit_radio.toggle()
         self.presenter.selected_data = ['Input Workspace Name_1', 'Input Workspace Name 2']
         self.view.function_browser.setFunction('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        trial_function = FunctionFactory.createInitialized(
-            'composite=MultiDomainFunction,NumDeriv=true;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,'
-            '$domains=i;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0,$domains=i')
 
         self.view.fit_button.clicked.emit(True)
         wait_for_thread(self.presenter.calculation_thread)
@@ -247,6 +244,9 @@ class FittingTabPresenterTest(GuiTest):
     def test_for_single_and_sequential_handle_display_workspace_changed_updates_the_displayed_function(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; Asymmetry']
+        fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
+        fit_function_1 = FunctionFactory.createInitialized('name=GausOsc,A=0.6,Sigma=0.6,Frequency=0.6,Phi=0')
+        self.view.function_browser.setFunction(str(fit_function))
         self.presenter.selected_data = new_workspace_list
         self.presenter.manual_selection_made = True
         self.presenter._start_x = [0.15, 0.45, 0.67]

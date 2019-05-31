@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
-from mantid.api import FunctionFactory
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
@@ -29,6 +28,8 @@ class FittingTabPresenter(object):
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
+        self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(self.context.data_context.current_runs,
@@ -202,7 +203,7 @@ class FittingTabPresenter(object):
 
     def _get_shared_parameters(self):
         params = {}
-        params['Function'] = FunctionFactory.createInitialized(self.view.fit_string)
+        params['Function'] = self.view.fit_string
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
         return params
@@ -229,8 +230,15 @@ class FittingTabPresenter(object):
         else:
             self.view.set_datasets_in_function_browser([self.selected_data[0]] if self.selected_data else [])
 
-        self.reset_start_time_to_first_good_data_value()
         self.view.update_displayed_data_combo_box(self.selected_data)
+        self.update_fit_status_information_in_view()
+
+        self.reset_start_time_to_first_good_data_value()
+
+    def clear_fit_information(self):
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
         self.update_fit_status_information_in_view()
 
     @property
