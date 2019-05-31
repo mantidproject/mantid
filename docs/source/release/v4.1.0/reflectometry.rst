@@ -21,6 +21,7 @@ New
 - Default values for the current instrument are automatically set in the Experiment and Instrument Settings tabs when the interface is opened or the instrument is changed.
 - Processing in event mode is now done asynchronously. Previously this used to lock up MantidPlot.
 - Error handling has been improved to catch invalid inputs earlier. Errors are highlighted in red or (for the table) with a red star.
+- The progress bar now remembers previous progress when you pause and restart processing.
 
 The Runs Table
 ^^^^^^^^^^^^^^
