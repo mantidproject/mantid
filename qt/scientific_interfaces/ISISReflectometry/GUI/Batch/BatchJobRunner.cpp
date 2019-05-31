@@ -24,18 +24,30 @@ bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
 void BatchJobRunner::reductionResumed() {
+  // Cache the selection when the user starts a reduction
+  m_selectedRowLocations = m_batch.selectedRowLocations();
   m_isProcessing = true;
   // If the user has manually selected failed rows, reprocess them; otherwise
-  // skip them
-  m_reprocessFailed = m_batch.hasSelection();
-  // If we're autoreducing, or there are no selected rows, process everything
-  m_processAll = m_isAutoreducing || !m_batch.hasSelection();
+  // skip them. If we're autoreducing, or there are no selected rows, process
+  // everything
+  if (m_selectedRowLocations.empty()) {
+    // Nothing selected so process everything. Skip failed rows.
+    m_processAll = true;
+    m_reprocessFailed = false;
+  } else {
+    // User has manually selected items so only process the selection (unless
+    // autoreducing). Also reprocess failed items.
+    m_processAll = m_isAutoreducing;
+    m_reprocessFailed = !m_isAutoreducing;
+  }
+
   m_batch.resetSkippedItems();
 }
 
 void BatchJobRunner::reductionPaused() { m_isProcessing = false; }
 
 void BatchJobRunner::autoreductionResumed() {
+  m_selectedRowLocations.clear();
   m_isAutoreducing = true;
   m_isProcessing = true;
   m_reprocessFailed = true;
@@ -50,7 +62,7 @@ void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
 }
 
 template <typename T> bool BatchJobRunner::isSelected(T const &item) {
-  return m_processAll || m_batch.isSelected(item);
+  return m_processAll || m_batch.isInSelection(item, m_selectedRowLocations);
 }
 
 bool BatchJobRunner::hasSelectedRows(Group const &group) {

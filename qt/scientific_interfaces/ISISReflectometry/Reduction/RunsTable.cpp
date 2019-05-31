@@ -31,10 +31,6 @@ std::vector<RowLocation> const &RunsTable::selectedRowLocations() const {
   return m_selectedRowLocations;
 }
 
-bool RunsTable::hasSelection() const {
-  return m_selectedRowLocations.size() > 0;
-}
-
 void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
   m_selectedRowLocations = std::move(selected);
 }
