@@ -9,6 +9,7 @@ import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_base_directory
 from mantid.simpleapi import RenameWorkspace
+from mantid.api import FunctionFactory
 
 
 class FittingTabModel(object):
@@ -16,8 +17,8 @@ class FittingTabModel(object):
         pass
 
     def do_single_fit(self, parameter_dict):
-        output_workspace, fitting_parameters_table, function_string = self.do_single_fit_and_return_workspace_parameters_and_fit_function(
-            parameter_dict)
+        output_workspace, fitting_parameters_table, function_string, output_status, output_chi_squared =\
+            self.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         workspace_name, directory = self.create_fitted_workspace_name(parameter_dict['InputWorkspace'],
                                                                       parameter_dict['Function'])
@@ -27,7 +28,7 @@ class FittingTabModel(object):
         self.add_workspace_to_ADS(output_workspace, workspace_name, directory)
         self.add_workspace_to_ADS(fitting_parameters_table, table_name, directory)
 
-        return function_string
+        return function_string, output_status, output_chi_squared
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
@@ -55,7 +56,7 @@ class FittingTabModel(object):
         return name, directory
 
     def do_simultaneous_fit(self, parameter_dict):
-        output_workspace, fitting_parameters_table, function_string =\
+        output_workspace, fitting_parameters_table, function_string, output_status, output_chi_squared =\
             self.do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         workspace_name, directory = self.create_multi_domain_fitted_workspace_name(parameter_dict['InputWorkspace'][0],
@@ -68,6 +69,8 @@ class FittingTabModel(object):
             self.rename_members_of_fitted_workspace_group(output_workspace, parameter_dict['InputWorkspace'], parameter_dict['Function'])
         self.add_workspace_to_ADS(fitting_parameters_table, table_name, directory)
 
+        return function_string, output_status, output_chi_squared
+
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
         return run_simultaneous_Fit(parameters_dict, alg)
@@ -79,6 +82,9 @@ class FittingTabModel(object):
             RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
 
     def do_sequential_fit(self, parameter_dict):
+        function_string_list = []
+        output_status_list = []
+        output_chi_squared_list = []
         function_string = parameter_dict['Function']
         for input_workspace, startX, endX in zip(parameter_dict['InputWorkspace'], parameter_dict['StartX'], parameter_dict['EndX']):
             sub_parameter_dict = parameter_dict.copy()
@@ -87,7 +93,14 @@ class FittingTabModel(object):
             sub_parameter_dict['EndX'] = endX
             sub_parameter_dict['Function'] = function_string
 
-            function_string = self.do_single_fit(sub_parameter_dict)
+            function_string, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict)
+            # This is required so that a new function object is created that is not overwritten in subsequent iterations
+            new_function = FunctionFactory.createInitialized(str(function_string))
+            function_string_list.append(new_function)
+            output_status_list.append(output_status)
+            output_chi_squared_list.append(output_chi_squared)
+
+        return function_string_list, output_status_list, output_chi_squared_list
 
     def get_function_name(self, function):
         if function.getNumberDomains() > 1:
