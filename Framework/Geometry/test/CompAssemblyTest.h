@@ -457,7 +457,6 @@ public:
   void testMultipleCompAssemblyRelativeTranslate() {
     V3D instInitialPos(0, 0, 0);
     V3D parentInitialPos(100, 100, 100);
-    V3D pos1(1, 1, 1);
     V3D pos2(6, 7, 8);
     V3D pos3(-10, -10, -10);
     V3D translate1(5, 6, 7);
