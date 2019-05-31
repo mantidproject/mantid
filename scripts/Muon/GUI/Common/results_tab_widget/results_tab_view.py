@@ -134,31 +134,6 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.output_results_table_btn.clicked.connect(
             self.output_results_requested)
 
-    # def update_fit_function_list(self, fit_function_list):
-    #     name = self.fit_function_combo.currentText()
-    #     self.fit_function_combo.clear()
-    #
-    #     self.fit_function_combo.addItems(fit_function_list)
-    #
-    #     index = self.fit_function_combo.findText(name)
-    #
-    #     if index != -1:
-    #         self.fit_function_combo.setCurrentIndex(index)
-    #     else:
-    #         self.fit_function_combo.setCurrentIndex(0)
-    #
-    # def update_fit_selector_model(self, new_model_dictionary):
-    #     self.fit_selector_presenter.update_model(new_model_dictionary)
-    #
-    # def update_log_selector_model(self, new_model_dictionary):
-    #     self.log_selector_presenter.update_model(new_model_dictionary)
-    #
-    # def get_selected_fit_list(self):
-    #     return self.fit_selector_presenter.get_selected_items()
-    #
-    # def get_selected_logs_list(self):
-    #     return self.log_selector_presenter.get_selected_items()
-
 
 # Private helper functions
 def _create_empty_list_selector(parent, col_zero_width):
