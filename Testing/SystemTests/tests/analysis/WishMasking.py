@@ -52,7 +52,7 @@ class WishMasking(systemtesting.MantidSystemTest):
             self.assertEqual(mask_boundary_outside,  expected_not_masking_identifier)
         except LookupError:
             print("Could not find the requested index")
-            self.assertTrue(False)
+            self.fail()
         finally:
             cfile.close()
             os.remove(cal_file_full_path)

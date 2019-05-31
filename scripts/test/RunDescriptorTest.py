@@ -594,12 +594,10 @@ class RunDescriptorTest(unittest.TestCase):
 
         propman.sample_run = wksp
 
-        fail = False
         try:
             mon_ws = wksp.getMonitorWorkspace()
         except:
-            fail= True
-        self.assertFalse(fail)
+            self.fail()
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertEqual(mon_ws.name(),'SR_wksp_monitors')
@@ -611,21 +609,17 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(mon_ws.name(),'SR_wksp_monitors')
 
         wsr.clearMonitorWorkspace()
-        fail = False
         try:
             mon_ws = wksp.getMonitorWorkspace()
         except:
-            fail= True
-        self.assertTrue(fail)
+            self.fail()
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
 
-        fail = False
         try:
             mon_ws = wksp.getMonitorWorkspace()
         except:
-            fail= True
-        self.assertFalse(fail)
+            self.fail()
 
 
 if __name__=="__main__":

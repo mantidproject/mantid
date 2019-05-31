@@ -77,14 +77,14 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
     def loadWorkspacesMergeThreeNotWorking(self):
         try:
             PoldiLoadRuns(2013, 6903, 6904, 3, OutputWorkspace="threeWorkspacesFail")
-            self.assertTrue(False)
+            self.fail()
         except:
             self.assertTrue(True)
 
     def loadWorkspacesNotFound(self):
         try:
             PoldiLoadRuns(1990, 6903, OutputWorkspace="notFound")
-            self.assertTrue(False)
+            self.fail()
         except:
             self.assertTrue(True)
 

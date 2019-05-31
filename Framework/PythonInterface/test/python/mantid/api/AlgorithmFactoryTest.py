@@ -63,12 +63,12 @@ class AlgorithmFactoryTest(unittest.TestCase):
         try:
             AlgorithmFactory.enableNotifications()
         except Exception:
-            self.assertTrue(False, "Algorithm factory class is expected to have a method 'enableNotifications'")
+            self.fail( "Algorithm factory class is expected to have a method 'enableNotifications'")
 
         try:
             AlgorithmFactory.disableNotifications()
         except Exception:
-            self.assertTrue(False, "Algorithm factory class is expected to have a method 'disableNotifications'")
+            self.fail( "Algorithm factory class is expected to have a method 'disableNotifications'")
 
 
 if __name__ == '__main__':

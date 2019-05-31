@@ -97,7 +97,7 @@ class FunctionsTest(TestCase):
         try:
             result_workspaces = workspace_names_dummy_func([ws_name1])
         except ValueError:
-            self.assertFalse(True, "Passing workspace names should not raise a value error.")
+            self.fail("Passing workspace names should not raise a value error.")
         else:
             # The list of workspace names we pass in should have been converted
             # to a list of workspaces

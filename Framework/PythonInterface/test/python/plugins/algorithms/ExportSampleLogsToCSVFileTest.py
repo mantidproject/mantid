@@ -43,7 +43,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile.close()
         except IOError as err:
             print("Unable to open file {0}.".format(outfilename))
-            self.assertTrue(False)
+            self.fail()
             return
 
         # Count lines in the file
@@ -89,7 +89,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile.close()
         except IOError as err:
             print("Unable to open file {0}.".format(outfilename))
-            self.assertTrue(False)
+            self.fail()
             return
 
         # Count lines in the file
@@ -232,7 +232,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile.close()
         except IOError as err:
             print("Unable to open file {0}.".format(outfilename))
-            self.assertTrue(False)
+            self.fail()
             return
 
         # Count lines in the file

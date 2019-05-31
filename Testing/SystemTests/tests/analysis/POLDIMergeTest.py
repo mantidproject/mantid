@@ -23,7 +23,7 @@ class POLDIMergeTest(systemtesting.MantidSystemTest):
 
         try:
             self.runPoldiMerge(dataFiles, "Dummy")
-            self.assertTrue(False)
+            self.fail()
         except RuntimeError:
             self.assertTrue(True)
 

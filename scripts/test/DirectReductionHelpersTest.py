@@ -320,10 +320,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # Good: prohibit assignment
         try:
             t1.A[0] = 10
-            Fail = False
         except TypeError:
-            Fail = True
-        self.assertTrue(Fail)
+            pass
+        else:
+            self.fail()  # TypeError should have been thrown
         self.assertEqual(t1.A,(1,10))
 
 
@@ -398,10 +398,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # Good, fail partial assignment
         try:
             t1.A[0] = 10
-            Fail = False
         except TypeError:
-            Fail = True
-        self.assertTrue(Fail)
+            pass
+        else:
+            self.fail()  # TypeError should have been thrown
         self.assertEqual(t1.A,(1,10))
 
         t1.special = 10
@@ -487,10 +487,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # Good, fail partial assignment
         try:
             t1.A[0] = 10
-            Fail = False
         except TypeError:
-            Fail = True
-        self.assertTrue(Fail)
+            pass
+        else:
+            self.fail()  # TypeError should have been thrown
         self.assertEqual(t1.A,(1,10))
 
 
