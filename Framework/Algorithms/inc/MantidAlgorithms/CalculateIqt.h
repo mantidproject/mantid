@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/MersenneTwister.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,6 +40,14 @@ private:
   convertToPointData(API::MatrixWorkspace_sptr workspace);
   API::MatrixWorkspace_sptr
   extractFFTSpectrum(API::MatrixWorkspace_sptr workspace);
+  API::MatrixWorkspace_sptr power(API::MatrixWorkspace_sptr inputWorkspace,
+                                  double const &exponent);
+  API::MatrixWorkspace_sptr minus(API::MatrixWorkspace_sptr lhsWorkspace,
+                                  API::MatrixWorkspace_sptr rhsWorkspace);
+  API::MatrixWorkspace_sptr plus(API::MatrixWorkspace_sptr lhsWorkspace,
+                                 API::MatrixWorkspace_sptr rhsWorkspace);
+  API::MatrixWorkspace_sptr scale(API::MatrixWorkspace_sptr lhsWorkspace,
+                                  double const &factor);
   API::MatrixWorkspace_sptr divide(API::MatrixWorkspace_sptr lhsWorkspace,
                                    API::MatrixWorkspace_sptr rhsWorkspace);
   API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr workspace,
@@ -46,6 +55,8 @@ private:
   API::MatrixWorkspace_sptr
   replaceSpecialValues(API::MatrixWorkspace_sptr workspace);
 
+  API::MatrixWorkspace_sptr
+  mean(std::vector<API::MatrixWorkspace_sptr> const &workspaces);
   API::MatrixWorkspace_sptr
   removeInvalidData(API::MatrixWorkspace_sptr workspace);
   API::MatrixWorkspace_sptr
@@ -60,9 +71,21 @@ private:
                                          const std::string &rebinParams,
                                          const int seed);
   API::MatrixWorkspace_sptr setErrorsToStandardDeviation(
-      const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
+      std::vector<API::MatrixWorkspace_sptr> const &simulatedWorkspaces,
+      int const &seed);
   API::MatrixWorkspace_sptr setErrorsToZero(
       const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
+
+  std::vector<API::MatrixWorkspace_sptr> randomSimulationWorkspaces(
+      std::vector<API::MatrixWorkspace_sptr> const &simulatedWorkspaces,
+      int const &numberOfSamples, int const &seed) const;
+  API::MatrixWorkspace_sptr randomSimulationWorkspace(
+      std::vector<API::MatrixWorkspace_sptr> const &simulatedWorkspaces,
+      int const &numberOfSimulations, Kernel::MersenneTwister &mTwister) const;
+
+  std::vector<API::MatrixWorkspace_sptr> calculateMonteCarloEstimates(
+      std::vector<API::MatrixWorkspace_sptr> const &workspaces,
+      int const &numberOfSampleEvents, int const &numberOfSamplesPerEvent);
 };
 
 } // namespace Algorithms

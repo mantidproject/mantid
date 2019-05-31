@@ -11,7 +11,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MersenneTwister.h"
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <cmath>
@@ -194,7 +193,7 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    return setErrorsToStandardDeviation(simulatedWorkspaces);
+    return setErrorsToStandardDeviation(simulatedWorkspaces, seed);
   }
   return setErrorsToZero(simulatedWorkspaces);
 }
@@ -255,6 +254,50 @@ CalculateIqt::extractFFTSpectrum(MatrixWorkspace_sptr workspace) {
   return FFTAlgorithm->getProperty("OutputWorkspace");
 }
 
+MatrixWorkspace_sptr CalculateIqt::power(MatrixWorkspace_sptr inputWorkspace,
+                                         double const &exponent) {
+  IAlgorithm_sptr powerAlgorithm = this->createChildAlgorithm("Power");
+  powerAlgorithm->initialize();
+  powerAlgorithm->setProperty("InputWorkspace", inputWorkspace);
+  powerAlgorithm->setProperty("Exponent", exponent);
+  powerAlgorithm->setProperty("OutputWorkspace", "_");
+  powerAlgorithm->execute();
+  return powerAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr CalculateIqt::minus(MatrixWorkspace_sptr lhsWorkspace,
+                                         MatrixWorkspace_sptr rhsWorkspace) {
+  IAlgorithm_sptr minusAlgorithm = this->createChildAlgorithm("Minus");
+  minusAlgorithm->initialize();
+  minusAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
+  minusAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
+  minusAlgorithm->setProperty("OutputWorkspace", "_");
+  minusAlgorithm->execute();
+  return minusAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr CalculateIqt::plus(MatrixWorkspace_sptr lhsWorkspace,
+                                        MatrixWorkspace_sptr rhsWorkspace) {
+  IAlgorithm_sptr plusAlgorithm = this->createChildAlgorithm("Plus");
+  plusAlgorithm->initialize();
+  plusAlgorithm->setProperty("LHSWorkspace", lhsWorkspace);
+  plusAlgorithm->setProperty("RHSWorkspace", rhsWorkspace);
+  plusAlgorithm->setProperty("OutputWorkspace", "_");
+  plusAlgorithm->execute();
+  return plusAlgorithm->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr CalculateIqt::scale(MatrixWorkspace_sptr lhsWorkspace,
+                                         double const &factor) {
+  IAlgorithm_sptr scaleAlgorithm = this->createChildAlgorithm("Scale");
+  scaleAlgorithm->initialize();
+  scaleAlgorithm->setProperty("InputWorkspace", lhsWorkspace);
+  scaleAlgorithm->setProperty("Factor", factor);
+  scaleAlgorithm->setProperty("OutputWorkspace", "_");
+  scaleAlgorithm->execute();
+  return scaleAlgorithm->getProperty("OutputWorkspace");
+}
+
 MatrixWorkspace_sptr CalculateIqt::divide(MatrixWorkspace_sptr lhsWorkspace,
                                           MatrixWorkspace_sptr rhsWorkspace) {
   IAlgorithm_sptr divideAlgorithm = this->createChildAlgorithm("Divide");
@@ -292,6 +335,15 @@ CalculateIqt::replaceSpecialValues(MatrixWorkspace_sptr workspace) {
 }
 
 MatrixWorkspace_sptr
+CalculateIqt::mean(std::vector<MatrixWorkspace_sptr> const &workspaces) {
+  auto summed = workspaces.front();
+  for (auto iter = workspaces.begin() + 1; iter != workspaces.end(); ++iter)
+    summed = plus(summed, *iter);
+
+  return scale(summed, 1.0 / workspaces.size());
+}
+
+MatrixWorkspace_sptr
 CalculateIqt::removeInvalidData(MatrixWorkspace_sptr workspace) {
   auto binning = (workspace->blocksize() + 1) / 2;
   auto binV = workspace->x(0)[binning];
@@ -325,18 +377,89 @@ MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample,
   return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
+// MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
+//    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
+//  auto outputWorkspace = simulatedWorkspaces.front();
+//  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
+//  for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i) {
+//    PARALLEL_START_INTERUPT_REGION
+//    outputWorkspace->mutableE(i) =
+//        standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
+//    PARALLEL_END_INTERUPT_REGION
+//  }
+//  PARALLEL_CHECK_INTERUPT_REGION
+//  return outputWorkspace;
+//}
+
 MatrixWorkspace_sptr CalculateIqt::setErrorsToStandardDeviation(
-    const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
+    std::vector<MatrixWorkspace_sptr> const &simulatedWorkspaces,
+    int const &seed) {
+  auto const numberOfSampleEvents = 100;
+  auto const numberOfSamplesPerEvent =
+      std::round(simulatedWorkspaces.size() * 0.1);
+
+  auto const sampledWorkspaces = randomSimulationWorkspaces(
+      simulatedWorkspaces, numberOfSampleEvents * numberOfSamplesPerEvent,
+      seed);
+
+  auto const monteCarloEstimates = calculateMonteCarloEstimates(
+      sampledWorkspaces, numberOfSampleEvents, numberOfSamplesPerEvent);
+
+  auto const estimatesMean = mean(monteCarloEstimates);
+
+  std::vector<MatrixWorkspace_sptr> differencesSquared;
+  for (auto estimate : monteCarloEstimates)
+    differencesSquared.emplace_back(power(minus(estimate, estimatesMean), 2));
+
+  auto const errors = power(mean(differencesSquared), 0.5);
+
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    outputWorkspace->mutableE(i) =
-        standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
+    outputWorkspace->mutableE(i) = errors->y(i).rawData();
     PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+
   return outputWorkspace;
+}
+
+std::vector<MatrixWorkspace_sptr> CalculateIqt::randomSimulationWorkspaces(
+    std::vector<MatrixWorkspace_sptr> const &simulatedWorkspaces,
+    int const &numberOfSamples, int const &seed) const {
+  MersenneTwister mTwister(seed);
+  auto const numberOfSimulations(simulatedWorkspaces.size());
+
+  std::vector<MatrixWorkspace_sptr> sampledWorkspaces;
+  sampledWorkspaces.reserve(numberOfSamples);
+
+  for (auto i = 0u; i < numberOfSamples; ++i)
+    sampledWorkspaces.emplace_back(randomSimulationWorkspace(
+        simulatedWorkspaces, numberOfSimulations, mTwister));
+
+  return sampledWorkspaces;
+}
+
+MatrixWorkspace_sptr CalculateIqt::randomSimulationWorkspace(
+    std::vector<MatrixWorkspace_sptr> const &simulatedWorkspaces,
+    int const &numberOfSimulations, MersenneTwister &mTwister) const {
+  auto const randomIndex = mTwister.nextInt(0, numberOfSimulations - 1);
+  return simulatedWorkspaces[randomIndex];
+}
+
+std::vector<MatrixWorkspace_sptr> CalculateIqt::calculateMonteCarloEstimates(
+    std::vector<MatrixWorkspace_sptr> const &workspaces,
+    int const &numberOfSampleEvents, int const &numberOfSamplesPerEvent) {
+  std::vector<MatrixWorkspace_sptr> monteCarloEstimates;
+  monteCarloEstimates.reserve(numberOfSampleEvents);
+
+  for (auto i = 0u; i < numberOfSampleEvents; ++i) {
+    std::vector<MatrixWorkspace_sptr> const samples(
+        workspaces.begin() + i * numberOfSamplesPerEvent,
+        workspaces.begin() + (i + 1) * numberOfSamplesPerEvent);
+    monteCarloEstimates.emplace_back(mean(samples));
+  }
+  return monteCarloEstimates;
 }
 
 MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(
