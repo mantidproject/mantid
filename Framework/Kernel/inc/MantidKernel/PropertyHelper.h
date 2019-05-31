@@ -195,12 +195,14 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
   }
 
   if (step == static_cast<T>(0))
-    throw std::runtime_error("Step size must be non-zero");
+    throw std::logic_error("Step size must be non-zero");
 
   // convert the input string into boundaries and run through a list
   const auto start = boost::lexical_cast<T>(strvalue.substr(0, pos));
   const auto stop = boost::lexical_cast<T>(strvalue.substr(pos + 1, numChar));
   if (start <= stop) {
+    if (start + step < start)
+      throw std::logic_error("Step size is negative with increasing limits");
     for (auto i = start; i <= stop;) {
       value.push_back(i);
       // done inside the loop because gcc7 doesn't like i+=step for short
@@ -208,6 +210,8 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
       i = static_cast<T>(i + step);
     }
   } else {
+    if (start + step >= start)
+      throw std::logic_error("Step size is positive with decreasing limits");
     for (auto i = start; i >= stop;) {
       value.push_back(i);
       // done inside the loop because gcc7 doesn't like i+=step for short

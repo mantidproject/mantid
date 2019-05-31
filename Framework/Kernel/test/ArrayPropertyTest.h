@@ -122,6 +122,14 @@ public:
     TS_ASSERT_EQUALS(i7.operator()()[1], 3);
     TS_ASSERT_EQUALS(i7.operator()()[2], 1);
 
+    // bad step size
+    TS_ASSERT_THROWS(ArrayProperty<int> i8("i", "1:5:0"),
+                     const std::logic_error &);
+    TS_ASSERT_THROWS(ArrayProperty<int> i9("i", "1:5:-2"),
+                     const std::logic_error &);
+    TS_ASSERT_THROWS(ArrayProperty<int> i10("i", "5:1"),
+                     const std::logic_error &);
+
     ArrayProperty<unsigned int> u1("i", "0:2,5");
     TS_ASSERT_EQUALS(u1.operator()()[0], 0);
     TS_ASSERT_EQUALS(u1.operator()()[1], 1);
