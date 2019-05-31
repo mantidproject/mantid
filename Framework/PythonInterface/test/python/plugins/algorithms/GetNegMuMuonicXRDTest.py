@@ -38,8 +38,8 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         #Test number of workspaces in group
         self.assertEqual(au_muon_group.getNumberOfEntries(),
                         neg_mu_xr_group.getNumberOfEntries())
-        self.assertTrue(au_muon_group.size() == 1)
-        self.assertTrue(neg_mu_xr_group.size() == 1)
+        self.assertEqual(au_muon_group.size(),  1)
+        self.assertEqual(neg_mu_xr_group.size(),  1)
 
         #now testing the one workspace in the workspace group
         neg_mu_xr_ws = neg_mu_xr_group[0]

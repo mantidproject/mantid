@@ -293,7 +293,7 @@ class AtomListBuilderTest(unittest.TestCase):
                              [(1.0 / 2.0 * 1.0 / 1.0), (1.0 / 2.0 * 1.0 / 2.0), (1.0 / 2.0 * 1.0 / 3.0)],
                              [(1.0 / 3.0 * 1.0 / 1.0), (1.0 / 3.0 * 1.0 / 2.0), (1.0 / 3.0 * 1.0 / 3.0)]])
 
-        self.assertTrue(np.all(matrix == expected))
+        self.assertEqual(np.all(matrix,  expected))
 
     def test_getSumWeights_orthorhombic(self):
         cell = UnitCell(1, 2, 3, 90, 90, 90)

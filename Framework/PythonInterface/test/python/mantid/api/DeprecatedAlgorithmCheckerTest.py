@@ -22,7 +22,7 @@ class DeprecatedAlgorithmCheckerTest(unittest.TestCase):
     def test_non_deprecated_algorithm_returns_empty_string_from_isDeprecated(self):
         deprecation_check = DeprecatedAlgorithmChecker("LoadRaw",-1)
         msg = deprecation_check.isDeprecated()
-        self.assertTrue(len(msg) == 0)
+        self.assertEqual(len(msg),  0)
 
     def test_deprecated_algorithm_returns_non_empty_string_from_isDeprecated(self):
         deprecation_check = DeprecatedAlgorithmChecker("DiffractionFocussing",1)

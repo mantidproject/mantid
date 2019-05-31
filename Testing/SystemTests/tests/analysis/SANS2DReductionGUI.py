@@ -78,10 +78,10 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         self.assertDelta(f1,f2,0.0001)
 
     def checkStr(self, s1, s2):
-        self.assertTrue(s1==s2, '%s != %s'%(s1,s2))
+        self.assertEqual(s1, s2, '%s != %s'%(s1,s2))
 
     def checkObj(self, ob1, ob2):
-        self.assertTrue(ob1 == ob2, '%s != %s'%(str(ob1),str(ob2)))
+        self.assertEqual(ob1,  ob2, '%s != %s'%(str(ob1),str(ob2)))
 
     def checkFirstPart(self):
         self.checkObj(i.ReductionSingleton().instrument.listDetectors(),('rear-detector', 'front-detector'))

@@ -41,9 +41,9 @@ class Workspace2DPickleTest(unittest.TestCase):
         self.assertEqual(y_orig, y_copy)
 
     def test_data_match(self):
-        self.assertTrue(all(self.ws_orig.readY(12) == self.ws_copy.readY(12)))
+        self.assertEqual(all(self.ws_orig.readY(12),  self.ws_copy.readY(12)))
         self.assertFalse(all(self.ws_orig.readY(12) == self.ws_copy.readY(23)))
-        self.assertTrue(all(self.ws_orig.readE(12) == self.ws_copy.readE(12)))
+        self.assertEqual(all(self.ws_orig.readE(12),  self.ws_copy.readE(12)))
         self.assertFalse(all(self.ws_orig.readE(12) == self.ws_copy.readE(23)))
 
     def test_pickling_scanning_workspace_forbidden(self):

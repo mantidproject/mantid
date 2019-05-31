@@ -80,7 +80,7 @@ class V3DTest(unittest.TestCase):
     def test_equality_operators_use_value_comparison(self):
         p1 = V3D(1.0, -5.0, 8.0)
         p2 = V3D(1.0, -5.0, 8.0)
-        self.assertTrue(p1 == p2)
+        self.assertEqual(p1,  p2)
 
     def test_inequality_operators_use_value_comparison(self):
         p1 = V3D(1.0, -5.0, 8.0)
@@ -163,7 +163,7 @@ class V3DTest(unittest.TestCase):
         v = V3D(1, 2, 3)
         v_as_numpy = np.array(v)
 
-        self.assertTrue(np.all(v_as_numpy == np.array([1, 2, 3])))
+        self.assertEqual(np.all(v_as_numpy,  np.array([1, 2, 3])))
 
 
 if __name__ == '__main__':

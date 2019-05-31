@@ -135,13 +135,13 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         # Check the units
         axis = workspace.getAxis(0)
         unit = axis.getUnit()
-        self.assertTrue(unit.unitID() == "Wavelength")
+        self.assertEqual(unit.unitID(),  "Wavelength")
 
         # Check the spectrum
-        self.assertTrue(len(workspace.dataY(0)) == 3)
-        self.assertTrue(workspace.getNumberHistograms() == 1)
+        self.assertEqual(len(workspace.dataY(0)),  3)
+        self.assertEqual(workspace.getNumberHistograms(),  1)
         single_spectrum = workspace.getSpectrum(0)
-        self.assertTrue(single_spectrum.getSpectrumNo() == expected_monitor_spectrum)
+        self.assertEqual(single_spectrum.getSpectrumNo(),  expected_monitor_spectrum)
 
         # Check the values
         tolerance = 1e-8

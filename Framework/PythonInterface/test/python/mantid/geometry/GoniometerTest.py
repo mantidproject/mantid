@@ -28,7 +28,7 @@ class GoniometerTest(unittest.TestCase):
         g = Goniometer()
         r = np.array([(1., 0., 0.), (0., 0., 1.), (0., -1., 0.)])
         g.setR(r)
-        self.assertTrue((g.getR() == r).all())
+        self.assertEqual((g.getR(),  r).all())
     
     def test_default_goniometer(self):
         """
@@ -39,7 +39,7 @@ class GoniometerTest(unittest.TestCase):
         run = ws.run()
         g = run.getGoniometer()
         self.assertTrue(isinstance(g, Goniometer))
-        self.assertTrue((g.getR() == np.identity(3)).all())
+        self.assertEqual((g.getR(),  np.identity(3)).all())
         
     def test_change_default_goniometer(self):
         """
@@ -53,7 +53,7 @@ class GoniometerTest(unittest.TestCase):
         # change the matrix:
         r = np.array([(1., 0., 0.), (0., 0., 1.), (0., -1., 0.)])
         g.setR(r)
-        self.assertTrue((g.getR() == r).all())
+        self.assertEqual((g.getR(),  r).all())
       
 
 if __name__ == '__main__':

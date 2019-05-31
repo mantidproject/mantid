@@ -47,7 +47,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         old_size = AlgorithmManager.size()
         new_alg = AlgorithmManager.create("ConvertUnits")
         new_size = AlgorithmManager.size()
-        self.assertTrue(new_size == old_size + 1)
+        self.assertEqual(new_size,  old_size + 1)
 
     def test_getAlgorithm_returns_correct_instance(self):
         returned_instance = AlgorithmManager.create("ConvertUnits")

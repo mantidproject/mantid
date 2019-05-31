@@ -411,7 +411,7 @@ class AddOperationTest(unittest.TestCase):
             index_out = timesout_list.index(overlap_time)
             value_in1 = prop_in1.nthValue(index_in1)
             value_out = prop_out.nthValue(index_out)
-            self.assertTrue(value_in1 == value_out)
+            self.assertEqual(value_in1 ,  value_out)
 
     def test_two_files_are_added_correctly_for_overlay_on(self):
         isOverlay = True
@@ -708,17 +708,17 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
 
         # Act and Assert
         errors = ws.dataE
-        self.assertTrue(errors(0)[0] == 0.0)
+        self.assertEqual(errors(0)[0],  0.0)
         self.assertTrue(errors(1)[0] != 0.0)
-        self.assertTrue(errors(2)[0] == 0.0)
+        self.assertEqual(errors(2)[0],  0.0)
         self.assertTrue(errors(3)[0] != 0.0)
 
         su.remove_zero_errors_from_workspace(ws)
 
-        self.assertTrue(errors(0)[0] == su.ZERO_ERROR_DEFAULT)
+        self.assertEqual(errors(0)[0],  su.ZERO_ERROR_DEFAULT)
         self.assertTrue(errors(1)[0] != 0.0)
         self.assertTrue(errors(1)[0] != su.ZERO_ERROR_DEFAULT)
-        self.assertTrue(errors(2)[0] == su.ZERO_ERROR_DEFAULT)
+        self.assertEqual(errors(2)[0],  su.ZERO_ERROR_DEFAULT)
         self.assertTrue(errors(3)[0] != 0.0)
         self.assertTrue(errors(3)[0] != su.ZERO_ERROR_DEFAULT)
 
@@ -781,9 +781,9 @@ class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):
         su.rename_monitors_for_multiperiod_event_data(ws_mon_group, ws_group, self.monitor_appendix)
 
         # Assert
-        self.assertTrue(ws_mon_1.name() == ws_1.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
-        self.assertTrue(ws_mon_2.name() == ws_2.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
-        self.assertTrue(ws_mon_3.name() == ws_3.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertEqual(ws_mon_1.name(),  ws_1.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertEqual(ws_mon_2.name(),  ws_2.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertEqual(ws_mon_3.name() ,  ws_3.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
 
         # Clean up
         for element in mtd.getObjectNames():
@@ -1018,10 +1018,10 @@ class TestErrorPropagationFitAndRescale(unittest.TestCase):
         self.assertEqual(5, len(r_return.dataX(0)))
 
         expected_errors_in_rear = [np.sqrt(5),np.sqrt(5),np.sqrt(5),np.sqrt(5)]
-        self.assertTrue(expected_errors_in_rear[0] == r_return.dataE(0)[0])
-        self.assertTrue(expected_errors_in_rear[1] == r_return.dataE(0)[1])
-        self.assertTrue(expected_errors_in_rear[2] == r_return.dataE(0)[2])
-        self.assertTrue(expected_errors_in_rear[3] == r_return.dataE(0)[3])
+        self.assertEqual(expected_errors_in_rear[0],  r_return.dataE(0)[0])
+        self.assertEqual(expected_errors_in_rear[1],  r_return.dataE(0)[1])
+        self.assertEqual(expected_errors_in_rear[2],  r_return.dataE(0)[2])
+        self.assertEqual(expected_errors_in_rear[3],  r_return.dataE(0)[3])
 
         # Clean up
         DeleteWorkspace(front)
@@ -1192,7 +1192,7 @@ class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
         dx_expected_0 = (dx_front[0]*y_front[0]*scale + dx_rear[0]*y_rear[0])/(y_front[0]*scale + y_rear[0])
         dx_expected_1 = (dx_front[1]*y_front[1]*scale + dx_rear[1]*y_rear[1])/(y_front[1]*scale + y_rear[1])
         dx_result = result.readDx(0)
-        self.assertTrue(len(dx_result) == 2)
+        self.assertEqual(len(dx_result),  2)
         self.assertEqual(dx_result[0], dx_expected_0)
         self.assertEqual(dx_result[1], dx_expected_1)
 
@@ -1204,7 +1204,7 @@ class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
 class TestDetectingValidUserFileExtensions(unittest.TestCase):
     def _do_test(self, file_name, expected):
         result = su.is_valid_user_file_extension(file_name)
-        self.assertTrue(result == expected)
+        self.assertEqual(result,  expected)
 
     def test_that_detects_txt_file(self):
         # Arrange
@@ -1266,7 +1266,7 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         in1_charge = in1.getRun().getProperty("gd_prtn_chrg").value
         in2_charge = in2.getRun().getProperty("gd_prtn_chrg").value
         out_charge = out.getRun().getProperty("gd_prtn_chrg").value
-        self.assertTrue(out_charge == (in1_charge + in2_charge))
+        self.assertEqual(out_charge,  (in1_charge + in2_charge))
 
     def test_that_non_overlapping_workspaces_have_their_cummulative_sample_log_added_correctly(self):
         # Arrange
@@ -1470,7 +1470,7 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
                                                            in_ws.getRun().getProperty(log_names[index]).value)
 
         # The gd_prtn_chrg should have been transferred
-        self.assertTrue(out_ws.getRun().getProperty("gd_prtn_chrg").value == in_ws.getRun().getProperty("gd_prtn_chrg").value)
+        self.assertEqual(out_ws.getRun().getProperty("gd_prtn_chrg").value,  in_ws.getRun().getProperty("gd_prtn_chrg").value)
 
         # The new series log should not have been transferred
         self._check_that_values_of_series_are_the_same(out_ref.getRun().getProperty(log_names[2]).value,
@@ -1506,7 +1506,7 @@ class TestBenchRotDetection(unittest.TestCase):
             su.check_has_bench_rot(workspace, log_dict)
         except RuntimeError:
             has_raised = True
-        self.assertTrue(has_raised == expected_raise)
+        self.assertEqual(has_raised,  expected_raise)
 
     def test_workspace_with_bench_rot_does_not_raise(self):
         # Arrange
@@ -1577,7 +1577,7 @@ class TestTransmissionName(unittest.TestCase):
         unfitted_workspace_name = su.get_unfitted_transmission_workspace_name(workspace_name)
         # Assert
         expected = workspace_name + "_unfitted"
-        self.assertTrue(unfitted_workspace_name == expected)
+        self.assertEqual(unfitted_workspace_name,  expected)
     def test_that_suffix_is_not_added_if_exists(self):
         # Arrange
         workspace_name = "test_workspace_name_unfitted"
@@ -1585,19 +1585,19 @@ class TestTransmissionName(unittest.TestCase):
         unfitted_workspace_name = su.get_unfitted_transmission_workspace_name(workspace_name)
         # Assert
         expected = workspace_name
-        self.assertTrue(unfitted_workspace_name == expected)
+        self.assertEqual(unfitted_workspace_name,  expected)
 
 
 class TestAddingUserFileExtension(unittest.TestCase):
     def test_that_does_not_alter_user_file_name_when_contains_txt_ending(self):
-        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.TXt") == ["test.TXt"])
-        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.txt") == ["test.txt"])
-        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.TXT") == ["test.TXT"])
-        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.tXt") == ["test.tXt"])
+        self.assertEqual(su.get_user_file_name_options_with_txt_extension("test.TXt"),  ["test.TXt"])
+        self.assertEqual(su.get_user_file_name_options_with_txt_extension("test.txt"),  ["test.txt"])
+        self.assertEqual(su.get_user_file_name_options_with_txt_extension("test.TXT"),  ["test.TXT"])
+        self.assertEqual(su.get_user_file_name_options_with_txt_extension("test.tXt"),  ["test.tXt"])
 
     def test_that_does_alters_user_file_name_when_does_contain_txt_ending(self):
-        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.tt") == ["test.tt.txt", "test.tt.TXT"])
-        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test") == ["test.txt", "test.TXT"])
+        self.assertEqual(su.get_user_file_name_options_with_txt_extension("test.tt"),  ["test.tt.txt", "test.tt.TXT"])
+        self.assertEqual(su.get_user_file_name_options_with_txt_extension("test"),  ["test.txt", "test.TXT"])
 
 
 class TestSelectNewDetector(unittest.TestCase):
@@ -1643,13 +1643,13 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
         workspace_name = workspace.name()
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_rear"))
-        self.assertTrue(out_name == "test_rear")
+        self.assertEqual(out_name,  "test_rear")
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.HAB, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_front"))
-        self.assertTrue(out_name == "test_front")
+        self.assertEqual(out_name,  "test_front")
         out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.Merged, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_merged"))
-        self.assertTrue(out_name == "test_merged")
+        self.assertEqual(out_name,  "test_merged")
 
         if AnalysisDataService.doesExist("test_merged"):
             AnalysisDataService.remove("test_merged")
@@ -1677,13 +1677,13 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
         workspace_name = workspace.name()
         out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test_main"))
-        self.assertTrue(out_name == "test_main")
+        self.assertEqual(out_name,  "test_main")
         out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.HAB, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_hab"))
-        self.assertTrue(out_name == "test_hab")
+        self.assertEqual(out_name,  "test_hab")
         out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.Merged, "test", out_name)
         self.assertTrue(AnalysisDataService.doesExist("test_merged"))
-        self.assertTrue(out_name == "test_merged")
+        self.assertEqual(out_name,  "test_merged")
 
         if AnalysisDataService.doesExist("test_merged"):
             AnalysisDataService.remove("test_merged")
@@ -1694,7 +1694,7 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
 
         out_name = su.rename_workspace_correctly("LARMOR", su.ReducedType.LAB, "test", workspace_name)
         self.assertTrue(AnalysisDataService.doesExist("test"))
-        self.assertTrue(out_name == "test")
+        self.assertEqual(out_name,  "test")
 
         if AnalysisDataService.doesExist("test"):
             AnalysisDataService.remove("test")

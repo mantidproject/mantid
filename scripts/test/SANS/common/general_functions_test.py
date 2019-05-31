@@ -126,7 +126,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         run = workspace.run()
         self.assertTrue(run.hasProperty(log_name))
-        self.assertTrue(run.getProperty(log_name).value == log_value)
+        self.assertEqual(run.getProperty(log_name).value,  log_value)
 
     def test_that_sample_log_raises_for_non_string_type_arguments(self):
         # Arrange
@@ -176,7 +176,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Act
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
-        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+        self.assertEqual("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37",  output_workspace)
 
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
@@ -306,11 +306,11 @@ class SANSFunctionsTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(workspace is not None)
-        self.assertTrue(workspace.name() == AnalysisDataService.retrieve("test_ws").name())
+        self.assertEqual(workspace.name(),  AnalysisDataService.retrieve("test_ws").name())
         self.assertTrue(workspace_count is not None)
-        self.assertTrue(workspace_count.name() == AnalysisDataService.retrieve("test_ws_count").name())
+        self.assertEqual(workspace_count.name(),  AnalysisDataService.retrieve("test_ws_count").name())
         self.assertTrue(workspace_norm is not None)
-        self.assertTrue(workspace_norm.name() == AnalysisDataService.retrieve("test_ws_norm").name())
+        self.assertEqual(workspace_norm.name(),  AnalysisDataService.retrieve("test_ws_norm").name())
 
         # Clean up
         SANSFunctionsTest._remove_workspaces()

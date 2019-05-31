@@ -89,7 +89,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_input_event)
 
         expected_num_spectr_ws = 20 - 9  + 1
-        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 10 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 10 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -125,7 +125,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         scatter_workspace, monitor_workspace = self._do_test_valid(settings)
 
         expected_num_spectr_ws = 20 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
-        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
 
         # Expect all entries to be 0 except for monitor 0. We selected monitor 1 and all detectors
         # for the subtraction. Hence only moniotr 0 would have been spared.
@@ -161,7 +161,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         is_event_ws = True
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_ws, run_number)
         expected_num_spectr_ws = 20 - 9 + 1
-        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -196,7 +196,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_ws, run_number)
 
         expected_num_spectr_ws = 20 - 9 + 1 # Total number of spectra in the original workspace from 9 to 245798
-        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -233,7 +233,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         scatter_workspace, monitor_workspace = self._do_test_valid(settings, is_event_input, run_number)
 
         expected_num_spectr_ws = 20 - 9 + 1
-        self.assertTrue(scatter_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 8 spectra")
+        self.assertEqual(scatter_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 8 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -269,7 +269,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
         expected_num_spectr_ws = len(trans_ids)
-        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 4 spectra")
+        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 4 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -301,7 +301,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
         expected_num_spectr_ws = len(trans_ids)
-        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have 4 spectra")
+        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have 4 spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -342,7 +342,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
         expected_num_spectr_ws = len(trans_ids) # monitors + detectors
-        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have the same number of spectra")
+        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have the same number of spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
@@ -384,7 +384,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         transmission_workspace = self._do_test_valid_transmission(settings, trans_ids)
 
         expected_num_spectr_ws = len(trans_ids) # monitors + detectors
-        self.assertTrue(transmission_workspace.getNumberHistograms() == expected_num_spectr_ws, "Should have all spectra")
+        self.assertEqual(transmission_workspace.getNumberHistograms(),  expected_num_spectr_ws, "Should have all spectra")
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP

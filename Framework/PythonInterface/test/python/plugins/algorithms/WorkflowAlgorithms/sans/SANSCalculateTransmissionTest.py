@@ -255,10 +255,10 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
 
         # Assert
         tolerance = 1e-8
-        self.assertTrue(fitted_workspace.getNumberHistograms() == 1)
-        self.assertTrue(unfitted_workspace.getNumberHistograms() == 1)
-        self.assertTrue(fitted_workspace.YUnitLabel() == "Transmission")
-        self.assertTrue(unfitted_workspace.YUnitLabel() == "Transmission")
+        self.assertEqual(fitted_workspace.getNumberHistograms(),  1)
+        self.assertEqual(unfitted_workspace.getNumberHistograms(),  1)
+        self.assertEqual(fitted_workspace.YUnitLabel(),  "Transmission")
+        self.assertEqual(unfitted_workspace.YUnitLabel(),  "Transmission")
         self.assertTrue(unfitted_workspace.isDistribution())
         self.assertTrue(fitted_workspace.isDistribution())
 
@@ -363,7 +363,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
                                                                                            direct_workspace, state,
                                                                                            is_sample=True)
             was_successful = True
-            self.assertTrue(fitted_workspace.getNumberHistograms() == 1)
+            self.assertEqual(fitted_workspace.getNumberHistograms(),  1)
         except:  # noqa
             was_successful = False
 

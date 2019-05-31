@@ -48,8 +48,8 @@ class WishMasking(systemtesting.MantidSystemTest):
         try:
             mask_boundary_inside = self.get_masking_for_index(cfile, masking_edge)
             mask_boundary_outside = self.get_masking_for_index(cfile, masking_edge+1)
-            self.assertTrue(mask_boundary_inside == expected_masking_identifier)
-            self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
+            self.assertEqual(mask_boundary_inside,  expected_masking_identifier)
+            self.assertEqual(mask_boundary_outside,  expected_not_masking_identifier)
         except LookupError:
             print("Could not find the requested index")
             self.assertTrue(False)
@@ -145,8 +145,8 @@ class WishMasking(systemtesting.MantidSystemTest):
 
                         #Test that the merged output cal file has actually taken the masking from the update file.
             self.assertTrue(merged_mask_boundary_inside != merged_mask_boundary_outside)
-            self.assertTrue(merged_mask_boundary_inside == update_mask_boundary_inside)
-            self.assertTrue(merged_mask_boundary_outside == update_mask_boundary_outside)
+            self.assertEqual(merged_mask_boundary_inside,  update_mask_boundary_inside)
+            self.assertEqual(merged_mask_boundary_outside,  update_mask_boundary_outside)
 
         finally:
                         #clean up no matter what.

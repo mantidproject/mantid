@@ -87,11 +87,11 @@ class StateDataBuilderTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # # Assert
-        self.assertTrue(data_state.sample_scatter == "LOQ74044")
-        self.assertTrue(data_state.sample_scatter_period == 3)
-        self.assertTrue(data_state.sample_direct_period == 0)
+        self.assertEqual(data_state.sample_scatter,  "LOQ74044")
+        self.assertEqual(data_state.sample_scatter_period,  3)
+        self.assertEqual(data_state.sample_direct_period,  0)
         self.assertTrue(data_state.instrument is SANSInstrument.LOQ)
-        self.assertTrue(data_state.sample_scatter_run_number == 74044)
+        self.assertEqual(data_state.sample_scatter_run_number,  74044)
 
 
 if __name__ == '__main__':

@@ -53,7 +53,7 @@ class FunctionFactoryTest(unittest.TestCase):
     def test_get_Gaussian(self):
         name = "Gaussian"
         func = FunctionFactory.createFunction(name)
-        self.assertTrue(func.name() == name)
+        self.assertEqual(func.name(),  name)
         self.assertTrue(len(func.__repr__()) > len(name))
         self.assertTrue("Peak" in func.categories())
 

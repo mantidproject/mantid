@@ -72,7 +72,7 @@ class DetectorInfoTest(unittest.TestCase):
         """ Check equality of detectors """
         info = self._ws.detectorInfo()
         self.assertTrue(info.isEquivalent(info))
-        self.assertTrue(info == info)
+        self.assertEqual(info,  info)
 
     def test_twoTheta(self):
         """ See if the returned value is a double (float in Python). """

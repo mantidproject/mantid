@@ -123,7 +123,7 @@ class MergeReductionsTest(unittest.TestCase):
         self.assertTrue(abs(shift - shift_input) < 1e-4)
 
         # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
     def test_that_can_merge_fitting(self):
         # Arrange
@@ -142,7 +142,7 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
         scale = result.scale
         shift = result.shift
@@ -168,7 +168,7 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
         scale = result.scale
         shift = result.shift
@@ -194,7 +194,7 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
         scale = result.scale
         shift = result.shift

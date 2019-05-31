@@ -53,7 +53,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         def verify_absent(file_list):
             for file in file_list:
                 file = FileFinder.getFullPath(file)
-                self.assertTrue(len(file)==0)
+                self.assertEqual(len(file), 0)
 
         def verify_present_and_delete(file_list):
             for file in file_list:
@@ -68,7 +68,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
                 NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
 
 
-        self.assertTrue(len(tReducer.prop_man.save_format) ==0)
+        self.assertEqual(len(tReducer.prop_man.save_format), 0)
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file')
         #
@@ -87,7 +87,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file.tt')
         file = FileFinder.getFullPath('save_formats_test_file.tt')
-        self.assertTrue(len(file)==0)
+        self.assertEqual(len(file), 0)
 
         # save file with given extension on direct request:
         tReducer.save_results(tws,'save_formats_test_file.nxs')
@@ -97,7 +97,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file')
         file = FileFinder.getFullPath('save_formats_test_file')
-        self.assertTrue(len(file)==0)
+        self.assertEqual(len(file), 0)
 
 
         # save files with extensions on request
@@ -105,7 +105,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         verify_present_and_delete(['save_formats_test_file.nxspe','save_formats_test_file.nxs'])
 
         # this is strange feature.
-        self.assertTrue(len(tReducer.prop_man.save_format) ==2)
+        self.assertEqual(len(tReducer.prop_man.save_format), 2)
 
     def test_diagnostics_wb(self):
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)

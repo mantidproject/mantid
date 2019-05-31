@@ -87,20 +87,20 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         expected_spectra = list(set(expected_spectra))
         masked_spectra = list(get_masked_spectrum_numbers(workspace))
 
-        self.assertTrue(len(expected_spectra) == len(masked_spectra),
+        self.assertEqual(len(expected_spectra),  len(masked_spectra),
                         "{} does not equal {}".format(len(expected_spectra), len(masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(masked_spectra)):
-            self.assertTrue(expected == actual, "{} does not equal {}".format(expected, actual))
+            self.assertEqual(expected,  actual, "{} does not equal {}".format(expected, actual))
 
     def _do_assert_non_masked(self, workspace, expected_spectra):
         # Remove duplicate masks from expected
         expected_spectra = list(set(expected_spectra))
 
         non_masked_spectra = list(get_non_masked_spectrum_numbers(workspace))
-        self.assertTrue(len(expected_spectra) == len(non_masked_spectra),
+        self.assertEqual(len(expected_spectra),  len(non_masked_spectra),
                         "Expected length {}, got length {}".format(len(expected_spectra), len(non_masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(non_masked_spectra)):
-            self.assertTrue(expected == actual)
+            self.assertEqual(expected,  actual)
 
     def test_that_spectra_masking_is_applied(self):
         # Arrange
@@ -347,9 +347,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         tof_spectra_11_masked = workspace.getSpectrum(11).getTofs()
         # Spectrum 10
         # Three events should have been removed
-        self.assertTrue(len(tof_spectra_10_masked) == len(tof_spectra_10_original) - 3)
+        self.assertEqual(len(tof_spectra_10_masked),  len(tof_spectra_10_original) - 3)
         # One event should have been removed
-        self.assertTrue(len(tof_spectra_11_masked) == len(tof_spectra_11_original) - 1)
+        self.assertEqual(len(tof_spectra_11_masked),  len(tof_spectra_11_original) - 1)
 
         # Make sure that there are no elements
         for start, stop in zip(bin_mask_general_start, bin_mask_general_stop):
@@ -392,7 +392,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
         # Spectrum 23813
         # Five events should have been removed
-        self.assertTrue(len(tof_spectra_23813_masked) == len(tof_spectra_23813_original) - 5)
+        self.assertEqual(len(tof_spectra_23813_masked),  len(tof_spectra_23813_original) - 5)
 
         # Make sure that there are no elements
         for start, stop in zip(bin_mask_start, bin_mask_stop):

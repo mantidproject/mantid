@@ -111,9 +111,9 @@ class VMDTest(unittest.TestCase):
 
     def test_equality_operators(self):
         v1 = VMD(1.0,2.0)
-        self.assertTrue(v1 == v1)
+        self.assertEqual(v1,  v1)
         v2 = VMD(1.0,2.0) # different object, same value
-        self.assertTrue(v1 == v2)
+        self.assertEqual(v1,  v2)
         self.assertFalse(v1 != v2)
         v3 = VMD(1.0,-5.0)
         self.assertTrue(v1 != v3)

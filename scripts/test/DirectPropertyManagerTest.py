@@ -256,10 +256,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         formats = propman.save_format
-        self.assertTrue(len(formats) == 0)
+        self.assertEqual(len(formats),  0)
 
         propman.save_format = 'unknown'
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
 
         propman.save_format = '.spe'
         formats = propman.save_format
@@ -273,7 +273,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         propman.save_format = ''
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
 
         propman.save_format = ['nxspe','.nxs']
         formats = propman.save_format
@@ -281,7 +281,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue('nxspe' in formats)
 
         propman.save_format = None
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
         propman.save_format = 'spe,.nxs'
         formats = propman.save_format
         self.assertEqual(len(propman.save_format),2)
@@ -293,7 +293,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(len(propman.save_format),3)
 
         propman.save_format = 'None'
-        self.assertTrue(len(propman.save_format) == 0)
+        self.assertEqual(len(propman.save_format),  0)
 
         propman.save_format = ('spe','nxspe')
         self.assertEqual(len(propman.save_format),2)
@@ -1043,17 +1043,17 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_multirep_tof_specta_list(self):
         propman = self.prop_man
         sp = propman.multirep_tof_specta_list
-        self.assertTrue(len(sp) == 2)
+        self.assertEqual(len(sp),  2)
         self.assertEqual(sp[0],5)
 
         propman.multirep_tof_specta_list = '10'
         sp = propman.multirep_tof_specta_list
-        self.assertTrue(len(sp) == 1)
+        self.assertEqual(len(sp),  1)
         self.assertEqual(sp[0],10)
 
         propman.multirep_tof_specta_list = '10,11,13,15'
         sp = propman.multirep_tof_specta_list
-        self.assertTrue(len(sp) == 4)
+        self.assertEqual(len(sp),  4)
         self.assertEqual(sp[3],15)
 
     def test_mono_correction_factor(self):

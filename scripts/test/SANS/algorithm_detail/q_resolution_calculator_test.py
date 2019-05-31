@@ -32,7 +32,7 @@ class QResolutionCalculatorTest(unittest.TestCase):
 
     def _assert_collection_elements_are_equal(self, collection1, collection2):
         tolerance = 1e-7
-        self.assertTrue(len(collection1) == len(collection2))
+        self.assertEqual(len(collection1),  len(collection2))
         for index in range(len(collection1)):
             self.assertTrue(abs(collection1[index] - collection2[index]) < tolerance)
 
@@ -126,8 +126,8 @@ class QResolutionCalculatorTest(unittest.TestCase):
         # Act
         a1, a2 = get_aperture_diameters(mock_state.convert_to_q)
         # Assert
-        self.assertTrue(a1 == 2.)
-        self.assertTrue(a2 == 3.)
+        self.assertEqual(a1,  2.)
+        self.assertEqual(a2,  3.)
 
     def test_that_calculates_the_aperture_diameters_for_rectangular_settings(self):
         # Arrange
@@ -139,8 +139,8 @@ class QResolutionCalculatorTest(unittest.TestCase):
         # Assert
         expected_a1 = 2*sqrt((16. + 49.) / 6)
         expected_a2 = 2 * sqrt((36. + 64.) / 6)
-        self.assertTrue(a1 == expected_a1)
-        self.assertTrue(a2 == expected_a2)
+        self.assertEqual(a1,  expected_a1)
+        self.assertEqual(a2,  expected_a2)
 
     def test_that_defaults_to_circular_if_not_all_rectangular_are_specified(self):
         q_options = {"q_resolution_a1": 2., "q_resolution_a2": 3., "q_resolution_h1": 4., "q_resolution_h2": None,
@@ -149,8 +149,8 @@ class QResolutionCalculatorTest(unittest.TestCase):
         # Act
         a1, a2 = get_aperture_diameters(mock_state.convert_to_q)
         # Assert
-        self.assertTrue(a1 == 2.)
-        self.assertTrue(a2 == 3.)
+        self.assertEqual(a1,  2.)
+        self.assertEqual(a2,  3.)
 
     def test_that_moderator_workspace_is_histogram(self):
         # Arrange
@@ -158,7 +158,7 @@ class QResolutionCalculatorTest(unittest.TestCase):
         # Act
         workspace = load_sigma_moderator_workspace(file_name)
         # Assert
-        self.assertTrue(len(workspace.dataX(0)) == len(workspace.dataY(0)) + 1)
+        self.assertEqual(len(workspace.dataX(0)),  len(workspace.dataY(0)) + 1)
 
     def test_that_executes_the_q_resolution_calculation_without_issues(self):
         # Arrange
@@ -177,10 +177,10 @@ class QResolutionCalculatorTest(unittest.TestCase):
                                                                QResolutionCalculatorTest.data_workspace)
         # Assert
         self.assertTrue(q_resolution_workspace is not None)
-        self.assertTrue(len(q_resolution_workspace.dataX(0)) == len(QResolutionCalculatorTest.data_workspace.dataX(0)))
-        self.assertTrue(len(q_resolution_workspace.dataY(0)) == len(QResolutionCalculatorTest.data_workspace.dataY(0)))
+        self.assertEqual(len(q_resolution_workspace.dataX(0)),  len(QResolutionCalculatorTest.data_workspace.dataX(0)))
+        self.assertEqual(len(q_resolution_workspace.dataY(0)),  len(QResolutionCalculatorTest.data_workspace.dataY(0)))
         for e1, e2 in zip(q_resolution_workspace.dataX(0), QResolutionCalculatorTest.data_workspace.dataX(0)):
-            self.assertTrue(e1 == e2)
+            self.assertEqual(e1,  e2)
 
 if __name__ == "__main__":
     unittest.main()

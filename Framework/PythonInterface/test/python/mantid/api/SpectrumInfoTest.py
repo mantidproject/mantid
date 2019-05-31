@@ -341,7 +341,7 @@ class SpectrumInfoTest(unittest.TestCase):
         spectrumDefinition = info.getSpectrumDefinition(0)
         # Check equality with equals() and == to make sure same result is given
         self.assertTrue(spectrumDefinition.equals(spectrumDefinition))
-        self.assertTrue(spectrumDefinition == spectrumDefinition)
+        self.assertEqual(spectrumDefinition,  spectrumDefinition)
 
     def test_spectrumDefintionNotEquals(self):
         """ Check the equality of the SpectrumDefintions """

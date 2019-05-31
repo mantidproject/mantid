@@ -82,14 +82,14 @@ class ExportSpectraMaskTest(unittest.TestCase):
 
     def test_ExportAlgosWork(self):
         r_masks = ExportSpectraMask('test_ws',ExportMaskOnly=True)
-        self.assertTrue((np.array(self.masks)==r_masks).all())
+        self.assertEqual((np.array(self.masks), r_masks).all())
 
         test_file = self.test_file + '.msk'
         self.assertFalse(os.path.isfile(test_file))
 
         r_masks = ExportSpectraMask('test_ws',Filename = test_file)
         self.assertTrue(os.path.isfile(test_file))
-        self.assertTrue((np.array(self.masks)==r_masks).all())
+        self.assertEqual((np.array(self.masks), r_masks).all())
 
         default_tf = os.path.join(mantid.config.getString('defaultsave.directory'),'test_ws.msk')
         ExportSpectraMask('test_ws')

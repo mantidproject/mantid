@@ -22,7 +22,7 @@ class FileFinderTest(unittest.TestCase):
 
     def test_find_runs_returns_absolute_paths_of_given_runs(self):
         runs = FileFinder.findRuns("CNCS7860")
-        self.assertTrue(len(runs) == 1)
+        self.assertEqual(len(runs),  1)
         # We can't be sure what the full path is in general but it should certainly exist!
         self.assertTrue(os.path.exists(runs[0]))
 
@@ -36,7 +36,7 @@ class FileFinderTest(unittest.TestCase):
                                        " {} error was raised with message {}".format(type(e).__name__, str(e)))
         else:
             # Confirm that it works as above
-            self.assertTrue(len(runs) == 1)
+            self.assertEqual(len(runs),  1)
             self.assertTrue(os.path.exists(runs[0]))
 
 

@@ -89,9 +89,9 @@ class ReflectometryISIS(with_metaclass(ABCMeta, systemtesting.MantidSystemTest))
         pipf_comparison = CompareMDWorkspaces(Workspace1='PiPf_rebinned',Workspace2='PiPf_benchmark', Tolerance=0.01, CheckEvents=False)
 
         # Assert against the outputs
-        self.assertTrue(int(qxqy_comparison[0]) == 1)
-        self.assertTrue(int(kikf_comparison[0]) == 1)
-        self.assertTrue(int(pipf_comparison[0]) == 1)
+        self.assertEqual(int(qxqy_comparison[0]),  1)
+        self.assertEqual(int(kikf_comparison[0]),  1)
+        self.assertEqual(int(pipf_comparison[0]),  1)
 
         return True
 
