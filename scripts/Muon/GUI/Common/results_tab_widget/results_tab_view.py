@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantidqt.utils.qt import load_ui
-from qtpy import QtCore, QtWidgets
+from qtpy import PYQT4, QtCore, QtWidgets
 
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
@@ -63,7 +63,11 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         function_selector.clear()
         function_selector.addItems(names)
         if original_selection in names:
-            function_selector.setCurrentText(original_selection)
+            if PYQT4:
+                function_selector.setCurrentIndex(
+                    function_selector.findText(original_selection))
+            else:
+                function_selector.setCurrentText(original_selection)
         function_selector.blockSignals(False)
 
     def selected_result_workspaces(self):
