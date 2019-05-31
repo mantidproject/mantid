@@ -58,7 +58,7 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
         run_vanadium_calibration(inst_obj, focus_mode=self.focus_mode)
 
         # Make sure that inst settings reverted to the default after create_vanadium
-        self.assertEquals(inst_obj._inst_settings.focus_mode, "trans")
+        self.assertEqual(inst_obj._inst_settings.focus_mode, "trans")
 
     def skipTests(self):
         # Don't actually run this test, as it is a dummy for the focus-mode-specific tests
@@ -135,6 +135,38 @@ class FocusTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
 
+class FocusLongThenShortTest(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
+        inst_object.focus(run_number=98507, vanadium_normalisation=False, do_absorb_corrections=False,
+                          long_mode=True, perform_attenuation=False, tt_mode="tt70")
+        self.focus_results = run_focus(inst_object, tt_mode="tt70")
+
+        # Make sure that inst settings reverted to the default after focus
+        self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
+        self.assertFalse(inst_object._inst_settings.long_mode)
+
+    def validate(self):
+        self.tolerance = 5e-9  # Required for difference in spline data between operating systems
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
 
 class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
 
@@ -174,7 +206,7 @@ class CreateCalTest(systemtesting.MantidSystemTest):
         self.calibration_results = run_create_cal(inst_object, focus_mode="all")
 
         # Make sure that inst_settings reverted to the default after create_cal
-        self.assertEquals(inst_object._inst_settings.focus_mode, "trans")
+        self.assertEqual(inst_object._inst_settings.focus_mode, "trans")
 
     def validate(self):
         self.tolerance = 1e-5
@@ -231,7 +263,7 @@ def run_focus_with_absorb_corrections():
     run_number = 98507
     inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
     return inst_object.focus(run_number=run_number, vanadium_normalisation=False, perform_attenuation=False,
-                             do_absorb_corrections=True)
+                             do_absorb_corrections=True, long_mode=False)
 
 
 def setup_mantid_paths():

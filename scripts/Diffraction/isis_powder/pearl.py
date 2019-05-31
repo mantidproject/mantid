@@ -33,15 +33,15 @@ class Pearl(AbstractInst):
         self._cached_run_details = {}
 
     def focus(self, **kwargs):
-        with self._apply_temporary_inst_settings(kwargs):
+        with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
             return self._focus(run_number_string=self._inst_settings.run_number,
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
                                do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
         kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
-
-        with self._apply_temporary_inst_settings(kwargs):
+        print(kwargs)
+        with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
                 for new_tt_mode in ["tt35", "tt70", "tt88"]:
                     self._inst_settings.tt_mode = new_tt_mode
@@ -50,7 +50,7 @@ class Pearl(AbstractInst):
                 self._run_create_vanadium()
 
     def create_cal(self, **kwargs):
-        with self._apply_temporary_inst_settings(kwargs):
+        with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
             run_details = self._get_run_details(self._inst_settings.run_number)
 
             cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
@@ -77,7 +77,7 @@ class Pearl(AbstractInst):
         return self._inst_settings.subtract_empty_inst
 
     @contextmanager
-    def _apply_temporary_inst_settings(self, kwargs):
+    def _apply_temporary_inst_settings(self, kwargs, run):
 
         # set temporary settings
         if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
@@ -85,7 +85,7 @@ class Pearl(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         # check that cache exists
-        run_number_string_key = self._generate_run_details_fingerprint(self._inst_settings.run_number,
+        run_number_string_key = self._generate_run_details_fingerprint(run,
                                                                        self._inst_settings.file_extension,
                                                                        self._inst_settings.tt_mode)
         if run_number_string_key in self._cached_run_details:
