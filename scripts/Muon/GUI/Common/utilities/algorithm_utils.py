@@ -164,7 +164,7 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
-           alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+        alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
 
 
 def run_AppendSpectra(ws1, ws2):
