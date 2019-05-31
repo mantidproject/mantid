@@ -86,7 +86,7 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
-    self.assertTrue(abs_difference <= abs(tolerance_value),
+    self.assertLessEqual(abs_difference, abs(tolerance_value),
                     msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
 
 

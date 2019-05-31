@@ -267,7 +267,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
 
         for e1, e2 in zip(unfitted_workspace.dataY(0), ratio):
             self.assertTrue(abs(e1 - e2) < tolerance)
-            self.assertTrue(e1 <= 1.0)  # The transmission has to be smaller or equal to 1
+            self.assertLessEqual(e1, 1.0)  # The transmission has to be smaller or equal to 1
 
     def test_that_calculates_transmission_for_general_background_and_no_prompt_peak(self):
         # Arrange

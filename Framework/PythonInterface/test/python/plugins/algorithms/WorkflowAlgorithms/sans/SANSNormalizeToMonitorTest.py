@@ -148,7 +148,7 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         for e1, e2, in zip(workspace.dataX(0), expected_lambda):
             self.assertTrue(abs(e1 - e2) < tolerance)
         for e1, e2, in zip(workspace.dataY(0), expected_signal):
-            self.assertTrue(abs(e1-e2) < tolerance)
+            self.assertLess(abs(e1-e2), tolerance)
 
     def test_that_gets_normalization_for_general_background_and_no_prompt_peak(self):
         # Arrange

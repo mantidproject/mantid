@@ -252,8 +252,8 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
 
     def test_fit_multi_ion_and_spectra(self):
         from CrystalField.fitting import makeWorkspace
@@ -287,8 +287,8 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2], MaxIterations=10)
         fit.fit()
 
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
 
     def test_set_background(self):
         cf = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHM=[1.0], Background='name=LinearBackground,A0=1')

@@ -58,7 +58,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         def verify_present_and_delete(file_list):
             for file in file_list:
                 file = FileFinder.getFullPath(file)
-                self.assertTrue(len(file)>0)
+                self.assertGreater(len(file), 0)
                 os.remove(file)
 
         clean_up(files)
@@ -342,9 +342,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         xMax = max(x)
 
 
-        self.assertTrue(tof_range[0]>xMin)
+        self.assertGreater(tof_range[0], xMin)
         #self.assertAlmostEqual(tof_range[1],dt)
-        self.assertTrue(tof_range[2]<xMax)
+        self.assertLess(tof_range[2], xMax)
 
         # check another working mode
         red.prop_man.multirep_tof_specta_list = 4
@@ -353,12 +353,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
   
         tof_range1 = red.find_tof_range_for_multirep(run_tof)
 
-        self.assertTrue(tof_range1[0]>xMin)
-        self.assertTrue(tof_range1[2]<xMax)
+        self.assertGreater(tof_range1[0], xMin)
+        self.assertLess(tof_range1[2], xMax)
 
-        self.assertTrue(tof_range1[2]<tof_range[2])
-        self.assertTrue(tof_range1[0]<tof_range[0])
-        self.assertTrue(tof_range1[1]<tof_range[1])
+        self.assertLess(tof_range1[2], tof_range[2])
+        self.assertLess(tof_range1[0], tof_range[0])
+        self.assertLess(tof_range1[1], tof_range[1])
 
     def test_multirep_mode(self):
         # create test workspace

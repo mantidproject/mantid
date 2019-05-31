@@ -67,7 +67,7 @@ class SymmetriseTest(unittest.TestCase):
         data_x = workspace.dataX(0)
         for idx in range(0, int(len(data_x) / 2)):
             delta = abs(data_x[idx]) - abs(data_x[-(idx + 1)])
-            self.assertTrue(abs(delta) < tolerance)
+            self.assertLess(abs(delta), tolerance)
 
         # Test that the axis and values were preserved
         sample_x_axis = self._sample_ws.getAxis(0)

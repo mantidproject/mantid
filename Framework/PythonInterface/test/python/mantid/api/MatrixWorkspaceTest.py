@@ -42,7 +42,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(self._test_ws.getTitle(), "Test histogram")
         self.assertEquals(self._test_ws.getComment(), "")
         self.assertEquals(self._test_ws.isDirty(), False)
-        self.assertTrue(self._test_ws.getMemorySize() > 0.0)
+        self.assertGreater(self._test_ws.getMemorySize(), 0.0)
         self.assertEquals(self._test_ws.threadSafe(), True)
 
     def test_workspace_data_information(self):
@@ -108,7 +108,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Have got a MatrixWorkspace back and not just the generic interface
         self.assertTrue(isinstance(propValue, MatrixWorkspace))
         mem = propValue.getMemorySize()
-        self.assertTrue((mem > 0))
+        self.assertGreater((mem, 0))
 
         AnalysisDataService.remove(wsname)
 
@@ -121,7 +121,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Have got a MatrixWorkspace back and not just the generic interface
         self.assertTrue(isinstance(value, MatrixWorkspace))
         mem = value.getMemorySize()
-        self.assertTrue((mem > 0))
+        self.assertGreater((mem, 0))
 
         AnalysisDataService.remove(wsname)
 

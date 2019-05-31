@@ -25,7 +25,7 @@ class POLDIMergeTest(systemtesting.MantidSystemTest):
             self.runPoldiMerge(dataFiles, "Dummy")
             self.fail()
         except RuntimeError:
-            self.assertTrue(True)
+            pass
 
     def testHappyCase(self):
         dataFiles = ["poldi2013n006903", "poldi2013n006904"]

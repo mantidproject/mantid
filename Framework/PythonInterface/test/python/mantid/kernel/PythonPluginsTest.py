@@ -51,7 +51,7 @@ class PythonPluginsTest(unittest.TestCase):
 
     def test_loading_python_algorithm_increases_registered_algs_by_one(self):
         loaded = plugins.load(self._testdir)
-        self.assertTrue(len(loaded) > 0)
+        self.assertGreater(len(loaded), 0)
         expected_name = 'TestPyAlg'
         # Has the name appear in the module dictionary
         self.assertTrue(expected_name in sys.modules)

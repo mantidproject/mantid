@@ -36,7 +36,7 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_type_str_is_not_empty(self):
         rangeLower=self.__class__._integration.getProperty("RangeLower")
-        self.assertTrue(len(rangeLower.type) > 0)
+        self.assertGreater(len(rangeLower.type), 0)
 
     def test_getproperty_value_returns_derived_type(self):
         data = [1.0,2.0,3.0]

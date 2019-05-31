@@ -27,7 +27,7 @@ class InProcessJupyterConsoleTest(GuiTest):
         widget = InProcessJupyterConsole()
         self.assertTrue(hasattr(widget, "kernel_manager"))
         self.assertTrue(hasattr(widget, "kernel_client"))
-        self.assertTrue(len(widget.banner) > 0)
+        self.assertGreater(len(widget.banner), 0)
         self._pre_delete_console_cleanup(widget)
         del widget
 

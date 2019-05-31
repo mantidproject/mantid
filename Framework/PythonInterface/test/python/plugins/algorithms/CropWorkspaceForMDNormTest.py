@@ -20,8 +20,8 @@ class CropWorkspaceForMDNormTest(unittest.TestCase):
                                         XMin=1,
                                         XMax=6)
         self.assertEquals(ws_out.getNumberEvents(), ws_in.getNumberEvents()/2)                       
-        self.assertTrue(ws_out.getSpectrum(1).getTofs().max()<=6.)
-        self.assertTrue(ws_out.getSpectrum(1).getTofs().min()>=1.)
+        self.assertLessEqual(ws_out.getSpectrum(1).getTofs().max(), 6.)
+        self.assertGreaterEqual(ws_out.getSpectrum(1).getTofs().min(), 1.)
         self.assertTrue(ws_out.run().hasProperty('MDNorm_low'))
         self.assertTrue(ws_out.run().hasProperty('MDNorm_high'))
         self.assertTrue(ws_out.run().hasProperty('MDNorm_spectra_index'))

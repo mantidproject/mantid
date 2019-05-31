@@ -51,7 +51,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 2)
@@ -122,7 +122,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 3)
@@ -181,7 +181,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 3)
@@ -246,7 +246,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 2)
@@ -310,7 +310,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 2)
@@ -388,7 +388,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 4)
@@ -401,8 +401,8 @@ class ExportExperimentLogTest(unittest.TestCase):
             nextline = lines[i+1]
             next_run = int(nextline.split(',')[0])
             next_min = float(nextline.split(',')[2])
-            self.assertTrue(curr_run < next_run)
-            self.assertTrue(curr_min < next_min)
+            self.assertLess(curr_run, next_run)
+            self.assertLess(curr_min, next_min)
 
 
         # Remove generated files
@@ -504,7 +504,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 4)
@@ -517,8 +517,8 @@ class ExportExperimentLogTest(unittest.TestCase):
             nextline = lines[i+1]
             next_run = int(nextline.split('\t')[0])
             next_min = float(nextline.split('\t')[2])
-            self.assertTrue(curr_run < next_run)
-            self.assertTrue(curr_min < next_min)
+            self.assertLess(curr_run, next_run)
+            self.assertLess(curr_min, next_min)
 
         line2 = lines[2]
         terms = line2.split("\t")
@@ -600,7 +600,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 4)
@@ -613,8 +613,8 @@ class ExportExperimentLogTest(unittest.TestCase):
             nextline = lines[i+1]
             next_run = int(nextline.split('\t')[0])
             next_min = float(nextline.split('\t')[2])
-            self.assertTrue(curr_run < next_run)
-            self.assertTrue(curr_min < next_min)
+            self.assertLess(curr_run, next_run)
+            self.assertLess(curr_min, next_min)
 
         line2 = lines[2]
         terms = line2.split("\t")
@@ -665,7 +665,7 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Last line cannot be empty, i.e., before EOF '\n' is not allowed
         lastline = lines[-1]
-        self.assertTrue(len(lastline.strip()) > 0)
+        self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
         self.assertEquals(len(lines), 2)

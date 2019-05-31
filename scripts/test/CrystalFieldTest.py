@@ -683,7 +683,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1], MaxIterations=10)
         fit.fit()
 
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertLess(cf.chi2, chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -802,7 +802,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
 
-        self.assertTrue(cf.chi2 < chi2)
+        self.assertLess(cf.chi2, chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -1281,8 +1281,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=100, Constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', Seed=123)
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, 100.0)
 
     def test_monte_carlo_multi_spectrum(self):
         from CrystalField.fitting import makeWorkspace
@@ -1306,8 +1306,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit.monte_carlo(NSamples=100, Constraints='20<f0.f1.PeakCentre<45,20<f0.f2.PeakCentre<45', Seed=123)
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 > 0.0)
-        self.assertTrue(cf.chi2 < 200.0)
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, 200.0)
 
     def test_normalisation(self):
         from CrystalField.normalisation import split2range
@@ -1346,7 +1346,7 @@ class CrystalFieldFitTest(unittest.TestCase):
                                 Type='Cross Entropy', NSamples=10, Seed=123)
         # Run fit
         fit.fit()
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertLess(cf.chi2, 100.0)
 
     def test_estimate_parameters_multiple_results(self):
         from CrystalField.fitting import makeWorkspace
@@ -1368,9 +1368,9 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=ws)
         fit.estimate_parameters(50, ['B22', 'B40', 'B42', 'B44'],
                                 constraints='20<f1.PeakCentre<45,20<f2.PeakCentre<45', NSamples=100, Seed=123)
-        self.assertTrue(fit.get_number_estimates() > 1)
+        self.assertGreater(fit.get_number_estimates(), 1)
         fit.fit()
-        self.assertTrue(cf.chi2 < 100.0)
+        self.assertLess(cf.chi2, 100.0)
 
     def test_intensity_scaling_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function

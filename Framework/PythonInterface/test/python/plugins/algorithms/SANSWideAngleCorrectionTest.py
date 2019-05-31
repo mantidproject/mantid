@@ -48,8 +48,8 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
         hRange = Max(correction)
         lRange = Transpose(lRange)
         hRange = Transpose(hRange)
-        self.assertTrue(97 > hRange.dataY(0).all())
-        self.assertTrue(1 >= hRange.dataY(0).all())
+        self.assertGreater(97, hRange.dataY(0).all())
+        self.assertGreaterEqual(1, hRange.dataY(0).all())
 
 
     def test_negative_trans_data(self):

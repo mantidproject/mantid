@@ -32,7 +32,7 @@ class UnitFactoryTest(unittest.TestCase):
                       'Energy_inWavenumber', 'dSpacing', 'MomentumTransfer',
                       'QSquared', 'DeltaE', 'DeltaE_inWavenumber',
                       'DeltaE_inFrequency', 'Momentum', 'dSpacingPerpendicular']
-        self.assertTrue(len(core_units) <= len(known_units))
+        self.assertLessEqual(len(core_units), len(known_units))
 
         for unit in core_units:
             self.assertTrue(unit in known_units, "%s unit not found in UnitFactory keys" % unit)

@@ -74,7 +74,7 @@ class MDGeometryTest(unittest.TestCase):
 
     def test_getGeometryXML_returns_non_empty_string(self):
         xml = self._test_mdws.getGeometryXML()
-        self.assertTrue(len(xml) > 0)
+        self.assertGreater(len(xml), 0)
 
     def test_getBasisVector_returns_VMD(self):
         basis = self._test_mdws.getBasisVector(0)

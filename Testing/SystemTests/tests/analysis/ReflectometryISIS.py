@@ -60,7 +60,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, systemtesting.MantidSystemTest))
             thisTheta = ws1.detectorSignedTwoTheta(ws1.getDetector(i))
             nextTheta = ws1.detectorSignedTwoTheta(ws1.getDetector(i+1))
             #This check would fail if negative values were being normalised.
-            self.assertTrue(thisTheta < nextTheta)
+            self.assertLess(thisTheta, nextTheta)
 
         # MD transformations
         QxQy, _QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',

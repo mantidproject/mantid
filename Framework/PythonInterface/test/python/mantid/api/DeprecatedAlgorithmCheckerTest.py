@@ -27,7 +27,7 @@ class DeprecatedAlgorithmCheckerTest(unittest.TestCase):
     def test_deprecated_algorithm_returns_non_empty_string_from_isDeprecated(self):
         deprecation_check = DeprecatedAlgorithmChecker("DiffractionFocussing",1)
         msg = deprecation_check.isDeprecated()
-        self.assertTrue(len(msg) > 0)
+        self.assertGreater(len(msg), 0)
 
 
 if __name__ == '__main__':

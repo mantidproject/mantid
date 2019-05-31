@@ -162,7 +162,7 @@ class SpectrumInfoTest(unittest.TestCase):
             self.assertAlmostEquals(pos.X(), 0)
             self.assertAlmostEquals(pos.Z(), 5)
             if(lastY):
-                self.assertTrue(pos.Y() > lastY)
+                self.assertGreater(pos.Y(), lastY)
             lastY = pos.Y()
 
     """

@@ -54,7 +54,7 @@ class FunctionFactoryTest(unittest.TestCase):
         name = "Gaussian"
         func = FunctionFactory.createFunction(name)
         self.assertEqual(func.name(),  name)
-        self.assertTrue(len(func.__repr__()) > len(name))
+        self.assertGreater(len(func.__repr__()), len(name))
         self.assertTrue("Peak" in func.categories())
 
     def test_function_subscription_of_non_class_type_raises_error(self):

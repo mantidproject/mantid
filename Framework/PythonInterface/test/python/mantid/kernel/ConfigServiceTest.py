@@ -48,7 +48,7 @@ class ConfigServiceTest(unittest.TestCase):
         facilities = config.getFacilities()
         names = config.getFacilityNames()
 
-        self.assertTrue(len(names)>0)
+        self.assertGreater(len(names), 0)
         self.assertEquals(len(names),len(facilities))
         for i in range(len(names)):
             self.assertEquals(names[i],facilities[i].name())

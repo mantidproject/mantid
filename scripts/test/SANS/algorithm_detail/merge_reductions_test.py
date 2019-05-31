@@ -200,8 +200,8 @@ class MergeReductionsTest(unittest.TestCase):
         shift = result.shift
 
         self.assertNotEqual(scale,  scale_input)
-        self.assertTrue(abs(scale-1.0) < 1e-4)
-        self.assertTrue(abs(shift-shift_input) < 1e-4)
+        self.assertLess(abs(scale-1.0), 1e-4)
+        self.assertLess(abs(shift-shift_input), 1e-4)
 
 
 if __name__ == '__main__':

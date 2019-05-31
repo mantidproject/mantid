@@ -94,7 +94,7 @@ class RunDescriptorTest(unittest.TestCase):
 
         ok,file=PropertyManager.sample_run.find_file(propman)
         self.assertTrue(ok)
-        self.assertTrue(len(file)>0)
+        self.assertGreater(len(file), 0)
 
         ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.raw')
@@ -225,7 +225,7 @@ class RunDescriptorTest(unittest.TestCase):
         PropertyManager.sample_run.synchronize_ws(ws1)
 
         ws1 = PropertyManager.sample_run.get_workspace()
-        self.assertTrue(str.find(ws1.name(),'_modified')>0)
+        self.assertGreater(str.find(ws1.name(),'_modified'), 0)
 
         propman.sample_run = ws1
         self.assertEqual(ws1.name(),PropertyManager.sample_run._ws_name)

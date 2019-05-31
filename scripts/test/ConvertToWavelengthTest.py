@@ -136,8 +136,8 @@ class ConvertToWavelengthTest(unittest.TestCase):
         self.assertEqual("Wavelength", monitor_ws.getAxis(0).getUnit().unitID())
         x_min, x_max = ConvertToWavelengthTest.cropped_x_range(detector_ws, 0)
 
-        self.assertTrue(x_min >= 0.0)
-        self.assertTrue(x_max <= 10.0)
+        self.assertGreaterEqual(x_min, 0.0)
+        self.assertLessEqual(x_max, 10.0)
 
 if __name__ == '__main__':
     unittest.main()

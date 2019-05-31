@@ -507,7 +507,7 @@ class ComponentInfoTest(unittest.TestCase):
         source_pos = comp_info.sourcePosition()
         it = iter(comp_info)
         # basic check on first detector position
-        self.assertTrue(next(it).position.distance(source_pos) > 0)
+        self.assertGreater(next(it).position.distance(source_pos), 0)
         
     def test_children_via_iterator(self):
         info = self._ws.componentInfo()

@@ -79,14 +79,14 @@ class POLDILoadRunsTest(systemtesting.MantidSystemTest):
             PoldiLoadRuns(2013, 6903, 6904, 3, OutputWorkspace="threeWorkspacesFail")
             self.fail()
         except:
-            self.assertTrue(True)
+            pass
 
     def loadWorkspacesNotFound(self):
         try:
             PoldiLoadRuns(1990, 6903, OutputWorkspace="notFound")
             self.fail()
         except:
-            self.assertTrue(True)
+            pass
 
     def loadWorkspacesAddToGroup(self):
         wsGroup = PoldiLoadRuns(2013, 6903)

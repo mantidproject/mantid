@@ -68,7 +68,7 @@ class FunctionsTest(TestCase):
         plt.pcolormesh(np.arange(9.).reshape(3,3))
         allowed, msg = can_overplot()
         self.assertFalse(allowed)
-        self.assertTrue(len(msg) > 0)
+        self.assertGreater(len(msg), 0)
 
     def test_current_figure_or_none_returns_none_if_no_figures_exist(self):
         self.assertEqual(current_figure_or_none(), None)

@@ -167,13 +167,13 @@ class DetectorInfoTest(unittest.TestCase):
             self.assertAlmostEquals(pos.X(), 0)
             self.assertAlmostEquals(pos.Z(), 5)
             if(lastY):
-                self.assertTrue(pos.Y() > lastY)
+                self.assertGreater(pos.Y(), lastY)
             lastY = pos.Y()
 
     def test_iterator_for_l2(self):
         info = self._ws.detectorInfo()
         for item in info:
-            self.assertTrue(item.l2 > 0)
+            self.assertGreater(item.l2, 0)
 
     """
     ----------------------------------------------------------------------------
