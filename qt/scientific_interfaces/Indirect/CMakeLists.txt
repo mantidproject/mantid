@@ -261,6 +261,11 @@ set(
   ContainerSubtraction.cpp
   CorrectionsTab.cpp
   IndirectCorrections.cpp
+  IndirectInterface.cpp
+  IndirectSettings.cpp
+  IndirectSettingsModel.cpp
+  IndirectSettingsPresenter.cpp
+  IndirectSettingsView.cpp
   IndirectTab.cpp
 )
 
@@ -271,7 +276,12 @@ set(
   CalculatePaalmanPings.h
   ContainerSubtraction.h
   CorrectionsTab.h
+  IIndirectSettingsView.h
   IndirectCorrections.h
+  IndirectInterface.h
+  IndirectSettings.h
+  IndirectSettingsPresenter.h
+  IndirectSettingsView.h
   IndirectTab.h
 )
 
@@ -284,7 +294,14 @@ set(
   CalculatePaalmanPings.ui
   ContainerSubtraction.ui
   IndirectCorrections.ui
+  IndirectInterfaceSettings.ui
+  IndirectSettings.ui
 )
+
+set(RES_FILES IndirectInterfaceResources.qrc)
+
+# XML is required to parse the settings file
+find_package(Qt5 COMPONENTS Xml REQUIRED)
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesIndirect
@@ -293,8 +310,11 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_INDIRECT
-  PRECOMPILED PrecompiledHeader.h
+  RES ${RES_FILES}
+  DEFS
+    IN_MANTIDQT_INDIRECT
+    PRECOMPILED
+    PrecompiledHeader.h
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -303,6 +323,7 @@ mtd_add_qt_library(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
+    Qt5::Xml
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
