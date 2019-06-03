@@ -15,6 +15,7 @@ import unittest
 # third-party library imports
 import matplotlib
 matplotlib.use('AGG')  # noqa
+from numpy.testing import assert_almost_equal
 from qtpy.QtCore import Qt
 
 # local package imports
@@ -164,12 +165,12 @@ class FigureInteractionTest(unittest.TestCase):
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        self.assertSequenceEqual(list(ax.lines[0]._x), [15, 25])
-        self.assertSequenceEqual(list(ax.lines[0]._y), [0.2, 0.3])
+        assert_almost_equal(ax.lines[0]._x, [15, 25])
+        assert_almost_equal(ax.lines[0]._y, [0.2, 0.3])
         self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
         fig_interactor._toggle_normalization(ax)
-        self.assertSequenceEqual(list(ax.lines[0]._x), [15, 25])
-        self.assertSequenceEqual(list(ax.lines[0]._y), [2, 3])
+        assert_almost_equal(ax.lines[0]._x, [15, 25])
+        assert_almost_equal(ax.lines[0]._y, [2, 3])
         self.assertEqual("Counts", ax.get_ylabel())
 
 

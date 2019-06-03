@@ -174,7 +174,7 @@ class FigureInteraction(object):
         menu.addMenu(norm_menu)
 
     def _is_normalized(self, ax):
-        return ax.tracked_workspaces.values()[0][0].is_normalized
+        return list(ax.tracked_workspaces.values())[0][0].is_normalized
 
     def _set_normalization_bin_width(self, ax):
         if self._is_normalized(ax):
