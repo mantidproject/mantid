@@ -262,13 +262,13 @@ confusion and hinder more than they help. The NHS came up with a
 good set of rules for what icons should be used and this could be
 useful to designers, check out this `article. <https://digital.nhs.uk
 /blog/transformation-blog/2019/icons-avoid-temptation-and-start-with
--user-needs>`_ It may fit a situation more to have a text button
+-user-needs>`_. It may fit a situation more to have a text button
 instead of an icon.
 
 Whilst having too many icons will confuse the average user there are
-cases where many cases where it would help if, a button does a
+cases where many cases where it would help, for example if a button does a
 similar thing to another button somewhere else in the program then
-it should have the same Icon. Have a look to see if the need you has
+it should have the same icon. Have a look to see if the need you has
 an icon in Mantid by look at this handy :ref:`MantidUsedIconsTable`.
 
 Python
