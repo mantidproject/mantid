@@ -26,7 +26,6 @@ from qtpy.QtWidgets import QActionGroup, QMenu
 # local imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import MantidAxes
-from mantid.plots.helperfunctions import get_axes_labels
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
 

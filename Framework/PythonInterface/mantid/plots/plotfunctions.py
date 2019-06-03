@@ -33,6 +33,7 @@ import mantid.plots.modest_image
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 
+
 # ================================================
 # Private 2D Helper functions
 # ================================================
@@ -78,12 +79,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
             axes.set_xlabel("Spectrum")
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
         elif axis == MantidAxType.SPECTRUM:
-            try:
-                workspace_artists = axes.tracked_workspaces.values()
-            except AttributeError:
-                workspace_artists = None
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
-                workspace, workspace_artists, **kwargs)
+                workspace, axes, **kwargs)
             x, y, dy, dx = get_spectrum(workspace, workspace_index,
                                         normalize_by_bin_width, with_dy, with_dx)
         else:
@@ -121,7 +118,9 @@ def _plot_impl(axes, workspace, args, kwargs):
         kwargs['linestyle'] = 'steps-post'
     else:
         x, y, _, _, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-        normalize_by_bin_width = on_off_to_bool(config['graph1d.autodistribution'])
+
+        normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
+            workspace, axes, **kwargs)
         _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
     return x, y, args, kwargs
 
@@ -141,7 +140,8 @@ def plot(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
-    :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to config['graph1d.autodistribution']
+    :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to global
+                                   setting: config['graph1d.autodistribution']
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
@@ -192,6 +192,8 @@ def errorbar(axes, workspace, *args, **kwargs):
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
+    :param normalize_by_bin_width: Plot the workspace as a distribution. If None default to global
+                                   setting: config['graph1d.autodistribution']
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
@@ -215,7 +217,8 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
-    normalize_by_bin_width = on_off_to_bool(config['graph1d.autodistribution'])
+    normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
+        workspace, axes, **kwargs)
     _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 

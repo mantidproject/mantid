@@ -50,7 +50,7 @@ def get_distribution(workspace, **kwargs):
     return bool(distribution), kwargs
 
 
-def get_normalize_by_bin_width(workspace, current_artists, pop=True, **kwargs):
+def get_normalize_by_bin_width(workspace, axes, pop=True, **kwargs):
     """
     Determine whether or not the workspace should be plotted as a
     distribution. If the workspace is a distribution return False, else,
@@ -58,11 +58,15 @@ def get_normalize_by_bin_width(workspace, current_artists, pop=True, **kwargs):
     whether those curves are distributions. Else go by the global
     setting.
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
-    :param current_artists: The axes' tracked WorkspaceArtists
+    :param axes: The axes being plotted on
     :param pop: Bool. Set to True to remove 'normalize_by_bin_width' from 'kwargs'
     """
-    if workspace.isDistribution():
+    if hasattr(workspace, 'isDistribution') and workspace.isDistribution():
         return False, kwargs
+    try:
+        current_artists = axes.tracked_workspaces.values()
+    except AttributeError:
+        current_artists = None
 
     if current_artists:
         current_normalization = any(
