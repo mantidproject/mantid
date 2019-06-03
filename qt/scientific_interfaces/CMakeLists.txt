@@ -40,7 +40,9 @@ set(TEST_FILES
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
     test/RunMapTest.h
-    test/ISISReflectometry/Batch/BatchJobRunnerTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h

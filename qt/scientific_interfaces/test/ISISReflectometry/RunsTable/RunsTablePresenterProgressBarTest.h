@@ -45,20 +45,6 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testTwoGroupsWithBothGroupsComplete() {
-    auto reductionJobs = twoGroupsWithTwoRowsModel();
-    reductionJobs.mutableGroups()[0].setSuccess();
-    reductionJobs.mutableGroups()[0].mutableRows()[0]->setSuccess();
-    reductionJobs.mutableGroups()[0].mutableRows()[1]->setSuccess();
-    reductionJobs.mutableGroups()[1].setSuccess();
-    reductionJobs.mutableGroups()[1].mutableRows()[0]->setSuccess();
-    reductionJobs.mutableGroups()[1].mutableRows()[1]->setSuccess();
-    auto presenter = makePresenter(m_view, std::move(reductionJobs));
-    expectUpdateProgressBar(100);
-    presenter.notifyRowStateChanged();
-    verifyAndClearExpectations();
-  }
-
 private:
   void expectUpdateProgressBar() {
     EXPECT_CALL(m_view, setProgress(_)).Times(1);
