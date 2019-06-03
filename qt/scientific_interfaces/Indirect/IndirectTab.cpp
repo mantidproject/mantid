@@ -18,6 +18,10 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Plot.h"
+#endif
+
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>
@@ -443,21 +447,26 @@ void IndirectTab::plotMultipleSpectra(
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param spectraIndex Index of spectrum from each workspace to plot
+ * @param wsIndex Index of spectrum from each workspace to plot
  */
 void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               const int &spectraIndex) {
+                               const int &wsIndex) {
   if (!workspaceNames.isEmpty()) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     const QString errors = m_plotErrorBars ? "True" : "False";
 
     QString pyInput = "from mantidplot import plotSpectrum\n";
     pyInput += "plotSpectrum(['";
     pyInput += workspaceNames.join("','");
     pyInput += "'], ";
-    pyInput += QString::number(spectraIndex);
+    pyInput += QString::number(wsIndex);
     pyInput += ", error_bars=" + errors + ")\n";
 
     m_pythonRunner.runPythonCode(pyInput);
+#else
+    using MantidQt::Widgets::MplCpp::plot;
+    plot(workspaceNames, boost::none, std::vector<int>{wsIndex});
+#endif
   }
 }
 
