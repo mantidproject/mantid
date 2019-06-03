@@ -3,7 +3,6 @@
 .. |copy| image:: images/LocalIcons/content-copy.png
 .. |paste| image:: images/LocalIcons/content-paste.png
 .. |cut| image:: images/LocalIcons/content-cut.png
-.. |outline-settings| image:: images/LocalIcons/settings-outline.png
 .. |settings| image:: images/LocalIcons/settings.png
 .. |eraser| image:: images/LocalIcons/eraser.png
 .. |delete| image:: images/LocalIcons/trash-can.png
@@ -28,8 +27,6 @@
 .. |beam-centre| image:: images/LocalIcons/adjust.png
 .. |diagnostic| image:: images/LocalIcons/stethoscope.png
 .. |process-all| image:: images/LocalIcons/sigma.png
-.. |sum-all| image:: images/LocalIcons/plus-circle-outline.png
-.. |process-tab| image:: images/LocalIcons/play-circle-outline.png
 
 .. |table| image:: images/LocalIcons/table.png
 .. |export-data| image:: images/LocalIcons/file-export.png
@@ -64,7 +61,7 @@ General Icons
 +---------------+-------------------------------------------+-----------------------------------+
 | Cut           | "mdi.content-cut"                         | |cut|                             |
 +---------------+-------------------------------------------+-----------------------------------+
-| Settings      | "mdi.settings-outline" and "mdi.settings" | |outline-settings| and |settings| |
+| Settings      | "mdi.settings"                            | |settings|                        |
 +---------------+-------------------------------------------+-----------------------------------+
 | Eraser        | "mdi.eraser"                              | |eraser|                          |
 +---------------+-------------------------------------------+-----------------------------------+
@@ -111,11 +108,6 @@ General Icons
 | Diagnostic    | "mdi.stethoscope"                         | |diagnostic|                      |
 +---------------+-------------------------------------------+-----------------------------------+
 | Process All   | "mdi.sigma"                               | |process-all|                     |
-+---------------+-------------------------------------------+-----------------------------------+
-| Sum All       | "mdi.plus-circle-outline"                 | |sum-all|                         |
-+---------------+-------------------------------------------+-----------------------------------+
-| Play/Process  | "mdi.play-circle-outline"                 | |process-tab|                     |
-| Tab           |                                           |                                   |
 +---------------+-------------------------------------------+-----------------------------------+
 
 Table Icons
