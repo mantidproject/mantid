@@ -89,17 +89,20 @@ class Pearl(AbstractInst):
                                                                        self._inst_settings.tt_mode)
         if run_number_string_key in self._cached_run_details:
             # update spline path of cache
-            if self._inst_settings.long_mode:
-                self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
-                                                                              [self._inst_settings.tt_mode, "long"])
+
+            add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
+                [self._inst_settings.tt_mode]
+
+            self._cached_run_details[run_number_string_key].update_spline(self._inst_settings, add_spline)
         yield
         # reset instrument settings
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
 
         # reset spline path
-        if self._inst_settings.long_mode:
-            self._cached_run_details[run_number_string_key].update_spline(self._inst_settings,
-                                                                          [self._inst_settings.tt_mode, "long"])
+        add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
+            [self._inst_settings.tt_mode]
+
+        self._cached_run_details[run_number_string_key].update_spline(self._inst_settings, add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
