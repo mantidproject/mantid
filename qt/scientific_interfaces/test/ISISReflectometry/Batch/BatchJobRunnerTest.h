@@ -345,6 +345,141 @@ public:
     verifyAndClear();
   }
 
+  void testProgressWithEmptyTable() {
+    auto jobRunner = makeJobRunner(oneEmptyGroupModel());
+    jobRunner.m_processAll = true;
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressWithEmptyGroup() {
+    auto jobRunner = makeJobRunner(oneEmptyGroupModel());
+    jobRunner.m_processAll = true;
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressWhenRowNotStarted() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressWhenRowStarting() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setStarting();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressWhenRowRunning() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setRunning();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressWhenRowComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressWhenRowFailed() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setError("error message");
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressWhenGroupNotStarted() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressWhenGroupStarting() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setStarting();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressWhenGroupRunning() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setRunning();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressWhenGroupComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressWhenGroupError() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setError("error message");
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressExcludesSingleRowGroup() {
+    // Postprocessing is not applicable to a group if it only has one row, so
+    // in this case the single row is the only item that needs processing and
+    // so we expect 100% when that row is complete
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressForTwoRowGroupWithOneRowComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressForTwoRowGroupWithTwoRowsComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 66);
+  }
+
+  void testProgressForTwoRowGroupWithEverythingComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressForTwoGroupsWithOneGroupComplete() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 50);
+  }
+
+  void testProgressForTwoGroupsWithBothGroupsComplete() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    jobRunner.m_processAll = true;
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    getGroup(jobRunner, 1).setSuccess();
+    getRow(jobRunner, 1, 0)->setSuccess();
+    getRow(jobRunner, 1, 1)->setSuccess();
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_tolerance;
