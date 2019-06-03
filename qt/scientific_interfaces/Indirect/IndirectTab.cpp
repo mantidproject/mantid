@@ -417,12 +417,11 @@ void IndirectTab::setPlotErrorBars(bool errorBars) {
 void IndirectTab::plotMultipleSpectra(
     const QStringList &workspaceNames,
     const std::vector<int> &workspaceIndices) {
-
   if (workspaceNames.isEmpty())
     return;
   if (workspaceNames.length() != static_cast<int>(workspaceIndices.size()))
     return;
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString pyInput = "from mantidplot import plotSpectrum\n";
   pyInput += "current_window = plotSpectrum('";
   pyInput += workspaceNames[0];
@@ -438,6 +437,10 @@ void IndirectTab::plotMultipleSpectra(
     pyInput += ", window=current_window)\n";
   }
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::plot;
+  plot(workspaceNames, boost::none, workspaceIndices);
+#endif
 }
 
 /**
@@ -501,6 +504,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
                                int specEnd) {
   if (workspaceNames.isEmpty())
     return;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotSpectrum\n";
@@ -514,6 +518,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   pyInput += ")), error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::plot;
+  // Range is inclusive of end
+  const auto nSpectra{specEnd - specStart + 1};
+  std::vector<int> wkspIndices(nSpectra);
+  std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
+  plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
+       boost::none, boost::none, m_plotErrorBars);
+#endif
 }
 
 /**
@@ -549,7 +562,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
                               const std::vector<int> &wsIndices) {
   if (workspaceNames.isEmpty() || wsIndices.empty())
     return;
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotSpectrum\n";
@@ -565,6 +578,11 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
   pyInput += "]";
   pyInput += ", error_bars=" + errors + ")\n";
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::plot;
+  plot(workspaceNames, boost::none, wsIndices, boost::none, boost::none,
+       boost::none, boost::none, m_plotErrorBars);
+#endif
 }
 
 /**
@@ -590,6 +608,7 @@ void IndirectTab::plotSpectra(const QString &workspaceName,
 void IndirectTab::plotTiled(std::string const &workspaceName,
                             std::size_t const &fromIndex,
                             std::size_t const &toIndex) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   auto const numberOfPlots = toIndex - fromIndex + 1;
   if (numberOfPlots != 0) {
     QString pyInput = "from mantidplot import newTiledWindow\n";
@@ -605,6 +624,12 @@ void IndirectTab::plotTiled(std::string const &workspaceName,
     pyInput += QString::fromStdString("])\n");
     m_pythonRunner.runPythonCode(pyInput);
   }
+#else
+  Q_UNUSED(workspaceName);
+  Q_UNUSED(fromIndex);
+  Q_UNUSED(toIndex);
+  throw std::runtime_error("plotTiled is not implemented for >= Qt 5.");
+#endif
 }
 
 /**
@@ -644,7 +669,7 @@ void IndirectTab::plot2D(const QString &workspaceName) {
 void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   if (workspaceNames.isEmpty())
     return;
-
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString const errors = m_plotErrorBars ? "True" : "False";
 
   QString pyInput = "from mantidplot import plotTimeBin\n";
@@ -656,6 +681,11 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   pyInput += ", error_bars=" + errors + ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  Q_UNUSED(workspaceNames);
+  Q_UNUSED(binIndex);
+  throw std::runtime_error("plotTimeBin is not implemented for >= Qt 5.");
+#endif
 }
 
 /**
