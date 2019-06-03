@@ -7,6 +7,12 @@
 #include "IndirectSettings.h"
 #include "IndirectInterface.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtIcons/Icon.h"
+#endif
+
+constexpr auto SETTINGS_ICON = "mdi.settings";
+
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSettings)
@@ -14,6 +20,14 @@ DECLARE_SUBWINDOW(IndirectSettings)
 IndirectSettings::IndirectSettings(QWidget *parent)
     : MantidQt::API::UserSubWindow(parent) {
   m_uiForm.setupUi(this);
+}
+
+QIcon IndirectSettings::icon() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  return QIcon(":/configure.png");
+#else
+  return Icons::getIcon(SETTINGS_ICON);
+#endif
 }
 
 void IndirectSettings::initLayout() {
