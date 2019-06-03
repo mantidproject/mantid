@@ -618,6 +618,7 @@ void IndirectTab::plot2D(const QString &workspaceName) {
   if (workspaceName.isEmpty())
     return;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QString pyInput = "from mantidplot import plot2D\n";
 
   pyInput += "plot2D('";
@@ -625,6 +626,10 @@ void IndirectTab::plot2D(const QString &workspaceName) {
   pyInput += "')\n";
 
   m_pythonRunner.runPythonCode(pyInput);
+#else
+  using MantidQt::Widgets::MplCpp::pcolormesh;
+  pcolormesh({workspaceName});
+#endif
 }
 
 /**
