@@ -49,7 +49,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index))
   }
 
-
   void testPlottingWorksWithSpecNum() {
     std::vector<std::string> workspaces = {m_testws_name};
     std::vector<int> index = {1};
@@ -133,6 +132,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
                                   boost::none, boost::none, boost::none, false,
                                   false))
+  }
+
+  void testPcolormesh() {
+    QStringList workspaces = {m_testws_name};
+    TS_ASSERT_THROWS_NOTHING(pcolormesh(workspaces));
   }
 
 private:

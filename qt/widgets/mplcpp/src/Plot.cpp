@@ -20,6 +20,14 @@ namespace Widgets {
 namespace MplCpp {
 
 namespace {
+
+/**
+ * @returns The mantidqt.plotting.functions module
+ */
+Python::Object functionsModule() {
+  return Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"));
+}
+
 /**
  * Construct a Python list from a vector of strings
  * @param workspaces A strings
@@ -43,6 +51,9 @@ Python::Object constructArgs(const QStringList &workspaces) {
   return Python::NewRef(Py_BuildValue("(O)", sobj));
 }
 
+/**
+ * Construct kwargs list for the plot function
+ */
 Python::Object
 constructKwargs(boost::optional<std::vector<int>> spectrumNums,
                 boost::optional<std::vector<int>> wkspIndices,
@@ -86,12 +97,10 @@ Python::Object plot(const Python::Object &args,
                     boost::optional<QHash<QString, QVariant>> axProperties,
                     boost::optional<std::string> windowTitle, bool errors,
                     bool overplot) {
-  auto funcsModule =
-      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions"));
   auto kwargs = constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs,
                                 axProperties, windowTitle, errors, overplot);
   try {
-    return funcsModule.attr("plot")(*args, **kwargs);
+    return functionsModule().attr("plot")(*args, **kwargs);
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }
@@ -127,6 +136,20 @@ Python::Object plot(const QStringList &workspaces,
               std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
               std::move(axProperties), std::move(windowTitle), errors,
               overplot);
+}
+
+Python::Object pcolormesh(const QStringList &workspaces,
+                          boost::optional<Python::Object> fig) {
+  GlobalInterpreterLock lock;
+  try {
+    auto args = constructArgs(workspaces);
+    Python::Dict kwargs;
+    if(fig)
+      kwargs["fig"] = fig.get();
+    return functionsModule().attr("pcolormesh")(*args, **kwargs);
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
 }
 
 } // namespace MplCpp

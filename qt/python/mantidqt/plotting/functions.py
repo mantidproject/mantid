@@ -256,6 +256,7 @@ def use_imshow(ws):
         return False
 
 
+@manage_workspace_names
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots
