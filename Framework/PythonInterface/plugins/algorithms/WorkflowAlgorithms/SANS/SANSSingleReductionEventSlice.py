@@ -433,6 +433,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                                                          reduction_mode=bundle.reduction_mode,
                                                          output_parts=bundle.output_parts,
                                                          scatter_workspace=bundle.scatter_workspace,
+                                                         dummy_mask_workspace=bundle.dummy_mask_workspace,
                                                          scatter_monitor_workspace=bundle.scatter_monitor_workspace,
                                                          calculated_transmission_workspace=
                                                          bundle.calculated_transmission_workspace,

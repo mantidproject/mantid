@@ -42,6 +42,10 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('ScatterWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The scatter workspace. This workspace does not contain monitors.')
+        self.declareProperty(MatrixWorkspaceProperty('DummyMaskWorkspace', '',
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc='The histogram workspace containing mask bins for the event workspace, to be copied '
+                                 'over after event slicing.')
         self.declareProperty(MatrixWorkspaceProperty('ScatterMonitorWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The scatter monitor workspace. This workspace only contains monitors.')
@@ -117,16 +121,7 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
         workspace = self._convert_to_histogram(workspace)
 
         # ------------------------------------------------------------
-        # 3. Re-mask. We need to bin mask in histogram mode in order
-        #    to have knowledge of masked regions: masking
-        #    EventWorkspaces simply removes their events
-        # ------------------------------------------------------------
-        component_as_string = self.getProperty("Component").value
-        progress.report("Masking bin ...")
-        workspace = self._mask_bins(state, workspace, component_as_string)
-
-        # ------------------------------------------------------------
-        # 4. Convert to Q
+        # 3. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
         wavelength_adjustment_workspace = self.getProperty("WavelengthAdjustmentWorkspace").value
@@ -137,7 +132,16 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
                                                                     wavelength_adjustment_workspace,
                                                                     pixel_adjustment_workspace,
                                                                     wavelength_and_pixel_adjustment_workspace)
-        progress.report("Completed SANSReductionCore ...")
+
+        # ------------------------------------------------------------
+        # 4. Re-mask. We need to bin mask in histogram mode in order
+        #    to have knowledge of masked regions: masking
+        #    EventWorkspaces simply removes their events
+        # ------------------------------------------------------------
+        dummy_mask_workspace = self.getProperty("DummyMaskWorkspace").value
+        self._copy_bin_masks(workspace, dummy_mask_workspace)
+
+        progress.report("Completed SANSReductionCoreEventSlice...")
 
         # ------------------------------------------------------------
         # Populate the output
@@ -182,91 +186,13 @@ class SANSReductionCoreEventSlice(DistributedDataProcessorAlgorithm):
 
         return workspace
 
-    def _mask_bins(self, state, workspace, component):
-        instrument = workspace.getInstrument().getName()
-        mask_info = state.mask
-
-        bin_mask_general_start = mask_info.bin_mask_general_start
-        bin_mask_general_stop = mask_info.bin_mask_general_stop
-
-        # Convert the bins with the detector-specific setting
-        bin_mask_start = mask_info.detectors[component].bin_mask_start
-        bin_mask_stop = mask_info.detectors[component].bin_mask_stop
-
-        if bin_mask_general_start and bin_mask_general_stop:
-            bin_mask_general_start, \
-                bin_mask_general_stop = self._convert_mask_values(bin_mask_general_start,
-                                                                  bin_mask_general_stop,
-                                                                  instrument,
-                                                                  state.property_manager)
-            mask_info.bin_mask_general_start = bin_mask_general_start
-            mask_info.bin_mask_general_stop = bin_mask_general_stop
-
-        if bin_mask_start and bin_mask_stop:
-            bin_mask_start, bin_mask_stop = self._convert_mask_values(bin_mask_start, bin_mask_stop,
-                                                                      instrument,
-                                                                      state.property_manager)
-            mask_info.detectors[component].bin_mask_start = bin_mask_start
-            mask_info.detectors[component].bin_mask_stop = bin_mask_stop
-
-        component = DetectorType.from_string(component)
-        return mask_bins(mask_info, workspace, component)
-
-    def _convert_mask_values(self, mask_start, mask_stop, instrument, state_serialized):
-        """
-        Convert the mask boundaries from TOF to wavelength and then scale.
-        To convert units, we create a workspace with the boundaries as bins,
-        ConvertUnits on the workspace, and extract the new bins.
-
-        :param mask_start: the start of the masking region, in TOF
-        :param mask_stop: the end of the masking region, in TOF
-        :param instrument: the instrument of the workspace, necessary for
-                           converting units on the dummy workspace
-        :param state_serialized: a SANS state object
-        :return: mask start in wavelength, mask stop in wavelength
-        """
-        # Create the workspace
-        create_workspace_options = {"OutputWorkspace": "TemporaryWorkspace",
-                                    "DataX": [mask_start[0], mask_stop[0]],
-                                    "DataY": [0.],
-                                    "UnitX": "TOF"}
-        create_workspace_alg = create_managed_non_child_algorithm("CreateWorkspace", **create_workspace_options)
-        create_workspace_alg.execute()
-
-        # Give it an instrument
-        load_instrument_options = {"Workspace": "TemporaryWorkspace",
-                                   "RewriteSpectraMap": True,
-                                   "InstrumentName": instrument}
-        load_instrument_alg = create_managed_non_child_algorithm("LoadInstrument", **load_instrument_options)
-        load_instrument_alg.execute()
-
-        # Convert units to wavelength
-        convert_units_options = {"InputWorkspace": "TemporaryWorkspace",
-                                 "OutputWorkspace": "TemporaryWorkspace",
-                                 "Target": "Wavelength"}
-        # Child so we can get workspace directly from the algorithm
-        convert_units_alg = create_child_algorithm(self, "ConvertUnits", **convert_units_options)
-        convert_units_alg.execute()
-        temp_workspace = convert_units_alg.getProperty("OutputWorkspace").value
-
-        scale_name = "SANSScale"
-        scale_options = {"SANSState": state_serialized,
-                         "InputWorkspace": temp_workspace,
-                         "OutputWorkspace": "TemporaryWorkspace"}
-        scale_alg = create_child_algorithm(self, scale_name, **scale_options)
-        scale_alg.execute()
-        temp_workspace = scale_alg.getProperty("OutputWorkspace").value
-
-        # Get the new values
-        new_boundaries = temp_workspace.extractX()[0]  # extractX returns a 2d numpy array
-        new_mask_start = [float(new_boundaries[0])]
-        new_mask_stop = [float(new_boundaries[1])]
-
-        # Delete the workspace
-        delete_alg = create_managed_non_child_algorithm("DeleteWorkspace", **{"Workspace": "TemporaryWorkspace"})
-        delete_alg.execute()
-
-        return new_mask_start, new_mask_stop
+    def _copy_bin_masks(self, workspace, dummy_workspace):
+        mask_options = {"InputWorkspace": workspace,
+                        "MaskedWorkspace": dummy_workspace,
+                        "OutputWorkspace": EMPTY_NAME}
+        mask_alg = create_child_algorithm(self, "MaskBinsFromWorkspace", **mask_options)
+        mask_alg.execute()
+        return mask_alg.getProperty("OutputWorkspace").value
 
     def _convert_to_q(self, state_serialized, workspace, wavelength_adjustment_workspace, pixel_adjustment_workspace,
                       wavelength_and_pixel_adjustment_workspace):

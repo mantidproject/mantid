@@ -53,6 +53,7 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
 
     # Get the results
     output_workspace = reduction_alg.getProperty("OutputWorkspace").value
+    mask_workspace = reduction_alg.getProperty("DummyMaskWorkspace").value
     output_monitor_workspace = reduction_alg.getProperty("OutputMonitorWorkspace").value
 
     calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
@@ -67,6 +68,7 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
                                    reduction_mode=reduction_setting_bundle.reduction_mode,
                                    output_parts=reduction_setting_bundle.output_parts,
                                    scatter_workspace=output_workspace,
+                                   dummy_mask_workspace=mask_workspace,
                                    scatter_monitor_workspace=output_monitor_workspace,
                                    calculated_transmission_workspace=calculated_transmission_workspace,
                                    unfitted_transmission_workspace=unfitted_transmission_workspace,
@@ -93,6 +95,7 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("SANSState", serialized_state)
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
+    reduction_alg.setProperty("DummyMaskWorkspace", reduction_setting_bundle.dummy_mask_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
 
     reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
