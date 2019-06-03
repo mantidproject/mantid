@@ -81,7 +81,11 @@ void ALCBaselineModellingView::initialize() {
           SLOT(sectionsContextMenu(const QPoint &)));
 
   // Make columns non-resizeable and to fill all the available space
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_ui.sections->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  m_ui.sections->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 
   connect(m_ui.sections, SIGNAL(cellChanged(int, int)),
           SIGNAL(sectionRowModified(int)));

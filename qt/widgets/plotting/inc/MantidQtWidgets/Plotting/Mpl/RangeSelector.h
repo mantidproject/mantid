@@ -29,10 +29,27 @@ public:
   /// convenience overload
   void setRange(const std::pair<double, double> &range);
 
+  double getMinimum();
+  double getMaximum();
+
 public slots:
   void setRange(const double min, const double max);
   void setMinimum(double value);
   void setMaximum(double value);
+  void detach();
+  void setColour(QColor colour);
+
+private:
+  /// Type of selection
+  SelectType m_type;
+  /// Current position of the line marking the minimum
+  double m_min;
+  /// Current position of the line marking the maximum
+  double m_max;
+  /// Lowest allowed position of the lines
+  double m_lower;
+  /// Highest allowed position of the lines
+  double m_higher;
 };
 
 } // namespace MantidWidgets
