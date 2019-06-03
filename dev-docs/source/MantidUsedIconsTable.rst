@@ -41,14 +41,13 @@ Mantid Icon Table
 #################
 
 Here is a list of all currently used icons in Mantid.
-These icons are from Material Design Icons (3.6.95) an open source
-icon project by google. Best place to find new unused icons
+These icons are from Material Design Icons (3.6.95), an open source
+icon project by Google. Best place to find new unused icons
 is on the `cheatsheet. <https://cdn.materialdesignicons.com/3.6.95/>`_
 
 A developer who adds a new icon to a GUI should update this list with
 it's specific usage if it can be used anywhere else in the codebase.
 
-Last Updated: 24/05/2019
 
 General Icons
 -------------
