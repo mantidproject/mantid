@@ -10,6 +10,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "RowProcessingAlgorithm.h"
 
+#include <numeric>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
