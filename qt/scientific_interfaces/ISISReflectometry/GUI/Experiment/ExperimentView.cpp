@@ -95,8 +95,6 @@ void ExperimentView::initLayout() {
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(onRestoreDefaultsRequested()));
-  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(onSummationTypeChanged(int)));
   connect(m_ui.addPerAngleOptionsButton, SIGNAL(clicked()), this,
           SLOT(onNewPerThetaDefaultsRowRequested()));
 }
@@ -172,27 +170,23 @@ void ExperimentView::connectSettingsChange(QTableWidget &edit) {
 }
 
 void ExperimentView::disconnectSettingsChange(QLineEdit &edit) {
-  disconnect(&edit, SIGNAL(textChanged(QString const &)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
 }
 
 void ExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
-  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
 }
 
 void ExperimentView::disconnectSettingsChange(QComboBox &edit) {
-  disconnect(&edit, SIGNAL(currentIndexChanged(int)), this,
-             SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(currentIndexChanged(int)), 0, 0);
 }
 
 void ExperimentView::disconnectSettingsChange(QCheckBox &edit) {
-  disconnect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+  disconnect(&edit, SIGNAL(stateChanged(int)), 0, 0);
 }
 
 void ExperimentView::disconnectSettingsChange(QTableWidget &edit) {
-  disconnect(&edit, SIGNAL(cellChanged(int, int)), this,
-             SLOT(onPerAngleDefaultsChanged(int, int)));
+  disconnect(&edit, SIGNAL(cellChanged(int, int)), 0, 0);
 }
 
 void ExperimentView::onSettingsChanged() {
@@ -224,11 +218,11 @@ void ExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
 
 void ExperimentView::registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg) {
   registerExperimentSettingsWidgets(alg);
+  connectExperimentSettingsWidgets();
 }
 
 void ExperimentView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
-  connectSettingsChange(*m_ui.optionsTable);
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
@@ -248,6 +242,8 @@ void ExperimentView::registerExperimentSettingsWidgets(
 }
 
 void ExperimentView::connectExperimentSettingsWidgets() {
+  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onSummationTypeChanged(int)));
   connectSettingsChange(*m_ui.optionsTable);
   connectSettingsChange(*m_ui.analysisModeComboBox);
   connectSettingsChange(*m_ui.startOverlapEdit);
@@ -259,7 +255,6 @@ void ExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.CPpEdit);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
-  connectSettingsChange(*m_ui.summationTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
   connectSettingsChange(*m_ui.floodCorComboBox);
   connectSettingsChange(*m_ui.floodWorkspaceWsSelector);
@@ -267,6 +262,7 @@ void ExperimentView::connectExperimentSettingsWidgets() {
 }
 
 void ExperimentView::disconnectExperimentSettingsWidgets() {
+  disconnectSettingsChange(*m_ui.summationTypeComboBox);
   disconnectSettingsChange(*m_ui.optionsTable);
   disconnectSettingsChange(*m_ui.analysisModeComboBox);
   disconnectSettingsChange(*m_ui.startOverlapEdit);
@@ -278,7 +274,6 @@ void ExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.CPpEdit);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
-  disconnectSettingsChange(*m_ui.summationTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
   disconnectSettingsChange(*m_ui.floodCorComboBox);
   disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
@@ -314,7 +309,6 @@ template <typename Widget>
 void ExperimentView::registerSettingWidget(Widget &widget,
                                            std::string const &propertyName,
                                            Mantid::API::IAlgorithm_sptr alg) {
-  connectSettingsChange(widget);
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
 }
 

@@ -586,6 +586,15 @@ public:
     verifyAndClear();
   }
 
+  void testRestoreDefaultsDisconnectsNotificationsBackFromView() {
+    auto defaultOptions = expectDefaults(makeModel());
+    EXPECT_CALL(m_view, disconnectExperimentSettingsWidgets()).Times(1);
+    EXPECT_CALL(m_view, connectExperimentSettingsWidgets()).Times(1);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
