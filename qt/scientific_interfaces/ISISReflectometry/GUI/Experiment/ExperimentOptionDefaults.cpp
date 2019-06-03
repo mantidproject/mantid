@@ -56,7 +56,6 @@ getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
     throw std::invalid_argument("Transmission run overlap range is invalid");
 
   // We currently don't specify stitch parameters in the parameters file
-  // although we
   auto stitchParameters = std::map<std::string, std::string>();
 
   // For per-theta defaults, we can only specify defaults for the wildcard row
