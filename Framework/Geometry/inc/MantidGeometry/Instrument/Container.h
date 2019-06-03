@@ -36,9 +36,7 @@ public:
 
   void setSampleShape(const std::string &sampleShapeXML);
 
-  const IObject& getShape() const {
-    return *m_shape;
-  }
+  const IObject &getShape() const { return *m_shape; }
 
   bool isValid(const Kernel::V3D &p) const override {
     return m_shape->isValid(p);

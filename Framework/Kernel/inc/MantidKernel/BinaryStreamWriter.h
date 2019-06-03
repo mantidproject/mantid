@@ -51,28 +51,31 @@ public:
 
   ///@name 1D methods
   /// @{
-  BinaryStreamWriter &write(const std::vector<int16_t> &value, const size_t nvals);
-  BinaryStreamWriter &write(const std::vector<int32_t> &value, const size_t nvals);
-  BinaryStreamWriter &write(const std::vector<int64_t> &value, const size_t nvals);
-  BinaryStreamWriter &write(const std::vector<float> &value, const size_t nvals);
-  BinaryStreamWriter &write(const std::vector<double> &value, const size_t nvals);
+  BinaryStreamWriter &write(const std::vector<int16_t> &value,
+                            const size_t nvals);
+  BinaryStreamWriter &write(const std::vector<int32_t> &value,
+                            const size_t nvals);
+  BinaryStreamWriter &write(const std::vector<int64_t> &value,
+                            const size_t nvals);
+  BinaryStreamWriter &write(const std::vector<float> &value,
+                            const size_t nvals);
+  BinaryStreamWriter &write(const std::vector<double> &value,
+                            const size_t nvals);
   BinaryStreamWriter &write(const std::string &value, const size_t length);
   /// @}
 
   ///@name 2D methods
   /// @{
   BinaryStreamWriter &write(const std::vector<std::string> &value,
-                           const std::vector<int32_t> &shape,
-                           MatrixOrdering order);
+                            const std::vector<int32_t> &shape,
+                            MatrixOrdering order);
   BinaryStreamWriter &write(const Kernel::Matrix<float> &value,
-                           const std::vector<int32_t> &shape,
-                           MatrixOrdering order);
+                            const std::vector<int32_t> &shape,
+                            MatrixOrdering order);
   BinaryStreamWriter &write(const Kernel::Matrix<double> &value,
-                           const std::vector<int32_t> &shape,
-                           MatrixOrdering order);
+                            const std::vector<int32_t> &shape,
+                            MatrixOrdering order);
   /// @}
-
-
 
 private:
   /// Reference to the stream being written to

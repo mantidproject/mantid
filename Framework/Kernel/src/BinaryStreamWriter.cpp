@@ -42,7 +42,7 @@ inline void writeToStream(std::ostream &stream, const T &value) {
  */
 template <typename T>
 inline void writeToStream(std::ostream &stream, const std::vector<T> &value,
-                           size_t nvals) {
+                          size_t nvals) {
   stream.write(reinterpret_cast<const char *>(value.data()), nvals * sizeof(T));
 }
 } // namespace
@@ -58,10 +58,11 @@ inline void writeToStream(std::ostream &stream, const std::vector<T> &value,
  * it.
  */
 BinaryStreamWriter::BinaryStreamWriter(std::ostream &ofstrm)
-    : m_ofstrm(ofstrm), m_strLengthSize(static_cast<uint64_t>(sizeof(int32_t))) {
+    : m_ofstrm(ofstrm),
+      m_strLengthSize(static_cast<uint64_t>(sizeof(int32_t))) {
   if (!ofstrm) {
-    throw std::runtime_error(
-        "BinaryStreamWriter: Output stream is in a bad state. Cannot continue.");
+    throw std::runtime_error("BinaryStreamWriter: Output stream is in a bad "
+                             "state. Cannot continue.");
   }
 }
 
@@ -159,7 +160,7 @@ BinaryStreamWriter &BinaryStreamWriter::operator<<(const uint32_t &value) {
  * @return A reference to the BinaryStreamWriter object
  */
 BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<int16_t> &value,
-                                             const size_t nvals) {
+                                              const size_t nvals) {
   writeToStream(m_ofstrm, value, nvals);
   return *this;
 }
@@ -171,7 +172,7 @@ BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<int16_t> &value,
  * @return A reference to the BinaryStreamWriter object
  */
 BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<int32_t> &value,
-                                             const size_t nvals) {
+                                              const size_t nvals) {
   writeToStream(m_ofstrm, value, nvals);
   return *this;
 }
@@ -183,7 +184,7 @@ BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<int32_t> &value,
  * @return A reference to the BinaryStreamWriter object
  */
 BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<int64_t> &value,
-                                             const size_t nvals) {
+                                              const size_t nvals) {
   writeToStream(m_ofstrm, value, nvals);
   return *this;
 }
@@ -195,7 +196,7 @@ BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<int64_t> &value,
  * @return A reference to the BinaryStreamWriter object
  */
 BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<float> &value,
-                                             const size_t nvals) {
+                                              const size_t nvals) {
   writeToStream(m_ofstrm, value, nvals);
   return *this;
 }
@@ -207,7 +208,7 @@ BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<float> &value,
  * @return A reference to the BinaryStreamWriter object
  */
 BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<double> &value,
-                                             const size_t nvals) {
+                                              const size_t nvals) {
   writeToStream(m_ofstrm, value, nvals);
   return *this;
 }
@@ -219,12 +220,10 @@ BinaryStreamWriter &BinaryStreamWriter::write(const std::vector<double> &value,
  * @return A reference to the BinaryStreamWriter object
  */
 BinaryStreamWriter &BinaryStreamWriter::write(const std::string &value,
-                                             const size_t length) {
+                                              const size_t length) {
   m_ofstrm.write(const_cast<char *>(value.data()), length);
   return *this;
 }
-
-
 
 } // namespace Kernel
 } // namespace Mantid

@@ -31,7 +31,6 @@ public:
 
   BinaryStreamWriterTest() : CxxTest::TestSuite(), m_bytes() {}
 
-
   //----------------------------------------------------------------------------
   // Successes cases
   //----------------------------------------------------------------------------
@@ -103,8 +102,6 @@ public:
     doWriteArrayValueTest(expectedValue.size(), expectedValue);
   }
 
-
-  
 private:
   template <typename T> void doWriteSingleValueTest(T value) {
     BinaryStreamWriter writer(m_bytes);
@@ -115,8 +112,8 @@ private:
     TS_ASSERT_EQUALS(readVal, value);
   }
 
-  template <typename T> void doWriteArrayValueTest(const size_t nvals,
-                            const std::vector<T> &values) {
+  template <typename T>
+  void doWriteArrayValueTest(const size_t nvals, const std::vector<T> &values) {
     BinaryStreamWriter writer(m_bytes);
     BinaryStreamReader reader(m_bytes);
     std::vector<T> readValues;

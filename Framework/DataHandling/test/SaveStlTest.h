@@ -65,17 +65,18 @@ public:
     Poco::File(path).remove();
   }
 
-  void test_fails_invalid_shape(){
+  void test_fails_invalid_shape() {
     std::string path =
         "/home/sjenkins/Documents/SampleCorrections/SaveStlTest.stl";
-    std::vector<uint32_t> triangle{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5,
-                                   2, 5, 4, 6, 1, 3, 6, 5, 1, 4, 5, 6,
-                                   7, 3, 0, 0, 4, 7, 7, 6, 3, 4, };
+    std::vector<uint32_t> triangle{
+        0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5, 2, 5, 4, 6, 1,
+        3, 6, 5, 1, 4, 5, 6, 7, 3, 0, 0, 4, 7, 7, 6, 3, 4,
+    };
     std::vector<V3D> vertices{V3D(-5, -5, -15), V3D(5, 5, -15), V3D(5, -5, -15),
                               V3D(-5, 5, -15),  V3D(5, -5, 15), V3D(5, 5, 15),
                               V3D(-5, 5, 15),   V3D(-5, -5, 15)};
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
-    TS_ASSERT_THROWS(writer.writeStl(),std::runtime_error);
+    TS_ASSERT_THROWS(writer.writeStl(), std::runtime_error);
     TS_ASSERT(!Poco::File(path).exists());
   }
 };
