@@ -220,14 +220,14 @@ public:
     m.set(3, 2, 32);
     m.set(3, 3, 33);
 
-    TS_ASSERT_THROWS(GSLMatrix subm(m, 2, 2, 3, 3), std::runtime_error);
+    TS_ASSERT_THROWS(GSLMatrix subm(m, 2, 2, 3, 3), const std::runtime_error &);
   }
 
   void test_eigenSystem_rectangular_throw() {
     GSLMatrix M(3, 4);
     GSLVector v;
     GSLMatrix Q;
-    TS_ASSERT_THROWS(M.eigenSystem(v, Q), std::runtime_error);
+    TS_ASSERT_THROWS(M.eigenSystem(v, Q), const std::runtime_error &);
   }
 
   void test_eigenSystem() {
@@ -382,7 +382,7 @@ public:
     TS_ASSERT_EQUALS(m(2, 1), -3.0);
 
     TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_vector_mul() {
@@ -401,7 +401,7 @@ public:
     GSLMatrix m({{0.0, 0.0}, {0.0, 0.0}});
     GSLVector b({1.0, 2.0});
     GSLVector x;
-    TS_ASSERT_THROWS(m.solve(b, x), std::runtime_error);
+    TS_ASSERT_THROWS(m.solve(b, x), const std::runtime_error &);
   }
 
   void test_solve_singular_1() {
@@ -409,7 +409,7 @@ public:
     GSLMatrix m({{1.0, 2.0}, {2.0, 4.0}});
     GSLVector b({1.0, 2.0});
     GSLVector x;
-    TS_ASSERT_THROWS(m.solve(b, x), std::runtime_error);
+    TS_ASSERT_THROWS(m.solve(b, x), const std::runtime_error &);
   }
 
   void test_solve() {

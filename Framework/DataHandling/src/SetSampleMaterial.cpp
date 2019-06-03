@@ -77,6 +77,14 @@ void SetSampleMaterial::init() {
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
+  declareProperty(
+      "SampleMass", EMPTY_DBL(), mustBePositive,
+      "Measured mass in g of the sample. This is used with the SampleVolume "
+      "to calculate the number density.");
+  declareProperty(
+      "SampleVolume", EMPTY_DBL(), mustBePositive,
+      "Measured volume in gm^3 of the sample. This is used with the SampleMass "
+      "to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(),
                   boost::make_shared<StringListValidator>(units),
@@ -94,6 +102,8 @@ void SetSampleMaterial::init() {
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
   setPropertyGroup("SampleMassDensity", densityGrp);
+  setPropertyGroup("SampleMass", densityGrp);
+  setPropertyGroup("SampleVolume", densityGrp);
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
@@ -123,6 +133,8 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.zParameter = getProperty("ZParameter");
   params.unitCellVolume = getProperty("UnitCellVolume");
   params.sampleMassDensity = getProperty("SampleMassDensity");
+  params.sampleMass = getProperty("SampleMass");
+  params.sampleVolume = getProperty("SampleVolume");
   params.coherentXSection = getProperty("CoherentXSection");
   params.incoherentXSection = getProperty("IncoherentXSection");
   params.attenuationXSection = getProperty("AttenuationXSection");

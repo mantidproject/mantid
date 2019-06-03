@@ -220,6 +220,16 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   return std::move(dialog);
 }
 
+void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
+}
+
+void JumpFitDataPresenter::setMultiInputResolutionWSSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

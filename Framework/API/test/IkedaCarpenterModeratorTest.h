@@ -36,19 +36,21 @@ public:
   void test_Initializing_With_Empty_String_Throws() {
     Mantid::API::IkedaCarpenterModerator ikmod;
 
-    TS_ASSERT_THROWS(ikmod.initialize(""), std::invalid_argument);
+    TS_ASSERT_THROWS(ikmod.initialize(""), const std::invalid_argument &);
   }
 
   void test_Initializing_With_Invalid_String_Throws() {
     Mantid::API::IkedaCarpenterModerator ikmod;
 
-    TS_ASSERT_THROWS(ikmod.initialize("TiltAngle"), std::invalid_argument);
+    TS_ASSERT_THROWS(ikmod.initialize("TiltAngle"),
+                     const std::invalid_argument &);
   }
 
   void test_Initializing_With_String_Containing_Unknown_Parameter_Throws() {
     Mantid::API::IkedaCarpenterModerator ikmod;
 
-    TS_ASSERT_THROWS(ikmod.initialize("unknown=6.3"), std::invalid_argument);
+    TS_ASSERT_THROWS(ikmod.initialize("unknown=6.3"),
+                     const std::invalid_argument &);
   }
 
   void
@@ -88,9 +90,9 @@ public:
     IkedaCarpenterModerator_sptr ikmod = createTestModerator();
 
     TS_ASSERT_THROWS(ikmod->sampleTimeDistribution(-0.01),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(ikmod->sampleTimeDistribution(-1.5),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -122,8 +124,9 @@ public:
     IkedaCarpenterModerator_sptr ikmod = createTestModerator();
 
     TS_ASSERT_THROWS(ikmod->sampleTimeDistribution(1.01),
-                     std::invalid_argument);
-    TS_ASSERT_THROWS(ikmod->sampleTimeDistribution(5.5), std::invalid_argument);
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(ikmod->sampleTimeDistribution(5.5),
+                     const std::invalid_argument &);
   }
 
 private:

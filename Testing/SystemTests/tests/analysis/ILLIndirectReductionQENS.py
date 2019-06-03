@@ -74,7 +74,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         self.assertTrue(result[0],"Unmirror 1 should be the sum of 2 and 3")
 
-        left_right = GroupWorkspaces([mtd['left_red'].getItem(0).getName(), mtd['right_red'].getItem(0).getName()])
+        left_right = GroupWorkspaces([mtd['left_red'].getItem(0).name(), mtd['right_red'].getItem(0).name()])
 
         result = CompareWorkspaces(left_right,'zero_red')
 

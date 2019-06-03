@@ -33,9 +33,12 @@ using Geometry::Goniometer;
 using Geometry::ReferenceFrame;
 using Geometry::SampleEnvironment;
 using Kernel::Logger;
+using Kernel::PropertyWithValue;
 using Kernel::V3D;
 
 namespace {
+constexpr double CUBIC_METRE_TO_CM = 100. * 100. * 100.;
+
 /// Private namespace storing property name strings
 namespace PropertyNames {
 /// Input workspace property name
@@ -290,12 +293,25 @@ void SetSample::exec() {
     sampleEnviron = setSampleEnvironment(workspace, environArgs);
   }
 
+  double sampleVolume = 0.;
   if (geometryArgs || sampleEnviron) {
     setSampleShape(workspace, geometryArgs, sampleEnviron);
+    // get the volume back out to use in setting the material
+    sampleVolume = CUBIC_METRE_TO_CM * workspace->sample().getShape().volume();
   }
 
   // Finally the material arguments
   if (materialArgs) {
+    // add the sample volume if it was defined/determined
+    if (sampleVolume > 0.) {
+      const std::string VOLUME_ARG{"SampleVolume"};
+      // only add the volume if it isn't already specfied
+      if (!materialArgs->existsProperty(VOLUME_ARG)) {
+        materialArgs->declareProperty(
+            Kernel::make_unique<PropertyWithValue<double>>(VOLUME_ARG,
+                                                           sampleVolume));
+      }
+    }
     runChildAlgorithm("SetSampleMaterial", workspace, *materialArgs);
   }
 }

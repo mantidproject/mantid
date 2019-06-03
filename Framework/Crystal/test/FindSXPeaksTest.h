@@ -78,7 +78,7 @@ public:
     alg->setProperty("StartWorkspaceIndex", 3);
     alg->setProperty("EndWorkspaceIndex", 2);
     TSM_ASSERT_THROWS("Cannot have start index > end index", alg->execute(),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testFindNoPeaks() {

@@ -149,9 +149,12 @@ public:
     TS_ASSERT(!s.operator()()[1].compare("b"))
     TS_ASSERT(!s.operator()()[2].compare("c"))
 
-    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "aa,bb"), std::bad_cast)
-    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "5.5,6.6"), std::bad_cast)
-    TS_ASSERT_THROWS(ArrayProperty<double> dd("dd", "aa,bb"), std::bad_cast)
+    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "aa,bb"),
+                     const std::bad_cast &)
+    TS_ASSERT_THROWS(ArrayProperty<int> ii("ii", "5.5,6.6"),
+                     const std::bad_cast &)
+    TS_ASSERT_THROWS(ArrayProperty<double> dd("dd", "aa,bb"),
+                     const std::bad_cast &)
   }
 
   void testConstructorByString_long() {

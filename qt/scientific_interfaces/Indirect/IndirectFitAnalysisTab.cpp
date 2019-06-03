@@ -300,20 +300,46 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
   m_dataPresenter->loadSettings(settings);
 }
 
-void IndirectFitAnalysisTab::setSampleWSSuffices(const QStringList &suffices) {
+void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
+  auto const tab = tabName();
+  setSampleSuffixes(tab, filter);
+  if (hasResolution())
+    setResolutionSuffixes(tab, filter);
+}
+
+void IndirectFitAnalysisTab::setSampleSuffixes(std::string const &tab,
+                                               bool filter) {
+  QStringList const noSuffixes{""};
+  setSampleWSSuffixes(filter ? getSampleWSSuffixes(tab) : noSuffixes);
+  setSampleFBSuffixes(filter ? getSampleFBSuffixes(tab) : getExtensions(tab));
+  m_dataPresenter->setMultiInputSampleWSSuffixes();
+  m_dataPresenter->setMultiInputSampleFBSuffixes();
+}
+
+void IndirectFitAnalysisTab::setResolutionSuffixes(std::string const &tab,
+                                                   bool filter) {
+  QStringList const noSuffixes{""};
+  setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tab) : noSuffixes);
+  setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tab)
+                                 : getExtensions(tab));
+  m_dataPresenter->setMultiInputResolutionWSSuffixes();
+  m_dataPresenter->setMultiInputResolutionFBSuffixes();
+}
+
+void IndirectFitAnalysisTab::setSampleWSSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setSampleFBSuffices(const QStringList &suffices) {
+void IndirectFitAnalysisTab::setSampleFBSuffixes(const QStringList &suffices) {
   m_dataPresenter->setSampleFBSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setResolutionWSSuffices(
+void IndirectFitAnalysisTab::setResolutionWSSuffixes(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionWSSuffices(suffices);
 }
 
-void IndirectFitAnalysisTab::setResolutionFBSuffices(
+void IndirectFitAnalysisTab::setResolutionFBSuffixes(
     const QStringList &suffices) {
   m_dataPresenter->setResolutionFBSuffices(suffices);
 }
@@ -878,7 +904,7 @@ void IndirectFitAnalysisTab::plotSelectedSpectra() {
 void IndirectFitAnalysisTab::plotSelectedSpectra(
     std::vector<SpectrumToPlot> const &spectra) {
   for (auto const &spectrum : spectra)
-    plotSpectrum(spectrum.first, spectrum.second, true);
+    plotSpectrum(spectrum.first, spectrum.second);
   m_outOptionsPresenter->clearSpectraToPlot();
 }
 
@@ -889,10 +915,9 @@ void IndirectFitAnalysisTab::plotSelectedSpectra(
  * @errorBars :: true if you want error bars to be plotted
  */
 void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
-                                          std::size_t const &index,
-                                          bool errorBars) {
+                                          std::size_t const &index) {
   IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
-                            static_cast<int>(index), errorBars);
+                            static_cast<int>(index));
 }
 
 /**

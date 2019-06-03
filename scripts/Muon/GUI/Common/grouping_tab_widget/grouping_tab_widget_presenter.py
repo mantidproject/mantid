@@ -179,9 +179,11 @@ class GroupingTabPresenter(object):
 
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
+            self._model._context.show_raw_data()
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()
+            self.handle_update_all_clicked()
         else:
             self.on_clear_requested()
 

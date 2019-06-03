@@ -23,6 +23,8 @@ Improvements
 
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` has a new property, ``RemoveTemp``, which allows the user to inspect temporary workspaces is left unchecked.
 
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` now correctly takes into account scale for translation. Rotation is now applied before translation to reduce confusion.
+
 Bug Fixes
 #########
 
@@ -47,6 +49,9 @@ Bug Fixes
 - Prevented issue with reading CSV files on python 3
 
 - GUI now correctly loads the file browsed to instead of looking for a run number in every folder along the path to that file.
+
+- :ref:`MDNorm <algm-MDNorm>` will not crash if the detector is masked in the flux workspace, but not in the input workspace.
+
 
 Single Crystal Diffraction
 --------------------------

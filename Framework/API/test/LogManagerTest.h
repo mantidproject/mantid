@@ -85,7 +85,7 @@ public:
     TS_ASSERT(!pp->name().compare("Test"));
     TS_ASSERT(dynamic_cast<ConcreteProperty *>(pp));
     TS_ASSERT_THROWS(pp = runInfo.getProperty("NotThere"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
 
     std::vector<Property *> props = runInfo.getProperties();
     TS_ASSERT(!props.empty());
@@ -106,7 +106,7 @@ public:
   void testStartTime() {
     LogManager runInfo;
     // Nothing there yet
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
     // Add run_start and see that get picked up
     const std::string run_start("2013-12-19T13:38:00");
     auto run_start_prop =
@@ -125,7 +125,7 @@ public:
     TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
     // And back to failure if they're both that
     run_start_prop->setValue(epoch);
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
 
     // Set run_start back to valid value and make start_time contain nonsense
     run_start_prop->setValue(run_start);
@@ -137,17 +137,17 @@ public:
     TS_ASSERT_EQUALS(runInfo.startTime(), DateAndTime(run_start));
     // Now make run_start something invalid
     run_start_prop->setValue("notADate");
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
     // And check things if it's the wrong property type
     runInfo.removeProperty("run_start");
     addTimeSeriesEntry(runInfo, "run_start", 4.44);
-    TS_ASSERT_THROWS(runInfo.startTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.startTime(), const std::runtime_error &);
   }
 
   void testEndTime() {
     LogManager runInfo;
     // Nothing there yet
-    TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
     // Add run_end and see that get picked up
     const std::string run_end("2013-12-19T13:38:00");
     auto run_end_prop = new PropertyWithValue<std::string>("run_end", run_end);
@@ -170,11 +170,11 @@ public:
     TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(run_end));
     // Now make run_end something invalid
     run_end_prop->setValue("notADate");
-    TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
     // And check things if it's the wrong property type
     runInfo.removeProperty("run_end");
     addTimeSeriesEntry(runInfo, "run_end", 4.44);
-    TS_ASSERT_THROWS(runInfo.endTime(), std::runtime_error);
+    TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
   }
 
   void testMemory() {
@@ -202,7 +202,7 @@ public:
   void test_GetTimeSeriesProperty_Throws_When_Log_Does_Not_Exist() {
     LogManager runInfo;
     TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>("not_a_log"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void
@@ -212,13 +212,13 @@ public:
     runInfo.addProperty(name, 5.6); // Standard double property
 
     TS_ASSERT_THROWS(runInfo.getTimeSeriesProperty<double>(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsType_Throws_When_Property_Does_Not_Exist() {
     LogManager runInfo;
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<double>("not_a_log"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsType_Returns_Expected_Value_When_Type_Is_Correct() {
@@ -238,7 +238,7 @@ public:
     runInfo.addProperty("double_prop", 6.7); // Standard double property
 
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleValue_SingleValue_DoubleType() {
@@ -295,13 +295,13 @@ public:
     const std::string name = "T_prop";
     runInfo.addProperty<double>(name, 1.0);
     TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_GetPropertyAsSingleInteger_Throws_for_nonexistant_property() {
     LogManager runInfo;
     TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue("T_prop"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {
@@ -334,7 +334,7 @@ public:
     runInfo.addProperty<std::string>(name, "hello"); // not a number
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -345,7 +345,7 @@ public:
     runInfo.addProperty<bool>(name, value); // Adds a bool property
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void

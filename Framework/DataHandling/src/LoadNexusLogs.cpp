@@ -156,9 +156,9 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
       return;
 
     tsLog->addValue(endTime, tsLog->lastValue());
-  } catch (Exception::NotFoundError) {
+  } catch (const Exception::NotFoundError &) {
     // pass
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // pass
   }
 }

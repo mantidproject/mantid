@@ -214,6 +214,15 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
+void IndirectMoments::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Moments");
+  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                         : getExtensions(tabName));
+  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                         : noSuffixes);
+}
+
 /**
  * Handle when Run is clicked
  */

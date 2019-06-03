@@ -48,7 +48,7 @@ public:
     if (!nxLoad.isInitialized())
       nxLoad.initialize();
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(nxLoad.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(nxLoad.execute(), const std::runtime_error &);
 
     // Now set required filename and output workspace name
     inputFile = "emu00006473.nxs";

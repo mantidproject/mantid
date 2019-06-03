@@ -69,7 +69,8 @@ public:
     manager.setProperty("InputWorkspace", ws);
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
-    TS_ASSERT_THROWS(creator.createDomain(domain, values), std::runtime_error);
+    TS_ASSERT_THROWS(creator.createDomain(domain, values),
+                     const std::runtime_error &);
   }
 
   void test_domain_values() {

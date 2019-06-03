@@ -145,6 +145,10 @@ void export_IFunction() {
                (arg("self"), arg("i"), arg("value"), arg("explicitlySet")),
                "Sets the value of the ith parameter"))
 
+      .def("setError", &IFunction::setError,
+           (args("self"), args("i"), args("err")),
+           "Sets the error on parameter index i")
+
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(
                (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
@@ -244,6 +248,9 @@ void export_IFunction() {
            &IFunctionAdapter::createPythonEquivalentFunctions, (arg("self")),
            "Split this function (if needed) into a list of "
            "independent functions")
+
+      .def("getFunction", &IFunction::getFunction, (arg("self"), arg("index")),
+           "Returns the pointer to i-th child function")
 
       .def("nDomains", &IFunction::getNumberDomains, arg("self"),
            "Get the number of domains.")

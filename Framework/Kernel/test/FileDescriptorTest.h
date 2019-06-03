@@ -140,9 +140,10 @@ public:
   //===================== Failure cases
   //============================================
   void test_IsAscii_Throws_For_Inaccessible_Filename() {
-    TS_ASSERT_THROWS(FileDescriptor::isAscii(""), std::invalid_argument);
+    TS_ASSERT_THROWS(FileDescriptor::isAscii(""),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(FileDescriptor::isAscii("__not_a_File.txt__"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -161,12 +162,12 @@ public:
   }
 
   void test_Constructor_Throws_With_Empty_filename() {
-    TS_ASSERT_THROWS(FileDescriptor(""), std::invalid_argument);
+    TS_ASSERT_THROWS(FileDescriptor(""), const std::invalid_argument &);
   }
 
   void test_Constructor_Throws_With_NonExistant_filename() {
     TS_ASSERT_THROWS(FileDescriptor("__ThisShouldBeANonExistantFile.txt"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
 private:

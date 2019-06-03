@@ -249,12 +249,12 @@ public:
 
   void testParameterAliasUnique() {
     TS_ASSERT_THROWS(ImmutableCompositeFunctionTest_FunctionThrow icf,
-                     Mantid::Kernel::Exception::ExistsError);
+                     const Mantid::Kernel::Exception::ExistsError &);
   }
 
   void testSetAliasThrowsIfNameDoesntExist() {
     TS_ASSERT_THROWS(ImmutableCompositeFunctionTest_FunctionThrow1 icf,
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testAddTies() {

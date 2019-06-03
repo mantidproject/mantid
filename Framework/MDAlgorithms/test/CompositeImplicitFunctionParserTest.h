@@ -41,7 +41,7 @@ public:
     TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as "
                       "Function element was expected, but not found.",
                       functionParser.createFunctionBuilder(pRootElem),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void disabled_testNoSuccessorFunctionParserThrows(void) {
@@ -58,7 +58,8 @@ public:
     CompositeImplicitFunctionParser functionParser;
     TSM_ASSERT_THROWS(
         "There is no successor parser setup for the PlaneFunctionParser",
-        functionParser.createFunctionBuilder(pRootElem), std::runtime_error);
+        functionParser.createFunctionBuilder(pRootElem),
+        const std::runtime_error &);
   }
 
   void disabled_testCallsFunctionParserChain() {

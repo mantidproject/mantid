@@ -77,7 +77,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     TS_ASSERT_THROWS(oncat.login("user", "does_not_exist"),
-                     InvalidCredentialsError);
+                     const InvalidCredentialsError &);
     TS_ASSERT(!oncat.isUserLoggedIn());
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
@@ -183,7 +183,7 @@ public:
 
     TS_ASSERT_THROWS(
         oncat.refreshTokenIfNeeded(DateAndTime::getCurrentTime() + 3601.0),
-        InvalidRefreshTokenError);
+        const InvalidRefreshTokenError &);
 
     TS_ASSERT(!oncat.isUserLoggedIn());
 
@@ -287,7 +287,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     TS_ASSERT_THROWS(oncat.list("api", "instruments", {{"facility", "HFIR"}}),
-                     TokenRejectedError);
+                     const TokenRejectedError &);
     TS_ASSERT(!oncat.isUserLoggedIn());
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());

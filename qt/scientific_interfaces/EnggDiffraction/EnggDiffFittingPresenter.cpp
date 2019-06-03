@@ -504,7 +504,7 @@ void EnggDiffFittingPresenter::doFitting(const std::vector<RunLabel> &runLabels,
       // A userError should be used for this message once the threading has been
       // looked into
       return;
-    } catch (Mantid::API::Algorithm::CancelException) {
+    } catch (const Mantid::API::Algorithm::CancelException &) {
       g_log.error() << "Fit terminated by user.\n";
       return;
     }
@@ -728,7 +728,7 @@ void EnggDiffFittingPresenter::plotAlignedWorkspace(
                             generateXAxisLabel(ws->getAxis(0)->unit()));
       m_view->showStatus("Peaks fitted successfully");
     }
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     g_log.error()
         << "Unable to finish of the plotting of the graph for "
            "engggui_fitting_focused_fitpeaks  workspace. Error "
