@@ -49,6 +49,17 @@ public:
     TS_ASSERT_EQUALS(newColour, line2.pyobj().attr("get_color")());
   }
 
+  void testRemoveArtists() {
+    Axes axes(pyAxes());
+    const auto line1 = axes.plot({1, 2, 3}, {1, 2, 3}, "b-", "line1");
+    const auto line2 = axes.plot({2, 3, 4}, {2, 3, 4}, "g-", "line2");
+    const auto line3 = axes.plot({2, 3, 4}, {2, 3, 4}, "r-", "line3");
+
+    axes.removeArtists("lines", "line2");
+
+    TS_ASSERT_EQUALS(2, Python::Len(axes.pyobj().attr("lines")));
+  }
+
   void testSetXLabel() {
     Axes axes(pyAxes());
     axes.setXLabel("X");
