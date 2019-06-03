@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import numpy as np
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
 from mantidqt.utils.qt import load_ui
@@ -23,6 +24,7 @@ class AxesTabWidgetView(QWidget):
         self.ui = load_ui(__file__,
                           'axes_tab_widget.ui',
                           baseinstance=self)
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Set maxima and minima for the axis limit spin boxes
         for axis in ['x', 'y']:

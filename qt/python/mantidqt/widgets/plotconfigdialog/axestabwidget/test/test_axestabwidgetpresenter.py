@@ -15,6 +15,7 @@ mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
 from mantid.py3compat import mock
+from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.axestabwidgetpresenter import AxesTabWidgetPresenter as Presenter
 
@@ -39,9 +40,9 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         return Presenter(self.fig, view=mock_view)
         
     def test_generate_ax_name_returns_correct_name(self):
-        ax0_name = Presenter.generate_ax_name(self.fig.get_axes()[0])
+        ax0_name = generate_ax_name(self.fig.get_axes()[0])
         self.assertEqual("My Axes: (0, 0)", ax0_name)
-        ax1_name = Presenter.generate_ax_name(self.fig.get_axes()[1])
+        ax1_name = generate_ax_name(self.fig.get_axes()[1])
         self.assertEqual("(1, 0)", ax1_name)
 
     def test_apply_properties_calls_setters_with_correct_properties(self):
@@ -70,8 +71,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                 get_props_mock().yscale)
 
     def test_get_axes_names_dict(self):
-        presenter = self._generate_presenter()
-        actual_dict = presenter.get_axes_names_dict()
+        actual_dict = get_axes_names_dict(self.fig)
         expected = {"My Axes: (0, 0)": self.fig.get_axes()[0],
                     "(1, 0)": self.fig.get_axes()[1]}
         self.assertEqual(expected, actual_dict)
@@ -122,5 +122,5 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         new_title = "New Title"
         presenter.set_ax_title(self.fig.get_axes()[0], new_title)
         self.assertIn((new_title + ": (0, 0)", self.fig.get_axes()[0]),
-                      presenter.get_axes_names_dict().items())
+                      get_axes_names_dict(self.fig).items())
         self.assertEqual(new_title, self.fig.get_axes()[0].title.get_text())
