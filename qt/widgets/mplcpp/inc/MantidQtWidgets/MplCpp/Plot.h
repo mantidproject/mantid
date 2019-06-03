@@ -12,6 +12,7 @@
 
 #include <QHash>
 #include <QString>
+#include <QStringList>
 #include <QVariant>
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
@@ -60,6 +61,26 @@ namespace MplCpp {
  */
 MANTID_MPLCPP_DLL Common::Python::Object
 plot(const std::vector<std::string> &workspaces,
+     boost::optional<std::vector<int>> spectrumNums,
+     boost::optional<std::vector<int>> wkspIndices,
+     boost::optional<Common::Python::Object> fig = boost::none,
+     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+     boost::optional<std::string> windowTitle = boost::none,
+     bool errors = false, bool overplot = false);
+
+/**
+ * \overload plot(const std::vector<std::string> &workspaces,
+     boost::optional<std::vector<int>> spectrumNums,
+     boost::optional<std::vector<int>> wkspIndices,
+     boost::optional<Common::Python::Object> fig = boost::none,
+     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+     boost::optional<std::string> windowTitle = boost::none,
+     bool errors = false, bool overplot = false)
+ */
+MANTID_MPLCPP_DLL Common::Python::Object
+plot(const QStringList &workspaces,
      boost::optional<std::vector<int>> spectrumNums,
      boost::optional<std::vector<int>> wkspIndices,
      boost::optional<Common::Python::Object> fig = boost::none,
