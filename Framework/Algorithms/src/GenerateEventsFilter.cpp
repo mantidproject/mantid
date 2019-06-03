@@ -1278,7 +1278,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         // Check this value whether it falls into any range
         size_t index = searchValue(logvalueranges, currValue);
 
-				bool valueWithinMinMax = true;
+        bool valueWithinMinMax = true;
         if (index > logvalueranges.size()) {
           // Out of range
           valueWithinMinMax = false;

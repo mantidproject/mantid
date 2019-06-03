@@ -108,9 +108,9 @@ void FilterEvents::init() {
                   "workspaces.  Group name will be "
                   "OutputWorkspaceBaseName.");
 
-  declareProperty("InformativeOutputNames", false,
+  declareProperty("DescriptiveOutputNames", false,
                   "If selected, the names of the output workspaces will "
-                  "include information about each slice. ");
+                  "include information about each slice.");
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
                   "If selected, the minimum output workspace is indexed from 1 "
@@ -1146,7 +1146,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   if (numnewws != m_splittersWorkspace->getNumberSplitters() + 1) {
     splitByTime = false;
   }
-  bool informativeNames = getProperty("InformativeOutputNames");
+  bool descriptiveNames = getProperty("DescriptiveOutputNames");
 
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
@@ -1154,13 +1154,13 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     std::stringstream wsname;
 
     if (wsgroup >= 0) {
-      if (informativeNames && splitByTime) {
+      if (descriptiveNames && splitByTime) {
         auto splitter = m_splitters[wsgroup];
         auto startTime = splitter.start() - m_runStartTime;
         auto stopTime = splitter.stop() - m_runStartTime;
-        wsname << "start_" << startTime.total_seconds() << "_end_"
+        wsname << m_outputWSNameBase << "_" << startTime.total_seconds() << "_"
                << stopTime.total_seconds();
-      } else if (informativeNames && m_hasInfoWS) {
+      } else if (descriptiveNames && m_hasInfoWS) {
         wsname << infomap[wsgroup];
       } else {
         wsname << m_outputWSNameBase << "_" << (wsgroup + delta_wsindex);
@@ -1267,7 +1267,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
   // SplittersWorkspace, MatrixWorkspace and TableWorkspace cases
   size_t numoutputws = m_targetWorkspaceIndexSet.size();
   size_t wsgindex = 0;
-  bool informativeNames = getProperty("InformativeOutputNames");
+  bool descriptiveNames = getProperty("DescriptiveOutputNames");
 
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < 0)
@@ -1277,10 +1277,10 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // workspace name
     std::stringstream wsname;
     if (wsgroup > 0) {
-      if (informativeNames) {
+      if (descriptiveNames) {
         auto startTime = m_vecSplitterTime[wsgroup];
         auto stopTime = m_vecSplitterTime[wsgroup + 1];
-        wsname << "start_" << startTime << "_end_" << stopTime;
+        wsname << m_outputWSNameBase << "_" << startTime << "_" << stopTime;
       } else {
         int target_name = m_wsGroupdYMap[wsgroup];
         wsname << m_outputWSNameBase << "_" << target_name;
@@ -1370,12 +1370,12 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
       throw std::runtime_error("It is not possible to have split-target group "
                                "index < 0 in TableWorkspace case.");
 
-    std::stringstream wsname;
-    bool informativeNames = getProperty("InformativeOutputNames");
-
     // workspace name
+    std::stringstream wsname;
+    bool descriptiveNames = getProperty("DescriptiveOutputNames");
+
     if (wsgroup > 0) {
-      if (informativeNames) {
+      if (descriptiveNames) {
         int startIndex;
         for (auto itr = 0; itr < m_vecSplitterGroup.size(); ++itr) {
           if (m_vecSplitterGroup[itr] == wsgroup)
@@ -1385,8 +1385,9 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
             m_vecSplitterTime[startIndex] - m_runStartTime.totalNanoseconds();
         auto stopTime = m_vecSplitterTime[startIndex + 1] -
                         m_runStartTime.totalNanoseconds();
-        wsname << "start_" << timeInNanosecondsToSeconds(0, startTime)
-               << "_end_" << timeInNanosecondsToSeconds(0, stopTime);
+        wsname << m_outputWSNameBase << "_"
+               << timeInNanosecondsToSeconds(0, startTime) << "_"
+               << timeInNanosecondsToSeconds(0, stopTime);
       } else {
         std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
         wsname << m_outputWSNameBase << "_" << target_name;
