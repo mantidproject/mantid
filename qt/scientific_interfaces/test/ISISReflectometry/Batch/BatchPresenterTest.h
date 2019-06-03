@@ -281,6 +281,16 @@ public:
     verifyAndClear();
   }
 
+  void testPercentCompleteIsRequestedFromJobRunner() {
+    auto presenter = makePresenter();
+    auto progress = 33;
+    EXPECT_CALL(*m_jobRunner, percentComplete())
+        .Times(1)
+        .WillOnce(Return(progress));
+    TS_ASSERT_EQUALS(presenter.percentComplete(), progress);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobRunner> *m_jobRunner;

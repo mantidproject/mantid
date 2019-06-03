@@ -272,6 +272,16 @@ public:
     verifyAndClear();
   }
 
+  void testPercentCompleteIsRequestedFromMainPresenter() {
+    auto presenter = makePresenter();
+    auto progress = 33;
+    EXPECT_CALL(m_mainPresenter, percentComplete())
+        .Times(1)
+        .WillOnce(Return(progress));
+    TS_ASSERT_EQUALS(presenter.percentComplete(), progress);
+    verifyAndClear();
+  }
+
   // TODO
   //  void testStartMonitor() {
   //    auto presenter = makePresenter();

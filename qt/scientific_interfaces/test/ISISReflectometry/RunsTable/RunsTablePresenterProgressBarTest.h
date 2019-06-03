@@ -47,11 +47,11 @@ public:
 
 private:
   void expectUpdateProgressBar() {
-    EXPECT_CALL(m_view, setProgress(_)).Times(1);
-  }
-
-  void expectUpdateProgressBar(int percentComplete) {
-    EXPECT_CALL(m_view, setProgress(percentComplete)).Times(1);
+    auto progress = 33;
+    EXPECT_CALL(m_mainPresenter, percentComplete())
+        .Times(1)
+        .WillOnce(Return(progress));
+    EXPECT_CALL(m_view, setProgress(progress)).Times(1);
   }
 };
 
