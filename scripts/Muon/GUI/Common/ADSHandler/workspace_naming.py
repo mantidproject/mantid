@@ -151,4 +151,4 @@ def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
 
 
 def get_fit_workspace_base_directory():
-    return 'Muon Data/Fitting Output/'
+    return 'Muon Data/'

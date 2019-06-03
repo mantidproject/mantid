@@ -71,7 +71,7 @@ class FittingTabPresenterTest(GuiTest):
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
-             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint'})
+             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint', 'GroupName': 'Fitting Results'})
 
         self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']), 'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
 
@@ -83,7 +83,7 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(result, {'Function': mock.ANY,
                                   'InputWorkspace': 'Input Workspace Name',
                                   'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0,
-                                  'EvaluationType': 'CentrePoint'}
+                                  'EvaluationType': 'CentrePoint', 'GroupName': 'Fitting Results'}
                          )
 
     def test_for_single_fit_mode_when_display_workspace_changes_updates_fitting_browser_with_new_name(self):
@@ -276,6 +276,25 @@ class FittingTabPresenterTest(GuiTest):
         self.presenter.selected_data = []
 
         self.assertEqual(self.view.fit_status_success_failure.text(), 'No Fit')
+
+    def test_update_fit_group_name_correctly_increments_name(self):
+        self.presenter.increment_fit_group_name()
+
+        self.assertEqual(self.view.group_name, 'Fitting Results 1')
+
+        self.presenter.increment_fit_group_name()
+
+        self.assertEqual(self.view.group_name, 'Fitting Results 2')
+
+        self.view.group_name = '1 custom fit name 1'
+        self.presenter.increment_fit_group_name()
+
+        self.assertEqual(self.view.group_name, '1 custom fit name 2')
+
+        self.view.group_name = '7 custom fit name 1'
+        self.presenter.increment_fit_group_name()
+
+        self.assertEqual(self.view.group_name, '7 custom fit name 2')
 
 
 if __name__ == '__main__':

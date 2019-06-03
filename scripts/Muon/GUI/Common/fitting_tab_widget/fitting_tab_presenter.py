@@ -166,6 +166,7 @@ class FittingTabPresenter(object):
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
 
         self.update_fit_status_information_in_view()
+        self.increment_fit_group_name()
 
     def handle_error(self, error):
         self.thread_success = False
@@ -205,6 +206,7 @@ class FittingTabPresenter(object):
         params['Function'] = FunctionFactory.createInitialized(self.view.fit_string)
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
+        params['GroupName'] = self.view.group_name
         return params
 
     @property
@@ -270,3 +272,11 @@ class FittingTabPresenter(object):
         self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status)
+
+    def increment_fit_group_name(self):
+        current_number = re.search(r'\d+$', self.view.group_name)
+        if current_number:
+            new_number = str(int(current_number.group()) + 1)
+            self.view.group_name = self.view.group_name[:-len(current_number.group())] + new_number
+        else:
+            self.view.group_name = self.view.group_name + ' 1'

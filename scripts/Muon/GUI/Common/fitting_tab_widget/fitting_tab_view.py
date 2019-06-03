@@ -192,6 +192,14 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
         self.fit_to_raw_data_checkbox.setCheckState(state)
 
+    @property
+    def group_name(self):
+        return str(self.ads_group_name_textbox.text())
+
+    @group_name.setter
+    def group_name(self, value):
+        self.ads_group_name_textbox.setText(value)
+
     def warning_popup(self, message):
         warning(message, parent=self)
 

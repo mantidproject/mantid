@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.MuonAnalysis.muon_analysis_2 import MuonAnalysisGui
-import qtpy as QtCore
+from qtpy import QtCore
 
 
 Name = "Muon_Analysis_2"
