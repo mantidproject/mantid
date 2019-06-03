@@ -228,7 +228,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
         output_parts_bundles = []
         output_transmission_bundles = []
         for event_slice_bundles in slice_reduction_setting_bundles:
-            # Output bundles and parts bundles need to be grouped by a event slices
+            # Output bundles and parts bundles need to be sepated by a event slices, but grouped by component
             # e.g. [[workspaces for slice1], [workspaces for slice2]]
             slice_bundles = []
             slice_parts_bundles = []
@@ -277,7 +277,7 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
             for i, event_slice_part_bundle in enumerate(output_parts_bundles):
                 merge_bundle = get_merge_bundle_for_merge_request(event_slice_part_bundle, self)
                 if i == 0:
-                    # We only need to set this once. It's the same for each slice??? TODO check that it is
+                    # We only need to set this once.
                     self.set_shift_and_scale_output(merge_bundle)
                 reduction_mode_vs_output_workspaces[ReductionMode.Merged].append(merge_bundle.merged_workspace)
                 merged_name = self._get_merged_workspace_name(event_slice_part_bundle)
@@ -435,17 +435,8 @@ class SANSSingleReductionEventSlice(DistributedDataProcessorAlgorithm):
                                                          scatter_workspace=bundle.scatter_workspace,
                                                          dummy_mask_workspace=bundle.dummy_mask_workspace,
                                                          scatter_monitor_workspace=bundle.scatter_monitor_workspace,
-                                                         calculated_transmission_workspace=
-                                                         bundle.calculated_transmission_workspace,
-                                                         unfitted_transmission_workspace=
-                                                         bundle.unfitted_transmission_workspace,
-                                                         wavelength_adjustment_workspace=
-                                                         bundle.wavelength_adjustment_workspace,
-                                                         pixel_adjustment_workspace=
-                                                         bundle.pixel_adjustment_workspace,
-                                                         wavelength_and_pixel_adjustment_workspace=
-                                                         bundle.wavelength_and_pixel_adjustment_workspace,
-                                                         direct_workspace=bundle.direct_workspace))
+                                                         direct_workspace=bundle.direct_workspace,
+                                                         transmission_workspace=bundle.transmission_workspace))
         return slice_bundles
 
     def _get_slice_reduction_setting_bundles(self, intermediate_bundles):

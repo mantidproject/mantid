@@ -55,9 +55,5 @@ EventSliceSettingBundle = namedtuple('EventSliceSettingBundle', 'state, data_typ
                                                                 'output_parts, scatter_workspace, '
                                                                 'dummy_mask_workspace, '
                                                                 'scatter_monitor_workspace, '
-                                                                'calculated_transmission_workspace, '
-                                                                'unfitted_transmission_workspace, '
-                                                                'wavelength_adjustment_workspace, '
-                                                                'pixel_adjustment_workspace, '
-                                                                'wavelength_and_pixel_adjustment_workspace, '
-                                                                'direct_workspace')
+                                                                'direct_workspace, '
+                                                                'transmission_workspace')

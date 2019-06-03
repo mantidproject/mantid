@@ -39,12 +39,6 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
     reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
 
-    if reduction_setting_bundle.direct_workspace is not None:
-        reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direct_workspace)
-
-    if reduction_setting_bundle.transmission_workspace is not None:
-        reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
-
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("OutputMonitorWorkspace", EMPTY_NAME)
 
@@ -56,13 +50,6 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     mask_workspace = reduction_alg.getProperty("DummyMaskWorkspace").value
     output_monitor_workspace = reduction_alg.getProperty("OutputMonitorWorkspace").value
 
-    calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
-    unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
-
-    wavelength_adjustment_workspace = reduction_alg.getProperty("WavelengthAdjustmentWorkspace").value
-    pixel_adjustment_workspace = reduction_alg.getProperty("PixelAdjustmentWorkspace").value
-    wavelength_and_pixel_adjustment_workspace = reduction_alg.getProperty("WavelengthAndPixelAdjustmentWorkspace").value
-
     return EventSliceSettingBundle(state=reduction_setting_bundle.state,
                                    data_type=reduction_setting_bundle.data_type,
                                    reduction_mode=reduction_setting_bundle.reduction_mode,
@@ -70,12 +57,8 @@ def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):
                                    scatter_workspace=output_workspace,
                                    dummy_mask_workspace=mask_workspace,
                                    scatter_monitor_workspace=output_monitor_workspace,
-                                   calculated_transmission_workspace=calculated_transmission_workspace,
-                                   unfitted_transmission_workspace=unfitted_transmission_workspace,
-                                   wavelength_adjustment_workspace=wavelength_adjustment_workspace,
-                                   pixel_adjustment_workspace=pixel_adjustment_workspace,
-                                   wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace,
-                                   direct_workspace=reduction_setting_bundle.direct_workspace)
+                                   direct_workspace=reduction_setting_bundle.direct_workspace,
+                                   transmission_workspace=reduction_setting_bundle.transmission_workspace)
 
 
 def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
@@ -95,21 +78,12 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.setProperty("SANSState", serialized_state)
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
+    reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direct_workspace)
+    reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
     reduction_alg.setProperty("DummyMaskWorkspace", reduction_setting_bundle.dummy_mask_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
 
     reduction_alg.setProperty("DataType", DataType.to_string(reduction_setting_bundle.data_type))
-
-    if reduction_setting_bundle.wavelength_adjustment_workspace is not None:
-        reduction_alg.setProperty("WavelengthAdjustmentWorkspace",
-                                  reduction_setting_bundle.wavelength_adjustment_workspace)
-
-    if reduction_setting_bundle.pixel_adjustment_workspace is not None:
-        reduction_alg.setProperty("PixelAdjustmentWorkspace", reduction_setting_bundle.pixel_adjustment_workspace)
-
-    if reduction_setting_bundle.wavelength_and_pixel_adjustment_workspace is not None:
-        reduction_alg.setProperty("WavelengthAndPixelAdjustmentWorkspace",
-                                  reduction_setting_bundle.wavelength_and_pixel_adjustment_workspace)
 
     reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
     reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
@@ -122,6 +96,8 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     output_workspace = reduction_alg.getProperty("OutputWorkspace").value
     output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
     output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
+    output_calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
+    output_unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
 
     # Pull the result out of the workspace
     output_bundle = OutputBundle(state=reduction_setting_bundle.state,
@@ -138,9 +114,9 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
                                                           data_type=reduction_setting_bundle.data_type,
                                                           calculated_transmission_workspace=
-                                                          reduction_setting_bundle.calculated_transmission_workspace,
+                                                          output_calculated_transmission_workspace,
                                                           unfitted_transmission_workspace=
-                                                          reduction_setting_bundle.unfitted_transmission_workspace,
+                                                          output_unfitted_transmission_workspace,
                                                           )
     return output_bundle, output_parts_bundle, output_transmission_bundle
 
