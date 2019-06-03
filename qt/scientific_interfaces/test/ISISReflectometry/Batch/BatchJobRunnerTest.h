@@ -170,9 +170,7 @@ public:
 
   void testGetWorkspacesToSaveForOnlyRowInGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithARowModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
+    auto *row = getRow(jobRunner, 0, 0);
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
 
     EXPECT_CALL(*m_jobAlgorithm, item())
@@ -189,9 +187,7 @@ public:
 
   void testGetWorkspacesToSaveForRowInMultiRowGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
+    auto *row = getRow(jobRunner, 0, 0);
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
 
     EXPECT_CALL(*m_jobAlgorithm, item())
@@ -208,16 +204,14 @@ public:
 
   void testGetWorkspacesToSaveForGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto *group = &reductionJobs.mutableGroups()[0];
-    group->setOutputNames({
+    auto &group = getGroup(jobRunner, 0);
+    group.setOutputNames({
         "stitched_test",
     });
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(group));
+        .WillRepeatedly(Return(&group));
 
     auto workspacesToSave =
         jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
@@ -229,9 +223,7 @@ public:
 
   void testDeletedWorkspaceResetsStateForRow() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    auto *row = getRow(jobRunner, 0, 1);
     row->setSuccess();
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
@@ -242,9 +234,7 @@ public:
 
   void testDeletedWorkspaceResetsOutputNamesForRow() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    auto *row = getRow(jobRunner, 0, 1);
     row->setSuccess();
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
@@ -257,9 +247,7 @@ public:
 
   void testDeleteWorkspaceResetsStateForGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &group = reductionJobs.mutableGroups()[0];
+    auto &group = getGroup(jobRunner, 0);
     group.setSuccess();
     group.setOutputNames({"stitched_test"});
 
@@ -270,9 +258,7 @@ public:
 
   void testDeleteWorkspaceResetsOutputNamesForGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &group = reductionJobs.mutableGroups()[0];
+    auto &group = getGroup(jobRunner, 0);
     group.setSuccess();
     group.setOutputNames({"stitched_test"});
 
@@ -283,9 +269,7 @@ public:
 
   void testRenameWorkspaceDoesNotResetStateForRow() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    auto *row = getRow(jobRunner, 0, 1);
     row->setSuccess();
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
@@ -296,9 +280,7 @@ public:
 
   void testRenameWorkspaceUpdatesCorrectWorkspaceForRow() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
+    auto *row = getRow(jobRunner, 0, 1);
     row->setSuccess();
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
 
@@ -311,9 +293,7 @@ public:
 
   void testRenameWorkspaceDoesNotResetStateForGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &group = reductionJobs.mutableGroups()[0];
+    auto &group = getGroup(jobRunner, 0);
     group.setSuccess();
     group.setOutputNames({"stitched_test"});
 
@@ -324,9 +304,7 @@ public:
 
   void testRenameWorkspaceUpdatesPostprocessedNameForGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &group = reductionJobs.mutableGroups()[0];
+    auto &group = getGroup(jobRunner, 0);
     group.setSuccess();
     group.setOutputNames({"stitched_test"});
 
@@ -337,10 +315,8 @@ public:
 
   void testDeleteAllWorkspacesResetsStateForRowAndGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
-    auto &group = reductionJobs.mutableGroups()[0];
+    auto *row = getRow(jobRunner, 0, 1);
+    auto &group = getGroup(jobRunner, 0);
     row->setSuccess();
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
     group.setSuccess();
@@ -354,10 +330,8 @@ public:
 
   void testDeleteAllWorkspacesResetsOutputNamesForRowAndGroup() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
-    auto &reductionJobs =
-        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto &row = reductionJobs.mutableGroups()[0].mutableRows()[1];
-    auto &group = reductionJobs.mutableGroups()[0];
+    auto *row = getRow(jobRunner, 0, 1);
+    auto &group = getGroup(jobRunner, 0);
     row->setSuccess();
     row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
     group.setSuccess();
@@ -408,6 +382,22 @@ private:
   Workspace2D_sptr createWorkspace() {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     return ws;
+  }
+
+  Row *getRow(BatchJobRunnerFriend &jobRunner, int groupIndex, int rowIndex) {
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex]
+                     .mutableRows()[rowIndex]
+                     .get();
+    return row;
+  }
+
+  Group &getGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
+    auto &reductionJobs =
+        jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+    auto &group = reductionJobs.mutableGroups()[groupIndex];
+    return group;
   }
 };
 
