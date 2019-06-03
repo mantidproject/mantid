@@ -26,54 +26,17 @@ using namespace MantidQt::MantidWidgets;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
-    : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
-      m_fitCurve(new QwtPlotCurve()), m_correctedCurve(new QwtPlotCurve()),
-      m_dataErrorCurve(nullptr), m_correctedErrorCurve(nullptr),
-      m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
+    : m_widget(widget), m_ui(), m_rangeSelectors(),
+      m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
-ALCBaselineModellingView::~ALCBaselineModellingView() {
-  m_dataCurve->detach();
-  delete m_dataCurve;
-  m_correctedCurve->detach();
-  delete m_correctedCurve;
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-  if (m_correctedErrorCurve) {
-    m_correctedErrorCurve->detach();
-    delete m_correctedErrorCurve;
-  }
-}
+ALCBaselineModellingView::~ALCBaselineModellingView() {}
 
 void ALCBaselineModellingView::initialize() {
   m_ui.setupUi(m_widget);
   connect(m_ui.fit, SIGNAL(clicked()), SIGNAL(fitRequested()));
 
-  m_ui.dataPlot->setCanvasBackground(Qt::white);
-  m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-  m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
-
-  m_ui.correctedPlot->setCanvasBackground(Qt::white);
-  m_ui.correctedPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-  m_ui.correctedPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
-
-  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
-  m_dataCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
-  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_dataCurve->attach(m_ui.dataPlot);
-
-  m_fitCurve->setPen(QPen(Qt::red, 1.5));
-  m_fitCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_fitCurve->attach(m_ui.dataPlot);
-
-  m_correctedCurve->setStyle(QwtPlotCurve::NoCurve);
-  m_correctedCurve->setPen(QPen(Qt::green));
-  m_correctedCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(Qt::green), QSize(7, 7)));
-  m_correctedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_correctedCurve->attach(m_ui.correctedPlot);
+  m_ui.dataPlot->setCanvasColour(Qt::white);
+  m_ui.correctedPlot->setCanvasColour(Qt::white);
 
   // Context menu for sections table
   m_ui.sections->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -118,45 +81,26 @@ int ALCBaselineModellingView::noOfSectionRows() const {
   return m_ui.sections->rowCount();
 }
 
-void ALCBaselineModellingView::setDataCurve(const QwtData &data,
-                                            const std::vector<double> &errors) {
-  // Set data
-  m_dataCurve->setData(data);
-
-  // Set errors
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
-  m_dataErrorCurve->attach(m_ui.dataPlot);
-
-  // Replot
-  m_ui.dataPlot->replot();
+void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
+                                            std::size_t const &workspaceIndex) {
+  m_ui.dataPlot->clear();
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(
-    const QwtData &data, const std::vector<double> &errors) {
-  // Set data
-  m_correctedCurve->setData(data);
-
-  // Set errors
-  if (m_correctedErrorCurve) {
-    m_correctedErrorCurve->detach();
-    delete m_correctedErrorCurve;
-  }
-  m_correctedErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_correctedCurve, errors);
-  m_correctedErrorCurve->attach(m_ui.correctedPlot);
-
-  // Replot
-  m_ui.correctedPlot->replot();
+    MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
+  m_ui.dataPlot->clear();
+  m_ui.dataPlot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::blue);
 }
 
-void ALCBaselineModellingView::setBaselineCurve(const QwtData &data) {
-  m_fitCurve->setData(data);
-  m_ui.dataPlot->replot();
+void ALCBaselineModellingView::setBaselineCurve(
+    MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
+  m_ui.dataPlot->clear();
+  m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
+}
+
+void ALCBaselineModellingView::removePlot(QString const &plotName) {
+  m_ui.dataPlot->removeSpectrum(plotName);
 }
 
 void ALCBaselineModellingView::setFunction(IFunction_const_sptr func) {

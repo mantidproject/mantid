@@ -32,7 +32,7 @@ public:
   /**
    * @return Data we are fitting peaks to
    */
-  virtual Mantid::API::MatrixWorkspace_const_sptr data() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr data() const = 0;
 
   /**
    * Fit specified peaks to the data of the model

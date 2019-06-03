@@ -21,18 +21,9 @@ namespace CustomInterfaces {
 /// This is the string "Auto", used for last file
 const std::string ALCDataLoadingView::g_autoString = "Auto";
 
-ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_dataCurve(new QwtPlotCurve()),
-      m_dataErrorCurve(nullptr) {}
+ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
 
-ALCDataLoadingView::~ALCDataLoadingView() {
-  m_dataCurve->detach();
-  delete m_dataCurve;
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-}
+ALCDataLoadingView::~ALCDataLoadingView() {}
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
@@ -156,8 +147,8 @@ ALCDataLoadingView::timeRange() const {
   return boost::make_optional(range);
 }
 
-void ALCDataLoadingView::setPlottedData(MatrixWorkspace_sptr &workspace,
-                                        std::size_t const &workspaceIndex) {
+void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr &workspace,
+                                      std::size_t const &workspaceIndex) {
   m_ui.dataPlot->clear();
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
 }

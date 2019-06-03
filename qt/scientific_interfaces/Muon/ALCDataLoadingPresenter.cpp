@@ -221,7 +221,7 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
-    m_view->setPlottedData(m_loadedData);
+    m_view->setDataCurve(m_loadedData);
 
     emit dataChanged();
 
@@ -294,23 +294,18 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
-  if (m_loadedData) {
-
+  if (m_loadedData)
     return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
-
-  } else {
-
-    return MatrixWorkspace_sptr();
-  }
+  return MatrixWorkspace_sptr();
 }
 
-void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
+void ALCDataLoadingPresenter::setData(MatrixWorkspace_sptr data) {
 
   if (data) {
     // Set the data
     m_loadedData = data;
     // Plot the data
-    m_view->setPlottedData(m_loadedData);
+    m_view->setDataCurve(m_loadedData);
 
   } else {
     std::invalid_argument("Cannot load an empty workspace");

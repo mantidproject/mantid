@@ -31,15 +31,13 @@ public:
   void initialize();
 
   /// @return Last loaded data workspace
-  Mantid::API::MatrixWorkspace_const_sptr loadedData() const {
-    return m_loadedData;
-  }
+  Mantid::API::MatrixWorkspace_sptr loadedData() const { return m_loadedData; }
 
   /// @return Loaded data as MatrixWorkspace_sptr
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
   /// Sets some data
-  void setData(Mantid::API::MatrixWorkspace_const_sptr data);
+  void setData(Mantid::API::MatrixWorkspace_sptr data);
 
 private slots:
   /// Check file range and call method to load new data

@@ -19,18 +19,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget)
-    : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
-      m_fittedCurve(new QwtPlotCurve()), m_dataErrorCurve(nullptr),
-      m_peakPicker(nullptr) {}
+    : m_widget(widget), m_ui() {} //, m_peakPicker(nullptr) {}
 
-ALCPeakFittingView::~ALCPeakFittingView() {
-  m_dataCurve->detach();
-  delete m_dataCurve;
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-}
+ALCPeakFittingView::~ALCPeakFittingView() {}
 
 IFunction_const_sptr ALCPeakFittingView::function(QString index) const {
   return m_ui.peaks->getFunctionByIndex(index);
@@ -40,34 +31,22 @@ boost::optional<QString> ALCPeakFittingView::currentFunctionIndex() const {
   return m_ui.peaks->currentFunctionIndex();
 }
 
-IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const {
-  return m_peakPicker->peak();
-}
+// IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const {
+//  return m_peakPicker->peak();
+//}
 
 void ALCPeakFittingView::initialize() {
   m_ui.setupUi(m_widget);
 
   connect(m_ui.fit, SIGNAL(clicked()), this, SIGNAL(fitRequested()));
 
-  m_ui.plot->setCanvasBackground(Qt::white);
-  m_ui.plot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-  m_ui.plot->setAxisFont(QwtPlot::yLeft, m_widget->font());
-
-  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
-  m_dataCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
-  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_dataCurve->attach(m_ui.plot);
-
-  m_fittedCurve->setPen(QPen(Qt::red, 1.5));
-  m_fittedCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_fittedCurve->attach(m_ui.plot);
+  m_ui.plot->setCanvasColour(Qt::white);
 
   // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
   // (auto-delete option)
-  m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
+  // m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
 
-  connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
+  // connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
 
   connect(m_ui.peaks, SIGNAL(currentFunctionChanged()),
           SIGNAL(currentFunctionChanged()));
@@ -78,28 +57,19 @@ void ALCPeakFittingView::initialize() {
   connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
 }
 
-void ALCPeakFittingView::setDataCurve(const QwtData &data,
-                                      const std::vector<double> &errors) {
-
-  // Set data
-  m_dataCurve->setData(data);
-
-  // Set errors
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
-  m_dataErrorCurve->attach(m_ui.plot);
-
-  // Replot
-  m_ui.plot->replot();
+void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr &workspace,
+                                      std::size_t const &workspaceIndex) {
+  m_ui.plot->clear();
+  m_ui.plot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
 }
 
-void ALCPeakFittingView::setFittedCurve(const QwtData &data) {
-  m_fittedCurve->setData(data);
-  m_ui.plot->replot();
+void ALCPeakFittingView::setFittedCurve(MatrixWorkspace_sptr &workspace,
+                                        std::size_t const &workspaceIndex) {
+  m_ui.plot->addSpectrum("Fit", workspace, workspaceIndex, Qt::red);
+}
+
+void ALCPeakFittingView::removePlot(QString const &plotName) {
+  m_ui.plot->removeSpectrum(plotName);
 }
 
 void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
@@ -125,14 +95,14 @@ void ALCPeakFittingView::setParameter(const QString &funcIndex,
 }
 
 void ALCPeakFittingView::setPeakPickerEnabled(bool enabled) {
-  m_peakPicker->setEnabled(enabled);
-  m_peakPicker->setVisible(enabled);
-  m_ui.plot->replot(); // PeakPicker might get hidden/shown
+  // m_peakPicker->setEnabled(enabled);
+  // m_peakPicker->setVisible(enabled);
+  // m_ui.plot->replot(); // PeakPicker might get hidden/shown
 }
 
 void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
-  m_peakPicker->setPeak(peak);
-  m_ui.plot->replot();
+  // m_peakPicker->setPeak(peak);
+  // m_ui.plot->replot();
 }
 
 void ALCPeakFittingView::help() {

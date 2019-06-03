@@ -34,7 +34,9 @@ public:
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker
-  virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
+  // virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
+
+  virtual void removePlot(QString const &plotName) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -43,12 +45,13 @@ public slots:
   /// Update the data curve displayed
   /// @param data :: New curve data
   /// @param errors :: New curve errors
-  virtual void setDataCurve(const QwtData &data,
-                            const std::vector<double> &errors) = 0;
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                            std::size_t const &workspaceIndex = 0) = 0;
 
   /// Update the fitted curve displayed
   /// @param data :: New curve data
-  virtual void setFittedCurve(const QwtData &data) = 0;
+  virtual void setFittedCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                              std::size_t const &workspaceIndex = 0) = 0;
 
   /// Set function displayed in Function Browser
   /// @param newFunction :: New function to display

@@ -48,31 +48,35 @@ public:
    */
   virtual int noOfSectionRows() const = 0;
 
+  virtual void removePlot(QString const &plotName) = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;
 
   /**
    * Update displayed data curve
-   * @param data :: New curve data
-   * @param errors :: Curve errors
+   * @param workspace :: The workspace containing the data to plot
+   * @param workspaceIndex :: The index of the data to plot
    */
-  virtual void setDataCurve(const QwtData &data,
-                            const std::vector<double> &errors) = 0;
+  virtual void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                            std::size_t const &workspaceIndex = 0) = 0;
 
   /**
    * Update displayed corrected data curve
-   * @param data :: New curve data
-   * @param errors :: Curve errors
+   * @param workspace :: The workspace containing the data to plot
+   * @param workspaceIndex :: The index of the data to plot
    */
-  virtual void setCorrectedCurve(const QwtData &data,
-                                 const std::vector<double> &errors) = 0;
+  virtual void setCorrectedCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                                 std::size_t const &workspaceIndex = 0) = 0;
 
   /**
    * Update displayed baseline curve
-   * @param data :: New curve data
+   * @param workspace :: The workspace containing the data to plot
+   * @param workspaceIndex :: The index of the data to plot
    */
-  virtual void setBaselineCurve(const QwtData &data) = 0;
+  virtual void setBaselineCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                                std::size_t const &workspaceIndex = 0) = 0;
 
   /**
    * Update displayed function

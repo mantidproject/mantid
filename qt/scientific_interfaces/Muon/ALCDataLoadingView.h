@@ -58,8 +58,8 @@ public:
   std::string calculationType() const override;
   boost::optional<std::pair<double, double>> timeRange() const override;
 
-  void setPlottedData(Mantid::API::MatrixWorkspace_sptr &workspace,
-                      std::size_t const &workspaceIndex = 0) override;
+  void setDataCurve(Mantid::API::MatrixWorkspace_sptr &workspace,
+                    std::size_t const &workspaceIndex = 0) override;
   void displayError(const std::string &error) override;
   void setAvailableLogs(const std::vector<std::string> &logs) override;
   void setAvailablePeriods(const std::vector<std::string> &periods) override;
@@ -93,12 +93,6 @@ private:
 
   /// The widget used
   QWidget *const m_widget;
-
-  /// Loaded data curve
-  QwtPlotCurve *m_dataCurve;
-
-  /// Loaded errors
-  MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve;
 
   /// the string "Auto"
   static const std::string g_autoString;

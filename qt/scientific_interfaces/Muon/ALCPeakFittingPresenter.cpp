@@ -45,7 +45,7 @@ void ALCPeakFittingPresenter::fit() {
   IFunction_const_sptr func = m_view->function("");
   auto dataWS = m_model->data();
   if (func && dataWS) {
-    removePlots();
+    removePlot("Fit");
     m_model->fitPeaks(func);
   } else {
     m_view->displayError("Couldn't fit with empty function/data");
@@ -78,14 +78,14 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   // (See onCurrentFunctionChanged)
   assert(bool(index));
 
-  auto peakFunc = m_view->peakPicker();
+  // auto peakFunc = m_view->peakPicker();
 
   // Update all the defined parameters of the peak function
-  for (size_t i = 0; i < peakFunc->nParams(); ++i) {
-    QString paramName = QString::fromStdString(peakFunc->parameterName(i));
-    m_view->setParameter(*index, paramName,
-                         peakFunc->getParameter(paramName.toStdString()));
-  }
+  // for (size_t i = 0; i < peakFunc->nParams(); ++i) {
+  //  QString paramName = QString::fromStdString(peakFunc->parameterName(i));
+  //  m_view->setParameter(*index, paramName,
+  //                       peakFunc->getParameter(paramName.toStdString()));
+  //}
 }
 
 void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
@@ -106,24 +106,17 @@ void ALCPeakFittingPresenter::onFittedPeaksChanged() {
   IFunction_const_sptr fitted = m_model->fittedPeaks();
   auto dataWS = m_model->data();
   if (fitted && dataWS) {
-    const auto &x = dataWS->x(0);
-    m_view->setFittedCurve(
-        *(QwtHelper::curveDataFromFunction(fitted, x.rawData())));
+    m_view->setFittedCurve(dataWS, 1);
     m_view->setFunction(fitted);
   } else {
-    m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
     m_view->setFunction(IFunction_const_sptr());
   }
 }
 
 void ALCPeakFittingPresenter::onDataChanged() {
   auto dataWS = m_model->data();
-  if (dataWS) {
-    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_model->data(), 0)),
-                         QwtHelper::curveErrorsFromWs(m_model->data(), 0));
-  } else {
-    m_view->setDataCurve(*(QwtHelper::emptyCurveData()), Mantid::MantidVec{});
-  }
+  if (dataWS)
+    m_view->setDataCurve(dataWS);
 }
 
 /**
@@ -132,14 +125,14 @@ void ALCPeakFittingPresenter::onDataChanged() {
  */
 void ALCPeakFittingPresenter::onPlotGuessClicked() {
   if (m_guessPlotted) {
-    removePlots();
+    removePlot("Fit");
   } else {
     if (plotGuessOnGraph()) {
       m_view->changePlotGuessState(true);
       m_guessPlotted = true;
     } else {
       m_view->displayError("Couldn't plot with empty function/data");
-      removePlots();
+      removePlot("Fit");
     }
   }
 }
@@ -150,23 +143,20 @@ void ALCPeakFittingPresenter::onPlotGuessClicked() {
  * @returns :: success or failure
  */
 bool ALCPeakFittingPresenter::plotGuessOnGraph() {
-  bool plotted = false;
   auto func = m_view->function("");
   auto dataWS = m_model->data();
   if (func && dataWS) {
-    const auto &xdata = dataWS->x(0);
-    m_view->setFittedCurve(
-        *(QwtHelper::curveDataFromFunction(func, xdata.rawData())));
-    plotted = true;
+    m_view->setFittedCurve(dataWS, 1);
+    return true;
   }
-  return plotted;
+  return false;
 }
 
 /**
  * Removes any fit function from the graph.
  */
-void ALCPeakFittingPresenter::removePlots() {
-  m_view->setFittedCurve(*(QwtHelper::emptyCurveData()));
+void ALCPeakFittingPresenter::removePlot(std::string const &plotName) {
+  m_view->removePlot(QString::fromStdString(plotName));
   m_view->changePlotGuessState(false);
   m_guessPlotted = false;
 }

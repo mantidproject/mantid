@@ -165,36 +165,28 @@ void ALCBaselineModellingPresenter::onSectionSelectorModified(int index) {
 }
 
 void ALCBaselineModellingPresenter::updateDataCurve() {
-  MatrixWorkspace_const_sptr dataWs = m_model->data();
-  assert(dataWs);
-  m_view->setDataCurve(*(QwtHelper::curveDataFromWs(dataWs, 0)),
-                       QwtHelper::curveErrorsFromWs(dataWs, 0));
-  // Delete all section selectors
-  int noRows = m_view->noOfSectionRows() - 1;
-  for (int j = noRows; j > -1; --j) {
-    removeSection(j);
+  if (auto dataWs = m_model->data()) {
+    m_view->setDataCurve(dataWs);
+    // Delete all section selectors
+    int noRows = m_view->noOfSectionRows() - 1;
+    for (int j = noRows; j > -1; --j) {
+      removeSection(j);
+    }
   }
 }
 
 void ALCBaselineModellingPresenter::updateCorrectedCurve() {
-  if (MatrixWorkspace_const_sptr correctedData = m_model->correctedData()) {
-    m_view->setCorrectedCurve(*(QwtHelper::curveDataFromWs(correctedData, 0)),
-                              QwtHelper::curveErrorsFromWs(correctedData, 0));
-  } else {
-    m_view->setCorrectedCurve(*(QwtHelper::emptyCurveData()),
-                              std::vector<double>());
-  }
+  if (auto correctedData = m_model->correctedData())
+    m_view->setCorrectedCurve(correctedData);
+  else
+    m_view->removePlot("Corrected");
 }
 
 void ALCBaselineModellingPresenter::updateBaselineCurve() {
-  if (IFunction_const_sptr fittedFunc = m_model->fittedFunction()) {
-
-    const auto &xValues = m_model->data()->x(0);
-    m_view->setBaselineCurve(
-        *(QwtHelper::curveDataFromFunction(fittedFunc, xValues.rawData())));
-  } else {
-    m_view->setBaselineCurve(*(QwtHelper::emptyCurveData()));
-  }
+  if (auto baselineData = m_model->data())
+    m_view->setBaselineCurve(baselineData);
+  else
+    m_view->removePlot("Baseline");
 }
 
 void ALCBaselineModellingPresenter::updateFunction() {

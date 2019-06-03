@@ -35,12 +35,12 @@ public:
   /**
    * @return Corrected data produced by the last fit
    */
-  virtual Mantid::API::MatrixWorkspace_const_sptr correctedData() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr correctedData() const = 0;
 
   /**
    * @return Current data used for fitting
    */
-  virtual Mantid::API::MatrixWorkspace_const_sptr data() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr data() const = 0;
 
   /**
    * Perform a fit using current data and specified function and sections.

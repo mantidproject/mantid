@@ -68,7 +68,7 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function,
   m_sections = sections;
 }
 
-void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data) {
+void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) {
   m_data = data;
   emit dataChanged();
 }
@@ -180,8 +180,7 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() {
   }
 }
 
-void ALCBaselineModellingModel::setCorrectedData(
-    MatrixWorkspace_const_sptr data) {
+void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_sptr data) {
   m_data = data;
   emit correctedDataChanged();
 }
@@ -192,7 +191,7 @@ void ALCBaselineModellingModel::setFittedFunction(
   emit fittedFunctionChanged();
 }
 
-MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const {
+MatrixWorkspace_sptr ALCBaselineModellingModel::data() const {
   if (m_data) {
     IAlgorithm_sptr extract =
         AlgorithmManager::Instance().create("ExtractSingleSpectrum");
@@ -202,14 +201,14 @@ MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const {
     extract->setProperty("WorkspaceIndex", 0);
     extract->setProperty("OutputWorkspace", "__NotUsed__");
     extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr result = extract->getProperty("OutputWorkspace");
     return result;
   } else {
-    return MatrixWorkspace_const_sptr();
+    return MatrixWorkspace_sptr();
   }
 }
 
-MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const {
+MatrixWorkspace_sptr ALCBaselineModellingModel::correctedData() const {
   if (m_data && (m_data->getNumberHistograms() == 3)) {
     IAlgorithm_sptr extract =
         AlgorithmManager::Instance().create("ExtractSingleSpectrum");
@@ -219,10 +218,10 @@ MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const {
     extract->setProperty("WorkspaceIndex", 2);
     extract->setProperty("OutputWorkspace", "__NotUsed__");
     extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr result = extract->getProperty("OutputWorkspace");
     return result;
   } else {
-    return MatrixWorkspace_const_sptr();
+    return MatrixWorkspace_sptr();
   }
 }
 

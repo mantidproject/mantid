@@ -20,7 +20,8 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-void ALCPeakFittingModel::setData(MatrixWorkspace_const_sptr newData) {
+
+void ALCPeakFittingModel::setData(MatrixWorkspace_sptr newData) {
   m_data = newData;
   emit dataChanged();
 }
