@@ -480,6 +480,174 @@ public:
     TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
   }
 
+  void testProgressOfSelectionWithEmptyTable() {
+    auto jobRunner = makeJobRunner(oneEmptyGroupModel());
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionWithEmptyGroup() {
+    auto jobRunner = makeJobRunner(oneEmptyGroupModel());
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionWhenRowNotStarted() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 0, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressOfSelectionWhenRowStarting() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    getRow(jobRunner, 0, 0)->setStarting();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressOfSelectionWhenRowRunning() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    getRow(jobRunner, 0, 0)->setRunning();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressOfSelectionWhenRowComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    getRow(jobRunner, 0, 0)->setSuccess();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionWhenRowFailed() {
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    getRow(jobRunner, 0, 0)->setError("error message");
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionWhenGroupNotStarted() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressOfSelectionWhenGroupStarting() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getGroup(jobRunner, 0).setStarting();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressOfSelectionWhenGroupRunning() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getGroup(jobRunner, 0).setRunning();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 0);
+  }
+
+  void testProgressOfSelectionWhenGroupComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getGroup(jobRunner, 0).setSuccess();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressOfSelectionWhenGroupError() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getGroup(jobRunner, 0).setError("error message");
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressOfSelectionExcludesSingleRowGroup() {
+    // Postprocessing is not applicable to a group if it only has one row, so
+    // so we expect 100% when that row is complete
+    auto jobRunner = makeJobRunner(oneGroupWithARowModel());
+    jobRunner.m_processAll = true;
+    getRow(jobRunner, 0, 0)->setSuccess();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionForTwoRowGroupWithOneRowComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getRow(jobRunner, 0, 0)->setSuccess();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressOfSelectionForTwoRowGroupWithTwoRowsComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 66);
+  }
+
+  void testProgressOfSelectionForTwoRowGroupWithEverythingComplete() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    selectGroup(jobRunner, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionForTwoGroupsWithOneGroupComplete() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    selectGroup(jobRunner, 0);
+    selectGroup(jobRunner, 1);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 50);
+  }
+
+  void testProgressOfSelectionWithBothChildAndParentItemsSelected() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getRow(jobRunner, 0, 1)->setSuccess();
+    // The rows are implicitly selected when we select the group, but make sure
+    // they rows are only counted once if we also select one of the rows
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 0, 0);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
+  void testProgressOfSelectionWithOneRowOutOfTwoSelected() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    getRow(jobRunner, 0, 1)->setSuccess();
+    selectRow(jobRunner, 0, 1);
+    // the selected row is complete
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionForTwoGroupsWithBothGroupsComplete() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    getGroup(jobRunner, 1).setSuccess();
+    getRow(jobRunner, 1, 0)->setSuccess();
+    getRow(jobRunner, 1, 1)->setSuccess();
+    selectGroup(jobRunner, 0);
+    selectGroup(jobRunner, 1);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 100);
+  }
+
+  void testProgressOfSelectionExcludesUnselectedGroups() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    // first group is 100% complete
+    getGroup(jobRunner, 0).setSuccess();
+    getRow(jobRunner, 0, 0)->setSuccess();
+    getRow(jobRunner, 0, 1)->setSuccess();
+    // second group is 33% complete
+    getRow(jobRunner, 1, 0)->setSuccess();
+    // select second group only
+    selectGroup(jobRunner, 1);
+    TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_tolerance;
@@ -533,6 +701,17 @@ private:
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[groupIndex];
     return group;
+  }
+
+  void selectGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
+    jobRunner.m_rowLocationsToProcess.push_back(
+        MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
+  }
+
+  void selectRow(BatchJobRunnerFriend &jobRunner, int groupIndex,
+                 int rowIndex) {
+    jobRunner.m_rowLocationsToProcess.push_back(
+        MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
   }
 };
 

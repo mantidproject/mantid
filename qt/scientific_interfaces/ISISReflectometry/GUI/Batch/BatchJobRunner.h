@@ -59,10 +59,9 @@ protected:
   bool m_isAutoreducing;
   bool m_reprocessFailed;
   bool m_processAll;
-
-private:
   std::vector<MantidWidgets::Batch::RowLocation> m_rowLocationsToProcess;
 
+private:
   int totalItemsInSelection() const;
   int completedItemsInSelection() const;
 
