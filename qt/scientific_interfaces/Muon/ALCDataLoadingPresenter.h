@@ -79,7 +79,7 @@ private:
   IALCDataLoadingView *const m_view;
 
   /// Last loaded data workspace
-  Mantid::API::MatrixWorkspace_const_sptr m_loadedData;
+  Mantid::API::MatrixWorkspace_sptr m_loadedData;
 
   /// Watch a directory for changes
   QFileSystemWatcher m_watcher;

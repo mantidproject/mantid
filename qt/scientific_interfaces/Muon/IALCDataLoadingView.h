@@ -82,11 +82,11 @@ public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;
 
-  /// Updates the data curve
-  /// @param data :: New curve data to set
-  /// @param errors :: New curve errors to set
-  virtual void setDataCurve(const QwtData &data,
-                            const std::vector<double> &errors) = 0;
+  /// Updates the plotted data
+  /// @param workspace :: The workspace containing the data
+  /// @param workspaceIndex :: the index to plot
+  virtual void setPlottedData(Mantid::API::MatrixWorkspace_sptr &workspace,
+                              std::size_t const &workspaceIndex = 0) = 0;
 
   /// Displays an error
   /// @param error :: Error message to display

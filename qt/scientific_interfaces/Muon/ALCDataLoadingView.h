@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGVIEW_H_
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 #include "ALCDataLoadingPresenter.h"
@@ -57,8 +58,8 @@ public:
   std::string calculationType() const override;
   boost::optional<std::pair<double, double>> timeRange() const override;
 
-  void setDataCurve(const QwtData &data,
-                    const std::vector<double> &errors) override;
+  void setPlottedData(Mantid::API::MatrixWorkspace_sptr &workspace,
+                      std::size_t const &workspaceIndex = 0) override;
   void displayError(const std::string &error) override;
   void setAvailableLogs(const std::vector<std::string> &logs) override;
   void setAvailablePeriods(const std::vector<std::string> &periods) override;

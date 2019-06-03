@@ -378,7 +378,16 @@
                </size>
               </property>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <property name="margin">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
                 <number>0</number>
                </property>
                <item>
@@ -500,7 +509,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QwtPlot" name="dataPlot">
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="dataPlot" native="true">
          <property name="minimumSize">
           <size>
            <width>300</width>
@@ -517,12 +526,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/MWRunFiles.h</header>
@@ -531,6 +534,12 @@
    <class>MantidQt::MantidWidgets::LogValueSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/LogValueSelector.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -642,8 +651,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="calculationType"/>
   <buttongroup name="deadTimeCorrType"/>
+  <buttongroup name="detectorGroupingType"/>
  </buttongroups>
 </ui>

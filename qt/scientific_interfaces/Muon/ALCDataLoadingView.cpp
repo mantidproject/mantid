@@ -14,6 +14,8 @@
 
 #include <qwt_symbol.h>
 
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 /// This is the string "Auto", used for last file
@@ -46,15 +48,7 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
 
-  m_ui.dataPlot->setCanvasBackground(Qt::white);
-  m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-  m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
-
-  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
-  m_dataCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
-  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_dataCurve->attach(m_ui.dataPlot);
+  m_ui.dataPlot->setCanvasColour(Qt::white);
 
   // The following lines disable the groups' titles when the
   // group is disabled
@@ -162,23 +156,10 @@ ALCDataLoadingView::timeRange() const {
   return boost::make_optional(range);
 }
 
-void ALCDataLoadingView::setDataCurve(const QwtData &data,
-                                      const std::vector<double> &errors) {
-
-  // Set data
-  m_dataCurve->setData(data);
-
-  // Set errors
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
-  m_dataErrorCurve->attach(m_ui.dataPlot);
-  m_dataErrorCurve->setItemAttribute(QwtPlotItem::AutoScale, true);
-
-  m_ui.dataPlot->replot();
+void ALCDataLoadingView::setPlottedData(MatrixWorkspace_sptr &workspace,
+                                        std::size_t const &workspaceIndex) {
+  m_ui.dataPlot->clear();
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {
