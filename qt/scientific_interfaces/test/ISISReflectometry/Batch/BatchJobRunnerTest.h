@@ -111,12 +111,11 @@ public:
 
   void testAlgorithmStarted() {
     auto row = makeRow("12345", 0.5);
-    auto &item = dynamic_cast<Item &>(row);
     auto jobRunner = makeJobRunner();
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(&item));
+        .WillRepeatedly(Return(&row));
 
     jobRunner.algorithmStarted(m_jobAlgorithm);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_RUNNING);
@@ -128,14 +127,13 @@ public:
 
   void testAlgorithmComplete() {
     auto row = makeRow("12345", 0.5);
-    auto &item = dynamic_cast<Item &>(row);
     auto jobRunner = makeJobRunner();
     auto iVsQ = createWorkspace();
     auto iVsQBin = createWorkspace();
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(&item));
+        .WillRepeatedly(Return(&row));
     EXPECT_CALL(*m_jobAlgorithm, outputWorkspaceNames())
         .Times(1)
         .WillOnce(Return(std::vector<std::string>{"", "IvsQ", "IvsQBin"}));
@@ -154,13 +152,12 @@ public:
 
   void testAlgorithmError() {
     auto row = makeRow("12345", 0.5);
-    auto &item = dynamic_cast<Item &>(row);
     auto jobRunner = makeJobRunner();
     auto message = std::string("test error message");
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(&item));
+        .WillRepeatedly(Return(&row));
 
     jobRunner.algorithmError(m_jobAlgorithm, message);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_ERROR);
@@ -177,11 +174,10 @@ public:
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
-    auto *item = dynamic_cast<Item *>(row);
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(item));
+        .WillRepeatedly(Return(row));
 
     // For a single row, we save the binned workspace for the row
     auto workspacesToSave =
@@ -197,11 +193,10 @@ public:
         jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
     auto *row = &reductionJobs.mutableGroups()[0].mutableRows()[0].get();
     row->setOutputNames({"", "IvsQ", "IvsQBin"});
-    auto *item = dynamic_cast<Item *>(row);
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(item));
+        .WillRepeatedly(Return(row));
 
     // For multiple rows, we don't save any workspaces
     auto workspacesToSave =
@@ -219,11 +214,10 @@ public:
     group->setOutputNames({
         "stitched_test",
     });
-    auto *item = dynamic_cast<Item *>(group);
 
     EXPECT_CALL(*m_jobAlgorithm, item())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(item));
+        .WillRepeatedly(Return(group));
 
     auto workspacesToSave =
         jobRunner.algorithmOutputWorkspacesToSave(m_jobAlgorithm);
