@@ -174,7 +174,8 @@ class FigureInteraction(object):
         menu.addMenu(norm_menu)
 
     def _is_normalized(self, ax):
-        return list(ax.tracked_workspaces.values())[0][0].is_normalized
+        artists = [art for art in ax.tracked_workspaces.values()]
+        return all(art[0].is_normalized for art in artists)
 
     def _set_normalization_bin_width(self, ax):
         if self._is_normalized(ax):
@@ -203,10 +204,8 @@ class FigureInteraction(object):
                         "'{}'".format(workspace.name()))
             for ws_artist in ax.tracked_workspaces[workspace.name()]:
                 if ws_artist.spec_num == arg_set.get('specNum'):
-                    ws_artist.replace_data(workspace, arg_set_copy)
                     ws_artist.is_normalized = not is_normalized
-        y_label = get_axes_labels(workspace, normalize_by_bin_width=not is_normalized)[0]
-        ax.set_ylabel(y_label)
+                    ws_artist.replace_data(workspace, arg_set_copy)
         ax.relim()
         ax.autoscale()
         self.canvas.draw()
