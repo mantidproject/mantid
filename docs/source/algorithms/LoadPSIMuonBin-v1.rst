@@ -16,13 +16,10 @@ extension .bin. The file should only be loaded if the first two bytes
 are "1N" representing it as the format that this will load.
 
 LoadPSIMuonBin is capable of loading in accompanying temperature files.
-There are two options for achieving this. If a temperature file path 
-is passed to the property `TemperatureFilename` it will attempt to use
-this file. With no file given and temperature file searching is not 
-turned off (on by default), this is done by setting 
-`SearchForTempFile` to False, then it will recursively search for the 
-file in the current directory of the data file, and up to 3 directories
-deeper than the file.
+There are two options for achieving this. If no file is provided and 
+the temperature file searching enabled (it is by default), then it 
+will recursively search for the file in the current directory of the
+data file and up to 3 directories deeper than the file.
 
 Any temperature data loaded in from a separate file will be available 
 from the resultant workspace's sample logs, as a number series that 
