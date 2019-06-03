@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
-from mantid.api import FunctionFactory
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
 import re
+from mantid.api import FunctionFactory
 
 
 class FittingTabPresenter(object):
@@ -29,6 +29,8 @@ class FittingTabPresenter(object):
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
+        self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
+        self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(self.context.data_context.current_runs,
@@ -103,6 +105,7 @@ class FittingTabPresenter(object):
 
     def handle_fit_type_changed(self):
         fit_type = self.view.fit_type
+        self.clear_fit_information()
 
         if fit_type == self.view.single_fit:
             self.view.workspace_combo_box_label.setText('Select Workspace')
@@ -157,7 +160,7 @@ class FittingTabPresenter(object):
             self._fit_status = fit_status
             self._fit_chi_squared = fit_chi_squared
         elif self.view.fit_type == self.view.single_fit:
-            self._fit_function[index] = fit_function
+            self._fit_function[index] = FunctionFactory.createInitialized(str(fit_function))
             self._fit_status[index] = fit_status
             self._fit_chi_squared[index] = fit_chi_squared
         elif self.view.fit_type == self.view.simultaneous_fit:
@@ -203,7 +206,7 @@ class FittingTabPresenter(object):
 
     def _get_shared_parameters(self):
         params = {}
-        params['Function'] = FunctionFactory.createInitialized(self.view.fit_string)
+        params['Function'] = self.view.fit_string
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
         params['GroupName'] = self.view.group_name
@@ -235,6 +238,12 @@ class FittingTabPresenter(object):
         self.view.update_displayed_data_combo_box(self.selected_data)
         self.update_fit_status_information_in_view()
 
+    def clear_fit_information(self):
+        self._fit_status = [None] * len(self.selected_data) if self.selected_data else [None]
+        self._fit_chi_squared = [0.0] * len(self.selected_data) if self.selected_data else [0.0]
+        self._fit_function = [None] * len(self.selected_data) if self.selected_data else [None]
+        self.update_fit_status_information_in_view()
+
     @property
     def start_x(self):
         return self._start_x
@@ -256,13 +265,14 @@ class FittingTabPresenter(object):
     def retrieve_first_good_data_from_run_name(self, workspace_name):
         try:
             run = [float(re.search('[0-9]+', workspace_name).group())]
-        except AttributeError as error:
+        except AttributeError:
             return 0.0
 
         return self.context.first_good_data(run)
 
     def reset_start_time_to_first_good_data_value(self):
-        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if self.selected_data else [0.0]
+        self._start_x = [self.retrieve_first_good_data_from_run_name(run_name) for run_name in self.selected_data] if\
+            self.selected_data else [0.0]
         self._end_x = [self.view.end_time] * len(self.selected_data) if self.selected_data else [15.0]
         self.view.start_time = self.start_x[0] if 0 < len(self.start_x) else 0.0
         self.view.end_time = self.end_x[0] if 0 < len(self.end_x) else 15.0

@@ -11,6 +11,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_base_d
 from mantid.simpleapi import RenameWorkspace
 from mantid.api import FunctionFactory
 
+
 class FittingTabModel(object):
     def __init__(self):
         pass

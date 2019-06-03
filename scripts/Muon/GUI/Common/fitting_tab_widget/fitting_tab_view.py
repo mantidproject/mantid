@@ -78,7 +78,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
             return
 
-        self.function_browser.setFunction(str(fit_function))
+        self.function_browser.updateMultiDatasetParameters(fit_function)
+
         if output_status == 'success':
             self.fit_status_success_failure.setText('Success')
             self.fit_status_success_failure.setStyleSheet('color: green')
@@ -89,7 +90,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_status_chi_squared.setText('Chi squared: {:.4g}'.format(output_chi_squared))
 
     def update_global_fit_state(self, output_list):
-        if self.fit_type == self.single_fit:
+        if self.fit_type == self.single_fit or self.fit_type == self.simultaneous_fit:
             indexed_fit = output_list[self.get_index_for_start_end_times()]
             boolean_list = [indexed_fit == 'success'] if indexed_fit else []
         else:
@@ -136,7 +137,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     @property
     def fit_string(self):
-        return str(self.function_browser.getFitFunctionString())
+        return self.function_browser.getGlobalFunction()
 
     @property
     def minimizer(self):

@@ -46,11 +46,13 @@ class FittingTabModelTest(unittest.TestCase):
         parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
 
-        output_workspace, parameter_table, fitting_function = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
+        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
 
         self.assertAlmostEqual(parameter_table.row(0)['Value'], 5.0)
         self.assertAlmostEqual(parameter_table.row(1)['Value'], 0.0)
         self.assertAlmostEqual(parameter_table.row(2)['Value'], 1.0)
+        self.assertEqual(fit_status, 'success')
+        self.assertAlmostEqual(fit_chi_squared, 0.0)
 
     def test_add_workspace_to_ADS_adds_workspace_to_ads_in_correct_group_structure(self):
         workspace = CreateWorkspace([0,0], [0,0])
@@ -80,7 +82,7 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_do_sequential_fit_correctly_delegates_to_do_single_fit(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
-        self.model.do_single_fit = mock.MagicMock(return_value=trial_function)
+        self.model.do_single_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
         x_data = range(0, 100)
         y_data = [5 + x * x for x in x_data]
         workspace = CreateWorkspace(x_data, y_data)
@@ -90,7 +92,7 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.do_sequential_fit(parameter_dict)
 
         self.assertEqual(self.model.do_single_fit.call_count, 5)
-        self.model.do_single_fit.assert_called_with({'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
+        self.model.do_single_fit.assert_called_with({'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
 
 
