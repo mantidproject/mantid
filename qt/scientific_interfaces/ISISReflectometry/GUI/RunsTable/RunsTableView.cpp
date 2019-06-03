@@ -74,7 +74,7 @@ void RunsTableView::mustSelectGroup() {
 
 void RunsTableView::mustNotSelectGroup() {
   QMessageBox::critical(this, "Group Selected",
-                        "To delete rows you should not deselect any groups.");
+                        "To delete rows you should not select any groups.");
 }
 
 void RunsTableView::mustSelectGroupOrRow() {
