@@ -74,7 +74,7 @@ class FittingTabModel(object):
             parameter_dict['InputWorkspace'][0], parameter_dict['Function'])
         table_name, directory = self.create_parameter_table_name(
             parameter_dict['InputWorkspace'][0] + '+ ...',
-                                                                 parameter_dict['Function'])
+            parameter_dict['Function'])
 
         self.add_workspace_to_ADS(output_workspace, workspace_name, directory)
         if len(parameter_dict['InputWorkspace']) > 1:
@@ -88,7 +88,6 @@ class FittingTabModel(object):
                                 parameter_dict['InputWorkspace'])
 
         return function_string, output_status, output_chi_squared
-
 
     def do_simultaneous_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
@@ -119,9 +118,11 @@ class FittingTabModel(object):
             sub_parameter_dict['EndX'] = endX
             sub_parameter_dict['Function'] = function_string
 
-            function_string, output_status, output_chi_squared = self.do_single_fit(sub_parameter_dict)
+            function_string, output_status, output_chi_squared = self.do_single_fit(
+                sub_parameter_dict)
             # This is required so that a new function object is created that is not overwritten in subsequent iterations
-            new_function = FunctionFactory.createInitialized(str(function_string))
+            new_function = FunctionFactory.createInitialized(
+                str(function_string))
             function_string_list.append(new_function)
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)

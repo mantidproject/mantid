@@ -40,7 +40,7 @@ def check_facility():
     if current_facility not in SUPPORTED_FACILITIES:
         raise AttributeError(
             "Your facility {} is not supported by MuonAnalysis 2.0, so you"
-                             "will not be able to load any files. \n \n"
+            "will not be able to load any files. \n \n"
             "Supported facilities are :" + "\n - ".join(SUPPORTED_FACILITIES))
 
 
