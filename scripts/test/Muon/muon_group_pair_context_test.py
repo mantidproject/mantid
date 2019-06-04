@@ -136,20 +136,6 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.assertEqual(workspace_list, ['asymmetry_name_33333'])
 
-    def test_modifying_selected_group_pair_sends_modification_signal(self):
-        group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
-        group_2 = MuonGroup('group_2', [1, 3, 4, 7, 9])
-        group_3 = MuonGroup('group_3', [1, 3, 4, 7, 9])
-        self.context.add_group(group_1)
-        self.context.add_group(group_3)
-        self.context.add_group(group_2)
-        mock_callback = mock.MagicMock()
-        observer = GenericObserverWithArgPassing(mock_callback)
-        self.context.selected_group_pair_changed_notifier.add_subscriber(observer)
-
-        self.context.selected = 'group_3'
-
-        mock_callback.assert_called_once_with('group_3')
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

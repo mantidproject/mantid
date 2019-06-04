@@ -11,6 +11,7 @@ from qtpy import QtWidgets
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory
+from mantid.simpleapi import CreateWorkspace
 
 
 def retrieve_combobox_info(combo_box):
@@ -284,20 +285,24 @@ class FittingTabPresenterTest(GuiTest):
         self.assertEqual(self.view.fit_status_success_failure.text(), 'No Fit')
 
     def test_update_fit_group_name_correctly_increments_name(self):
+        CreateWorkspace(DataX=[0], DataY=[0], OutputWorkspace='Fitting Results')
         self.presenter.increment_fit_group_name()
 
         self.assertEqual(self.view.group_name, 'Fitting Results 1')
 
+        CreateWorkspace(DataX=[0], DataY=[0], OutputWorkspace='Fitting Results 1')
         self.presenter.increment_fit_group_name()
 
         self.assertEqual(self.view.group_name, 'Fitting Results 2')
 
         self.view.group_name = '1 custom fit name 1'
+        CreateWorkspace(DataX=[0], DataY=[0], OutputWorkspace='1 custom fit name 1')
         self.presenter.increment_fit_group_name()
 
         self.assertEqual(self.view.group_name, '1 custom fit name 2')
 
         self.view.group_name = '7 custom fit name 1'
+        CreateWorkspace(DataX=[0], DataY=[0], OutputWorkspace='7 custom fit name 1')
         self.presenter.increment_fit_group_name()
 
         self.assertEqual(self.view.group_name, '7 custom fit name 2')
