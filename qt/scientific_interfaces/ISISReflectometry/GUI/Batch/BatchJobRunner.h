@@ -52,6 +52,7 @@ public:
   void notifyAllWorkspacesDeleted() override;
 
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() override;
+  AlgorithmRuntimeProps rowProcessingProperties() const override;
 
 protected:
   Batch m_batch;

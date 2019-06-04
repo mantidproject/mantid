@@ -197,6 +197,10 @@ void BatchJobRunner::addAlgorithmForProcessingRow(
   algorithms.emplace_back(std::move(algorithm));
 }
 
+AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
+  return createAlgorithmRuntimeProps(m_batch);
+}
+
 void BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm =
       boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);

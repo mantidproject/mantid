@@ -115,6 +115,8 @@ protected:
   /// The run notifier implementation
   std::unique_ptr<IRunNotifier> m_runNotifier;
 
+  std::string liveDataReductionOptions(const std::string &instrument);
+
 private:
   /// The main view we're managing
   IRunsView *m_view;
@@ -161,7 +163,6 @@ private:
   void stopMonitor();
   void startMonitorComplete();
   std::string liveDataReductionAlgorithm();
-  std::string liveDataReductionOptions(const std::string &instrument);
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
   void handleError(const std::string &message, const std::exception &e);
