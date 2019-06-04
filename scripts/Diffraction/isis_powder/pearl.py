@@ -79,11 +79,9 @@ class Pearl(AbstractInst):
     def _apply_temporary_inst_settings(self, kwargs, run):
 
         # set temporary settings
+        self._inst_settings.update_attributes(kwargs=kwargs)
         if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
-            self._inst_settings.update_attributes(kwargs=kwargs)
             self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        else:
-            self._inst_settings.update_attributes(kwargs=kwargs)
 
         # check that cache exists
         run_number_string_key = self._generate_run_details_fingerprint(run,
