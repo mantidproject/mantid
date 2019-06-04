@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
-#include "../ModelCreationHelpers.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;

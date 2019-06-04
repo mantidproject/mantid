@@ -1,5 +1,6 @@
 set(COMMON_SRC_FILES Parse.cpp GetInstrumentParameter.cpp
-                     InstrumentParameters.cpp OptionDefaults.cpp)
+                     InstrumentParameters.cpp OptionDefaults.cpp
+                     ModelCreationHelper.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -12,6 +13,7 @@ set(COMMON_INC_FILES
     InstrumentParameters.h
     Map.h
     OptionDefaults.h
+    ModelCreationHelper.h
     Parse.h
     QWidgetGroup.h
     ValidationResult.h

@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERPROGRESSBARTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERPROGRESSBARTEST_H_
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
-#include "../ModelCreationHelpers.h"
 #include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>

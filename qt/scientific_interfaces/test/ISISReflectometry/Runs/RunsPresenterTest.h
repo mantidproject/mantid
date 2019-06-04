@@ -7,9 +7,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
+#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
-#include "../ModelCreationHelpers.h"
 #include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
@@ -22,11 +22,13 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::_;
 using testing::_;
 
 //=====================================================================================

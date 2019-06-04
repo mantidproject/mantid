@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;

@@ -84,7 +84,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp
-                   test/ISISReflectometry/ModelCreationHelpers.cpp
                  LINK_LIBS
                    ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}

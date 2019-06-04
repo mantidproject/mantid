@@ -4,10 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "ModelCreationHelper.h"
 #include "../../ISISReflectometry/Reduction/Batch.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ModelCreationHelper {
 
 namespace { // unnamed
 Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
@@ -309,5 +311,6 @@ Instrument makeEmptyInstrument() {
                          RangeInLambda(0.0, 0.0)),
       DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
 }
+} // namespace ModelCreationHelper
 } // namespace CustomInterfaces
 } // namespace MantidQt
