@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import os, math
+import os
+import math
 import numpy as np
 from mantid import config, mtd, logger
-from mantid.dataobjects import TableWorkspace
-from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
+from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, \
+    FloatArrayProperty, FloatArrayLengthValidator, IntBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     WorkspaceGroupProperty, FileAction, Progress, WorkspaceProperty, PropertyMode
-from mantid.simpleapi import *  # noqa
+from mantid.simpleapi import *
 
 
 def _ws_or_none(s):
@@ -55,6 +56,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _efixed = None
     _normalise_to = None
     _monitor_cutoff = None
+    _sample_coords = None
+    _fit_option = None
+    _group_by = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -127,6 +131,24 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                                optional=PropertyMode.Optional),
                              doc='The name of the output elastic channel workspace.')
 
+        self.declareProperty(name='ElasticPeakFitting', defaultValue='FitAllPixelGroups',
+                             validator=StringListValidator(['FitAllPixelGroups', 'FitEquatorialOnly']),
+                             doc='Choose the method for calibrating TOF axes.')
+
+        self.declareProperty(name='GroupPixelsBy', defaultValue=4, validator=IntBoundedValidator(lower=1, upper=128),
+                             doc='Choose how to group the pixels for elastic peak fitting; must be a power of 2.')
+
+        self.declareProperty(FloatArrayProperty("SampleCoordinates", [0.,0.,0.], FloatArrayLengthValidator(3), direction=Direction.Input),
+                             doc='The sample coordinates X, Y, Z.')
+
+        bats_options = 'BATS only options'
+        self.setPropertyGroup('MonitorCutoff', bats_options)
+        self.setPropertyGroup('InputElasticChannelWorkspace', bats_options)
+        self.setPropertyGroup('OutputElasticChannelWorkspace', bats_options)
+        self.setPropertyGroup('ElasticPeakFitting', bats_options)
+        self.setPropertyGroup('GroupPixelsBy', bats_options)
+        self.setPropertyGroup('SampleCoordinates', bats_options)
+
     def validateInputs(self):
 
         issues = dict()
@@ -140,10 +162,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                     or self._psd_int_range[0] >= self._psd_int_range[1]:
                 issues['ManualPSDIntegrationRange'] = 'Start or end pixel number out is of range [1-128], or has wrong order'
 
+        group_by = self.getProperty('GroupPixelsBy').value
+        if group_by % 2 != 0:
+            issues['GroupPixelsBy'] = 'Group by must be a power of 2, e.g. 2, 4, 8, 16 ... 128'
+
         return issues
 
     def setUp(self):
-
+        """
+        Sets up the input properties to configure the reduction flow
+        """
         self._run_file = self.getPropertyValue('Run').replace(',','+') # automatic summing
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
@@ -153,6 +181,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
         self._normalise_to = self.getPropertyValue('NormaliseTo')
         self._monitor_cutoff = self.getProperty('MonitorCutoff').value
+        self._sample_coords = self.getProperty('SampleCoordinates').value
+        self._fit_option = self.getPropertyValue('ElasticPeakFitting')
+        self._group_by = self.getProperty('GroupPixelsBy').value
 
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == 128):
             self._use_map_file = True
@@ -339,95 +370,180 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace',self._red_ws)
 
-    def _create_elastic_channel_ws(self, channel, speed, phase, delay):
-        tws = TableWorkspace()
-        tws.addColumn('double', 'ElasticChannel')
-        tws.addColumn('double', 'ChopperSpeed')
-        tws.addColumn('double', 'ChopperPhase')
-        tws.addColumn('double', 'PSD_TOF_Delay')
-        tws.addRow([channel, speed, phase, delay])
-        return tws
+    def _get_trigger_chopper_info(self, run):
+        # check the trigger chopper flag from run
+        return [run.getLogData('CH3.rotation_speed').value, run.getLogData('CH3.phase').value]
+
+    def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None):
+        """
+        Creates the elastic channel table workspace.
+        @param epp_ws: EPP workspace
+        @param run: run object
+        @param epp_equator_ws: EPP workspace of the equatorial line
+        """
+        speed, phase = self._get_trigger_chopper_info(run)
+        delay = run.getLogData('PSD.time_of_flight_2').value
+        epp_ws.removeColumn('WorkspaceIndex')
+        epp_ws.removeColumn('PeakCentreError')
+        epp_ws.removeColumn('Sigma')
+        epp_ws.removeColumn('SigmaError')
+        epp_ws.removeColumn('Height')
+        epp_ws.removeColumn('HeightError')
+        epp_ws.removeColumn('chiSq')
+        if epp_equator_ws:
+            equator_center = epp_equator_ws.cell('PeakCentre', 0)
+            center_status = epp_equator_ws.cell('FitStatus', 0)
+            equator_row = {'PeakCentre': equator_center, 'FitStatus': center_status}
+            epp_ws.addRow(equator_row)
+        epp_ws.addColumn('double', 'ChopperSpeed')
+        epp_ws.addColumn('double', 'ChopperPhase')
+        epp_ws.addColumn('double', 'PSD_TOF_Delay')
+        for row in range(epp_ws.rowCount()):
+            epp_ws.setCell('ChopperSpeed', row, speed)
+            epp_ws.setCell('ChopperPhase', row, phase)
+            epp_ws.setCell('PSD_TOF_Delay', row, delay)
 
     def _t0_offset(self, center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
+        """
+        Calculates the t0 offset between measurements with and without inelastic offset.
+        """
         return - (shifted_chopper_phase - center_chopper_phase) / center_chopper_speed / 6 + (shifted_psd_delay - center_psd_delay) * 1E-6
+
+    def _convert_to_energy_bats(self, ws, epp_ws, t0_offset=0.):
+        """
+        Converts the workspace to TOF for Bats mode.
+        @param ws: input workspace
+        @param epp_ws: input EPP workspace
+        @param t0_offset: TOF offset for the measurements with inelastic shift
+        """
+        detector_info = ws.detectorInfo()
+        l1 = detector_info.l1()
+        l2_equator = (detector_info.l2(64) + detector_info.l2(65)) / 2.
+        v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
+        elastic_tof_equator = ((l1 + l2_equator) / v_fixed + t0_offset) * 1E+6
+        run = ws.getRun()
+        channel_width = run.getLogData('PSD.time_of_flight_0').value
+        input_epp = self.getProperty('InputElasticChannelWorkspace').value
+        output_epp = self.getPropertyValue('OutputElasticChannelWorkspace')
+        rows = epp_ws.rowCount()
+        if rows == 1:
+            elastic_channel_equator = epp_ws.cell('PeakCentre', 0)
+            formula = '{0} + (x - {1})*{2}'.format(elastic_tof_equator, elastic_channel_equator, channel_width)
+            ConvertAxisByFormula(InputWorkspace=ws, Axis='X', AxisUnits='TOF', Formula=formula, OutputWorkspace=ws)
+        else:
+            elastic_channel_equator = epp_ws.cell('PeakCentre', rows-1)
+            x = ws.extractX()
+            for pixel in range(ws.getNumberHistograms()):
+                if 0 < pixel < 2049:
+                    group = int((pixel - 1) / self._group_by)
+                    if epp_ws.cell('FitStatus', group) == 'success':
+                        l2 = detector_info.l2(pixel)
+                        elastic_tof = ((l1 + l2) / v_fixed + t0_offset) * 1E+6
+                        elastic_channel = epp_ws.cell('PeakCentre', group)
+                else:
+                    elastic_tof = elastic_tof_equator
+                    elastic_channel = elastic_channel_equator
+                x_new = elastic_tof + (x[pixel] - elastic_channel) * channel_width
+                ws.setX(pixel, x_new)
+            ws.getAxis(0).setUnit('TOF')
+
+        if output_epp:
+            RenameWorkspace(InputWorkspace=epp_ws, OutputWorkspace=output_epp)
+            self.setProperty('OutputElasticChannelWorkspace', output_epp)
+        elif not input_epp:
+            DeleteWorkspace(epp_ws)
+
+        self._rebin_to_monitor(ws.name(), v_fixed, elastic_tof_equator)
+
+    def _rebin_to_monitor(self, ws, v_fixed, elastic_tof_equator):
+        """
+        Adjusts the TOF of the monitor, converts to energy and rebins data to the monitor binning.
+        @param ws: input workspace name
+        @param v_fixed: elastic velocity defined by the analyser
+        @param elastic_tof_equator : elastic time-of-flight of the equatorial line
+        """
+        run = mtd[ws].getRun()
+        mon_ws = '__' + ws + '_mon'
+        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace=mon_ws)
+        delay_offset = run.getLogData('monitor.time_of_flight_2').value - run.getLogData('PSD.time_of_flight_2').value
+        ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=delay_offset, Operation='Add')
+        frame_width = 1E+6 * 2 * 4. / v_fixed
+        mon_data = mtd[mon_ws].readY(0)
+        mon_elastic = np.argmax(mon_data)
+        mon_elastic_tof = mtd[mon_ws].readX(0)[mon_elastic]
+        n_frames_diff = math.floor((mon_elastic_tof - elastic_tof_equator) / frame_width) + 1
+        ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=-n_frames_diff * frame_width, Operation='Add')
+        ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Energy', EMode='Elastic')
+        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='Energy', EMode='Indirect')
+        monitor = mtd[mon_ws].readY(0)
+        x_axis = mtd[mon_ws].readX(0)
+        cutoff = np.max(monitor) * self._monitor_cutoff
+        mon_range = x_axis[:-1][monitor > cutoff]
+        self.log().information('Cutoff from {0} to {1} in Energy [mev]'.format(mon_range[0], mon_range[-1]))
+        CropWorkspace(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, XMin=mon_range[0], XMax=mon_range[-1])
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=mon_range[0], XMax=mon_range[-1])
+        RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=mon_ws, OutputWorkspace=ws)
+        if self._normalise_to == 'Monitor':
+            Divide(LHSWorkspace=ws, RHSWorkspace=mon_ws, OutputWorkspace=ws)
+            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+        DeleteWorkspace(mon_ws)
 
     def _reduce_bats(self, ws):
         """
         Reduces inverted TOF mode (BATS)
-        @param ws :: input workspace
+        @param ws :: input workspace name
         """
-        t0_offset = 0.
-        input_epp = self.getPropertyValue('InputElasticChannelWorkspace')
-        output_epp = self.getPropertyValue('OutputElasticChannelWorkspace')
+        x,y,z = self._sample_coords
+        if x**2+y**2+z**2 != 0.:
+            MoveInstrumentComponent(Workspace=ws, ComponentName='sample-position', X=x, Y=y, Z=z, RelativePosition=False)
+        input_epp = self.getProperty('InputElasticChannelWorkspace').value
+
         if not input_epp:
-            epp_ws = '__'+self._ws+'_epp'
-            equator_ws = '__'+self._ws+'_eq'
+            equator_epp_ws = '__'+ws+'_eq_epp'
+            equator_ws = '__'+ws+'_eq'
+            grouped_ws = '__'+ws+'_gr'
+            epp_ws = '__'+ ws+'_epp'
             equator_grouping_filename = self._instrument.getStringParameter('EquatorialGroupingFile')[0]
             grouping_file = os.path.join(config['groupingFiles.directory'], equator_grouping_filename)
-            GroupDetectors(InputWorkspace=self._ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
-            to_crop = mtd[self._ws].blocksize() / 4
+            GroupDetectors(InputWorkspace=ws, OutputWorkspace=equator_ws, MapFile=grouping_file)
+            to_crop = mtd[ws].blocksize() / 4
             CropWorkspace(InputWorkspace=equator_ws, OutputWorkspace=equator_ws, XMin=to_crop, XMax=3*to_crop)
-            FindEPP(InputWorkspace=equator_ws, OutputWorkspace=epp_ws)
-            elastic_channel = mtd[epp_ws].cell(0,1)
-            if output_epp:
-                run = mtd[self._ws].getRun()
-                tws = self._create_elastic_channel_ws(elastic_channel, run.getLogData('CH3.rotation_speed').value,
-                                                      run.getLogData('CH3.phase').value, run.getLogData('PSD.time_of_flight_2').value)
-                self.setProperty('OutputElasticChannelWorkspace', tws)
-            DeleteWorkspaces([equator_ws, epp_ws])
+            FindEPP(InputWorkspace=equator_ws, OutputWorkspace=equator_epp_ws)
+            DeleteWorkspace(equator_ws)
+
+            if self._fit_option == 'FitAllPixelGroups':
+                GroupDetectors(InputWorkspace=ws, OutputWorkspace=grouped_ws, GroupingPattern=self._group_pixels(self._group_by))
+                CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, XMin=to_crop, XMax=3 * to_crop)
+                FindEPP(InputWorkspace=grouped_ws, OutputWorkspace=epp_ws)
+                self._create_elastic_channel_ws(mtd[epp_ws], mtd[ws].getRun(), mtd[equator_epp_ws])
+                DeleteWorkspaces([equator_epp_ws, grouped_ws])
+            else:
+                self._create_elastic_channel_ws(mtd[equator_epp_ws], mtd[ws].getRun())
+                RenameWorkspace(InputWorkspace=equator_epp_ws, OutputWorkspace=epp_ws)
+            self._convert_to_energy_bats(mtd[ws], mtd[epp_ws])
         else:
-            elastic_channel = mtd[input_epp].cell(0,0)
-            center_chopper_speed = mtd[input_epp].cell(0,1)
-            center_chopper_phase = mtd[input_epp].cell(0,2)
-            center_psd_delay = mtd[input_epp].cell(0,3)
-            shifted_chopper_phase = mtd[self._ws].getRun().getLogData('CH3.phase').value
-            shifted_psd_delay = mtd[self._ws].getRun().getLogData('PSD.time_of_flight_2').value
+            center_chopper_speed = input_epp.cell('ChopperSpeed', 0)
+            center_chopper_phase = input_epp.cell('ChopperPhase', 0)
+            center_psd_delay = input_epp.cell('PSD_TOF_Delay', 0)
+            run = mtd[ws].getRun()
+            shifted_chopper_phase = self._get_trigger_chopper_info(run)[1]
+            shifted_psd_delay = run.getLogData('PSD.time_of_flight_2').value
             t0_offset = self._t0_offset(center_chopper_speed, center_chopper_phase,
                                         shifted_chopper_phase, center_psd_delay, shifted_psd_delay)
             self.log().information('T0 Offset is {0} [sec]'.format(t0_offset))
-        mon_ws = '__'+self._ws+'_mon'
-        rebin_ws = self._ws + '_reb'
-        detectro_info = mtd[self._ws].detectorInfo()
-        l1 = detectro_info.l1()
-        l2_equator = (detectro_info.l2(65) + detectro_info.l2(66)) / 2.
-        v_fixed = self._instrument.getNumberParameter('Vfixed')[0]
-        elastic_tof = ((l1 + l2_equator) / v_fixed + t0_offset) * 1E+6
-        run = mtd[self._ws].getRun()
-        channel_width = run.getLogData('PSD.time_of_flight_0').value
-        formula = '{0} + (x - {1})*{2}'.format(elastic_tof, elastic_channel, channel_width)
-        ConvertAxisByFormula(InputWorkspace=self._ws, Axis='X', AxisUnits='TOF', Formula=formula, OutputWorkspace=self._ws)
-        ExtractMonitors(InputWorkspace=self._ws, DetectorWorkspace=self._ws, MonitorWorkspace=mon_ws)
-        if self._normalise_to == 'Monitor':
-            if not run.hasProperty('monitor.time_of_flight_2') or not run.hasProperty('PSD.time_of_flight_2'):
-                raise RuntimeError('Unable to normalise to monitor: missing chopper delay information.')
-            phase_offset = run.getLogData('monitor.time_of_flight_2').value - run.getLogData('PSD.time_of_flight_2').value
-            ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=phase_offset, Operation='Add')
-            frame_width = 1E+6 * 2 * 4./v_fixed
-            mon_data = mtd[mon_ws].readY(0)
-            mon_elastic = np.argmax(mon_data)
-            mon_elastic_tof = mtd[mon_ws].readX(0)[mon_elastic]
-            n_frames_diff = math.floor((mon_elastic_tof - elastic_tof)/frame_width) + 1
-            ScaleX(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Factor=-n_frames_diff * frame_width, Operation='Add')
-            ConvertUnits(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, Target='Energy', EMode='Elastic')
-            ConvertUnits(InputWorkspace=self._ws, OutputWorkspace=self._ws, Target='Energy', EMode='Indirect')
-            monitor = mtd[mon_ws].readY(0)
-            x_axis = mtd[mon_ws].readX(0)
-            cutoff = np.max(monitor) * self._monitor_cutoff
-            range = x_axis[:-1][monitor > cutoff]
-            self.log().information('Cutoff from {0} to {1} in Energy [mev]'.format(range[0], range[-1]))
-            CropWorkspace(InputWorkspace=mon_ws, OutputWorkspace=mon_ws, XMin=range[0], XMax=range[-1])
-            CropWorkspace(InputWorkspace=self._ws, OutputWorkspace=self._ws, XMin=range[0], XMax=range[-1])
-            RebinToWorkspace(WorkspaceToRebin=self._ws, WorkspaceToMatch=mon_ws, OutputWorkspace=self._ws)
-            Divide(LHSWorkspace=self._ws, RHSWorkspace=mon_ws, OutputWorkspace=self._ws)
-            ReplaceSpecialValues(InputWorkspace=self._ws, OutputWorkspace=self._ws,
-                                 NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
-        ConvertUnits(InputWorkspace=self._ws, OutputWorkspace=self._ws, Target='DeltaE', EMode='Indirect')
-        ExtractSingleSpectrum(InputWorkspace=self._ws, OutputWorkspace=rebin_ws, WorkspaceIndex=0)
-        RebinToWorkspace(WorkspaceToRebin=self._ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=self._ws)
-        GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
-        DeleteWorkspaces([rebin_ws, mon_ws])
+            self._convert_to_energy_bats(mtd[ws], input_epp, t0_offset)
+
+        rebin_ws = '__'+ws+'_rebin'
+        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
+        ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=64)
+        RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
+        GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
+        DeleteWorkspaces([rebin_ws])
 
     def _group_pixels(self, by=4):
+        """
+        Groups pixels in the tubes by the factor, which should be a power of 2.
+        """
         pattern = ''
         for i in range(16):
             for j in range(int(128/by)):
@@ -521,18 +637,18 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         elif self._reduction_type == 'EFWS':
             # Integrate over the whole range
 
-            int = '__integral1_' + ws
-            Integration(InputWorkspace=mon, OutputWorkspace=int,
+            int_ws = '__integral1_' + ws
+            Integration(InputWorkspace=mon, OutputWorkspace=int_ws,
                         RangeLower=x[0], RangeUpper=x[-1])
 
-            if mtd[int].readY(0)[0] !=0: # this needs to be checked
-                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int].readY(0)[0])
+            if mtd[int_ws].readY(0)[0] !=0: # this needs to be checked
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int_ws].readY(0)[0])
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int].readY(0)[0]), EnableLogging = False)
+                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging = False)
 
-            DeleteWorkspace(int)
+            DeleteWorkspace(int_ws)
 
         elif self._reduction_type == 'IFWS':
             # Integrate over the two peaks at the beginning and at the end and sum
@@ -541,7 +657,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
             i1 = '__integral1_' + ws
             i2 = '__integral2_' + ws
-            int = '__integral_' + ws
+            int_ws = '__integral_' + ws
 
             Integration(InputWorkspace=mon, OutputWorkspace=i1,
                         RangeLower=x[0], RangeUpper=x[2*x_start])
@@ -549,18 +665,18 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             Integration(InputWorkspace=mon, OutputWorkspace=i2,
                         RangeLower=x[-2*(size - x_end)], RangeUpper=x[-1])
 
-            Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int)
+            Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int_ws)
 
-            if mtd[int].readY(0)[0] != 0: # this needs to be checked
-                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int].readY(0)[0])
+            if mtd[int_ws].readY(0)[0] != 0: # this needs to be checked
+                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int_ws].readY(0)[0])
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int].readY(0)[0]), EnableLogging = False)
+                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging = False)
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
-            DeleteWorkspace(int)
+            DeleteWorkspace(int_ws)
 
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
