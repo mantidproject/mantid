@@ -116,13 +116,14 @@ template <typename T> bool BatchJobRunner::isSelected(T const &item) {
   return m_processAll || m_batch.isInSelection(item, m_rowLocationsToProcess);
 }
 
-bool BatchJobRunner::hasSelectedRows(Group const &group) {
+bool BatchJobRunner::hasSelectedRowsRequiringProcessing(Group const &group) {
   // If the group itself is selected, consider its rows to also be selected
   if (m_processAll || isSelected(group))
     return true;
 
   for (auto const &row : group.rows()) {
-    if (row && isSelected(row.get()))
+    if (row && isSelected(row.get()) &&
+        row->requiresProcessing(m_reprocessFailed))
       return true;
   }
 
@@ -133,49 +134,52 @@ bool BatchJobRunner::hasSelectedRows(Group const &group) {
  * groups in the table
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
-  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &groups =
       m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
   for (auto &group : groups) {
-    // Process the rows in the group or, if there are no rows to process,
-    // postprocess the group. If that's also done, continue to the next group
-    if (hasSelectedRows(group) && group.requiresProcessing(m_reprocessFailed)) {
-      addAlgorithmsForProcessingRowsInGroup(group, algorithms);
-      return algorithms;
-    } else if (isSelected(group) &&
-               group.requiresPostprocessing(m_reprocessFailed)) {
-      addAlgorithmForPostprocessingGroup(group, algorithms);
-      return algorithms;
-    }
+    // If the group is selected, process all of its rows
+    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed))
+      return algorithmsForProcessingRowsInGroup(group, true);
+    // If the group has rows that are selected, process the selected rows
+    if (hasSelectedRowsRequiringProcessing(group))
+      return algorithmsForProcessingRowsInGroup(group, false);
+    // If the group's requires postprocessing, do it
+    if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed))
+      return algorithmForPostprocessingGroup(group);
   }
-  return algorithms;
+  return std::deque<IConfiguredAlgorithm_sptr>();
 }
 
 /** Add the algorithms and related properties for postprocessing a group
  * @param group : the group to get the row algorithms for
- * @param algorithms : the list of configured algorithms to add this group to
- * @returns : true if algorithms were added, false if there was nothing to do
+ * @returns : the list of configured algorithms
  */
-void BatchJobRunner::addAlgorithmForPostprocessingGroup(
-    Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+std::deque<IConfiguredAlgorithm_sptr>
+BatchJobRunner::algorithmForPostprocessingGroup(Group &group) {
   auto algorithm = createConfiguredAlgorithm(m_batch, group);
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   algorithms.emplace_back(std::move(algorithm));
+  return algorithms;
 }
 
 /** Add the algorithms and related properties for processing all the rows
  * in a group
  * @param group : the group to get the row algorithms for
- * @param algorithms : the list of configured algorithms to add this group's
- * rows to
- * @returns : true if algorithms were added, false if there was nothing to do
+ * @param processAll : if true, include all rows in the group;
+ * otherwise just include selected rows
+ * @returns : the list of configured algorithms
  */
-void BatchJobRunner::addAlgorithmsForProcessingRowsInGroup(
-    Group &group, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+std::deque<IConfiguredAlgorithm_sptr>
+BatchJobRunner::algorithmsForProcessingRowsInGroup(Group &group,
+                                                   bool processAll) {
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
   auto &rows = group.mutableRows();
   for (auto &row : rows) {
-    if (row && row->requiresProcessing(m_reprocessFailed))
+    if (row && row->requiresProcessing(m_reprocessFailed) &&
+        (processAll || isSelected(row.get())))
       addAlgorithmForProcessingRow(row.get(), algorithms);
   }
+  return algorithms;
 }
 
 /** Add the algorithm and related properties for processing a row

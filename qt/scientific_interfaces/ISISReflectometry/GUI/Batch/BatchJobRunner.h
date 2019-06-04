@@ -68,13 +68,11 @@ private:
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
 
   template <typename T> bool isSelected(T const &item);
-  bool hasSelectedRows(Group const &group);
-  void addAlgorithmForPostprocessingGroup(
-      Group &group,
-      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
-  void addAlgorithmsForProcessingRowsInGroup(
-      Group &group,
-      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
+  bool hasSelectedRowsRequiringProcessing(Group const &group);
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+  algorithmForPostprocessingGroup(Group &group);
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+  algorithmsForProcessingRowsInGroup(Group &group, bool processAll);
   void addAlgorithmForProcessingRow(
       Row &row,
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
