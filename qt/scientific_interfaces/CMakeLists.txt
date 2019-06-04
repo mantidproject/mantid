@@ -55,8 +55,10 @@ set(TEST_FILES
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowDeletionTest.h
     test/ISISReflectometry/Event/EventPresenterTest.h
     test/ISISReflectometry/Experiment/ExperimentPresenterTest.h
+    test/ISISReflectometry/Experiment/ExperimentOptionDefaultsTest.h
     test/ISISReflectometry/Experiment/PerThetaDefaultsTableValidatorTest.h
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
+    test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Plotting/PlotterTestQt4.h)
@@ -72,6 +74,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
                    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
                    ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                   ../../Framework/TestHelpers/src/ReflectometryHelper.cpp
                    ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp

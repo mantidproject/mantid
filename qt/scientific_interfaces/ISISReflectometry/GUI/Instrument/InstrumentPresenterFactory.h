@@ -21,18 +21,7 @@ public:
   InstrumentPresenterFactory() {}
 
   std::unique_ptr<IInstrumentPresenter> make(IInstrumentView *view) {
-    return std::make_unique<InstrumentPresenter>(view, makeModel());
-  }
-
-private:
-  // TODO inject model rather than creating it here
-  Instrument makeModel() {
-    auto wavelengthRange = RangeInLambda(0.0, 0.0);
-    auto monitorCorrections = MonitorCorrections(
-        0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
-    auto detectorCorrections =
-        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+    return std::make_unique<InstrumentPresenter>(view, Instrument());
   }
 };
 } // namespace CustomInterfaces

@@ -356,7 +356,6 @@ set(INC_FILES
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
     inc/MantidAlgorithms/BinaryOperateMasks.h
     inc/MantidAlgorithms/BinaryOperation.h
-    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
     inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
     inc/MantidAlgorithms/CalculateCountRate.h
     inc/MantidAlgorithms/CalculateDIFC.h

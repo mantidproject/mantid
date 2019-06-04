@@ -25,11 +25,11 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
   else if (correctionType == "ParameterFile")
     return PolarizationCorrectionType::ParameterFile;
   else
-    throw std::runtime_error("Unexpected polarization correction type.");
+    throw std::invalid_argument("Unexpected polarization correction type.");
 }
 
 inline std::string
-PolarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
+polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
   switch (correctionType) {
   case PolarizationCorrectionType::None:
     return "None";
@@ -40,7 +40,7 @@ PolarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
   case PolarizationCorrectionType::ParameterFile:
     return "ParameterFile";
   }
-  throw std::runtime_error("Unexpected polarization correction type.");
+  throw std::invalid_argument("Unexpected polarization correction type.");
 }
 
 inline bool polarizationCorrectionRequiresInputs(

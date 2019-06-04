@@ -31,6 +31,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentViewSubscriber {
 public:
   virtual void notifyPerAngleDefaultsChanged(int column, int row) = 0;
   virtual void notifySettingsChanged() = 0;
+  virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySummationTypeChanged() = 0;
   virtual void notifyNewPerAngleDefaultsRequested() = 0;
   virtual void notifyRemovePerAngleDefaultsRequested(int index) = 0;
@@ -39,6 +40,8 @@ public:
 class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentView {
 public:
   virtual void subscribe(ExperimentViewSubscriber *notifyee) = 0;
+  virtual void connectExperimentSettingsWidgets() = 0;
+  virtual void disconnectExperimentSettingsWidgets() = 0;
   virtual void
   createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
 
@@ -63,6 +66,8 @@ public:
 
   virtual std::vector<std::array<std::string, 8>>
   getPerAngleOptions() const = 0;
+  virtual void
+      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
   virtual void showAllPerAngleOptionsAsValid() = 0;

@@ -51,6 +51,8 @@ void InstrumentView::initLayout() {
   m_ui.monBgMaxEdit->setSpecialValueText("Unset");
   m_ui.lamMinEdit->setSpecialValueText("Unset");
   m_ui.lamMaxEdit->setSpecialValueText("Unset");
+  connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
+          SLOT(onRestoreDefaultsRequested()));
 }
 
 void InstrumentView::connectSettingsChange(QLineEdit &edit) {
@@ -77,8 +79,36 @@ void InstrumentView::connectSettingsChange(QCheckBox &edit) {
   connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
+void InstrumentView::disconnectSettingsChange(QLineEdit &edit) {
+  disconnect(&edit, SIGNAL(textChanged(QString const &)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void InstrumentView::disconnectSettingsChange(QSpinBox &edit) {
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void InstrumentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void InstrumentView::disconnectSettingsChange(QComboBox &edit) {
+  disconnect(&edit, SIGNAL(currentIndexChanged(int)), this,
+             SLOT(onSettingsChanged()));
+}
+
+void InstrumentView::disconnectSettingsChange(QCheckBox &edit) {
+  disconnect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
+}
+
 void InstrumentView::onSettingsChanged() {
   m_notifyee->notifySettingsChanged();
+}
+
+void InstrumentView::onRestoreDefaultsRequested() {
+  m_notifyee->notifyRestoreDefaultsRequested();
 }
 
 void InstrumentView::disableAll() { m_ui.instSettingsGroup->setEnabled(false); }
@@ -116,6 +146,32 @@ void InstrumentView::registerInstrumentSettingsWidgets(
                         "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors",
                         alg);
+}
+
+void InstrumentView::connectInstrumentSettingsWidgets() {
+  connectSettingsChange(*m_ui.intMonCheckBox);
+  connectSettingsChange(*m_ui.monIntMinEdit);
+  connectSettingsChange(*m_ui.monIntMaxEdit);
+  connectSettingsChange(*m_ui.monBgMinEdit);
+  connectSettingsChange(*m_ui.monBgMaxEdit);
+  connectSettingsChange(*m_ui.lamMinEdit);
+  connectSettingsChange(*m_ui.lamMaxEdit);
+  connectSettingsChange(*m_ui.I0MonitorIndex);
+  connectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
+  connectSettingsChange(*m_ui.correctDetectorsCheckBox);
+}
+
+void InstrumentView::disconnectInstrumentSettingsWidgets() {
+  disconnectSettingsChange(*m_ui.intMonCheckBox);
+  disconnectSettingsChange(*m_ui.monIntMinEdit);
+  disconnectSettingsChange(*m_ui.monIntMaxEdit);
+  disconnectSettingsChange(*m_ui.monBgMinEdit);
+  disconnectSettingsChange(*m_ui.monBgMaxEdit);
+  disconnectSettingsChange(*m_ui.lamMinEdit);
+  disconnectSettingsChange(*m_ui.lamMaxEdit);
+  disconnectSettingsChange(*m_ui.I0MonitorIndex);
+  disconnectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
+  disconnectSettingsChange(*m_ui.correctDetectorsCheckBox);
 }
 
 template <typename Widget>
@@ -217,13 +273,29 @@ int InstrumentView::getMonitorIndex() const {
   return m_ui.I0MonitorIndex->value();
 }
 
+void InstrumentView::setMonitorIndex(int value) {
+  m_ui.I0MonitorIndex->setValue(value);
+}
+
 bool InstrumentView::getIntegrateMonitors() const {
   return m_ui.intMonCheckBox->isChecked();
 }
 
+void InstrumentView::setIntegrateMonitors(bool value) {
+  m_ui.intMonCheckBox->setChecked(value);
+}
+
 double InstrumentView::getLambdaMin() const { return m_ui.lamMinEdit->value(); }
 
+void InstrumentView::setLambdaMin(double value) {
+  m_ui.lamMinEdit->setValue(value);
+}
+
 double InstrumentView::getLambdaMax() const { return m_ui.lamMaxEdit->value(); }
+
+void InstrumentView::setLambdaMax(double value) {
+  m_ui.lamMaxEdit->setValue(value);
+}
 
 void InstrumentView::showLambdaRangeInvalid() {
   showAsInvalid(*m_ui.lamMinEdit);
@@ -239,8 +311,16 @@ double InstrumentView::getMonitorBackgroundMin() const {
   return m_ui.monBgMinEdit->value();
 }
 
+void InstrumentView::setMonitorBackgroundMin(double value) {
+  m_ui.monBgMinEdit->setValue(value);
+}
+
 double InstrumentView::getMonitorBackgroundMax() const {
   return m_ui.monBgMaxEdit->value();
+}
+
+void InstrumentView::setMonitorBackgroundMax(double value) {
+  m_ui.monBgMaxEdit->setValue(value);
 }
 
 void InstrumentView::showMonitorBackgroundRangeInvalid() {
@@ -257,8 +337,16 @@ double InstrumentView::getMonitorIntegralMin() const {
   return m_ui.monIntMinEdit->value();
 }
 
+void InstrumentView::setMonitorIntegralMin(double value) {
+  m_ui.monIntMinEdit->setValue(value);
+}
+
 double InstrumentView::getMonitorIntegralMax() const {
   return m_ui.monIntMaxEdit->value();
+}
+
+void InstrumentView::setMonitorIntegralMax(double value) {
+  m_ui.monIntMaxEdit->setValue(value);
 }
 
 void InstrumentView::showMonitorIntegralRangeInvalid() {
@@ -275,8 +363,16 @@ bool InstrumentView::getCorrectDetectors() const {
   return m_ui.correctDetectorsCheckBox->isChecked();
 }
 
+void InstrumentView::setCorrectDetectors(bool value) {
+  m_ui.correctDetectorsCheckBox->setChecked(value);
+}
+
 std::string InstrumentView::getDetectorCorrectionType() const {
   return getText(*m_ui.detectorCorrectionTypeComboBox);
+}
+
+void InstrumentView::setDetectorCorrectionType(std::string const &value) {
+  setSelected(*m_ui.detectorCorrectionTypeComboBox, value);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

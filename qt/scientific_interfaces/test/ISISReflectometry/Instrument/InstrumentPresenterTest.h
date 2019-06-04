@@ -9,6 +9,11 @@
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentPresenter.h"
 #include "../ReflMockObjects.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ReflectometryHelper.h"
+#include "MockInstrumentOptionDefaults.h"
 #include "MockInstrumentView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -31,7 +36,9 @@ public:
   }
   static void destroySuite(InstrumentPresenterTest *suite) { delete suite; }
 
-  InstrumentPresenterTest() : m_view() {}
+  InstrumentPresenterTest() : m_view() {
+    Mantid::API::FrameworkManager::Instance();
+  }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
@@ -245,6 +252,89 @@ public:
     verifyAndClear();
   }
 
+  void testRestoreDefaultsNotifiesMainPresenter() {
+    auto defaultOptions = expectDefaults(makeModel());
+    auto presenter = makePresenter(std::move(defaultOptions));
+    EXPECT_CALL(m_mainPresenter, notifyRestoreDefaultsRequested())
+        .Times(AtLeast(1));
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesMonitorOptionsInView() {
+    auto model = makeModelWithMonitorOptions(MonitorCorrections(
+        2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    EXPECT_CALL(m_view, setMonitorIndex(2)).Times(1);
+    EXPECT_CALL(m_view, setIntegrateMonitors(true)).Times(1);
+    EXPECT_CALL(m_view, setMonitorBackgroundMin(17.0)).Times(1);
+    EXPECT_CALL(m_view, setMonitorBackgroundMax(18.0)).Times(1);
+    EXPECT_CALL(m_view, setMonitorIntegralMin(4.0)).Times(1);
+    EXPECT_CALL(m_view, setMonitorIntegralMax(10.0)).Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesMonitorOptionsInModel() {
+    auto model = makeModelWithMonitorOptions(MonitorCorrections(
+        2, true, RangeInLambda(17.0, 18.0), RangeInLambda(4.0, 10.0)));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    presenter.notifyRestoreDefaultsRequested();
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), 2);
+    TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), true);
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
+                     RangeInLambda(17.0, 18.0));
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(),
+                     RangeInLambda(4.0, 10.0));
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesWavelengthRangeInView() {
+    auto model = makeModelWithWavelengthRange(RangeInLambda(1.5, 17.0));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    EXPECT_CALL(m_view, setLambdaMin(1.5)).Times(1);
+    EXPECT_CALL(m_view, setLambdaMax(17.0)).Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesWavelengthRangeInModel() {
+    auto model = makeModelWithWavelengthRange(RangeInLambda(1.5, 17.0));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    presenter.notifyRestoreDefaultsRequested();
+    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(),
+                     RangeInLambda(1.5, 17.0));
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesUpdatesDetectorOptionsInView() {
+    auto model = makeModelWithDetectorCorrections(
+        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    EXPECT_CALL(m_view, setCorrectDetectors(true)).Times(1);
+    EXPECT_CALL(m_view, setDetectorCorrectionType("RotateAroundSample"))
+        .Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
+  void testRestoreDefaultsUpdatesUpdatesDetectorOptionsInModel() {
+    auto model = makeModelWithDetectorCorrections(
+        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample));
+    auto defaultOptions = expectDefaults(model);
+    auto presenter = makePresenter(std::move(defaultOptions));
+    presenter.notifyRestoreDefaultsRequested();
+    auto const expected =
+        DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
+    TS_ASSERT_EQUALS(presenter.instrument().detectorCorrections(), expected);
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
@@ -252,14 +342,45 @@ private:
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
     auto monitorCorrections = MonitorCorrections(
-        0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
     auto detectorCorrections =
         DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
-    return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
+                      std::move(detectorCorrections));
   }
 
-  InstrumentPresenter makePresenter() {
-    auto presenter = InstrumentPresenter(&m_view, makeModel());
+  Instrument
+  makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
+    auto wavelengthRange = RangeInLambda(0.0, 0.0);
+    auto detectorCorrections =
+        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
+                      std::move(detectorCorrections));
+  }
+
+  Instrument makeModelWithWavelengthRange(RangeInLambda wavelengthRange) {
+    auto monitorCorrections = MonitorCorrections(
+        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+    auto detectorCorrections =
+        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
+                      std::move(detectorCorrections));
+  }
+
+  Instrument
+  makeModelWithDetectorCorrections(DetectorCorrections detectorCorrections) {
+    auto wavelengthRange = RangeInLambda(0.0, 0.0);
+    auto monitorCorrections = MonitorCorrections(
+        0, false, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+    return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
+                      std::move(detectorCorrections));
+  }
+
+  InstrumentPresenter
+  makePresenter(std::unique_ptr<IInstrumentOptionDefaults> defaultOptions =
+                    std::make_unique<MockInstrumentOptionDefaults>()) {
+    auto presenter =
+        InstrumentPresenter(&m_view, makeModel(), std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -267,6 +388,15 @@ private:
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_mainPresenter));
+  }
+
+  std::unique_ptr<MockInstrumentOptionDefaults>
+  expectDefaults(Instrument const &model) {
+    // Create a defaults object, set expectations on it, and return it so
+    // that it can be passed to the presenter
+    auto defaultOptions = std::make_unique<MockInstrumentOptionDefaults>();
+    EXPECT_CALL(*defaultOptions, get(_)).Times(1).WillOnce(Return(model));
+    return defaultOptions;
   }
 
   void expectProcessing() {

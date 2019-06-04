@@ -6,18 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "PerThetaDefaultsTableValidator.h"
 #include "Reduction/ParseReflectometryStrings.h"
 #include "Reduction/ValidatePerThetaDefaults.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+}
 
-ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
-                                         Experiment experiment,
-                                         double defaultsThetaTolerance)
-    : m_view(view), m_model(std::move(experiment)),
-      m_thetaTolerance(defaultsThetaTolerance) {
+ExperimentPresenter::ExperimentPresenter(
+    IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
+    std::unique_ptr<IExperimentOptionDefaults> experimentDefaults)
+    : m_experimentDefaults(std::move(experimentDefaults)), m_view(view),
+      m_model(std::move(experiment)), m_thetaTolerance(defaultsThetaTolerance) {
   m_view->subscribe(this);
 }
 
@@ -34,8 +39,17 @@ void ExperimentPresenter::notifySettingsChanged() {
   m_mainPresenter->notifySettingsChanged();
 }
 
+void ExperimentPresenter::notifyRestoreDefaultsRequested() {
+  // Notify main presenter first to make sure instrument is up to date
+  m_mainPresenter->notifyRestoreDefaultsRequested();
+  restoreDefaults();
+}
+
 void ExperimentPresenter::notifySummationTypeChanged() {
   notifySettingsChanged();
+}
+
+void ExperimentPresenter::updateSummationTypeEnabledState() {
   if (m_model.summationType() == SummationType::SumInQ) {
     m_view->enableReductionType();
     m_view->enableIncludePartialBins();
@@ -77,11 +91,16 @@ bool ExperimentPresenter::isAutoreducing() const {
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
-void ExperimentPresenter::updateWidgetEnabledState() const {
-  if (isProcessing() || isAutoreducing())
+void ExperimentPresenter::updateWidgetEnabledState() {
+  if (isProcessing() || isAutoreducing()) {
     m_view->disableAll();
-  else
-    m_view->enableAll();
+    return;
+  }
+
+  m_view->enableAll();
+  updateSummationTypeEnabledState();
+  updatePolarizationCorrectionEnabledState();
+  updateFloodCorrectionEnabledState();
 }
 
 void ExperimentPresenter::reductionPaused() { updateWidgetEnabledState(); }
@@ -92,19 +111,45 @@ void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
+void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
+  UNUSED_ARG(instrumentName);
+  restoreDefaults();
+}
+
+void ExperimentPresenter::restoreDefaults() {
+  auto const instrument = m_mainPresenter->instrument();
+  try {
+    m_model = m_experimentDefaults->get(instrument);
+  } catch (std::invalid_argument &ex) {
+    std::ostringstream msg;
+    msg << "Error setting default Experiment Settings: " << ex.what()
+        << ". Please check the " << instrument->getName()
+        << " parameters file.";
+    g_log.error(msg.str());
+    m_model = Experiment();
+  }
+  updateViewFromModel();
+}
+
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(
       m_view->getPolarizationCorrectionType());
 
   if (polarizationCorrectionRequiresInputs(correctionType)) {
-    m_view->enablePolarizationCorrectionInputs();
     return PolarizationCorrections(correctionType, m_view->getCRho(),
                                    m_view->getCAlpha(), m_view->getCAp(),
                                    m_view->getCPp());
   }
 
-  m_view->disablePolarizationCorrectionInputs();
   return PolarizationCorrections(correctionType);
+}
+
+void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
+  if (polarizationCorrectionRequiresInputs(
+          m_model.polarizationCorrections().correctionType()))
+    m_view->enablePolarizationCorrectionInputs();
+  else
+    m_view->disablePolarizationCorrectionInputs();
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
@@ -112,12 +157,18 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
       floodCorrectionTypeFromString(m_view->getFloodCorrectionType());
 
   if (floodCorrectionRequiresInputs(correctionType)) {
-    m_view->enableFloodCorrectionInputs();
     return FloodCorrections(correctionType, m_view->getFloodWorkspace());
   }
 
-  m_view->disableFloodCorrectionInputs();
   return FloodCorrections(correctionType);
+}
+
+void ExperimentPresenter::updateFloodCorrectionEnabledState() {
+  if (floodCorrectionRequiresInputs(
+          m_model.floodCorrections().correctionType()))
+    m_view->enableFloodCorrectionInputs();
+  else
+    m_view->disableFloodCorrectionInputs();
 }
 
 boost::optional<RangeInLambda>
@@ -178,8 +229,10 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
 
 ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
   auto validationResult = validateExperimentFromView();
-  if (validationResult.isValid())
+  if (validationResult.isValid()) {
     m_model = validationResult.assertValid();
+    updateWidgetEnabledState();
+  }
   return validationResult;
 }
 
@@ -200,6 +253,45 @@ void ExperimentPresenter::showValidationResult(
     auto errors = result.assertError();
     showPerThetaTableErrors(errors.perThetaValidationErrors());
   }
+}
+
+void ExperimentPresenter::updateViewFromModel() {
+  // Disconnect notifications about settings updates otherwise we'll end
+  // up updating the model from the view after the first change
+  m_view->disconnectExperimentSettingsWidgets();
+
+  m_view->setAnalysisMode(analysisModeToString(m_model.analysisMode()));
+  m_view->setReductionType(reductionTypeToString(m_model.reductionType()));
+  m_view->setSummationType(summationTypeToString(m_model.summationType()));
+  m_view->setIncludePartialBins(m_model.includePartialBins());
+  m_view->setDebugOption(m_model.debug());
+  m_view->setPerAngleOptions(m_model.perThetaDefaultsArray());
+  if (m_model.transmissionRunRange()) {
+    m_view->setTransmissionStartOverlap(m_model.transmissionRunRange()->min());
+    m_view->setTransmissionEndOverlap(m_model.transmissionRunRange()->max());
+  } else {
+    m_view->setTransmissionStartOverlap(0.0);
+    m_view->setTransmissionEndOverlap(0.0);
+  }
+  m_view->setPolarizationCorrectionType(polarizationCorrectionTypeToString(
+      m_model.polarizationCorrections().correctionType()));
+  m_view->setFloodCorrectionType(
+      floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
+  if (m_model.floodCorrections().workspace())
+    m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+  else
+    m_view->setFloodWorkspace("");
+  m_view->setStitchOptions(m_model.stitchParametersString());
+
+  // We don't allow invalid config so reset all state to valid
+  m_view->showAllPerAngleOptionsAsValid();
+  m_view->showTransmissionRangeValid();
+  m_view->showStitchParametersValid();
+
+  updateWidgetEnabledState();
+
+  // Reconnect settings change notifications
+  m_view->connectExperimentSettingsWidgets();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

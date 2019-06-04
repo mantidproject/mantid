@@ -9,6 +9,7 @@
 
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
+#include "ExperimentOptionDefaults.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
 #include "PerThetaDefaultsTableValidationError.h"
@@ -45,13 +46,17 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
     : public ExperimentViewSubscriber,
       public IExperimentPresenter {
 public:
-  ExperimentPresenter(IExperimentView *view, Experiment experiment,
-                      double defaultsThetaTolerance);
+  ExperimentPresenter(
+      IExperimentView *view, Experiment experiment,
+      double defaultsThetaTolerance,
+      std::unique_ptr<IExperimentOptionDefaults> experimentDefaults =
+          std::make_unique<ExperimentOptionDefaults>());
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   Experiment const &experiment() const override;
 
   void notifySettingsChanged() override;
+  void notifyRestoreDefaultsRequested() override;
   void notifySummationTypeChanged() override;
   void notifyNewPerAngleDefaultsRequested() override;
   void notifyRemovePerAngleDefaultsRequested(int index) override;
@@ -61,9 +66,15 @@ public:
   void reductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionResumed() override;
+  void instrumentChanged(std::string const &instrumentName) override;
+  void restoreDefaults() override;
+
+protected:
+  std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
 
 private:
   IBatchPresenter *m_mainPresenter;
+
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
@@ -71,12 +82,17 @@ private:
   std::map<std::string, std::string> stitchParametersFromView();
 
   ExperimentValidationResult updateModelFromView();
+  void updateViewFromModel();
 
   void showValidationResult(ExperimentValidationResult const &result);
   void
   showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
 
-  void updateWidgetEnabledState() const;
+  void updateWidgetEnabledState();
+  void updateSummationTypeEnabledState();
+  void updatePolarizationCorrectionEnabledState();
+  void updateFloodCorrectionEnabledState();
+
   bool isProcessing() const;
   bool isAutoreducing() const;
 

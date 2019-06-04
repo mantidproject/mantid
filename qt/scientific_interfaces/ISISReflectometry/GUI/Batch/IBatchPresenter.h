@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IBATCHPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IBATCHPRESENTER_H
 
+#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
@@ -32,6 +33,7 @@ public:
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
   virtual void notifyInstrumentChanged(const std::string &instName) = 0;
+  virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySettingsChanged() = 0;
 
   /// Transmission runs for a specific run angle
@@ -43,6 +45,8 @@ public:
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual bool requestClose() const = 0;
+
+  virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

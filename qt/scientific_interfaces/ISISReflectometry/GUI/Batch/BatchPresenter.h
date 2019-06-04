@@ -16,6 +16,7 @@
 #include "IBatchJobRunner.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
@@ -59,6 +60,7 @@ public:
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
   void notifyInstrumentChanged(const std::string &instName) override;
+  void notifyRestoreDefaultsRequested() override;
   void notifySettingsChanged() override;
   bool hasPerAngleOptions() const override;
   MantidWidgets::DataProcessor::OptionsQMap
@@ -66,6 +68,7 @@ public:
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+  Mantid::Geometry::Instrument_const_sptr instrument() const override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;
@@ -86,6 +89,7 @@ private:
   void autoreductionPaused();
   void autoreductionCompleted();
   void instrumentChanged(const std::string &instName);
+  void updateInstrument(const std::string &instName);
   void settingsChanged();
 
   IBatchView *m_view;
@@ -94,6 +98,7 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
 
 protected:
   std::unique_ptr<IBatchJobRunner> m_jobRunner;

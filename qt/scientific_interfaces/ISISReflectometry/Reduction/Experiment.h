@@ -29,6 +29,7 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Experiment {
 public:
+  Experiment();
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
              SummationType summationType, bool includePartialBins, bool debug,
              PolarizationCorrections polarizationCorrections,
@@ -46,10 +47,13 @@ public:
   FloodCorrections const &floodCorrections() const;
   boost::optional<RangeInLambda> transmissionRunRange() const;
   std::map<std::string, std::string> stitchParameters() const;
+  std::string stitchParametersString() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
+  std::vector<std::array<std::string, 8>> perThetaDefaultsArray() const;
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle,
                                            double tolerance) const;
+  PerThetaDefaults const *wildcardDefaults() const;
 
 private:
   AnalysisMode m_analysisMode;
@@ -65,6 +69,11 @@ private:
   std::map<std::string, std::string> m_stitchParameters;
   std::vector<PerThetaDefaults> m_perThetaDefaults;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs,
+                                               Experiment const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs,
+                                               Experiment const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENT_H_

@@ -28,7 +28,16 @@ detectorCorrectionTypeToString(DetectorCorrectionType correctionType) {
   case DetectorCorrectionType::RotateAroundSample:
     return "RotateAroundSample";
   }
-  throw std::runtime_error("Unexpected detector correction type");
+  throw std::invalid_argument("Unexpected detector correction type");
+}
+
+inline DetectorCorrectionType
+detectorCorrectionTypeFromString(std::string const &correctionType) {
+  if (correctionType == "VerticalShift")
+    return DetectorCorrectionType::VerticalShift;
+  if (correctionType == "RotateAroundSample")
+    return DetectorCorrectionType::RotateAroundSample;
+  throw std::invalid_argument("Unexpected detector correction type");
 }
 
 /** The DetectorCorrections model holds information about whether
@@ -46,6 +55,11 @@ private:
   bool m_correctPositions;
   DetectorCorrectionType m_correctionType;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(DetectorCorrections const &lhs,
+                                               DetectorCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(DetectorCorrections const &lhs,
+                                               DetectorCorrections const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_DETECTORCORRECTIONS_H_

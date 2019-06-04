@@ -4,23 +4,22 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
-#define MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
+#ifndef MANTID_API_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
+#define MANTID_API_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <string>
 
 namespace Mantid {
-namespace Algorithms {
-/** BoostOptionalToAlgorithmProperty : Checks for default values of an algorithm
-property
-if the user has not supplied the value. If it is a mandatory property then the
-value will be
-returned, if the property is optional then a value of type boost::optional<T>
-will be returned.
+namespace API {
+/** BoostOptionalToAlgorithmProperty : Checks for default values of an
+algorithm property if the user has not supplied the value. If it is a mandatory
+property then the value will be returned, if the property is optional then a
+value of type boost::optional<T> will be returned.
 */
 
 /**
@@ -86,7 +85,20 @@ boost::optional<T> checkForOptionalInstrumentDefault(
     return boost::optional<T>(static_cast<T>(value));
   }
 }
-} // namespace Algorithms
+
+/**
+ * Specializations for std::string
+ */
+template <>
+DLLExport std::string checkForMandatoryInstrumentDefault(
+    Mantid::API::Algorithm *const alg, std::string propName,
+    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
+
+template <>
+DLLExport boost::optional<std::string> checkForOptionalInstrumentDefault(
+    Mantid::API::Algorithm *const alg, std::string propName,
+    Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
+} // namespace API
 } // namespace Mantid
 
-#endif // MANTID_ALGORITHMS_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
+#endif // MANTID_API_BOOSTOPTIONALTOALGORITHMPROPERTY_H_

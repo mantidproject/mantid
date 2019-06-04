@@ -5,38 +5,68 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentOptionDefaults.h"
-#include "Common/ValueOr.h"
+#include "Common/OptionDefaults.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "Reduction/Instrument.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-bool operator==(InstrumentOptionDefaults const &lhs,
-                InstrumentOptionDefaults const &rhs) {
-  return lhs.NormalizeByIntegratedMonitors ==
-             rhs.NormalizeByIntegratedMonitors &&
-         lhs.MonitorIntegralMin == rhs.MonitorIntegralMin &&
-         lhs.MonitorIntegralMax == rhs.MonitorIntegralMax &&
-         lhs.MonitorBackgroundMin == rhs.MonitorBackgroundMin &&
-         lhs.LambdaMin == rhs.LambdaMin && lhs.LambdaMax == rhs.LambdaMax &&
-         lhs.I0MonitorIndex == rhs.I0MonitorIndex &&
-         lhs.DetectorCorrectionType == rhs.DetectorCorrectionType;
-}
 
-std::ostream &operator<<(std::ostream &os,
-                         InstrumentOptionDefaults const &defaults) {
-  os << "InstrumentOptionDefaults: { NormalizeByIntegratedMonitors: "
-     << (defaults.NormalizeByIntegratedMonitors ? "true" : "false")
-     << ",\n MonitorIntegralMin: " << defaults.MonitorIntegralMin
-     << ",\n MonitorIntegralMax: " << defaults.MonitorIntegralMax
-     << ",\n MonitorBackgroundMin: " << defaults.MonitorBackgroundMin
-     << ",\n MonitorBackgroundMax: " << defaults.MonitorBackgroundMax
-     << ",\n LambdaMin: " << defaults.LambdaMin
-     << ",\n LambdaMax: " << defaults.LambdaMax
-     << ",\n I0MonitorIndex: " << defaults.I0MonitorIndex
-     << ",\n CorrectDetectors: "
-     << (defaults.CorrectDetectors ? "true" : "false");
-  os << ",\n DetectorCorrectionType: '" << defaults.DetectorCorrectionType
-     << "' }" << std::endl;
-  return os;
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+
+Instrument
+getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
+  auto defaults = OptionDefaults(instrument);
+
+  auto wavelengthRange =
+      RangeInLambda(defaults.getDoubleOrZero("WavelengthMin", "LambdaMin"),
+                    defaults.getDoubleOrZero("WavelengthMax", "LambdaMax"));
+  if (!wavelengthRange.bothSet())
+    throw std::invalid_argument("Min and max wavelength range must be set");
+  if (!wavelengthRange.isValid(false))
+    throw std::invalid_argument("Invalid wavelength range");
+
+  auto monitorIndex = defaults.getIntOrZero("I0MonitorIndex", "I0MonitorIndex");
+  if (monitorIndex < 0)
+    throw std::invalid_argument("Monitor index cannot be negative");
+
+  auto integrate = defaults.getBoolOrFalse("NormalizeByIntegratedMonitors",
+                                           "NormalizeByIntegratedMonitors");
+  auto backgroundRange =
+      RangeInLambda(defaults.getDoubleOrZero("MonitorBackgroundWavelengthMin",
+                                             "MonitorBackgroundMin"),
+                    defaults.getDoubleOrZero("MonitorBackgroundWavelengthMax",
+                                             "MonitorBackgroundMax"));
+  if (!backgroundRange.isValid(true))
+    throw std::invalid_argument("Invalid monitor background range");
+
+  auto integralRange =
+      RangeInLambda(defaults.getDoubleOrZero("MonitorIntegrationWavelengthMin",
+                                             "MonitorIntegralMin"),
+                    defaults.getDoubleOrZero("MonitorIntegrationWavelengthMax",
+                                             "MonitorIntegralMax"));
+  if (!integralRange.isValid(false))
+    throw std::invalid_argument("Invalid monitor integral range");
+
+  auto monitorCorrections = MonitorCorrections(monitorIndex, integrate,
+                                               backgroundRange, integralRange);
+
+  auto detectorCorrectionString = defaults.getStringOrDefault(
+      "DetectorCorrectionType", "DetectorCorrectionType", "VerticalShift");
+  auto detectorCorrections = DetectorCorrections(
+      defaults.getBoolOrFalse("CorrectDetectors", "CorrectDetectors"),
+      detectorCorrectionTypeFromString(detectorCorrectionString));
+
+  return Instrument(std::move(wavelengthRange), std::move(monitorCorrections),
+                    std::move(detectorCorrections));
+}
+} // unnamed namespace
+
+Instrument InstrumentOptionDefaults::get(
+    Mantid::Geometry::Instrument_const_sptr instrument) {
+  return getInstrumentDefaults(instrument);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

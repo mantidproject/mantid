@@ -303,7 +303,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Get Defaults</string>
+         <string>Restore Defaults</string>
         </property>
         <property name="fixedWidth" stdset="0">
          <number>70</number>

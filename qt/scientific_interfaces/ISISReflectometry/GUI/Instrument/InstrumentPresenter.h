@@ -11,6 +11,8 @@
 #include "Common/DllConfig.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
+#include "InstrumentOptionDefaults.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -25,7 +27,10 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
     : public InstrumentViewSubscriber,
       public IInstrumentPresenter {
 public:
-  InstrumentPresenter(IInstrumentView *view, Instrument instrument);
+  InstrumentPresenter(
+      IInstrumentView *view, Instrument instrument,
+      std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults =
+          std::make_unique<InstrumentOptionDefaults>());
   Instrument const &instrument() const override;
 
   // IInstrumentPresenver overrides
@@ -35,9 +40,14 @@ public:
   void autoreductionPaused() override;
   void autoreductionResumed() override;
   void instrumentChanged(std::string const &instrumentName) override;
+  void restoreDefaults() override;
 
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
+  void notifyRestoreDefaultsRequested() override;
+
+protected:
+  std::unique_ptr<IInstrumentOptionDefaults> m_instrumentDefaults;
 
 private:
   IInstrumentView *m_view;
@@ -51,7 +61,9 @@ private:
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();
   void updateModelFromView();
-  void updateWidgetEnabledState() const;
+  void updateViewFromModel();
+  void updateWidgetEnabledState();
+  void updateWidgetValidState();
   bool isProcessing() const;
   bool isAutoreducing() const;
 };

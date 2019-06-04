@@ -22,6 +22,7 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
+  Instrument();
   Instrument(boost::optional<RangeInLambda> wavelengthRange,
              MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections);
@@ -42,6 +43,11 @@ private:
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs,
+                                               Instrument const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Instrument const &lhs,
+                                               Instrument const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_INSTRUMENT_H_

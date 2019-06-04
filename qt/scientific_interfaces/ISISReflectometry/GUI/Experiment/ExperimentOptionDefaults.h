@@ -7,39 +7,29 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H
 #include "Common/DllConfig.h"
-#include <boost/optional.hpp>
-#include <ostream>
-#include <string>
+#include "MantidGeometry/Instrument_fwd.h"
+#include "Reduction/Experiment.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-struct MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults {
-  std::string AnalysisMode;
-  std::string PolarizationAnalysis;
-  std::string SummationType;
-  std::string ReductionType;
-  bool IncludePartialBins;
-  std::string CRho;
-  std::string CAlpha;
-  std::string CAp;
-  std::string CPp;
-  boost::optional<double> TransRunStartOverlap;
-  boost::optional<double> TransRunEndOverlap;
-  boost::optional<double> MomentumTransferMin;
-  boost::optional<double> MomentumTransferMax;
-  boost::optional<double> MomentumTransferStep;
-  boost::optional<double> ScaleFactor;
-  boost::optional<std::string> ProcessingInstructions;
-  boost::optional<std::string> StitchParams;
+class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentOptionDefaults {
+public:
+  virtual ~IExperimentOptionDefaults() = default;
+  virtual Experiment
+  get(Mantid::Geometry::Instrument_const_sptr instrument) = 0;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool
-operator==(const ExperimentOptionDefaults &lhs,
-           const ExperimentOptionDefaults &rhs);
+/** @class ExperimentOptionDefaults
 
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, ExperimentOptionDefaults const &defaults);
+    This class gets the defaults for the "Experiment" settings tab in the
+    reflectometry GUI
+ */
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults
+    : public IExperimentOptionDefaults {
+public:
+  Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) override;
+};
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H

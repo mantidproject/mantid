@@ -26,5 +26,16 @@ boost::optional<RangeInLambda> MonitorCorrections::backgroundRange() const {
 boost::optional<RangeInLambda> MonitorCorrections::integralRange() const {
   return m_integralRange;
 }
+
+bool operator!=(MonitorCorrections const &lhs, MonitorCorrections const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(MonitorCorrections const &lhs, MonitorCorrections const &rhs) {
+  return lhs.monitorIndex() == rhs.monitorIndex() &&
+         lhs.integrate() == rhs.integrate() &&
+         lhs.backgroundRange() == rhs.backgroundRange() &&
+         lhs.integralRange() == rhs.integralRange();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -8,12 +8,19 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+Instrument::Instrument()
+    : m_wavelengthRange(RangeInLambda(0.0, 0.0)),
+      m_monitorCorrections(MonitorCorrections(0, true, RangeInLambda(0.0, 0.0),
+                                              RangeInLambda(0.0, 0.0))),
+      m_detectorCorrections(
+          DetectorCorrections(false, DetectorCorrectionType::VerticalShift)) {}
+
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange,
                        MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections)
-    : m_wavelengthRange(wavelengthRange),
-      m_monitorCorrections(monitorCorrections),
-      m_detectorCorrections(detectorCorrections) {}
+    : m_wavelengthRange(std::move(wavelengthRange)),
+      m_monitorCorrections(std::move(monitorCorrections)),
+      m_detectorCorrections(std::move(detectorCorrections)) {}
 
 boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const {
   return m_wavelengthRange;
@@ -51,5 +58,14 @@ DetectorCorrectionType Instrument::detectorCorrectionType() const {
   return m_detectorCorrections.correctionType();
 }
 
+bool operator!=(Instrument const &lhs, Instrument const &rhs) {
+  return !(lhs == rhs);
+}
+
+bool operator==(Instrument const &lhs, Instrument const &rhs) {
+  return lhs.wavelengthRange() == rhs.wavelengthRange() &&
+         lhs.monitorCorrections() == rhs.monitorCorrections() &&
+         lhs.detectorCorrections() == rhs.detectorCorrections();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

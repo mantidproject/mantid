@@ -25,6 +25,7 @@
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -85,10 +86,12 @@ public:
   MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
   MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
+  MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(requestClose, bool());
+  MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -128,6 +131,8 @@ public:
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
+  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(restoreDefaults, void());
 };
 
 class MockInstrumentPresenter : public IInstrumentPresenter {
@@ -139,6 +144,7 @@ public:
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
   MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD0(restoreDefaults, void());
 };
 
 class MockSavePresenter : public ISavePresenter {

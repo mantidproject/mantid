@@ -10,9 +10,9 @@
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
+#include <array>
 #include <boost/optional.hpp>
 #include <string>
-#include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -49,6 +49,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
+std::array<std::string, 8>
+perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
