@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QCheckBox" name="show_errorbars_tickbox">
+  <widget class="QCheckBox" name="hide_errorbars_tickbox">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -29,7 +29,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Show Errorbars</string>
+    <string>Hide Errorbars</string>
    </property>
   </widget>
   <widget class="QWidget" name="layoutWidget_4">
@@ -41,9 +41,9 @@
      <height>157</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="line_options_layout_3">
+   <layout class="QGridLayout" name="layout">
     <property name="sizeConstraint">
-     <enum>QLayout::SetFixedSize</enum>
+     <enum>QLayout::SetMinimumSize</enum>
     </property>
     <item row="2" column="0">
      <widget class="QLabel" name="draw_style_label_3">
@@ -78,57 +78,6 @@
        <string>Color (RGBA)</string>
       </property>
      </widget>
-    </item>
-    <item row="5" column="2">
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <item>
-       <widget class="QLineEdit" name="color_line_edit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="select_color_button_6">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </item>
     <item row="0" column="0" colspan="2">
      <widget class="QLabel" name="errorbar_options_label">
@@ -247,6 +196,9 @@
        <number>1</number>
       </property>
      </widget>
+    </item>
+    <item row="5" column="2">
+     <widget class="QWidget" name="color_dummy_widget" native="true"/>
     </item>
    </layout>
   </widget>

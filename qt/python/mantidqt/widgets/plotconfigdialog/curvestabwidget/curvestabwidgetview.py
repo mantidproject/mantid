@@ -18,7 +18,7 @@ from mantidqt.utils.qt import load_ui
 
 class CurvesTabWidgetView(QWidget):
 
-    def __init__(self, parent=None, hide_errorbars_tab=True):
+    def __init__(self, parent=None):
         super(CurvesTabWidgetView, self).__init__(parent=parent)
 
         self.ui = load_ui(__file__,
@@ -27,12 +27,20 @@ class CurvesTabWidgetView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         self.line = LineTabWidget(self)
-        self.tab_widget.addTab(self.line, "Line")
+        self.tab_container.addTab(self.line, "Line")
         self.marker = MarkerTabWidget(self)
-        self.tab_widget.addTab(self.marker, "Marker")
-        if not hide_errorbars_tab:
+        self.tab_container.addTab(self.marker, "Marker")
+        self.errorbars = None  # Add errorbar tab widget later if needed
+
+    def show_errorbars_tab(self, show):
+        """Show or hide the errorbars tab"""
+        if show:
             self.errorbars = ErrorbarsTabWidget(self)
-            self.tab_widget.addTab(self.errorbars, "Errorbars")
+            self.tab_container.addTab(self.errorbars, "Errorbars")
+        else:
+            if not self.errorbars:
+                self.tab_container.removeTab(2)
+                self.errorbars = None
 
     def populate_select_axes_combo_box(self, axes_names):
         self.select_axes_combo_box.addItems(axes_names)
@@ -76,6 +84,7 @@ class CurvesTabWidgetView(QWidget):
         return CurveProperties.from_view(self)
 
     def set_properties(self, curve_props):
+        """Set all fields in the view from CurveProperties object"""
         self.set_curve_label(curve_props.label)
         self.set_hide_curve(curve_props.hide_curve)
         # Line properties
@@ -88,6 +97,14 @@ class CurvesTabWidgetView(QWidget):
         self.marker.set_size(curve_props.marker_size)
         self.marker.face_color_selector_widget.set_color(curve_props.marker_face_color)
         self.marker.edge_color_selector_widget.set_color(curve_props.marker_edge_color)
+        # Errorbar properties
+        if hasattr(curve_props, 'hide_errorbars'):
+            self.errorbars.set_hide(curve_props.hide_errorbars)
+            self.errorbars.set_width(curve_props.errorbar_width)
+            self.errorbars.set_capsize(curve_props.errorbar_capsize)
+            self.errorbars.set_cap_thickness(curve_props.errorbar_cap_thickness)
+            self.errorbars.set_error_every(curve_props.errorbar_error_every)
+            self.errorbars.set_color(curve_props.errorbar_color)
 
 
 class LineTabWidget(QWidget):
@@ -137,9 +154,9 @@ class MarkerTabWidget(QWidget):
                           'curves_tab_marker_tab.ui',
                           baseinstance=self)
         self.face_color_selector_widget = ColorSelector(parent=self)
-        self.edge_color_selector_widget = ColorSelector(parent=self)
         self.grid_layout.replaceWidget(self.face_color_dummy_widget,
                                        self.face_color_selector_widget)
+        self.edge_color_selector_widget = ColorSelector(parent=self)
         self.grid_layout.replaceWidget(self.edge_color_dummy_widget,
                                        self.edge_color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -175,15 +192,18 @@ class ErrorbarsTabWidget(QWidget):
         super(ErrorbarsTabWidget, self).__init__(parent=parent)
 
         self.ui = load_ui(__file__,
-                          'curves_tab_errobars_tab.ui',
+                          'curves_tab_errorbars_tab.ui',
                           baseinstance=self)
+        self.color_selector_widget = ColorSelector(parent=self)
+        self.layout.replaceWidget(self.color_dummy_widget,
+                                  self.color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-    def get_show_errorbars(self):
-        return self.show_errorbars_tickbox.checkState()
+    def get_hide(self):
+        return self.hide_errorbars_tickbox.checkState()
 
-    def set_show_errorbars(self, state):
-        self.show_errorbars_tickbox.setState(state)
+    def set_hide(self, state):
+        self.hide_errorbars_tickbox.setCheckState(state)
 
     def get_width(self):
         return self.width_spin_box.value()
@@ -210,7 +230,7 @@ class ErrorbarsTabWidget(QWidget):
         self.error_every_spin_box.setValue(error_every)
 
     def get_color(self):
-        return self.color_line_edit.text()
+        return self.color_selector_widget.current_color
 
     def set_color(self, color):
-        self.color_line_edit.setText(color)
+        self.color_selector_widget.set_color(color)

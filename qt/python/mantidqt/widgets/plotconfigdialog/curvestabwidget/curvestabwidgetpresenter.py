@@ -8,6 +8,8 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.axes import ErrorbarContainer
+
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, MARKER_MAP
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.curvestabwidgetview import CurvesTabWidgetView
@@ -37,6 +39,7 @@ class CurvesTabWidgetPresenter:
         self.axes_names_dict = get_axes_names_dict(self.fig)
         self.populate_select_axes_combo_box()
         self.populate_select_curve_combo_box()
+        self.view.show_errorbars_tab(self.get_current_curve_errorbars())
         self.set_selected_curve_view_properties()
 
         # Signals
@@ -49,15 +52,23 @@ class CurvesTabWidgetPresenter:
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve
         )
+        self.view.select_curve_combo_box.currentIndexChanged.connect(
+            lambda: self.view.show_errorbars_tab(self.get_current_curve_errorbars())
+        )
 
     def apply_properties(self):
         """Update the curve's properties from values in the view"""
         props = self.view.get_properties()
         curve = self.get_selected_curve()
 
+        if isinstance(curve, ErrorbarContainer):
+            self.apply_errorbar_properties(curve, props)
+            curve = curve.lines[0]  # This is the line between errorbar points
+
         # Top level properties
         curve.set_visible(not props.hide_curve)
-        self.set_curve_label(curve, props.label)
+        if 'nolegend' not in curve.get_label():
+            self.set_curve_label(curve, props.label)
 
         # Line properties
         curve.set_linestyle(props.line_style)
@@ -71,23 +82,38 @@ class CurvesTabWidgetPresenter:
         curve.set_markerfacecolor(props.marker_face_color)
         curve.set_markeredgecolor(props.marker_edge_color)
 
-    def set_curve_label(self, line, label):
-        """Set label on curve and update its entry in the combo box"""
-        line.set_label(label)
-        self.view.set_current_curve_selector_text(label)
+    # Errorbar methods
+    def apply_errorbar_properties(self, container, props):
+        caps_tuple = container.lines[1]
+        bars = container.lines[2][0]
+        self.hide_errorbars(not props.hide_errorbars, caps_tuple, bars)
+        bars.set_linewidth(props.errorbar_width)
+        self.apply_error_cap_properties(caps_tuple, props)
+        # self.set_error_every()
+        bars.set_color(props.errorbar_color)
 
-    def remove_selected_curve(self):
-        """
-        Remove selected curve from figure and combobox. If there are no
-        curves left on the axes remove that axes from axes the combo box
-        """
-        self.get_selected_curve().remove()
+    @staticmethod
+    def apply_error_cap_properties(caps_tuple, props):
+        for caps in caps_tuple:
+            caps.set_markersize(2*props.errorbar_capsize)
+            caps.set_markeredgewidth(props.errorbar_cap_thickness)
+            caps.set_color(props.errorbar_color)
+
+    @staticmethod
+    def hide_errorbars(visible, caps_tuple, bars):
+        bars.set_visible(visible)
+        for caps in caps_tuple:
+            caps.set_visible(visible)
+
+    def get_current_ax_errorbars(self):
         ax = self.get_selected_ax()
-        ax.figure.canvas.draw()
-        with BlockQSignals(self.view.select_curve_combo_box):
-            self.view.remove_select_curve_combo_box_current_item()
-            if self.view.select_curve_combo_box.count() == 0:
-                self.view.remove_select_axes_combo_box_current_item()
+        return [cont for cont in ax.containers if isinstance(cont, ErrorbarContainer)]
+
+    def get_current_curve_errorbars(self):
+        for errors in self.get_current_ax_errorbars():
+            if errors.get_label() == self.view.get_selected_curve_name():
+                return errors
+        return False
 
     def get_selected_ax(self):
         """
@@ -100,13 +126,18 @@ class CurvesTabWidgetPresenter:
             return None
 
     def get_selected_curve(self):
-        """Get selected Line2D object"""
+        """Get selected Line2D or ErrorbarContainer object"""
         for curve in self.get_selected_ax().get_lines():
             if curve.get_label() == self.view.get_selected_curve_name():
                 return curve
+        for errobar_container in self.get_current_ax_errorbars():
+            if errobar_container.get_label() == self.view.get_selected_curve_name():
+                return errobar_container
 
     def get_selected_curve_properties(self):
-        """Get CurveProperties object from current Line2D object"""
+        """
+        Get CurveProperties object from current Line2D or ErrorbarContainer
+        """
         return CurveProperties.from_curve(self.get_selected_curve())
 
     def populate_select_axes_combo_box(self):
@@ -133,8 +164,13 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
         lines = self.get_selected_ax().get_lines()
+        for errorbar_container in self.get_current_ax_errorbars():
+            if 'nolegend' not in errorbar_container.get_label():
+                curve_names.append(errorbar_container.get_label())
         for line in lines:
-            curve_names.append(line.get_label())
+            if 'nolegend' not in line.get_label():
+                curve_names.append(line.get_label())
+
         self.view.populate_select_curve_combo_box(curve_names)
         return True
 
@@ -145,6 +181,24 @@ class CurvesTabWidgetPresenter:
         """
         if self.populate_select_curve_combo_box():
             self.set_selected_curve_view_properties()
+
+    def remove_selected_curve(self):
+        """
+        Remove selected curve from figure and combobox. If there are no
+        curves left on the axes remove that axes from axes the combo box
+        """
+        self.get_selected_curve().remove()
+        ax = self.get_selected_ax()
+        ax.figure.canvas.draw()
+        with BlockQSignals(self.view.select_curve_combo_box):
+            self.view.remove_select_curve_combo_box_current_item()
+            if self.view.select_curve_combo_box.count() == 0:
+                self.view.remove_select_axes_combo_box_current_item()
+
+    def set_curve_label(self, line, label):
+        """Set label on curve and update its entry in the combo box"""
+        line.set_label(label)
+        self.view.set_current_curve_selector_text(label)
 
     def set_selected_curve_view_properties(self):
         """Update the view's fields with the selected curve's properties"""

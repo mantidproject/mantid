@@ -61,7 +61,7 @@
     <string>Select a curve</string>
    </property>
   </widget>
-  <widget class="QTabWidget" name="tab_widget">
+  <widget class="QTabWidget" name="tab_container">
    <property name="geometry">
     <rect>
      <x>9</x>

@@ -7,7 +7,8 @@
 #  This file is part of the mantid workbench.
 
 from matplotlib import colors
-from qtpy import QtCore
+from matplotlib.axes import ErrorbarContainer
+from qtpy.QtCore import Qt
 
 MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 'TICKDOWN', 'triangle_right': '>',
               'tickup': 'TICKUP', 'hline': '_', 'vline': '|', 'pentagon': 'p', 'tri_left': '3',
@@ -25,7 +26,7 @@ def convert_color_to_hex(color):
     """Convert a matplotlib color to its hex form"""
     try:
         return colors.cnames[color]
-    except KeyError:
+    except (KeyError, TypeError):
         return colors.to_hex(color)
 
 
@@ -35,10 +36,10 @@ class CurveProperties:
         pass
 
     @classmethod
-    def from_view(cls, view):
+    def from_view(cls, view, errorbars=None):
         # Top level entries
         cls.label = view.get_curve_label()
-        cls.hide_curve = (view.get_hide_curve() == QtCore.Qt.Checked)
+        cls.hide_curve = (view.get_hide_curve() == Qt.Checked)
 
         # Line tab entries
         cls.line_style = view.line.get_style()
@@ -52,19 +53,36 @@ class CurveProperties:
         cls.marker_face_color = view.marker.get_face_color()
         cls.marker_edge_color = view.marker.get_edge_color()
 
-        # # Errorbars tab
-        # cls.show_errorbars = view.get_show_errorbars()
-        # cls.errorbar_width = view.get_errorbar_width()
-        # cls.errorbar_capsize = view.get_errorbar_capsize()
-        # cls.errorbar_cap_thickness = view.get_errorbar_cap_thickness()
-        # cls.errobar_error_every = view.get_errobar_error_every()
-        # cls.errobar_color = view.get_errobar_color()
+        # Errorbars tab
+        if view.errorbars:
+            cls.hide_errorbars = (view.errorbars.get_hide() == Qt.Checked)
+            cls.errorbar_width = view.errorbars.get_width()
+            cls.errorbar_capsize = view.errorbars.get_capsize()
+            cls.errorbar_cap_thickness = view.errorbars.get_cap_thickness()
+            cls.errorbar_error_every = view.errorbars.get_error_every()
+            cls.errorbar_color = convert_color_to_hex(view.errorbars.get_color())
         return cls()
 
     @classmethod
-    def from_curve(cls, line):
+    def from_curve(cls, curve):
         # Top level entries
-        cls.label = line.get_label()
+        if isinstance(curve, ErrorbarContainer):
+            line = curve.lines[0]
+            caps_tuple = curve.lines[1]
+            bars = curve.lines[2][0]
+
+            # TODO: if cyclic values set for these, set to None and disable option
+            cls.hide_errorbars = (not curve.lines[2][0].get_visible())
+            cls.errorbar_width = bars.get_linewidth()[0]
+            cls.errorbar_capsize = caps_tuple[0].get_markersize()/2
+            cls.errorbar_cap_thickness = caps_tuple[0].get_markeredgewidth()
+            # cls.errorbar_error_every = curve.get_error_every()
+            cls.errorbar_error_every = 1
+            cls.errorbar_color = convert_color_to_hex(bars.get_color()[0])
+        else:
+            line = curve
+
+        cls.label = curve.get_label()
         cls.hide_curve = (not line.get_visible())
 
         # Line tab entries
@@ -79,11 +97,4 @@ class CurveProperties:
         cls.marker_face_color = convert_color_to_hex(line.get_markerfacecolor())
         cls.marker_edge_color = convert_color_to_hex(line.get_markeredgecolor())
 
-        # # Errorbars tab
-        # cls.show_errorbars = line.get_show_errorbars()
-        # cls.errorbar_width = line.get_errorbar_width()
-        # cls.errorbar_capsize = line.get_errorbar_capsize()
-        # cls.errorbar_cap_thickness = line.get_errorbar_cap_thickness()
-        # cls.errobar_error_every = line.get_errobar_error_every()
-        # cls.errobar_color = convert_color_to_hex(line.get_errobar_color())
         return cls()
