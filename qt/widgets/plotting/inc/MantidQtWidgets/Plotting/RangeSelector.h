@@ -12,7 +12,7 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Plotting/Qwt/RangeSelector.h"
 #else
-#error "RangeSelector not implemented for Qtglobal >= 5"
+#include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 #endif
 
 #endif // MANTIDQT_MANTIDWIDGET_RANGESELECTOR_H

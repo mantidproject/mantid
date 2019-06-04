@@ -10,6 +10,7 @@
 #include "ui_PreviewPlot.h"
 
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 #include "MantidQtWidgets/Plotting/Qwt/RangeSelector.h"
@@ -55,6 +56,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public API::MantidWidget {
 public:
   PreviewPlot(QWidget *parent = nullptr, bool init = true);
   ~PreviewPlot() override;
+  void watchADS(bool on);
 
   QColor canvasColour();
   void setCanvasColour(const QColor &colour);
@@ -62,7 +64,8 @@ public:
   bool legendIsShown();
   QStringList getShownErrorBars();
 
-  void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
+  void setAxisRange(QPair<double, double> range,
+                    AxisID axisID = AxisID::XBottom);
 
   QPair<double, double>
   getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
