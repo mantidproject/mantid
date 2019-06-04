@@ -87,7 +87,7 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
     self.assertLessEqual(abs_difference, abs(tolerance_value),
-                    msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
+                         msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
 
 
 def _get_peak_height_and_index(workspace, ws_index):

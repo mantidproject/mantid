@@ -127,10 +127,10 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         self.assertEqual(integ_tbl.columnCount(), precalc_integ_tbl.columnCount())
         for i in range(integ_tbl.rowCount()):
             self.assertEqual((0,  integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0)) or
-                            rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
-                            "Relative difference bigger than gaccepted error (%f) when comparing the "
-                            "integration of a spectrum (%f) against the integration previously calculated and "
-                            "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0)))
+                             rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
+                             "Relative difference bigger than gaccepted error (%f) when comparing the "
+                             "integration of a spectrum (%f) against the integration previously calculated and "
+                             "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0)))
 
         # === check the 'focussed' spectrum ===
         out_precalc_ws = mtd[self.out_ws_precalc_name]

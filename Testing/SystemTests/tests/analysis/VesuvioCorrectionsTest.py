@@ -603,8 +603,8 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
             self.assertLessEqual(abs_difference, abs(tolerance_value),
-                            msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i]) +
-                                "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
+                                 msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i]) +
+                                 "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
 
 
 # pylint: disable=too-many-arguments
@@ -625,7 +625,7 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
     self.assertLessEqual(abs_difference, abs(tolerance_value),
-                    msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
+                         msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
     self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance,
                     msg="abs({:.6f} - {:.6f}) > {:.6f}".format(peak_bin, expected_bin, bin_tolerance))
 

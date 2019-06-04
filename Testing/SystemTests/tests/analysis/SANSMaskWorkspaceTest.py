@@ -87,8 +87,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         expected_spectra = list(set(expected_spectra))
         masked_spectra = list(get_masked_spectrum_numbers(workspace))
 
-        self.assertEqual(len(expected_spectra),  len(masked_spectra),
-                        "{} does not equal {}".format(len(expected_spectra), len(masked_spectra)))
+        self.assertEqual(len(expected_spectra), len(masked_spectra),
+                         "{} does not equal {}".format(len(expected_spectra), len(masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(masked_spectra)):
             self.assertEqual(expected,  actual, "{} does not equal {}".format(expected, actual))
 
@@ -97,8 +97,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         expected_spectra = list(set(expected_spectra))
 
         non_masked_spectra = list(get_non_masked_spectrum_numbers(workspace))
-        self.assertEqual(len(expected_spectra),  len(non_masked_spectra),
-                        "Expected length {}, got length {}".format(len(expected_spectra), len(non_masked_spectra)))
+        self.assertEqual(len(expected_spectra), len(non_masked_spectra),
+                         "Expected length {}, got length {}".format(len(expected_spectra), len(non_masked_spectra)))
         for expected, actual in zip(sorted(expected_spectra), sorted(non_masked_spectra)):
             self.assertEqual(expected,  actual)
 
