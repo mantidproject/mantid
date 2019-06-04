@@ -50,6 +50,9 @@ public:
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
+  int totalItems() const override;
+  int completedItems() const override;
+
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;

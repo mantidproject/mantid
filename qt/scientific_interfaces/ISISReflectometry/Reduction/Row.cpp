@@ -1,3 +1,4 @@
+
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
@@ -85,6 +86,15 @@ Row Row::withExtraRunNumbers(
   auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
   return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
              scaleFactor(), reductionOptions(), wsNames);
+}
+
+int Row::totalItems() const { return 1; }
+
+int Row::completedItems() const {
+  if (complete())
+    return 1;
+
+  return 0;
 }
 
 bool operator!=(Row const &lhs, Row const &rhs) { return !(lhs == rhs); }

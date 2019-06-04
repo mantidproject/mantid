@@ -17,41 +17,21 @@ namespace CustomInterfaces {
 
 namespace { // unnamed
 
-int totalJobsForLocation(
+int countItemsForLocation(
     ReductionJobs const &jobs,
     MantidWidgets::Batch::RowLocation const &location,
-    std::vector<MantidWidgets::Batch::RowLocation> const &locations) {
-  // Count groups and their child rows
-  if (isGroupLocation(location))
-    return jobs.getGroupFromPath(location).totalItems();
+    std::vector<MantidWidgets::Batch::RowLocation> const &locations,
+    Item::ItemCountFunction countFunction) {
+  if (!jobs.validItemAtPath(location))
+    return 0;
 
-  // Valid rows have a single processing step but we want to
-  // ignore them if their parent group is also in the
-  // selection or they will be counted twice.
-  auto const &row = jobs.getRowFromPath(location);
-  if (row.is_initialized() && !containsPath(locations, {groupOf(location)}))
-    return 1;
+  // Rows have a single processing step but we want to ignore them if their
+  // parent group is also in the selection or they will be counted twice.
+  if (isRowLocation(location) && containsPath(locations, {groupOf(location)}))
+    return 0;
 
-  return 0;
-}
-
-int completedJobsForLocation(
-    ReductionJobs const &jobs,
-    MantidWidgets::Batch::RowLocation const &location,
-    std::vector<MantidWidgets::Batch::RowLocation> const &locations) {
-  // Count groups and their child rows
-  if (isGroupLocation(location))
-    return jobs.getGroupFromPath(location).completedItems();
-
-  // Valid rows have a single processing step but we want to
-  // ignore them if their parent group is also in the
-  // selection or they will be counted twice.
-  auto const &row = jobs.getRowFromPath(location);
-  if (row.is_initialized() && row->complete() &&
-      !containsPath(locations, {groupOf(location)}))
-    return 1;
-
-  return 0;
+  auto const &item = jobs.getItemFromPath(location);
+  return (item.*countFunction)();
 }
 } // unnamed namespace
 
@@ -65,25 +45,16 @@ bool BatchJobRunner::isProcessing() const { return m_isProcessing; }
 
 bool BatchJobRunner::isAutoreducing() const { return m_isAutoreducing; }
 
-int BatchJobRunner::totalItemsInSelection() const {
+int BatchJobRunner::itemsInSelection(
+    Item::ItemCountFunction countFunction) const {
   auto const &jobs = m_batch.runsTable().reductionJobs();
   auto const &locations = m_rowLocationsToProcess;
   return std::accumulate(
-      m_rowLocationsToProcess.cbegin(), m_rowLocationsToProcess.cend(), 0,
-      [&jobs, &locations](int &count,
-                          MantidWidgets::Batch::RowLocation const &location) {
-        return count + totalJobsForLocation(jobs, location, locations);
-      });
-}
-
-int BatchJobRunner::completedItemsInSelection() const {
-  auto const &jobs = m_batch.runsTable().reductionJobs();
-  auto const &locations = m_rowLocationsToProcess;
-  return std::accumulate(
-      m_rowLocationsToProcess.cbegin(), m_rowLocationsToProcess.cend(), 0,
-      [&jobs, &locations](int &count,
-                          MantidWidgets::Batch::RowLocation const &location) {
-        return count + completedJobsForLocation(jobs, location, locations);
+      locations.cbegin(), locations.cend(), 0,
+      [&jobs, &locations, countFunction](
+          int &count, MantidWidgets::Batch::RowLocation const &location) {
+        return count +
+               countItemsForLocation(jobs, location, locations, countFunction);
       });
 }
 
@@ -94,11 +65,13 @@ int BatchJobRunner::percentComplete() const {
         m_batch.runsTable().reductionJobs());
 
   // If processing a selection but there is nothing to process, return 100%
-  if (totalItemsInSelection() == 0)
+  auto const totalItems = itemsInSelection(&Item::totalItems);
+  if (totalItems == 0)
     return 100;
 
   // Otherwise calculate the percentage of completed items in the selection
-  return completedItemsInSelection() * 100 / totalItemsInSelection();
+  auto const completedItems = itemsInSelection(&Item::completedItems);
+  return completedItems * 100 / totalItems;
 }
 
 void BatchJobRunner::reductionResumed() {

@@ -62,8 +62,7 @@ protected:
   std::vector<MantidWidgets::Batch::RowLocation> m_rowLocationsToProcess;
 
 private:
-  int totalItemsInSelection() const;
-  int completedItemsInSelection() const;
+  int itemsInSelection(Item::ItemCountFunction countFunction) const;
 
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;

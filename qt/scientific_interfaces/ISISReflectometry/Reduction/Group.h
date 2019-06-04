@@ -45,8 +45,8 @@ public:
   void updateRow(int rowIndex, boost::optional<Row> const &row);
   bool allRowsAreValid() const;
 
-  int totalItems() const;
-  int completedItems() const;
+  int totalItems() const override;
+  int completedItems() const override;
 
   void resetState() override;
   void resetSkipped();

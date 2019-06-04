@@ -23,7 +23,18 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs,
     return jobs.mutableGroups()[maybeGroupIndex.get()];
   else
     return jobs.appendGroup(Group(groupName));
-} // unnamed
+}
+
+/* Return the number of rows and groups that have processing or
+ * postprocessing associated with them */
+int countItems(ReductionJobs const &jobs,
+               Item::ItemCountFunction countFunction) {
+  auto const &groups = jobs.groups();
+  return std::accumulate(groups.cbegin(), groups.cend(), 0,
+                         [countFunction](int &count, Group const &group) {
+                           return count + (group.*countFunction)();
+                         });
+}
 } // namespace
 
 ReductionJobs::ReductionJobs( // cppcheck-suppress passedByValue
@@ -188,35 +199,15 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex) {
   return jobs[groupIndex].name();
 }
 
-/* Return the total number of rows and groups that have processing or
- * postprocessing associated with them */
-int totalItems(ReductionJobs const &jobs) {
-  auto const &groups = jobs.groups();
-  return std::accumulate(groups.cbegin(), groups.cend(), 0,
-                         [](int &count, Group const &group) {
-                           return count + group.totalItems();
-                         });
-}
-
-/* Return the total number of rows and groups that have been processed or
- * postprocessed */
-int completedItems(ReductionJobs const &jobs) {
-  auto const &groups = jobs.groups();
-  return std::accumulate(groups.cbegin(), groups.cend(), 0,
-                         [](int &count, Group const &group) {
-                           return count + group.completedItems();
-                         });
-}
-
 /* Return the percentage of items that have been completed */
 int percentComplete(ReductionJobs const &jobs) {
-  auto const total = totalItems(jobs);
-
   // If there's nothing to process we're 100% complete
+  auto const total = countItems(jobs, &Item::totalItems);
   if (total == 0)
     return 100;
 
-  return static_cast<int>(completedItems(jobs) * 100 / total);
+  auto const completed = countItems(jobs, &Item::completedItems);
+  return static_cast<int>(completed * 100 / total);
 }
 
 Group const &ReductionJobs::operator[](int index) const {
@@ -304,6 +295,26 @@ boost::optional<Row> const &ReductionJobs::getRowFromPath(
     return groups()[groupOf(rowLocation)].rows()[rowOf(rowLocation)];
   } else {
     throw std::invalid_argument("Path given does not point to a row.");
+  }
+}
+
+bool ReductionJobs::validItemAtPath(
+    const MantidWidgets::Batch::RowLocation rowLocation) const {
+  if (isGroupLocation(rowLocation))
+    return true;
+
+  return getRowFromPath(rowLocation).is_initialized();
+}
+
+Item const &ReductionJobs::getItemFromPath(
+    const MantidWidgets::Batch::RowLocation rowLocation) const {
+  if (isGroupLocation(rowLocation)) {
+    return getGroupFromPath(rowLocation);
+  } else {
+    auto &maybeRow = getRowFromPath(rowLocation);
+    if (!maybeRow.is_initialized())
+      throw std::invalid_argument("Attempted to access invalid row");
+    return maybeRow.get();
   }
 }
 

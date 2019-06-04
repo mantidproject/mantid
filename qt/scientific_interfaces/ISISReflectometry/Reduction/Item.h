@@ -22,6 +22,8 @@ namespace CustomInterfaces {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL Item {
 public:
+  using ItemCountFunction = int (Item::*)() const;
+
   Item();
 
   virtual bool isGroup() const = 0;
@@ -36,6 +38,9 @@ public:
 
   virtual void setOutputNames(std::vector<std::string> const &outputNames) = 0;
   virtual void resetOutputNames() = 0;
+
+  virtual int totalItems() const = 0;
+  virtual int completedItems() const = 0;
 
   bool complete() const;
   bool success() const;

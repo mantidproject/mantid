@@ -46,10 +46,14 @@ public:
   boost::optional<Item &>
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
+  bool
+  validItemAtPath(const MantidWidgets::Batch::RowLocation rowLocation) const;
   Group const &
   getGroupFromPath(const MantidWidgets::Batch::RowLocation path) const;
   boost::optional<Row> const &
   getRowFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  Item const &
+  getItemFromPath(const MantidWidgets::Batch::RowLocation path) const;
 
 private:
   std::vector<Group> m_groups;
@@ -78,8 +82,6 @@ bool setGroupName(ReductionJobs &jobs, int groupIndex,
                   std::string const &newValue);
 std::string groupName(ReductionJobs const &jobs, int groupIndex);
 
-int totalItems(ReductionJobs const &jobs);
-int completedItems(ReductionJobs const &jobs);
 int percentComplete(ReductionJobs const &jobs);
 
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
