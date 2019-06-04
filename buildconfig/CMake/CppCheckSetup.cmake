@@ -11,7 +11,7 @@ if ( CPPCHECK_EXECUTABLE )
         qt/widgets/mplcpp
       )
 
-  set ( CPPCHECK_USE_INCLUDE_DIRS OFF CACHE BOOL "Use specified include directories. WARNING: cppcheck will run significantly slower." )
+  option ( CPPCHECK_USE_INCLUDE_DIRS "Use specified include directories. WARNING: cppcheck will run significantly slower." )
 
   set ( CPPCHECK_INCLUDE_DIRS
         Framework/Algorithms/inc

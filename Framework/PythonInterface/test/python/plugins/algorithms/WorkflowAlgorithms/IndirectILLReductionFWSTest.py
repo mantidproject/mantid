@@ -78,7 +78,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         item = wsgroup.getItem(0)
 
-        name = item.getName()
+        name = item.name()
 
         self.assertTrue(isinstance(item, MatrixWorkspace),
                         "{0} should be a matrix workspace".format(name))

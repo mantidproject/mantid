@@ -99,7 +99,7 @@ public:
 
     vtkDataSetToScaledDataSet scaler;
 
-    TS_ASSERT_THROWS(scaler.execute(1, 1, 1, in), std::runtime_error);
+    TS_ASSERT_THROWS(scaler.execute(1, 1, 1, in), const std::runtime_error &);
   }
 
   void testExecution() {

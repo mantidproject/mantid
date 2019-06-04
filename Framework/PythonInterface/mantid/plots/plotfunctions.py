@@ -21,6 +21,7 @@ import sys
 import mantid.api
 import mantid.kernel
 import mantid.plots.modest_image
+from mantid.kernel import config
 from mantid.plots.helperfunctions import get_axes_labels, get_bins, get_data_uneven_flag, get_distribution, \
     get_matrix_2d_ragged, get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
@@ -36,11 +37,11 @@ _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
 # ================================================
 
 
-def _setLabels1D(axes, workspace, indices=None):
+def _setLabels1D(axes, workspace, indices=None, plot_as_dist=True):
     '''
     helper function to automatically set axes labels for 1D plots
     '''
-    labels = get_axes_labels(workspace, indices)
+    labels = get_axes_labels(workspace, indices, plot_as_dist)
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[0])
 
@@ -57,6 +58,8 @@ def _setLabels2D(axes, workspace, indices=None, transpose=False):
         axes.set_xlabel(labels[1])
         axes.set_ylabel(labels[2])
     axes.set_title(labels[-1])
+    if hasattr(workspace, 'isCommonLogBins') and workspace.isCommonLogBins():
+        axes.set_xscale('log')
 
 
 def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
@@ -80,6 +83,14 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
     return x, y, dy, dx, indices, kwargs
 
 
+def on_off_to_bool(on_or_off):
+    if on_or_off.lower() == 'on':
+        return True
+    if on_or_off.lower() == 'off':
+        return False
+    raise ValueError("Argument 'on_or_off' must be either 'On' or 'Off")
+
+
 # ========================================================
 # Plot functions
 # ========================================================
@@ -101,7 +112,8 @@ def _plot_impl(axes, workspace, args, kwargs):
         kwargs['linestyle'] = 'steps-post'
     else:
         x, y, _, _, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs)
-        _setLabels1D(axes, workspace, indices)
+        plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
+        _setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
     return x, y, args, kwargs
 
 
@@ -195,15 +207,22 @@ def errorbar(axes, workspace, *args, **kwargs):
     """
     x, y, dy, dx, indices, kwargs = _get_data_for_plot(axes, workspace, kwargs,
                                                        with_dy=True, with_dx=False)
-    _setLabels1D(axes, workspace, indices)
-    # extract the errors visible kwarg before the
-    # original errorbar call or it will fail due to unknown kwarg
-    errors_visible = kwargs.pop(MantidAxKwargs.ERRORS_VISIBLE, True)
 
-    errorbar_container = axes.errorbar(x, y, dy, dx, *args, **kwargs)
-    errorbar_container[2][0].set_visible(errors_visible)
+<< << << < HEAD
+_setLabels1D(axes, workspace, indices)
+# extract the errors visible kwarg before the
+# original errorbar call or it will fail due to unknown kwarg
+errors_visible = kwargs.pop(MantidAxKwargs.ERRORS_VISIBLE, True)
 
-    return errorbar_container
+errorbar_container = axes.errorbar(x, y, dy, dx, *args, **kwargs)
+errorbar_container[2][0].set_visible(errors_visible)
+
+return errorbar_container
+== == == =
+plot_as_distribution = on_off_to_bool(config['graph1d.autodistribution'])
+_setLabels1D(axes, workspace, indices, plot_as_dist=plot_as_distribution)
+return axes.errorbar(x, y, dy, dx, *args, **kwargs)
+>> >> >> > master
 
 
 def scatter(axes, workspace, *args, **kwargs):
@@ -718,7 +737,6 @@ def update_colorplot_datalimits(axes, mappables):
         xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
         xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
-
     axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
     axes.autoscale()
 

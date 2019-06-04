@@ -52,6 +52,10 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/ParallelRunner.cpp
       ../../TestHelpers/src/ReflectometryHelper.cpp)
   cxxtest_add_test(AlgorithmsTest ${TEST_FILES})
+  if(WIN32)
+    # On Windows Boost uuid requires the bcrypt library
+    set(BCRYPT bcrypt)
+  endif()
   target_link_libraries(AlgorithmsTest
                         LINK_PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -59,6 +63,7 @@ if(CXXTEST_FOUND)
                         Algorithms
                         DataHandling
                         Nexus
+                        ${BCRYPT}
                         ${GMOCK_LIBRARIES}
                         ${GTEST_LIBRARIES})
   add_dependencies(AlgorithmsTest Crystal CurveFitting)

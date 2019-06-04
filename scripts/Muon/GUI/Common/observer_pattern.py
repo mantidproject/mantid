@@ -60,3 +60,12 @@ class GenericObserver(Observer):
 
     def update(self, observable, arg):
         self.callback()
+
+
+class GenericObserverWithArgPassing(Observer):
+    def __init__(self, callback):
+        Observer.__init__(self)
+        self.callback = callback
+
+    def update(self, observable, arg):
+        self.callback(arg)

@@ -1244,8 +1244,8 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       }
     } // single fit
     else {
-      FitPropertyBrowser::clear();
-      FitPropertyBrowser::addFunction(func->asString());
+      m_functionBrowser->clear();
+      m_functionBrowser->setFunction(func);
     }
 
     updateTFPlot();
@@ -1679,7 +1679,7 @@ bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
             // if the box does not exist and there is more than 1 period in name
             return false;
           }
-        } catch (boost::bad_lexical_cast) {
+        } catch (const boost::bad_lexical_cast &) {
           // none int value
           return false;
         }

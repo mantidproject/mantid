@@ -41,9 +41,9 @@ public:
     TS_ASSERT(alg.isInitialized());
     // Setting properties to input workspaces that don't exist throws
     TS_ASSERT_THROWS(alg.setPropertyValue(inputProp1, "test_in21"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue(inputProp2, "test_in22"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(outputProp, "test_out2"));
   }
 

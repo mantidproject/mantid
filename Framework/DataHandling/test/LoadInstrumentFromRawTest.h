@@ -97,7 +97,7 @@ public:
     // last
     const auto &ptrDetLast = detectorInfo.detector(detectorInfo.indexOf(8));
     TS_ASSERT_EQUALS(ptrDetLast.getID(), 8);
-    TS_ASSERT_THROWS(detectorInfo.indexOf(9), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(9), const std::out_of_range &);
 
     // Check the monitors are correctly marked
     const auto &detInfo = output->detectorInfo();

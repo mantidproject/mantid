@@ -25,6 +25,7 @@ class SliceViewer(object):
             self.update_plot_data = self.update_plot_data_MDE
         else:
             self.new_plot = self.new_plot_matrix
+            self.update_plot_data = self.update_plot_data_matrix
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(), parent)
 
@@ -47,3 +48,11 @@ class SliceViewer(object):
         self.view.update_plot_data(self.model.get_data(slicepoint=self.view.dimensions.get_slicepoint(),
                                                        bin_params=self.view.dimensions.get_bin_params(),
                                                        transpose=self.view.dimensions.transpose))
+
+    def update_plot_data_matrix(self):
+        # should never be called, since this workspace type is only 2D the plot dimensions never change
+        pass
+
+    def line_plots(self):
+        self.view.create_axes()
+        self.new_plot()

@@ -150,7 +150,7 @@ void AnnularRingAbsorption::runCreateSampleShape(
                         createSampleShapeXML(refFrame->vecPointingUp()));
   try {
     alg->executeAsChildAlg();
-  } catch (std::exception &exc) {
+  } catch (const std::exception &exc) {
     throw std::invalid_argument(
         std::string("Unable to create sample shape: '") + exc.what() + "'");
   }

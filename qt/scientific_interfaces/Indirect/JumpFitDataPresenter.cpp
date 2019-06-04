@@ -96,7 +96,7 @@ void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
 }
 
 void JumpFitDataPresenter::updateAvailableParameterTypes() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_cbParameterType);
+  MantidQt::API::SignalBlocker blocker(m_cbParameterType);
   m_cbParameterType->clear();
   for (const auto &type : getParameterTypes(m_dataIndex))
     m_cbParameterType->addItem(QString::fromStdString(type));
@@ -111,7 +111,7 @@ void JumpFitDataPresenter::updateParameterSelectionEnabled() {
 
 void JumpFitDataPresenter::setAvailableParameters(
     const std::vector<std::string> &parameters) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_cbParameter);
+  MantidQt::API::SignalBlocker blocker(m_cbParameter);
   m_cbParameter->clear();
   for (const auto &parameter : parameters)
     m_cbParameter->addItem(QString::fromStdString(parameter));
@@ -218,6 +218,16 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
           SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
                                           const std::string &)));
   return std::move(dialog);
+}
+
+void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
+}
+
+void JumpFitDataPresenter::setMultiInputResolutionWSSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  UNUSED_ARG(dialog);
 }
 
 } // namespace IDA

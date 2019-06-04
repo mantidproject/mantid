@@ -224,7 +224,7 @@ def chop_workspace(workspace, monitor_index):
     """
     from mantid.simpleapi import ChopData
 
-    workspace_name = workspace.getName()
+    workspace_name = workspace.name()
 
     # Chop data if required
     try:
@@ -399,7 +399,7 @@ def add_workspace_names(workspace_names, workspace):
     if isinstance(workspace, WorkspaceGroup):
         workspace_names.extend(workspace.getNames())
     else:
-        workspace_names.append(workspace.getName())
+        workspace_names.append(workspace.name())
     return workspace_names
 
 
@@ -694,7 +694,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         # Otherwise use the value of GroupingPolicy
         grouping_method = method
 
-    logger.information('Grouping method for workspace %s is %s' % (workspace.getName(), grouping_method))
+    logger.information('Grouping method for workspace %s is %s' % (workspace.name(), grouping_method))
 
     if grouping_method == 'Individual':
         # Nothing to do here
@@ -744,7 +744,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         return group_on_string(group_detectors, group_string)
 
     else:
-        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.name()))
 
     group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()

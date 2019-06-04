@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 
 from mantid.kernel import ConfigServiceImpl
@@ -45,7 +44,6 @@ def check_facility():
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):
-
     """
     The Frequency Domain Analaysis 2.0 interface.
     """
@@ -80,7 +78,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.transform = TransformWidget(self.context, FFTWidget, MaxEntWidget, parent=self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget()
+        self.help_widget = HelpWidget("Frequency Domain Analysis")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()

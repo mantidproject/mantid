@@ -58,6 +58,12 @@ struct headerData {
   float monHigh[4];
 };
 
+struct temperatureHeaderData {
+  std::vector<std::string> titles;
+  std::string startDateTime;
+  bool delimeterOfTitlesIsBackSlash;
+};
+
 class DLLExport LoadPSIMuonBin
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
@@ -81,8 +87,28 @@ private:
   void readInHistograms(Mantid::Kernel::BinaryStreamReader &streamReader);
   void generateUnknownAxis();
 
+  // Temperature file processing
+  void readInTemperatureFile(DataObjects::Workspace2D_sptr &ws);
+  std::string detectTempFile();
+  void processLine(const std::string &line, DataObjects::Workspace2D_sptr &ws);
+  void readInTemperatureFileHeader(const std::string &contents);
+  void processHeaderLine(const std::string &line);
+  void processDateHeaderLine(const std::string &line);
+  void processTitleHeaderLine(const std::string &line);
+
+  // Sample log helper functions
+  Mantid::API::Algorithm_sptr
+  createSampleLogAlgorithm(DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const std::string &logText,
+                      DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const double &logNumber,
+                      DataObjects::Workspace2D_sptr &ws);
+  void addToSampleLog(const std::string &logName, const int &logNumber,
+                      DataObjects::Workspace2D_sptr &ws);
+
   std::vector<std::vector<double>> m_histograms;
   struct headerData m_header;
+  struct temperatureHeaderData m_tempHeader;
   std::vector<double> m_xAxis;
   std::vector<std::vector<double>> m_eAxis;
 };

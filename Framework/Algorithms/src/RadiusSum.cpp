@@ -291,8 +291,8 @@ std::vector<double> RadiusSum::getBoundariesOfInputWorkspace() {
  *
  *  It is important that the input workspace must be a numeric image, and not an
  *instrument related workspace.
- *  The function will raise exception (std::invalid_argument) if an invalid
- *input is give.
+ *  The function will raise exception (std::invalid_argument) if an
+ *invalid input is give.
  *
  *  @see RadiusSum::inputWorkspaceHasInstrumentAssociated for reference.
  *
@@ -474,9 +474,8 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
  *
  *  It will test that all the values of the centre is inside their respective
  *dominium.
- *  If the test fails, it will raise an exception (invalid_argument) to express
- *that
- *  the given centre is not inside the boundaries.
+ *  If the test fails, it will raise an exception (invalid_argument) to
+ *express that the given centre is not inside the boundaries.
  */
 void RadiusSum::centerIsInsideLimits(const std::vector<double> &centre,
                                      const std::vector<double> &boundaries) {

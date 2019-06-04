@@ -12,13 +12,19 @@ from qtpy import QtWidgets, QtCore
 from mantid.kernel import ConfigServiceImpl
 
 import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.contexts.muon_context import MuonContext
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
+from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
+from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
+from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget import GroupingTabWidget
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
+from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
@@ -55,15 +61,23 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
-        self.context = MuonDataContext(load_data=self.loaded_data)
+        self.data_context = MuonDataContext(self.loaded_data)
+        self.gui_context = MuonGuiContext()
+        self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
+        self.phase_context = PhaseTableContext()
+
+        self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
+                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
         self.grouping_tab_widget = GroupingTabWidget(self.context)
         self.home_tab = HomeTabWidget(self.context, self)
+        self.phase_tab = PhaseTabWidget(self.context, self)
+        self.fitting_tab = FittingTabWidget(self.context, self)
 
         self.setup_tabs()
-        self.help_widget = HelpWidget()
+        self.help_widget = HelpWidget("Muon Analysis 2")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
@@ -74,54 +88,31 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Muon Analysis version 2")
+        self.setWindowTitle("Muon Analysis")
 
-        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.setup_load_observers()
 
-        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.groupingObserver)
+        self.setup_gui_variable_observers()
 
-        self.context.instrumentNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.instrumentObserver)
+        self.setup_alpha_recalculated_observers()
 
-        self.context.instrumentNotifier.add_subscriber(
-            self.load_widget.load_widget.instrumentObserver)
+        self.setup_grouping_changed_observers()
 
-        self.context.instrumentNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
+        self.setup_instrument_changed_notifier()
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.home_tab.home_tab_widget.loadObserver)
+        self.setup_group_calculation_enable_notifer()
 
-        self.load_widget.load_widget.loadNotifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+        self.setup_group_calculation_disabler_notifer()
 
-        self.context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
-        self.context.gui_variables_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+        self.setup_on_load_enabler()
 
-        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
-            self.home_tab.home_tab_widget.enable_observer)
+        self.setup_on_load_disabler()
 
-        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
-            self.home_tab.home_tab_widget.disable_observer)
+        self.setup_phase_quad_changed_notifer()
 
-        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
-            self.load_widget.load_widget.enable_observer)
+        self.setup_phase_table_changed_notifier()
 
-        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
-            self.load_widget.load_widget.disable_observer)
-
-        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-            self.home_tab.home_tab_widget.enable_observer)
-        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-            self.home_tab.home_tab_widget.disable_observer)
-
-        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.enable_observer)
-        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.disable_observer)
+        self.context.data_context.message_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.message_observer)
 
     def setup_tabs(self):
         """
@@ -131,6 +122,99 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab.home_tab_view, 'Home')
         self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view, 'Grouping')
+        self.tabs.addTabWithOrder(self.phase_tab.phase_table_view, 'Phase Table')
+        self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
+
+    def setup_load_observers(self):
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.loadObserver)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.phase_tab.phase_table_presenter.run_change_observer)
+
+        self.load_widget.load_widget.loadNotifier.add_subscriber(self.fitting_tab.fitting_tab_presenter.run_changed_observer)
+
+    def setup_gui_variable_observers(self):
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.gui_variables_observer)
+
+        self.context.gui_context.gui_variables_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+        self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+    def setup_alpha_recalculated_observers(self):
+        self.home_tab.group_widget.pairAlphaNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.loadObserver)
+
+    def setup_grouping_changed_observers(self):
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.groupingObserver)
+
+        self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.group_change_observer)
+
+    def setup_instrument_changed_notifier(self):
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.home_tab.home_tab_widget.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.load_widget.load_widget.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.instrumentObserver)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.phase_tab.phase_table_presenter.instrument_changed_observer)
+
+    def setup_group_calculation_enable_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.enable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.load_widget.load_widget.enable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+
+    def setup_group_calculation_disabler_notifer(self):
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.disable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.load_widget.load_widget.disable_observer)
+
+        self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+
+    def setup_on_load_enabler(self):
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.enable_observer)
+
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.enable_observer)
+
+        self.load_widget.load_widget.load_run_widget.enable_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+
+    def setup_on_load_disabler(self):
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.home_tab.home_tab_widget.disable_observer)
+
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.grouping_tab_widget.group_tab_presenter.disable_observer)
+
+        self.load_widget.load_widget.load_run_widget.disable_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+
+    def setup_phase_quad_changed_notifer(self):
+        pass
+
+    def setup_phase_table_changed_notifier(self):
+        pass
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

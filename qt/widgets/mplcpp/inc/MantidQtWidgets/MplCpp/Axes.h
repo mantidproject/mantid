@@ -11,19 +11,23 @@
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 
 #include <QString>
-
+#include <functional>
 #include <tuple>
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
-class MANTID_MPLCPP_DLL Axes : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Axes : public Common::Python::InstanceHolder {
 public:
-  explicit Axes(Python::Object obj);
+  explicit Axes(Common::Python::Object obj);
 
-  /// @name Formatting
+  /// @name General axes manipulation
   /// @{
+  void clear();
+  /// Function-signature required for operation applied to each artist
+  using ArtistOperation = std::function<void(Artist &&)>;
+  void forEachArtist(const char *containerAttr, const ArtistOperation &op);
   void setXLabel(const char *label);
   void setYLabel(const char *label);
   void setTitle(const char *label);
@@ -31,8 +35,12 @@ public:
 
   /// @name Drawing
   /// @{
+  Artist legend(const bool draggable);
+  Artist legendInstance() const;
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
               const char *format = "b-");
+  Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
+              const QString format, const QString label);
   Artist text(double x, double y, QString text,
               const char *horizontalAlignment);
   /// @}
@@ -50,7 +58,7 @@ public:
   void relim(bool visibleOnly = false);
   void autoscale(bool enable);
   void autoscaleView(bool scaleX = true, bool scaleY = true);
-  void autoscaleView(bool tight, bool scaleX = true, bool scaleY = true);
+  void autoscaleView(bool tight, bool scaleX, bool scaleY);
   /// @}
 };
 

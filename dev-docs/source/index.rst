@@ -221,6 +221,7 @@ Component Overviews
    ISISSANSReductionBackend
    LoadAlgorithmHook
    Logging
+   MatplotlibInCpp
    MultiThreadingInAlgorithms
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI

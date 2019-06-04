@@ -308,7 +308,7 @@ void LoadBBY::exec() {
   auto getParam = [&allParams](std::string tag, double defValue) {
     try {
       return std::stod(allParams[tag]);
-    } catch (std::invalid_argument) {
+    } catch (const std::invalid_argument &) {
       return defValue;
     }
   };
@@ -512,7 +512,7 @@ void LoadBBY::loadInstrumentParameters(
                               << hdfTag << ", using default.\n";
           }
 
-        } catch (std::invalid_argument) {
+        } catch (const std::invalid_argument &) {
           g_log.warning() << "Invalid format for BILBY parameter " << x.first
                           << std::endl;
         }
@@ -613,7 +613,7 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       try {
         logParams["L1_chopper_value"] =
             logParams["Ltof_det_value"] - logParams["L2_det_value"];
-      } catch (std::invalid_argument) {
+      } catch (const std::invalid_argument &) {
         logParams["L1_chopper_value"] = 18.47258984375;
         g_log.warning() << "Cannot find parameter 'L1_chopper_value'"
                         << ", using default.\n";

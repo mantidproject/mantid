@@ -51,7 +51,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(domain[1]);
     TS_ASSERT_THROWS_NOTHING(domain[2]);
 
-    TS_ASSERT_THROWS(domain[3], IndexError)
+    TS_ASSERT_THROWS(domain[3], const IndexError &)
   }
 };
 

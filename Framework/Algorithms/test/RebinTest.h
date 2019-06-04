@@ -111,7 +111,7 @@ public:
     rebin.setPropertyValue("InputWorkspace", "test_in1D");
     rebin.setPropertyValue("OutputWorkspace", "test_out");
     // Check it fails if "Params" property not set
-    TS_ASSERT_THROWS(rebin.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &);
     TS_ASSERT(!rebin.isExecuted());
     // Now set the property
     rebin.setPropertyValue("Params", "1.5,2.0,20,-0.1,30,1.0,35");
@@ -183,7 +183,7 @@ public:
     rebin.setPropertyValue("InputWorkspace", "test_in1D");
     rebin.setPropertyValue("OutputWorkspace", "test_out");
     // Check it fails if "Params" property not set
-    TS_ASSERT_THROWS(rebin.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &);
     TS_ASSERT(!rebin.isExecuted());
     // Now set the property
     rebin.setPropertyValue("Params", "1.0,-1.0,1000.0");

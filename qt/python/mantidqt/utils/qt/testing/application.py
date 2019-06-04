@@ -14,7 +14,7 @@ from qtpy.QtWidgets import QApplication
 from mantidqt.utils.qt.plugins import setup_library_paths
 
 # Hold on to QAPP reference to avoid garbage collection
-_QAPP = None
+_QAPP = QApplication.instance()
 
 
 def get_application(name=''):

@@ -32,6 +32,9 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/regex.hpp>
+
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -49,6 +52,50 @@ namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
 constexpr const double EPSILON{1.0e-9};
+
+/** Append the x-unit of the workspace to the y-unit label as a denominator
+ * E.g. if a workspace has y-unit label "Counts" and x-unit angstrom, the y-unit
+ * label becomes "Counts per angstrom". Or if useLatex is true "Counts per
+ * $\AA$"
+ * @param yLabel :: The y-axis label
+ * @param workspace :: The workspace
+ * @param useLatex :: Boolean, if true use latex else use ascii
+ */
+std::string appendUnitDenominatorUsingPer(std::string yLabel,
+                                          const MatrixWorkspace &workspace,
+                                          bool useLatex) {
+  if (useLatex) {
+    std::string xLabel = workspace.getAxis(0)->unit()->label().latex();
+    if (!xLabel.empty())
+      yLabel += " per $" + workspace.getAxis(0)->unit()->label().latex() + "$";
+  } else {
+    std::string xLabel = workspace.getAxis(0)->unit()->label().ascii();
+    if (!xLabel.empty())
+      yLabel += " per " + workspace.getAxis(0)->unit()->label().ascii();
+  }
+  return yLabel;
+}
+
+/** Splits a string on the word "per" and replaces it with a Latex equivalent.
+ * E.g. "Counts per meV per hour" becomes "Counts (meV hour)$^{-1}$"
+ * If no "per"s are present leave the string as it is.
+ * @param yLabel :: The y-axis label
+ * @return std::string
+ */
+std::string replacePerWithLatex(std::string yLabel) {
+  std::vector<std::string> splitVec;
+  boost::split_regex(splitVec, yLabel, boost::regex(" per "));
+  if (splitVec.size() > 1) {
+    yLabel = splitVec[0];
+    splitVec.erase(splitVec.begin());
+    std::string unitString = boost::algorithm::join(splitVec, " ");
+    if (!yLabel.empty())
+      yLabel += " ";
+    yLabel += "(" + unitString + ")$^{-1}$";
+  }
+  return yLabel;
+}
+
 } // namespace
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
@@ -930,22 +977,35 @@ void MatrixWorkspace::setYUnit(const std::string &newUnit) {
   m_YUnit = newUnit;
 }
 
-/// Returns a caption for the units of the data in the workspace
-std::string MatrixWorkspace::YUnitLabel() const {
+/**
+ * Returns a caption for the units of the data in the workspace.
+ * @param useLatex :: Return label using Latex syntax
+ * @param plotAsDistribution :: If true, the Y-axis has been divided by bin
+ * width
+ */
+std::string
+MatrixWorkspace::YUnitLabel(bool useLatex /* = false */,
+                            bool plotAsDistribution /* = false */) const {
   std::string retVal;
-  if (!m_YUnitLabel.empty())
+  if (!m_YUnitLabel.empty()) {
     retVal = m_YUnitLabel;
-  else {
+    // If a custom label has been set and we are dividing by bin width when
+    // plotting (i.e. plotAsDistribution = true and the workspace is not a
+    // distribution), we must append the x-unit as a divisor. We assume the
+    // custom label contains the correct units for the data.
+    if (plotAsDistribution && !this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
+  } else {
     retVal = m_YUnit;
-    // If this workspace a distribution & has at least one axis & this axis has
-    // its unit set
-    // then append that unit to the string to be returned
-    if (!retVal.empty() && this->isDistribution() && this->axes() &&
-        this->getAxis(0)->unit()) {
-      retVal = retVal + " per " + this->getAxis(0)->unit()->label().ascii();
-    }
+    // If no custom label is set and the workspace is a distribution we need to
+    // append the divisor's unit to the label. If the workspace is not a
+    // distribution, but we are plotting it as a distribution, we must append
+    // the divisor's unit.
+    if (plotAsDistribution || this->isDistribution())
+      retVal = appendUnitDenominatorUsingPer(retVal, *this, useLatex);
   }
-
+  if (useLatex)
+    retVal = replacePerWithLatex(retVal);
   return retVal;
 }
 

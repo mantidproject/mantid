@@ -128,22 +128,22 @@ public:
     std::string xml;
     std::istringstream instream(xml);
     MaterialXMLParser parser;
-    TS_ASSERT_THROWS(parser.parse(instream), std::invalid_argument);
+    TS_ASSERT_THROWS(parser.parse(instream), const std::invalid_argument &);
   }
 
   void test_Missing_Or_Empty_Id_Tag_Throws_Error() {
     TS_ASSERT_THROWS(parseMaterial("<material formula=\"V\">"
                                    "</material>"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(parseMaterial("<material id=\"\" formula=\"V\">"
                                    "</material>"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Unknown_Attribute_Throws_Error() {
     TS_ASSERT_THROWS(parseMaterial("<material id=\"n\" atomic=\"28\">"
                                    "</material>"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   //----------------------------------------------------------------------------

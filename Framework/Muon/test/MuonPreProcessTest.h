@@ -152,7 +152,7 @@ public:
     alg->setProperty("TimeMin", 0.6);
     alg->setProperty("TimeMax", 0.4);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_that_negative_TimeMin_is_an_accepted_input() {
@@ -173,7 +173,7 @@ public:
     alg->setProperty("TimeMin", 0.5);
     alg->setProperty("TimeMax", 0.5);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_that_TimeMin_and_TimeMax_both_in_same_bin_throws_logic_error() {
@@ -189,7 +189,7 @@ public:
     alg->setProperty("TimeMax", 0.58);
 
     // Expect runtime error as alg is set to rethrow
-    TS_ASSERT_THROWS(alg->execute(), std::logic_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::logic_error &);
   }
 
   // --------------------------------------------------------------------------
@@ -205,7 +205,7 @@ public:
 
     auto alg = setUpAlgorithmWithDeadTimeTable(ws, deadTimeTable);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   // --------------------------------------------------------------------------
@@ -415,7 +415,7 @@ public:
     WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
     auto alg = setUpAlgorithmWithNoOptionalProperties(wsGroup);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void
@@ -428,7 +428,7 @@ public:
     wsGroup->addWorkspace(wsTwoSpectra);
     auto alg = setUpAlgorithmWithNoOptionalProperties(wsGroup);
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 };
 
