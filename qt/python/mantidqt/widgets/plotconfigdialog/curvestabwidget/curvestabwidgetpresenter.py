@@ -76,7 +76,10 @@ class CurvesTabWidgetPresenter:
         self.view.select_curve_combo_box.blockSignals(False)
 
     def get_selected_ax(self):
-        return self.axes_names_dict[self.view.get_selected_ax_name()]
+        try:
+            return self.axes_names_dict[self.view.get_selected_ax_name()]
+        except KeyError:
+            return None
 
     def get_selected_curve(self):
         for curve in self.get_selected_ax().get_lines():
@@ -96,14 +99,19 @@ class CurvesTabWidgetPresenter:
         with BlockQSignals(self.view.select_curve_combo_box):
             self.clear_select_curves_combo_box_signal_blocking()
         curve_names = []
+        selected_ax = self.get_selected_ax()
+        if not selected_ax:
+            self.view.close()
+            return False
         lines = self.get_selected_ax().get_lines()
         for line in lines:
             curve_names.append(line.get_label())
         self.view.populate_select_curve_combo_box(curve_names)
+        return True
 
     def populate_curve_combo_box_and_update_properties(self):
-        self.populate_select_curve_combo_box()
-        self.set_selected_curve_view_properties()
+        if self.populate_select_curve_combo_box():
+            self.set_selected_curve_view_properties()
 
     def set_selected_curve_view_properties(self):
         self.view.set_properties(self.get_selected_curve_properties())
