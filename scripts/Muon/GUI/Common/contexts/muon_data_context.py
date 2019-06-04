@@ -8,7 +8,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
-import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
@@ -17,7 +16,7 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
 from mantid.api import WorkspaceGroup
-from mantid.kernel import ConfigServiceImpl, ConfigService
+from mantid.kernel import ConfigService
 from Muon.GUI.Common.observer_pattern import Observable
 
 

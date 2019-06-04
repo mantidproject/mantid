@@ -150,5 +150,5 @@ def get_maxent_workspace_group_name(insertion_workspace_name, instrument):
     return group
 
 
-def get_fit_workspace_base_directory():
-    return 'Muon Data/'
+def get_fit_workspace_directory(group_name, suffix):
+    return 'Muon Data/' + group_name + '/' + group_name + suffix + '/'
