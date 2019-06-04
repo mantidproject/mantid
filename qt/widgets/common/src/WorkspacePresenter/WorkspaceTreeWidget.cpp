@@ -5,27 +5,27 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
-#include <MantidGeometry/Instrument.h>
+#include "MantidGeometry/Instrument.h"
 
-#include <MantidQtWidgets/Common/AlgorithmDialog.h>
-#include <MantidQtWidgets/Common/AlgorithmInputHistory.h>
-#include <MantidQtWidgets/Common/FlowLayout.h>
-#include <MantidQtWidgets/Common/InterfaceManager.h>
-#include <MantidQtWidgets/Common/LineEditWithClear.h>
-#include <MantidQtWidgets/Common/MantidDisplayBase.h>
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
-#include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
-#include <MantidQtWidgets/Common/WorkspaceIcons.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/FlowLayout.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/LineEditWithClear.h"
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
+#include "MantidQtWidgets/Common/WorkspaceIcons.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/IMDEventWorkspace.h>
-#include <MantidAPI/IMDWorkspace.h>
-#include <MantidAPI/IPeaksWorkspace.h>
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <Poco/Path.h>
 

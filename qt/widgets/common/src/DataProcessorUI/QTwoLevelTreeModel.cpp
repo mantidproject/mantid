@@ -8,7 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

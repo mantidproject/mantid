@@ -7,8 +7,8 @@
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include <MantidAPI/IMDWorkspace.h>
-#include <MantidGeometry/MDGeometry/MDImplicitFunction.h>
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>

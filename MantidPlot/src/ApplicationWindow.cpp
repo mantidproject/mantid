@@ -114,7 +114,7 @@
 #include "TextEditor.h"
 #include "TiledWindow.h"
 #include "importOPJ.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ContourLinesEditor.h"

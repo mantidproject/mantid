@@ -12,7 +12,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
-#include <MantidAPI/MatrixWorkspace.h>
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
 

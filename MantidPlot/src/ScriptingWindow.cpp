@@ -14,7 +14,7 @@
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 // Mantid
 #include "MantidKernel/ConfigService.h"

@@ -9,7 +9,7 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h"
-#include <MantidQtWidgets/Common/WorkspaceObserver.h>
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <Poco/NObserver.h>
 
 namespace MantidQt {

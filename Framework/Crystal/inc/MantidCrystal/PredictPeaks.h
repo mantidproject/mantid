@@ -14,8 +14,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/NearestNeighbours.h"
 #include "MantidKernel/System.h"
-#include <MantidGeometry/Crystal/OrientedLattice.h>
-#include <MantidGeometry/Crystal/StructureFactorCalculator.h>
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 
 #include <tuple>
 

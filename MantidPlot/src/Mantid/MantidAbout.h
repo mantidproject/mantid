@@ -11,7 +11,7 @@
 // Includes
 //----------------------
 #include "ui_MantidAbout.h"
-#include <MantidQtWidgets/Common/MantidDialog.h>
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 /**
 This class implements About MantidPlot dialog for mnatid help menu.

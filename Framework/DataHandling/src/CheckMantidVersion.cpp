@@ -10,7 +10,7 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>

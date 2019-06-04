@@ -29,7 +29,7 @@
 #include "PluginFit.h"
 #include "PolynomialFit.h"
 #include "SigmoidalFit.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QCloseEvent>
 #include <QComboBox>

@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>

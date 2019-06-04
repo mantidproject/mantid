@@ -34,7 +34,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
 #include <limits>

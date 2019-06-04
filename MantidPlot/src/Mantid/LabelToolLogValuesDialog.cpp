@@ -12,7 +12,7 @@
 
 // Mantid
 #include <LegendWidget.h>
-#include <Mantid/MantidUI.h>
+#include "Mantid/MantidUI.h"
 
 // Qt
 #include <QFormLayout>

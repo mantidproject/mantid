@@ -9,7 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/Strings.h"
-#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <fstream>
 
 using namespace Mantid::Kernel::Strings;

@@ -7,7 +7,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
 #include <iterator>

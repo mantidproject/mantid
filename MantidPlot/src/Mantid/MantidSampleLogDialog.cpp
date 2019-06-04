@@ -11,7 +11,7 @@
 
 // Mantid
 #include "MantidUI.h"
-#include <MantidAPI/MultipleExperimentInfos.h>
+#include "MantidAPI/MultipleExperimentInfos.h"
 
 // Qt
 #include <QFormLayout>

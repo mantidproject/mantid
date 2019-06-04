@@ -46,7 +46,7 @@
 #include "SymbolBox.h"
 #include "Table.h"
 #include "VectorCurve.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"

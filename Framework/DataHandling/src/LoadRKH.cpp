@@ -25,7 +25,7 @@
 // clang-format on
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <istream>
 #include <numeric>

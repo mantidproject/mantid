@@ -33,7 +33,7 @@
 #include "PlotCurve.h"
 #include "SymbolBox.h"
 #include "Table.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include <QKeyEvent>
 #include <qwt_symbol.h>
 

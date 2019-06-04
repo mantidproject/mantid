@@ -15,7 +15,7 @@
 #include "MantidKernel/Strings.h"
 #include <fstream>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/tokenizer.hpp>
 // String utilities
 #include <boost/algorithm/string.hpp>

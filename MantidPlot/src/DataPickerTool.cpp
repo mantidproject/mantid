@@ -33,7 +33,7 @@
 #include "Plot.h"
 #include "PlotCurve.h"
 #include "QwtErrorPlotCurve.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QClipboard>

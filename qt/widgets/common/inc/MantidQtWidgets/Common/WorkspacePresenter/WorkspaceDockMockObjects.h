@@ -9,9 +9,9 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <MantidAPI/Workspace.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>
+#include "MantidAPI/Workspace.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>

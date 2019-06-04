@@ -8,7 +8,7 @@
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
 #include "MantidAPI/WorkspaceHistory.h"
-#include <MantidAPI/Workspace.h>
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

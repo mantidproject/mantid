@@ -19,7 +19,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
-#include <MantidVatesAPI/ADSWorkspaceProvider.h>
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"

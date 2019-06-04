@@ -15,7 +15,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <MantidAPI/IEventWorkspace.h>
+#include "MantidAPI/IEventWorkspace.h"
 #include <climits>
 #include <cmath>
 

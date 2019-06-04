@@ -9,8 +9,8 @@
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <MantidKernel/DateAndTime.h>
-#include <MantidQtWidgets/Common/WorkspaceObserver.h>
+#include "MantidKernel/DateAndTime.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <QTreeWidgetItem>
 
 namespace MantidQt {

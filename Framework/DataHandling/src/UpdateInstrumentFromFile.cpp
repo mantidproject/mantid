@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/scoped_ptr.hpp>

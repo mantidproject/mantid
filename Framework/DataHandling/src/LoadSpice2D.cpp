@@ -27,7 +27,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>

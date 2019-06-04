@@ -8,7 +8,7 @@
 
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
-#include <MantidAPI/AlgorithmManager.h>
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid;
 

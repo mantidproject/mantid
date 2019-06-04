@@ -37,7 +37,7 @@ Description          : Preferences dialog
 #include "Matrix.h"
 #include "MultiLayer.h"
 #include "SendToProgramDialog.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QComboBox>

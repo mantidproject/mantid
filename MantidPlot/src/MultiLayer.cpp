@@ -68,12 +68,12 @@
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "MantidKernel/Strings.h"
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
 #include "Mantid/MantidMDCurveDialog.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
-#include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include <gsl/gsl_vector.h>
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"

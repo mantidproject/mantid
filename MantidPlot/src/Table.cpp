@@ -35,7 +35,7 @@
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "SortDialog.h"
 #include "muParserScript.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -62,7 +62,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <MantidKernel/Strings.h>
+#include "MantidKernel/Strings.h"
 
 #include <ctime>
 

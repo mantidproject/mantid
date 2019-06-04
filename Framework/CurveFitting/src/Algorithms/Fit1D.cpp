@@ -16,7 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>

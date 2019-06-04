@@ -14,7 +14,7 @@
 #include "MantidMatrixModel.h"
 #include "MantidUI.h"
 #include "Preferences.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 

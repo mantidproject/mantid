@@ -12,7 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <MantidHistogramData/LinearGenerator.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 

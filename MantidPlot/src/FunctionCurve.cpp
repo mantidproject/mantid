@@ -32,9 +32,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MyParser.h"
-#include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/IFunction.h>
-#include <MantidAPI/MatrixWorkspace.h>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 FunctionCurve::FunctionCurve(const QString &name)
     : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),

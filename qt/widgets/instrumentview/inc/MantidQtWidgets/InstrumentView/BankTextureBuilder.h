@@ -10,7 +10,7 @@
 #include "GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/InstrumentView/GridTextureFace.h"
-#include <MantidBeamline/ComponentType.h>
+#include "MantidBeamline/ComponentType.h"
 #include <utility>
 #include <vector>
 

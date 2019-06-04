@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h"
-#include <MantidAPI/AnalysisDataService.h>
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;

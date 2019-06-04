@@ -36,7 +36,7 @@
 #include "Matrix.h"
 #include "PlotCurve.h"
 #include "Table.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QCheckBox>
 #include <QCloseEvent>

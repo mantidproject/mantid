@@ -29,7 +29,7 @@
 
 #include <boost/weak_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/ActiveMethod.h>
 #include <Poco/ActiveResult.h>
 #include <Poco/NotificationCenter.h>

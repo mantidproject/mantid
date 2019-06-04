@@ -35,7 +35,7 @@
 #include "MatrixCommand.h"
 #include "ScriptingEnv.h"
 #include "muParserScript.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include <QApplication>
 #include <QClipboard>
