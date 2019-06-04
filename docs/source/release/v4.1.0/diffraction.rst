@@ -30,6 +30,8 @@ Bug Fixes
 
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
 
+- Pearl no longer produces an output of NaN when long-mode is changed after focusing.
+
 Engineering Diffraction
 -----------------------
 
