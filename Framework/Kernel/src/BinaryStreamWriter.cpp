@@ -60,7 +60,7 @@ inline void writeToStream(std::ostream &stream, const std::vector<T> &value,
 BinaryStreamWriter::BinaryStreamWriter(std::ostream &ofstrm)
     : m_ofstrm(ofstrm),
       m_strLengthSize(static_cast<uint64_t>(sizeof(int32_t))) {
-  if (!ofstrm) {
+  if (ofstrm.fail()) {
     throw std::runtime_error("BinaryStreamWriter: Output stream is in a bad "
                              "state. Cannot continue.");
   }

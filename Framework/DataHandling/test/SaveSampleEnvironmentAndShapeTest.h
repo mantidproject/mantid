@@ -16,6 +16,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -256,5 +257,5 @@ public:
     return cube;
   }
 
-  const std::string m_OutputFile = "SaveSampleTest.stl";
+  const std::string m_OutputFile = Poco::Path::current() + "SaveSampleTest.stl";
 };

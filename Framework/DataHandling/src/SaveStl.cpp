@@ -63,7 +63,6 @@ void SaveStl::writeStl() {
     throw std::runtime_error("Invalid mesh, could not save.");
   }
   std::ofstream myFile(m_filename.c_str(), std::ios::out | std::ios::binary);
-
   const uint32_t numberOfTriangles = uint32_t(m_triangle.size() / 3);
   Kernel::BinaryStreamWriter streamWriter = Kernel::BinaryStreamWriter(myFile);
   writeHeader(streamWriter);
