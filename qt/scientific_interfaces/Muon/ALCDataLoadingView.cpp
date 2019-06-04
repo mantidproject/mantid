@@ -36,7 +36,7 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
 
-  m_ui.dataPlot->setCanvasColour(Qt::white);
+  m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
   // The following lines disable the groups' titles when the
   // group is disabled

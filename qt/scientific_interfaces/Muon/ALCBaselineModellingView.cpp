@@ -80,19 +80,23 @@ int ALCBaselineModellingView::noOfSectionRows() const {
 
 void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                                             std::size_t const &workspaceIndex) {
+  // These kwargs ensure only the data points are plotted with no line
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+
   m_ui.dataPlot->clear();
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, true,
+                             kwargs);
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
-  m_ui.dataPlot->clear();
   m_ui.dataPlot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::blue);
 }
 
 void ALCBaselineModellingView::setBaselineCurve(
     MatrixWorkspace_sptr &workspace, std::size_t const &workspaceIndex) {
-  m_ui.dataPlot->clear();
   m_ui.dataPlot->addSpectrum("Baseline", workspace, workspaceIndex, Qt::red);
 }
 
@@ -154,18 +158,18 @@ void ALCBaselineModellingView::addSectionSelector(
   newSelector->setRange(values.first, values.second);
   setSelectorValues(newSelector, values);
 
-  //m_ui.dataPlot->replot();
+  // m_ui.dataPlot->replot();
 }
 
 void ALCBaselineModellingView::deleteSectionSelector(int index) {
-  //auto rangeSelector = m_rangeSelectors[index];
-  //m_rangeSelectors.erase(index);
+  // auto rangeSelector = m_rangeSelectors[index];
+  // m_rangeSelectors.erase(index);
 
-  //rangeSelector->detach(); // This is not done when it's deleted
-  //m_selectorModifiedMapper->removeMappings(rangeSelector);
-  //delete rangeSelector;
+  // rangeSelector->detach(); // This is not done when it's deleted
+  // m_selectorModifiedMapper->removeMappings(rangeSelector);
+  // delete rangeSelector;
 
-  //m_ui.dataPlot->replot();
+  // m_ui.dataPlot->replot();
 }
 
 void ALCBaselineModellingView::updateSectionSelector(
