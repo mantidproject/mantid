@@ -10,7 +10,7 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
 import re
-from mantid.api import FunctionFactory
+from mantid.api import AnalysisDataService
 
 
 class FittingTabPresenter(object):
@@ -28,7 +28,8 @@ class FittingTabPresenter(object):
         self.thread_success = True
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
-        self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
+        self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
+        self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
         self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
         self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
@@ -52,31 +53,20 @@ class FittingTabPresenter(object):
         for key in changed_values.keys():
             if key in ['FirstGoodDataFromFile', 'FirstGoodData']:
                 self.reset_start_time_to_first_good_data_value()
-            if key == 'selected_group_pair' and changed_values[key]:
-                self.update_selected_workspace_guess()
+
+    def handle_selected_group_pair_changed(self):
+        self.update_selected_workspace_guess()
 
     def update_selected_workspace_guess(self):
-        fit_type = self.view.fit_type
-
-        if fit_type == self.view.single_fit:
-            if not self.manual_selection_made:
-                guess_selection = self.context.get_names_of_workspaces_to_fit(runs='All',
-                                                                              group_and_pair='All', phasequad=True,
-                                                                              rebin=not self.view.fit_to_raw)
-            else:
-                guess_selection = self.selected_data
-            self.selected_data = guess_selection
+        if not self.manual_selection_made:
+            guess_selection = self.context.get_names_of_workspaces_to_fit(runs='All',
+                                                                          group_and_pair=self.context.group_pair_context.selected,
+                                                                          phasequad=True,
+                                                                          rebin=not self.view.fit_to_raw)
         else:
-            if not self.manual_selection_made:
-                guess_selection = self.context.get_names_of_workspaces_to_fit(runs='All',
-                                                                              group_and_pair=self.context.gui_context[
-                                                                                  'selected_group_pair'],
-                                                                              phasequad=True,
-                                                                              rebin=not self.view.fit_to_raw)
-            else:
-                guess_selection = self.selected_data
+            guess_selection = self.selected_data
 
-            self.selected_data = guess_selection
+        self.selected_data = guess_selection
 
     def handle_display_workspace_changed(self):
         fit_type = self.view.fit_type
@@ -160,7 +150,7 @@ class FittingTabPresenter(object):
             self._fit_status = fit_status
             self._fit_chi_squared = fit_chi_squared
         elif self.view.fit_type == self.view.single_fit:
-            self._fit_function[index] = FunctionFactory.createInitialized(str(fit_function))
+            self._fit_function[index] = fit_function
             self._fit_status[index] = fit_status
             self._fit_chi_squared[index] = fit_chi_squared
         elif self.view.fit_type == self.view.simultaneous_fit:
@@ -169,6 +159,7 @@ class FittingTabPresenter(object):
             self._fit_chi_squared = [fit_chi_squared] * len(self.start_x)
 
         self.update_fit_status_information_in_view()
+        self.increment_fit_group_name()
 
     def handle_error(self, error):
         self.thread_success = False
@@ -208,6 +199,7 @@ class FittingTabPresenter(object):
         params['Function'] = self.view.fit_string
         params['Minimizer'] = self.view.minimizer
         params['EvaluationType'] = self.view.evaluation_type
+        params['GroupName'] = self.view.group_name
         return params
 
     @property
@@ -280,3 +272,12 @@ class FittingTabPresenter(object):
         self.view.update_with_fit_outputs(self._fit_function[current_index], self._fit_status[current_index],
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status)
+
+    def increment_fit_group_name(self):
+        while AnalysisDataService.doesExist(self.view.group_name):
+            current_number = re.search(r'\d+$', self.view.group_name)
+            if current_number:
+                new_number = str(int(current_number.group()) + 1)
+                self.view.group_name = self.view.group_name[:-len(current_number.group())] + new_number
+            else:
+                self.view.group_name = self.view.group_name + ' 1'

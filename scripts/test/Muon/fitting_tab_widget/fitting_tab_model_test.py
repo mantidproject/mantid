@@ -19,10 +19,10 @@ class FittingTabModelTest(unittest.TestCase):
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output/'
+        expected_directory_name = 'Muon Data/Fitting Output/Fitting Output_workspaces/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc'
 
-        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function)
+        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function, 'Fitting Output')
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -30,10 +30,10 @@ class FittingTabModelTest(unittest.TestCase):
     def test_create_parameter_table_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output/'
+        expected_directory_name = 'Muon Data/Fitting Output/Fitting Output_parameter_tables/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters; GausOsc'
 
-        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function)
+        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function, 'Fitting Output')
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -72,10 +72,10 @@ class FittingTabModelTest(unittest.TestCase):
                                                            ' n = 0, A0 = 0,$domains = i;name = Polynomial, n = 0, A0 = 0,'
                                                            '$domains = i;name = Polynomial, n = 0, A0 = 0,$domains = i;'
                                                            'name = Polynomial, n = 0, A0 = 0,$domains = i')
-        expected_directory_name = 'Muon Data/Fitting Output/'
+        expected_directory_name = 'Muon Data/Fitting Output/Fitting Output_workspaces/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
 
-        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function)
+        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function, 'Fitting Output')
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
