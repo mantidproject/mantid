@@ -71,13 +71,15 @@ public:
   getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
   QPair<double, double> getCurveRange(const QString &curveName);
 
-  void addSpectrum(const QString &curveName,
-                   const Mantid::API::MatrixWorkspace_sptr &ws,
-                   const size_t wsIndex = 0,
-                   const QColor &curveColour = QColor());
-  void addSpectrum(const QString &curveName, const QString &wsName,
-                   const size_t wsIndex = 0,
-                   const QColor &curveColour = QColor());
+  void addSpectrum(
+      const QString &curveName, const Mantid::API::MatrixWorkspace_sptr &ws,
+      const size_t wsIndex = 0, const QColor &curveColour = QColor(),
+      const bool errorBars = false,
+      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(
+      const QString &curveName, const QString &wsName, const size_t wsIndex = 0,
+      const QColor &curveColour = QColor(), const bool errorBars = false,
+      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
 
   void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
   void removeSpectrum(const QString &curveName);

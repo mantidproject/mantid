@@ -251,7 +251,12 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString &curveName) {
  */
 void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr &ws,
-                              const size_t wsIndex, const QColor &curveColour) {
+                              const size_t wsIndex, const QColor &curveColour,
+                              const bool errorBars,
+                              const QHash<QString, QVariant> &plotKwargs) {
+  UNUSED_ARG(errorBars);
+  UNUSED_ARG(plotKwargs);
+
   if (curveName.isEmpty()) {
     g_log.warning("Cannot plot with empty curve name");
     return;
@@ -307,7 +312,9 @@ void PreviewPlot::addSpectrum(const QString &curveName,
  * @param curveColour Colour of curve to plot
  */
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
-                              const size_t wsIndex, const QColor &curveColour) {
+                              const size_t wsIndex, const QColor &curveColour,
+                              const bool errorBars,
+                              const QHash<QString, QVariant> &plotKwargs) {
   if (wsName.isEmpty()) {
     g_log.error("Cannot plot with empty workspace name");
     return;
@@ -322,7 +329,7 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
     throw std::runtime_error(
         wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
-  addSpectrum(curveName, ws, wsIndex, curveColour);
+  addSpectrum(curveName, ws, wsIndex, curveColour, errorBars, plotKwargs);
 }
 
 /**

@@ -146,8 +146,14 @@ ALCDataLoadingView::timeRange() const {
 
 void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr &workspace,
                                       std::size_t const &workspaceIndex) {
+  // These kwargs ensure only the data points are plotted with no line
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+
   m_ui.dataPlot->clear();
-  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black);
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, true,
+                             kwargs);
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {

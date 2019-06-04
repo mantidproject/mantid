@@ -11,6 +11,11 @@
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/ErrorbarContainer.h"
 
+#include <boost/optional.hpp>
+
+#include <QHash>
+#include <QVariant>
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -26,10 +31,13 @@ public:
   ///@{
   Line2D plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
               const size_t wkspIndex, const QString lineColour,
-              const QString label);
-  ErrorbarContainer errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                             const size_t wkspIndex, const QString lineColour,
-                             const QString label);
+              const QString label,
+              const boost::optional<QHash<QString, QVariant>> &otherKwargs);
+  ErrorbarContainer
+  errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace,
+           const size_t wkspIndex, const QString lineColour,
+           const QString label,
+           const boost::optional<QHash<QString, QVariant>> &otherKwargs);
   ///@}
 
   /// @name Artist removal/replacement
