@@ -588,7 +588,7 @@ public:
   }
 
   void testRestoreDefaultsDisconnectsNotificationsBackFromView() {
-    auto defaultOptions = expectDefaults(makeModel());
+    auto defaultOptions = expectDefaults(makeEmptyExperiment());
     EXPECT_CALL(m_view, disconnectExperimentSettingsWidgets()).Times(1);
     EXPECT_CALL(m_view, connectExperimentSettingsWidgets()).Times(1);
     auto presenter = makePresenter(std::move(defaultOptions));

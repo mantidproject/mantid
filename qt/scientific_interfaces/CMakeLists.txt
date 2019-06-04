@@ -106,7 +106,9 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    GUITests)
 
 set(QT5_TEST_FILES     
-    test/ISISReflectometry/Batch/BatchJobRunnerTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
+    test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h

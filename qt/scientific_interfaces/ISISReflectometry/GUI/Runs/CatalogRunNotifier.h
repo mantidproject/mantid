@@ -7,7 +7,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_CATALOGRUNNOTIFIER_H
 #define MANTID_ISISREFLECTOMETRY_CATALOGRUNNOTIFIER_H
 
-#include "GUI/Runs/IRunsView.h"
 #include "IRunNotifier.h"
 
 namespace MantidQt {
