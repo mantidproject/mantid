@@ -10,7 +10,7 @@ from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
 import re
-from mantid.api import FunctionFactory
+from mantid.api import AnalysisDataService
 
 
 class FittingTabPresenter(object):
@@ -29,7 +29,7 @@ class FittingTabPresenter(object):
         self.update_selected_workspace_guess()
         self.gui_context_observer = GenericObserverWithArgPassing(self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(self.handle_selected_group_pair_changed)
-        self.run_changed_observer = GenericObserver(self.handle_new_data_loaded)
+        self.input_workspace_observer = GenericObserver(self.handle_new_data_loaded)
         self.disable_tab_observer = GenericObserver(lambda: self.view.setEnabled(False))
         self.enable_tab_observer = GenericObserver(lambda: self.view.setEnabled(True))
 
@@ -274,9 +274,10 @@ class FittingTabPresenter(object):
         self.view.update_global_fit_state(self._fit_status)
 
     def increment_fit_group_name(self):
-        current_number = re.search(r'\d+$', self.view.group_name)
-        if current_number:
-            new_number = str(int(current_number.group()) + 1)
-            self.view.group_name = self.view.group_name[:-len(current_number.group())] + new_number
-        else:
-            self.view.group_name = self.view.group_name + ' 1'
+        while AnalysisDataService.doesExist(self.view.group_name):
+            current_number = re.search(r'\d+$', self.view.group_name)
+            if current_number:
+                new_number = str(int(current_number.group()) + 1)
+                self.view.group_name = self.view.group_name[:-len(current_number.group())] + new_number
+            else:
+                self.view.group_name = self.view.group_name + ' 1'

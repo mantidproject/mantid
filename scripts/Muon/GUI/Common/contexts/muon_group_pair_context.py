@@ -12,7 +12,7 @@ from Muon.GUI.Common.muon_pair import MuonPair
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
-from Muon.GUI.Common.observer_pattern import Observable, GenericObservable
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 def get_default_grouping(workspace, instrument, main_field_direction):
@@ -82,7 +82,6 @@ class MuonGroupPairContext(object):
         self._selected = ''
 
         self.message_notifier = MessageNotifier(self)
-        self.selected_group_pair_changed_notifier = GenericObservable()
 
         self._check_group_contains_valid_detectors = check_group_contains_valid_detectors
 
@@ -114,7 +113,6 @@ class MuonGroupPairContext(object):
     def selected(self, value):
         if value in self.group_names + self.pair_names and self._selected != value:
             self._selected = value
-            self.selected_group_pair_changed_notifier.notify_subscribers(value)
 
     @property
     def group_names(self):

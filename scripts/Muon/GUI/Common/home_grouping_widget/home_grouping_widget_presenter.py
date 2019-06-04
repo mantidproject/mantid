@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from Muon.GUI.Common.observer_pattern import Observable
+from Muon.GUI.Common.observer_pattern import Observable, GenericObservable
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 
@@ -32,6 +32,7 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.on_subtracted_periods_changed(self.handle_periods_changed)
 
         self.pairAlphaNotifier = HomeGroupingWidgetPresenter.PairAlphaNotifier(self)
+        self.selected_group_pair_changed_notifier = GenericObservable()
 
     def show(self):
         self._view.show()
@@ -66,6 +67,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
             self._view.set_current_alpha(alpha)
         else:
             self._view.alpha_hidden(True)
+
+        self.selected_group_pair_changed_notifier.notify_subscribers()
 
     def update_view_from_model(self):
         self.update_group_pair_list()

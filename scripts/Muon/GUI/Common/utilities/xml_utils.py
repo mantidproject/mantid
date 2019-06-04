@@ -87,7 +87,12 @@ def load_grouping_from_XML(filename):
     root = tree.getroot()
 
     description = root.get('description')
-    default = root.find('default').get('name')
+    if not description:
+        description = filename
+    try:
+        default = root.find('default').get('name')
+    except (AttributeError, KeyError):
+        default = ''
 
     group_names, group_ids = _get_groups_from_XML(root)
     pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
