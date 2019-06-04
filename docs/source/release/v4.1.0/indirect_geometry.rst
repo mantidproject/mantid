@@ -92,6 +92,14 @@ Bug Fixes
 - Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.
 
 
+Diffraction Interface
+----------------------
+
+Bug Fixes
+#########
+- Fixed a bug which allowed an out-of-range Spectra Min and Spectra Max.
+
+
 Indirect Settings Interface
 ---------------------------
 
