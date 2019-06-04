@@ -104,18 +104,18 @@ class MantidPlotProxiesTest(unittest.TestCase):
         legend2 = l.newLegend("a new legend")
         grid = l.grid()
         errbar = l.errorBarSettings(0)
-        self.assertNotEqual(legend._getHeldObject(), None, "Object returned correctly")
-        self.assertNotEqual(legend2._getHeldObject(), None, "Object returned correctly")
-        self.assertNotEqual(grid._getHeldObject(), None, "Object returned correctly")
-        self.assertNotEqual(l._getHeldObject(), None, "Object returned correctly")
-        self.assertNotEqual(errbar._getHeldObject(), None, "Object returned correctly")
+        self.assertFalse(legend._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(legend2._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(grid._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(l._getHeldObject() is None, "Object returned correctly")
+        self.assertFalse(errbar._getHeldObject() is None, "Object returned correctly")
         # Deleting the parent graph should None the children
         self.try_closing(g, "plotSpectrum()")
-        self.assertNotEqual(legend._getHeldObject(), None, "Deleted Legend safely")
-        self.assertNotEqual(legend2._getHeldObject(), None, "Deleted new Legend safely")
-        self.assertNotEqual(grid._getHeldObject(), None, "Deleted Grid safely")
-        self.assertNotEqual(l._getHeldObject(), None, "Deleted Layer safely")
-        self.assertNotEqual(errbar._getHeldObject(), None, "Deleted ErrorBarSettings safely")
+        self.assertTrue(legend._getHeldObject() is None, "Deleted Legend safely")
+        self.assertTrue(legend2._getHeldObject() is None, "Deleted new Legend safely")
+        self.assertTrue(grid._getHeldObject() is None, "Deleted Grid safely")
+        self.assertTrue(l._getHeldObject() is None, "Deleted Layer safely")
+        self.assertTrue(errbar._getHeldObject() is None, "Deleted ErrorBarSettings safely")
 
     def test_closing_MantidMatrix(self):
         """ Create a MantidMatrix and then delete it safely """
@@ -128,8 +128,8 @@ class MantidPlotProxiesTest(unittest.TestCase):
         g = mm.plotGraph2D()
         spec = g.activeLayer().spectrogram()
         self.try_closing(mm, "importMatrixWorkspace()")
-        self.assertNotEqual(g._getHeldObject(), None, "Deleted graph safely when the parent MantidMatrix was deleted")
-        self.assertNotEqual(spec._getHeldObject(), None, "Deleted spectrogram safely")
+        self.assertTrue(g._getHeldObject() is None, "Deleted graph safely when the parent MantidMatrix was deleted")
+        self.assertTrue(spec._getHeldObject() is None, "Deleted spectrogram safely")
 
     def test_closing_MantidMatrix_plotGraph3D(self):
         """ Make a 3D plot. then delete"""

@@ -1617,8 +1617,8 @@ class TestSelectNewDetector(unittest.TestCase):
         self.assertEqual(su.get_correct_combinDet_setting("loq", "merged"), "merged")
 
     def test_that_for_LARMOR_correct_settings_are_selected(self):
-        self.assertNotEqual(su.get_correct_combinDet_setting("larmor", "main"), None)
-        self.assertNotEqual(su.get_correct_combinDet_setting("LARMOR", "DetectorBench"), None)
+        self.assertEqual(su.get_correct_combinDet_setting("larmor", "main"), None)
+        self.assertEqual(su.get_correct_combinDet_setting("LARMOR", "DetectorBench"), None)
 
     def test_that_for_unknown_instrument_raises(self):
         args = ["unknown_instrument", "main"]

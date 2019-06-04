@@ -612,6 +612,8 @@ class RunDescriptorTest(unittest.TestCase):
         try:
             mon_ws = wksp.getMonitorWorkspace()
         except:
+            pass
+        else:
             self.fail()
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()

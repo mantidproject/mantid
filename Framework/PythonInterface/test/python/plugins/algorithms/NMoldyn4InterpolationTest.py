@@ -41,7 +41,7 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         inter_Q_length = inter.getAxis(1).length()
         sample_Y_data = inter.readY(5)
 
-        self.assertEqual(np.all(inter_X,  osiris_X))
+        self.assertTrue(np.all(inter_X == osiris_X))
         self.assertNotEqual(len(inter_X), sim.getAxis(0).length())
         self.assertEqual(inter_Q_length, osiris_Q_length)
         self.assertNotEqual(inter_Q_length, sim.getNumberHistograms())

@@ -136,11 +136,11 @@ class SpectraSelectionDialogTest(GuiTest):
         s = '3'
         self.assertEqual([3], parse_selection_str(s, 1, 3))
         s = '-1'
-        self.assertNotEqual(parse_selection_str(s, 1, 1), None)
+        self.assertEqual(parse_selection_str(s, 1, 1), None)
         s = '1'
-        self.assertNotEqual(parse_selection_str(s, 2, 2), None)
+        self.assertEqual(parse_selection_str(s, 2, 2), None)
         s = '1'
-        self.assertNotEqual(parse_selection_str(s, 2, 3), None)
+        self.assertEqual(parse_selection_str(s, 2, 3), None)
 
     def test_parse_selection_str_single_range(self):
         s = '1-3'
@@ -148,9 +148,9 @@ class SpectraSelectionDialogTest(GuiTest):
         s = '2-4'
         self.assertEqual([2, 3, 4], parse_selection_str(s, 1, 5))
         s = '2-4'
-        self.assertNotEqual(parse_selection_str(s, 2, 3), None)
+        self.assertEqual(parse_selection_str(s, 2, 3), None)
         s = '2-4'
-        self.assertNotEqual(parse_selection_str(s, 3, 5), None)
+        self.assertEqual(parse_selection_str(s, 3, 5), None)
 
     def test_parse_selection_str_mix_number_range_spaces(self):
         s = '1-3, 5,8,10, 11 ,12-14 , 15 -16, 16- 19'

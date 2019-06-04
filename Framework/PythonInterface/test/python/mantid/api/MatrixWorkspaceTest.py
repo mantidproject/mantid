@@ -108,7 +108,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Have got a MatrixWorkspace back and not just the generic interface
         self.assertTrue(isinstance(propValue, MatrixWorkspace))
         mem = propValue.getMemorySize()
-        self.assertGreater((mem, 0))
+        self.assertGreater(mem, 0)
 
         AnalysisDataService.remove(wsname)
 
@@ -121,7 +121,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Have got a MatrixWorkspace back and not just the generic interface
         self.assertTrue(isinstance(value, MatrixWorkspace))
         mem = value.getMemorySize()
-        self.assertGreater((mem, 0))
+        self.assertGreater(mem, 0)
 
         AnalysisDataService.remove(wsname)
 

@@ -582,7 +582,7 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEqual(-10, dim_arrays[1][0])
         self.assertEqual(10, dim_arrays[1][-1])
 
-        self.assertEqual(all(len(d),  10 for d in data))
+        self.assertTrue(all(len(d) == 10 for d in data))
         self.assertEqual(0.0, data[0][0])
         self.assertEqual(99.0, data[-1][-1])
 
@@ -599,11 +599,11 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEqual(-10, dim_arrays[1][0])
         self.assertEqual(10, dim_arrays[1][-1])
 
-        self.assertEqual(all(len(d),  10 for d in data))
+        self.assertTrue(all(len(d) == 10 for d in data))
         self.assertEqual(0.0, data[0][0])
         self.assertEqual(99.0, data[-1][-1])
 
-        self.assertEqual(all(len(e),  10 for e in err))
+        self.assertTrue(all(len(e) == 10 for e in err))
         self.assertEqual(0.0, err[0][0])
         self.assertEqual(99.0, err[-1][-1])
 

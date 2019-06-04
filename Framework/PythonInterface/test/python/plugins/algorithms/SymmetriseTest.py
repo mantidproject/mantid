@@ -79,10 +79,10 @@ class SymmetriseTest(unittest.TestCase):
         self.assertEqual(sample_v_axis.getUnit().unitID(), test_v_axis.getUnit().unitID())
 
         if self._spec_range is None:
-            self.assertEqual((sample_v_axis.extractValues(),  test_v_axis.extractValues()).all())
+            self.assertTrue((sample_v_axis.extractValues() == test_v_axis.extractValues()).all())
         else:
             sample_axis = sample_v_axis.extractValues()[self._spec_range[0] - 1:self._spec_range[1]]
-            self.assertEqual((sample_axis,  test_v_axis.extractValues()).all())
+            self.assertTrue((sample_axis == test_v_axis.extractValues()).all())
 
 
     def setUp(self):

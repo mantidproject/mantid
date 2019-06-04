@@ -149,7 +149,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #sample run has not been defined
         self.assertEqual(getattr(tReducer,'sample_run'), None)
         prop_man = tReducer.prop_man
-        self.assertNotEqual(getattr(prop_man ,'sample_run'), None)
+        self.assertEqual(getattr(prop_man,'sample_run'), None)
         # define sample run
         tReducer.sample_run =10234
         self.assertEqual(tReducer.sample_run,10234)

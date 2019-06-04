@@ -198,7 +198,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1,
                                                 CanWorkspace=container_1,
                                                 RebinCanToSample=True)
-        self.assertGreater(numpy.all(sample_1.extractY(), corrected.extractY()))
+        self.assertTrue(numpy.all(sample_1.extractY() > corrected.extractY()))
         DeleteWorkspace(sample_1)
         DeleteWorkspace(container_1)
         DeleteWorkspace(corrected)

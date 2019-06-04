@@ -256,7 +256,7 @@ class ArrayPropertyTest(unittest.TestCase):
         alg.setProperty("Input", input_values)
         alg.execute()
 
-        self.assertNotEqual(alg._input_values, None)
+        self.assertTrue(alg._input_values is not None)
         self.assertEqual(len(alg._input_values), len(input_values))
         for index, val in enumerate(input_values):
             self.assertEqual(val,input_values[index])

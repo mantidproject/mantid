@@ -163,7 +163,7 @@ class V3DTest(unittest.TestCase):
         v = V3D(1, 2, 3)
         v_as_numpy = np.array(v)
 
-        self.assertEqual(np.all(v_as_numpy,  np.array([1, 2, 3])))
+        self.assertTrue(np.all(v_as_numpy == np.array([1, 2, 3])))
 
 
 if __name__ == '__main__':
