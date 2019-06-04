@@ -44,6 +44,7 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py
+   muon_plot_model_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    transformWidget_test.py
@@ -90,6 +91,7 @@ set ( TEST_PY_FILES_QT5
    grouping_tab/pairing_table_alpha_test.py
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
+   muon_plot_model_test.py
    PeriodicTableModel_test.py
    PeriodicTablePresenter_test.py
    help_widget_presenter_test.py

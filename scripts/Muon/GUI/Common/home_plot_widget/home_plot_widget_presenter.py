@@ -16,7 +16,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._view = view
         self._model = model
         self._plot_window = None
-        self._view.on_plot_button_clicked(self.handle_plot_button_clicked)
+        self._view.on_plot_button_clicked(self.handle_new_data_loaded)
         self.keep = False
 
     def show(self):
@@ -24,6 +24,12 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
 
     def update_view_from_model(self):
         pass
+
+    def handle_new_data_loaded(self):
+        if self._plot_window:
+            self._plot_window.close()
+        self._plot_window = self._model.create_new_plot(self._model.get_workspaces_to_plot(), self._model.get_plot_title)
+        self._plot_window.show()
 
     def handle_plot_button_clicked(self):
         is_raw = self._view.if_raw()
