@@ -16,11 +16,8 @@
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-#endif
 
 #include <QDoubleValidator>
 #include <QMap>
@@ -28,6 +25,7 @@
 
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -143,10 +141,6 @@ protected:
 
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
-
-  /// Resizes the specified plot range
-  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
-                       QPair<double, double> range);
 
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.

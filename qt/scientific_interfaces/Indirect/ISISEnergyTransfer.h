@@ -82,6 +82,8 @@ private:
   QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
 
+  void loadDetailedBalance(std::string const &filename);
+
   void setRunEnabled(bool enable);
   void setPlotEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);

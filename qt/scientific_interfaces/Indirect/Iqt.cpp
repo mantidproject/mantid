@@ -650,7 +650,7 @@ void Iqt::updateEnergyRange(int state) {
 }
 
 void Iqt::setTiledPlotFirstPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   auto const lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
   auto const rangeSize = lastPlotIndex - value;
   if (value > lastPlotIndex)
@@ -666,7 +666,7 @@ void Iqt::setTiledPlotFirstPlot(int value) {
 }
 
 void Iqt::setTiledPlotLastPlot(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const rangeSize = value - firstPlotIndex;
   if (value < firstPlotIndex)
@@ -689,12 +689,12 @@ void Iqt::setMinMaxOfTiledPlotLastIndex(int minimum, int maximum) {
 }
 
 void Iqt::setTiledPlotFirstIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotFirst);
   m_uiForm.spTiledPlotFirst->setValue(value);
 }
 
 void Iqt::setTiledPlotLastIndex(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spTiledPlotLast);
   auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
                                  ? firstPlotIndex + m_maxTiledPlots
@@ -703,12 +703,12 @@ void Iqt::setTiledPlotLastIndex(int value) {
 }
 
 void Iqt::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setMaximum(maximum);
 }
 
 void Iqt::setPlotSpectrumIndex(int spectrum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
   m_uiForm.spSpectrum->setValue(spectrum);
 }
 

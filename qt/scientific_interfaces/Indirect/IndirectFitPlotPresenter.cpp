@@ -219,7 +219,7 @@ void IndirectFitPlotPresenter::updateSelectedDataName() {
 }
 
 void IndirectFitPlotPresenter::updateDataSelection() {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_view);
+  MantidQt::API::SignalBlocker blocker(m_view);
   m_view->clearDataSelection();
   for (auto i = 0u; i < m_model->numberOfWorkspaces(); ++i)
     m_view->appendToDataSelection(m_model->getFitDataName(i));
@@ -287,7 +287,7 @@ void IndirectFitPlotPresenter::plotResult(MatrixWorkspace_sptr result) {
 
 void IndirectFitPlotPresenter::updatePlotRange(
     const std::pair<double, double> &range) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_view);
+  MantidQt::API::SignalBlocker blocker(m_view);
   m_view->setFitRange(range.first, range.second);
   m_view->setHWHMRange(range.first, range.second);
 }

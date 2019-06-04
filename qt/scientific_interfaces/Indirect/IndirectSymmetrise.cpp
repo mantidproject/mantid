@@ -17,6 +17,7 @@ Mantid::Kernel::Logger g_log("IndirectSymmetrise");
 using namespace Mantid::API;
 
 namespace MantidQt {
+using MantidWidgets::AxisID;
 namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -155,8 +156,8 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
 
   // Set default x axis range
   QPair<double, double> defaultRange(-1.0, 1.0);
-  m_uiForm.ppRawPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
-  m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, QwtPlot::xBottom);
+  m_uiForm.ppRawPlot->setAxisRange(defaultRange, AxisID::XBottom);
+  m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, AxisID::XBottom);
 
   // Disable run until preview is clicked
   m_uiForm.pbRun->setEnabled(false);
@@ -289,7 +290,7 @@ void IndirectSymmetrise::updateMiniPlots() {
 
   // Match X axis range on preview plot
   m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange("Raw"),
-                                       QwtPlot::xBottom);
+                                       AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
 }
 
