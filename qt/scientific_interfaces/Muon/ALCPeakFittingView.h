@@ -11,18 +11,11 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingView.h"
-#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
+//#include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
 
 #include <QWidget>
-#include <qwt_plot_curve.h>
-
-namespace MantidQt {
-namespace MantidWidgets {
-class ErrorCurve;
-}
-} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {

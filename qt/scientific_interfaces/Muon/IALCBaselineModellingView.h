@@ -12,7 +12,6 @@
 #include "DllConfig.h"
 #include "MantidAPI/IFunction.h"
 
-#include "qwt_data.h"
 #include <QObject>
 
 namespace MantidQt {

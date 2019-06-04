@@ -10,12 +10,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
-
 using namespace Mantid::API;
 
 namespace MantidQt {
-namespace QwtHelper = API::QwtHelper;
 namespace CustomInterfaces {
 
 ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(

@@ -15,8 +15,6 @@
 
 #include "ui_ALCInterface.h"
 
-#include <qwt_symbol.h>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 

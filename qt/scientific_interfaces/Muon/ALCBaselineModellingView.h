@@ -18,8 +18,6 @@
 
 class QSignalMapper;
 
-#include <qwt_plot_curve.h>
-
 namespace MantidQt {
 namespace MantidWidgets {
 class ErrorCurve;

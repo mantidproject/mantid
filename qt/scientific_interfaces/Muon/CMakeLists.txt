@@ -132,6 +132,7 @@ set(
   ALCPeakFittingModel.cpp
   ALCPeakFittingPresenter.cpp
   ALCPeakFittingView.cpp
+  MuonAnalysisHelper.cpp
 )
 
 set(
@@ -146,6 +147,7 @@ set(
   IALCDataLoadingView.h
   IALCPeakFittingView.h
   IALCPeakFittingModel.h
+  MuonAnalysisHelper.h
 )
 
 set(
@@ -179,14 +181,13 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
+					 ${PYTHON_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
-                   QT5_LINK_LIBS
-                     Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
+					 MantidQtWidgetsMplCpp
                      MantidQtWidgetsPlotting
-                     MantidScientificInterfacesMultiDatasetFit
                    INSTALL_DIR_BASE
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH

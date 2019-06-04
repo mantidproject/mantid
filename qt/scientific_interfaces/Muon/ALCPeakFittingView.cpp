@@ -7,11 +7,8 @@
 #include "ALCPeakFittingView.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 
 #include <QMessageBox>
-
-#include <qwt_symbol.h>
 
 using namespace Mantid::API;
 
