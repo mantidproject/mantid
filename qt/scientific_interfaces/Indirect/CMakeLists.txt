@@ -261,6 +261,8 @@ set(
   ContainerSubtraction.cpp
   CorrectionsTab.cpp
   IndirectCorrections.cpp
+  IndirectDiffractionReduction.cpp
+  IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
@@ -278,6 +280,8 @@ set(
   CorrectionsTab.h
   IIndirectSettingsView.h
   IndirectCorrections.h
+  IndirectDiffractionReduction.h
+  IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -294,6 +298,8 @@ set(
   CalculatePaalmanPings.ui
   ContainerSubtraction.ui
   IndirectCorrections.ui
+  IndirectDiffractionReduction.ui
+  IndirectInstrumentConfig.ui
   IndirectInterfaceSettings.ui
   IndirectSettings.ui
 )
