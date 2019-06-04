@@ -33,7 +33,6 @@ qRegisterMetaType<Message>("Message");
     SIP_UNBLOCK_THREADS
 %End
 };
-
 // ----------------------------------------------------------------------------
 // Classes
 // ----------------------------------------------------------------------------
@@ -685,12 +684,16 @@ signals:
 
 };
 
+
 // ---------------------------------
 // Function Browser
 // ---------------------------------
 class FunctionBrowser : public QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include <boost/python/extract.hpp>
+#include <boost/python/to_python_value.hpp>
+using namespace MantidQt::API;
 %End
 public:
     FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
@@ -708,6 +711,54 @@ public:
     void addDatasets(const QStringList &names);
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
+    void setErrorsEnabled(bool enabled);
+    QStringList getGlobalParameters() const;
+    void setGlobalParameters(const QStringList &globals);
+    void clear();
+    void updateParameters(SIP_PYOBJECT);
+    %MethodCode
+    try{
+      auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+      sipCpp->updateParameters(*function);
+      }
+      catch (std::invalid_argument &sipExceptionRef)
+      {
+         const char *detail = sipExceptionRef.what();
+         SIP_BLOCK_THREADS
+         PyErr_SetString(PyExc_ValueError, detail);
+         SIP_UNBLOCK_THREADS
+         return NULL;
+      }
+      catch (...)
+      {
+         sipRaiseUnknownException();
+         return NULL;
+      }
+    %End
+    void updateMultiDatasetParameters(SIP_PYOBJECT);
+    %MethodCode
+    try{
+      auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+      sipCpp->updateMultiDatasetParameters(*function);
+      }
+      catch (std::invalid_argument &sipExceptionRef)
+      {
+         const char *detail = sipExceptionRef.what();
+         SIP_BLOCK_THREADS
+         PyErr_SetString(PyExc_ValueError, detail);
+         SIP_UNBLOCK_THREADS
+         return NULL;
+      }
+      catch (...)
+      {
+         sipRaiseUnknownException();
+         return NULL;
+      }
+    %End
+    SIP_PYOBJECT getGlobalFunction();
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
+    %End
 signals:
     void functionStructureChanged();
 };

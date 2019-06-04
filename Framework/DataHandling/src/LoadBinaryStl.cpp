@@ -7,14 +7,8 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <Poco/File.h>
-#include <boost/functional/hash.hpp>
-#include <boost/make_shared.hpp>
-#include <chrono>
 #include <fstream>
-#include <string>
-#include <vector>
 namespace Mantid {
 namespace DataHandling {
 

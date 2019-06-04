@@ -298,7 +298,7 @@ class SANSDataProcessorGui(QMainWindow,
         add_runs_page_icon = icons.get_icon("mdi.plus-circle-outline")
         _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
 
-        diagnostic_icon = icons.get_icon("mdi.help-circle-outline")
+        diagnostic_icon = icons.get_icon("mdi.stethoscope")
         _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
 
         # Set the 0th row enabled

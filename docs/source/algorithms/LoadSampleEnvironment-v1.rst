@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads an environment into the sample of a workspace, either replacing the current environment, or adding to it. The newly added Environment can be translated by a vector, and rotated by an angle along each axis applied in order X,Y,Z. You may also set a material for the environment to be loaded, this follows the same inputs as :ref:`algm-SetSampleMaterial`.
+Loads an environment into the sample of a workspace, either replacing the current environment, or adding to it. The newly added Environment can be translated by a vector, and rotated by an angle along each axis applied in order X,Y,Z, rotation applies before translation. You may also set a material for the environment to be loaded, this follows the same inputs as :ref:`algm-SetSampleMaterial`.
 
 The following types of input file are supported:
 
