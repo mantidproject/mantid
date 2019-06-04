@@ -143,7 +143,7 @@ class CurvesTabWidgetPresenter:
         Get CurveProperties object from current Line2D or ErrorbarContainer
         """
         return CurveProperties.from_curve(self.get_selected_curve())
-    
+
     def populate_select_axes_combo_box(self):
         """
         Add Axes names to select axes combo box.

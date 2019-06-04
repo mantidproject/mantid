@@ -10,16 +10,18 @@ from matplotlib import colors
 from matplotlib.axes import ErrorbarContainer
 from qtpy.QtCore import Qt
 
-MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 'TICKDOWN', 'triangle_right': '>',
-              'tickup': 'TICKUP', 'hline': '_', 'vline': '|', 'pentagon': 'p', 'tri_left': '3',
-              'caretdown (centered at tip)': 'CARETDOWN', 'caretright (centered at base)': 'CARETRIGHTBASE',
-              'tickright': 'TICKRIGHT', 'caretright (centered at tip)': 'CARETRIGHT',
-              'caretleft (centered at tip)': 'CARETLEFT', 'tickleft': 'TICKLEFT', 'tri_up': '2', 'circle': 'o',
-              'pixel': ',', 'caretleft (centered at base)': 'CARETLEFTBASE', 'diamond': 'D', 'star': '*',
-              'hexagon1': 'h', 'octagon': '8', 'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
-              'thin_diamond': 'd', 'tri_down': '1', 'triangle_left': '<', 'plus': '+', 'triangle_down': 'v',
-              'triangle_up': '^', 'x': 'x', 'caretup (centered at tip)': 'CARETUP',
-              'caretup (centered at base)': 'CARETUPBASE', 'None': 'None'}
+MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
+              'triangle_right': '>', 'tickup': 2, 'hline': '_', 'vline': '|',
+              'pentagon': 'p', 'tri_left': '3', 'caretdown': 7,
+              'caretright (centered at base)': 9, 'tickright': '1',
+              'caretright': 5, 'caretleft': 4, 'tickleft': 0, 'tri_up': '2',
+              'circle': 'o', 'pixel': ',', 'caretleft (centered at base)': 8,
+              'diamond': 'D', 'star': '*', 'hexagon1': 'h', 'octagon': '8',
+              'hexagon2': 'H', 'tri_right': '4', 'x (filled)': 'X',
+              'thin_diamond': 'd', 'tri_down': 1, 'triangle_left': '<',
+              'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
+              'caretup': 6, 'caretup (centered at base)': 10,
+              'caretdown (centered at base)': 11, 'None': 'None'}
 
 
 def convert_color_to_hex(color):
