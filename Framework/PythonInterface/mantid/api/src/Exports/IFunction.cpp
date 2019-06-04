@@ -95,8 +95,7 @@ void export_IFunction() {
            "Return a semi-colon(;) separated string for the categories this "
            "class should belong to. For sub-categories use a \\ separator")
 
-      .def("clone", &IFunction::clone, arg("self"),
-           "Clones the function")
+      .def("clone", &IFunction::clone, arg("self"), "Clones the function")
 
       .def("initialize", &IFunction::initialize, arg("self"),
            "Declares any parameters and attributes on the function")
