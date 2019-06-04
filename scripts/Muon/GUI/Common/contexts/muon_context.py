@@ -21,12 +21,14 @@ from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_groupin
 
 class MuonContext(object):
     def __init__(self, muon_data_context=MuonDataContext(), muon_gui_context=MuonGuiContext(),
-                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext()):
+                 muon_group_context=MuonGroupPairContext(), base_directory='Muon Data', muon_phase_context= PhaseTableContext(),
+                 workspace_suffix=' MA'):
         self._data_context = muon_data_context
         self._gui_context = muon_gui_context
         self._group_pair_context = muon_group_context
         self._phase_context = muon_phase_context
         self.base_directory = base_directory
+        self.workspace_suffix = workspace_suffix
 
         self.gui_context.update({'DeadTimeSource': 'None', 'LastGoodDataFromFile': True, 'selected_group_pair': ''})
 

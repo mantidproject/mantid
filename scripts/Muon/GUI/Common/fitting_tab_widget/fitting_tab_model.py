@@ -12,8 +12,8 @@ from mantid.simpleapi import RenameWorkspace
 
 
 class FittingTabModel(object):
-    def __init__(self):
-        pass
+    def __init__(self, context):
+        self.context = context
 
     def do_single_fit(self, parameter_dict):
         group_name = parameter_dict.pop('GroupName')
@@ -39,19 +39,22 @@ class FittingTabModel(object):
         workspace_wrapper.show()
 
     def create_fitted_workspace_name(self, input_workspace_name, function_name, group_name):
-        directory = get_fit_workspace_directory(group_name, '_workspaces')
+        directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
+                                                self.context.workspace_suffix)
         name = input_workspace_name + '; Fitted; ' + self.get_function_name(function_name)
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function, group_name):
-        directory = get_fit_workspace_directory(group_name, '_workspaces')
+        directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
+                                                self.context.workspace_suffix)
         name = input_workspace + '+ ...; Fitted; ' + self.get_function_name(function)
 
         return name, directory
 
     def create_parameter_table_name(self, input_workspace_name, function_name, group_name):
-        directory = get_fit_workspace_directory(group_name, '_parameter_tables')
+        directory = get_fit_workspace_directory(group_name, '_parameter_tables', self.context.data_context.base_directory,
+                                                self.context.workspace_suffix)
         name = input_workspace_name + '; Fitted Parameters; ' + self.get_function_name(function_name)
         return name, directory
 

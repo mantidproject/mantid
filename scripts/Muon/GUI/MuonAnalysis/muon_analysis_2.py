@@ -61,13 +61,14 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
-        self.data_context = MuonDataContext(self.loaded_data)
+        self.data_context = MuonDataContext('Muon Data', self.loaded_data)
         self.gui_context = MuonGuiContext()
         self.group_pair_context = MuonGroupPairContext(self.data_context.check_group_contains_valid_detectors)
         self.phase_context = PhaseTableContext()
 
         self.context = MuonContext(muon_data_context=self.data_context, muon_gui_context=self.gui_context,
-                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context)
+                                   muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
+                                   workspace_suffix=' MA')
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
