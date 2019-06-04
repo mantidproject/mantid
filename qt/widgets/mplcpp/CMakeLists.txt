@@ -7,13 +7,13 @@ set(LIB_SRCS
     src/ColorbarWidget.cpp
     src/Colormap.cpp
     src/ColorConverter.cpp
-    src/Cycler.cpp
     src/Figure.cpp
+    src/Cycler.cpp
     src/FigureCanvasQt.cpp
     src/Line2D.cpp
     src/MantidColorMap.cpp
-    src/Plot.cpp
     src/ScalarMappable.cpp
+    src/Plot.cpp
     src/Zoomer.cpp)
 
 set(MOC_HEADERS
@@ -24,15 +24,15 @@ set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/Artist.h
     inc/MantidQtWidgets/MplCpp/Axes.h
     inc/MantidQtWidgets/MplCpp/Colors.h
-    inc/MantidQtWidgets/MplCpp/Colormap.h
     inc/MantidQtWidgets/MplCpp/ColorConverter.h
+    inc/MantidQtWidgets/MplCpp/Colormap.h
     inc/MantidQtWidgets/MplCpp/Cycler.h
     inc/MantidQtWidgets/MplCpp/Figure.h
     inc/MantidQtWidgets/MplCpp/Line2D.h
     inc/MantidQtWidgets/MplCpp/MantidColorMap.h
-    inc/MantidQtWidgets/MplCpp/Plot.h
     inc/MantidQtWidgets/MplCpp/ScalarMappable.h
-    inc/MantidQtWidgets/MplCpp/Zoomer.h)
+    inc/MantidQtWidgets/MplCpp/Zoomer.h
+    inc/MantidQtWidgets/MplCpp/Plot.h)
 
 set(UI_FILES
     inc/MantidQtWidgets/MplCpp/Colorbar.ui)

@@ -32,7 +32,7 @@ public:
   MOCK_METHOD0(resetFilter, void());
   MOCK_CONST_METHOD0(hasFilter, bool());
 
-  MOCK_METHOD1(subscribe, void(JobTreeViewSubscriber &));
+  MOCK_METHOD1(subscribe, void(JobTreeViewSubscriber *));
 
   MOCK_METHOD3(insertChildRowOf, RowLocation(RowLocation const &, int,
                                              std::vector<Cell> const &));

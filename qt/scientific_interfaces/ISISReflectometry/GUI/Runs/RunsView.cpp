@@ -6,20 +6,21 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "SearchModel.h"
+#include <QMenu>
 #include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::Icons;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -54,6 +55,16 @@ void RunsView::initLayout() {
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
   ui.tablePane->layout()->addWidget(m_tableView);
+
+  // Add Icons to the buttons
+  ui.actionAutoreducePause->setIcon(getIcon("mdi.pause", "red", 1.3));
+  ui.buttonAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
+  ui.buttonAutoreducePause->setIcon(getIcon("mdi.pause", "red", 1.3));
+  ui.buttonMonitor->setIcon(getIcon("mdi.play", "green", 1.3));
+  ui.buttonStopMonitor->setIcon(getIcon("mdi.pause", "red", 1.3));
+  ui.actionAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
+  ui.actionSearch->setIcon(getIcon("mdi.folder", "black", 1.3));
+  ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
 
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
   m_monitorAlgoRunner =
@@ -106,10 +117,7 @@ void RunsView::missingRunsToTransfer() {
  * @param isProcessing: Whether processing is running
  */
 void RunsView::updateMenuEnabledState(bool isProcessing) {
-
-  for (auto &command : m_commands) {
-    command->updateEnabledState(isProcessing);
-  }
+  UNUSED_ARG(isProcessing)
 }
 
 /**

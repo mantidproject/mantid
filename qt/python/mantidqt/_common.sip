@@ -225,7 +225,6 @@ public:
   GenericDialog(QWidget *parent = nullptr);
 };
 
-
 class UserSubWindow : QMainWindow {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -562,7 +561,7 @@ public:
     JobTreeView(const QStringList &columnHeadings, const Cell& defaultCellStyle,
      QWidget *parent = nullptr);
 
-    void subscribe(JobTreeViewSubscriber& subscriber);
+    void subscribe(JobTreeViewSubscriber *subscriber);
     MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
      &parent, int beforeRow,
                           const std::vector<Cell> &rowText);
@@ -684,7 +683,6 @@ signals:
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
-
 };
 
 // ---------------------------------

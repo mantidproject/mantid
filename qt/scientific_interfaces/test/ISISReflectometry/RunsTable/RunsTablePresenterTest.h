@@ -99,12 +99,20 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     Plotter plotter(nullptr);
+#else
+    Plotter plotter;
+#endif
     return RunsTablePresenter(&view, {}, 0.01, ReductionJobs(), plotter);
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, ReductionJobs jobs) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     Plotter plotter(nullptr);
+#else
+    Plotter plotter;
+#endif
     return RunsTablePresenter(&view, {}, 0.01, std::move(jobs), plotter);
   }
 

@@ -22,11 +22,11 @@ namespace Batch {
 
 JobTreeView::JobTreeView(QStringList const &columnHeadings,
                          Cell const &emptyCellStyle, QWidget *parent)
-    : QTreeView(parent), m_mainModel(0, columnHeadings.size(), this),
+    : QTreeView(parent), m_notifyee(nullptr),
+      m_mainModel(0, columnHeadings.size(), this),
       m_adaptedMainModel(m_mainModel, emptyCellStyle),
       m_filteredModel(RowLocationAdapter(m_mainModel), this),
       m_lastEdited(QModelIndex()) {
-
   setModel(&m_mainModel);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -55,6 +55,8 @@ void JobTreeView::commitData(QWidget *editor) {
 void JobTreeView::selectionChanged(const QItemSelection &selected,
                                    const QItemSelection &deselected) {
   QTreeView::selectionChanged(selected, deselected);
+  if (!m_notifyee)
+    return;
   m_notifyee->notifySelectionChanged();
 }
 
@@ -296,8 +298,8 @@ void JobTreeView::setHeaderLabels(QStringList const &columnHeadings) {
     resizeColumnToContents(i);
 }
 
-void JobTreeView::subscribe(JobTreeViewSubscriber &subscriber) {
-  m_notifyee = &subscriber;
+void JobTreeView::subscribe(JobTreeViewSubscriber *subscriber) {
+  m_notifyee = subscriber;
 }
 
 bool JobTreeView::hasEditorOpen() const { return m_lastEdited.isValid(); }

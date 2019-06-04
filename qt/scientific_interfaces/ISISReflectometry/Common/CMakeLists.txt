@@ -1,12 +1,10 @@
-set ( COMMON_SRC_FILES
-    Parse.cpp
-    GetInstrumentParameter.cpp
-    InstrumentParameters.cpp
-)
+set(COMMON_SRC_FILES Parse.cpp GetInstrumentParameter.cpp
+                     InstrumentParameters.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
-# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
-set ( COMMON_INC_FILES
+# IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
+# find it.
+set(COMMON_INC_FILES
     DllConfig.h
     First.h
     GetInstrumentParameter.h
@@ -18,11 +16,10 @@ set ( COMMON_INC_FILES
     QWidgetGroup.h
     ValidationResult.h
     ValueOr.h
-    ZipRange.h
-)
+    ZipRange.h)
 
-PREPEND( COMMON_SRC_FILES Common ${COMMON_SRC_FILES})
-PREPEND( COMMON_INC_FILES Common ${COMMON_INC_FILES})
+prepend(COMMON_SRC_FILES Common ${COMMON_SRC_FILES})
+prepend(COMMON_INC_FILES Common ${COMMON_INC_FILES})
 
-set (COMMON_SRC_FILES ${COMMON_SRC_FILES} PARENT_SCOPE)
-set (COMMON_INC_FILES ${COMMON_INC_FILES} PARENT_SCOPE)
+set(COMMON_SRC_FILES ${COMMON_SRC_FILES} PARENT_SCOPE)
+set(COMMON_INC_FILES ${COMMON_INC_FILES} PARENT_SCOPE)

@@ -35,8 +35,12 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static RunsPresenterTest *createSuite() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     IMainWindowView *mainWindowMock = new MockMainWindowView();
     Plotter plotter(mainWindowMock);
+#else
+    Plotter plotter;
+#endif
     return new RunsPresenterTest(plotter);
   }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
@@ -285,8 +289,12 @@ private:
 
   RunsPresenterFriend makePresenter() {
     auto const defaultInstrumentIndex = 0;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     IMainWindowView *mainWindowMock = new MockMainWindowView();
     Plotter plotter(mainWindowMock);
+#else
+    Plotter plotter;
+#endif
     m_runsTablePresenterFactory =
         MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance, plotter);
     auto presenter = RunsPresenterFriend(

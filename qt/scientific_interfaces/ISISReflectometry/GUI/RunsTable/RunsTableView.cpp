@@ -9,8 +9,10 @@
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -38,6 +40,10 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
           SLOT(onFilterChanged(QString const &)));
   connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onInstrumentChanged(int)));
+
+  // Set up the icon
+  m_ui.processButton->setIcon(
+      MantidQt::Icons::getIcon("mdi.sigma", "black", 1.3));
 }
 
 void RunsTableView::invalidSelectionForCopy() {
@@ -132,61 +138,81 @@ void RunsTableView::setProcessButtonEnabled(bool enable) {
   m_ui.processButton->setEnabled(enable);
 }
 
-QAction *RunsTableView::addToolbarItem(Action action,
-                                       std::string const &iconPath,
+/**
+ * Returns a toolbar item/action
+ * @param action
+ * @param icon For Qt4 The IconPath i.e. Mantidplot. In Qt5 uses it to get the
+ * Icon from the mantidqt.icons library.
+ * @param description
+ * @return QAction*
+ */
+QAction *RunsTableView::addToolbarItem(Action action, std::string const &icon,
                                        std::string const &description) {
+  QIcon qIcon;
+  if (icon == "") {
+    qIcon = QIcon(QString::fromStdString(""));
+  } else {
+    qIcon = MantidQt::Icons::getIcon(QString::fromStdString(icon));
+  }
+
   m_actions[action] =
-      m_ui.toolBar->addAction(QIcon(QString::fromStdString(iconPath)),
-                              QString::fromStdString(description));
+      m_ui.toolBar->addAction(qIcon, QString::fromStdString(description));
   return m_actions[action];
 }
 
 void RunsTableView::addToolbarActions() {
-  connect(addToolbarItem(Action::Process, "://stat_rows.png",
-                         "Process selected runs."),
+  connect(addToolbarItem(Action::Process, "mdi.sigma", "Process selected runs"),
           SIGNAL(triggered(bool)), this, SLOT(onProcessPressed(bool)));
-  connect(addToolbarItem(Action::Pause, "://pause.png",
-                         "Pause processing of runs."),
-          SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
+
   connect(
-      addToolbarItem(Action::Expand, "://expand_all.png", "Expand all groups"),
-      SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
-  connect(addToolbarItem(Action::Collapse, "://collapse_all.png",
+      addToolbarItem(Action::Pause, "mdi.pause", "Pause processing of runs"),
+      SIGNAL(triggered(bool)), this, SLOT(onPausePressed(bool)));
+
+  connect(addToolbarItem(Action::Expand, "mdi.expand-all", "Expand all groups"),
+          SIGNAL(triggered(bool)), this, SLOT(onExpandAllGroupsPressed(bool)));
+
+  connect(addToolbarItem(Action::Collapse, "mdi.collapse-all",
                          "Collapse all groups"),
           SIGNAL(triggered(bool)), this,
           SLOT(onCollapseAllGroupsPressed(bool)));
 
-  connect(addToolbarItem(Action::PlotSelected, "://graph.png",
+  connect(addToolbarItem(Action::PlotSelected, "mdi.chart-line",
                          "Plot selected rows as graphs"),
           SIGNAL(triggered(bool)), this, SLOT(onPlotSelectedPressed(bool)));
 
   connect(addToolbarItem(Action::PlotSelectedStitchedOutput,
-                         "://trajectory.png",
+                         "mdi.chart-areaspline",
                          "Plot selected rows with stitched outputs as graphs"),
           SIGNAL(triggered(bool)), this,
           SLOT(onPlotSelectedStitchedOutputPressed(bool)));
 
-  connect(addToolbarItem(Action::InsertRow, "://insert_row.png",
+  connect(addToolbarItem(Action::InsertRow, "mdi.table-row-plus-after",
                          "Insert row into selected"),
           SIGNAL(triggered(bool)), this, SLOT(onInsertRowPressed(bool)));
-  connect(addToolbarItem(Action::InsertGroup, "://insert_group.png",
-                         "Insert group after first selected"),
-          SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
-  connect(addToolbarItem(Action::DeleteRow, "://delete_row.png",
+
+  connect(addToolbarItem(Action::DeleteRow, "mdi.table-row-remove",
                          "Delete all selected rows"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteRowPressed(bool)));
-  connect(addToolbarItem(Action::DeleteGroup, "://delete_group.png",
+
+  connect(addToolbarItem(Action::InsertGroup, "mdi.table-plus",
+                         "Insert group after first selected"),
+          SIGNAL(triggered(bool)), this, SLOT(onInsertGroupPressed(bool)));
+
+  connect(addToolbarItem(Action::DeleteGroup, "mdi.table-remove",
                          "Delete all selected groups"),
           SIGNAL(triggered(bool)), this, SLOT(onDeleteGroupPressed(bool)));
-  connect(
-      addToolbarItem(Action::Copy, "://copy.png", "Copy the current selection"),
-      SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
-  connect(addToolbarItem(Action::Paste, "://paste.png",
+
+  connect(addToolbarItem(Action::Copy, "mdi.content-copy",
+                         "Copy the current selection"),
+          SIGNAL(triggered(bool)), this, SLOT(onCopyPressed(bool)));
+
+  connect(addToolbarItem(Action::Paste, "mdi.content-paste",
                          "Paste over the current selection"),
           SIGNAL(triggered(bool)), this, SLOT(onPastePressed(bool)));
-  connect(
-      addToolbarItem(Action::Cut, "://cut.png", "Cut the current selection"),
-      SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
+
+  connect(addToolbarItem(Action::Cut, "mdi.content-cut",
+                         "Cut the current selection"),
+          SIGNAL(triggered(bool)), this, SLOT(onCutPressed(bool)));
 }
 
 MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
@@ -195,7 +221,7 @@ MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
 
 void RunsTableView::subscribe(RunsTableViewSubscriber *notifyee) {
   m_notifyee = notifyee;
-  m_jobs->subscribe(*notifyee);
+  m_jobs->subscribe(notifyee);
   connect(m_ui.processButton, SIGNAL(clicked(bool)), this,
           SLOT(onProcessPressed(bool)));
 }

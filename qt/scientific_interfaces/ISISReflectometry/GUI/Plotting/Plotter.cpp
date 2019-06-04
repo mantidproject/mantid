@@ -9,6 +9,13 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "../MainWindow/IMainWindowView.h"
+#else
+#include "MantidQtWidgets/MplCpp/Plot.h"
+
+#include <QHash>
+#include <QString>
+#include <QVariant>
+using namespace MantidQt::Widgets::MplCpp;
 #endif
 
 namespace MantidQt {
@@ -34,8 +41,22 @@ void Plotter::reflectometryPlot(
     this->runPython(pythonSrc);
   }
 #else
-  throw std::runtime_error(
-      "Plotter::reflectometryPlot() not implemented for Qt >= 5");
+  // Workbench Plotting
+  QHash<QString, QVariant> ax_properties;
+  ax_properties[QString("yscale")] = QVariant("log");
+  ax_properties[QString("xscale")] = QVariant("log");
+
+  // plot(workspaces, spectrum_nums, wksp_indices, fig, plot_kwargs,
+  // ax_properties, windows_title, errors, overplot)
+  std::string window_title = "ISIS Reflectometry Plot";
+  if (!workspaces.empty()) {
+    window_title = workspaces[0];
+  }
+
+  const bool plotErrorBars = true;
+  std::vector<int> wksp_indices = {0};
+  plot(workspaces, boost::none, wksp_indices, boost::none, boost::none,
+       ax_properties, window_title, plotErrorBars, true);
 #endif
 }
 

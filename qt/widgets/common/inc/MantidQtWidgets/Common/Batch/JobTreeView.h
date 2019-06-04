@@ -43,7 +43,7 @@ public:
                          std::unique_ptr<HintStrategy> hintStrategy) override;
   void setHintsForColumn(int column, HintStrategy *hintStrategy) override;
 
-  void subscribe(JobTreeViewSubscriber &subscriber) override;
+  void subscribe(JobTreeViewSubscriber *subscriber) override;
 
   RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
                                std::vector<Cell> const &rowText) override;

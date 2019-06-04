@@ -183,7 +183,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     line plot to the new axes. show() is called before returning the figure instance. A legend
     is added.
 
-    :param workspaces: A list of workspace handles
+    :param workspaces: A list of workspace handles or strings
     :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
     :param wksp_indices: A list of workspace indexes (starts from 0)
     :param errors: If true then error bars are added for each plot
