@@ -65,22 +65,25 @@ class CurvesTabWidgetPresenter:
             self.apply_errorbar_properties(curve, props)
             curve = curve.lines[0]  # This is the line between errorbar points
 
-        # Top level properties
         curve.set_visible(not props.hide_curve)
         if 'nolegend' not in curve.get_label():
             self.set_curve_label(curve, props.label)
+        self.apply_line_properties(curve, props)
+        self.apply_marker_properties(curve, props)
 
-        # Line properties
-        curve.set_linestyle(props.line_style)
-        curve.set_drawstyle(props.draw_style)
-        curve.set_linewidth(props.line_width)
-        curve.set_color(props.line_color)
+    @staticmethod
+    def apply_line_properties(line, props):
+        line.set_linestyle(props.line_style)
+        line.set_drawstyle(props.draw_style)
+        line.set_linewidth(props.line_width)
+        line.set_color(props.line_color)
 
-        # Marker properties
-        curve.set_marker(MARKER_MAP[props.marker_style])
-        curve.set_markersize(props.marker_size)
-        curve.set_markerfacecolor(props.marker_face_color)
-        curve.set_markeredgecolor(props.marker_edge_color)
+    @staticmethod
+    def apply_marker_properties(line, props):
+        line.set_marker(MARKER_MAP[props.marker_style])
+        line.set_markersize(props.marker_size)
+        line.set_markerfacecolor(props.marker_face_color)
+        line.set_markeredgecolor(props.marker_edge_color)
 
     # Errorbar methods
     def apply_errorbar_properties(self, container, props):
@@ -105,6 +108,7 @@ class CurvesTabWidgetPresenter:
         for caps in caps_tuple:
             caps.set_visible(visible)
 
+    # Getters
     def get_current_ax_errorbars(self):
         ax = self.get_selected_ax()
         return [cont for cont in ax.containers if isinstance(cont, ErrorbarContainer)]
@@ -139,7 +143,7 @@ class CurvesTabWidgetPresenter:
         Get CurveProperties object from current Line2D or ErrorbarContainer
         """
         return CurveProperties.from_curve(self.get_selected_curve())
-
+    
     def populate_select_axes_combo_box(self):
         """
         Add Axes names to select axes combo box.
