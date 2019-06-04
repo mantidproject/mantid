@@ -44,20 +44,20 @@ class QuickEditWidgetTest(unittest.TestCase):
     def test_add_subplot(self):
         name = "new plot"
         self.widget.add_subplot(name)
-        self.assertEquals(self.pres.add_subplot.call_count, 1)
+        self.assertEqual(self.pres.add_subplot.call_count, 1)
         self.pres.add_subplot.assert_called_with(name)
 
     def test_get_selection_one(self):
         name = "one plot"
         self.pres.widget.current_selection = mock.MagicMock(return_value = name)
         output = self.widget.get_selection()
-        self.assertEquals([name], output)
+        self.assertEqual([name], output)
 
     def test_get_selection_all(self):
         name = "All"
         self.pres.widget.current_selection = mock.MagicMock(return_value = name)
         output = self.widget.get_selection()
-        self.assertEquals(self.pres.all.call_count, 1)
+        self.assertEqual(self.pres.all.call_count, 1)
 
     def test_set_plot_x_range(self):
         self.widget.set_plot_x_range([0,1])

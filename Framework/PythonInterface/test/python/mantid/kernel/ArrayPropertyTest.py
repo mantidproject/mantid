@@ -52,7 +52,7 @@ class ArrayPropertyTest(unittest.TestCase):
         validator = NullValidator()
         arr = FloatArrayProperty(name, validator, direc)
         self._check_object_attributes(arr, name, direc)
-        self.assertEquals(arr.isValid, "")
+        self.assertEqual(arr.isValid, "")
 
     def test_name_string_values_validator_direction_constructor_gives_correct_object(self):
         """
@@ -64,7 +64,7 @@ class ArrayPropertyTest(unittest.TestCase):
         values_str = "1.345,34.2,5345.3,4,5.3948"
         arr = FloatArrayProperty(name, values_str, validator, direc)
         self._check_object_attributes(arr, name, direc, length = 5)
-        self.assertEquals(arr.isValid, "")
+        self.assertEqual(arr.isValid, "")
         values = arr.value
         self.assertTrue(isinstance(values, np.ndarray))
 
@@ -97,9 +97,9 @@ class ArrayPropertyTest(unittest.TestCase):
         """
             Do attribute tests
         """
-        self.assertEquals(arrprop.name, name)
-        self.assertEquals(arrprop.direction, direction)
-        self.assertEquals(len(arrprop.value), length)
+        self.assertEqual(arrprop.name, name)
+        self.assertEqual(arrprop.direction, direction)
+        self.assertEqual(len(arrprop.value), length)
 
     def test_setProperty_with_FloatArrayProperty(self):
         """
@@ -160,9 +160,9 @@ class ArrayPropertyTest(unittest.TestCase):
         str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
 
         # Test
-        self.assertEquals(float_arr.dtype(), "f")
-        self.assertEquals(int_arr.dtype(), "i")
-        self.assertEquals(str_arr.dtype(), "S1")
+        self.assertEqual(float_arr.dtype(), "f")
+        self.assertEqual(int_arr.dtype(), "i")
+        self.assertEqual(str_arr.dtype(), "S1")
 
     def test_construct_numpy_array_with_given_dtype_float(self):
         # Set up
@@ -176,7 +176,7 @@ class ArrayPropertyTest(unittest.TestCase):
         # Use the returned dtype() to check it works with numpy arrays
         x = np.arange(1, 10, dtype=float_arr.dtype())
         self.assertIsInstance(x, np.ndarray)
-        self.assertEquals(x.dtype, float_arr.dtype())
+        self.assertEqual(x.dtype, float_arr.dtype())
 
     def test_construct_numpy_array_with_given_dtype_int(self):
         # Set up
@@ -190,7 +190,7 @@ class ArrayPropertyTest(unittest.TestCase):
         # Use the returned dtype() to check it works with numpy arrays
         x = np.arange(1, 10, dtype=int_arr.dtype())
         self.assertIsInstance(x, np.ndarray)
-        self.assertEquals(x.dtype, int_arr.dtype())
+        self.assertEqual(x.dtype, int_arr.dtype())
 
     def test_construct_numpy_array_with_given_dtype_string(self):
         # Set up
@@ -205,7 +205,7 @@ class ArrayPropertyTest(unittest.TestCase):
         x = np.array(str_input_values, dtype=str_arr.dtype())
         self.assertIsInstance(x, np.ndarray)
         # Expect longest string to be returned
-        self.assertEquals(x.dtype, "S12")
+        self.assertEqual(x.dtype, "S12")
 
     def test_PythonAlgorithm_setProperty_With_Ranges_String(self):
         """
@@ -227,7 +227,7 @@ class ArrayPropertyTest(unittest.TestCase):
         alg.setProperty("Input", "10:15")
         alg.execute()
 
-        self.assertEquals(6, len(alg._input_values))
+        self.assertEqual(6, len(alg._input_values))
 
     def test_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
         """
@@ -257,9 +257,9 @@ class ArrayPropertyTest(unittest.TestCase):
         alg.execute()
 
         self.assertNotEqual(alg._input_values, None)
-        self.assertEquals(len(alg._input_values), len(input_values))
+        self.assertEqual(len(alg._input_values), len(input_values))
         for index, val in enumerate(input_values):
-            self.assertEquals(val,input_values[index])
+            self.assertEqual(val,input_values[index])
 
 if __name__ == "__main__":
     unittest.main()

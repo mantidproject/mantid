@@ -54,12 +54,12 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 2)
+        self.assertEqual(len(lines), 2)
 
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split("\t")
-        self.assertEquals(len(terms), 5)
+        self.assertEqual(len(terms), 5)
 
         # Get property
         pchargelog = ws.getRun().getProperty("proton_charge").value
@@ -125,12 +125,12 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 3)
+        self.assertEqual(len(lines), 3)
 
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split("\t")
-        self.assertEquals(len(terms), 3)
+        self.assertEqual(len(terms), 3)
 
         # Remove generated files
         os.remove(outfilename)
@@ -184,12 +184,12 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 3)
+        self.assertEqual(len(lines), 3)
 
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split("\t")
-        self.assertEquals(len(terms), 3)
+        self.assertEqual(len(terms), 3)
 
         #
         # # Remove generated files
@@ -249,12 +249,12 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 2)
+        self.assertEqual(len(lines), 2)
 
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split("\t")
-        self.assertEquals(len(terms), 4)
+        self.assertEqual(len(terms), 4)
 
         # Locate the previos file
 
@@ -313,12 +313,12 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 2)
+        self.assertEqual(len(lines), 2)
 
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split(",")
-        self.assertEquals(len(terms), 3)
+        self.assertEqual(len(terms), 3)
 
         #
         # # Remove generated files
@@ -391,7 +391,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 4)
+        self.assertEqual(len(lines), 4)
 
         # Check value
         for i in range(1, 3):
@@ -507,7 +507,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 4)
+        self.assertEqual(len(lines), 4)
 
         # Check value
         for i in range(1, 3):
@@ -523,7 +523,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         line2 = lines[2]
         terms = line2.split("\t")
         duration = int(terms[1])
-        self.assertEquals(duration, 34567)
+        self.assertEqual(duration, 34567)
         pchargeavg = float(terms[3])
         self.assertAlmostEqual(pchargeavg, 12.921)
 
@@ -603,7 +603,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 4)
+        self.assertEqual(len(lines), 4)
 
         # Check value
         for i in range(1, 3):
@@ -619,7 +619,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         line2 = lines[2]
         terms = line2.split("\t")
         duration = int(terms[1])
-        self.assertEquals(duration, 34567)
+        self.assertEqual(duration, 34567)
         pchargeavg = float(terms[3])
         self.assertAlmostEqual(pchargeavg, 12.921)
 
@@ -668,12 +668,12 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertGreater(len(lastline.strip()), 0)
 
         # Number of lines
-        self.assertEquals(len(lines), 2)
+        self.assertEqual(len(lines), 2)
 
         # Check line
         firstdataline = lines[1]
         terms = firstdataline.strip().split("\t")
-        self.assertEquals(len(terms), 6)
+        self.assertEqual(len(terms), 6)
 
         # Get property
         runstarttime = ws.run().getProperty("run_start").value

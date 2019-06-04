@@ -306,7 +306,7 @@ class BankByBankForwardSpectraNoBackground(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
-        self.assertEquals(4, len(self._fit_results))
+        self.assertEqual(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
         self.assertTrue(isinstance(fitted_banks, WorkspaceGroup),
@@ -355,7 +355,7 @@ class SpectraBySpectraForwardSpectraNoBackground(systemtesting.MantidSystemTest)
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
-        self.assertEquals(4, len(self._fit_results))
+        self.assertEqual(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
         self.assertTrue(isinstance(fitted_spec, WorkspaceGroup),
@@ -402,7 +402,7 @@ class PassPreLoadedWorkspaceToFitTOF(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
-        self.assertEquals(4, len(self._fit_results))
+        self.assertEqual(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
         self.assertTrue(isinstance(fitted_spec, WorkspaceGroup),
@@ -453,7 +453,7 @@ class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
-        self.assertEquals(4, len(self._fit_results))
+        self.assertEqual(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
         self.assertTrue(isinstance(fitted_banks, WorkspaceGroup),

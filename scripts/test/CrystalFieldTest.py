@@ -826,10 +826,10 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertRaises(ValueError, fit.fit)
         cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling=[1])
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=1)
-        self.assertEquals(fit.check_consistency(), None)
+        self.assertEqual(fit.check_consistency(), None)
         cf = CrystalField('Nd', 'C2v', B20=-0.4, Temperature=[5], FWHM=0.5, IntensityScaling = 1)
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws], MaxIterations=1)
-        self.assertEquals(fit.check_consistency(), None)
+        self.assertEqual(fit.check_consistency(), None)
 
     def test_constraints_single_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
@@ -1107,8 +1107,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         def func(x):
             return np.sin(x)
         rm = ResolutionModel(func, 0, np.pi)
-        self.assertEquals(len(rm.model[0]), 129)
-        self.assertEquals(len(rm.model[1]), 129)
+        self.assertEqual(len(rm.model[0]), 129)
+        self.assertEqual(len(rm.model[1]), 129)
         self.assertEqual(np.all(func(rm.model[0]),  rm.model[1]))
 
     def test_ResolutionModel_func_multi(self):
@@ -1126,13 +1126,13 @@ class CrystalFieldFitTest(unittest.TestCase):
         func2 = func1.model
         rm = ResolutionModel([func0, func1, func2], -np.pi/2, np.pi/2, accuracy = 0.01)
 
-        self.assertEquals(len(rm.model), 3)
-        self.assertEquals(len(rm.model[0][0]), 17)
-        self.assertEquals(len(rm.model[0][1]), 17)
-        self.assertEquals(len(rm.model[1][0]), 9)
-        self.assertEquals(len(rm.model[1][1]), 9)
-        self.assertEquals(len(rm.model[2][0]), 17)
-        self.assertEquals(len(rm.model[2][1]), 17)
+        self.assertEqual(len(rm.model), 3)
+        self.assertEqual(len(rm.model[0][0]), 17)
+        self.assertEqual(len(rm.model[0][1]), 17)
+        self.assertEqual(len(rm.model[1][0]), 9)
+        self.assertEqual(len(rm.model[1][1]), 9)
+        self.assertEqual(len(rm.model[2][0]), 17)
+        self.assertEqual(len(rm.model[2][1]), 17)
         self.assertEqual(np.all(func0(rm.model[0][0]),  rm.model[0][1]))
         self.assertEqual(np.all(func1(rm.model[1][0]),  rm.model[1][1]))
         self.assertEqual(np.all(func2(rm.model[2][0]),  rm.model[2][1]))
@@ -1143,8 +1143,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         x = [1, 2, 3]
         y = [3, 2, 1]
         rm = ResolutionModel((x, y))
-        self.assertEquals(rm.model[0], x)
-        self.assertEquals(rm.model[1], y)
+        self.assertEqual(rm.model[0], x)
+        self.assertEqual(rm.model[1], y)
 
     def test_ResolutionModel_array_multi(self):
         from CrystalField import ResolutionModel
@@ -1155,11 +1155,11 @@ class CrystalFieldFitTest(unittest.TestCase):
         y1 = [6, 5, 4]
         rm = ResolutionModel([(x0, y0), (x1, y1)])
 
-        self.assertEquals(len(rm.model), 2)
-        self.assertEquals(rm.model[0][0], x0)
-        self.assertEquals(rm.model[0][1], y0)
-        self.assertEquals(rm.model[1][0], x1)
-        self.assertEquals(rm.model[1][1], y1)
+        self.assertEqual(len(rm.model), 2)
+        self.assertEqual(rm.model[0][0], x0)
+        self.assertEqual(rm.model[0][1], y0)
+        self.assertEqual(rm.model[1][0], x1)
+        self.assertEqual(rm.model[1][1], y1)
 
     def test_ResolutionModel_set_single(self):
         from CrystalField import ResolutionModel, CrystalField

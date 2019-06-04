@@ -91,7 +91,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_group(group_3)
         self.context.add_group(group_2)
 
-        self.assertEquals(self.context.group_names, ['group_1', 'group_3', 'group_2'])
+        self.assertEqual(self.context.group_names, ['group_1', 'group_3', 'group_2'])
 
     def test_pair_names_returns_ordered_list_of_names(self):
         pair_1 = MuonPair('pair_1')
@@ -102,7 +102,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.context.add_pair(pair_2)
         self.context.add_pair(pair_3)
 
-        self.assertEquals(self.context.pair_names, ['pair_1', 'pair_2', 'pair_3'])
+        self.assertEqual(self.context.pair_names, ['pair_1', 'pair_2', 'pair_3'])
 
     def test_can_remove_groups_as_expected(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])
@@ -114,7 +114,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.context.remove_group('group_1')
 
-        self.assertEquals(self.context.group_names, ['group_2', 'group_3'])
+        self.assertEqual(self.context.group_names, ['group_2', 'group_3'])
 
     def test_can_remove_pairs_as_expected(self):
         pair_1 = MuonPair('pair_1')
@@ -126,7 +126,7 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.context.remove_pair('pair_2')
 
-        self.assertEquals(self.context.pair_names, ['pair_1', 'pair_3'])
+        self.assertEqual(self.context.pair_names, ['pair_1', 'pair_3'])
 
     def test_get_group_workspace_names_returns_correct_workspace_names(self):
         group = create_group_populated_by_two_workspace()

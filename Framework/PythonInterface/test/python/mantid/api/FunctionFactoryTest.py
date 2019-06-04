@@ -77,7 +77,7 @@ class FunctionFactoryTest(unittest.TestCase):
         nfuncs_orig = len(FunctionFactory.getFunctionNames())
         FunctionFactory.subscribe(TestFunctionCorrectForm)
         new_funcs = FunctionFactory.getFunctionNames()
-        self.assertEquals(nfuncs_orig+1, len(new_funcs))
+        self.assertEqual(nfuncs_orig+1, len(new_funcs))
         self.assertTrue("TestFunctionCorrectForm" in new_funcs)
 
     def test_function_existing_function_can_be_unsubscribed(self):
@@ -85,7 +85,7 @@ class FunctionFactoryTest(unittest.TestCase):
         nfuncs_before = len(FunctionFactory.getFunctionNames())
         FunctionFactory.unsubscribe("TestFunctionCorrectForm")
         available_functions = FunctionFactory.getFunctionNames()
-        self.assertEquals(nfuncs_before - 1, len(available_functions))
+        self.assertEqual(nfuncs_before - 1, len(available_functions))
         self.assertTrue("TestFunctionCorrectForm" not in available_functions)
 
 

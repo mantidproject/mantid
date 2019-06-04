@@ -182,14 +182,14 @@ class WidgetTest(GuiTest):
 
         widget._add_tree_items(top_level, model.get_algorithm_data()[1])
 
-        self.assertEquals(top_level[0].text(0), "Data")
-        self.assertEquals(top_level[1].text(0), "Sorted")
-        self.assertEquals(top_level[2].text(0), "Stuff")
-        self.assertEquals(top_level[3].text(0), "Transform")
+        self.assertEqual(top_level[0].text(0), "Data")
+        self.assertEqual(top_level[1].text(0), "Sorted")
+        self.assertEqual(top_level[2].text(0), "Stuff")
+        self.assertEqual(top_level[3].text(0), "Transform")
 
         second_level = top_level[1].takeChildren()
-        self.assertEquals(second_level[0].text(0), "ComesFirst v.1")
-        self.assertEquals(second_level[1].text(0), "GoesSecond v.1")
+        self.assertEqual(second_level[0].text(0), "ComesFirst v.1")
+        self.assertEqual(second_level[1].text(0), "GoesSecond v.1")
 
     def test_refresh(self):
         # Set a mock to return an empty descriptor list

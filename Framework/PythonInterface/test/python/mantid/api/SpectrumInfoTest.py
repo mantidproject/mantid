@@ -32,67 +32,67 @@ class SpectrumInfoTest(unittest.TestCase):
         """ Check that the number of spectra we initailly created
             is the same as in memory. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(len(info), 3)
+        self.assertEqual(len(info), 3)
 
     def test_size(self):
         """ Check that the number of spectra we initailly created
             is the same as in memory. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(info.size(), 3)
+        self.assertEqual(info.size(), 3)
 
     def test_isMonitor(self):
         """ Check if a monitor is present. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(info.isMonitor(1), False)
+        self.assertEqual(info.isMonitor(1), False)
 
     def test_isMasked(self):
         """ Check if the detector is masked. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(info.isMasked(1), False)
+        self.assertEqual(info.isMasked(1), False)
 
     def test_setMaskedTrue(self):
         """ Test that the detector's masking can be set to True. """
         info = self._ws.spectrumInfo()
         info.setMasked(1, True)
-        self.assertEquals(info.isMasked(1), True)
+        self.assertEqual(info.isMasked(1), True)
 
     def test_setMaskedFalse(self):
         """ Test that the detector's masking can be set to False. """
         info = self._ws.spectrumInfo()
         info.setMasked(1, False)
-        self.assertEquals(info.isMasked(1), False)
+        self.assertEqual(info.isMasked(1), False)
 
     def test_twoTheta(self):
         """ See if the returned value is a double (float in Python). """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.twoTheta(1)), float)
+        self.assertEqual(type(info.twoTheta(1)), float)
 
     def test_signedTwoTheta(self):
         """ See if the returned value is a double (float in Python). """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.signedTwoTheta(1)), float)
+        self.assertEqual(type(info.signedTwoTheta(1)), float)
 
     def test_l1(self):
         """ Check if a distance is returned (source to sample). """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.l1()), float)
+        self.assertEqual(type(info.l1()), float)
 
     def test_l2(self):
         """ Check if a distance is returned (sample to spectrum). """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.l2(1)), float)
+        self.assertEqual(type(info.l2(1)), float)
 
     def test_hasDetectors(self):
         """ Check to see which spectrum has detectors. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(info.hasDetectors(0), False)
-        self.assertEquals(info.hasDetectors(1), True)
+        self.assertEqual(info.hasDetectors(0), False)
+        self.assertEqual(info.hasDetectors(1), True)
 
     def test_hasUniqueDetector(self):
         """ Test if the spectra have unique detectors. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(info.hasUniqueDetector(0), False)
-        self.assertEquals(info.hasUniqueDetector(1), True)
+        self.assertEqual(info.hasUniqueDetector(0), False)
+        self.assertEqual(info.hasUniqueDetector(1), True)
 
     """
     The following are test cases test for returned V3D objects. The objects
@@ -102,17 +102,17 @@ class SpectrumInfoTest(unittest.TestCase):
     def test_position(self):
         """ Test that the spectrum's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.position(1)), V3D)
+        self.assertEqual(type(info.position(1)), V3D)
 
     def test_sourcePosition(self):
         """ Test that the source's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.sourcePosition()), V3D)
+        self.assertEqual(type(info.sourcePosition()), V3D)
 
     def test_samplePosition(self):
         """ Test that the sample's position is returned. """
         info = self._ws.spectrumInfo()
-        self.assertEquals(type(info.samplePosition()), V3D)
+        self.assertEqual(type(info.samplePosition()), V3D)
 
     """
     ---------------
@@ -123,7 +123,7 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         expected_iterations = len(info) 
         actual_iterations = len(list(iter(info)))
-        self.assertEquals(expected_iterations, actual_iterations)
+        self.assertEqual(expected_iterations, actual_iterations)
 
     def test_iterator_for_monitors(self):
         info = self._ws.spectrumInfo()
@@ -325,15 +325,15 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         spectrumDefinitionOne = info.getSpectrumDefinition(0)
         spectrumDefinitionTwo = info.getSpectrumDefinition(1)
-        self.assertEquals(spectrumDefinitionOne.size(), 0)
-        self.assertEquals(spectrumDefinitionTwo.size(), 1)
+        self.assertEqual(spectrumDefinitionOne.size(), 0)
+        self.assertEqual(spectrumDefinitionTwo.size(), 1)
 
     def test_spectrumDefintionAdd(self):
         """ Add a pair of detector index and time index """
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(1)
         spectrumDefinition.add(1, 1)
-        self.assertEquals(spectrumDefinition.size(), 2)
+        self.assertEqual(spectrumDefinition.size(), 2)
 
     def test_spectrumDefintionEquals(self):
         """ Check the equality of the SpectrumDefintions """
@@ -357,7 +357,7 @@ class SpectrumInfoTest(unittest.TestCase):
         """ See if indexing works """
         info = self._ws.spectrumInfo()
         spectrumDefinition = info.getSpectrumDefinition(1)
-        self.assertEquals(spectrumDefinition[0], (1, 0))
+        self.assertEqual(spectrumDefinition[0], (1, 0))
 
 if __name__ == '__main__':
     unittest.main()

@@ -15,15 +15,15 @@ from mantid.kernel import V3D
 class V3DTest(unittest.TestCase):
     def test_default_construction_is_at_origin(self):
         p = V3D()
-        self.assertEquals(p.X(), 0.0)
-        self.assertEquals(p.Y(), 0.0)
-        self.assertEquals(p.Z(), 0.0)
+        self.assertEqual(p.X(), 0.0)
+        self.assertEqual(p.Y(), 0.0)
+        self.assertEqual(p.Z(), 0.0)
 
     def test_construction_with_xyz(self):
         p = V3D(1.5, 2.4, 6.5)
-        self.assertEquals(p.X(), 1.5)
-        self.assertEquals(p.Y(), 2.4)
-        self.assertEquals(p.Z(), 6.5)
+        self.assertEqual(p.X(), 1.5)
+        self.assertEqual(p.Y(), 2.4)
+        self.assertEqual(p.Z(), 6.5)
 
     def test_distance(self):
         a = V3D(0.0, 0.0, 0.0)
@@ -44,12 +44,12 @@ class V3DTest(unittest.TestCase):
     def test_zenith(self):
         b = V3D(0.0, 0.0, 0.0)
         a = V3D(9.9, 7.6, 0.0)
-        self.assertEquals(a.zenith(a), 0.0)
+        self.assertEqual(a.zenith(a), 0.0)
         self.assertAlmostEquals(a.zenith(b), math.pi / 2.0)
         a = V3D(-1.1, 0.0, 0.0);
         self.assertAlmostEquals(a.zenith(b), math.pi / 2.0)
         a = V3D(0.0, 0.0, 1.0);
-        self.assertEquals(a.zenith(b), 0.0);
+        self.assertEqual(a.zenith(b), 0.0);
         a = V3D(1.0, 0.0, 1.0);
         self.assertAlmostEquals(a.zenith(b), math.pi / 4.0)
         a = V3D(1.0, 0.0, -1.0);
@@ -111,7 +111,7 @@ class V3DTest(unittest.TestCase):
 
         a = set([v1, v2, v3])
 
-        self.assertEquals(len(a), 2)
+        self.assertEqual(len(a), 2)
 
     def test_get_item(self):
         v = V3D(2, 1, 3)
@@ -119,13 +119,13 @@ class V3DTest(unittest.TestCase):
         self.assertRaises(IndexError, v.__getitem__, 3)
         self.assertRaises(IndexError, v.__getitem__, -4)
 
-        self.assertEquals(v[0], 2.0)
-        self.assertEquals(v[1], 1.0)
-        self.assertEquals(v[2], 3.0)
+        self.assertEqual(v[0], 2.0)
+        self.assertEqual(v[1], 1.0)
+        self.assertEqual(v[2], 3.0)
 
-        self.assertEquals(v[-3], 2.0)
-        self.assertEquals(v[-2], 1.0)
-        self.assertEquals(v[-1], 3.0)
+        self.assertEqual(v[-3], 2.0)
+        self.assertEqual(v[-2], 1.0)
+        self.assertEqual(v[-1], 3.0)
 
     def test_set_item(self):
         v = V3D(2, 1, 3)
@@ -137,27 +137,27 @@ class V3DTest(unittest.TestCase):
         v[1] = 2.0
         v[2] = 4.0
 
-        self.assertEquals(v[0], 1.0)
-        self.assertEquals(v[1], 2.0)
-        self.assertEquals(v[2], 4.0)
+        self.assertEqual(v[0], 1.0)
+        self.assertEqual(v[1], 2.0)
+        self.assertEqual(v[2], 4.0)
 
         v[-3] = 3.0
         v[-2] = 5.0
         v[-1] = 6.0
 
-        self.assertEquals(v[0], 3.0)
-        self.assertEquals(v[1], 5.0)
-        self.assertEquals(v[2], 6.0)
+        self.assertEqual(v[0], 3.0)
+        self.assertEqual(v[1], 5.0)
+        self.assertEqual(v[2], 6.0)
 
     def test_iterator(self):
         times_two = [2 * x for x in V3D(3, 4, 5)]
 
-        self.assertEquals(times_two[0], 6.0)
-        self.assertEquals(times_two[1], 8.0)
-        self.assertEquals(times_two[2], 10.0)
+        self.assertEqual(times_two[0], 6.0)
+        self.assertEqual(times_two[1], 8.0)
+        self.assertEqual(times_two[2], 10.0)
 
     def test_len(self):
-        self.assertEquals(len(V3D(2, 2, 2)), 3)
+        self.assertEqual(len(V3D(2, 2, 2)), 3)
 
     def test_numpy_conversion(self):
         v = V3D(1, 2, 3)

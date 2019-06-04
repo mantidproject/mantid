@@ -23,10 +23,10 @@ class AlgorithmManagerTest(unittest.TestCase):
         alg = testhelpers.assertRaisesNothing(self, AlgorithmManager.create, "ConvertUnits")
         # Tests
         self.assertNotEqual(alg, None)
-        self.assertEquals(alg.name(), "ConvertUnits")
-        self.assertEquals(alg.version(), 1)
-        self.assertEquals(alg.category(), "Transforms\\Units")
-        self.assertEquals(alg.helpURL(), "")
+        self.assertEqual(alg.name(), "ConvertUnits")
+        self.assertEqual(alg.version(), 1)
+        self.assertEqual(alg.category(), "Transforms\\Units")
+        self.assertEqual(alg.helpURL(), "")
 
     def test_create_unknown_alg_throws(self):
         self.assertRaises(RuntimeError, AlgorithmManager.create,"DoesNotExist")
@@ -53,13 +53,13 @@ class AlgorithmManagerTest(unittest.TestCase):
         returned_instance = AlgorithmManager.create("ConvertUnits")
         id = returned_instance.getAlgorithmID()
         mgr_instance = AlgorithmManager.getAlgorithm(id)
-        self.assertEquals(id, mgr_instance.getAlgorithmID())
+        self.assertEqual(id, mgr_instance.getAlgorithmID())
 
     def test_removeById_removes_correct_instance(self):
         alg = AlgorithmManager.create("ConvertUnits")
         alg2 = AlgorithmManager.create("ConvertUnits")
         AlgorithmManager.removeById(alg.getAlgorithmID())
-        self.assertEquals(None, AlgorithmManager.getAlgorithm(alg.getAlgorithmID()))
+        self.assertEqual(None, AlgorithmManager.getAlgorithm(alg.getAlgorithmID()))
         self.assertNotEqual(None, AlgorithmManager.getAlgorithm(alg2.getAlgorithmID()))
 
     def test_newestInstanceOf_returns_correct_instance(self):
@@ -67,7 +67,7 @@ class AlgorithmManagerTest(unittest.TestCase):
         alg2 = AlgorithmManager.create("ConvertUnits")
         alg3 = AlgorithmManager.newestInstanceOf("ConvertUnits")
 
-        self.assertEquals(alg2.getAlgorithmID(), alg3.getAlgorithmID())
+        self.assertEqual(alg2.getAlgorithmID(), alg3.getAlgorithmID())
         self.assertNotEqual(alg.getAlgorithmID(), alg3.getAlgorithmID())
 
     def test_runningInstancesOf_returns_python_list(self):
@@ -92,7 +92,7 @@ class AlgorithmManagerTest(unittest.TestCase):
             # should now be running
             algs = AlgorithmManager.runningInstancesOf("Pause")
             self.assertTrue(isinstance(algs, list))
-            self.assertEquals(1, len(algs))
+            self.assertEqual(1, len(algs))
         except:
             pause_thread.algorithm.cancel()
             pause_thread.join()
@@ -105,7 +105,7 @@ class AlgorithmManagerTest(unittest.TestCase):
     def test_clear_removes_all_managed_algorithms(self):
         AlgorithmManager.clear()
         new_size = AlgorithmManager.size()
-        self.assertEquals(0, new_size)
+        self.assertEqual(0, new_size)
 
 
 if __name__ == '__main__':

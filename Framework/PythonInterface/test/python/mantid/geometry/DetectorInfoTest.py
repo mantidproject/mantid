@@ -35,24 +35,24 @@ class DetectorInfoTest(unittest.TestCase):
     def test_len(self):
         """ Test return value for number of detectors """
         info = self._ws.detectorInfo()
-        self.assertEquals(len(info), 2)
+        self.assertEqual(len(info), 2)
 
     def test_size(self):
         """ Test return value for number of detectors """
         info = self._ws.detectorInfo()
-        self.assertEquals(info.size(), 2)
+        self.assertEqual(info.size(), 2)
 
     def test_isMonitor(self):
         """ Check if detector is a monitor """
         info = self._ws.detectorInfo()
-        self.assertEquals(info.isMonitor(0), False)
-        self.assertEquals(info.isMonitor(1), False)
+        self.assertEqual(info.isMonitor(0), False)
+        self.assertEqual(info.isMonitor(1), False)
 
     def test_isMasked(self):
         """ Check masking of detector """
         info = self._ws.detectorInfo()
-        self.assertEquals(info.isMasked(0), False)
-        self.assertEquals(info.isMasked(1), False)
+        self.assertEqual(info.isMasked(0), False)
+        self.assertEqual(info.isMasked(1), False)
 
     def test_setMasked(self):
         """ Test that the detector's masking can be set to True. """
@@ -77,7 +77,7 @@ class DetectorInfoTest(unittest.TestCase):
     def test_twoTheta(self):
         """ See if the returned value is a double (float in Python). """
         info = self._ws.detectorInfo()
-        self.assertEquals(type(info.twoTheta(0)), float)
+        self.assertEqual(type(info.twoTheta(0)), float)
 
     def test_createWorkspaceAndDetectorInfo(self):
     	""" Try to create a workspace and see if DetectorInfo object
@@ -86,7 +86,7 @@ class DetectorInfoTest(unittest.TestCase):
     	dataY = [1,2,3,4,5]
     	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
     	info = workspace.detectorInfo()
-    	self.assertEquals(info.size(), 0)
+    	self.assertEqual(info.size(), 0)
     
     def test_detectorIds(self):
         info = self._ws.detectorInfo()
@@ -94,33 +94,33 @@ class DetectorInfoTest(unittest.TestCase):
         # Should be read-only
         self.assertFalse(ids.flags.writeable)
         for a, b in zip(ids, [1,2]):
-            self.assertEquals(a,b)
+            self.assertEqual(a,b)
 
 
     def test_position(self):
         """ Test that the detector's position is returned. """
         info = self._ws.detectorInfo()
-        self.assertEquals(type(info.position(0)), V3D)
-        self.assertEquals(type(info.position(1)), V3D)
+        self.assertEqual(type(info.position(0)), V3D)
+        self.assertEqual(type(info.position(1)), V3D)
 
     def test_rotation(self):
         """ Test that the detector's rotation is returned. """
         info = self._ws.detectorInfo()
-        self.assertEquals(type(info.rotation(0)), Quat)
-        self.assertEquals(type(info.rotation(1)), Quat)
+        self.assertEqual(type(info.rotation(0)), Quat)
+        self.assertEqual(type(info.rotation(1)), Quat)
 
     def test_l2(self):
         det_info = self._ws.detectorInfo()
         sample_pos = self._ws.componentInfo().samplePosition()
         l2_calc = det_info.position(0).distance(sample_pos)
-        self.assertEquals(det_info.l2(0), l2_calc)
+        self.assertEqual(det_info.l2(0), l2_calc)
 
     def test_l1(self):
         source_pos = self._ws.componentInfo().sourcePosition()
         sample_pos = self._ws.componentInfo().samplePosition()
         l1_calc = sample_pos.distance(source_pos)
         det_info = self._ws.detectorInfo()
-        self.assertEquals(det_info.l1(), l1_calc)
+        self.assertEqual(det_info.l1(), l1_calc)
         
     """
     ---------------
@@ -132,10 +132,10 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         expected_iterations = len(info) 
         actual_iterations = len(list(iter(info)))
-        self.assertEquals(expected_iterations, actual_iterations)
+        self.assertEqual(expected_iterations, actual_iterations)
         it = iter(info)
-        self.assertEquals(next(it).index, 0)
-        self.assertEquals(next(it).index, 1)
+        self.assertEqual(next(it).index, 0)
+        self.assertEqual(next(it).index, 1)
 
     def test_iterator_for_monitors(self):
         info = self._ws.detectorInfo()
@@ -196,8 +196,8 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         with self.assertRaises(OverflowError):
             info.twoTheta(-1)
-        self.assertEquals(type(info.twoTheta(0)), float)
-        self.assertEquals(type(info.twoTheta(1)), float)
+        self.assertEqual(type(info.twoTheta(0)), float)
+        self.assertEqual(type(info.twoTheta(1)), float)
 
     def test_position_extreme(self):
         info = self._ws.detectorInfo()

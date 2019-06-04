@@ -300,8 +300,8 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
       contents = read_project_file(self._project_folder)
 
       window_options = contents['instrumentwindow']
-      self.assertEquals(int(window_options['SurfaceType']), 2)
-      self.assertEquals(int(window_options['CurrentTab']), 0)
+      self.assertEqual(int(window_options['SurfaceType']), 2)
+      self.assertEqual(int(window_options['CurrentTab']), 0)
 
       # render tab options
       render_options = contents['instrumentwindow']['tabs']['rendertab']

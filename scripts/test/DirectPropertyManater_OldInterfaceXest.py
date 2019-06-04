@@ -231,17 +231,17 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         tReducer.test_name=''
         tReducer.save_results(pws)
-        self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.test_name)
+        self.assertEqual(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.test_name)
         file_long_name = ws_name+'_file_spe_other_file_name.spe'
 
         tReducer.test_name=''
         tReducer.save_results(pws,'other_file_name')
-        self.assertEquals(file_long_name,tReducer.test_name)
+        self.assertEqual(file_long_name,tReducer.test_name)
 
         file_long_name=ws_name+'_file_nxspe_ofn.nxspe'+ws_name+'_file_nxs_ofn.nxs'
         tReducer.test_name=''
         tReducer.save_results(pws,'ofn',['.nxspe','.nxs'])
-        self.assertEquals(file_long_name,tReducer.test_name)
+        self.assertEqual(file_long_name,tReducer.test_name)
 
         #clear all previous default formats
         tReducer.save_format=[]
@@ -257,7 +257,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         tReducer.test_name=''
         tReducer.save_results(pws,'ofn')
-        self.assertEquals(file_long_name,tReducer.test_name)
+        self.assertEqual(file_long_name,tReducer.test_name)
 
     def test_set_spectra_to_mon(self):
         tReducer = self.reducer
@@ -266,7 +266,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         tReducer.spectra_to_monitors_list = 35
         self.assertTrue(isinstance(tReducer.spectra_to_monitors_list,list))
-        self.assertEquals(35,tReducer.spectra_to_monitors_list[0])
+        self.assertEqual(35,tReducer.spectra_to_monitors_list[0])
 
         tReducer.spectra_to_monitors_list = None
         self.assertEqual(tReducer.spectra_to_monitors_list, None)
@@ -276,15 +276,15 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.spectra_to_monitors_list, None)
 
         tReducer.spectra_to_monitors_list = '467'
-        self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
+        self.assertEqual(467,tReducer.spectra_to_monitors_list[0])
 
         tReducer.spectra_to_monitors_list = '467,444'
-        self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
-        self.assertEquals(444,tReducer.spectra_to_monitors_list[1])
+        self.assertEqual(467,tReducer.spectra_to_monitors_list[0])
+        self.assertEqual(444,tReducer.spectra_to_monitors_list[1])
 
         tReducer.spectra_to_monitors_list = ['467','444']
-        self.assertEquals(467,tReducer.spectra_to_monitors_list[0])
-        self.assertEquals(444,tReducer.spectra_to_monitors_list[1])
+        self.assertEqual(467,tReducer.spectra_to_monitors_list[0])
+        self.assertEqual(444,tReducer.spectra_to_monitors_list[1])
 
     def test_process_copy_spectra_to_monitors(self):
         pass

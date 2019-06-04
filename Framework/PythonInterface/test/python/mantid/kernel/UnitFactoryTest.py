@@ -25,7 +25,7 @@ class UnitFactoryTest(unittest.TestCase):
     def test_keys_returns_a_non_empty_python_list_of_unit_keys(self):
         known_units = UnitFactory.getKeys()
 
-        self.assertEquals(type(known_units), list)
+        self.assertEqual(type(known_units), list)
         # Check length is at least the known core units
         # but allow for others to be added
         core_units = ['Empty', 'Label', 'TOF', 'Wavelength','Energy',

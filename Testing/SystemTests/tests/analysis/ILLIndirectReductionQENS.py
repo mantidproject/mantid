@@ -156,7 +156,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
                                  CalibrationBackgroundScalingFactor=0.1,
                                  OutputWorkspace='out_calib_bg')
 
-        self.assertEquals(mtd['out_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
+        self.assertEqual(mtd['out_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
 
         self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[1024 - 580], 0.0035, 0.0001)
 
@@ -164,9 +164,9 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
         out_croped_mon = IndirectILLReductionQENS(Run='140721-140722', CropDeadMonitorChannels=True)
 
-        self.assertEquals(out_croped_mon.getItem(0).getNumberHistograms(), 18)
+        self.assertEqual(out_croped_mon.getItem(0).getNumberHistograms(), 18)
 
-        self.assertEquals(out_croped_mon.getItem(0).blocksize(), 1018)
+        self.assertEqual(out_croped_mon.getItem(0).blocksize(), 1018)
 
     def validate(self):
         return ['136558_multiple_out_red','ILLIN16B_QENS.nxs']

@@ -35,7 +35,7 @@ class CreateActionTest(GuiTest):
         parent = Parent()
         action = create_action(parent, "Test Action")
         self.assertTrue(isinstance(action, QAction))
-        self.assertEquals(parent, action.parent())
+        self.assertEqual(parent, action.parent())
 
     def test_parent_can_be_none(self):
         action = create_action(None, "Test Action")
@@ -92,7 +92,7 @@ class AddActionsTest(GuiTest):
         # so check the number of children increases by 2
         nchildren_before = len(test_toolbar.children())
         add_actions(test_toolbar, [test_act_1, test_act_2])
-        self.assertEquals(nchildren_before + 2, len(test_toolbar.children()))
+        self.assertEqual(nchildren_before + 2, len(test_toolbar.children()))
 
     def test_add_actions_with_bad_target_raises_attribute_error(self):
         test_act_1 = create_action(None, "Test Action 1")

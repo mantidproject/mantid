@@ -34,7 +34,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         self.assertEqual(p.getL(), 7)
 
         hkl = p.getHKL()
-        self.assertEquals(hkl, V3D(5,6,7))
+        self.assertEqual(hkl, V3D(5,6,7))
 
         p.setIntensity(456)
         p.setSigmaIntensity(789)
@@ -119,11 +119,11 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         pws.setCell("QLab", 0, V3D(1,1,1))
         pws.setCell("QSample", 0, V3D(1,1,1))
 
-        self.assertEquals(pws.cell("h", 0), 1)
-        self.assertEquals(pws.cell("k", 0), 2)
-        self.assertEquals(pws.cell("l", 0), 3)
-        self.assertEquals(pws.cell("QLab", 0), V3D(1,1,1))
-        self.assertEquals(pws.cell("QSample", 0), V3D(1,1,1))
+        self.assertEqual(pws.cell("h", 0), 1)
+        self.assertEqual(pws.cell("k", 0), 2)
+        self.assertEqual(pws.cell("l", 0), 3)
+        self.assertEqual(pws.cell("QLab", 0), V3D(1,1,1))
+        self.assertEqual(pws.cell("QSample", 0), V3D(1,1,1))
 
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ class InProcessJupyterConsoleTest(GuiTest):
 
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
-        self.assertEquals(1, widget.kernel_manager.kernel.shell.user_ns['x'])
+        self.assertEqual(1, widget.kernel_manager.kernel.shell.user_ns['x'])
         self._pre_delete_console_cleanup(widget)
         del widget
 

@@ -50,8 +50,8 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertTrue( 'ConvertUnits' in all_algs )
         self.assertTrue( 'LoadRaw' in all_algs )
         # one versions of LoadRaw
-        self.assertEquals( len(all_algs['LoadRaw']), 1 )
-        self.assertEquals( all_algs['LoadRaw'], [3] )
+        self.assertEqual( len(all_algs['LoadRaw']), 1 )
+        self.assertEqual( all_algs['LoadRaw'], [3] )
 
     def test_algorithm_subscription_with_valid_object_succeeds(self):
         testhelpers.assertRaisesNothing(self, AlgorithmFactory.subscribe, IsAnAlgorithm)

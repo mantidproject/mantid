@@ -29,7 +29,7 @@ class SANSStitchTest(unittest.TestCase):
         alg = AlgorithmManager.create('SANSStitch')
         alg.setChild(True)
         alg.initialize()
-        self.assertEquals('None', alg.getProperty('Mode').value)
+        self.assertEqual('None', alg.getProperty('Mode').value)
 
     def test_none_mode_requires_scale_and_shift_factors(self):
         alg = AlgorithmManager.create('SANSStitch')
@@ -199,8 +199,8 @@ class SANSStitchTest(unittest.TestCase):
 
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
 
-        self.assertEquals(out_scale_factor, in_scale_factor)
-        self.assertEquals(out_shift_factor, in_shift_factor)
+        self.assertEqual(out_scale_factor, in_scale_factor)
+        self.assertEqual(out_shift_factor, in_shift_factor)
         y_array = out_ws.readY(0)
 
         expected_y_array = [1.5] * 9
@@ -314,8 +314,8 @@ class SANSStitchTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-        self.assertEquals(out_scale_factor, 1.0)
-        self.assertEquals(out_shift_factor, -5.0)
+        self.assertEqual(out_scale_factor, 1.0)
+        self.assertEqual(out_shift_factor, -5.0)
 
         y_array = out_ws.readY(0)
 
@@ -365,8 +365,8 @@ class SANSStitchTest(unittest.TestCase):
         out_ws = alg.getProperty('OutputWorkspace').value
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
-        self.assertEquals(out_scale_factor, 1.0)
-        self.assertEquals(out_shift_factor, -5.0)
+        self.assertEqual(out_scale_factor, 1.0)
+        self.assertEqual(out_shift_factor, -5.0)
 
         out_ws = alg.getProperty('OutputWorkspace').value
 

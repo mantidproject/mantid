@@ -80,7 +80,7 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
 
     def validate(self):
         out_ws = mtd[self.out_ws_name]
-        self.assertEquals(out_ws.name(), self.out_ws_name)
+        self.assertEqual(out_ws.name(), self.out_ws_name)
         self.assertEqual(out_ws.getNumberHistograms(), 1)
         self.assertEqual(out_ws.blocksize(), 10186)
         self.assertEqual(out_ws.getNEvents(), 10186)
@@ -94,7 +94,7 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         self.assertEqual(dimY.getUnits(), '')
 
         van_out_ws = mtd[self.van_bank_curves_name]
-        self.assertEquals(van_out_ws.name(), self.van_bank_curves_name)
+        self.assertEqual(van_out_ws.name(), self.van_bank_curves_name)
         self.assertTrue(van_out_ws.getNumberHistograms(), 3)
         self.assertEqual(out_ws.blocksize(), 10186)
 
@@ -110,7 +110,7 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
 
         # with precalc curve but not precalc integration
         precalc_curve_simul = self._precalc_van_ws.readY(1)
-        self.assertEquals(len(simul), len(precalc_curve_simul))
+        self.assertEqual(len(simul), len(precalc_curve_simul))
 
         delta = 1e-5
         for i in range(0, len(simul)):
@@ -122,9 +122,9 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         # === check the integration table against the previously saved integration table ===
         integ_tbl = mtd[self.van_integ_name]
         precalc_integ_tbl = self._precalc_van_integ_tbl
-        self.assertEquals(integ_tbl.rowCount(), 2513)
-        self.assertEquals(integ_tbl.rowCount(), precalc_integ_tbl.rowCount())
-        self.assertEquals(integ_tbl.columnCount(), precalc_integ_tbl.columnCount())
+        self.assertEqual(integ_tbl.rowCount(), 2513)
+        self.assertEqual(integ_tbl.rowCount(), precalc_integ_tbl.rowCount())
+        self.assertEqual(integ_tbl.columnCount(), precalc_integ_tbl.columnCount())
         for i in range(integ_tbl.rowCount()):
             self.assertEqual((0,  integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0)) or
                             rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
@@ -134,8 +134,8 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
 
         # === check the 'focussed' spectrum ===
         out_precalc_ws = mtd[self.out_ws_precalc_name]
-        self.assertEquals(out_precalc_ws.getNumberHistograms(), 1)
-        self.assertEquals(out_precalc_ws.blocksize(), out_ws.blocksize())
+        self.assertEqual(out_precalc_ws.getNumberHistograms(), 1)
+        self.assertEqual(out_precalc_ws.blocksize(), out_ws.blocksize())
         focussed_sp = out_ws.readY(0)
         focussed_sp_precalc = out_precalc_ws.readY(0)
         for i in range(0, out_ws.blocksize()):
@@ -220,31 +220,31 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
     def validate(self):
         # === check detector positions table produced by EnggCalibrateFull
         self.assertTrue(self.pos_table)
-        self.assertEquals(self.pos_table.columnCount(), 10)
-        self.assertEquals(self.pos_table.rowCount(), 1200)
-        self.assertEquals(self.pos_table.cell(88, 0), 100089)  # det ID
-        self.assertEquals(self.pos_table.cell(200, 0), 101081)  # det ID
-        self.assertEquals(self.pos_table.cell(88, 0), 100089)  # det ID
+        self.assertEqual(self.pos_table.columnCount(), 10)
+        self.assertEqual(self.pos_table.rowCount(), 1200)
+        self.assertEqual(self.pos_table.cell(88, 0), 100089)  # det ID
+        self.assertEqual(self.pos_table.cell(200, 0), 101081)  # det ID
+        self.assertEqual(self.pos_table.cell(88, 0), 100089)  # det ID
 
         # The output table of peak parameters has the expected structure
-        self.assertEquals(self.peaks_info.rowCount(), 1200)
-        self.assertEquals(self.peaks_info.columnCount(), 2)
-        self.assertEquals(self.peaks_info.keys(), ['Detector ID', 'Parameters'])
-        self.assertEquals(self.peaks_info.cell(10, 0), 100011)
-        self.assertEquals(self.peaks_info.cell(100, 0), 100101)
-        self.assertEquals(self.peaks_info.cell(123, 0), 101004)
-        self.assertEquals(self.peaks_info.cell(517, 0), 104038)
-        self.assertEquals(self.peaks_info.cell(987, 0), 108028)
-        self.assertEquals(self.peaks_info.cell(1000, 0), 108041)
+        self.assertEqual(self.peaks_info.rowCount(), 1200)
+        self.assertEqual(self.peaks_info.columnCount(), 2)
+        self.assertEqual(self.peaks_info.keys(), ['Detector ID', 'Parameters'])
+        self.assertEqual(self.peaks_info.cell(10, 0), 100011)
+        self.assertEqual(self.peaks_info.cell(100, 0), 100101)
+        self.assertEqual(self.peaks_info.cell(123, 0), 101004)
+        self.assertEqual(self.peaks_info.cell(517, 0), 104038)
+        self.assertEqual(self.peaks_info.cell(987, 0), 108028)
+        self.assertEqual(self.peaks_info.cell(1000, 0), 108041)
         for idx in [0, 12, 516, 789, 891, 1112]:
             cell_val = self.peaks_info.cell(idx, 1)
             self.assertTrue(isinstance(cell_val, str))
             if PY2:  # This test depends on consistent ordering of a dict which is not guaranteed for python 3
-                self.assertEquals(cell_val[0:11], '{"1": {"A":')
-            self.assertEquals(cell_val[-2:], '}}')
+                self.assertEqual(cell_val[0:11], '{"1": {"A":')
+            self.assertEqual(cell_val[-2:], '}}')
 
-        self.assertEquals(self.difa, 0)
-        self.assertEquals(self.difa_b2, 0)
+        self.assertEqual(self.difa, 0)
+        self.assertEqual(self.difa_b2, 0)
 
         # this will be used as a comparison delta in relative terms (percentage)
         exdelta_special = 5e-4
@@ -262,7 +262,7 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(400, 4), 1.65264105797, single_spectrum_delta))
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(200, 5), -0.296705961227, single_spectrum_delta))
         # DIFA column
-        self.assertEquals(self.pos_table.cell(133, 7), 0)
+        self.assertEqual(self.pos_table.cell(133, 7), 0)
         # DIFC column
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18603.7597656, single_spectrum_delta))
         # TZERO column
@@ -288,12 +288,12 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         expected_peaks = [1.1046, 1.3528, 1.5621, 1.6316, 1.9132, 2.7057]
         # Note that CalibrateFull is not applied on bank 2. These peaks are not too difficult and
         # fitted successfully though (but note the increased DIFC).
-        self.assertEquals(len(self.peaks), len(expected_peaks))
-        self.assertEquals(len(self.peaks_b2), len(expected_peaks))
-        self.assertEquals(self.peaks, expected_peaks)
-        self.assertEquals(self.peaks_b2, expected_peaks)
-        self.assertEquals(len(self.peaks_fitted), len(expected_peaks))
-        self.assertEquals(len(self.peaks_fitted_b2), len(expected_peaks))
+        self.assertEqual(len(self.peaks), len(expected_peaks))
+        self.assertEqual(len(self.peaks_b2), len(expected_peaks))
+        self.assertEqual(self.peaks, expected_peaks)
+        self.assertEqual(self.peaks_b2, expected_peaks)
+        self.assertEqual(len(self.peaks_fitted), len(expected_peaks))
+        self.assertEqual(len(self.peaks_fitted_b2), len(expected_peaks))
 
         # Check that the individual peaks do not deviate too much from the fitted
         # straight line

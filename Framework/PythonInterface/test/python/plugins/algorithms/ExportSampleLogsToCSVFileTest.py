@@ -54,7 +54,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
                 goodlines += 1
             # ENDIF
         # ENDFOR
-        self.assertEquals(goodlines, 25)
+        self.assertEqual(goodlines, 25)
 
         # Remove generated files
         os.remove(outfilename)
@@ -98,7 +98,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             line = line.strip()
             if len(line) > 0 and len(line.split()) == 6 and line.startswith('76130'):
                 goodlines += 1
-        self.assertEquals(goodlines, 64)
+        self.assertEqual(goodlines, 64)
 
         # Remove generated files
         os.remove(outfilename)
@@ -138,7 +138,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile.close()
         except IOError as err:
             errmsg = "Unable to open header file %s. " % (headerfilename)
-            self.assertEquals(errmsg, "")
+            self.assertEqual(errmsg, "")
             return
 
         # Count lines in the file
@@ -147,7 +147,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             line = line.strip()
             if len(line) > 0:
                 goodlines += 1
-        self.assertEquals(goodlines, 3)
+        self.assertEqual(goodlines, 3)
 
         # Clean
         os.remove(outfilename)
@@ -189,7 +189,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile.close()
         except IOError as err:
             errmsg = "Unable to open header file %s. " % (headerfilename)
-            self.assertEquals(errmsg, "")
+            self.assertEqual(errmsg, "")
             return
 
         # Count lines in the file
@@ -198,7 +198,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             line = line.strip()
             if len(line) > 0:
                 goodlines += 1
-        self.assertEquals(goodlines, 3)
+        self.assertEqual(goodlines, 3)
 
         # Clean
         os.remove(outfilename)
@@ -241,14 +241,14 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             line = line.strip()
             if len(line) > 0:
                 goodlines += 1
-        self.assertEquals(goodlines, 25)
+        self.assertEqual(goodlines, 25)
 
         # Check values
         line0 = lines[0]
         terms = line0.split()
-        self.assertEquals(len(terms), 6)
+        self.assertEqual(len(terms), 6)
         value2 = float(terms[4])
-        self.assertEquals(value2, 0.)
+        self.assertEqual(value2, 0.)
 
         # Clean
         os.remove(outfilename)
