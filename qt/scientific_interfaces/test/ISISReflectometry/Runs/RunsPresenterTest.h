@@ -36,15 +36,7 @@ class RunsPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RunsPresenterTest *createSuite() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    IMainWindowView *mainWindowMock = new MockMainWindowView();
-    Plotter plotter(mainWindowMock);
-#else
-    Plotter plotter;
-#endif
-    return new RunsPresenterTest(plotter);
-  }
+  static RunsPresenterTest *createSuite() { return new RunsPresenterTest(); }
   static void destroySuite(RunsPresenterTest *suite) { delete suite; }
 
   RunsPresenterTest()
@@ -330,8 +322,8 @@ private:
 #else
     Plotter plotter;
 #endif
-    m_runsTablePresenterFactory =
-        MockRunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
+    auto makeRunsTablePresenter = RunsTablePresenterFactory(
+        m_instruments, m_thetaTolerance, std::move(plotter));
     auto presenter = RunsPresenterFriend(
         &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
         m_instruments, defaultInstrumentIndex, &m_messageHandler,
