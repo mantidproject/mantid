@@ -28,6 +28,7 @@ class ColorSelector(QWidget):
         self.h_layout = QHBoxLayout(self)
         self.h_layout.addWidget(self.line_edit)
         self.h_layout.addWidget(self.button)
+        self.h_layout.setContentsMargins(0, 0, 0, 0)
 
         self.line_edit.setText(self.initial_color.name())
         self.line_edit.setReadOnly(True)
